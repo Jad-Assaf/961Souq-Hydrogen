@@ -44,7 +44,7 @@ img {
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  padding: 16px;
+  padding: 10px;
   min-height: 400px;
 }
 
@@ -61,6 +61,7 @@ img {
   white-space: pre-wrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 130px;
 }
 
 .product-price {
