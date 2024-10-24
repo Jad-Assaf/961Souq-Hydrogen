@@ -35,17 +35,6 @@ img {
   opacity: 1;
 }
 
-.banner-title {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  color: white;
-  font-size: 1.5rem;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-}
-
 .collections-container {
   padding: 2rem;
 }
