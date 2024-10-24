@@ -108,7 +108,7 @@ function RecommendedProducts({ products }) {
  */
 const GET_COLLECTIONS_QUERY = `#graphql
   query GetCollections {
-    collections(first: 50) {
+    collections(first: 500) {
       nodes {
         id
         title
