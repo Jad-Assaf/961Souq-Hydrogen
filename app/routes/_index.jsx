@@ -2,6 +2,7 @@ import {defer} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, Link} from '@remix-run/react';
 import {Suspense} from 'react';
 import {Image, Money} from '@shopify/hydrogen';
+import { CollectionDisplay } from './components/CollectionDisplay';
 
 /**
  * @type {MetaFunction}
@@ -60,11 +61,11 @@ function loadDeferredData({context}) {
 }
 
 export default function Homepage() {
-  /** @type {LoaderReturnData} */
   const data = useLoaderData();
+
   return (
     <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
+      <CollectionDisplay collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
   );
@@ -135,27 +136,48 @@ function RecommendedProducts({products}) {
 }
 
 const FEATURED_COLLECTION_QUERY = `#graphql
-  fragment FeaturedCollection on Collection {
+  fragment Product on Product {
     id
     title
-    image {
-      id
-      url
-      altText
-      width
-      height
-    }
     handle
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    images(first: 1) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
   }
+
+  fragment Collection on Collection {
+    id
+    title
+    handle
+    products(first: 4) {
+      nodes {
+        ...Product
+      }
+    }
+  }
+
   query FeaturedCollection($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
     collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
       nodes {
-        ...FeaturedCollection
+        ...Collection
       }
     }
   }
 `;
+
 
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   fragment RecommendedProduct on Product {
