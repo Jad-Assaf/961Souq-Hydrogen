@@ -46,15 +46,10 @@ function loadDeferredData({ context }) {
 export default function Homepage() {
   const data = useLoaderData();
 
-  console.log('Fetched collections:', data.collections); // Debugging
-
-
   // Specify the collections you want to display
   const specificCollections = data.collections.filter((collection) =>
     ['apple', 'gaming'].includes(collection.handle)
   );
-
-  console.log('Filtered collections:', specificCollections); // Debugging
 
   return (
     <div className="home">
@@ -137,7 +132,7 @@ const COLLECTIONS_QUERY = `#graphql
 
   query Collections($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    collections(first: 10) {
+    collections(first: 300) {
       nodes {
         ...Collection
       }
