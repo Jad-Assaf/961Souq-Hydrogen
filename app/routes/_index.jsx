@@ -22,22 +22,40 @@ export async function loader(args) {
 }
 
 /**
- * Load critical collections data.
+ * Load critical collections data by their handles.
  */
 async function loadCriticalData({ context }) {
-  const { collections } = await context.storefront.query(GET_COLLECTIONS_QUERY);
+  const handles = ['apple', 'gaming'];
+  const collections = await fetchCollectionsByHandles(context, handles);
 
-  const filteredCollections = collections.nodes.filter((collection) =>
-    ['apple', 'gaming'].includes(collection.handle)
-  );
+  console.log('Filtered collections:', collections);
 
-  console.log('Filtered collections:', filteredCollections);
-
-  if (filteredCollections.length === 0) {
+  if (collections.length === 0) {
     throw new Response('No matching collections found.', { status: 404 });
   }
 
-  return { collections: filteredCollections };
+  return { collections };
+}
+
+/**
+ * Fetch multiple collections using `collectionByHandle`.
+ */
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+
+  for (const handle of handles) {
+    const variables = { handle };
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables }
+    );
+
+    if (collectionByHandle) {
+      collections.push(collectionByHandle);
+    }
+  }
+
+  return collections;
 }
 
 /**
@@ -104,34 +122,29 @@ function RecommendedProducts({ products }) {
 }
 
 /**
- * GraphQL query to fetch collections.
+ * GraphQL query to fetch a single collection by handle.
  */
-const GET_COLLECTIONS_QUERY = `#graphql
-  query GetCollections {
-    collections(first: 500) {
-      nodes {
-        id
-        title
-        handle
-        products(first: 4) {
-          nodes {
-            id
-            title
-            handle
-            priceRange {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      products(first: 4) {
+        nodes {
+          id
+          title
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
             }
-            images(first: 1) {
-              nodes {
-                id
-                url
-                altText
-                width
-                height
-              }
+          }
+          images(first: 1) {
+            nodes {
+              url
+              altText
             }
           }
         }
