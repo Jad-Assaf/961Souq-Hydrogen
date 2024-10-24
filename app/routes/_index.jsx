@@ -130,7 +130,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       id
       title
       handle
-      products(first: 4) {
+      products(first: 14) {
         nodes {
           id
           title
