@@ -1,10 +1,10 @@
 // src/components/ProductRow.jsx
 
 import React from 'react';
-import { Link, useShopQuery, gql } from '@shopify/hydrogen';
+import { Link, useShopQuery } from '@shopify/hydrogen';
 import '../styles/productRow.css'
 
-const PRODUCT_ROW_QUERY = gql`
+const PRODUCT_ROW_QUERY = `#graphql
   query CollectionProducts($handle: String!) {
     collection(handle: $handle) {
       title
