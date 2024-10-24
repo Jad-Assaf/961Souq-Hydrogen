@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Link, useShopQuery, gql } from '@shopify/hydrogen';
-import { AddToCartButton } from './AddToCartButton'; //
 import '../styles/productRow.css'
 
 const PRODUCT_ROW_QUERY = gql`
@@ -67,7 +66,6 @@ export default function ProductRow({ collectionHandle }) {
                                 {product.priceRange.minVariantPrice.currencyCode}
                             </p>
                         </Link>
-                        <AddToCartButton productId={product.id} />
                     </div>
                 ))
             )}
