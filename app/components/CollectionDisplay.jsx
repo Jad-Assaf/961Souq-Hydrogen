@@ -4,19 +4,20 @@ import { Image, Money } from '@shopify/hydrogen';
 /**
  * @param {{
  *   collections: Array<{
+ *     id: string;
  *     title: string;
  *     handle: string;
  *     products: { nodes: Array<ProductFragment> };
- *   }>;
+ *   }>
  * }}
  */
 export function CollectionDisplay({ collections }) {
-    if (!collections || collections.length === 0) return null;
+    if (!collections || collections.length === 0) return <p>No collections found.</p>;
 
     return (
-        <div className="collection-display">
+        <div className="collections-container">
             {collections.map((collection) => (
-                <div key={collection.handle} className="collection-section">
+                <div key={collection.id} className="collection-section">
                     <h3>{collection.title}</h3>
                     <div className="collection-products-row">
                         {collection.products.nodes.map((product) => (

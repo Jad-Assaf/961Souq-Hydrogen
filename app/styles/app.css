@@ -20,13 +20,15 @@ img {
 
 .product-item {
   min-width: 200px;
+  width: 300px;
   text-align: center;
 }
 
 .product-item img {
-  width: 100%;
+  width: 250px;
   height: auto;
   object-fit: cover;
+  margin: auto;
 }
 /*
 * --------------------------------------------------
