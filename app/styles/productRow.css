@@ -1,0 +1,35 @@
+/* src/styles/HomePage.css */
+
+.product-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.product-card {
+    width: calc(25% - 16px);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.product-card img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 8px;
+}
+
+.product-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+}
+
+.product-card p {
+    margin: 8px 0;
+}
+
+.homepage-row {
+    margin-bottom: 48px;
+}
