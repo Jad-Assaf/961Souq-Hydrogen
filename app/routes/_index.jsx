@@ -59,9 +59,9 @@ export default function Homepage() {
   const data = useLoaderData();
 
   const banners = [
-    { imageUrl: 'https://961souq.com/cdn/shop/files/google-pixel-banner.jpg?v=1728123476&width=2000' },
-    { imageUrl: 'https://961souq.com/cdn/shop/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718&width=2000' },
-    { imageUrl: 'https://961souq.com/cdn/shop/files/samsung-flip-fold-6.jpg?v=1727957859&width=2000' },
+    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
+    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601' },
+    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718' },
   ];
 
   return (
