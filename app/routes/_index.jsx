@@ -1,8 +1,6 @@
 import { defer } from '@shopify/remix-oxygen';
-import { Await, useLoaderData, Link } from '@remix-run/react';
-import { Suspense } from 'react';
+import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
-import { Image, Money } from '@shopify/hydrogen';
 
 /**
  * @type {MetaFunction}
@@ -15,10 +13,8 @@ export const meta = () => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-
-  return defer({ ...deferredData, ...criticalData });
+  return defer({ ...criticalData });
 }
 
 /**
@@ -58,6 +54,16 @@ async function fetchCollectionsByHandles(context, handles) {
   return collections;
 }
 
+export default function Homepage() {
+  const data = useLoaderData();
+
+  return (
+    <div className="home">
+      <CollectionDisplay collections={data.collections} />
+    </div>
+  );
+}
+
 /**
  * GraphQL query to fetch a single collection by handle.
  */
@@ -90,8 +96,5 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
-
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
-/** @typedef {import('storefrontapi.generated').FeaturedCollectionFragment} FeaturedCollectionFragment */
-/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
