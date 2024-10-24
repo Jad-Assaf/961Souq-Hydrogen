@@ -116,6 +116,16 @@
   }
 }
 
+.productRow-img{
+  width: 300px;
+  height: auto;
+}
+
+.productRow-image{
+  width: 250px !important;
+  margin: auto;
+}
+
 @layer utilities {
   .hidden-scroll {
     scrollbar-width: none;
