@@ -1,5 +1,5 @@
 import React from 'react';
-import './CategorySlider.css'; // Import the CSS file for styling
+import '../styles/CategorySlider.css'; // Import the CSS file for styling
 
 /**
  * CategorySlider Component.
