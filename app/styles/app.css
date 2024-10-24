@@ -35,7 +35,7 @@ img {
   opacity: 1;
 }
 
-.collections-container::-webkit-scrollbar {
+.collection-products-row::-webkit-scrollbar {
   display: none;
 }
 .collections-container {
