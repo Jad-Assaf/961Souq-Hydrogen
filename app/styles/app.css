@@ -14,7 +14,7 @@ img {
 
 .banner-slideshow {
   position: relative;
-  width: 100%;
+  width: 100vw;
   height: 300px;
   overflow: hidden;
 }
@@ -140,7 +140,7 @@ aside header h2 {
 }
 
 aside main {
-  margin: 1rem;
+  /* margin: 1rem; */
 }
 
 aside p {
