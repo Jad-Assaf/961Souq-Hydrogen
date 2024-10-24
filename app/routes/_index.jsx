@@ -48,7 +48,7 @@ export default function Homepage() {
 
   // Specify the collections you want to display
   const specificCollections = data.collections.filter((collection) =>
-    ['collection-handle-1', 'collection-handle-2'].includes(collection.handle)
+    ['apple', 'gaming'].includes(collection.handle)
   );
 
   return (
