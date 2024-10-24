@@ -21,7 +21,7 @@ img {
 
 .collection-products-row {
   display: flex;
-  gap: 16px;
+  gap: 30px;
   overflow-x: auto;
   padding: 1rem 0;
   scroll-behavior: smooth;
@@ -196,7 +196,7 @@ button.reset:hover:not(:has(> *)) {
   z-index: 1;
 }
 .header *{
-  color: #fff;
+  color: #fff !important;
 }
 
 .header-menu-mobile-toggle {
