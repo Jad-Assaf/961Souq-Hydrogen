@@ -11,17 +11,41 @@
 img {
   border-radius: 4px;
 }
+.collections-container {
+  padding: 2rem;
+}
+
+.collection-section {
+  margin-bottom: 3rem;
+}
+
 .collection-products-row {
   display: flex;
   gap: 16px;
   overflow-x: auto;
   padding: 1rem 0;
+  scroll-behavior: smooth;
+  /* Adds smooth scrolling */
+  cursor: grab;
+  /* Change cursor to indicate draggable behavior */
+}
+
+.collection-products-row:active {
+  cursor: grabbing;
+  /* Change cursor when dragging */
 }
 
 .product-item {
   min-width: 200px;
   width: 300px;
   text-align: center;
+  transition: transform 0.3s ease;
+  /* Smooth hover effect */
+}
+
+.product-item:hover {
+  transform: scale(1.05);
+  /* Scale up the product on hover */
 }
 
 .product-item img {
@@ -29,6 +53,8 @@ img {
   height: auto;
   object-fit: cover;
   margin: auto;
+  border-radius: 8px;
+  /* Adds rounded corners */
 }
 /*
 * --------------------------------------------------
