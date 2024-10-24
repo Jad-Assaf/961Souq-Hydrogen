@@ -71,7 +71,7 @@ function ProductRow({ products }) {
                             aspectRatio="1/1"
                             sizes="(min-width: 45em) 20vw, 50vw"
                         />
-                        <h4 className="product-title">{truncateText(product.title, 15)}</h4>
+                        <h4 className="product-title">{truncateText(product.title, 20)}</h4>
                         <div className="product-price">
                             <Money data={product.priceRange.minVariantPrice} />
                         </div>
