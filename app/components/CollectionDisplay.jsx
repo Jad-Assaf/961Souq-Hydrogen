@@ -3,14 +3,17 @@ import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 
 /**
- * @param {{
- *   collections: Array<{
- *     id: string;
- *     title: string;
- *     handle: string;
- *     products: { nodes: Array<ProductFragment> };
- *   }>
- * }}
+ * Truncate text to a specific word limit.
+ */
+function truncateText(text, maxWords) {
+    const words = text.split(' ');
+    return words.length > maxWords
+        ? words.slice(0, maxWords).join(' ') + '...'
+        : text;
+}
+
+/**
+ * CollectionDisplay component with drag-to-scroll functionality.
  */
 export function CollectionDisplay({ collections }) {
     return (
@@ -26,7 +29,7 @@ export function CollectionDisplay({ collections }) {
 }
 
 /**
- * Product row with drag-to-scroll functionality.
+ * ProductRow component with drag-to-scroll.
  */
 function ProductRow({ products }) {
     const rowRef = useRef(null);
@@ -41,7 +44,6 @@ function ProductRow({ products }) {
     };
 
     const handleMouseLeave = () => setIsDragging(false);
-
     const handleMouseUp = () => setIsDragging(false);
 
     const handleMouseMove = (e) => {
@@ -62,18 +64,18 @@ function ProductRow({ products }) {
             onMouseMove={handleMouseMove}
         >
             {products.map((product) => (
-                <Link
-                    key={product.id}
-                    className="product-item"
-                    to={`/products/${product.handle}`}
-                >
-                    <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 50vw"
-                    />
-                    <h4>{product.title}</h4>
-                    <Money data={product.priceRange.minVariantPrice} />
+                <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
+                    <div className="product-card">
+                        <Image
+                            data={product.images.nodes[0]}
+                            aspectRatio="1/1"
+                            sizes="(min-width: 45em) 20vw, 50vw"
+                        />
+                        <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                        <div className="product-price">
+                            <Money data={product.priceRange.minVariantPrice} />
+                        </div>
+                    </div>
                 </Link>
             ))}
         </div>
