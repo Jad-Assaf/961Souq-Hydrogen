@@ -87,7 +87,7 @@ export let schema: HydrogenComponentSchema = {
           defaultValue: 4,
           configs: {
             min: 1,
-            max: 12,
+            max: 20,
             step: 1,
           },
         },
