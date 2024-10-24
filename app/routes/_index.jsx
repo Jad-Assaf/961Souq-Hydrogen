@@ -26,13 +26,25 @@ export async function loader(args) {
  */
 async function loadCriticalData({ context }) {
   const variables = {
-    handles: ['apple', 'gaming'], // Specify the desired collection handles here
+    handles: ['apple', 'gaming'], // Specify collection handles
   };
 
-  const { collections } = await context.storefront.query(SPECIFIC_COLLECTIONS_QUERY, { variables });
+  try {
+    const { collections } = await context.storefront.query(SPECIFIC_COLLECTIONS_QUERY, { variables });
 
-  return { collections: collections.nodes };
+    console.log('Fetched Collections:', collections); // Debugging
+
+    if (!collections || collections.nodes.length === 0) {
+      throw new Error('No collections found with the specified handles.');
+    }
+
+    return { collections: collections.nodes };
+  } catch (error) {
+    console.error('Error fetching collections:', error);
+    throw new Response('Failed to load collections.', { status: 500 });
+  }
 }
+
 
 /**
  * Load recommended products.
