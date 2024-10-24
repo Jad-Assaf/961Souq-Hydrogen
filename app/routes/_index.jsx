@@ -1,6 +1,7 @@
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
+import { BannerSlideshow } from '../components/BannerSlideshow';
 
 /**
  * @type {MetaFunction}
@@ -57,8 +58,15 @@ async function fetchCollectionsByHandles(context, handles) {
 export default function Homepage() {
   const data = useLoaderData();
 
+  const banners = [
+    { title: 'New Arrivals', imageUrl: 'https://961souq.com/cdn/shop/files/google-pixel-banner.jpg?v=1728123476&width=2000' },
+    { title: 'Summer Sale', imageUrl: 'https://961souq.com/cdn/shop/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718&width=2000' },
+    { title: 'Trending Now', imageUrl: 'https://961souq.com/cdn/shop/files/samsung-flip-fold-6.jpg?v=1727957859&width=2000' },
+  ];
+
   return (
     <div className="home">
+      <BannerSlideshow banners={banners} />
       <CollectionDisplay collections={data.collections} />
     </div>
   );
