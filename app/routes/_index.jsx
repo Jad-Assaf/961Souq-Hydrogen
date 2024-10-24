@@ -1,23 +1,22 @@
-import React from 'react';
+// src/pages/index.server.jsx
+
 import ProductRow from '../components/ProductRow';
 
 export default function HomePage() {
-  const collections = [
-    'featured-collection',
-    'new-arrivals',
-    'best-sellers',
-  ]; // Add the collection handles you want to display
+  const collectionHandles = ['featured-collection', 'new-arrivals', 'best-sellers'];
 
   return (
     <div>
       <header>
         <h1>Welcome to Our Store</h1>
       </header>
-      {collections.map((handle) => (
-        <div key={handle} className="homepage-row">
+      {collectionHandles.map((handle) => (
+        <section key={handle}>
           <h2>{handle.replace('-', ' ').toUpperCase()}</h2>
-          <ProductRow collectionHandle={handle} />
-        </div>
+          <Suspense fallback={<p>Loading products...</p>}>
+            <ProductRow handle={handle} />
+          </Suspense>
+        </section>
       ))}
     </div>
   );
