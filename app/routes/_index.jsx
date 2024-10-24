@@ -25,27 +25,19 @@ export async function loader(args) {
  * Load critical collections data.
  */
 async function loadCriticalData({ context }) {
-  const variables = {
-    handles: ['apple', 'gaming'], // Specify the desired collection handles
-  };
+  const { collections } = await context.storefront.query(GET_COLLECTIONS_QUERY);
 
-  try {
-    const { collections } = await context.storefront.query(
-      SPECIFIC_COLLECTIONS_QUERY,
-      { variables }
-    );
+  const filteredCollections = collections.nodes.filter((collection) =>
+    ['apple', 'gaming'].includes(collection.handle)
+  );
 
-    console.log('Fetched collections:', collections); // Debugging
+  console.log('Filtered collections:', filteredCollections);
 
-    if (!collections || collections.nodes.length === 0) {
-      throw new Error('No collections found with the specified handles.');
-    }
-
-    return { collections: collections.nodes };
-  } catch (error) {
-    console.error('Error fetching collections:', error);
-    throw new Response('Failed to load collections.', { status: 500 });
+  if (filteredCollections.length === 0) {
+    throw new Response('No matching collections found.', { status: 404 });
   }
+
+  return { collections: filteredCollections };
 }
 
 /**
@@ -112,11 +104,11 @@ function RecommendedProducts({ products }) {
 }
 
 /**
- * GraphQL query to fetch specific collections.
+ * GraphQL query to fetch collections.
  */
-const SPECIFIC_COLLECTIONS_QUERY = `#graphql
-  query SpecificCollections($handles: [String!]!) {
-    collections(first: 10) {
+const GET_COLLECTIONS_QUERY = `#graphql
+  query GetCollections {
+    collections(first: 50) {
       nodes {
         id
         title
