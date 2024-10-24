@@ -1,6 +1,4 @@
-// src/components/ProductRow.jsx
-
-import { Link } from '@shopify/hydrogen';
+import { Link } from 'react-router-dom';
 
 export default function ProductRow({ products }) {
     return (
@@ -19,7 +17,6 @@ export default function ProductRow({ products }) {
                             {product.priceRange.minVariantPrice.currencyCode}
                         </p>
                     </Link>
-                    <button>Add to Cart</button>
                 </div>
             ))}
         </div>

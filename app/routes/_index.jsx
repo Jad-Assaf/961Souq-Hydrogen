@@ -1,9 +1,7 @@
-// src/routes/index.server.jsx
-
 import { json } from '@shopify/remix-oxygen';
 import ProductRow from '../components/ProductRow';
 
-const COLLECTION_QUERY = `
+const COLLECTION_QUERY = `#graphql
   query Collection($handle: String!) {
     collection(handle: $handle) {
       products(first: 10) {
@@ -34,29 +32,28 @@ const COLLECTION_QUERY = `
   }
 `;
 
-export async function loader({ context }) {
+export const loader = async ({ context }) => {
   const handles = ['featured-collection', 'new-arrivals', 'best-sellers'];
 
-  const promises = handles.map((handle) =>
-    context.storefront.query(COLLECTION_QUERY, { variables: { handle } })
+  const results = await Promise.all(
+    handles.map((handle) =>
+      context.storefront.query(COLLECTION_QUERY, { variables: { handle } })
+    )
   );
-  const results = await Promise.all(promises);
 
   const productsByCollection = results.map(
     (result) => result.data.collection.products.edges.map((edge) => edge.node)
   );
 
   return json({ productsByCollection });
-}
+};
 
-export default function HomePage({ data }) {
-  const { productsByCollection } = data;
+export default function HomePage() {
+  const { productsByCollection } = useLoaderData();
 
   return (
     <div>
-      <header>
-        <h1>Welcome to Our Store</h1>
-      </header>
+      <h1>Welcome to Our Store</h1>
       {productsByCollection.map((products, index) => (
         <section key={index}>
           <h2>Collection {index + 1}</h2>
