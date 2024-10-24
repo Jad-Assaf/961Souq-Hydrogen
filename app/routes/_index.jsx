@@ -22,17 +22,20 @@ export async function loader(args) {
 }
 
 /**
- * Load critical collections data based on specific handles.
+ * Load critical collections data.
  */
 async function loadCriticalData({ context }) {
   const variables = {
-    handles: ['apple', 'gaming'], // Specify collection handles
+    handles: ['apple', 'gaming'], // Specify the desired collection handles
   };
 
   try {
-    const { collections } = await context.storefront.query(SPECIFIC_COLLECTIONS_QUERY, { variables });
+    const { collections } = await context.storefront.query(
+      SPECIFIC_COLLECTIONS_QUERY,
+      { variables }
+    );
 
-    console.log('Fetched Collections:', collections); // Debugging
+    console.log('Fetched collections:', collections); // Debugging
 
     if (!collections || collections.nodes.length === 0) {
       throw new Error('No collections found with the specified handles.');
@@ -44,7 +47,6 @@ async function loadCriticalData({ context }) {
     throw new Response('Failed to load collections.', { status: 500 });
   }
 }
-
 
 /**
  * Load recommended products.
@@ -109,10 +111,12 @@ function RecommendedProducts({ products }) {
   );
 }
 
+/**
+ * GraphQL query to fetch specific collections.
+ */
 const SPECIFIC_COLLECTIONS_QUERY = `#graphql
-  query SpecificCollections($handles: [String!]!, $country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    collections(first: 10, query: $handles) {
+  query SpecificCollections($handles: [String!]!) {
+    collections(first: 10) {
       nodes {
         id
         title
@@ -144,6 +148,9 @@ const SPECIFIC_COLLECTIONS_QUERY = `#graphql
   }
 `;
 
+/**
+ * GraphQL query to fetch recommended products.
+ */
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   fragment RecommendedProduct on Product {
     id
