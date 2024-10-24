@@ -1,9 +1,14 @@
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
+import '../styles/productRow.css';
 
 /**
  * @param {{
- *   collection: CollectionFragment & { products: { nodes: ProductFragment[] } };
+ *   collection: { 
+ *     title: string; 
+ *     handle: string; 
+ *     products: { nodes: Array<ProductFragment> } 
+ *   }
  * }}
  */
 export function CollectionDisplay({ collection }) {
