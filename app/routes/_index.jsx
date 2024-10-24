@@ -15,35 +15,22 @@ export const meta = () => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
   return defer({ ...deferredData, ...criticalData });
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- * @param {LoaderFunctionArgs}
+ * Load critical collections data.
  */
 async function loadCriticalData({ context }) {
-  const [{ collections }] = await Promise.all([
-    context.storefront.query(FEATURED_COLLECTION_QUERY),
-  ]);
-
-  return {
-    featuredCollection: collections.nodes[0],
-  };
+  const { collections } = await context.storefront.query(COLLECTIONS_QUERY);
+  return { collections: collections.nodes };
 }
 
 /**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- * @param {LoaderFunctionArgs}
+ * Load recommended products.
  */
 function loadDeferredData({ context }) {
   const recommendedProducts = context.storefront
@@ -53,26 +40,27 @@ function loadDeferredData({ context }) {
       return null;
     });
 
-  return {
-    recommendedProducts,
-  };
+  return { recommendedProducts };
 }
 
 export default function Homepage() {
   const data = useLoaderData();
 
+  // Specify the collections you want to display
+  const specificCollections = data.collections.filter((collection) =>
+    ['collection-handle-1', 'collection-handle-2'].includes(collection.handle)
+  );
+
   return (
     <div className="home">
-      <CollectionDisplay collection={data.featuredCollection} />
+      <CollectionDisplay collections={specificCollections} />
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
   );
 }
 
 /**
- * @param {{
- *   products: Promise<RecommendedProductsQuery | null>;
- * }}
+ * Recommended products component.
  */
 function RecommendedProducts({ products }) {
   return (
@@ -109,7 +97,7 @@ function RecommendedProducts({ products }) {
   );
 }
 
-const FEATURED_COLLECTION_QUERY = `#graphql
+const COLLECTIONS_QUERY = `#graphql
   fragment Product on Product {
     id
     title
@@ -142,9 +130,9 @@ const FEATURED_COLLECTION_QUERY = `#graphql
     }
   }
 
-  query FeaturedCollection($country: CountryCode, $language: LanguageCode)
+  query Collections($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
+    collections(first: 10) {
       nodes {
         ...Collection
       }
@@ -183,6 +171,7 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     }
   }
 `;
+
 
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
