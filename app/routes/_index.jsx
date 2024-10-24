@@ -22,10 +22,15 @@ export async function loader(args) {
 }
 
 /**
- * Load critical collections data.
+ * Load critical collections data based on specific handles.
  */
 async function loadCriticalData({ context }) {
-  const { collections } = await context.storefront.query(COLLECTIONS_QUERY);
+  const variables = {
+    handles: ['apple', 'gaming'], // Specify the desired collection handles here
+  };
+
+  const { collections } = await context.storefront.query(SPECIFIC_COLLECTIONS_QUERY, { variables });
+
   return { collections: collections.nodes };
 }
 
@@ -46,14 +51,9 @@ function loadDeferredData({ context }) {
 export default function Homepage() {
   const data = useLoaderData();
 
-  // Specify the collections you want to display
-  const specificCollections = data.collections.filter((collection) =>
-    ['apple', 'gaming'].includes(collection.handle)
-  );
-
   return (
     <div className="home">
-      <CollectionDisplay collections={specificCollections} />
+      <CollectionDisplay collections={data.collections} />
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
   );
@@ -97,44 +97,36 @@ function RecommendedProducts({ products }) {
   );
 }
 
-const COLLECTIONS_QUERY = `#graphql
-  fragment Product on Product {
-    id
-    title
-    handle
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    images(first: 1) {
+const SPECIFIC_COLLECTIONS_QUERY = `#graphql
+  query SpecificCollections($handles: [String!]!, $country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    collections(first: 10, query: $handles) {
       nodes {
         id
-        url
-        altText
-        width
-        height
-      }
-    }
-  }
-
-  fragment Collection on Collection {
-    id
-    title
-    handle
-    products(first: 4) {
-      nodes {
-        ...Product
-      }
-    }
-  }
-
-  query Collections($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    collections(first: 300) {
-      nodes {
-        ...Collection
+        title
+        handle
+        products(first: 4) {
+          nodes {
+            id
+            title
+            handle
+            priceRange {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+            images(first: 1) {
+              nodes {
+                id
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -171,8 +163,6 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     }
   }
 `;
-
-
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
