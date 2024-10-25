@@ -63,6 +63,7 @@ function ProductRow({ products }) {
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
         >
+            <div className="blur"></div>
             {products.map((product) => (
                 <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
                     <div className="product-card">
@@ -78,6 +79,7 @@ function ProductRow({ products }) {
                     </div>
                 </Link>
             ))}
+            <div className="blur"></div>
         </div>
     );
 }
