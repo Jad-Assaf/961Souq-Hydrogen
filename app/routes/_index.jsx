@@ -91,7 +91,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       id
       title
       handle
-      products(first: 14) {
+      products(first: 50) {
         nodes {
           id
           title
