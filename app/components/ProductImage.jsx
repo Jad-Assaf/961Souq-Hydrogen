@@ -5,6 +5,34 @@ import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import 'yet-another-react-lightbox/styles.css';
 import '../styles/ProductImage.css';
 
+const LeftArrowIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+);
+
+const RightArrowIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+);
+
 /**
  * @param {{
  *   images: Array<{node: ProductFragment['images']['edges'][0]['node']}>;
@@ -71,7 +99,7 @@ export function ProductImages({ images }) {
             handlePrevImage();
           }}
         >
-          &#9664;
+          <LeftArrowIcon />
         </button>
         <button
           className="next-button"
@@ -80,7 +108,7 @@ export function ProductImages({ images }) {
             handleNextImage();
           }}
         >
-          &#9654;
+          <RightArrowIcon />
         </button>
       </div>
 
