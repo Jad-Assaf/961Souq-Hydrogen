@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Image } from '@shopify/hydrogen';
-import Lightbox from 'react-image-lightbox';
-import 'react-image-lightbox/style.css'; // Lightbox styles
 import '../styles/ProductImage.css';
+
+// Lazy load the Lightbox component to avoid SSR issues
+const Lightbox = lazy(() => import('react-image-lightbox'));
+import 'react-image-lightbox/style.css';
 
 /**
  * @param {{
@@ -49,24 +51,26 @@ export function ProductImages({ images }) {
       </div>
 
       {isLightboxOpen && (
-        <Lightbox
-          mainSrc={lightboxImages[selectedImageIndex]}
-          nextSrc={lightboxImages[(selectedImageIndex + 1) % images.length]}
-          prevSrc={
-            lightboxImages[
-            (selectedImageIndex + images.length - 1) % images.length
-            ]
-          }
-          onCloseRequest={() => setIsLightboxOpen(false)}
-          onMovePrevRequest={() =>
-            setSelectedImageIndex(
+        <Suspense fallback={<div>Loading...</div>}>
+          <Lightbox
+            mainSrc={lightboxImages[selectedImageIndex]}
+            nextSrc={lightboxImages[(selectedImageIndex + 1) % images.length]}
+            prevSrc={
+              lightboxImages[
               (selectedImageIndex + images.length - 1) % images.length
-            )
-          }
-          onMoveNextRequest={() =>
-            setSelectedImageIndex((selectedImageIndex + 1) % images.length)
-          }
-        />
+              ]
+            }
+            onCloseRequest={() => setIsLightboxOpen(false)}
+            onMovePrevRequest={() =>
+              setSelectedImageIndex(
+                (selectedImageIndex + images.length - 1) % images.length
+              )
+            }
+            onMoveNextRequest={() =>
+              setSelectedImageIndex((selectedImageIndex + 1) % images.length)
+            }
+          />
+        </Suspense>
       )}
     </div>
   );
