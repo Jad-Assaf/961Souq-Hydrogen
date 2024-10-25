@@ -23,7 +23,7 @@ export async function loader(args) {
  * Load critical collections data by their handles.
  */
 async function loadCriticalData({ context }) {
-  const handles = ['apple', 'gaming'];
+  const handles = ['apple', 'gaming', 'laptops', 'mobiles', 'monitors', 'fitness watches'];
   const collections = await fetchCollectionsByHandles(context, handles);
 
   console.log('Filtered collections:', collections);
