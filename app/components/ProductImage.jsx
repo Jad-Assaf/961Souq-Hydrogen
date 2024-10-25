@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Image } from '@shopify/hydrogen';
-import Lightbox from 'react-awesome-lightbox';
-import 'react-awesome-lightbox/build/style.css'; // Import the lightbox styles
+import Lightbox from 'yet-another-react-lightbox';
+import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
+import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
+import 'yet-another-react-lightbox/styles.css';
 import '../styles/ProductImage.css';
 
 /**
@@ -22,7 +24,11 @@ export function ProductImages({ images }) {
   return (
     <div className="product-images-container">
       {/* Main Image */}
-      <div className="main-image" onClick={() => setIsLightboxOpen(true)}>
+      <div
+        className="main-image"
+        onClick={() => setIsLightboxOpen(true)}
+        style={{ cursor: 'grab' }}
+      >
         <Image
           alt={selectedImage.altText || 'Product Image'}
           aspectRatio="1/1"
@@ -49,12 +55,15 @@ export function ProductImages({ images }) {
         ))}
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox with Swipe, Thumbnails, and Fullscreen */}
       {isLightboxOpen && (
         <Lightbox
-          images={images.map(({ node }) => ({ url: node.url, title: node.altText }))}
-          startIndex={selectedImageIndex}
-          onClose={() => setIsLightboxOpen(false)}
+          open={isLightboxOpen}
+          close={() => setIsLightboxOpen(false)}
+          index={selectedImageIndex}
+          slides={images.map(({ node }) => ({ src: node.url }))}
+          onIndexChange={setSelectedImageIndex}
+          plugins={[Thumbnails, Fullscreen]}
         />
       )}
     </div>

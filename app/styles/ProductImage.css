@@ -7,19 +7,26 @@
 
 .main-image {
     width: 80%;
-    cursor: pointer;
+    cursor: grab;
     transition: transform 0.3s ease;
+    position: relative;
+}
+
+.main-image:active {
+    cursor: grabbing;
 }
 
 .main-image:hover {
     transform: scale(1.05);
 }
 
+/* Thumbnails Styling */
 .thumbnails {
     display: flex;
     gap: 10px;
     justify-content: center;
     overflow-x: auto;
+    padding: 10px 0;
 }
 
 .thumbnail {
@@ -27,15 +34,47 @@
     height: 60px;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: border 0.3s;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border 0.3s, transform 0.2s;
 }
 
 .thumbnail.active {
     border-color: #000;
+    transform: scale(1.1);
 }
 
 .thumbnail img {
     object-fit: cover;
     width: 100%;
     height: 100%;
+    display: block;
+}
+
+/* Lightbox Fullscreen Overlay */
+.yarl__container {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+/* Lightbox Navigation Buttons */
+.yarl__navigation-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.yarl__navigation-button:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+@media (min-width: 768px) {
+    .main-image {
+        width: 50%;
+    }
+
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+    }
 }
