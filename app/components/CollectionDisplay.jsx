@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
+import { ResponsiveImageGrid } from '../components/ResponsiveImageGrid';
 
 /**
  * Truncate text to a specific word limit.
