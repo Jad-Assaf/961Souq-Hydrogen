@@ -169,57 +169,51 @@ export async function loader({ context, params }) {
   const { storefront } = context;
   const { handle } = params;
 
-  if (!handle) {
-    throw new Error('Product handle is required');
-  }
-
-  const data = await storefront.query(
-    `#graphql
-    query ProductWithAllImages($handle: String!) {
-      product(handle: $handle) {
-        id
-        title
-        descriptionHtml
-        images(first: 250) {
-          edges {
-            node {
+  try {
+    const data = await storefront.query(
+      `#graphql
+      query ProductWithAllImages($handle: String!) {
+        product(handle: $handle) {
+          id
+          title
+          descriptionHtml
+          images(first: 250) {
+            edges {
+              node {
+                id
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+          variants(first: 1) {
+            nodes {
               id
-              url
-              altText
-              width
-              height
+              title
+              price {
+                amount
+                currencyCode
+              }
             }
           }
         }
-        variants(first: 1) {
-          nodes {
-            id
-            title
-            price {
-              amount
-              currencyCode
-            }
-            compareAtPrice {
-              amount
-              currencyCode
-            }
-            image {
-              url
-              altText
-            }
-          }
-        }
-      }
-    }`,
-    { variables: { handle } }
-  );
+      }`,
+      { variables: { handle } }
+    );
 
-  if (!data.product) {
-    throw new Response('Product not found', { status: 404 });
+    if (!data.product) {
+      throw new Response('Product not found', { status: 404 });
+    }
+
+    return data.product;
+  } catch (error) {
+    console.error('Failed to load product:', error);
+    throw new Response('Internal Server Error', { status: 500 });
   }
-
-  return data.product;
 }
+
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
