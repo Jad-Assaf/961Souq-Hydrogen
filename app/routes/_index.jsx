@@ -2,7 +2,7 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import { ResponsiveImageGrid } from './ResponsiveImageGrid';
+import { ResponsiveImageGrid } from '../components/ResponsiveImageGrid';
 
 /**
  * @type {MetaFunction}
