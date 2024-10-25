@@ -16,151 +16,8 @@ import { ProductForm } from '~/components/ProductForm';
  * @type {MetaFunction<typeof loader>}
  */
 export const meta = ({ data }) => {
-  return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
+  return [{ title: `Hydrogen | ${data?.title ?? 'Product'}` }];
 };
-
-/**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- * @param {LoaderFunctionArgs}
- */
-async function loadCriticalData({ context, params, request }) {
-  const { handle } = params;
-  const { storefront } = context;
-
-  if (!handle) {
-    throw new Error('Expected product handle to be defined');
-  }
-
-  const [{ product }] = await Promise.all([
-    storefront.query(PRODUCT_QUERY, {
-      variables: { handle, selectedOptions: getSelectedProductOptions(request) },
-    }),
-    // Add other queries here, so that they are loaded in parallel
-  ]);
-
-  if (!product?.id) {
-    throw new Response(null, { status: 404 });
-  }
-
-  const firstVariant = product.variants.nodes[0];
-  const firstVariantIsDefault = Boolean(
-    firstVariant.selectedOptions.find(
-      (option) => option.name === 'Title' && option.value === 'Default Title',
-    ),
-  );
-
-  if (firstVariantIsDefault) {
-    product.selectedVariant = firstVariant;
-  } else {
-    if (!product.selectedVariant) {
-      throw redirectToFirstVariant({ product, request });
-    }
-  }
-
-  return { product };
-}
-
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- * @param {LoaderFunctionArgs}
- */
-function loadDeferredData({ context, params }) {
-  const variants = context.storefront
-    .query(VARIANTS_QUERY, { variables: { handle: params.handle } })
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
-
-  return { variants };
-}
-
-/**
- * @param {{
- *   product: ProductFragment;
- *   request: Request;
- * }}
- */
-function redirectToFirstVariant({ product, request }) {
-  const url = new URL(request.url);
-  const firstVariant = product.variants.nodes[0];
-
-  return redirect(
-    getVariantUrl({
-      pathname: url.pathname,
-      handle: product.handle,
-      selectedOptions: firstVariant.selectedOptions,
-      searchParams: new URLSearchParams(url.search),
-    }),
-    { status: 302 },
-  );
-}
-
-export default function ProductPage() {
-  const product = useLoaderData();
-
-  return (
-    <div className="product-page">
-      <h1>{product.title}</h1>
-      <div className="product-images">
-        {product.images.edges.map(({ node: image }) => (
-          <Image
-            key={image.id}
-            data={image}
-            alt={image.altText || 'Product Image'}
-            aspectRatio="1/1"
-          />
-        ))}
-      </div>
-
-      <Suspense fallback={<p>Loading product details...</p>}>
-        <Await resolve={product.variants}>
-          {(data) =>
-            data.nodes.map((variant) => (
-              <div key={variant.id} className="variant-info">
-                <h2>{variant.title}</h2>
-                <ProductPrice
-                  price={variant.price}
-                  compareAtPrice={variant.compareAtPrice}
-                />
-                <Image
-                  data={variant.image}
-                  alt={variant.image.altText || 'Variant Image'}
-                  aspectRatio="1/1"
-                />
-              </div>
-            ))
-          }
-        </Await>
-      </Suspense>
-
-      <div className="product-description">
-        <strong>Description</strong>
-        <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
-      </div>
-
-      <ProductForm product={product} />
-      <Analytics.ProductView
-        data={{
-          products: [
-            {
-              id: product.id,
-              title: product.title,
-              price: product.variants.nodes[0]?.price.amount || '0',
-              vendor: product.vendor,
-              variantId: product.variants.nodes[0]?.id || '',
-              variantTitle: product.variants.nodes[0]?.title || '',
-              quantity: 1,
-            },
-          ],
-        }}
-      />
-    </div>
-  );
-}
 
 /**
  * Loader function to fetch product with all images
@@ -172,6 +29,8 @@ export async function loader({ context, params }) {
   try {
     const data = await storefront.query(PRODUCT_WITH_ALL_IMAGES_QUERY, { variables: { handle } });
 
+    console.log('Fetched product data:', data); // For debugging
+
     if (!data.product) {
       throw new Response('Product not found', { status: 404 });
     }
@@ -181,6 +40,84 @@ export async function loader({ context, params }) {
     console.error('Failed to load product:', error);
     throw new Response('Internal Server Error', { status: 500 });
   }
+}
+
+export default function ProductPage() {
+  const product = useLoaderData();
+
+  if (!product) {
+    return <p>Product not found.</p>; // Graceful fallback
+  }
+
+  const { title, descriptionHtml, images, variants } = product;
+
+  return (
+    <div className="product-page">
+      <h1>{title}</h1>
+
+      <div className="product-images">
+        {images.edges.length > 0 ? (
+          images.edges.map(({ node: image }) => (
+            <Image
+              key={image.id}
+              data={image}
+              alt={image.altText || 'Product Image'}
+              aspectRatio="1/1"
+            />
+          ))
+        ) : (
+          <p>No images available.</p>
+        )}
+      </div>
+
+      <Suspense fallback={<p>Loading product details...</p>}>
+        <Await resolve={variants}>
+          {(data) =>
+            data.nodes.length > 0 ? (
+              data.nodes.map((variant) => (
+                <div key={variant.id} className="variant-info">
+                  <h2>{variant.title}</h2>
+                  <ProductPrice
+                    price={variant.price}
+                    compareAtPrice={variant.compareAtPrice}
+                  />
+                  <Image
+                    data={variant.image}
+                    alt={variant.image?.altText || 'Variant Image'}
+                    aspectRatio="1/1"
+                  />
+                </div>
+              ))
+            ) : (
+              <p>No variants available.</p>
+            )
+          }
+        </Await>
+      </Suspense>
+
+      <div className="product-description">
+        <strong>Description</strong>
+        <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
+      </div>
+
+      <ProductForm product={product} />
+      <Analytics.ProductView
+        data={{
+          products: [
+            {
+              id: product.id,
+              title,
+              price: variants.nodes[0]?.price.amount || '0',
+              vendor: product.vendor,
+              variantId: variants.nodes[0]?.id || '',
+              variantTitle: variants.nodes[0]?.title || '',
+              quantity: 1,
+            },
+          ],
+        }}
+      />
+    </div>
+  );
 }
 
 const PRODUCT_WITH_ALL_IMAGES_QUERY = `#graphql
