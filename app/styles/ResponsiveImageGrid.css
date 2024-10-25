@@ -1,18 +1,11 @@
-/* Container Styling */
-.responsive-image-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    /* 2 images per row */
-    gap: 30px;
-    /* 30px gap between images */
+/* Center the inter-row image with some padding */
+.inter-row-image {
+    margin: 30px auto;
     max-width: 1500px;
-    margin: 0 auto;
-    /* Center the grid */
-    padding: 20px;
+    padding: 10px 0;
 }
 
-/* Ensure images are responsive */
-.image-wrapper img {
+.inter-row-image img {
     width: 100%;
     height: auto;
     border-radius: 10px;
@@ -20,16 +13,7 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover effect on images */
-.image-wrapper img:hover {
-    transform: scale(1.05);
+.inter-row-image img:hover {
+    transform: scale(1.02);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Mobile Styles: 1 image per row */
-@media (max-width: 768px) {
-    .responsive-image-grid {
-        grid-template-columns: 1fr;
-        /* 1 image per row */
-    }
 }

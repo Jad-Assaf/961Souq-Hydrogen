@@ -15,18 +15,31 @@ function truncateText(text, maxWords) {
 /**
  * CollectionDisplay component with drag-to-scroll functionality.
  */
-export function CollectionDisplay({ collections }) {
+export function CollectionDisplay({ collections, interRowImages }) {
     return (
         <div className="collections-container">
-            {collections.map((collection) => (
+            {collections.map((collection, index) => (
                 <div key={collection.id} className="collection-section">
                     <h3>{collection.title}</h3>
                     <ProductRow products={collection.products.nodes} />
+
+                    {/* Display the inter-row image, if it exists for the current index */}
+                    {interRowImages && interRowImages[index] && (
+                        <div className="inter-row-image">
+                            <Image
+                                src={interRowImages[index].url}
+                                alt={interRowImages[index].altText || `Inter-row Image ${index + 1}`}
+                                width="100%"
+                                height="auto"
+                            />
+                        </div>
+                    )}
                 </div>
             ))}
         </div>
     );
 }
+
 
 /**
  * ProductRow component with drag-to-scroll.
@@ -127,5 +140,3 @@ function ProductRow({ products }) {
         </div>
     );
 }
-
-
