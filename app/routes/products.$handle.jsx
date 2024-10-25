@@ -170,38 +170,7 @@ export async function loader({ context, params }) {
   const { handle } = params;
 
   try {
-    const data = await storefront.query(
-      `#graphql
-      query ProductWithAllImages($handle: String!) {
-        product(handle: $handle) {
-          id
-          title
-          descriptionHtml
-          images(first: 250) {
-            edges {
-              node {
-                id
-                url
-                altText
-                width
-                height
-              }
-            }
-          }
-          variants(first: 1) {
-            nodes {
-              id
-              title
-              price {
-                amount
-                currencyCode
-              }
-            }
-          }
-        }
-      }`,
-      { variables: { handle } }
-    );
+    const data = await storefront.query(PRODUCT_WITH_ALL_IMAGES_QUERY, { variables: { handle } });
 
     if (!data.product) {
       throw new Response('Product not found', { status: 404 });
@@ -214,6 +183,36 @@ export async function loader({ context, params }) {
   }
 }
 
+const PRODUCT_WITH_ALL_IMAGES_QUERY = `#graphql
+  query ProductWithAllImages($handle: String!) {
+    product(handle: $handle) {
+      id
+      title
+      descriptionHtml
+      images(first: 250) {
+        edges {
+          node {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+      variants(first: 1) {
+        nodes {
+          id
+          title
+          price {
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
+  }
+`;
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
