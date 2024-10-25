@@ -205,7 +205,7 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
       currencyCode
     }
     id
-    images(first: 15) {
+    image {
       __typename
       id
       url
