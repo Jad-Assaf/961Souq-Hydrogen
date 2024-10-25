@@ -31,6 +31,36 @@ export function CollectionDisplay({ collections }) {
 /**
  * ProductRow component with drag-to-scroll.
  */
+
+const LeftArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+);
+
+const RightArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);
+
+
 function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -61,7 +91,7 @@ function ProductRow({ products }) {
     return (
         <div className="product-row-container">
             <button className="prev-button" onClick={() => scrollRow(-300)}>
-                &#9664; {/* Left arrow */}
+                <LeftArrowIcon />
             </button>
             <div
                 className="collection-products-row"
@@ -94,9 +124,10 @@ function ProductRow({ products }) {
                 <div className="blur"></div>
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
-                &#9654; {/* Right arrow */}
+                <RightArrowIcon />
             </button>
         </div>
     );
 }
+
 

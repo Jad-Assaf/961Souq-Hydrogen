@@ -80,20 +80,41 @@ img {
 }
 
 /* Buttons Styling for Prev/Next Navigation */
+/* Product Row Navigation Buttons (Styled Like Product Image Buttons) */
 .prev-button,
 .next-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
+  /* Subtle transparency */
   border: none;
+  border-radius: 50%;
+  /* Circular buttons */
   color: white;
-  font-size: 2rem;
-  padding: 10px;
+  width: 40px;
+  height: 40px;
+  /* Ensure buttons are circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   z-index: 1;
-  border-radius: 50%;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
+}
+
+.prev-button:hover,
+.next-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Darker background on hover */
+}
+
+.prev-button svg,
+.next-button svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  /* SVG icon matches button text color */
 }
 
 .prev-button {
@@ -102,11 +123,6 @@ img {
 
 .next-button {
   right: 10px;
-}
-
-.prev-button:hover,
-.next-button:hover {
-  background-color: rgba(0, 0, 0, 0.7);
 }
 
 /* Product Item Styling */
