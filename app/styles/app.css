@@ -38,12 +38,24 @@ img {
 .collection-products-row::-webkit-scrollbar {
   display: none;
 }
+
 .collections-container {
   padding: 2rem;
 }
 
 .collection-section {
-  margin-bottom: 3rem;
+  max-width: 1500px;
+  margin: 0 auto 50px auto;
+  box-shadow: inset 1px 1px 20px 3px #f4f4f4;
+  border-radius: 20px;
+  padding: 20px;
+  background-color: transparent;
+  backdrop-filter: blur(10px);
+}
+
+.collection-section h3{
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .collection-products-row {
@@ -96,11 +108,6 @@ img {
   color: #ff5722;
 }
 
-.blur{
-  filter: blur(5px);
-  position: relative;
-  left: 0;
-}
 /*
 * --------------------------------------------------
 * components/Aside
@@ -205,6 +212,7 @@ aside li {
   pointer-events: auto;
   visibility: visible;
 }
+
 /* reveal aside */
 .overlay.expanded aside {
   transform: translateX(calc(var(--aside-width) * -1));
@@ -216,7 +224,7 @@ button.reset {
   font-size: inherit;
 }
 
-button.reset > * {
+button.reset>* {
   margin: 0;
 }
 
@@ -245,7 +253,8 @@ button.reset:hover:not(:has(> *)) {
   top: 0;
   z-index: 1;
 }
-.header *{
+
+.header * {
   color: #fff !important;
 }
 
@@ -264,6 +273,7 @@ button.reset:hover:not(:has(> *)) {
 .header-menu-desktop {
   display: none;
   grid-gap: 1rem;
+
   @media (min-width: 45em) {
     display: flex;
     grid-gap: 1rem;
@@ -357,6 +367,7 @@ button.reset:hover:not(:has(> *)) {
   align-items: center;
   display: flex;
 }
+
 /*
 * --------------------------------------------------
 * components/Search
@@ -423,6 +434,7 @@ button.reset:hover:not(:has(> *)) {
 
 .featured-collection-image {
   aspect-ratio: 1 / 1;
+
   @media (min-width: 45em) {
     aspect-ratio: 16 / 9;
   }
@@ -438,6 +450,7 @@ button.reset:hover:not(:has(> *)) {
   display: grid;
   grid-gap: 1.5rem;
   grid-template-columns: repeat(2, 1fr);
+
   @media (min-width: 45em) {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -471,6 +484,7 @@ button.reset:hover:not(:has(> *)) {
 .collection-description {
   margin-bottom: 1rem;
   max-width: 95%;
+
   @media (min-width: 45em) {
     max-width: 600px;
   }
@@ -495,6 +509,7 @@ button.reset:hover:not(:has(> *)) {
 */
 .product {
   display: grid;
+
   @media (min-width: 45em) {
     grid-template-columns: 1fr 1fr;
     grid-gap: 4rem;
