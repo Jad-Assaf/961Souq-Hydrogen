@@ -54,36 +54,49 @@ function ProductRow({ products }) {
         rowRef.current.scrollLeft = scrollLeft - walk;
     };
 
+    const scrollRow = (distance) => {
+        rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
+    };
+
     return (
-        <div
-            className="collection-products-row"
-            ref={rowRef}
-            onMouseDown={handleMouseDown}
-            onMouseLeave={handleMouseLeave}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-        >
-            <div className="blur"></div>
-            {products.map((product) => (
-                <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
-                    <div className="product-card">
-                        <Image
-                            data={product.images.nodes[0]}
-                            aspectRatio="1/1"
-                            sizes="(min-width: 45em) 20vw, 40vw"
-                            srcSet={`${product.images.nodes[0].url}?width=300&quality=50 300w,
-                                     ${product.images.nodes[0].url}?width=600&quality=50 600w,
-                                     ${product.images.nodes[0].url}?width=1200&quality=50 1200w`}
-                            alt={product.images.nodes[0].altText || 'Product Image'}
-                        />
-                        <h4 className="product-title">{truncateText(product.title, 20)}</h4>
-                        <div className="product-price">
-                            <Money data={product.priceRange.minVariantPrice} />
+        <div className="product-row-container">
+            <button className="prev-button" onClick={() => scrollRow(-300)}>
+                &#9664; {/* Left arrow */}
+            </button>
+            <div
+                className="collection-products-row"
+                ref={rowRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+            >
+                <div className="blur"></div>
+                {products.map((product) => (
+                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
+                        <div className="product-card">
+                            <Image
+                                data={product.images.nodes[0]}
+                                aspectRatio="1/1"
+                                sizes="(min-width: 45em) 20vw, 40vw"
+                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                alt={product.images.nodes[0].altText || 'Product Image'}
+                            />
+                            <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                            <div className="product-price">
+                                <Money data={product.priceRange.minVariantPrice} />
+                            </div>
                         </div>
-                    </div>
-                </Link>
-            ))}
-            <div className="blur"></div>
+                    </Link>
+                ))}
+                <div className="blur"></div>
+            </div>
+            <button className="next-button" onClick={() => scrollRow(300)}>
+                &#9654; {/* Right arrow */}
+            </button>
         </div>
     );
 }
+
