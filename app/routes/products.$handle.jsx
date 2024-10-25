@@ -167,7 +167,7 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
     product {
       title
       handle
-      images(first: 15) {
+      images(first: 30) {
         edges {
           node {
             __typename
@@ -201,7 +201,7 @@ const PRODUCT_FRAGMENT = `#graphql
     handle
     descriptionHtml
     description
-    images(first: 15) {
+    images(first: 30) {
       edges {
         node {
           __typename
