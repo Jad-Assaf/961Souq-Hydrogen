@@ -77,7 +77,6 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} />
       <CollectionDisplay collections={collections} />
     </div>
   );
