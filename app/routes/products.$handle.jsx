@@ -189,7 +189,7 @@ const PRODUCT_WITH_ALL_IMAGES_QUERY = `#graphql
       id
       title
       descriptionHtml
-      images(first: 250) {
+      images(first: 20) {
         edges {
           node {
             id
