@@ -39,14 +39,3 @@
     width: 100%;
     height: 100%;
 }
-
-@media (min-width: 768px) {
-    .main-image {
-        width: 50%;
-    }
-
-    .thumbnail {
-        width: 80px;
-        height: 80px;
-    }
-}

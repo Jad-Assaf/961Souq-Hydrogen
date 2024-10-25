@@ -1,10 +1,8 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState } from 'react';
 import { Image } from '@shopify/hydrogen';
+import Lightbox from 'react-awesome-lightbox';
+import 'react-awesome-lightbox/build/style.css'; // Import the lightbox styles
 import '../styles/ProductImage.css';
-
-// Lazy load the Lightbox component to avoid SSR issues
-const Lightbox = lazy(() => import('react-image-lightbox'));
-import 'react-image-lightbox/style.css';
 
 /**
  * @param {{
@@ -12,18 +10,18 @@ import 'react-image-lightbox/style.css';
  * }}
  */
 export function ProductImages({ images }) {
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   if (!images || images.length === 0) {
     return <div className="product-images" />;
   }
 
   const selectedImage = images[selectedImageIndex].node;
-  const lightboxImages = images.map(({ node }) => node.url);
 
   return (
     <div className="product-images-container">
+      {/* Main Image */}
       <div className="main-image" onClick={() => setIsLightboxOpen(true)}>
         <Image
           alt={selectedImage.altText || 'Product Image'}
@@ -33,6 +31,7 @@ export function ProductImages({ images }) {
         />
       </div>
 
+      {/* Thumbnails */}
       <div className="thumbnails">
         {images.map(({ node: image }, index) => (
           <div
@@ -50,27 +49,13 @@ export function ProductImages({ images }) {
         ))}
       </div>
 
+      {/* Lightbox */}
       {isLightboxOpen && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <Lightbox
-            mainSrc={lightboxImages[selectedImageIndex]}
-            nextSrc={lightboxImages[(selectedImageIndex + 1) % images.length]}
-            prevSrc={
-              lightboxImages[
-              (selectedImageIndex + images.length - 1) % images.length
-              ]
-            }
-            onCloseRequest={() => setIsLightboxOpen(false)}
-            onMovePrevRequest={() =>
-              setSelectedImageIndex(
-                (selectedImageIndex + images.length - 1) % images.length
-              )
-            }
-            onMoveNextRequest={() =>
-              setSelectedImageIndex((selectedImageIndex + 1) % images.length)
-            }
-          />
-        </Suspense>
+        <Lightbox
+          images={images.map(({ node }) => ({ url: node.url, title: node.altText }))}
+          startIndex={selectedImageIndex}
+          onClose={() => setIsLightboxOpen(false)}
+        />
       )}
     </div>
   );
