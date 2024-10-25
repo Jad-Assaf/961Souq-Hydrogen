@@ -1,47 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { CollectionDisplay } from '../components/CollectionDisplay';
+import React from 'react';
+import { Image } from '@shopify/hydrogen';
+import '../styles/ResponsiveImageGrid.css';
 
-// Inter-row images to display between ProductRow components
-const interRowImages = [
-    {
-        url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
-        altText: 'Placeholder Image 1'
-    },
-    {
-        url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/APPLE-IPHONE-16-wh.jpg?v=1728307748',
-        altText: 'Placeholder Image 2'
-    },
-    {
-        url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps-studios.jpg?v=1728486402',
-        altText: 'Placeholder Image 3'
-    },
-    {
-        url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cmf-phone-1-banner-1.jpg?v=1727944715',
-        altText: 'Placeholder Image 4'
-    },
-];
-
-export default function ResponsiveImageGrid() {
-    const [collections, setCollections] = useState([]);
-
-    // Fetch collections dynamically on component mount
-    useEffect(() => {
-        async function fetchCollections() {
-            try {
-                const response = await fetch('/api/collections'); // Update to your API route
-                const data = await response.json();
-                setCollections(data.collections);
-            } catch (error) {
-                console.error('Error fetching collections:', error);
-            }
-        }
-
-        fetchCollections();
-    }, []);
+/**
+ * ResponsiveImageGrid Component
+ * @param {{ images: Array<{ url: string, altText?: string }> }} props
+ */
+export function ResponsiveImageGrid({ images }) {
+    if (!images || images.length === 0) {
+        return <p>No images to display.</p>;
+    }
 
     return (
-        <div>
-            <CollectionDisplay collections={collections} interRowImages={interRowImages} />
+        <div className="responsive-image-grid">
+            {images.map((image, index) => (
+                <div key={index} className="image-wrapper">
+                    <Image
+                        src={image.url}
+                        alt={image.altText || `Image ${index + 1}`}
+                        width="100%"
+                        height="auto"
+                    />
+                </div>
+            ))}
         </div>
     );
 }
