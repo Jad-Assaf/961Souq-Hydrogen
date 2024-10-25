@@ -1,7 +1,6 @@
 import {Await, Link} from '@remix-run/react';
 import {Suspense, useId} from 'react';
 import {Aside} from '~/components/Aside';
-import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {
@@ -16,7 +15,6 @@ import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 export function PageLayout({
   cart,
   children = null,
-  footer,
   header,
   isLoggedIn,
   publicStoreDomain,
@@ -35,11 +33,6 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
     </Aside.Provider>
   );
 }
@@ -168,7 +161,6 @@ function MobileMenuAside({header, publicStoreDomain}) {
 /**
  * @typedef {Object} PageLayoutProps
  * @property {Promise<CartApiQueryFragment|null>} cart
- * @property {Promise<FooterQuery|null>} footer
  * @property {HeaderQuery} header
  * @property {Promise<boolean>} isLoggedIn
  * @property {string} publicStoreDomain
@@ -176,5 +168,4 @@ function MobileMenuAside({header, publicStoreDomain}) {
  */
 
 /** @typedef {import('storefrontapi.generated').CartApiQueryFragment} CartApiQueryFragment */
-/** @typedef {import('storefrontapi.generated').FooterQuery} FooterQuery */
 /** @typedef {import('storefrontapi.generated').HeaderQuery} HeaderQuery */
