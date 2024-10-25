@@ -23,7 +23,7 @@ export async function loader(args) {
  * Load critical collections data by their handles.
  */
 async function loadCriticalData({ context }) {
-  const handles = ['apple', 'gaming', 'laptops', 'mobiles', 'monitors', 'fitness watches'];
+  const handles = ['new-arrivals', 'apple', 'gaming', 'gaming-laptops', 'laptops', 'mobiles', 'apple-iphone', 'samsung', 'monitors', 'fitness watches'];
   const collections = await fetchCollectionsByHandles(context, handles);
 
   console.log('Filtered collections:', collections);
@@ -91,7 +91,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       id
       title
       handle
-      products(first: 50) {
+      products(first: 30) {
         nodes {
           id
           title
