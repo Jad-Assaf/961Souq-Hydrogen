@@ -1,0 +1,35 @@
+/* Container Styling */
+.responsive-image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 images per row */
+    gap: 30px;
+    /* 30px gap between images */
+    max-width: 1500px;
+    margin: 0 auto;
+    /* Center the grid */
+    padding: 20px;
+}
+
+/* Ensure images are responsive */
+.image-wrapper img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect on images */
+.image-wrapper img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile Styles: 1 image per row */
+@media (max-width: 768px) {
+    .responsive-image-grid {
+        grid-template-columns: 1fr;
+        /* 1 image per row */
+    }
+}
