@@ -1,35 +1,26 @@
-.product-image-gallery {
+.product-images {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.productPage-image {
+.selected-image {
     width: 100%;
     max-width: 500px;
     margin-bottom: 10px;
 }
 
-.product-thumbnails {
+.thumbnails {
     display: flex;
     gap: 10px;
-    justify-content: center;
 }
 
 .thumbnail {
     cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 5px;
-    overflow: hidden;
+    border: 1px solid transparent;
+    transition: border 0.3s;
 }
 
-.thumbnail.active {
-    border-color: #ff5722;
-}
-
-.thumbnail img {
-    display: block;
-    width: 75px;
-    height: 75px;
-    object-fit: cover;
+.thumbnail:hover {
+    border-color: #000;
 }

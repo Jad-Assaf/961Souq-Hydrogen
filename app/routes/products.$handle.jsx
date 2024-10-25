@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { Await, useLoaderData } from '@remix-run/react';
+import { Image } from '@shopify/hydrogen';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -19,16 +20,9 @@ export const meta = ({ data }) => {
 };
 
 /**
- * Loader function to fetch product data and variants.
- */
-export async function loader(args) {
-  const criticalData = await loadCriticalData(args);
-  const deferredData = loadDeferredData(args);
-  return defer({ ...criticalData, ...deferredData });
-}
-
-/**
- * Fetch product data including all media and variants.
+ * Load data necessary for rendering content above the fold. This is the critical data
+ * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * @param {LoaderFunctionArgs}
  */
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
@@ -38,46 +32,57 @@ async function loadCriticalData({ context, params, request }) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const { product } = await storefront.query(PRODUCT_QUERY, {
-    variables: { handle, selectedOptions: getSelectedProductOptions(request) },
-  });
+  const [{ product }] = await Promise.all([
+    storefront.query(PRODUCT_QUERY, {
+      variables: { handle, selectedOptions: getSelectedProductOptions(request) },
+    }),
+    // Add other queries here, so that they are loaded in parallel
+  ]);
 
   if (!product?.id) {
-    throw new Response('Product not found', { status: 404 });
+    throw new Response(null, { status: 404 });
   }
 
-  const firstVariant = product.variants?.nodes?.[0];
-  if (!firstVariant) {
-    throw new Error('No variants found for this product');
-  }
-
-  const firstVariantIsDefault = firstVariant.selectedOptions.some(
-    (option) => option.name === 'Title' && option.value === 'Default Title'
+  const firstVariant = product.variants.nodes[0];
+  const firstVariantIsDefault = Boolean(
+    firstVariant.selectedOptions.find(
+      (option) => option.name === 'Title' && option.value === 'Default Title',
+    ),
   );
 
-  product.selectedVariant = firstVariantIsDefault
-    ? firstVariant
-    : product.selectedVariant || firstVariant;
+  if (firstVariantIsDefault) {
+    product.selectedVariant = firstVariant;
+  } else {
+    if (!product.selectedVariant) {
+      throw redirectToFirstVariant({ product, request });
+    }
+  }
 
   return { product };
 }
 
 /**
- * Load deferred variants data.
+ * Load data for rendering content below the fold. This data is deferred and will be
+ * fetched after the initial page load. If it's unavailable, the page should still 200.
+ * Make sure to not throw any errors here, as it will cause the page to 500.
+ * @param {LoaderFunctionArgs}
  */
 function loadDeferredData({ context, params }) {
-  return {
-    variants: context.storefront
-      .query(VARIANTS_QUERY, { variables: { handle: params.handle } })
-      .catch((error) => {
-        console.error('Error fetching variants:', error);
-        return { product: { variants: { nodes: [] } } };
-      }),
-  };
+  const variants = context.storefront
+    .query(VARIANTS_QUERY, { variables: { handle: params.handle } })
+    .catch((error) => {
+      console.error(error);
+      return null;
+    });
+
+  return { variants };
 }
 
 /**
- * Redirect to the first variant if no selected variant is found.
+ * @param {{
+ *   product: ProductFragment;
+ *   request: Request;
+ * }}
  */
 function redirectToFirstVariant({ product, request }) {
   const url = new URL(request.url);
@@ -90,92 +95,95 @@ function redirectToFirstVariant({ product, request }) {
       selectedOptions: firstVariant.selectedOptions,
       searchParams: new URLSearchParams(url.search),
     }),
-    { status: 302 }
+    { status: 302 },
   );
 }
 
-/**
- * Product component rendering product details with media and variants.
- */
-export default function Product() {
-  const { product, variants } = useLoaderData();
-  const selectedVariant = useOptimisticVariant(
-    product.selectedVariant,
-    variants
-  );
-
-  const { title, descriptionHtml } = product;
+export default function ProductPage() {
+  const product = useLoaderData();
 
   return (
-    <div className="product">
-      <ProductImage media={product.media.nodes} />
-      <div className="product-main">
-        <h1>{title}</h1>
-        <ProductPrice
-          price={selectedVariant?.price}
-          compareAtPrice={selectedVariant?.compareAtPrice}
-        />
-        <Suspense
-          fallback={
-            <ProductForm
-              product={product}
-              selectedVariant={selectedVariant}
-              variants={[]}
-            />
-          }
-        >
-          <Await resolve={variants}>
-            {(data) => (
-              <ProductForm
-                product={product}
-                selectedVariant={selectedVariant}
-                variants={data?.product?.variants.nodes || []}
-              />
-            )}
-          </Await>
-        </Suspense>
-        <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
-        <Analytics.ProductView
-          data={{
-            products: [
-              {
-                id: product.id,
-                title: product.title,
-                price: selectedVariant?.price.amount || '0',
-                vendor: product.vendor,
-                variantId: selectedVariant?.id || '',
-                variantTitle: selectedVariant?.title || '',
-                quantity: 1,
-              },
-            ],
-          }}
-        />
+    <div className="product-page">
+      <h1>{product.title}</h1>
+      <div className="product-images">
+        {product.images.edges.map(({ node: image }) => (
+          <Image
+            key={image.id}
+            data={image}
+            alt={image.altText || 'Product Image'}
+            aspectRatio="1/1"
+          />
+        ))}
       </div>
+
+      <Suspense fallback={<p>Loading product details...</p>}>
+        <Await resolve={product.variants}>
+          {(data) =>
+            data.nodes.map((variant) => (
+              <div key={variant.id} className="variant-info">
+                <h2>{variant.title}</h2>
+                <ProductPrice
+                  price={variant.price}
+                  compareAtPrice={variant.compareAtPrice}
+                />
+                <Image
+                  data={variant.image}
+                  alt={variant.image.altText || 'Variant Image'}
+                  aspectRatio="1/1"
+                />
+              </div>
+            ))
+          }
+        </Await>
+      </Suspense>
+
+      <div className="product-description">
+        <strong>Description</strong>
+        <div dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
+      </div>
+
+      <ProductForm product={product} />
+      <Analytics.ProductView
+        data={{
+          products: [
+            {
+              id: product.id,
+              title: product.title,
+              price: product.variants.nodes[0]?.price.amount || '0',
+              vendor: product.vendor,
+              variantId: product.variants.nodes[0]?.id || '',
+              variantTitle: product.variants.nodes[0]?.title || '',
+              quantity: 1,
+            },
+          ],
+        }}
+      />
     </div>
   );
 }
 
 /**
- * GraphQL Query to fetch product data with media and variants.
+ * Loader function to fetch product with all images
  */
-const PRODUCT_QUERY = `#graphql
-  query Product(
-    $country: CountryCode
-    $handle: String!
-    $language: LanguageCode
-    $selectedOptions: [SelectedOptionInput!]!
-  ) @inContext(country: $country, language: $language) {
-    product(handle: $handle) {
-      id
-      title
-      vendor
-      handle
-      descriptionHtml
-      media(first: 10) {
-        nodes {
-          ... on MediaImage {
-            id
-            image {
+export async function loader({ context, params }) {
+  const { storefront } = context;
+  const { handle } = params;
+
+  if (!handle) {
+    throw new Error('Product handle is required');
+  }
+
+  const data = await storefront.query(
+    `#graphql
+    query ProductWithAllImages($handle: String!) {
+      product(handle: $handle) {
+        id
+        title
+        descriptionHtml
+        images(first: 250) {
+          edges {
+            node {
+              id
               url
               altText
               width
@@ -183,15 +191,86 @@ const PRODUCT_QUERY = `#graphql
             }
           }
         }
-      }
-      variants(first: 1) {
-        nodes {
-          ...ProductVariant
+        variants(first: 1) {
+          nodes {
+            id
+            title
+            price {
+              amount
+              currencyCode
+            }
+            compareAtPrice {
+              amount
+              currencyCode
+            }
+            image {
+              url
+              altText
+            }
+          }
         }
       }
-      selectedVariant: variantBySelectedOptions(
-        selectedOptions: $selectedOptions
-      ) {
+    }`,
+    { variables: { handle } }
+  );
+
+  if (!data.product) {
+    throw new Response('Product not found', { status: 404 });
+  }
+
+  return data.product;
+}
+
+const PRODUCT_VARIANT_FRAGMENT = `#graphql
+  fragment ProductVariant on ProductVariant {
+    availableForSale
+    compareAtPrice {
+      amount
+      currencyCode
+    }
+    id
+    image {
+      __typename
+      id
+      url
+      altText
+      width
+      height
+    }
+    price {
+      amount
+      currencyCode
+    }
+    product {
+      title
+      handle
+    }
+    selectedOptions {
+      name
+      value
+    }
+    sku
+    title
+    unitPrice {
+      amount
+      currencyCode
+    }
+  }
+`;
+
+const PRODUCT_FRAGMENT = `#graphql
+  fragment Product on Product {
+    id
+    title
+    vendor
+    handle
+    descriptionHtml
+    options {
+      name
+      values
+    }
+    variants(first: 1) {
+      nodes {
         ...ProductVariant
       }
     }
@@ -199,38 +278,17 @@ const PRODUCT_QUERY = `#graphql
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
 
-const PRODUCT_VARIANT_FRAGMENT = `#graphql
-  fragment ProductVariant on ProductVariant {
-    id
-    title
-    price {
-      amount
-      currencyCode
-    }
-    compareAtPrice {
-      amount
-      currencyCode
-    }
-    image {
-      id
-      url
-      altText
-      width
-      height
-    }
-    selectedOptions {
-      name
-      value
+const PRODUCT_QUERY = `#graphql
+  query Product($handle: String!) {
+    product(handle: $handle) {
+      ...Product
     }
   }
+  ${PRODUCT_FRAGMENT}
 `;
 
 const VARIANTS_QUERY = `#graphql
-  query ProductVariants(
-    $country: CountryCode
-    $language: LanguageCode
-    $handle: String!
-  ) @inContext(country: $country, language: $language) {
+  query ProductVariants($handle: String!) {
     product(handle: $handle) {
       variants(first: 250) {
         nodes {
@@ -247,3 +305,4 @@ const VARIANTS_QUERY = `#graphql
 /** @typedef {import('storefrontapi.generated').ProductFragment} ProductFragment */
 /** @typedef {import('@shopify/hydrogen/storefront-api-types').SelectedOption} SelectedOption */
 /** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
+/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
