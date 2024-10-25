@@ -3,6 +3,7 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    position: relative;
 }
 
 .main-image {
@@ -20,61 +21,29 @@
     transform: scale(1.05);
 }
 
-/* Thumbnails Styling */
-.thumbnails {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    overflow-x: auto;
-    padding: 10px 0;
-}
-
-.thumbnail {
-    width: 60px;
-    height: 60px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: border 0.3s, transform 0.2s;
-}
-
-.thumbnail.active {
-    border-color: #000;
-    transform: scale(1.1);
-}
-
-.thumbnail img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* Lightbox Fullscreen Overlay */
-.yarl__container {
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-/* Lightbox Navigation Buttons */
-.yarl__navigation-button {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+.prev-button,
+.next-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    font-size: 2rem;
     padding: 10px;
-    transition: background-color 0.3s ease;
+    cursor: pointer;
+    z-index: 10;
 }
 
-.yarl__navigation-button:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+.prev-button {
+    left: 10px;
 }
 
-@media (min-width: 768px) {
-    .main-image {
-        width: 50%;
-    }
+.next-button {
+    right: 10px;
+}
 
-    .thumbnail {
-        width: 80px;
-        height: 80px;
-    }
+.prev-button:hover,
+.next-button:hover {
+    background-color: rgba(0, 0, 0, 0.7);
 }
