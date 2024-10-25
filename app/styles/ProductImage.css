@@ -10,7 +10,6 @@
     flex-direction: column;
     gap: 10px;
     max-height: 80vh;
-    overflow-y: auto;
 }
 
 .thumbnail {
@@ -74,4 +73,9 @@
 .prev-button:hover,
 .next-button:hover {
     background-color: rgba(0, 0, 0, 0.7);
+}
+
+.yarl__container {
+    background-color: #000000ab !important;
+    backdrop-filter: blur(15px) !important;
 }
