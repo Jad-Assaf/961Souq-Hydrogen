@@ -71,9 +71,9 @@ function ProductRow({ products }) {
                             data={product.images.nodes[0]}
                             aspectRatio="1/1"
                             sizes="(min-width: 45em) 20vw, 40vw"
-                            srcSet={`${product.images.nodes[0].url}?width=300 300x,
-                                     ${product.images.nodes[0].url}?width=600 600x,
-                                     ${product.images.nodes[0].url}?width=1200 1200x`}
+                            srcSet={`${product.images.nodes[0].url}?width=300 2000x,
+                                     ${product.images.nodes[0].url}?width=600 2000x,
+                                     ${product.images.nodes[0].url}?width=1200 2000x`}
                             alt={product.images.nodes[0].altText || 'Product Image'}
                         />
                         <h4 className="product-title">{truncateText(product.title, 20)}</h4>
