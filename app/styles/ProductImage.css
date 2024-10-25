@@ -1,0 +1,35 @@
+.product-image-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.productPage-image {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 10px;
+}
+
+.product-thumbnails {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.thumbnail {
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.thumbnail.active {
+    border-color: #ff5722;
+}
+
+.thumbnail img {
+    display: block;
+    width: 75px;
+    height: 75px;
+    object-fit: cover;
+}
