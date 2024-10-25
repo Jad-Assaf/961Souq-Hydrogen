@@ -220,6 +220,18 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
     product {
       title
       handle
+      images(first: 15) {  // Fetch all product images (up to 15)
+        edges {
+          node {
+            __typename
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
     }
     selectedOptions {
       name
@@ -233,6 +245,7 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
     }
   }
 `;
+
 
 const PRODUCT_FRAGMENT = `#graphql
   fragment Product on Product {
