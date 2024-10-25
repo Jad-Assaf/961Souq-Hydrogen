@@ -1,26 +1,10 @@
 .product-images {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.selected-image {
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 10px;
-}
-
-.thumbnails {
-    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-.thumbnail {
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: border 0.3s;
-}
-
-.thumbnail:hover {
-    border-color: #000;
+.product-image {
+    flex: 1 1 calc(33.333% - 10px);
+    max-width: calc(33.333% - 10px);
 }

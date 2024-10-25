@@ -89,11 +89,11 @@ export default function Product() {
     variants
   );
 
-  const { title, descriptionHtml } = product;
+  const { title, descriptionHtml, images } = product;
 
   return (
     <div className="product">
-      <ProductImage image={selectedVariant?.image} />
+      <ProductImages images={images.edges} />
       <div className="product-main">
         <h1>{title}</h1>
         <ProductPrice
@@ -142,6 +142,7 @@ export default function Product() {
     </div>
   );
 }
+
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
