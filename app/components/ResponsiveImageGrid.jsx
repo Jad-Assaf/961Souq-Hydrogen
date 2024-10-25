@@ -8,7 +8,8 @@ import '../styles/ResponsiveImageGrid.css';
  */
 export function ResponsiveImageGrid({ images }) {
     if (!images || images.length === 0) {
-        return <p>No images to display.</p>;
+        console.warn('No images to display'); // Add a warning to debug
+        return <p>No images available.</p>; // Render a fallback if no images are passed
     }
 
     return (
@@ -26,3 +27,4 @@ export function ResponsiveImageGrid({ images }) {
         </div>
     );
 }
+

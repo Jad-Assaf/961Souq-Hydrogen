@@ -2,6 +2,7 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
+import { CategorySlider } from '../components/CategorySlider';
 
 /**
  * @type {MetaFunction}
@@ -22,13 +23,10 @@ export async function loader(args) {
  * Load critical collections data by their handles.
  */
 async function loadCriticalData({ context }) {
-  const handles = [
-    'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
-    'laptops', 'mobiles', 'apple-iphone', 'samsung',
-    'monitors', 'fitness watches'
-  ];
-
+  const handles = ['new-arrivals', 'apple', 'gaming', 'gaming-laptops', 'laptops', 'mobiles', 'apple-iphone', 'samsung', 'monitors', 'fitness watches'];
   const collections = await fetchCollectionsByHandles(context, handles);
+
+  console.log('Filtered collections:', collections);
 
   if (collections.length === 0) {
     throw new Response('No matching collections found.', { status: 404 });
@@ -76,29 +74,10 @@ export default function Homepage() {
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718' },
   ];
 
-  const interRowImages = [
-    {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
-      altText: 'Placeholder Image 1'
-    },
-    {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/APPLE-IPHONE-16-wh.jpg?v=1728307748',
-      altText: 'Placeholder Image 2'
-    },
-    {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps-studios.jpg?v=1728486402',
-      altText: 'Placeholder Image 3'
-    },
-    {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cmf-phone-1-banner-1.jpg?v=1727944715',
-      altText: 'Placeholder Image 4'
-    },
-  ];
-
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionDisplay collections={collections} interRowImages={interRowImages} />
+      <CollectionDisplay collections={collections} />
     </div>
   );
 }
@@ -149,7 +128,6 @@ const GET_MENU_QUERY = `#graphql
     }
   }
 `;
-
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */

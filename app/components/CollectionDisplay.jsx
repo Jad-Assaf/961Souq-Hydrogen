@@ -1,25 +1,27 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
-import { ResponsiveImageGrid } from '../components/ResponsiveImageGrid'; // Import ResponsiveImageGrid
 
 /**
- * CollectionDisplay component with drag-to-scroll functionality and inter-row image grids.
+ * Truncate text to a specific word limit.
  */
-export function CollectionDisplay({ collections, interRowImages }) {
+function truncateText(text, maxWords) {
+    const words = text.split(' ');
+    return words.length > maxWords
+        ? words.slice(0, maxWords).join(' ') + '...'
+        : text;
+}
+
+/**
+ * CollectionDisplay component with drag-to-scroll functionality.
+ */
+export function CollectionDisplay({ collections }) {
     return (
         <div className="collections-container">
-            {collections.map((collection, index) => (
+            {collections.map((collection) => (
                 <div key={collection.id} className="collection-section">
                     <h3>{collection.title}</h3>
                     <ProductRow products={collection.products.nodes} />
-
-                    {/* Insert the ResponsiveImageGrid to display inter-row images */}
-                    {interRowImages && interRowImages[index] && (
-                        <ResponsiveImageGrid
-                            images={[interRowImages[index]]} // Pass one image in an array to the grid
-                        />
-                    )}
                 </div>
             ))}
         </div>
@@ -29,6 +31,36 @@ export function CollectionDisplay({ collections, interRowImages }) {
 /**
  * ProductRow component with drag-to-scroll.
  */
+
+const LeftArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+);
+
+const RightArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);
+
+
 function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
