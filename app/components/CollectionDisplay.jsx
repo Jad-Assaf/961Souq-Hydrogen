@@ -24,22 +24,18 @@ export function CollectionDisplay({ collections, interRowImages }) {
                     <h3>{collection.title}</h3>
                     <ProductRow products={collection.products.nodes} />
 
-                    {/* Display the inter-row image, if it exists for the current index */}
+                    {/* Use ResponsiveImageGrid to display the inter-row image */}
                     {interRowImages && interRowImages[index] && (
-                        <div className="inter-row-image">
-                            <Image
-                                src={interRowImages[index].url}
-                                alt={interRowImages[index].altText || `Inter-row Image ${index + 1}`}
-                                width="100%"
-                                height="auto"
-                            />
-                        </div>
+                        <ResponsiveImageGrid
+                            images={[interRowImages[index]]} // Pass the current image in an array
+                        />
                     )}
                 </div>
             ))}
         </div>
     );
 }
+
 
 
 /**
