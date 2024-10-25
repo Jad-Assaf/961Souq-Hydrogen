@@ -70,7 +70,11 @@ function ProductRow({ products }) {
                         <Image
                             data={product.images.nodes[0]}
                             aspectRatio="1/1"
-                            sizes="(min-width: 45em) 20vw, 50vw"
+                            sizes="(min-width: 45em) 20vw, 40vw"
+                            srcSet={`${product.images.nodes[0].url}?width=300 300w,
+                                     ${product.images.nodes[0].url}?width=600 600w,
+                                     ${product.images.nodes[0].url}?width=1200 1200w`}
+                            alt={product.images.nodes[0].altText || 'Product Image'}
                         />
                         <h4 className="product-title">{truncateText(product.title, 20)}</h4>
                         <div className="product-price">
