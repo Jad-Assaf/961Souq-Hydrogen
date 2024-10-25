@@ -8,7 +8,7 @@ import {
 } from '@shopify/hydrogen';
 import { getVariantUrl } from '~/lib/variants';
 import { ProductPrice } from '~/components/ProductPrice';
-import { ProductImage } from '~/components/ProductImage';
+import { ProductImages } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
 
 export const meta = ({ data }) => {
