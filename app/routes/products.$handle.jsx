@@ -26,10 +26,16 @@ export async function loader({ context, params }) {
   const { storefront } = context;
   const { handle } = params;
 
-  try {
-    const data = await storefront.query(PRODUCT_WITH_ALL_IMAGES_QUERY, { variables: { handle } });
+  if (!handle) {
+    throw new Error('Product handle is required.');
+  }
 
-    console.log('Fetched product data:', data); // For debugging
+  try {
+    const data = await storefront.query(PRODUCT_WITH_ALL_IMAGES_QUERY, {
+      variables: { handle },
+    });
+
+    console.log('Fetched product data:', data);
 
     if (!data.product) {
       throw new Response('Product not found', { status: 404 });
@@ -41,6 +47,7 @@ export async function loader({ context, params }) {
     throw new Response('Internal Server Error', { status: 500 });
   }
 }
+
 
 export default function ProductPage() {
   const product = useLoaderData();
@@ -137,19 +144,10 @@ const PRODUCT_WITH_ALL_IMAGES_QUERY = `#graphql
           }
         }
       }
-      variants(first: 1) {
-        nodes {
-          id
-          title
-          price {
-            amount
-            currencyCode
-          }
-        }
-      }
     }
   }
 `;
+
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
