@@ -21,7 +21,7 @@ const interRowImages = [
     },
 ];
 
-export default function HomePage() {
+export default function ResponsiveImageGrid() {
     const [collections, setCollections] = useState([]);
 
     // Fetch collections dynamically on component mount
@@ -41,7 +41,6 @@ export default function HomePage() {
 
     return (
         <div>
-            <h1>Shop Our Collections</h1>
             <CollectionDisplay collections={collections} interRowImages={interRowImages} />
         </div>
     );
