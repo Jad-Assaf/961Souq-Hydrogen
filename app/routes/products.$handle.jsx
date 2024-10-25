@@ -28,7 +28,7 @@ export async function loader(args) {
 }
 
 /**
- * Fetch product data including all images and variants.
+ * Fetch product data including all media and variants.
  */
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
@@ -66,14 +66,14 @@ async function loadCriticalData({ context, params, request }) {
  * Load deferred variants data.
  */
 function loadDeferredData({ context, params }) {
-  const variants = context.storefront
-    .query(VARIANTS_QUERY, { variables: { handle: params.handle } })
-    .catch((error) => {
-      console.error('Error fetching variants:', error);
-      return { product: { variants: { nodes: [] } } };
-    });
-
-  return { variants };
+  return {
+    variants: context.storefront
+      .query(VARIANTS_QUERY, { variables: { handle: params.handle } })
+      .catch((error) => {
+        console.error('Error fetching variants:', error);
+        return { product: { variants: { nodes: [] } } };
+      }),
+  };
 }
 
 /**
@@ -95,7 +95,7 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 /**
- * Product component rendering product details with images and variants.
+ * Product component rendering product details with media and variants.
  */
 export default function Product() {
   const { product, variants } = useLoaderData();
@@ -108,7 +108,7 @@ export default function Product() {
 
   return (
     <div className="product">
-      <ProductImage images={product.images.nodes} />
+      <ProductImage media={product.media.nodes} />
       <div className="product-main">
         <h1>{title}</h1>
         <ProductPrice
@@ -156,7 +156,7 @@ export default function Product() {
 }
 
 /**
- * GraphQL Query to fetch product data with images and variants.
+ * GraphQL Query to fetch product data with media and variants.
  */
 const PRODUCT_QUERY = `#graphql
   query Product(
@@ -171,13 +171,17 @@ const PRODUCT_QUERY = `#graphql
       vendor
       handle
       descriptionHtml
-      images(first: 10) {
+      media(first: 10) {
         nodes {
-          id
-          url
-          altText
-          width
-          height
+          ... on MediaImage {
+            id
+            image {
+              url
+              altText
+              width
+              height
+            }
+          }
         }
       }
       variants(first: 1) {
