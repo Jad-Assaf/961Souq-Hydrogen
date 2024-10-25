@@ -34,6 +34,24 @@ export function ProductImages({ images }) {
 
   return (
     <div className="product-images-container">
+      {/* Thumbnails on the Left */}
+      <div className="thumbnails">
+        {images.map(({ node: image }, index) => (
+          <div
+            key={image.id}
+            className={`thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
+            onClick={() => setSelectedImageIndex(index)}
+          >
+            <Image
+              alt={image.altText || 'Thumbnail Image'}
+              aspectRatio="1/1"
+              data={image}
+              sizes="50px"
+            />
+          </div>
+        ))}
+      </div>
+
       {/* Main Image with Prev/Next Buttons */}
       <div
         className="main-image"
@@ -46,10 +64,22 @@ export function ProductImages({ images }) {
           data={selectedImage}
           sizes="(min-width: 45em) 50vw, 100vw"
         />
-        <button className="prev-button" onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}>
+        <button
+          className="prev-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePrevImage();
+          }}
+        >
           &#9664;
         </button>
-        <button className="next-button" onClick={(e) => { e.stopPropagation(); handleNextImage(); }}>
+        <button
+          className="next-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNextImage();
+          }}
+        >
           &#9654;
         </button>
       </div>

@@ -1,16 +1,44 @@
 .product-images-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 20px;
-    position: relative;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnails {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.thumbnail {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border 0.3s, transform 0.2s;
+}
+
+.thumbnail.active {
+    border-color: #000;
+    transform: scale(1.1);
+}
+
+.thumbnail img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
 }
 
 .main-image {
-    width: 80%;
+    position: relative;
+    width: 60%;
     cursor: grab;
     transition: transform 0.3s ease;
-    position: relative;
 }
 
 .main-image:active {
