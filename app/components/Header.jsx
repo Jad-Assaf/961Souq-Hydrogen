@@ -4,13 +4,13 @@ import { NavLink } from '@remix-run/react';
 /**
  * Main Header Component
  */
-export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
+export function Header({ header, isLoggedIn, cart }) {
   const { menu } = header;
   return (
     <header className="header">
       <HeaderMenu 
         menu={menu} 
-        publicStoreDomain={publicStoreDomain} 
+        primaryDomainUrl={header.shop.primaryDomain.url} 
       />
     </header>
   );
@@ -19,7 +19,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 /**
  * HeaderMenu Component with Recursive Menu Rendering
  */
-export function HeaderMenu({ menu, publicStoreDomain }) {
+export function HeaderMenu({ menu, primaryDomainUrl }) {
   const [hoveredItem, setHoveredItem] = useState(null);
 
   const handleMouseEnter = (id) => setHoveredItem(id);
@@ -35,7 +35,7 @@ export function HeaderMenu({ menu, publicStoreDomain }) {
             hoveredItem={hoveredItem}
             onHover={handleMouseEnter}
             onLeave={handleMouseLeave}
-            publicStoreDomain={publicStoreDomain}
+            primaryDomainUrl={primaryDomainUrl}
           />
         ))}
       </ul>
@@ -46,12 +46,12 @@ export function HeaderMenu({ menu, publicStoreDomain }) {
 /**
  * MenuItem Component: Handles individual menu items and renders submenus recursively.
  */
-function MenuItem({ item, hoveredItem, onHover, onLeave, publicStoreDomain }) {
+function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl }) {
   const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
 
   const url = 
     item.url.includes('myshopify.com') || 
-    item.url.includes(publicStoreDomain)
+    item.url.includes(primaryDomainUrl)
       ? new URL(item.url).pathname
       : item.url;
 
