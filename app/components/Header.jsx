@@ -4,7 +4,7 @@ import { NavLink } from '@remix-run/react';
 /**
  * Main Header Component
  */
-export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
+export function Header({ header, publicStoreDomain }) {
   const { menu } = header;
   return (
     <header className="header">
@@ -71,23 +71,15 @@ function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publi
       {hasSubItems && hoveredItem === item.id && (
         <ul className="submenu">
           {item.items.map((subItem) => (
-            <li key={subItem.id}>
-              <NavLink className="submenu-link" to={subItem.url}>
-                {subItem.title}
-              </NavLink>
-
-              {Array.isArray(subItem.items) && subItem.items.length > 0 && (
-                <ul className="sub-submenu">
-                  {subItem.items.map((subSubItem) => (
-                    <li key={subSubItem.id}>
-                      <NavLink className="submenu-link" to={subSubItem.url}>
-                        {subSubItem.title}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
+            <MenuItem
+              key={subItem.id}
+              item={subItem}
+              hoveredItem={hoveredItem}
+              onHover={onHover}
+              onLeave={onLeave}
+              primaryDomainUrl={primaryDomainUrl}
+              publicStoreDomain={publicStoreDomain}
+            />
           ))}
         </ul>
       )}
@@ -101,28 +93,24 @@ const FALLBACK_HEADER_MENU = {
     {
       id: 'gid://shopify/MenuItem/461609500728',
       title: 'Collections',
-      type: 'HTTP',
       url: '/collections',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609533496',
       title: 'Blog',
-      type: 'HTTP',
       url: '/blogs/journal',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609566264',
       title: 'Policies',
-      type: 'HTTP',
       url: '/policies',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609599032',
       title: 'About',
-      type: 'PAGE',
       url: '/pages/about',
       items: [],
     },
