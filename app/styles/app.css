@@ -372,7 +372,11 @@ button.reset:hover:not(:has(> *)) {
   margin-left: auto;
 }
 
-.menu-item .submenu {
+.menu-item {
+  position: relative;
+}
+
+.submenu {
   display: none;
   position: absolute;
   top: 100%;
@@ -383,6 +387,15 @@ button.reset:hover:not(:has(> *)) {
 
 .menu-item:hover>.submenu {
   display: block;
+}
+
+.submenu .menu-item {
+  position: relative;
+}
+
+.submenu .submenu {
+  left: 100%;
+  top: 0;
 }
 
 /*
