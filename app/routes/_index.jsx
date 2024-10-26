@@ -131,14 +131,25 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
  */
 const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
-    menu(handle: $handle) {
+  menu(handle: $handle) {
+    items {
+      id
+      title
+      url
       items {
+        id
         title
         url
-        type
+        items { 
+          id
+          title
+          url
+        }
       }
     }
   }
+}
+
 `;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
