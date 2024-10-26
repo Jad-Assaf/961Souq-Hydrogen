@@ -6,30 +6,30 @@ import {useAside} from '~/components/Aside';
 /**
  * @param {HeaderProps}
  */
-export function Header({ menu = FALLBACK_HEADER_MENU, isLoggedIn, cart, publicStoreDomain }) {
-  const logoUrl = 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961-Souq-Logo.jpg?v=1684251396';
+export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
+  const { menu } = header;
+  const logoUrl = 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961-Souq-Logo.jpg?v=1684251396'; // Logo URL
 
   return (
     <header className="header">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <img
-          src={logoUrl}
-          alt="961 Souq Logo"
-          className="header-logo"
-          style={{ height: '50px', width: 'auto' }}
+        <img 
+          src={logoUrl} 
+          alt="961 Souq Logo" 
+          className="header-logo" 
+          style={{ height: '50px', width: 'auto' }} 
         />
       </NavLink>
       <HeaderMenu
         menu={menu}
         viewport="desktop"
+        primaryDomainUrl={header.shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
       />
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
     </header>
   );
 }
-
-
 
 
 /**
@@ -40,9 +40,14 @@ export function Header({ menu = FALLBACK_HEADER_MENU, isLoggedIn, cart, publicSt
  *   publicStoreDomain: HeaderProps['publicStoreDomain'];
  * }}
  */
-export function HeaderMenu({ menu, viewport, publicStoreDomain }) {
+export function HeaderMenu({
+  menu,
+  primaryDomainUrl,
+  viewport,
+  publicStoreDomain,
+}) {
   const className = `header-menu-${viewport}`;
-  const { close } = useAside();
+  const {close} = useAside();
 
   return (
     <nav className={className} role="navigation">
@@ -57,11 +62,16 @@ export function HeaderMenu({ menu, viewport, publicStoreDomain }) {
           Home
         </NavLink>
       )}
-      {menu.items.map((item) => {
+      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
-        const url = new URL(item.url, window.location.origin).pathname;
-
+        // if the url is internal, we strip the domain
+        const url =
+          item.url.includes('myshopify.com') ||
+          item.url.includes(publicStoreDomain) ||
+          item.url.includes(primaryDomainUrl)
+            ? new URL(item.url).pathname
+            : item.url;
         return (
           <NavLink
             className="header-menu-item"
@@ -79,8 +89,6 @@ export function HeaderMenu({ menu, viewport, publicStoreDomain }) {
     </nav>
   );
 }
-
-
 
 /**
  * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
