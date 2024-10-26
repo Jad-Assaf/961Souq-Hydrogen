@@ -1,7 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink } from '@remix-run/react';
 import { fetchMenuByHandle } from '../routes/_index'; // Assume this function sends the GraphQL query
 
+/**
+ * Main Header Component
+ */
+export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
+  const { menu } = header;
+  return (
+    <header className="header">
+      <HeaderMenu 
+        menu={menu} 
+        primaryDomainUrl={header.shop.primaryDomain.url} 
+        publicStoreDomain={publicStoreDomain} 
+      />
+    </header>
+  );
+}
+
+/**
+ * HeaderMenu Component with Recursive Menu Rendering
+ */
+export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
+  const [hoveredItem, setHoveredItem] = useState(null);
+
+  const handleMouseEnter = (id) => setHoveredItem(id);
+  const handleMouseLeave = () => setHoveredItem(null);
+
+  return (
+    <nav className="site-nav" role="navigation">
+      <ul className="main-menu">
+        {(menu?.items || FALLBACK_HEADER_MENU.items).map((item) => (
+          <MenuItem
+            key={item.id}
+            item={item}
+            hoveredItem={hoveredItem}
+            onHover={handleMouseEnter}
+            onLeave={handleMouseLeave}
+            primaryDomainUrl={primaryDomainUrl}
+            publicStoreDomain={publicStoreDomain}
+          />
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+/**
+ * MenuItem Component: Handles individual menu items and renders submenus recursively.
+ */
 function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
   const [subItems, setSubItems] = useState(item.items || []);
   const [isLoading, setIsLoading] = useState(false);
