@@ -81,6 +81,7 @@ function ProductRow({ products, image }) {
     };
 
     return (
+        <div>
         <div className="product-row-container">
             <button className="prev-button" onClick={() => scrollRow(-300)}>
                 <LeftArrowIcon />
@@ -116,6 +117,7 @@ function ProductRow({ products, image }) {
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
             </button>
+            </div>
             {image && (
                 <div className="row-image">
                     <img src={image} alt={`Image for row`} />
