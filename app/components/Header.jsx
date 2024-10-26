@@ -39,14 +39,9 @@ export function Header({ menu, isLoggedIn, cart, publicStoreDomain }) {
  *   publicStoreDomain: HeaderProps['publicStoreDomain'];
  * }}
  */
-export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
-  viewport,
-  publicStoreDomain,
-}) {
+export function HeaderMenu({ menu, viewport, publicStoreDomain }) {
   const className = `header-menu-${viewport}`;
-  const {close} = useAside();
+  const { close } = useAside();
 
   return (
     <nav className={className} role="navigation">
@@ -61,16 +56,13 @@ export function HeaderMenu({
           Home
         </NavLink>
       )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
+      {menu.items.map((item) => {
         if (!item.url) return null;
 
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
+        const url = item.url.includes(publicStoreDomain)
+          ? new URL(item.url).pathname
+          : item.url;
+
         return (
           <NavLink
             className="header-menu-item"
@@ -88,6 +80,7 @@ export function HeaderMenu({
     </nav>
   );
 }
+
 
 /**
  * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
