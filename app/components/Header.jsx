@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from '@remix-run/react';
-import { fetchMenuByHandle } from './fetchMenu'; // Assume this function sends the GraphQL query
+import { fetchMenuByHandle } from '../routes/_index'; // Assume this function sends the GraphQL query
 
 function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
   const [subItems, setSubItems] = useState(item.items || []);
