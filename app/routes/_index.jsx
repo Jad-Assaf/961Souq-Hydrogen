@@ -86,7 +86,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionDisplay collections={collections} images={images} />;
+      <CollectionDisplay collections={collections} images={images} />
     </div>
   );
 }

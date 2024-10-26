@@ -6,7 +6,7 @@ import {useAside} from '~/components/Aside';
 /**
  * @param {HeaderProps}
  */
-export function Header({ menu, isLoggedIn, cart, publicStoreDomain }) {
+export function Header({ menu = FALLBACK_HEADER_MENU, isLoggedIn, cart, publicStoreDomain }) {
   const logoUrl = 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961-Souq-Logo.jpg?v=1684251396';
 
   return (
@@ -28,6 +28,7 @@ export function Header({ menu, isLoggedIn, cart, publicStoreDomain }) {
     </header>
   );
 }
+
 
 
 
@@ -59,9 +60,7 @@ export function HeaderMenu({ menu, viewport, publicStoreDomain }) {
       {menu.items.map((item) => {
         if (!item.url) return null;
 
-        const url = item.url.includes(publicStoreDomain)
-          ? new URL(item.url).pathname
-          : item.url;
+        const url = new URL(item.url, window.location.origin).pathname;
 
         return (
           <NavLink
@@ -80,6 +79,7 @@ export function HeaderMenu({ menu, viewport, publicStoreDomain }) {
     </nav>
   );
 }
+
 
 
 /**
