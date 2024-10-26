@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { NavLink } from '@remix-run/react';
-import { fetchMenuByHandle } from '../routes/_index'; // Assume this function sends the GraphQL query
 
 /**
  * Main Header Component
@@ -50,41 +49,28 @@ export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
  * MenuItem Component: Handles individual menu items and renders submenus recursively.
  */
 function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
-  const [subItems, setSubItems] = useState(item.items || []);
-  const [isLoading, setIsLoading] = useState(false);
+  const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
 
-  const hasSubItems = Array.isArray(subItems) && subItems.length > 0;
-  const url = item.url.includes('myshopify.com') || item.url.includes(publicStoreDomain) ||
+  const url = 
+    item.url.includes('myshopify.com') || 
+    item.url.includes(publicStoreDomain) || 
     item.url.includes(primaryDomainUrl)
-    ? new URL(item.url).pathname
-    : item.url;
-
-  // Fetch submenu on hover if needed
-  const handleMouseEnter = async () => {
-    onHover(item.id);
-    if (subItems.length === 0 && item.handle) { // Only fetch if not already loaded
-      setIsLoading(true);
-      const menuData = await fetchMenuByHandle(item.handle); // Fetch submenu by handle
-      setSubItems(menuData?.items || []);
-      setIsLoading(false);
-    }
-  };
+      ? new URL(item.url).pathname
+      : item.url;
 
   return (
     <li
       className={`nav-item ${hasSubItems ? 'has-submenu' : ''}`}
-      onMouseEnter={handleMouseEnter}
+      onMouseEnter={() => onHover(item.id)}
       onMouseLeave={onLeave}
     >
       <NavLink className="main-nav-link" prefetch="intent" to={url}>
         {item.title}
       </NavLink>
 
-      {isLoading && <div>Loading...</div>} {/* Display loading indicator */}
-
       {hasSubItems && hoveredItem === item.id && (
         <ul className="submenu">
-          {subItems.map((subItem) => (
+          {item.items.map((subItem) => (
             <li key={subItem.id}>
               <NavLink className="submenu-link" to={subItem.url}>
                 {subItem.title}
@@ -108,9 +94,6 @@ function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publi
     </li>
   );
 }
-
-export default MenuItem;
-
 
 const FALLBACK_HEADER_MENU = {
   id: 'gid://shopify/Menu/199655587896',

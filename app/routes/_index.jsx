@@ -94,37 +94,6 @@ export default function Homepage() {
   );
 }
 
-export async function fetchMenuByHandle(handle) {
-  const query = `#graphql
-    query GetMenuByHandle($handle: String!) {
-      menu(handle: $handle) {
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
-  `;
-
-  const response = await fetch('/api/graphql', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query, variables: { handle } }),
-  });
-
-  const { data } = await response.json();
-  return data.menu;
-}
-
-
 /**
  * GraphQL query to fetch a single collection by handle.
  */
@@ -161,20 +130,15 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
  * GraphQL query to fetch the menu by handle.
  */
 const GET_MENU_QUERY = `#graphql
-  query GetMenuByHandle($handle: String!) {
-  menu(handle: $handle) {
-    items {
-      id
-      title
-      url
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
       items {
-        id
         title
         url
+        type
       }
     }
   }
-}
 `;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
