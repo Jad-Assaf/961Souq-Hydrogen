@@ -4,14 +4,14 @@ import { NavLink } from '@remix-run/react';
 /**
  * Main Header Component
  */
-export function Header({ header, publicStoreDomain }) {
+export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { menu } = header;
   return (
     <header className="header">
-      <HeaderMenu
-        menu={menu}
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
+      <HeaderMenu 
+        menu={menu} 
+        primaryDomainUrl={header.shop.primaryDomain.url} 
+        publicStoreDomain={publicStoreDomain} 
       />
     </header>
   );
@@ -51,10 +51,10 @@ export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
 function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
   const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
 
-  const url =
-    item.url.includes('myshopify.com') ||
-      item.url.includes(publicStoreDomain) ||
-      item.url.includes(primaryDomainUrl)
+  const url = 
+    item.url.includes('myshopify.com') || 
+    item.url.includes(publicStoreDomain) || 
+    item.url.includes(primaryDomainUrl)
       ? new URL(item.url).pathname
       : item.url;
 
@@ -71,15 +71,23 @@ function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publi
       {hasSubItems && hoveredItem === item.id && (
         <ul className="submenu">
           {item.items.map((subItem) => (
-            <MenuItem
-              key={subItem.id}
-              item={subItem}
-              hoveredItem={hoveredItem}
-              onHover={onHover}
-              onLeave={onLeave}
-              primaryDomainUrl={primaryDomainUrl}
-              publicStoreDomain={publicStoreDomain}
-            />
+            <li key={subItem.id}>
+              <NavLink className="submenu-link" to={subItem.url}>
+                {subItem.title}
+              </NavLink>
+
+              {Array.isArray(subItem.items) && subItem.items.length > 0 && (
+                <ul className="sub-submenu">
+                  {subItem.items.map((subSubItem) => (
+                    <li key={subSubItem.id}>
+                      <NavLink className="submenu-link" to={subSubItem.url}>
+                        {subSubItem.title}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
           ))}
         </ul>
       )}
@@ -93,29 +101,34 @@ const FALLBACK_HEADER_MENU = {
     {
       id: 'gid://shopify/MenuItem/461609500728',
       title: 'Collections',
+      type: 'HTTP',
       url: '/collections',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609533496',
       title: 'Blog',
+      type: 'HTTP',
       url: '/blogs/journal',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609566264',
       title: 'Policies',
+      type: 'HTTP',
       url: '/policies',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609599032',
       title: 'About',
+      type: 'PAGE',
       url: '/pages/about',
       items: [],
     },
   ],
 };
+
 
 /** @typedef {'desktop' | 'mobile'} Viewport */
 /**
