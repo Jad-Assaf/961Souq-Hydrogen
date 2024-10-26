@@ -41,78 +41,78 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
  * }}
  */
 export function HeaderMenu({ menu, primaryDomainUrl, viewport, publicStoreDomain }) {
-  const className = `header-menu-${viewport}`;
   const { close } = useAside();
-  const [hoveredItem, setHoveredItem] = useState(null); // Track the hovered item
+  const [hoveredItem, setHoveredItem] = useState(null);
 
   const handleMouseEnter = (id) => setHoveredItem(id);
   const handleMouseLeave = () => setHoveredItem(null);
 
   return (
-    <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
+    <nav className={`site-nav header-menu-${viewport}`} role="navigation">
+      <ul className="main-menu">
+        {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
+          const hasSubItems = item.items && item.items.length > 0;
+          const url =
+            item.url.includes('myshopify.com') ||
+              item.url.includes(publicStoreDomain) ||
+              item.url.includes(primaryDomainUrl)
+              ? new URL(item.url).pathname
+              : item.url;
 
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
-
-        const url = item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-          ? new URL(item.url).pathname
-          : item.url;
-
-        const hasSubItems = item.items && item.items.length > 0;
-
-        return (
-          <div
-            key={item.id}
-            className={`menu-item ${hasSubItems ? 'has-submenu' : ''}`}
-            onMouseEnter={() => handleMouseEnter(item.id)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <NavLink
-              className="header-menu-item"
-              end
-              onClick={close}
-              prefetch="intent"
-              style={activeLinkStyle}
-              to={url}
+          return (
+            <li
+              key={item.id}
+              className={`nav-item ${hasSubItems ? 'has-submenu' : ''}`}
+              onMouseEnter={() => handleMouseEnter(item.id)}
+              onMouseLeave={handleMouseLeave}
             >
-              {item.title}
-            </NavLink>
+              <NavLink
+                className="main-nav-link"
+                prefetch="intent"
+                to={url}
+                onClick={close}
+              >
+                {item.title}
+              </NavLink>
 
-            {hasSubItems && hoveredItem === item.id && (
-              <div className="submenu">
-                {item.items.map((subItem) => (
-                  <NavLink
-                    key={subItem.id}
-                    className="submenu-item"
-                    onClick={close}
-                    prefetch="intent"
-                    to={subItem.url}
-                  >
-                    {subItem.title}
-                  </NavLink>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
+              {hasSubItems && hoveredItem === item.id && (
+                <ul className="submenu">
+                  {item.items.map((subItem) => (
+                    <li key={subItem.id}>
+                      <NavLink
+                        className="submenu-link"
+                        to={subItem.url}
+                        onClick={close}
+                      >
+                        {subItem.title}
+                      </NavLink>
+
+                      {subItem.items && subItem.items.length > 0 && (
+                        <ul className="sub-submenu">
+                          {subItem.items.map((subSubItem) => (
+                            <li key={subSubItem.id}>
+                              <NavLink
+                                className="submenu-link"
+                                to={subSubItem.url}
+                                onClick={close}
+                              >
+                                {subSubItem.title}
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }
-
 
 /**
  * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
