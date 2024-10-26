@@ -51,11 +51,11 @@ export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
 function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
   const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
 
-  const url =
-    item.url.includes('myshopify.com') || item.url.includes(primaryDomainUrl)
-      ? new URL(item.url).pathname
-      : new URL(item.url, primaryDomainUrl).pathname;
-
+  const buildUrl = (itemUrl) => {
+    return itemUrl.includes('myshopify.com') || itemUrl.includes(primaryDomainUrl)
+      ? new URL(itemUrl).pathname
+      : new URL(itemUrl, primaryDomainUrl).pathname;
+  };
 
   return (
     <li
@@ -63,8 +63,8 @@ function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publi
       onMouseEnter={() => onHover(item.id)}
       onMouseLeave={onLeave}
     >
-      <NavLink className="main-nav-link" prefetch="intent" to={`/${url}`} relative="path">
-        {item.title}
+      <NavLink className="submenu-link" to={buildUrl(subItem.url)}>
+        {subItem.title}
       </NavLink>
 
       {hasSubItems && hoveredItem === item.id && (
