@@ -50,7 +50,7 @@ img {
 /* Collection Section Styling */
 .collection-section {
   max-width: 1500px;
-  margin: 0 auto 30px auto;
+  margin: 50px auto 50px auto;
   box-shadow: inset 1px 1px 20px 3px #f4f4f4;
   border-radius: 20px;
   padding: 20px;
@@ -67,7 +67,15 @@ img {
   width: 90vw;
   height: auto;
   border-radius: 50px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;;
+  margin: auto;
+  max-width: 1500px;
+}
+
+.row-image {
+  width: 100%;
+  height: auto;
+  border-radius: 50px;
 }
 
 /* Product Row Styling */
