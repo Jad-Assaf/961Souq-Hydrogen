@@ -20,7 +20,7 @@ export function CollectionDisplay({ collections, images }) {
                     </div>
                     {images[index] && (  // Ensure the image exists
                         <div className="row-image">
-                            <img src={images[index]} alt={`Image for row ${index + 1}`} />
+                            <img src={images[index]} alt={`Collection ${index + 1}`} loading='lazy'/>
                         </div>
                     )}
                 </div>

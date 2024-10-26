@@ -50,7 +50,7 @@ img {
 /* Collection Section Styling */
 .collection-section {
   max-width: 1500px;
-  margin: 0 auto 50px auto;
+  margin: 0 auto 30px auto;
   box-shadow: inset 1px 1px 20px 3px #f4f4f4;
   border-radius: 20px;
   padding: 20px;
@@ -61,6 +61,13 @@ img {
 .collection-section h3 {
   font-size: 16px;
   font-weight: bold;
+}
+
+.row-image{
+  width: 90vw;
+  height: auto;
+  border-radius: 50px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Product Row Styling */
