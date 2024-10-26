@@ -10,7 +10,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     <header className="header">
       <HeaderMenu 
         menu={menu} 
-        primaryDomainUrl={header.shop.primaryDomain.url} 
         publicStoreDomain={publicStoreDomain} 
       />
     </header>
@@ -20,7 +19,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 /**
  * HeaderMenu Component with Recursive Menu Rendering
  */
-export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
+export function HeaderMenu({ menu, publicStoreDomain }) {
   const [hoveredItem, setHoveredItem] = useState(null);
 
   const handleMouseEnter = (id) => setHoveredItem(id);
@@ -36,7 +35,6 @@ export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
             hoveredItem={hoveredItem}
             onHover={handleMouseEnter}
             onLeave={handleMouseLeave}
-            primaryDomainUrl={primaryDomainUrl}
             publicStoreDomain={publicStoreDomain}
           />
         ))}
@@ -48,13 +46,12 @@ export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
 /**
  * MenuItem Component: Handles individual menu items and renders submenus recursively.
  */
-function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
+function MenuItem({ item, hoveredItem, onHover, onLeave, publicStoreDomain }) {
   const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
 
   const url = 
     item.url.includes('myshopify.com') || 
-    item.url.includes(publicStoreDomain) || 
-    item.url.includes(primaryDomainUrl)
+    item.url.includes(publicStoreDomain)
       ? new URL(item.url).pathname
       : item.url;
 
