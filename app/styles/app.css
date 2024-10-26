@@ -335,7 +335,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .header * {
-  color: #fff !important;
+  color: #fff;
 }
 
 .header-menu-mobile-toggle {
@@ -379,15 +379,25 @@ button.reset:hover:not(:has(> *)) {
 .submenu {
   display: none;
   position: absolute;
-  left: 0;
-  top: 100%;
+  left: 100%;
+  /* Aligns next level to the right of the parent */
+  top: 0;
   background-color: white;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
 }
 
-.menu-item:hover .submenu {
+.menu-item:hover>.submenu {
   display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+.submenu .menu-item {
+  position: relative;
 }
 
 .submenu-item {

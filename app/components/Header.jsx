@@ -36,43 +36,37 @@ export function HeaderMenu({ menu, primaryDomainUrl, viewport, publicStoreDomain
   const className = `header-menu-${viewport}`;
   const { close } = useAside();
 
+  const renderMenuItems = (items) =>
+    items.map((item) => {
+      const url = new URL(item.url).pathname;
+
+      return (
+        <div key={item.id} className="menu-item">
+          <NavLink
+            end
+            onClick={close}
+            prefetch="intent"
+            style={activeLinkStyle}
+            to={url}
+          >
+            {item.title}
+          </NavLink>
+
+          {item.items?.length > 0 && (
+            <div className="submenu">
+              {renderMenuItems(item.items)}
+            </div>
+          )}
+        </div>
+      );
+    });
+
   return (
     <nav className={className} role="navigation">
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        const url = new URL(item.url).pathname;
-
-        return (
-          <div key={item.id} className="menu-item">
-            <NavLink
-              end
-              onClick={close}
-              prefetch="intent"
-              style={activeLinkStyle}
-              to={url}
-            >
-              {item.title}
-            </NavLink>
-            {item.items?.length > 0 && (
-              <div className="submenu">
-                {item.items.map((subItem) => (
-                  <NavLink
-                    key={subItem.id}
-                    to={new URL(subItem.url).pathname}
-                    className="submenu-item"
-                    prefetch="intent"
-                  >
-                    {subItem.title}
-                  </NavLink>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
     </nav>
   );
 }
-
 
 /**
  * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
