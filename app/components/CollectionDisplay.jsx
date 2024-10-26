@@ -2,9 +2,6 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 
-/**
- * Truncate text to a specific word limit.
- */
 function truncateText(text, maxWords) {
     const words = text.split(' ');
     return words.length > maxWords
@@ -12,25 +9,21 @@ function truncateText(text, maxWords) {
         : text;
 }
 
-/**
- * CollectionDisplay component with drag-to-scroll functionality.
- */
-export function CollectionDisplay({ collections }) {
+export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
-            {collections.map((collection) => (
+            {collections.map((collection, index) => (
                 <div key={collection.id} className="collection-section">
                     <h3>{collection.title}</h3>
-                    <ProductRow products={collection.products.nodes} />
+                    <ProductRow
+                        products={collection.products.nodes}
+                        image={images[index]}
+                    />
                 </div>
             ))}
         </div>
     );
 }
-
-/**
- * ProductRow component with drag-to-scroll.
- */
 
 const LeftArrowIcon = () => (
     <svg
@@ -60,8 +53,7 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-
-function ProductRow({ products }) {
+function ProductRow({ products, image }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -80,7 +72,7 @@ function ProductRow({ products }) {
         if (!isDragging) return;
         e.preventDefault();
         const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2; // Adjust scroll speed
+        const walk = (x - startX) * 2;
         rowRef.current.scrollLeft = scrollLeft - walk;
     };
 
@@ -124,6 +116,11 @@ function ProductRow({ products }) {
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
             </button>
+            {image && (
+                <div className="row-image">
+                    <img src={image} alt={`Image for row`} />
+                </div>
+            )}
         </div>
     );
 }

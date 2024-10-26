@@ -74,10 +74,18 @@ export default function Homepage() {
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718' },
   ];
 
+  const images = [
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps-studios.jpg?v=1728486402',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-banner.jpg?v=1727943839',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cmf-phone-1-banner-1.jpg?v=1727944715',
+  ];
+
+
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionDisplay collections={collections} />
+      <CollectionDisplay collections={collections} images={images} />;
     </div>
   );
 }
