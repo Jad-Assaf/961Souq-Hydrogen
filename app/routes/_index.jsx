@@ -2,7 +2,6 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import { CategorySlider } from '../components/CategorySlider';
 
 /**
  * @type {MetaFunction}
@@ -23,15 +22,18 @@ export async function loader(args) {
  * Load critical collections data by their handles.
  */
 async function loadCriticalData({ context }) {
-  const handles = ['new-arrivals', 'apple', 'gaming', 'gaming-laptops', 'laptops', 'mobiles', 'apple-iphone', 'samsung', 'monitors', 'fitness watches'];
+  const handles = [
+    'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
+    'laptops', 'mobiles', 'apple-iphone', 'samsung',
+    'monitors', 'fitness watches'
+  ];
   const collections = await fetchCollectionsByHandles(context, handles);
-
-  console.log('Filtered collections:', collections);
 
   if (collections.length === 0) {
     throw new Response('No matching collections found.', { status: 404 });
   }
 
+  // Fetch the "new-main-menu" menu
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
@@ -41,7 +43,10 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  return { collections, menu };
+  // Return the fetched menu inside a "header" object, as expected by the Header component
+  const header = { menu, shop: { primaryDomain: { url: 'https://example.com' } } };
+
+  return { collections, header };
 }
 
 /**
@@ -51,10 +56,9 @@ async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
 
   for (const handle of handles) {
-    const variables = { handle };
     const { collectionByHandle } = await context.storefront.query(
       GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables }
+      { variables: { handle } }
     );
 
     if (collectionByHandle) {
@@ -66,7 +70,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections, menu } = useLoaderData();
+  const { collections } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -81,7 +85,6 @@ export default function Homepage() {
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps-studios.jpg?v=1728486402',
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cmf-phone-1-banner-1.jpg?v=1727944715',
   ];
-
 
   return (
     <div className="home">
