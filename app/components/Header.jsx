@@ -63,7 +63,7 @@ function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publi
       onMouseEnter={() => onHover(item.id)}
       onMouseLeave={onLeave}
     >
-      <NavLink className="main-nav-link" prefetch="intent" to={url}>
+      <NavLink className="main-nav-link" prefetch="intent" to={`/${url}`} relative="path">
         {item.title}
       </NavLink>
 
