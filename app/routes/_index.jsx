@@ -130,30 +130,25 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
  * GraphQL query to fetch the menu by handle.
  */
 const GET_MENU_QUERY = `#graphql
-  query GetFullMenu {
-  menu(id: "gid://shopify/Menu/212314325244") {
-    id
-    title
-    items {
-      id
-      title
-      type
-      url
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
       items {
         id
         title
-        type
         url
         items {
           id
           title
-          type
           url
+          items {
+            id
+            title
+            url
+          }
         }
       }
     }
   }
-}
 `;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
