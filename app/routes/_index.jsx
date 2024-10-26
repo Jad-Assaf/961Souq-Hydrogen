@@ -144,6 +144,12 @@ const GET_MENU_QUERY = `#graphql
         title
         type
         url
+        items {
+          id
+          title
+          type
+          url
+        }
       }
     }
   }
