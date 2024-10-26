@@ -372,6 +372,34 @@ button.reset:hover:not(:has(> *)) {
   margin-left: auto;
 }
 
+.menu-item {
+  position: relative;
+}
+
+.submenu {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background-color: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.menu-item:hover .submenu {
+  display: block;
+}
+
+.submenu-item {
+  padding: 10px 15px;
+  white-space: nowrap;
+  display: block;
+}
+
+.submenu-item:hover {
+  background-color: #f0f0f0;
+}
+
 /*
 * --------------------------------------------------
 * components/Footer
