@@ -6,12 +6,19 @@ import {useAside} from '~/components/Aside';
 /**
  * @param {HeaderProps}
  */
-export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
-  const {shop, menu} = header;
+export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
+  const { menu } = header;
+  const logoUrl = 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961-Souq-Logo.jpg?v=1684251396'; // Logo URL
+
   return (
     <header className="header">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
+        <img
+          src={logoUrl}
+          alt="961 Souq Logo"
+          className="header-logo"
+          style={{ height: '50px', width: 'auto' }}
+        />
       </NavLink>
       <HeaderMenu
         menu={menu}
@@ -23,6 +30,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     </header>
   );
 }
+
 
 /**
  * @param {{
