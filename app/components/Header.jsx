@@ -4,13 +4,14 @@ import { NavLink } from '@remix-run/react';
 /**
  * Main Header Component
  */
-export function Header({ header, isLoggedIn, cart }) {
+export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { menu } = header;
   return (
     <header className="header">
       <HeaderMenu 
         menu={menu} 
         primaryDomainUrl={header.shop.primaryDomain.url} 
+        publicStoreDomain={publicStoreDomain} 
       />
     </header>
   );
@@ -19,7 +20,7 @@ export function Header({ header, isLoggedIn, cart }) {
 /**
  * HeaderMenu Component with Recursive Menu Rendering
  */
-export function HeaderMenu({ menu, primaryDomainUrl }) {
+export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
   const [hoveredItem, setHoveredItem] = useState(null);
 
   const handleMouseEnter = (id) => setHoveredItem(id);
@@ -36,6 +37,7 @@ export function HeaderMenu({ menu, primaryDomainUrl }) {
             onHover={handleMouseEnter}
             onLeave={handleMouseLeave}
             primaryDomainUrl={primaryDomainUrl}
+            publicStoreDomain={publicStoreDomain}
           />
         ))}
       </ul>
@@ -46,14 +48,14 @@ export function HeaderMenu({ menu, primaryDomainUrl }) {
 /**
  * MenuItem Component: Handles individual menu items and renders submenus recursively.
  */
-function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl }) {
+function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
   const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
 
-  const url = 
-    item.url.includes('myshopify.com') || 
-    item.url.includes(primaryDomainUrl)
+  const url =
+    item.url.includes('myshopify.com') || item.url.includes(primaryDomainUrl)
       ? new URL(item.url).pathname
-      : item.url;
+      : new URL(item.url, primaryDomainUrl).pathname;
+
 
   return (
     <li
@@ -125,7 +127,6 @@ const FALLBACK_HEADER_MENU = {
     },
   ],
 };
-
 
 /** @typedef {'desktop' | 'mobile'} Viewport */
 /**
