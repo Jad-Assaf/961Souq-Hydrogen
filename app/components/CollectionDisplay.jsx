@@ -13,9 +13,11 @@ export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div key={collection.id} className="collection-section">
-                    <h3>{collection.title}</h3>
-                    <ProductRow products={collection.products.nodes} />
+                <div>
+                    <div key={collection.id} className="collection-section">
+                        <h3>{collection.title}</h3>
+                        <ProductRow products={collection.products.nodes} />
+                    </div>
                     {images[index] && (  // Ensure the image exists
                         <div className="row-image">
                             <img src={images[index]} alt={`Image for row ${index + 1}`} />
@@ -75,7 +77,7 @@ function ProductRow({ products, image }) {
         if (!isDragging) return;
         e.preventDefault();
         const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2; 
+        const walk = (x - startX) * 2;
         rowRef.current.scrollLeft = scrollLeft - walk;
     };
 
