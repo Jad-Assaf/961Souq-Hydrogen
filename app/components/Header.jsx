@@ -1,4 +1,4 @@
-import {Suspense} from 'react';
+import React, { Suspense, useState } from 'react';
 import {Await, NavLink, useAsyncValue} from '@remix-run/react';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
@@ -40,14 +40,13 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
  *   publicStoreDomain: HeaderProps['publicStoreDomain'];
  * }}
  */
-export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
-  viewport,
-  publicStoreDomain,
-}) {
+export function HeaderMenu({ menu, primaryDomainUrl, viewport, publicStoreDomain }) {
   const className = `header-menu-${viewport}`;
-  const {close} = useAside();
+  const { close } = useAside();
+  const [hoveredItem, setHoveredItem] = useState(null); // Track the hovered item
+
+  const handleMouseEnter = (id) => setHoveredItem(id);
+  const handleMouseLeave = () => setHoveredItem(null);
 
   return (
     <nav className={className} role="navigation">
@@ -62,33 +61,58 @@ export function HeaderMenu({
           Home
         </NavLink>
       )}
+
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
+        const url = item.url.includes('myshopify.com') ||
           item.url.includes(publicStoreDomain) ||
           item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
+          ? new URL(item.url).pathname
+          : item.url;
+
+        const hasSubItems = item.items && item.items.length > 0;
+
         return (
-          <NavLink
-            className="header-menu-item"
-            end
+          <div
             key={item.id}
-            onClick={close}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
+            className={`menu-item ${hasSubItems ? 'has-submenu' : ''}`}
+            onMouseEnter={() => handleMouseEnter(item.id)}
+            onMouseLeave={handleMouseLeave}
           >
-            {item.title}
-          </NavLink>
+            <NavLink
+              className="header-menu-item"
+              end
+              onClick={close}
+              prefetch="intent"
+              style={activeLinkStyle}
+              to={url}
+            >
+              {item.title}
+            </NavLink>
+
+            {hasSubItems && hoveredItem === item.id && (
+              <div className="submenu">
+                {item.items.map((subItem) => (
+                  <NavLink
+                    key={subItem.id}
+                    className="submenu-item"
+                    onClick={close}
+                    prefetch="intent"
+                    to={subItem.url}
+                  >
+                    {subItem.title}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
         );
       })}
     </nav>
   );
 }
+
 
 /**
  * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
