@@ -1,13 +1,10 @@
-import {Suspense} from 'react';
-import {Await, NavLink, useAsyncValue} from '@remix-run/react';
-import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
-import {useAside} from '~/components/Aside';
+import { Suspense, useEffect } from 'react';
+import { Await, NavLink, useAsyncValue } from '@remix-run/react';
+import { useAnalytics, useOptimisticCart } from '@shopify/hydrogen';
+import { useAside } from '~/components/Aside';
 
-/**
- * @param {HeaderProps}
- */
-export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
-  const {shop, menu} = header;
+export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
+  const { shop, menu } = header;
   return (
     <header className="header">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
@@ -24,54 +21,62 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   );
 }
 
-/**
- * @param {{
- *   menu: HeaderProps['header']['menu'];
- *   primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
- *   viewport: Viewport;
- *   publicStoreDomain: HeaderProps['publicStoreDomain'];
- * }}
- */
 export function HeaderMenu({ menu, primaryDomainUrl, viewport, publicStoreDomain }) {
-  const className = `header-menu-${viewport}`;
   const { close } = useAside();
 
-  const renderMenuItems = (items) =>
-    items.map((item) => {
-      const url = new URL(item.url).pathname;
+  // JavaScript logic to handle submenu hover
+  useEffect(() => {
+    const menuItems = document.querySelectorAll('.menu-item');
 
-      return (
-        <div key={item.id} className="menu-item">
-          <NavLink
-            end
-            onClick={close}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
+    menuItems.forEach((item) => {
+      item.addEventListener('mouseenter', () => {
+        const submenu = item.querySelector('.submenu');
+        if (submenu) submenu.style.display = 'block';
+      });
 
-          {item.items?.length > 0 && (
-            <div className="submenu">
-              {renderMenuItems(item.items)}
-            </div>
-          )}
-        </div>
-      );
+      item.addEventListener('mouseleave', () => {
+        const submenu = item.querySelector('.submenu');
+        if (submenu) submenu.style.display = 'none';
+      });
     });
 
+    return () => {
+      menuItems.forEach((item) => {
+        item.removeEventListener('mouseenter', () => { });
+        item.removeEventListener('mouseleave', () => { });
+      });
+    };
+  }, []);
+
+  const renderMenuItems = (items) =>
+    items.map((item) => (
+      <div key={item.id} className="menu-item">
+        <NavLink
+          end
+          onClick={close}
+          prefetch="intent"
+          style={activeLinkStyle}
+          to={new URL(item.url).pathname}
+        >
+          {item.title}
+        </NavLink>
+
+        {item.items?.length > 0 && (
+          <div className="submenu">
+            {renderMenuItems(item.items)}
+          </div>
+        )}
+      </div>
+    ));
+
   return (
-    <nav className={className} role="navigation">
+    <nav className={`header-menu-${viewport}`} role="navigation">
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
     </nav>
   );
 }
 
-/**
- * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
- */
-function HeaderCtas({isLoggedIn, cart}) {
+function HeaderCtas({ isLoggedIn, cart }) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
@@ -89,7 +94,7 @@ function HeaderCtas({isLoggedIn, cart}) {
 }
 
 function HeaderMenuMobileToggle() {
-  const {open} = useAside();
+  const { open } = useAside();
   return (
     <button
       className="header-menu-mobile-toggle reset"
@@ -101,7 +106,7 @@ function HeaderMenuMobileToggle() {
 }
 
 function SearchToggle() {
-  const {open} = useAside();
+  const { open } = useAside();
   return (
     <button className="reset" onClick={() => open('search')}>
       Search
@@ -109,12 +114,9 @@ function SearchToggle() {
   );
 }
 
-/**
- * @param {{count: number | null}}
- */
-function CartBadge({count}) {
-  const {open} = useAside();
-  const {publish, shop, cart, prevCart} = useAnalytics();
+function CartBadge({ count }) {
+  const { open } = useAside();
+  const { publish, shop, cart, prevCart } = useAnalytics();
 
   return (
     <a
@@ -135,10 +137,7 @@ function CartBadge({count}) {
   );
 }
 
-/**
- * @param {Pick<HeaderProps, 'cart'>}
- */
-function CartToggle({cart}) {
+function CartToggle({ cart }) {
   return (
     <Suspense fallback={<CartBadge count={null} />}>
       <Await resolve={cart}>
@@ -159,50 +158,32 @@ const FALLBACK_HEADER_MENU = {
   items: [
     {
       id: 'gid://shopify/MenuItem/461609500728',
-      resourceId: null,
-      tags: [],
       title: 'Collections',
-      type: 'HTTP',
       url: '/collections',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609533496',
-      resourceId: null,
-      tags: [],
       title: 'Blog',
-      type: 'HTTP',
       url: '/blogs/journal',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609566264',
-      resourceId: null,
-      tags: [],
       title: 'Policies',
-      type: 'HTTP',
       url: '/policies',
       items: [],
     },
     {
       id: 'gid://shopify/MenuItem/461609599032',
-      resourceId: 'gid://shopify/Page/92591030328',
-      tags: [],
       title: 'About',
-      type: 'PAGE',
       url: '/pages/about',
       items: [],
     },
   ],
 };
 
-/**
- * @param {{
- *   isActive: boolean;
- *   isPending: boolean;
- * }}
- */
-function activeLinkStyle({isActive, isPending}) {
+function activeLinkStyle({ isActive, isPending }) {
   return {
     fontWeight: isActive ? 'bold' : undefined,
     color: isPending ? 'grey' : 'black',
