@@ -15,13 +15,10 @@ export function CollectionDisplay({ collections, images }) {
             {collections.map((collection, index) => (
                 <div key={collection.id} className="collection-section">
                     <h3>{collection.title}</h3>
-                    <ProductRow 
-                        products={collection.products.nodes} 
-                        image={images[index]} 
-                    />
-                    {image && (
+                    <ProductRow products={collection.products.nodes} />
+                    {images[index] && (  // Ensure the image exists
                         <div className="row-image">
-                            <img src={image} alt={`Image for row`} />
+                            <img src={images[index]} alt={`Image for row ${index + 1}`} />
                         </div>
                     )}
                 </div>
@@ -29,6 +26,7 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
+
 
 const LeftArrowIcon = () => (
     <svg
