@@ -1,76 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from '@remix-run/react';
+import { fetchMenuByHandle } from './fetchMenu'; // Assume this function sends the GraphQL query
 
-/**
- * Main Header Component
- */
-export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
-  const { menu } = header;
-  return (
-    <header className="header">
-      <HeaderMenu 
-        menu={menu} 
-        primaryDomainUrl={header.shop.primaryDomain.url} 
-        publicStoreDomain={publicStoreDomain} 
-      />
-    </header>
-  );
-}
-
-/**
- * HeaderMenu Component with Recursive Menu Rendering
- */
-export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
-  const [hoveredItem, setHoveredItem] = useState(null);
-
-  const handleMouseEnter = (id) => setHoveredItem(id);
-  const handleMouseLeave = () => setHoveredItem(null);
-
-  return (
-    <nav className="site-nav" role="navigation">
-      <ul className="main-menu">
-        {(menu?.items || FALLBACK_HEADER_MENU.items).map((item) => (
-          <MenuItem
-            key={item.id}
-            item={item}
-            hoveredItem={hoveredItem}
-            onHover={handleMouseEnter}
-            onLeave={handleMouseLeave}
-            primaryDomainUrl={primaryDomainUrl}
-            publicStoreDomain={publicStoreDomain}
-          />
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
-/**
- * MenuItem Component: Handles individual menu items and renders submenus recursively.
- */
 function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publicStoreDomain }) {
-  const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
+  const [subItems, setSubItems] = useState(item.items || []);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const url = 
-    item.url.includes('myshopify.com') || 
-    item.url.includes(publicStoreDomain) || 
+  const hasSubItems = Array.isArray(subItems) && subItems.length > 0;
+  const url = item.url.includes('myshopify.com') || item.url.includes(publicStoreDomain) ||
     item.url.includes(primaryDomainUrl)
-      ? new URL(item.url).pathname
-      : item.url;
+    ? new URL(item.url).pathname
+    : item.url;
+
+  // Fetch submenu on hover if needed
+  const handleMouseEnter = async () => {
+    onHover(item.id);
+    if (subItems.length === 0 && item.handle) { // Only fetch if not already loaded
+      setIsLoading(true);
+      const menuData = await fetchMenuByHandle(item.handle); // Fetch submenu by handle
+      setSubItems(menuData?.items || []);
+      setIsLoading(false);
+    }
+  };
 
   return (
     <li
       className={`nav-item ${hasSubItems ? 'has-submenu' : ''}`}
-      onMouseEnter={() => onHover(item.id)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={onLeave}
     >
       <NavLink className="main-nav-link" prefetch="intent" to={url}>
         {item.title}
       </NavLink>
 
+      {isLoading && <div>Loading...</div>} {/* Display loading indicator */}
+
       {hasSubItems && hoveredItem === item.id && (
         <ul className="submenu">
-          {item.items.map((subItem) => (
+          {subItems.map((subItem) => (
             <li key={subItem.id}>
               <NavLink className="submenu-link" to={subItem.url}>
                 {subItem.title}
@@ -94,6 +61,9 @@ function MenuItem({ item, hoveredItem, onHover, onLeave, primaryDomainUrl, publi
     </li>
   );
 }
+
+export default MenuItem;
+
 
 const FALLBACK_HEADER_MENU = {
   id: 'gid://shopify/Menu/199655587896',
