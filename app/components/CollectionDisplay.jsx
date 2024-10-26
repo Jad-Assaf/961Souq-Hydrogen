@@ -15,10 +15,15 @@ export function CollectionDisplay({ collections, images }) {
             {collections.map((collection, index) => (
                 <div key={collection.id} className="collection-section">
                     <h3>{collection.title}</h3>
-                    <ProductRow
-                        products={collection.products.nodes}
-                        image={images[index]}
+                    <ProductRow 
+                        products={collection.products.nodes} 
+                        image={images[index]} 
                     />
+                    {image && (
+                        <div className="row-image">
+                            <img src={image} alt={`Image for row`} />
+                        </div>
+                    )}
                 </div>
             ))}
         </div>
@@ -72,7 +77,7 @@ function ProductRow({ products, image }) {
         if (!isDragging) return;
         e.preventDefault();
         const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
+        const walk = (x - startX) * 2; 
         rowRef.current.scrollLeft = scrollLeft - walk;
     };
 
@@ -81,7 +86,6 @@ function ProductRow({ products, image }) {
     };
 
     return (
-        <div>
         <div className="product-row-container">
             <button className="prev-button" onClick={() => scrollRow(-300)}>
                 <LeftArrowIcon />
@@ -117,12 +121,6 @@ function ProductRow({ products, image }) {
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
             </button>
-            </div>
-            {image && (
-                <div className="row-image">
-                    <img src={image} alt={`Image for row`} />
-                </div>
-            )}
         </div>
     );
 }
