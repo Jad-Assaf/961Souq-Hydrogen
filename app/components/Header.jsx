@@ -6,9 +6,8 @@ import {useAside} from '~/components/Aside';
 /**
  * @param {HeaderProps}
  */
-export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
-  const { menu } = header;
-  const logoUrl = 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961-Souq-Logo.jpg?v=1684251396'; // Logo URL
+export function Header({ menu, isLoggedIn, cart, publicStoreDomain }) {
+  const logoUrl = 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961-Souq-Logo.jpg?v=1684251396';
 
   return (
     <header className="header">
@@ -23,13 +22,13 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       <HeaderMenu
         menu={menu}
         viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
       />
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
     </header>
   );
 }
+
 
 
 /**
