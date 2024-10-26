@@ -49,6 +49,37 @@ async function loadCriticalData({ context }) {
   return { collections, header };
 }
 
+export const loader = async ({ context }) => {
+  const GET_MENU_QUERY = `#graphql
+    query GetMenu($handle: String!) {
+      menu(handle: $handle) {
+        items {
+          id
+          title
+          url
+          items {
+            id
+            title
+            url
+            items {
+              id
+              title
+              url
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+    variables: { handle: 'main-menu' }, // Replace 'main-menu' with your actual handle
+  });
+
+  return { menu };
+};
+
+
 /**
  * Fetch multiple collections using `collectionByHandle`.
  */
