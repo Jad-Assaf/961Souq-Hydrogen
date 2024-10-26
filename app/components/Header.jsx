@@ -2,27 +2,41 @@ import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue} from '@remix-run/react';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
+import { fetchMenuData } from './fetchMenu';
 
 /**
  * @param {HeaderProps}
  */
-export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
-  const {shop, menu} = header;
+export function Header({ isLoggedIn, cart, publicStoreDomain }) {
+  const [menu, setMenu] = useState(null);
+
+  useEffect(() => {
+    // Fetch menu on component mount
+    const loadMenu = async () => {
+      const fetchedMenu = await fetchMenuData('new-main-menu');
+      setMenu(fetchedMenu);
+    };
+
+    loadMenu();
+  }, []);
+
   return (
     <header className="header">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
+        <strong>My Store</strong>
       </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
+      {menu && (
+        <HeaderMenu
+          menu={menu}
+          viewport="desktop"
+          publicStoreDomain={publicStoreDomain}
+        />
+      )}
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
     </header>
   );
 }
+
 
 /**
  * @param {{
