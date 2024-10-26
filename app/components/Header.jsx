@@ -40,164 +40,86 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
  *   publicStoreDomain: HeaderProps['publicStoreDomain'];
  * }}
  */
-export function HeaderMenu({ menu, primaryDomainUrl, viewport, publicStoreDomain }) {
-  const { close } = useAside();
-  const [hoveredItem, setHoveredItem] = useState(null);
+
+export function HeaderMenu({ menu, primaryDomainUrl, publicStoreDomain }) {
+  const [hoveredItem, setHoveredItem] = useState(null); // Track hovered menu item
 
   const handleMouseEnter = (id) => setHoveredItem(id);
   const handleMouseLeave = () => setHoveredItem(null);
 
   return (
-    <nav className={`site-nav header-menu-${viewport}`} role="navigation">
+    <nav className="site-nav" role="navigation">
       <ul className="main-menu">
-        {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-          const hasSubItems = item.items && item.items.length > 0;
-          const url =
-            item.url.includes('myshopify.com') ||
-              item.url.includes(publicStoreDomain) ||
-              item.url.includes(primaryDomainUrl)
-              ? new URL(item.url).pathname
-              : item.url;
-
-          return (
-            <li
-              key={item.id}
-              className={`nav-item ${hasSubItems ? 'has-submenu' : ''}`}
-              onMouseEnter={() => handleMouseEnter(item.id)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <NavLink
-                className="main-nav-link"
-                prefetch="intent"
-                to={url}
-                onClick={close}
-              >
-                {item.title}
-              </NavLink>
-
-              {hasSubItems && hoveredItem === item.id && (
-                <ul className="submenu">
-                  {item.items.map((subItem) => (
-                    <li key={subItem.id}>
-                      <NavLink
-                        className="submenu-link"
-                        to={subItem.url}
-                        onClick={close}
-                      >
-                        {subItem.title}
-                      </NavLink>
-
-                      {subItem.items && subItem.items.length > 0 && (
-                        <ul className="sub-submenu">
-                          {subItem.items.map((subSubItem) => (
-                            <li key={subSubItem.id}>
-                              <NavLink
-                                className="submenu-link"
-                                to={subSubItem.url}
-                                onClick={close}
-                              >
-                                {subSubItem.title}
-                              </NavLink>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          );
-        })}
+        {(menu || FALLBACK_HEADER_MENU).items.map((item) => (
+          <MenuItem
+            key={item.id}
+            item={item}
+            hoveredItem={hoveredItem}
+            onHover={handleMouseEnter}
+            onLeave={handleMouseLeave}
+            primaryDomainUrl={primaryDomainUrl}
+            publicStoreDomain={publicStoreDomain}
+          />
+        ))}
       </ul>
     </nav>
   );
 }
 
 /**
- * @param {Pick<HeaderProps, 'isLoggedIn' | 'cart'>}
+ * MenuItem Component: Handles individual menu items and renders submenus recursively.
  */
-function HeaderCtas({isLoggedIn, cart}) {
+function MenuItem({
+  item,
+  hoveredItem,
+  onHover,
+  onLeave,
+  primaryDomainUrl,
+  publicStoreDomain,
+}) {
+  const hasSubItems = item.items && item.items.length > 0;
+  const url =
+    item.url.includes('myshopify.com') ||
+      item.url.includes(publicStoreDomain) ||
+      item.url.includes(primaryDomainUrl)
+      ? new URL(item.url).pathname
+      : item.url;
+
   return (
-    <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
-          </Await>
-        </Suspense>
+    <li
+      className={`nav-item ${hasSubItems ? 'has-submenu' : ''}`}
+      onMouseEnter={() => onHover(item.id)}
+      onMouseLeave={onLeave}
+    >
+      <NavLink className="main-nav-link" prefetch="intent" to={url}>
+        {item.title}
       </NavLink>
-      <SearchToggle />
-      <CartToggle cart={cart} />
-    </nav>
+
+      {hasSubItems && hoveredItem === item.id && (
+        <ul className="submenu">
+          {item.items.map((subItem) => (
+            <li key={subItem.id}>
+              <NavLink className="submenu-link" to={subItem.url}>
+                {subItem.title}
+              </NavLink>
+
+              {subItem.items && subItem.items.length > 0 && (
+                <ul className="sub-submenu">
+                  {subItem.items.map((subSubItem) => (
+                    <li key={subSubItem.id}>
+                      <NavLink className="submenu-link" to={subSubItem.url}>
+                        {subSubItem.title}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
   );
-}
-
-function HeaderMenuMobileToggle() {
-  const {open} = useAside();
-  return (
-    <button
-      className="header-menu-mobile-toggle reset"
-      onClick={() => open('mobile')}
-    >
-      <h3>☰</h3>
-    </button>
-  );
-}
-
-function SearchToggle() {
-  const {open} = useAside();
-  return (
-    <button className="reset" onClick={() => open('search')}>
-      Search
-    </button>
-  );
-}
-
-/**
- * @param {{count: number | null}}
- */
-function CartBadge({count}) {
-  const {open} = useAside();
-  const {publish, shop, cart, prevCart} = useAnalytics();
-
-  return (
-    <a
-      href="/cart"
-      onClick={(e) => {
-        e.preventDefault();
-        open('cart');
-        publish('cart_viewed', {
-          cart,
-          prevCart,
-          shop,
-          url: window.location.href || '',
-        });
-      }}
-    >
-      Cart {count === null ? <span>&nbsp;</span> : count}
-    </a>
-  );
-}
-
-/**
- * @param {Pick<HeaderProps, 'cart'>}
- */
-function CartToggle({cart}) {
-  return (
-    <Suspense fallback={<CartBadge count={null} />}>
-      <Await resolve={cart}>
-        <CartBanner />
-      </Await>
-    </Suspense>
-  );
-}
-
-function CartBanner() {
-  const originalCart = useAsyncValue();
-  const cart = useOptimisticCart(originalCart);
-  return <CartBadge count={cart?.totalQuantity ?? 0} />;
 }
 
 const FALLBACK_HEADER_MENU = {
