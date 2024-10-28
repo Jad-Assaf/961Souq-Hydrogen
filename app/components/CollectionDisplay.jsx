@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from './AddToCartButton';
+import { ProductForm } from './ProductForm'; // Import the ProductForm component
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -15,11 +15,9 @@ export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div>
-                    <div key={collection.id} className="collection-section">
-                        <h3>{collection.title}</h3>
-                        <ProductRow products={collection.products.nodes} />
-                    </div>
+                <div key={collection.id} className="collection-section">
+                    <h3>{collection.title}</h3>
+                    <ProductRow products={collection.products.nodes} />
                     <div className="image-row">
                         {/* Display two images per row */}
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
@@ -39,7 +37,6 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
-
 
 const LeftArrowIcon = () => (
     <svg
@@ -69,7 +66,7 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products, image }) {
+function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -110,37 +107,33 @@ function ProductRow({ products, image }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => (
-                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
-                        <div className="product-card">
-                            <AnimatedImage
-                                data={product.images.nodes[0]}
-                                aspectRatio="1/1"
-                                sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                alt={product.images.nodes[0].altText || 'Product Image'}
-                                width="180px"
-                                height="180px"
-                            />
-                            <h4 className="product-title">{truncateText(product.title, 20)}</h4>
-                            <div className="product-price">
-                                <Money data={product.priceRange.minVariantPrice} />
+                    <div key={product.id} className="product-item">
+                        <Link to={`/products/${product.handle}`}>
+                            <div className="product-card">
+                                <AnimatedImage
+                                    data={product.images.nodes[0]}
+                                    aspectRatio="1/1"
+                                    sizes="(min-width: 45em) 20vw, 40vw"
+                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                    alt={product.images.nodes[0].altText || 'Product Image'}
+                                    width="180px"
+                                    height="180px"
+                                />
+                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                                <div className="product-price">
+                                    <Money data={product.priceRange.minVariantPrice} />
+                                </div>
                             </div>
-
-                            {/* Add the AddToCartButton below the price */}
-                            <AddToCartButton
-                                lines={[
-                                    {
-                                        merchandiseId: product.variants.nodes[0].id,
-                                        quantity: 1,
-                                    },
-                                ]}
-                            >
-                                Add to Cart
-                            </AddToCartButton>
-                        </div>
-                    </Link>
+                        </Link>
+                        {/* Integrate the ProductForm for variant selection and add-to-cart */}
+                        <ProductForm
+                            product={product}
+                            selectedVariant={product.variants.nodes[0]}
+                            variants={product.variants.nodes}
+                        />
+                    </div>
                 ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
@@ -149,4 +142,3 @@ function ProductRow({ products, image }) {
         </div>
     );
 }
-
