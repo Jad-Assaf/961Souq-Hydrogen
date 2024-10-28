@@ -112,9 +112,10 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-function ProductItem({product, loading}) {
+function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
+
   return (
     <Link
       className="product-item"
@@ -124,11 +125,9 @@ function ProductItem({product, loading}) {
     >
       {product.featuredImage && (
         <AnimatedImage
+          src={product.featuredImage.url} // Ensure src is passed correctly
           alt={product.featuredImage.altText || product.title}
-          aspectRatio="1/1"
           loading={loading}
-          data={product.featuredImage}
-          sizes="(min-width: 45em) 400px, 100vw"
           width="180px"
           height="180px"
         />
@@ -140,6 +139,7 @@ function ProductItem({product, loading}) {
     </Link>
   );
 }
+
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
