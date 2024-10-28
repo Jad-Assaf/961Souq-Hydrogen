@@ -122,8 +122,8 @@ function ProductRow({ products }) {
                                         aspectRatio="1/1"
                                         sizes="(min-width: 45em) 20vw, 40vw"
                                         srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
                                         alt={product.images.nodes[0].altText || 'Product Image'}
                                         width="180px"
                                         height="180px"
