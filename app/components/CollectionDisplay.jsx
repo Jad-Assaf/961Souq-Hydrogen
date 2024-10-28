@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, Suspense } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
+import { Await } from '@remix-run/react';
 import { ProductForm } from './ProductForm';
 
 function truncateText(text, maxWords) {
