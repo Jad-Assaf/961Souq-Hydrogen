@@ -59,6 +59,7 @@ img {
   gap: 1rem;
   width: 90vw;
   max-width: 1500px;
+  margin: auto;
 }
 
 .row-image img {
@@ -75,12 +76,12 @@ img {
 }
 
 .row-image * {
-  border-radius: 2vw;
+  border-radius: 1.5vw;
 }
 
 .row-image {
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-  border-radius: 2vw;
+  border-radius: 1.5vw;
   margin: 30px auto;
   max-width: 1500px;
   height: 13.7vw;
