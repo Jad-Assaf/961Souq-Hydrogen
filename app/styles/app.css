@@ -56,16 +56,9 @@ img {
 .image-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  /* Two equal columns */
   gap: 1rem;
-  /* Space between images */
-}
-
-.row-image {
-  width: 100%;
-  /* Ensure the image takes up the full column width */
-  overflow: hidden;
-  border-radius: 8px;
+  width: 90vw;
+  max-width: 1500px;
 }
 
 .row-image img {
@@ -82,17 +75,16 @@ img {
 }
 
 .row-image * {
-  border-radius: 3.5vw;
+  border-radius: 2vw;
 }
 
 .row-image {
-  width: 90vw;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-  border-radius: 3.5vw;
+  border-radius: 2vw;
   margin: 30px auto;
   max-width: 1500px;
-  height: 36vw;
-  max-height: 600px;
+  height: 13.7vw;
+  max-height: 290px;
 }
 
 /* Collection Section Styling */
