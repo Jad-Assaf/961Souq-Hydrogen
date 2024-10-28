@@ -3,7 +3,6 @@ import { Link, useLoaderData } from '@remix-run/react';
 import { Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
 import { AddToCartButton } from './AddToCartButton';
-import { storefrontClient } from '~/lib/shopify'; // Adjust path to your Shopify client
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
