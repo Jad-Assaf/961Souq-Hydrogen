@@ -127,8 +127,19 @@ function ProductRow({ products, image }) {
                             <div className="product-price">
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
+
+                            {/* Add the AddToCartButton below the price */}
+                            <AddToCartButton
+                                lines={[
+                                    {
+                                        merchandiseId: product.variants.nodes[0].id,
+                                        quantity: 1,
+                                    },
+                                ]}
+                            >
+                                Add to Cart
+                            </AddToCartButton>
                         </div>
-                        <AddToCartButton />
                     </Link>
                 ))}
             </div>
@@ -138,3 +149,4 @@ function ProductRow({ products, image }) {
         </div>
     );
 }
+

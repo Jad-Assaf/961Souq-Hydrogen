@@ -454,6 +454,7 @@ button.reset:hover:not(:has(> *)) {
 .header-menu-desktop {
   display: none;
   gap: 1rem;
+  margin: auto;
 
   @media (min-width: 45em) {
     display: flex;
