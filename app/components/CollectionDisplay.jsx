@@ -1,144 +1,131 @@
-import React, { useRef, useState } from 'react';
-import { Link } from '@remix-run/react';
-import { Image, Money } from '@shopify/hydrogen';
-import { AnimatedImage } from './AnimatedImage';
-import { ProductForm } from './ProductForm'; // Import the ProductForm component
+import { Suspense } from 'react';
+import { defer, redirect } from '@shopify/remix-oxygen';
+import { Await, useLoaderData } from '@remix-run/react';
+import {
+    getSelectedProductOptions,
+    useOptimisticVariant,
+} from '@shopify/hydrogen';
+import { getVariantUrl } from '~/lib/variants';
+import { ProductImages } from '~/components/ProductImage';
+import { ProductForm } from '~/components/ProductForm';
+import { ProductPrice } from '~/components/ProductPrice';
 
-function truncateText(text, maxWords) {
-    const words = text.split(' ');
-    return words.length > maxWords
-        ? words.slice(0, maxWords).join(' ') + '...'
-        : text;
+export const meta = ({ data }) => {
+    return [{ title: `Hydrogen | ${data?.product?.title ?? 'Product'}` }];
+};
+
+export async function loader(args) {
+    const deferredData = loadDeferredData(args);
+    const criticalData = await loadCriticalData(args);
+
+    return defer({ ...deferredData, ...criticalData });
 }
 
-export function CollectionDisplay({ collections, images }) {
-    return (
-        <div className="collections-container">
-            {collections.map((collection, index) => (
-                <div key={collection.id} className="collection-section">
-                    <h3>{collection.title}</h3>
-                    <ProductRow products={collection.products.nodes} />
-                    <div className="image-row">
-                        {/* Display two images per row */}
-                        {images.slice(index * 2, index * 2 + 2).map((image, i) => (
-                            <div key={`${collection.id}-${i}`} className="row-image">
-                                <AnimatedImage
-                                    src={image}
-                                    alt={`Collection ${index + 1} Image ${i + 1}`}
-                                    loading="lazy"
-                                    width="100%"
-                                    height="100%"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            ))}
-        </div>
+async function loadCriticalData({ context, params, request }) {
+    const { handle } = params;
+    const { storefront } = context;
+
+    if (!handle) {
+        throw new Error('Expected product handle to be defined');
+    }
+
+    const { product } = await storefront.query(PRODUCT_QUERY, {
+        variables: {
+            handle,
+            selectedOptions: getSelectedProductOptions(request) || [],
+        },
+    });
+
+    if (!product?.id) {
+        throw new Response('Product not found', { status: 404 });
+    }
+
+    const firstVariant = product.variants.nodes[0];
+    const firstVariantIsDefault = Boolean(
+        firstVariant.selectedOptions.find(
+            (option) => option.name === 'Title' && option.value === 'Default Title'
+        )
+    );
+
+    if (firstVariantIsDefault) {
+        product.selectedVariant = firstVariant;
+    } else if (!product.selectedVariant) {
+        throw redirectToFirstVariant({ product, request });
+    }
+
+    return { product };
+}
+
+function loadDeferredData({ context, params }) {
+    const { storefront } = context;
+
+    const variants = storefront.query(VARIANTS_QUERY, {
+        variables: { handle: params.handle },
+    }).catch((error) => {
+        console.error('Error loading variants:', error);
+        return null;
+    });
+
+    return { variants };
+}
+
+function redirectToFirstVariant({ product, request }) {
+    const url = new URL(request.url);
+    const firstVariant = product.variants.nodes[0];
+
+    return redirect(
+        getVariantUrl({
+            pathname: `/products/${product.handle}`,
+            handle: product.handle,
+            selectedOptions: firstVariant.selectedOptions,
+            searchParams: new URLSearchParams(url.search),
+        }),
+        { status: 302 }
     );
 }
 
-const LeftArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-);
+export default function Product() {
+    const { product, variants } = useLoaderData();
+    const selectedVariant = useOptimisticVariant(
+        product.selectedVariant,
+        variants
+    );
 
-const RightArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-);
-
-function ProductRow({ products }) {
-    const rowRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
-
-    const handleMouseDown = (e) => {
-        setIsDragging(true);
-        setStartX(e.pageX - rowRef.current.offsetLeft);
-        setScrollLeft(rowRef.current.scrollLeft);
-    };
-
-    const handleMouseLeave = () => setIsDragging(false);
-    const handleMouseUp = () => setIsDragging(false);
-
-    const handleMouseMove = (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
-        rowRef.current.scrollLeft = scrollLeft - walk;
-    };
-
-    const scrollRow = (distance) => {
-        rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
-    };
+    const { title, descriptionHtml, images } = product;
 
     return (
-        <div className="product-row-container">
-            <button className="prev-button" onClick={() => scrollRow(-300)}>
-                <LeftArrowIcon />
-            </button>
-            <div
-                className="collection-products-row"
-                ref={rowRef}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
-            >
-                {products.map((product) => (
-                    <div key={product.id} className="product-item">
-                        <Link to={`/products/${product.handle}`}>
-                            <div className="product-card">
-                                <AnimatedImage
-                                    data={product.images.nodes[0]}
-                                    aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                    alt={product.images.nodes[0].altText || 'Product Image'}
-                                    width="180px"
-                                    height="180px"
-                                />
-                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
-                                <div className="product-price">
-                                    <Money data={product.priceRange.minVariantPrice} />
-                                </div>
-                            </div>
-                        </Link>
-                        {/* Integrate the ProductForm for variant selection and add-to-cart */}
+        <div className="product">
+            <ProductImages images={images.edges} />
+            <div className="product-main">
+                <h1>{title}</h1>
+                <ProductPrice
+                    price={selectedVariant?.price}
+                    compareAtPrice={selectedVariant?.compareAtPrice}
+                />
+                <br />
+                <Suspense
+                    fallback={
                         <ProductForm
                             product={product}
-                            selectedVariant={product.variants.nodes[0]}
-                            variants={product.variants.nodes}
+                            selectedVariant={selectedVariant}
+                            variants={[]}
                         />
-                    </div>
-                ))}
+                    }
+                >
+                    <Await resolve={variants} errorElement="Problem loading variants">
+                        {(data) => (
+                            <ProductForm
+                                product={product}
+                                selectedVariant={selectedVariant}
+                                variants={data?.product?.variants.nodes || []}
+                            />
+                        )}
+                    </Await>
+                </Suspense>
+                <br />
+                <p><strong>Description</strong></p>
+                <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
             </div>
-            <button className="next-button" onClick={() => scrollRow(300)}>
-                <RightArrowIcon />
-            </button>
         </div>
     );
 }
