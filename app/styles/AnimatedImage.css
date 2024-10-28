@@ -1,4 +1,4 @@
-/* CSS for the fade-in animation */
+/* Smooth fade-in animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
