@@ -112,7 +112,12 @@ function ProductRow({ products }) {
                 {products.map((product) => {
                     const variants = product.variants?.nodes || [];
                     const hasMultipleVariants = variants.length > 1;
-                    const selectedVariant = variants[0]; // Use the first variant by default
+                    const selectedVariant = variants[0]; // Default to the first variant
+
+                    // Debug the data to ensure it's correctly populated
+                    console.log('Product:', product);
+                    console.log('Variants:', product.variants);
+                    console.log('Selected Variant:', selectedVariant);
 
                     const isAvailable = selectedVariant?.availableForSale;
 
