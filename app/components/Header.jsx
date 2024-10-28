@@ -9,8 +9,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   return (
     <header className="header">
       <div className="header-top">
-        <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-          <strong>{shop.name}</strong>
+        <NavLink prefetch="intent" to="/" className="logo-link" end>
+          <img
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
+            alt={`${shop.name} Logo`}
+            className="header-logo"
+          />
         </NavLink>
         <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
       </div>
@@ -26,6 +30,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     </header>
   );
 }
+
 
 
 export function HeaderMenu({ menu, primaryDomainUrl, viewport, publicStoreDomain }) {
@@ -87,10 +92,10 @@ function HeaderCtas({ isLoggedIn, cart }) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
+      <NavLink prefetch="intent" to="/account" className="sign-in-link">
+        <Suspense fallback={<UserIcon />}>
+          <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
+            {(isLoggedIn) => (isLoggedIn ? <UserIcon /> : <UserIcon />)}
           </Await>
         </Suspense>
       </NavLink>
@@ -99,6 +104,7 @@ function HeaderCtas({ isLoggedIn, cart }) {
     </nav>
   );
 }
+
 
 function HeaderMenuMobileToggle() {
   const { open } = useAside();
@@ -115,11 +121,12 @@ function HeaderMenuMobileToggle() {
 function SearchToggle() {
   const { open } = useAside();
   return (
-    <button className="reset" onClick={() => open('search')}>
-      Search
+    <button className="search-toggle reset" onClick={() => open('search')}>
+      <SearchIcon />
     </button>
   );
 }
+
 
 function CartBadge({ count }) {
   const { open } = useAside();
@@ -146,7 +153,7 @@ function CartBadge({ count }) {
 
 function CartToggle({ cart }) {
   return (
-    <Suspense fallback={<CartBadge count={null} />}>
+    <Suspense fallback={<CartIcon />}>
       <Await resolve={cart}>
         <CartBanner />
       </Await>
@@ -154,10 +161,35 @@ function CartToggle({ cart }) {
   );
 }
 
+
 function CartBanner() {
   const originalCart = useAsyncValue();
   const cart = useOptimisticCart(originalCart);
-  return <CartBadge count={cart?.totalQuantity ?? 0} />;
+  return <CartIcon />;
+}
+
+function UserIcon() {
+  return (
+    <svg fill="#2172af" width="30px" height="30px" viewBox="-8 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 96c48.6 0 88 39.4 88 88s-39.4 88-88 88-88-39.4-88-88 39.4-88 88-88zm0 344c-58.7 0-111.3-26.6-146.5-68.2 18.8-35.4 55.6-59.8 98.5-59.8 2.4 0 4.8.4 7.1 1.1 13 4.2 26.6 6.9 40.9 6.9 14.3 0 28-2.7 40.9-6.9 2.3-.7 4.7-1.1 7.1-1.1 42.9 0 79.7 24.4 98.5 59.8C359.3 421.4 306.7 448 248 448z" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#2172af" width="30px" height="30px">
+      <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg fill="#2172af" height="30px" width="30px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 482.854 482.854">
+      <path d="M439.927,148.655h-21.5h-0.1h-9.5l-130.2-144.7c-4.4-4.9-12-5.3-16.9-0.9s-5.3,12-0.9,16.9l115.8,128.7h-269.9 l115.4-128.7c4.4-4.9,4-12.5-0.9-16.9s-12.5-4-16.9,0.9l-129.9,144.7h-9.6l0,0h-21.9c-6.6,0-12,5.4-12,12s5.4,12,12,12h12.3 l34.6,161.3c5.5,27.7,30,47.8,58.3,47.8h131.1c6.6,0,12-5.4,12-12s-5.4-12-12-12h-131.1c-16.9,0-31.5-12-34.8-28.6 c0-0.1,0-0.1,0-0.2l-33.5-156.3h323.9l-13.8,67.6c-1.3,6.5,2.9,12.8,9.4,14.2c0.8,0.2,1.6,0.2,2.4,0.2c5.6,0,10.6-3.9,11.7-9.6 l14.8-72.4h11.7c6.6,0,12-5.4,12-12S446.527,148.655,439.927,148.655z" />
+    </svg>
+  );
 }
 
 const FALLBACK_HEADER_MENU = {
