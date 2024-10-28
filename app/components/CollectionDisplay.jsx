@@ -127,9 +127,7 @@ function ProductRow({ products, image }) {
                             <div className="product-price">
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
-                            <AddToCartButton
-                                variantId={product.variants[0].id}
-                            >
+                            <AddToCartButton variantId={product.variants.nodes[0].id}>
                                 Add to Cart
                             </AddToCartButton>
                         </div>
@@ -142,3 +140,16 @@ function ProductRow({ products, image }) {
         </div>
     );
 }
+
+const PRODUCT_QUERY = `#graphql
+  query ProductQuery($handle: String!) {
+    product(handle: $handle) {
+      title
+      variants(first: 1) {
+        nodes {
+          id
+        }
+      }
+    }
+  }
+`;
