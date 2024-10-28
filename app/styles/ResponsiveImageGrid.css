@@ -1,11 +1,11 @@
 /* Center the inter-row image with some padding */
-.inter-row-image {
+.row-image {
     margin: 30px auto;
     max-width: 1500px;
     padding: 10px 0;
 }
 
-.inter-row-image img {
+.row-image img {
     width: 100%;
     height: auto;
     border-radius: 10px;
@@ -13,7 +13,7 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.inter-row-image img:hover {
+.row-image img:hover {
     transform: scale(1.02);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
