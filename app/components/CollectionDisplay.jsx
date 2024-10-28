@@ -138,16 +138,12 @@ function ProductRow({ products, loadVariants }) {
                             </div>
                             <Suspense
                                 fallback={
-                                    <ProductForm
-                                        product={product}
-                                        selectedVariant={null}
-                                        variants={[]}
-                                    />
+                                    <ProductForm product={product} selectedVariant={null} variants={[]} />
                                 }
                             >
                                 <Await
                                     resolve={loadVariants(product.id)}
-                                    errorElement="There was a problem loading product variants"
+                                    errorElement={<div>There was a problem loading product variants</div>}
                                 >
                                     {(data) => (
                                         <ProductForm
