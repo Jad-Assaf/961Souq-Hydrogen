@@ -22,7 +22,7 @@ export function CollectionDisplay({ collections, images }) {
                     {images[index] && (  // Ensure the image exists
                         <div className="row-image">
                             <AnimatedImage src={images[index]} alt={`Collection ${index + 1}`} loading='lazy' width="100%"
-                                height="auto" />
+                                height="600px" />
                         </div>
                     )}
                 </div>
