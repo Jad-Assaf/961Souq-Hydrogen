@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Link, useLoaderData } from '@remix-run/react';
-import { Money } from '@shopify/hydrogen';
+import React, { useRef, useState } from 'react';
+import { Link } from '@remix-run/react';
+import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from './AddToCartButton';
+import { AddToCartButton } from '@shopify/hydrogen-react';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -11,55 +11,17 @@ function truncateText(text, maxWords) {
         : text;
 }
 
-// GraphQL Query to Fetch Products and Variants
-const PRODUCT_QUERY = `
-  query getProduct($handle: String!) {
-    product(handle: $handle) {
-      id
-      title
-      handle
-      images(first: 1) {
-        nodes {
-          url
-          altText
-        }
-      }
-      variants(first: 5) {
-        nodes {
-          id
-          title
-          availableForSale
-          price {
-            amount
-            currencyCode
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const loader = async ({ params }) => {
-    const { handle } = params;
-
-    const { data } = await storefrontClient.query({
-        query: PRODUCT_QUERY,
-        variables: { handle },
-    });
-
-    return data.product;
-};
-
 export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div key={collection.id}>
-                    <div className="collection-section">
+                <div>
+                    <div key={collection.id} className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
                     </div>
                     <div className="image-row">
+                        {/* Display two images per row */}
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
                             <div key={`${collection.id}-${i}`} className="row-image">
                                 <AnimatedImage
@@ -77,6 +39,7 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
+
 
 const LeftArrowIcon = () => (
     <svg
@@ -106,7 +69,7 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products }) {
+function ProductRow({ products, image }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -146,69 +109,32 @@ function ProductRow({ products }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product) => {
-                    const variants = product.variants?.nodes || [];
-                    const hasMultipleVariants = variants.length > 1;
-                    const selectedVariant = variants[0]; // Default to the first variant
-
-                    console.log('Product:', product);
-                    console.log('Variants:', variants);
-                    console.log('Selected Variant:', selectedVariant);
-
-                    const isAvailable = selectedVariant?.availableForSale;
-
-                    return (
-                        <div key={product.id} className="product-item">
-                            <div className="product-card">
-                                {product.images?.nodes?.[0] && (
-                                    <AnimatedImage
-                                        data={product.images.nodes[0]}
-                                        aspectRatio="1/1"
-                                        sizes="(min-width: 45em) 20vw, 40vw"
-                                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                        alt={product.images.nodes[0].altText || 'Product Image'}
-                                        width="180px"
-                                        height="180px"
-                                    />
-                                )}
-                                <h4 className="product-title">
-                                    {truncateText(product.title, 20)}
-                                </h4>
-                                <div className="product-price">
-                                    <Money data={product.priceRange.minVariantPrice} />
-                                </div>
-
-                                {hasMultipleVariants ? (
-                                    <Link
-                                        to={`/products/${product.handle}`}
-                                        className="select-option-button"
-                                    >
-                                        Select Option
-                                    </Link>
-                                ) : isAvailable ? (
-                                    <AddToCartButton
-                                        disabled={!isAvailable}
-                                        onClick={() => open('cart')}
-                                        lines={[
-                                            {
-                                                merchandiseId: selectedVariant.id,
-                                                quantity: 1,
-                                            },
-                                        ]}
-                                    >
-                                        Add to Cart
-                                    </AddToCartButton>
-                                ) : (
-                                    <button className="sold-out-button" disabled>
-                                        Sold Out
-                                    </button>
-                                )}
+                {products.map((product) => (
+                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
+                        <div className="product-card">
+                            <AnimatedImage
+                                data={product.images.nodes[0]}
+                                aspectRatio="1/1"
+                                sizes="(min-width: 45em) 20vw, 40vw"
+                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                alt={product.images.nodes[0].altText || 'Product Image'}
+                                width="180px"
+                                height="180px"
+                            />
+                            <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                            <div className="product-price">
+                                <Money data={product.priceRange.minVariantPrice} />
                             </div>
+                            <AddToCartButton
+                                variantId={product.variants[0].id}
+                            >
+                                Add to Cart
+                            </AddToCartButton>
                         </div>
-                    );
-                })}
+                    </Link>
+                ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
