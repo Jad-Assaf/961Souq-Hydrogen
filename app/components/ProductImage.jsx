@@ -95,8 +95,8 @@ export function ProductImages({ images }) {
             aspectRatio="1/1"
             data={selectedImage}
             sizes="(min-width: 45em) 50vw, 100vw"
-            width="180px"
-            height="180px"
+            width="100%"
+            height="auto"
           />
         )}
         <button
