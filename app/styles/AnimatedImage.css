@@ -1,0 +1,22 @@
+.image-wrapper {
+    overflow: hidden;
+    display: block;
+    position: relative;
+    background-color: #f0f0f0;
+    /* Fallback background */
+}
+
+.image-placeholder {
+    background-color: #e0e0e0;
+    animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: 200px 0;
+    }
+}

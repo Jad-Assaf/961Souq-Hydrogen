@@ -26,9 +26,9 @@ export function CartLineItem({layout, line}) {
           alt={title}
           aspectRatio="1/1"
           data={image}
-          height={100}
+          height="300px"
           loading="lazy"
-          width={100}
+          width="300px"
         />
       )}
 
