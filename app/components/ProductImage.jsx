@@ -89,9 +89,9 @@ export function ProductImages({ images }) {
       >
         <AnimatedImage
           alt={selectedImage.altText || 'Product Image'}
+          src={image}
           aspectRatio="1/1"
           data={selectedImage}
-          sizes="(min-width: 45em) 50vw, 100vw"
           width="180px"
           height="180px"
         />
