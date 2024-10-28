@@ -1,16 +1,38 @@
 .image-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
     overflow: hidden;
     display: block;
-    position: relative;
-    background-color: #f0f0f0;
-    /* Fallback background */
 }
 
+/* Placeholder styling (optional shimmer effect) */
 .image-placeholder {
+    width: 100%;
+    height: 100%;
     background-color: #e0e0e0;
-    animation: shimmer 1.5s infinite linear;
+    animation: shimmer 1.5s linear infinite;
 }
 
+/* Smooth loading of the image */
+.lazy-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Ensures the image fills the container */
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.lazy-image.lazy-load-image-loaded {
+    opacity: 1;
+    /* Image becomes visible after loading */
+}
+
+/* Optional shimmer animation */
 @keyframes shimmer {
     0% {
         background-position: -200px 0;
@@ -19,20 +41,4 @@
     100% {
         background-position: 200px 0;
     }
-}
-
-.image-wrapper {
-    margin: 0;
-    padding: 0;
-    display: block;
-    overflow: hidden;
-    position: relative;
-    box-sizing: border-box;
-}
-
-.lazy-load-image-background,
-.lazy-load-image {
-    margin: 0;
-    padding: 0;
-    display: block;
 }
