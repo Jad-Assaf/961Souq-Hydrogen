@@ -426,7 +426,7 @@ button.reset:hover:not(:has(> *)) {
   top: 0;
 }
 
-.submenu .submenu .menu-item {
+.menu-item .submenu .menu-item a {
   color: #000 !important;
 }
 
