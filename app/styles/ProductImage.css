@@ -1,13 +1,14 @@
 .product-images-container {
     display: flex;
     gap: 20px;
-    align-items: start;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: row-reverse;
 }
 
 .thumbnails {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
     max-height: 80vh;
 }
