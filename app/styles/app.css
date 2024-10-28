@@ -334,10 +334,6 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
 }
 
-.header svg {
-  fill: #2172af;
-}
-
 .header-top {
   display: flex;
   align-items: center;
@@ -419,6 +415,7 @@ button.reset:hover:not(:has(> *)) {
 
 .submenu .menu-item {
   position: relative;
+  padding: 5px;
 }
 
 .submenu .submenu {
