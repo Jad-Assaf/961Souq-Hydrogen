@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from './AddToCartButton';
+import { ProductForm } from './ProductForm';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -69,11 +69,12 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products }) {
+function ProductRow({ products, loadVariants }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -109,59 +110,56 @@ function ProductRow({ products }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product) => {
-                    const selectedVariant = product.variants.nodes[0]; // Assuming the first variant is selected
-
-                    return (
-                        <Link
-                            key={product.id}
-                            className="product-item"
-                            to={`/products/${product.handle}`}
-                        >
-                            <div className="product-card">
-                                <AnimatedImage
-                                    data={product.images.nodes[0]}
-                                    aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                    alt={product.images.nodes[0].altText || 'Product Image'}
-                                    width="180px"
-                                    height="180px"
-                                />
-                                <h4 className="product-title">
-                                    {truncateText(product.title, 20)}
-                                </h4>
-                                <div className="product-price">
-                                    <Money data={product.priceRange.minVariantPrice} />
-                                </div>
-                                <AddToCartButton
-                                    disabled={
-                                        !selectedVariant || !selectedVariant.availableForSale
-                                    }
-                                    onClick={() => {
-                                        console.log(`Added ${selectedVariant.id} to cart`);
-                                    }}
-                                    lines={
-                                        selectedVariant
-                                            ? [
-                                                {
-                                                    merchandiseId: selectedVariant.id,
-                                                    quantity: 1,
-                                                },
-                                            ]
-                                            : []
-                                    }
-                                >
-                                    {selectedVariant?.availableForSale
-                                        ? 'Add to cart'
-                                        : 'Sold out'}
-                                </AddToCartButton>
+                {products.map((product) => (
+                    <Link
+                        key={product.id}
+                        className="product-item"
+                        to={`/products/${product.handle}`}
+                        onClick={() => setSelectedProduct(product)}
+                    >
+                        <div className="product-card">
+                            <AnimatedImage
+                                data={product.images.nodes[0]}
+                                aspectRatio="1/1"
+                                sizes="(min-width: 45em) 20vw, 40vw"
+                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                alt={product.images.nodes[0].altText || 'Product Image'}
+                                width="180px"
+                                height="180px"
+                            />
+                            <h4 className="product-title">
+                                {truncateText(product.title, 20)}
+                            </h4>
+                            <div className="product-price">
+                                <Money data={product.priceRange.minVariantPrice} />
                             </div>
-                        </Link>
-                    );
-                })}
+                            <Suspense
+                                fallback={
+                                    <ProductForm
+                                        product={product}
+                                        selectedVariant={null}
+                                        variants={[]}
+                                    />
+                                }
+                            >
+                                <Await
+                                    resolve={loadVariants(product.id)}
+                                    errorElement="There was a problem loading product variants"
+                                >
+                                    {(data) => (
+                                        <ProductForm
+                                            product={product}
+                                            selectedVariant={data?.product?.variants.nodes[0] || null}
+                                            variants={data?.product?.variants.nodes || []}
+                                        />
+                                    )}
+                                </Await>
+                            </Suspense>
+                        </div>
+                    </Link>
+                ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
