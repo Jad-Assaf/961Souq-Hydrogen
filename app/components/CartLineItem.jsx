@@ -23,6 +23,7 @@ export function CartLineItem({layout, line}) {
     <li key={id} className="cart-line">
       {image && (
         <AnimatedImage
+          src={image.url}
           alt={title}
           aspectRatio="1/1"
           data={image}
