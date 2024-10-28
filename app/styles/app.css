@@ -324,14 +324,28 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .header {
-  align-items: center;
   background: #2172af;
-  display: flex;
-  height: var(--header-height);
-  padding: 0 1rem;
   position: sticky;
   top: 0;
   z-index: 1;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  padding: 0 1rem;
+  width: 100vw;
+}
+
+.header-bottom {
+  width: 100vw;
+  padding: 0 1rem;
+  background-color: #1a5e91;
 }
 
 .header * {
@@ -347,16 +361,16 @@ button.reset:hover:not(:has(> *)) {
 .header-menu-mobile {
   display: flex;
   flex-direction: column;
-  grid-gap: 1rem;
+  gap: 1rem;
 }
 
 .header-menu-desktop {
   display: none;
-  grid-gap: 1rem;
+  gap: 1rem;
 
   @media (min-width: 45em) {
     display: flex;
-    grid-gap: 1rem;
+    gap: 1rem;
     margin-left: 3rem;
   }
 }
@@ -366,10 +380,9 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .header-ctas {
-  align-items: center;
   display: flex;
-  grid-gap: 1rem;
-  margin-left: auto;
+  align-items: center;
+  gap: 1rem;
 }
 
 .menu-item {
@@ -400,7 +413,6 @@ button.reset:hover:not(:has(> *)) {
   left: 100%;
   top: 0;
 }
-
 /*
 * --------------------------------------------------
 * components/Footer
