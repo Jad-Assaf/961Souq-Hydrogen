@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from './AddToCartButton';
-
+import { AddToCartButton } from '~/components/AddToCartButton';
+import { useAside } from '~/components/Aside';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -16,8 +16,8 @@ export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div>
-                    <div key={collection.id} className="collection-section">
+                <div key={collection.id}>
+                    <div className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
                     </div>
@@ -40,7 +40,6 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
-
 
 const LeftArrowIcon = () => (
     <svg
@@ -70,11 +69,12 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products, image }) {
+function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
+    const { open } = useAside();
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -111,44 +111,38 @@ function ProductRow({ products, image }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => (
-                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
-                        <div className="product-card">
-                            <AnimatedImage
-                                data={product.images.nodes[0]}
-                                aspectRatio="1/1"
-                                sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                alt={product.images.nodes[0].altText || 'Product Image'}
-                                width="180px"
-                                height="180px"
-                            />
-                            <h4 className="product-title">{truncateText(product.title, 20)}</h4>
-                            <div className="product-price">
-                                <Money data={product.priceRange.minVariantPrice} />
+                    <div key={product.id} className="product-item">
+                        <Link to={`/products/${product.handle}`}>
+                            <div className="product-card">
+                                <AnimatedImage
+                                    data={product.images.nodes[0]}
+                                    aspectRatio="1/1"
+                                    sizes="(min-width: 45em) 20vw, 40vw"
+                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                    alt={product.images.nodes[0].altText || 'Product Image'}
+                                    width="180px"
+                                    height="180px"
+                                />
+                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                                <div className="product-price">
+                                    <Money data={product.priceRange.minVariantPrice} />
+                                </div>
                             </div>
-                            <AddToCartButton
-                                disabled={!selectedVariant || !selectedVariant.availableForSale}
-                                onClick={() => {
-                                    open('cart');
-                                }}
-                                lines={
-                                    selectedVariant
-                                        ? [
-                                            {
-                                                merchandiseId: selectedVariant.id,
-                                                quantity: 1,
-                                                selectedVariant,
-                                            },
-                                        ]
-                                        : []
-                                }
-                            >
-                                {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
-                            </AddToCartButton>
-                        </div>
-                    </Link>
+                        </Link>
+                        <AddToCartButton
+                            disabled={!product.availableForSale}
+                            onClick={() => open('cart')}
+                            lines={
+                                product.availableForSale
+                                    ? [{ merchandiseId: product.id, quantity: 1 }]
+                                    : []
+                            }
+                        >
+                            {product.availableForSale ? 'Add to cart' : 'Sold out'}
+                        </AddToCartButton>
+                    </div>
                 ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
