@@ -8,6 +8,7 @@ import {
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { AnimatedImage } from '~/components/AnimatedImage';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -122,7 +123,7 @@ function ProductItem({product, loading}) {
       to={variantUrl}
     >
       {product.featuredImage && (
-        <Image
+        <AnimatedImage
           alt={product.featuredImage.altText || product.title}
           aspectRatio="1/1"
           data={product.featuredImage}
