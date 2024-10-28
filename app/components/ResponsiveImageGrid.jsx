@@ -21,7 +21,7 @@ export function ResponsiveImageGrid({ images }) {
                         src={image.url}
                         alt={image.altText || `Image ${index + 1}`}
                         width="100%"
-                        height="600px"
+                        height="100%"
                     />
                 </div>
             ))}
