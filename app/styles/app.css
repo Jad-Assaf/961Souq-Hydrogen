@@ -742,6 +742,7 @@ button.reset:hover:not(:has(> *)) {
 */
 .product {
   display: grid;
+  margin-top: 5vw;
 
   @media (min-width: 45em) {
     grid-template-columns: 1fr 1fr;
