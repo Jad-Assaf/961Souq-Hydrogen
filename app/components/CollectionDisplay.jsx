@@ -14,10 +14,11 @@ export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div key={collection.id} className="collection-section">
-                    <h3>{collection.title}</h3>
-                    <ProductRow products={collection.products.nodes} />
-
+                <div>
+                    <div key={collection.id} className="collection-section">
+                        <h3>{collection.title}</h3>
+                        <ProductRow products={collection.products.nodes} />
+                    </div>
                     <div className="image-row">
                         {/* Display two images per row */}
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
@@ -37,7 +38,6 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
-
 
 
 const LeftArrowIcon = () => (
