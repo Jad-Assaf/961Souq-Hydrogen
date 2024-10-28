@@ -110,40 +110,45 @@ function ProductRow({ products }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product) => (
-                    <div key={product.id} className="product-item">
-                        <Link to={`/products/${product.handle}`}>
-                            <div className="product-card">
-                                <AnimatedImage
-                                    data={product.images.nodes[0]}
-                                    aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                    alt={product.images.nodes[0].altText || 'Product Image'}
-                                    width="180px"
-                                    height="180px"
-                                />
-                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
-                                <div className="product-price">
-                                    <Money data={product.priceRange.minVariantPrice} />
+                {products.map((product) => {
+                    const selectedVariant = product.variants.nodes[0]; // Get the first variant
+
+                    return (
+                        <div key={product.id} className="product-item">
+                            <Link to={`/products/${product.handle}`}>
+                                <div className="product-card">
+                                    <AnimatedImage
+                                        data={product.images.nodes[0]}
+                                        aspectRatio="1/1"
+                                        sizes="(min-width: 45em) 20vw, 40vw"
+                                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                        alt={product.images.nodes[0].altText || 'Product Image'}
+                                        width="180px"
+                                        height="180px"
+                                    />
+                                    <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                                    <div className="product-price">
+                                        <Money data={product.priceRange.minVariantPrice} />
+                                    </div>
                                 </div>
-                            </div>
-                        </Link>
-                        <AddToCartButton
-                            disabled={!product.availableForSale}
-                            onClick={() => open('cart')}
-                            lines={
-                                product.availableForSale
-                                    ? [{ merchandiseId: product.id, quantity: 1 }]
-                                    : []
-                            }
-                        >
-                            {product.availableForSale ? 'Add to cart' : 'Sold out'}
-                        </AddToCartButton>
-                    </div>
-                ))}
+                            </Link>
+                            <AddToCartButton
+                                disabled={!selectedVariant.availableForSale}
+                                onClick={() => open('cart')}
+                                lines={[
+                                    {
+                                        merchandiseId: selectedVariant.id,
+                                        quantity: 1,
+                                    },
+                                ]}
+                            >
+                                {selectedVariant.availableForSale ? 'Add to cart' : 'Sold out'}
+                            </AddToCartButton>
+                        </div>
+                    );
+                })}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
