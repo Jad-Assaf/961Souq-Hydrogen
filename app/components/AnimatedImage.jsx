@@ -9,8 +9,6 @@ export function AnimatedImage({ src, alt, placeholder, ...props }) {
             alt={alt}
             placeholderSrc={placeholder}
             effect="blur" // You can also try 'opacity' effect
-            width="100%"
-            height="auto"
             {...props}
         />
     );
