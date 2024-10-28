@@ -144,7 +144,7 @@ export default function Product() {
 }
 
 
-export const PRODUCT_VARIANT_FRAGMENT = `#graphql
+const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
     compareAtPrice {
@@ -193,7 +193,7 @@ export const PRODUCT_VARIANT_FRAGMENT = `#graphql
   }
 `;
 
-export const PRODUCT_FRAGMENT = `#graphql
+const PRODUCT_FRAGMENT = `#graphql
   fragment Product on Product {
     id
     title
@@ -233,7 +233,7 @@ export const PRODUCT_FRAGMENT = `#graphql
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
 
-export const PRODUCT_QUERY = `#graphql
+const PRODUCT_QUERY = `#graphql
   query Product(
     $country: CountryCode
     $handle: String!
@@ -247,7 +247,7 @@ export const PRODUCT_QUERY = `#graphql
   ${PRODUCT_FRAGMENT}
 `;
 
-export const PRODUCT_VARIANTS_FRAGMENT = `#graphql
+const PRODUCT_VARIANTS_FRAGMENT = `#graphql
   fragment ProductVariants on Product {
     variants(first: 250) {
       nodes {
@@ -258,7 +258,7 @@ export const PRODUCT_VARIANTS_FRAGMENT = `#graphql
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
 
-export const VARIANTS_QUERY = `#graphql
+const VARIANTS_QUERY = `#graphql
   ${PRODUCT_VARIANTS_FRAGMENT}
   query ProductVariants(
     $country: CountryCode

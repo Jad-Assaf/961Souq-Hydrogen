@@ -1,14 +1,9 @@
-import React, { useRef, useState } from 'react';
-import { Link } from '@remix-run/react';
-import { Image, Money } from '@shopify/hydrogen';
+import React, { useRef, useState, useEffect } from 'react';
+import { Link, useLoaderData } from '@remix-run/react';
+import { Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
 import { AddToCartButton } from './AddToCartButton';
-import {
-    PRODUCT_QUERY,
-    VARIANTS_QUERY,
-    PRODUCT_FRAGMENT,
-    PRODUCT_VARIANT_FRAGMENT,
-} from '../routes/products.$handle'; // Importing fragments and queries
+import { storefrontClient } from '~/lib/shopify'; // Adjust path to your Shopify client
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -16,6 +11,45 @@ function truncateText(text, maxWords) {
         ? words.slice(0, maxWords).join(' ') + '...'
         : text;
 }
+
+// GraphQL Query to Fetch Products and Variants
+const PRODUCT_QUERY = `
+  query getProduct($handle: String!) {
+    product(handle: $handle) {
+      id
+      title
+      handle
+      images(first: 1) {
+        nodes {
+          url
+          altText
+        }
+      }
+      variants(first: 5) {
+        nodes {
+          id
+          title
+          availableForSale
+          price {
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const loader = async ({ params }) => {
+    const { handle } = params;
+
+    const { data } = await storefrontClient.query({
+        query: PRODUCT_QUERY,
+        variables: { handle },
+    });
+
+    return data.product;
+};
 
 export function CollectionDisplay({ collections, images }) {
     return (
@@ -118,9 +152,8 @@ function ProductRow({ products }) {
                     const hasMultipleVariants = variants.length > 1;
                     const selectedVariant = variants[0]; // Default to the first variant
 
-                    // Debug the data to ensure it's correctly populated
                     console.log('Product:', product);
-                    console.log('Variants:', product.variants);
+                    console.log('Variants:', variants);
                     console.log('Selected Variant:', selectedVariant);
 
                     const isAvailable = selectedVariant?.availableForSale;
