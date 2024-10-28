@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
-import './AnimatedImage.css';
+import '../styles/AnimatedImage.css';
 
 export function AnimatedImage({ src, alt, width, height, placeholder, ...props }) {
     const [isLoaded, setIsLoaded] = useState(false);
