@@ -36,7 +36,7 @@
 
 .main-image {
     position: relative;
-    width: 60%;
+    width: 75%;
     cursor: grab;
     transition: transform 0.3s ease;
 }
