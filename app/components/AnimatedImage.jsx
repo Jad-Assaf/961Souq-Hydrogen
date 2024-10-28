@@ -9,7 +9,7 @@ export function AnimatedImage({ src, alt, width, height, placeholder, ...props }
     return (
         <div
             className="image-wrapper"
-            style={{ width, height, position: 'relative' }}
+            style={{ width, position: 'relative' }}
         >
             {/* Placeholder until image loads */}
             {!isLoaded && (
