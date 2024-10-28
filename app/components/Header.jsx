@@ -31,31 +31,31 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   );
 }
 
-
-
-export function HeaderMenu({ menu, primaryDomainUrl, viewport, publicStoreDomain }) {
+export function HeaderMenu({ menu, viewport }) {
   const { close } = useAside();
 
-  // JavaScript logic to handle submenu hover
   useEffect(() => {
     const menuItems = document.querySelectorAll('.menu-item');
 
-    menuItems.forEach((item) => {
-      item.addEventListener('mouseenter', () => {
-        const submenu = item.querySelector('.submenu');
-        if (submenu) submenu.style.display = 'block';
-      });
+    const handleMouseEnter = (event) => {
+      const submenu = event.currentTarget.querySelector('.submenu');
+      if (submenu) submenu.style.display = 'block';
+    };
 
-      item.addEventListener('mouseleave', () => {
-        const submenu = item.querySelector('.submenu');
-        if (submenu) submenu.style.display = 'none';
-      });
+    const handleMouseLeave = (event) => {
+      const submenu = event.currentTarget.querySelector('.submenu');
+      if (submenu) submenu.style.display = 'none';
+    };
+
+    menuItems.forEach((item) => {
+      item.addEventListener('mouseenter', handleMouseEnter);
+      item.addEventListener('mouseleave', handleMouseLeave);
     });
 
     return () => {
       menuItems.forEach((item) => {
-        item.removeEventListener('mouseenter', () => { });
-        item.removeEventListener('mouseleave', () => { });
+        item.removeEventListener('mouseenter', handleMouseEnter);
+        item.removeEventListener('mouseleave', handleMouseLeave);
       });
     };
   }, []);
@@ -95,7 +95,7 @@ function HeaderCtas({ isLoggedIn, cart }) {
       <NavLink prefetch="intent" to="/account" className="sign-in-link">
         <Suspense fallback={<UserIcon />}>
           <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
-            {(isLoggedIn) => (isLoggedIn ? <UserIcon /> : <UserIcon />)}
+            {() => <UserIcon />}
           </Await>
         </Suspense>
       </NavLink>
@@ -104,7 +104,6 @@ function HeaderCtas({ isLoggedIn, cart }) {
     </nav>
   );
 }
-
 
 function HeaderMenuMobileToggle() {
   const { open } = useAside();
@@ -127,45 +126,22 @@ function SearchToggle() {
   );
 }
 
-
-function CartBadge({ count }) {
-  const { open } = useAside();
-  const { publish, shop, cart, prevCart } = useAnalytics();
-
-  return (
-    <a
-      href="/cart"
-      onClick={(e) => {
-        e.preventDefault();
-        open('cart');
-        publish('cart_viewed', {
-          cart,
-          prevCart,
-          shop,
-          url: window.location.href || '',
-        });
-      }}
-    >
-      Cart {count === null ? <span>&nbsp;</span> : count}
-    </a>
-  );
-}
-
 function CartToggle({ cart }) {
+  const { open } = useAside();
+
   return (
-    <Suspense fallback={<CartIcon />}>
-      <Await resolve={cart}>
-        <CartBanner />
-      </Await>
-    </Suspense>
+    <button
+      className="cart-button reset"
+      onClick={() => open('cart')}
+      aria-label="Open Cart"
+    >
+      <Suspense fallback={<CartIcon />}>
+        <Await resolve={cart}>
+          {() => <CartIcon />}
+        </Await>
+      </Suspense>
+    </button>
   );
-}
-
-
-function CartBanner() {
-  const originalCart = useAsyncValue();
-  const cart = useOptimisticCart(originalCart);
-  return <CartIcon />;
 }
 
 function UserIcon() {

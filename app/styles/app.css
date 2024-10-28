@@ -324,7 +324,7 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .header {
-  background: #2172af;
+  background: #fff;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -339,14 +339,13 @@ button.reset:hover:not(:has(> *)) {
   justify-content: space-between;
   height: var(--header-height);
   width: 90vw;
-  margin: 20px auto auto auto;
-  background-color: #fff;
+  margin: 20px auto;
 }
 
 .header-bottom {
   width: 100vw;
   padding: 0 1rem;
-  background-color: #1a5e91;
+  background-color: #2172af;
 }
 
 .header * {
@@ -414,6 +413,19 @@ button.reset:hover:not(:has(> *)) {
   left: 100%;
   top: 0;
 }
+
+.header-ctas {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sign-in-link svg,
+.search-toggle svg,
+.cart-toggle svg {
+  cursor: pointer;
+}
+
 /*
 * --------------------------------------------------
 * components/Footer
