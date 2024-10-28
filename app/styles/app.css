@@ -370,8 +370,11 @@ button.reset:hover:not(:has(> *)) {
 
   @media (min-width: 45em) {
     display: flex;
-    gap: 1rem;
-    margin-left: 3rem;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      padding: 15px 0;
   }
 }
 
@@ -387,6 +390,7 @@ button.reset:hover:not(:has(> *)) {
 
 .menu-item {
   position: relative;
+  color: #fff !important
 }
 
 .submenu {
@@ -422,7 +426,7 @@ button.reset:hover:not(:has(> *)) {
 
 .sign-in-link svg,
 .search-toggle svg,
-.cart-toggle svg {
+.cart-button svg {
   cursor: pointer;
 }
 
