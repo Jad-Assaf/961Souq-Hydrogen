@@ -3,6 +3,12 @@ import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
 import { AddToCartButton } from './AddToCartButton';
+import {
+    PRODUCT_QUERY,
+    VARIANTS_QUERY,
+    PRODUCT_FRAGMENT,
+    PRODUCT_VARIANT_FRAGMENT,
+} from '../routes/products.$handle'; // Importing fragments and queries
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -15,13 +21,12 @@ export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div>
-                    <div key={collection.id} className="collection-section">
+                <div key={collection.id}>
+                    <div className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
                     </div>
                     <div className="image-row">
-                        {/* Display two images per row */}
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
                             <div key={`${collection.id}-${i}`} className="row-image">
                                 <AnimatedImage
@@ -39,7 +44,6 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
-
 
 const LeftArrowIcon = () => (
     <svg
