@@ -132,7 +132,6 @@ img {
 .row-image img {
   width: 100%;
   height: auto;
-  border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease !important;
 }
@@ -426,6 +425,7 @@ button.reset:hover:not(:has(> *)) {
   justify-content: space-between;
   height: var(--header-height);
   width: 90vw;
+  max-width: 1500px;
   margin: 20px auto;
 }
 
