@@ -47,7 +47,7 @@ export function ProductImages({ images }) {
     return <div className="product-images" />;
   }
 
-  const selectedImage = images[selectedImageIndex].node;
+  const selectedImage = images[selectedImageIndex]?.node; // Safely access the selected image
 
   const handlePrevImage = () => {
     setSelectedImageIndex((prevIndex) =>
@@ -88,15 +88,17 @@ export function ProductImages({ images }) {
         onClick={() => setIsLightboxOpen(true)}
         style={{ cursor: 'grab' }}
       >
-        <AnimatedImage
-          src={image.url}
-          alt={selectedImage.altText || 'Product Image'}
-          aspectRatio="1/1"
-          data={selectedImage}
-          sizes="(min-width: 45em) 50vw, 100vw"
-          width="180px"
-          height="180px"
-        />
+        {selectedImage && (
+          <AnimatedImage
+            src={selectedImage.url} // Use selectedImage.url instead of image.url
+            alt={selectedImage.altText || 'Product Image'}
+            aspectRatio="1/1"
+            data={selectedImage}
+            sizes="(min-width: 45em) 50vw, 100vw"
+            width="180px"
+            height="180px"
+          />
+        )}
         <button
           className="prev-button"
           onClick={(e) => {
@@ -131,5 +133,6 @@ export function ProductImages({ images }) {
     </div>
   );
 }
+
 
 /** @typedef {import('storefrontapi.generated').ProductFragment} ProductFragment */
