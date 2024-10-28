@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from '@shopify/hydrogen'; // Import AddToCartButton
+import { AddToCartButton } from './AddToCartButton';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
