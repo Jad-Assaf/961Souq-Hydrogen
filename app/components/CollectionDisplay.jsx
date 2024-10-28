@@ -1,22 +1,16 @@
-import React, { useRef, useState } from 'react';
-import { Link } from '@remix-run/react';
+import React, { useRef, useState, Suspense } from 'react';
+import { Link, Await } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from '@shopify/hydrogen-react';
-
-function truncateText(text, maxWords) {
-    const words = text.split(' ');
-    return words.length > maxWords
-        ? words.slice(0, maxWords).join(' ') + '...'
-        : text;
-}
+import { ProductForm } from '~/components/ProductForm';
+import { defer, useLoaderData } from '@shopify/remix-oxygen';
 
 export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div>
-                    <div key={collection.id} className="collection-section">
+                <div key={collection.id}>
+                    <div className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
                     </div>
@@ -39,35 +33,7 @@ export function CollectionDisplay({ collections, images }) {
     );
 }
 
-const LeftArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-);
-
-const RightArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-);
-
-function ProductRow({ products, image }) {
+function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -97,7 +63,7 @@ function ProductRow({ products, image }) {
     return (
         <div className="product-row-container">
             <button className="prev-button" onClick={() => scrollRow(-300)}>
-                <LeftArrowIcon />
+                {'<'}
             </button>
             <div
                 className="collection-products-row"
@@ -122,20 +88,30 @@ function ProductRow({ products, image }) {
                                     width="180px"
                                     height="180px"
                                 />
-                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                                <h4 className="product-title">
+                                    {truncateText(product.title, 20)}
+                                </h4>
                                 <div className="product-price">
                                     <Money data={product.priceRange.minVariantPrice} />
                                 </div>
                             </div>
                         </Link>
-                        <AddToCartButton variantId={product.variants.nodes[0].id}>
-                            Add to Cart
-                        </AddToCartButton>
+                        {/* ProductForm integrated here */}
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <Await resolve={product}>
+                                {(resolvedProduct) => (
+                                    <ProductForm
+                                        product={resolvedProduct}
+                                        selectedVariant={resolvedProduct.variants.nodes[0]}
+                                    />
+                                )}
+                            </Await>
+                        </Suspense>
                     </div>
                 ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
-                <RightArrowIcon />
+                {'>'}
             </button>
         </div>
     );
