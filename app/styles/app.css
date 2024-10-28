@@ -69,10 +69,13 @@ img {
   font-weight: bold;
 }
 
+.row-image *{
+  border-radius: 3.5vw;;
+}
+
 .row-image {
   width: 90vw;
   height: auto;
-  border-radius: 3.5vw;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
   ;
   margin: auto;
@@ -82,7 +85,6 @@ img {
 .row-image img {
   width: 100%;
   height: auto;
-  border-radius: 3.5vw;
 }
 
 /* Product Row Styling */
