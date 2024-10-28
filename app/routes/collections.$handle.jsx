@@ -126,9 +126,11 @@ function ProductItem({product, loading}) {
         <AnimatedImage
           alt={product.featuredImage.altText || product.title}
           aspectRatio="1/1"
-          data={product.featuredImage}
           loading={loading}
+          data={product.featuredImage}
           sizes="(min-width: 45em) 400px, 100vw"
+          width="180px"
+          height="180px"
         />
       )}
       <h4>{product.title}</h4>

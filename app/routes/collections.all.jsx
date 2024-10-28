@@ -101,6 +101,8 @@ function ProductItem({product, loading}) {
           data={product.featuredImage}
           loading={loading}
           sizes="(min-width: 45em) 400px, 100vw"
+          width="180px"
+          height="180px"
         />
       )}
       <h4>{product.title}</h4>
