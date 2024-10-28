@@ -92,8 +92,8 @@ export function ProductImages({ images }) {
           aspectRatio="1/1"
           data={selectedImage}
           sizes="(min-width: 45em) 50vw, 100vw"
-          width="200px"
-          height="200px"
+          width="180px"
+          height="180px"
         />
         <button
           className="prev-button"

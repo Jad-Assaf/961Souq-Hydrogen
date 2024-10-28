@@ -15,6 +15,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
             alt={`${shop.name} Logo`}
             className="header-logo"
+            width='200px'
+            height='100px'
           />
         </NavLink>
         <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />

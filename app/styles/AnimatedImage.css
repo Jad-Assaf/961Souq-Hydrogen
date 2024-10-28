@@ -27,6 +27,7 @@
     display: block;
     overflow: hidden;
     position: relative;
+    box-sizing: border-box;
 }
 
 .lazy-load-image-background,
