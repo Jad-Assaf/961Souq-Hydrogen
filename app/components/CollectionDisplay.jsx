@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from './AddToCartButton';
+import { AddToCartButton } from '@shopify/hydrogen'; // Import AddToCartButton
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -110,27 +110,25 @@ function ProductRow({ products }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => {
-                    const hasVariants = product.variants?.nodes.length > 1;
-                    const selectedVariant = product.variants?.nodes[0]; // Default to the first variant
+                    const hasVariants = product.variants?.nodes?.length > 1;
+                    const selectedVariant = product.variants?.nodes?.[0]; // Use optional chaining
 
                     return (
-                        <Link
-                            key={product.id}
-                            className="product-item"
-                            to={`/products/${product.handle}`}
-                        >
+                        <div key={product.id} className="product-item">
                             <div className="product-card">
-                                <AnimatedImage
-                                    data={product.images.nodes[0]}
-                                    aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                    alt={product.images.nodes[0].altText || 'Product Image'}
-                                    width="180px"
-                                    height="180px"
-                                />
+                                {product.images?.nodes?.[0] && (
+                                    <AnimatedImage
+                                        data={product.images.nodes[0]}
+                                        aspectRatio="1/1"
+                                        sizes="(min-width: 45em) 20vw, 40vw"
+                                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                        alt={product.images.nodes[0].altText || 'Product Image'}
+                                        width="180px"
+                                        height="180px"
+                                    />
+                                )}
                                 <h4 className="product-title">
                                     {truncateText(product.title, 20)}
                                 </h4>
@@ -139,7 +137,10 @@ function ProductRow({ products }) {
                                 </div>
 
                                 {hasVariants ? (
-                                    <Link to={`/products/${product.handle}`} className="select-option-button">
+                                    <Link
+                                        to={`/products/${product.handle}`}
+                                        className="select-option-button"
+                                    >
                                         Select Option
                                     </Link>
                                 ) : (
@@ -148,12 +149,16 @@ function ProductRow({ products }) {
                                             !selectedVariant || !selectedVariant.availableForSale
                                         }
                                         onClick={() => open('cart')}
-                                        lines={[
-                                            {
-                                                merchandiseId: selectedVariant.id,
-                                                quantity: 1,
-                                            },
-                                        ]}
+                                        lines={
+                                            selectedVariant
+                                                ? [
+                                                    {
+                                                        merchandiseId: selectedVariant.id,
+                                                        quantity: 1,
+                                                    },
+                                                ]
+                                                : []
+                                        }
                                     >
                                         {selectedVariant?.availableForSale
                                             ? 'Add to Cart'
@@ -161,7 +166,7 @@ function ProductRow({ products }) {
                                     </AddToCartButton>
                                 )}
                             </div>
-                        </Link>
+                        </div>
                     );
                 })}
             </div>
