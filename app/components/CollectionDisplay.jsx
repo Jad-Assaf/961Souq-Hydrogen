@@ -110,8 +110,11 @@ function ProductRow({ products }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => {
-                    const hasVariants = product.variants?.nodes?.length > 1;
-                    const selectedVariant = product.variants?.nodes?.[0]; // Default to the first variant
+                    const variants = product.variants?.nodes || [];
+                    const hasMultipleVariants = variants.length > 1;
+                    const selectedVariant = variants[0]; // Use the first variant by default
+
+                    const isAvailable = selectedVariant?.availableForSale;
 
                     return (
                         <div key={product.id} className="product-item">
@@ -136,34 +139,30 @@ function ProductRow({ products }) {
                                     <Money data={product.priceRange.minVariantPrice} />
                                 </div>
 
-                                {hasVariants ? (
+                                {hasMultipleVariants ? (
                                     <Link
                                         to={`/products/${product.handle}`}
                                         className="select-option-button"
                                     >
                                         Select Option
                                     </Link>
-                                ) : (
+                                ) : isAvailable ? (
                                     <AddToCartButton
-                                        disabled={
-                                            !selectedVariant || !selectedVariant.availableForSale
-                                        }
+                                        disabled={!isAvailable}
                                         onClick={() => open('cart')}
-                                        lines={
-                                            selectedVariant
-                                                ? [
-                                                    {
-                                                        merchandiseId: selectedVariant.id,
-                                                        quantity: 1,
-                                                    },
-                                                ]
-                                                : []
-                                        }
+                                        lines={[
+                                            {
+                                                merchandiseId: selectedVariant.id,
+                                                quantity: 1,
+                                            },
+                                        ]}
                                     >
-                                        {selectedVariant?.availableForSale
-                                            ? 'Add to Cart'
-                                            : 'Sold Out'}
+                                        Add to Cart
                                     </AddToCartButton>
+                                ) : (
+                                    <button className="sold-out-button" disabled>
+                                        Sold Out
+                                    </button>
                                 )}
                             </div>
                         </div>
