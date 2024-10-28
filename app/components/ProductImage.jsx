@@ -72,6 +72,7 @@ export function ProductImages({ images }) {
             onClick={() => setSelectedImageIndex(index)}
           >
             <AnimatedImage
+              src={image.url}
               alt={image.altText || 'Thumbnail Image'}
               aspectRatio="1/1"
               data={image}
@@ -88,10 +89,11 @@ export function ProductImages({ images }) {
         style={{ cursor: 'grab' }}
       >
         <AnimatedImage
+          src={image.url}
           alt={selectedImage.altText || 'Product Image'}
-          src={image}
           aspectRatio="1/1"
           data={selectedImage}
+          sizes="(min-width: 45em) 50vw, 100vw"
           width="180px"
           height="180px"
         />
