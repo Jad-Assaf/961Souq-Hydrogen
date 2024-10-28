@@ -128,7 +128,7 @@ function ProductRow({ products, image }) {
                             <div className="product-price">
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
-                        <AddToCartButton>Add to Cart</AddToCartButton>
+                            <AddToCartButton variantId={product.variantId}>Add to Cart</AddToCartButton>
                         </div>
                     </Link>
                 ))}
