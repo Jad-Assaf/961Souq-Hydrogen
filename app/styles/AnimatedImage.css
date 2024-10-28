@@ -20,3 +20,18 @@
         background-position: 200px 0;
     }
 }
+
+.image-wrapper {
+    margin: 0;
+    padding: 0;
+    display: block;
+    overflow: hidden;
+    position: relative;
+}
+
+.lazy-load-image-background,
+.lazy-load-image {
+    margin: 0;
+    padding: 0;
+    display: block;
+}
