@@ -1,6 +1,7 @@
 import React from 'react';
-import { Image } from '@shopify/hydrogen';
+// import { Image } from '@shopify/hydrogen';
 import '../styles/ResponsiveImageGrid.css';
+import { AnimatedImage } from './AnimatedImage';
 
 /**
  * ResponsiveImageGrid Component
@@ -16,7 +17,7 @@ export function ResponsiveImageGrid({ images }) {
         <div className="responsive-image-grid">
             {images.map((image, index) => (
                 <div key={index} className="image-wrapper">
-                    <Image
+                    <AnimatedImage
                         src={image.url}
                         alt={image.altText || `Image ${index + 1}`}
                         width="100%"

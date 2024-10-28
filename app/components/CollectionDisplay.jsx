@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
+import { AnimatedImage } from './AnimatedImage';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -20,7 +21,7 @@ export function CollectionDisplay({ collections, images }) {
                     </div>
                     {images[index] && (  // Ensure the image exists
                         <div className="row-image">
-                            <img src={images[index]} alt={`Collection ${index + 1}`} loading='lazy'/>
+                            <AnimatedImage src={images[index]} alt={`Collection ${index + 1}`} loading='lazy'/>
                         </div>
                     )}
                 </div>

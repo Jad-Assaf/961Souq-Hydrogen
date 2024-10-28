@@ -4,6 +4,7 @@ import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import 'yet-another-react-lightbox/styles.css';
 import '../styles/ProductImage.css';
+import { AnimatedImage } from './AnimatedImage';
 
 const LeftArrowIcon = () => (
   <svg
@@ -70,7 +71,7 @@ export function ProductImages({ images }) {
             className={`thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
             onClick={() => setSelectedImageIndex(index)}
           >
-            <Image
+            <AnimatedImage
               alt={image.altText || 'Thumbnail Image'}
               aspectRatio="1/1"
               data={image}
@@ -86,7 +87,7 @@ export function ProductImages({ images }) {
         onClick={() => setIsLightboxOpen(true)}
         style={{ cursor: 'grab' }}
       >
-        <Image
+        <AnimatedImage
           alt={selectedImage.altText || 'Product Image'}
           aspectRatio="1/1"
           data={selectedImage}

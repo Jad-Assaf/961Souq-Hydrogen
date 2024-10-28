@@ -2,6 +2,7 @@ import { Suspense, useEffect } from 'react';
 import { Await, NavLink, useAsyncValue } from '@remix-run/react';
 import { useAnalytics, useOptimisticCart } from '@shopify/hydrogen';
 import { useAside } from '~/components/Aside';
+import { AnimatedImage } from './AnimatedImage';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
@@ -10,7 +11,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     <header className="header">
       <div className="header-top">
         <NavLink prefetch="intent" to="/" className="logo-link" end>
-          <img
+          <AnimatedImage
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
             alt={`${shop.name} Logo`}
             className="header-logo"
@@ -201,7 +202,7 @@ const FALLBACK_HEADER_MENU = {
 function activeLinkStyle({ isActive, isPending }) {
   return {
     fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? '#e97244' : 'white',
+    color: isPending ? '#fff' : '#fff',
   };
 }
 
