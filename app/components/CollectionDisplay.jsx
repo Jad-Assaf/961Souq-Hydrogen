@@ -21,7 +21,6 @@ export function CollectionDisplay({ collections, images }) {
                         <ProductRow products={collection.products.nodes} />
                     </div>
                     <div className="image-row">
-                        {/* Display two images per row */}
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
                             <div key={`${collection.id}-${i}`} className="row-image">
                                 <AnimatedImage
@@ -39,7 +38,6 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
-
 
 const LeftArrowIcon = () => (
     <svg
@@ -110,28 +108,30 @@ function ProductRow({ products, image }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => (
-                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
-                        <div className="product-card">
-                            <AnimatedImage
-                                data={product.images.nodes[0]}
-                                aspectRatio="1/1"
-                                sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                alt={product.images.nodes[0].altText || 'Product Image'}
-                                width="180px"
-                                height="180px"
-                            />
-                            <h4 className="product-title">{truncateText(product.title, 20)}</h4>
-                            <div className="product-price">
-                                <Money data={product.priceRange.minVariantPrice} />
+                    <div key={product.id} className="product-item">
+                        <Link to={`/products/${product.handle}`}>
+                            <div className="product-card">
+                                <AnimatedImage
+                                    data={product.images.nodes[0]}
+                                    aspectRatio="1/1"
+                                    sizes="(min-width: 45em) 20vw, 40vw"
+                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                    alt={product.images.nodes[0].altText || 'Product Image'}
+                                    width="180px"
+                                    height="180px"
+                                />
+                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                                <div className="product-price">
+                                    <Money data={product.priceRange.minVariantPrice} />
+                                </div>
                             </div>
-                            <AddToCartButton variantId={product.variants.nodes[0].id}>
-                                Add to Cart
-                            </AddToCartButton>
-                        </div>
-                    </Link>
+                        </Link>
+                        <AddToCartButton variantId={product.variants.nodes[0].id}>
+                            Add to Cart
+                        </AddToCartButton>
+                    </div>
                 ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
@@ -140,16 +140,3 @@ function ProductRow({ products, image }) {
         </div>
     );
 }
-
-const PRODUCT_QUERY = `#graphql
-  query ProductQuery($handle: String!) {
-    product(handle: $handle) {
-      title
-      variants(first: 1) {
-        nodes {
-          id
-        }
-      }
-    }
-  }
-`;
