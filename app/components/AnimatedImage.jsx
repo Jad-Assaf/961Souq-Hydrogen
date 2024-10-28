@@ -26,9 +26,6 @@ export function AnimatedImage({ src, alt, width, height, placeholder, ...props }
                 style={{
                     opacity: isLoaded ? 1 : 0,
                     transition: 'opacity 0.5s ease-in-out',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
                 }}
                 {...props}
             />
