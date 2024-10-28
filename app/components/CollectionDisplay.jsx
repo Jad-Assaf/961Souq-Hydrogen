@@ -102,7 +102,7 @@ function ProductRow({ products, image }) {
                 {products.map((product) => (
                     <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
                         <div className="product-card">
-                            <Image
+                            <AnimatedImage
                                 data={product.images.nodes[0]}
                                 aspectRatio="1/1"
                                 sizes="(min-width: 45em) 20vw, 40vw"
