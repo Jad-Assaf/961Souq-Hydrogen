@@ -20,6 +20,8 @@ export function ResponsiveImageGrid({ images }) {
                     <AnimatedImage
                         src={image.url}
                         alt={image.altText || `Image ${index + 1}`}
+                        width="100%"
+                        height="auto"
                     />
                 </div>
             ))}
