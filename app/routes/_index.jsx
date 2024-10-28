@@ -123,11 +123,23 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               altText
             }
           }
+          variants(first: 20) {  // Fetch the first variant for each product
+            nodes {
+              id
+              title
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+            }
+          }
         }
       }
     }
   }
 `;
+
 
 /**
  * GraphQL query to fetch the menu by handle.
