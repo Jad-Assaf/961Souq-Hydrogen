@@ -1,9 +1,8 @@
-import React, { useRef, useState, Suspense } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { Await } from '@remix-run/react';
-import { ProductForm } from './ProductForm';
+import { AddToCartButton } from '@shopify/hydrogen-react';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -70,12 +69,11 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products, loadVariants }) {
+function ProductRow({ products, image }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
-    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -111,56 +109,45 @@ function ProductRow({ products, loadVariants }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product) => (
-                    <Link
-                        key={product.id}
-                        className="product-item"
-                        to={`/products/${product.handle}`}
-                        onClick={() => setSelectedProduct(product)}
-                    >
-                        <div className="product-card">
-                            <AnimatedImage
-                                data={product.images.nodes[0]}
-                                aspectRatio="1/1"
-                                sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                alt={product.images.nodes[0].altText || 'Product Image'}
-                                width="180px"
-                                height="180px"
-                            />
-                            <h4 className="product-title">
-                                {truncateText(product.title, 20)}
-                            </h4>
-                            <div className="product-price">
-                                <Money data={product.priceRange.minVariantPrice} />
-                            </div>
-                            <Suspense
-                                fallback={
-                                    <ProductForm product={product} selectedVariant={null} variants={[]} />
-                                }
+                {products.map((product) => {
+                    const selectedVariant = product.variants.nodes[0]; // Use the first variant
+
+                    return (
+                        <div key={product.id} className="product-item">
+                            <Link to={`/products/${product.handle}`}>
+                                <div className="product-card">
+                                    <AnimatedImage
+                                        data={product.images.nodes[0]}
+                                        aspectRatio="1/1"
+                                        sizes="(min-width: 45em) 20vw, 40vw"
+                                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                                ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                                ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                        alt={product.images.nodes[0].altText || 'Product Image'}
+                                        width="180px"
+                                        height="180px"
+                                    />
+                                    <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                                    <div className="product-price">
+                                        <Money data={product.priceRange.minVariantPrice} />
+                                    </div>
+                                </div>
+                            </Link>
+                            <AddToCartButton
+                                variantId={selectedVariant.id}
+                                quantity={1}
+                                accessibleAddingToCartLabel={`Adding ${product.title} to cart`}
                             >
-                                <Await
-                                    resolve={loadVariants(product.id)}
-                                    errorElement={<div>There was a problem loading product variants</div>}
-                                >
-                                    {(data) => (
-                                        <ProductForm
-                                            product={product}
-                                            selectedVariant={data?.product?.variants.nodes[0] || null}
-                                            variants={data?.product?.variants.nodes || []}
-                                        />
-                                    )}
-                                </Await>
-                            </Suspense>
+                                Add to Cart
+                            </AddToCartButton>
                         </div>
-                    </Link>
-                ))}
+                    );
+                })}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
             </button>
         </div>
     );
+
 }
