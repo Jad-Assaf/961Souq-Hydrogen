@@ -53,7 +53,7 @@ img {
   padding: 2rem;
 }
 
-.image-wrapper img {
+.row-image img {
   width: 100%;
   height: auto;
   border-radius: 10px;
@@ -61,7 +61,7 @@ img {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.image-wrapper img:hover {
+.row-image img:hover {
   transform: scale(1.02);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
