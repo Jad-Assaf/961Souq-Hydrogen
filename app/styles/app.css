@@ -69,16 +69,17 @@ img {
   font-weight: bold;
 }
 
-.row-image{
+.row-image {
   width: 90vw;
   height: auto;
   border-radius: 3.5vw;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  ;
   margin: auto;
   max-width: 1500px;
 }
 
-.row-image img{
+.row-image img {
   width: 100%;
   height: auto;
   border-radius: 3.5vw;
@@ -333,6 +334,10 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
 }
 
+.header svg {
+  fill: #2172af;
+}
+
 .header-top {
   display: flex;
   align-items: center;
@@ -370,11 +375,11 @@ button.reset:hover:not(:has(> *)) {
 
   @media (min-width: 45em) {
     display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      padding: 15px 0;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 0;
   }
 }
 
@@ -392,7 +397,7 @@ button.reset:hover:not(:has(> *)) {
   position: relative;
 }
 
-.menu-item a{
+.menu-item a {
   color: #fff;
 }
 
@@ -419,6 +424,10 @@ button.reset:hover:not(:has(> *)) {
 .submenu .submenu {
   left: 100%;
   top: 0;
+}
+
+.submenu .submenu .menu-item {
+  color: #000 !important;
 }
 
 .header-ctas {
