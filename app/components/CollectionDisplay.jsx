@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money } from '@shopify/hydrogen';
+import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { ProductForm } from './ProductForm'; // Import ProductForm component
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -15,9 +14,11 @@ export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div key={collection.id} className="collection-section">
-                    <h3>{collection.title}</h3>
-                    <ProductRow products={collection.products.nodes} />
+                <div>
+                    <div key={collection.id} className="collection-section">
+                        <h3>{collection.title}</h3>
+                        <ProductRow products={collection.products.nodes} />
+                    </div>
                     <div className="image-row">
                         {/* Display two images per row */}
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
@@ -37,6 +38,7 @@ export function CollectionDisplay({ collections, images }) {
         </div>
     );
 }
+
 
 const LeftArrowIcon = () => (
     <svg
@@ -106,9 +108,15 @@ function ProductRow({ products }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product) => (
-                    <div key={product.id} className="product-item">
-                        <Link to={`/products/${product.handle}`}>
+                {products.map((product) => {
+                    const selectedVariant = product.variants.nodes[0]; // Assuming the first variant is selected
+
+                    return (
+                        <Link
+                            key={product.id}
+                            className="product-item"
+                            to={`/products/${product.handle}`}
+                        >
                             <div className="product-card">
                                 <AnimatedImage
                                     data={product.images.nodes[0]}
@@ -127,16 +135,32 @@ function ProductRow({ products }) {
                                 <div className="product-price">
                                     <Money data={product.priceRange.minVariantPrice} />
                                 </div>
+                                <AddToCartButton
+                                    disabled={
+                                        !selectedVariant || !selectedVariant.availableForSale
+                                    }
+                                    onClick={() => {
+                                        console.log(`Added ${selectedVariant.id} to cart`);
+                                    }}
+                                    lines={
+                                        selectedVariant
+                                            ? [
+                                                {
+                                                    merchandiseId: selectedVariant.id,
+                                                    quantity: 1,
+                                                },
+                                            ]
+                                            : []
+                                    }
+                                >
+                                    {selectedVariant?.availableForSale
+                                        ? 'Add to cart'
+                                        : 'Sold out'}
+                                </AddToCartButton>
                             </div>
                         </Link>
-                        {/* ProductForm Integration */}
-                        <ProductForm
-                            product={product}
-                            selectedVariant={product.variants.nodes[0]}
-                            variants={product.variants.nodes}
-                        />
-                    </div>
-                ))}
+                    );
+                })}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
