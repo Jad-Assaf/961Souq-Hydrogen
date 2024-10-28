@@ -26,7 +26,7 @@ function AddToCartButton({ variantId }) {
     };
 
     return (
-        <button onClick={handleAddToCart}>Add to Cart</button>
+        <button onClick={handleAddToCart} style="z-index:99999;padding:10px">Add to Cart</button>
     );
 }
 
