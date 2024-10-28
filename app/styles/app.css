@@ -53,6 +53,21 @@ img {
   padding: 2rem;
 }
 
+.image-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* Two equal columns */
+  gap: 1rem;
+  /* Space between images */
+}
+
+.row-image {
+  width: 100%;
+  /* Ensure the image takes up the full column width */
+  overflow: hidden;
+  border-radius: 8px;
+}
+
 .row-image img {
   width: 100%;
   height: auto;

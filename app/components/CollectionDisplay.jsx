@@ -14,22 +14,30 @@ export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
             {collections.map((collection, index) => (
-                <div>
-                    <div key={collection.id} className="collection-section">
-                        <h3>{collection.title}</h3>
-                        <ProductRow products={collection.products.nodes} />
+                <div key={collection.id} className="collection-section">
+                    <h3>{collection.title}</h3>
+                    <ProductRow products={collection.products.nodes} />
+
+                    <div className="image-row">
+                        {/* Display two images per row */}
+                        {images.slice(index * 2, index * 2 + 2).map((image, i) => (
+                            <div key={`${collection.id}-${i}`} className="row-image">
+                                <AnimatedImage
+                                    src={image}
+                                    alt={`Collection ${index + 1} Image ${i + 1}`}
+                                    loading="lazy"
+                                    width="100%"
+                                    height="100%"
+                                />
+                            </div>
+                        ))}
                     </div>
-                    {images[index] && (  // Ensure the image exists
-                        <div className="row-image">
-                            <AnimatedImage src={images[index]} alt={`Collection ${index + 1}`} loading='lazy' width="100%"
-                                height="100%" />
-                        </div>
-                    )}
                 </div>
             ))}
         </div>
     );
 }
+
 
 
 const LeftArrowIcon = () => (
