@@ -390,7 +390,10 @@ button.reset:hover:not(:has(> *)) {
 
 .menu-item {
   position: relative;
-  color: #fff !important
+}
+
+.menu-item a{
+  color: #fff;
 }
 
 .submenu {
