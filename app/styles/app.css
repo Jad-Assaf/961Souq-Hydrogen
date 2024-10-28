@@ -457,11 +457,12 @@ button.reset:hover:not(:has(> *)) {
 
   @media (min-width: 45em) {
     display: flex;
-    gap: 3rem;
+    gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     padding: 15px 0;
+    max-width: 1500px;
   }
 }
 

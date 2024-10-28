@@ -19,7 +19,6 @@ export function CollectionDisplay({ collections, images }) {
                     <div key={collection.id} className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
-                        <AddToCartButton />
                     </div>
                     <div className="image-row">
                         {/* Display two images per row */}
@@ -129,6 +128,7 @@ function ProductRow({ products, image }) {
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
                         </div>
+                        <AddToCartButton />
                     </Link>
                 ))}
             </div>
