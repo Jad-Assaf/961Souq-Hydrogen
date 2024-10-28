@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import AddToCartButton from './AddToCart';
+import { AddToCartButton } from './AddToCartButton';
 
 
 function truncateText(text, maxWords) {
@@ -128,7 +128,25 @@ function ProductRow({ products, image }) {
                             <div className="product-price">
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
-                            <AddToCartButton variantId={product.variantId}>Add to Cart</AddToCartButton>
+                            <AddToCartButton
+                                disabled={!selectedVariant || !selectedVariant.availableForSale}
+                                onClick={() => {
+                                    open('cart');
+                                }}
+                                lines={
+                                    selectedVariant
+                                        ? [
+                                            {
+                                                merchandiseId: selectedVariant.id,
+                                                quantity: 1,
+                                                selectedVariant,
+                                            },
+                                        ]
+                                        : []
+                                }
+                            >
+                                {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+                            </AddToCartButton>
                         </div>
                     </Link>
                 ))}
