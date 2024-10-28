@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import { AddToCartButton } from '@shopify/hydrogen'; // Import AddToCartButton
+import { AddToCartButton } from './AddToCartButton';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -111,7 +111,7 @@ function ProductRow({ products }) {
             >
                 {products.map((product) => {
                     const hasVariants = product.variants?.nodes?.length > 1;
-                    const selectedVariant = product.variants?.nodes?.[0]; // Use optional chaining
+                    const selectedVariant = product.variants?.nodes?.[0]; // Default to the first variant
 
                     return (
                         <div key={product.id} className="product-item">
