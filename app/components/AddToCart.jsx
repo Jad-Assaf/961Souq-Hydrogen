@@ -4,7 +4,7 @@ function AddToCartButton({ variantId }) {
     const handleAddToCart = () => {
         const formData = {
             items: [{
-                id: variantId,
+                merchandiseId: variantId,  // Use 'merchandiseId' instead of 'id'
                 quantity: 1
             }]
         };
@@ -16,7 +16,12 @@ function AddToCartButton({ variantId }) {
             },
             body: JSON.stringify(formData)
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Item added to cart:', data);
             })
@@ -26,7 +31,9 @@ function AddToCartButton({ variantId }) {
     };
 
     return (
-        <button onClick={handleAddToCart} style="z-index:99999;padding:10px">Add to Cart</button>
+        <button onClick={handleAddToCart} style={{ zIndex: 99999, padding: '10px' }}>
+            Add to Cart
+        </button>
     );
 }
 
