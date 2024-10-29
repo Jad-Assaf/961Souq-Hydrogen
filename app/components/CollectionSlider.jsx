@@ -49,27 +49,35 @@ export default function CollectionSlider() {
 
     return (
         <div className="slide-con">
-            <h3 className="cat-h3">Featured Categories</h3>
+            <h3 className="cat-h3">Shop By Categories</h3>
             <div className="category-slider">
-                {collections.map((collection) => (
-                    <Link
-                        key={collection.id}
-                        to={`/collections/${collection.handle}`}
-                        className="category-container"
-                    >
-                    {collection.image ? (
-                        <img
-                            src={collection.image.url}
-                            alt={collection.image.altText || collection.title}
-                            className="category-image"
-                        />
-                    ) : (
-                        <div>Loading image...</div>
-                    )}
-                        <div className="category-title">{collection.title}</div>
-                    </Link>
-                ))}
+                {collections && collections.length > 0 ? (
+                    collections.map((collection) => (
+                        <Link
+                            key={collection.id}
+                            to={`/collections/${collection.handle}`}
+                            className="category-container"
+                        >
+                            {collection.image ? (
+                                <img
+                                    src={`${collection.image.url}?width=300&height=300`}
+                                    alt={collection.image.altText || collection.title}
+                                    className="category-image"
+                                    loading="lazy"
+                                    width="175"
+                                    height="175"
+                                />
+                            ) : (
+                                <div>Loading image...</div>
+                            )}
+                            <div className="category-title">{collection.title}</div>
+                        </Link>
+                    ))
+                ) : (
+                    <div>No collections found.</div>
+                )}
             </div>
         </div>
     );
 }
+
