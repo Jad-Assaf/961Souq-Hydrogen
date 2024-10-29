@@ -1,10 +1,7 @@
 import { useLoaderData } from '@remix-run/react';
 import { defer } from '@shopify/remix-oxygen';
-import '../styles/CollectionSlider.css';
+import { Link } from 'react-router-dom'; // Use Link for navigation
 
-/**
- * Loader function to fetch the collections
- */
 export async function loader({ context }) {
     const handles = [
         'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
@@ -16,9 +13,6 @@ export async function loader({ context }) {
     return defer({ collections });
 }
 
-/**
- * Reuse the fetch function from the existing code
- */
 async function fetchCollectionsByHandles(context, handles) {
     const collections = [];
     for (const handle of handles) {
@@ -31,14 +25,12 @@ async function fetchCollectionsByHandles(context, handles) {
     return collections;
 }
 
-/**
- * GraphQL query to fetch the collection by handle
- */
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
     collectionByHandle(handle: $handle) {
       id
       title
+      handle
       image {
         src
         altText
@@ -47,9 +39,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
-/**
- * CollectionSlider Component
- */
 export default function CollectionSlider() {
     const { collections } = useLoaderData();
 
@@ -58,14 +47,21 @@ export default function CollectionSlider() {
             <h3 className="cat-h3">Featured Categories</h3>
             <div className="category-slider">
                 {collections.map((collection) => (
-                    <div key={collection.id} className="category-container">
+                    <Link
+                        key={collection.id}
+                        to={`/collections/${collection.handle}`}
+                        className="category-container"
+                    >
                         <img
-                            src={collection.image?.src || 'https://via.placeholder.com/150'}
+                            src={
+                                collection.image?.src ||
+                                'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg'
+                            }
                             alt={collection.image?.altText || collection.title}
                             className="category-image"
                         />
                         <div className="category-title">{collection.title}</div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </div>
