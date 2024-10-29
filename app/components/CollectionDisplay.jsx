@@ -69,7 +69,7 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products, image }) {
+function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -81,8 +81,8 @@ function ProductRow({ products, image }) {
         setScrollLeft(rowRef.current.scrollLeft);
     };
 
-    const handleMouseLeave = () => setIsDragging(false);
     const handleMouseUp = () => setIsDragging(false);
+    const handleMouseLeave = () => setIsDragging(false);
 
     const handleMouseMove = (e) => {
         if (!isDragging) return;
@@ -105,8 +105,8 @@ function ProductRow({ products, image }) {
                 className="collection-products-row"
                 ref={rowRef}
                 onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
                 onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => (
@@ -117,8 +117,8 @@ function ProductRow({ products, image }) {
                                 aspectRatio="1/1"
                                 sizes="(min-width: 45em) 20vw, 40vw"
                                 srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
                                 alt={product.images.nodes[0].altText || 'Product Image'}
                                 width="180px"
                                 height="180px"
@@ -127,7 +127,6 @@ function ProductRow({ products, image }) {
                             <div className="product-price">
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
-                            {/* Add ProductForm Below the Price */}
                             <ProductForm
                                 product={product}
                                 selectedVariant={product.variants.nodes[0]}
@@ -143,3 +142,4 @@ function ProductRow({ products, image }) {
         </div>
     );
 }
+
