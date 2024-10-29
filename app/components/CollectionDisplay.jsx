@@ -68,12 +68,11 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products }) {
+function ProductRow({ products, image }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
-    const [isAdding, setIsAdding] = useState(false);
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -96,41 +95,6 @@ function ProductRow({ products }) {
         rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
     };
 
-    const handleAddToCart = async (variantId) => {
-        if (!variantId) {
-            console.error('No valid variant ID found.');
-            return;
-        }
-
-        setIsAdding(true);
-        console.log('Attempting to add to cart:', variantId);  // Log the variant ID
-
-        try {
-            const response = await fetch('/cart/add.js', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    items: [{ id: variantId, quantity: 1 }],
-                }),
-            });
-
-            console.log('Response status:', response.status);  // Log the response status
-
-            const data = await response.json();
-            console.log('Response data:', data);  // Log the response data
-
-            if (response.ok) {
-                alert('Item added to cart!');
-            } else {
-                console.error('Failed to add item:', data);
-            }
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-        } finally {
-            setIsAdding(false);
-        }
-    };
-
     return (
         <div className="product-row-container">
             <button className="prev-button" onClick={() => scrollRow(-300)}>
@@ -144,40 +108,27 @@ function ProductRow({ products }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product) => {
-                    const firstVariant = product.variants?.nodes?.[0];
-                    const variantId = firstVariant ? firstVariant.id : null;
-
-                    return (
-                        <div key={product.id} className="product-card">
-                            <Link to={`/products/${product.handle}`}>
-                                <AnimatedImage
-                                    data={product.images.nodes[0]}
-                                    aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                    alt={product.images.nodes[0].altText || 'Product Image'}
-                                    width="180px"
-                                    height="180px"
-                                />
-                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
-                                <div className="product-price">
-                                    <Money data={product.priceRange.minVariantPrice} />
-                                </div>
-                            </Link>
-                            <button
-                                onClick={() => handleAddToCart(variantId)}
-                                disabled={!variantId || isAdding}
-                                className="add-to-cart-button"
-                                type='submit'
-                            >
-                                {isAdding ? 'Adding...' : 'Add to Cart'}
-                            </button>
+                {products.map((product) => (
+                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
+                        <div className="product-card">
+                            <AnimatedImage
+                                data={product.images.nodes[0]}
+                                aspectRatio="1/1"
+                                sizes="(min-width: 45em) 20vw, 40vw"
+                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                alt={product.images.nodes[0].altText || 'Product Image'}
+                                width="180px"
+                                height="180px"
+                            />
+                            <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                            <div className="product-price">
+                                <Money data={product.priceRange.minVariantPrice} />
+                            </div>
                         </div>
-                    );
-                })}
+                    </Link>
+                ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
