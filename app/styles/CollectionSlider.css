@@ -81,7 +81,7 @@
         width: 95vw;
         box-shadow: inset 0px 0px 20px 0px #ededed;
         padding-bottom: 20px;
-        margin-left: 0;
+        margin: auto;
         justify-content: center;
     }
 
