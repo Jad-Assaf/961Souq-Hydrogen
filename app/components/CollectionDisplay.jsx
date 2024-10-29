@@ -68,7 +68,7 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products, image }) {
+function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -97,6 +97,11 @@ function ProductRow({ products, image }) {
     };
 
     const handleAddToCart = async (variantId) => {
+        if (!variantId) {
+            console.error('No valid variant ID found.');
+            return;
+        }
+
         setIsAdding(true);
         try {
             const response = await fetch('/cart/add.js', {
@@ -134,7 +139,9 @@ function ProductRow({ products, image }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => {
-                    const firstVariant = product.variants?.nodes[0];
+                    const firstVariant = product.variants?.nodes?.[0];
+                    const variantId = firstVariant ? firstVariant.id : null;
+
                     return (
                         <div key={product.id} className="product-card">
                             <Link to={`/products/${product.handle}`}>
@@ -154,10 +161,9 @@ function ProductRow({ products, image }) {
                                     <Money data={product.priceRange.minVariantPrice} />
                                 </div>
                             </Link>
-                            {/* Add to Cart Button Below the Price */}
                             <button
-                                onClick={() => handleAddToCart(firstVariant.id)}
-                                disabled={isAdding}
+                                onClick={() => handleAddToCart(variantId)}
+                                disabled={!variantId || isAdding}
                                 className="add-to-cart-button"
                             >
                                 {isAdding ? 'Adding...' : 'Add to Cart'}
