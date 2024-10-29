@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Image, Money } from '@shopify/hydrogen';
+import { Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
 import '../styles/CollectionSlider.css';
 
@@ -12,7 +12,7 @@ function truncateText(text, maxWords) {
         : text;
 }
 
-export function CollectionDisplay({ collections, images, menuHandles }) {
+export function CollectionDisplay({ collections, sliderCollections }) {
     return (
         <div className="collections-container">
             {/* Slide container using 'new-main-menu' handles */}
@@ -37,58 +37,15 @@ export function CollectionDisplay({ collections, images, menuHandles }) {
             </div>
 
             {/* Product rows using hardcoded handles */}
-            {collections.map((collection, index) => (
-                <div key={collection.id}>
-                    <div className="collection-section">
-                        <h3>{collection.title}</h3>
-                        <ProductRow products={collection.products.nodes} />
-                    </div>
-                    <div className="image-row">
-                        {images.slice(index * 2, index * 2 + 2).map((image, i) => (
-                            <div key={`${collection.id}-${i}`} className="row-image">
-                                <AnimatedImage
-                                    src={image}
-                                    alt={`Collection ${index + 1} Image ${i + 1}`}
-                                    loading="lazy"
-                                    width="100%"
-                                    height="100%"
-                                />
-                            </div>
-                        ))}
-                    </div>
+            {collections.map((collection) => (
+                <div key={collection.id} className="collection-section">
+                    <h3>{collection.title}</h3>
+                    <ProductRow products={collection.products.nodes} />
                 </div>
             ))}
         </div>
     );
 }
-
-const LeftArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-);
-
-const RightArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-);
 
 function ProductRow({ products }) {
     const rowRef = useRef(null);
@@ -120,7 +77,7 @@ function ProductRow({ products }) {
     return (
         <div className="product-row-container">
             <button className="prev-button" onClick={() => scrollRow(-300)}>
-                <LeftArrowIcon />
+                &lt;
             </button>
             <div
                 className="collection-products-row"
@@ -131,15 +88,15 @@ function ProductRow({ products }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => (
-                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
+                    <Link key={product.id} to={`/products/${product.handle}`} className="product-item">
                         <div className="product-card">
                             <AnimatedImage
                                 data={product.images.nodes[0]}
                                 aspectRatio="1/1"
                                 sizes="(min-width: 45em) 20vw, 40vw"
                                 srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
                                 alt={product.images.nodes[0].altText || 'Product Image'}
                                 width="180px"
                                 height="180px"
@@ -153,7 +110,7 @@ function ProductRow({ products }) {
                 ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
-                <RightArrowIcon />
+                &gt;
             </button>
         </div>
     );
