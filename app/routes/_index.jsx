@@ -93,7 +93,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <MenuCollectionDisplay context={header} />
+      <MenuCollectionDisplay menu={header.menu} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
