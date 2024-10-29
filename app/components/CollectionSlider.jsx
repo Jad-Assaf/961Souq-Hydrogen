@@ -53,6 +53,10 @@ export default function CollectionSlider() {
             <div className="category-slider">
                 {collections && collections.length > 0 ? (
                     collections.map((collection) => {
+                        const imageUrl = collection.image?.url
+                            ? `${collection.image.url}?width=300&height=300`
+                            : 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg';
+
                         return (
                             <Link
                                 key={collection.id}
@@ -60,14 +64,17 @@ export default function CollectionSlider() {
                                 className="category-container"
                             >
                                 <img
-                                    srcSet={`${collection.image.url}?width=300&quality=30 300w,
-             ${collection.image.url}?width=600&quality=30 600w,
-             ${collection.image.url}?width=1200&quality=30 1200w`}
-                                    alt={collection.image.altText || collection.title}
+                                    srcSet={`
+                                        ${imageUrl}?width=300&height=300 300w,
+                                        ${imageUrl}?width=600&height=600 600w,
+                                        ${imageUrl}?width=1200&height=1200 1200w
+                                    `}
+                                    sizes="(min-width: 45em) 20vw, 40vw"
+                                    alt={collection.image?.altText || collection.title}
+                                    className="category-image"
+                                    loading="lazy"
                                     width="175"
                                     height="175"
-                                    loading="lazy"
-                                    className="category-image"
                                 />
                                 <div className="category-title">{collection.title}</div>
                             </Link>
