@@ -33,7 +33,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       title
       handle
       image {
-        url  # Fetches the correct URL for the collection image
+        src
         altText
       }
     }
