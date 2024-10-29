@@ -47,6 +47,34 @@ export function CollectionDisplay({ collections, sliderCollections }) {
     );
 }
 
+const LeftArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+);
+
+const RightArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);
+
 function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -77,7 +105,7 @@ function ProductRow({ products }) {
     return (
         <div className="product-row-container">
             <button className="prev-button" onClick={() => scrollRow(-300)}>
-                &lt;
+                <LeftArrowIcon />
             </button>
             <div
                 className="collection-products-row"
@@ -88,7 +116,7 @@ function ProductRow({ products }) {
                 onMouseMove={handleMouseMove}
             >
                 {products.map((product) => (
-                    <Link key={product.id} to={`/products/${product.handle}`} className="product-item">
+                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
                         <div className="product-card">
                             <AnimatedImage
                                 data={product.images.nodes[0]}
@@ -110,7 +138,7 @@ function ProductRow({ products }) {
                 ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
-                &gt;
+                <RightArrowIcon />
             </button>
         </div>
     );
