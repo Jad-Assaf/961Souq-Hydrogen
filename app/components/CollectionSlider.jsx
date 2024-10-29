@@ -60,7 +60,7 @@ export default function CollectionSlider() {
                         >
                             <img
                                 src={
-                                     `${collection.image.url}?width=300&height=300`
+                                     `${collection.image?.url}?width=300&height=300`
                                 }
                                 alt={collection.image?.altText || collection.title}
                                 className="category-image"
