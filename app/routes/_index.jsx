@@ -70,7 +70,7 @@ async function fetchCollectionsByHandles(context, handles) {
   return collections;
 }
 
-export default function Homepage() {
+export default function Homepage({ context }) {
   const { collections, header } = useLoaderData();
 
   const banners = [
@@ -93,7 +93,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <MenuCollectionDisplay/>
+      <MenuCollectionDisplay context={header} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );

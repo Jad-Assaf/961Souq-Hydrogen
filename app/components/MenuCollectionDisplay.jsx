@@ -1,37 +1,49 @@
-import { useLoaderData } from '@remix-run/react';
-import { defer } from '@shopify/remix-oxygen';
+import { useEffect, useState } from 'react';
 import '../styles/MenuCollectionDisplay.css';
-/**
- * Fetch menu collections inside the component’s loader.
- * @param {LoaderFunctionArgs} args
- */
-export async function loader({ context }) {
-    try {
-        const menuHandle = 'new-main-menu';
-        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-            variables: { handle: menuHandle },
-        });
 
-        console.log('Menu Query Response:', menu);
+const manualCollections = [
+    { handle: 'apple-products', title: 'Apple Products' },
+    { handle: 'gaming', title: 'Gaming' },
+    { handle: 'fitness-watches', title: 'Fitness Watches' },
+];
 
-        if (!menu) {
-            return defer({ menu: null });
+export function MenuCollectionDisplay({ context }) {
+    const [collectionsWithImages, setCollectionsWithImages] = useState([]);
+
+    useEffect(() => {
+        async function fetchCollectionImages() {
+            try {
+                const { collections } = await context.storefront.query(
+                    GET_COLLECTION_IMAGES_QUERY,
+                    {
+                        variables: { handles: manualCollections.map((c) => c.handle) },
+                    }
+                );
+
+                const enrichedCollections = manualCollections.map((collection) => {
+                    const fetchedCollection = collections.edges.find(
+                        (edge) => edge.node.handle === collection.handle
+                    );
+
+                    return {
+                        ...collection,
+                        image: fetchedCollection?.node.image || {
+                            url: 'https://via.placeholder.com/150',
+                            altText: 'Placeholder Image',
+                        },
+                    };
+                });
+
+                setCollectionsWithImages(enrichedCollections);
+            } catch (error) {
+                console.error('Failed to fetch collection images:', error);
+            }
         }
 
-        return defer({ menu });
-    } catch (error) {
-        console.error('Error fetching menu:', error);
-        return defer({ menu: null });
-    }
-}
+        fetchCollectionImages();
+    }, [context]);
 
-/**
- * Component to display collections from the 'new-main-menu' menu.
- */
-export function MenuCollectionDisplay() {
-    const { menu } = useLoaderData();
-
-    if (!menu || !menu.items || menu.items.length === 0) {
+    if (collectionsWithImages.length === 0) {
         return <p>No collections available.</p>;
     }
 
@@ -39,14 +51,14 @@ export function MenuCollectionDisplay() {
         <div className="slide-con">
             <h3 className="cat-h3">Menu Collections</h3>
             <div className="category-slider">
-                {menu.items.map((item) => (
-                    <div key={item.id} className="category-container">
+                {collectionsWithImages.map((collection) => (
+                    <div key={collection.handle} className="category-container">
                         <img
-                            src={item.image?.url || 'https://via.placeholder.com/150'}
-                            alt={item.title}
+                            src={collection.image.url}
+                            alt={collection.image.altText}
                             className="category-image"
                         />
-                        <span className="category-title">{item.title}</span>
+                        <span className="category-title">{collection.title}</span>
                     </div>
                 ))}
             </div>
@@ -54,19 +66,16 @@ export function MenuCollectionDisplay() {
     );
 }
 
-/**
- * GraphQL query to fetch the 'new-main-menu'.
- */
-const GET_MENU_QUERY = `#graphql
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
-      items {
-        id
-        title
-        url
-        image {
-          url
-          altText
+const GET_COLLECTION_IMAGES_QUERY = `#graphql
+  query GetCollectionImages($handles: [String!]) {
+    collections(first: 10, query: $handles) {
+      edges {
+        node {
+          handle
+          image {
+            url
+            altText
+          }
         }
       }
     }
