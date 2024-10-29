@@ -1,29 +1,7 @@
-import { useLoaderData } from '@remix-run/react';
-import { defer } from '@shopify/remix-oxygen';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/CollectionSlider.css';
 
-// Self-contained loader for CollectionSlider
-export async function collectionSliderLoader({ context }) {
-    const sliderHandles = ['apple', 'gaming', 'laptops', 'monitors']; // Slider-specific handles
-    const collections = await fetchCollectionsForSlider(context, sliderHandles);
-    return defer({ collections });
-}
-
-// Fetch only slider collections
-async function fetchCollectionsForSlider(context, handles) {
-    const collections = [];
-    for (const handle of handles) {
-        const { collectionByHandle } = await context.storefront.query(
-            SLIDER_COLLECTION_QUERY,
-            { variables: { handle } }
-        );
-        if (collectionByHandle) collections.push(collectionByHandle);
-    }
-    return collections;
-}
-
-// Query for CollectionSlider-specific collections
 const SLIDER_COLLECTION_QUERY = `#graphql
   query GetSliderCollection($handle: String!) {
     collectionByHandle(handle: $handle) {
@@ -38,8 +16,28 @@ const SLIDER_COLLECTION_QUERY = `#graphql
   }
 `;
 
-export default function CollectionSlider() {
-    const { collections } = useLoaderData();
+async function fetchSliderCollections(context) {
+    const handles = ['apple', 'gaming', 'laptops', 'monitors']; // Slider-specific handles
+    const collections = [];
+    for (const handle of handles) {
+        const { collectionByHandle } = await context.storefront.query(
+            SLIDER_COLLECTION_QUERY,
+            { variables: { handle } }
+        );
+        if (collectionByHandle) collections.push(collectionByHandle);
+    }
+    return collections;
+}
+
+export default function CollectionSlider({ context }) {
+    const [collections, setCollections] = useState([]);
+
+    useEffect(() => {
+        // Fetch the data when the component mounts
+        fetchSliderCollections(context).then((data) => {
+            setCollections(data);
+        });
+    }, [context]);
 
     return (
         <div className="slide-con">

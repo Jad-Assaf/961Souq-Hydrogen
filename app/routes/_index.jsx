@@ -1,9 +1,8 @@
 import { defer } from '@shopify/remix-oxygen';
-import { Await, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import CollectionSlider, { collectionSliderLoader } from '~/components/CollectionSlider';
-import { Suspense } from 'react';
+import CollectionSlider from '~/components/CollectionSlider';
 
 /**
  * @type {MetaFunction}
@@ -17,9 +16,8 @@ export const meta = () => {
  */
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, sliderData: collectionSliderLoader(args) });
+  return defer({ ...criticalData });
 }
-
 
 /**
  * Load critical collections data by their handles.
@@ -72,8 +70,8 @@ async function fetchCollectionsByHandles(context, handles) {
   return collections;
 }
 
-export default function Homepage() {
-  const { collections, sliderData } = useLoaderData();
+export default function Homepage({ context }) {
+  const { collections } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -95,11 +93,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <Suspense fallback={<div>Loading Slider...</div>}>
-        <Await resolve={sliderData}>
-          {(resolvedSliderData) => <CollectionSlider data={resolvedSliderData} />}
-        </Await>
-      </Suspense>
+      <CollectionSlider context={context} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
