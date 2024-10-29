@@ -171,6 +171,7 @@ function ProductRow({ products }) {
                                 onClick={() => handleAddToCart(variantId)}
                                 disabled={!variantId || isAdding}
                                 className="add-to-cart-button"
+                                type='submit'
                             >
                                 {isAdding ? 'Adding...' : 'Add to Cart'}
                             </button>
