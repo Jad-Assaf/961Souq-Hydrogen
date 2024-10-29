@@ -71,6 +71,12 @@
   font-style: normal;
 }
 
+/* nprogress.css */
+#nprogress .bar {
+  background: #29d;
+  height: 4px;
+}
+
 body{
   font-family: "Montserrat";
 }
