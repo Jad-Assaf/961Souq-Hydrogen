@@ -103,6 +103,8 @@ function ProductRow({ products }) {
         }
 
         setIsAdding(true);
+        console.log('Attempting to add to cart:', variantId);  // Log the variant ID
+
         try {
             const response = await fetch('/cart/add.js', {
                 method: 'POST',
@@ -112,11 +114,15 @@ function ProductRow({ products }) {
                 }),
             });
 
+            console.log('Response status:', response.status);  // Log the response status
+
             const data = await response.json();
+            console.log('Response data:', data);  // Log the response data
+
             if (response.ok) {
                 alert('Item added to cart!');
             } else {
-                console.error('Error:', data);
+                console.error('Failed to add item:', data);
             }
         } catch (error) {
             console.error('Error adding to cart:', error);
