@@ -55,8 +55,8 @@ export default function CollectionSlider() {
                         className="category-container"
                     >
                             <img
-                                src={collection.image.nodes[0].url}
-                                alt={collection.image.altText || collection.title}
+                                src={collection.images.nodes[0].url}
+                                alt={collection.images.nodes[0].altText || collection.title}
                                 className="category-image"
                             />
                         <div className="category-title">{collection.title}</div>
