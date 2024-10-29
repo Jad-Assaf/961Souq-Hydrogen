@@ -53,10 +53,6 @@ export default function CollectionSlider() {
             <div className="category-slider">
                 {collections && collections.length > 0 ? (
                     collections.map((collection) => {
-                        const imageUrl = collection.image?.url
-                            ? `${collection.image.url}?width=300&height=300`
-                            : 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg';
-
                         return (
                             <Link
                                 key={collection.id}
@@ -64,13 +60,14 @@ export default function CollectionSlider() {
                                 className="category-container"
                             >
                                 <img
-                                    data={collection.image}
-                                    srcSet={collection.image?.url}
-                                    alt={collection.image?.altText || collection.title}
-                                    className="category-image"
-                                    loading="lazy"
+                                    srcSet={`${collection.image.url}?width=300&quality=30 300w,
+             ${collection.image.url}?width=600&quality=30 600w,
+             ${collection.image.url}?width=1200&quality=30 1200w`}
+                                    alt={collection.image.altText || collection.title}
                                     width="175"
                                     height="175"
+                                    loading="lazy"
+                                    className="category-image"
                                 />
                                 <div className="category-title">{collection.title}</div>
                             </Link>
