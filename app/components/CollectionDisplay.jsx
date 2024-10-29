@@ -25,10 +25,12 @@ export function CollectionDisplay({ collections, sliderCollections }) {
                             to={`/collections/${collection.handle}`}
                             className="category-container"
                         >
-                            <img
+                            <AnimatedImage
                                 src={collection.image?.url || 'https://via.placeholder.com/150'}
                                 alt={collection.image?.altText || collection.title}
                                 className="category-image"
+                                width="150px"
+                                height="150px"
                             />
                             <div className="category-title">{collection.title}</div>
                         </Link>
