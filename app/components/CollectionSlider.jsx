@@ -22,6 +22,7 @@ async function fetchCollectionsByHandles(context, handles) {
             { variables: { handle } }
         );
         if (collectionByHandle) collections.push(collectionByHandle);
+        console.log(collection.image.url);  // Check if this returns the correct URL.
     }
     return collections;
 }
