@@ -58,14 +58,18 @@ export default function CollectionSlider() {
                             to={`/collections/${collection.handle}`}
                             className="category-container"
                         >
-                                <img
-                                    src={`${collection.image.url}?width=300&height=300`}
-                                    alt={collection.image.altText || collection.title}
-                                    className="category-image"
-                                    loading="lazy"
-                                    width="175"
-                                    height="175"
-                                />
+                            <img
+                                src={
+                                    collection.image?.url
+                                        ? `${collection.image.url}?width=300&height=300`
+                                        : 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg'
+                                }
+                                alt={collection.image?.altText || collection.title}
+                                className="category-image"
+                                loading="lazy"
+                                width="175"
+                                height="175"
+                            />
                             <div className="category-title">{collection.title}</div>
                         </Link>
                     ))
@@ -76,4 +80,3 @@ export default function CollectionSlider() {
         </div>
     );
 }
-
