@@ -14,10 +14,10 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
+// Existing Homepage Loader with Added Collection Query
 export async function loader(args) {
-  const criticalData = await loadCriticalData(args);
+  const criticalData = await loadCriticalData(args); // Keep original data fetching
 
-  // Fetch the collection images dynamically.
   const handles = ['apple-products', 'gaming-consoles', 'fitness-watches'];
   const { context } = args;
 
@@ -28,19 +28,16 @@ export async function loader(args) {
   const enrichedCollections = collections.edges.map(({ node }) => ({
     id: node.id,
     title: node.handle.replace('-', ' ').toUpperCase(),
-    image: node.image || {
-      url: 'https://via.placeholder.com/150',
-      altText: 'Placeholder Image',
-    },
+    image: node.image || { url: 'https://via.placeholder.com/150', altText: 'Placeholder Image' },
   }));
 
-  // Combine critical data with the new collections data.
+  // Combine critical data with collections
   return defer({ ...criticalData, enrichedCollections });
 }
 
 const GET_COLLECTION_IMAGES_QUERY = `#graphql
   query GetCollectionImages($handles: [String!]) {
-    collections(first: 1000, query: $handles) {
+    collections(first: 10, query: $handles) {
       edges {
         node {
           id
@@ -54,7 +51,6 @@ const GET_COLLECTION_IMAGES_QUERY = `#graphql
     }
   }
 `;
-
 
 /**
  * Load critical collections data by their handles.
