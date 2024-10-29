@@ -35,10 +35,12 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
     id
     title
     handle
-    image {
-      url
-      altText
-      id
+    images(first: 5) {
+      nodes {
+        url
+        altText
+        id
+      }
     }
   }
 }
@@ -53,8 +55,8 @@ export default function CollectionSlider() {
             <div className="category-slider">
                 {collections && collections.length > 0 ? (
                     collections.map((collection) => {
-                        const imageUrl = collection.image?.url
-                            ? `${collection.image.url}?width=300&height=300`
+                        const imageUrl = collection.image?.nodes[0].url
+                            ? `${collection.image.nodes[0].url}?width=300&height=300`
                             : 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg';
 
                         return (
