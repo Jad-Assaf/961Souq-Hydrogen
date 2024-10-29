@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
-import '../styles/CollectionSlider.css'
+import '../styles/CollectionSlider.css';
 
 // Truncate text to fit within the given max word count
 function truncateText(text, maxWords) {
@@ -12,29 +12,31 @@ function truncateText(text, maxWords) {
         : text;
 }
 
-export function CollectionDisplay({ collections, images }) {
+export function CollectionDisplay({ collections, images, menuHandles }) {
     return (
         <div className="collections-container">
+            {/* Slide container using 'new-main-menu' handles */}
             <div className="slide-con">
                 <h3 className="cat-h3">Shop By Categories</h3>
                 <div className="category-slider">
-                    {collections.map((collection) => (
+                    {menuHandles.map((handle, index) => (
                         <Link
-                            key={collection.id}
-                            to={`/collections/${collection.handle}`}
+                            key={handle}
+                            to={`/collections/${handle}`}
                             className="category-container"
                         >
                             <img
-                                src={collection.image?.url || 'https://via.placeholder.com/150'}
-                                alt={collection.image?.altText || collection.title}
+                                src={images[index] || 'https://via.placeholder.com/150'}
+                                alt={`Category ${handle}`}
                                 className="category-image"
                             />
-                            <div className="category-title">{collection.title}</div>
+                            <div className="category-title">{handle.replace(/-/g, ' ')}</div>
                         </Link>
                     ))}
                 </div>
             </div>
 
+            {/* Product rows using hardcoded handles */}
             {collections.map((collection, index) => (
                 <div key={collection.id}>
                     <div className="collection-section">

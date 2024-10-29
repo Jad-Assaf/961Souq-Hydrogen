@@ -22,18 +22,6 @@ export async function loader(args) {
  * Load critical collections data by their handles.
  */
 async function loadCriticalData({ context }) {
-  const handles = [
-    'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
-    'laptops', 'apple-iphone', 'samsung',
-    'monitors', 'car-accessories', 'fitness watches', 'garmin-smart-watch', 'apple-watch', 'samsung-watches', 'kitchen-appliances', 'cleaning-devices'
-  ];
-  const collections = await fetchCollectionsByHandles(context, handles);
-
-  if (collections.length === 0) {
-    throw new Response('No matching collections found.', { status: 404 });
-  }
-
-  // Fetch the "new-main-menu" menu
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
@@ -43,10 +31,34 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Return the fetched menu inside a "header" object, as expected by the Header component
-  const header = { menu, shop: { primaryDomain: { url: 'https://example.com' } } };
+  // Extract handles from the new-main-menu items for the slider.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  return { collections, header };
+  // Hardcoded handles for product rows.
+  const hardcodedHandles = [
+    'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
+    'laptops', 'apple-iphone', 'samsung', 'monitors',
+    'car-accessories', 'fitness watches', 'garmin-smart-watch',
+    'apple-watch', 'samsung-watches', 'kitchen-appliances',
+    'cleaning-devices'
+  ];
+
+  // Fetch collections for product rows.
+  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+
+  if (collections.length === 0) {
+    throw new Response('No matching collections found.', { status: 404 });
+  }
+
+  // Prepare header data
+  const header = {
+    menu,
+    shop: { primaryDomain: { url: 'https://example.com' } }
+  };
+
+  return { collections, menuHandles, header };
 }
 
 /**
@@ -70,7 +82,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections } = useLoaderData();
+  const { collections, menuHandles } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -92,14 +104,11 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionDisplay collections={collections} images={images} />
+      <CollectionDisplay collections={collections} images={images} menuHandles={menuHandles} />
     </div>
   );
 }
 
-/**
- * GraphQL query to fetch a single collection by handle.
- */
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
     collectionByHandle(handle: $handle) {
@@ -133,10 +142,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
-
-/**
- * GraphQL query to fetch the menu by handle.
- */
 const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
     menu(handle: $handle) {
@@ -148,16 +153,8 @@ const GET_MENU_QUERY = `#graphql
           id
           title
           url
-          items {
-            id
-            title
-            url
-          }
         }
       }
     }
   }
 `;
-
-/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
-/** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
