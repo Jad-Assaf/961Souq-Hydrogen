@@ -1,49 +1,51 @@
-import { useEffect, useState } from 'react';
+// components/MenuCollectionDisplay.jsx
+import { useLoaderData } from '@remix-run/react';
+import { defer } from '@shopify/remix-oxygen';
 import '../styles/MenuCollectionDisplay.css';
 
-const manualCollections = [
-    { handle: 'apple-products', title: 'Apple Products' },
-    { handle: 'gaming', title: 'Gaming' },
-    { handle: 'fitness-watches', title: 'Fitness Watches' },
-];
+/**
+ * Loader function to fetch collection images.
+ */
+export async function loader({ context }) {
+    const handles = ['apple-products', 'gaming-consoles', 'fitness-watches'];
 
-export function MenuCollectionDisplay({ context }) {
-    const [collectionsWithImages, setCollectionsWithImages] = useState([]);
+    const { collections } = await context.storefront.query(GET_COLLECTION_IMAGES_QUERY, {
+        variables: { handles },
+    });
 
-    useEffect(() => {
-        async function fetchCollectionImages() {
-            try {
-                const { collections } = await context.storefront.query(
-                    GET_COLLECTION_IMAGES_QUERY,
-                    {
-                        variables: { handles: manualCollections.map((c) => c.handle) },
-                    }
-                );
+    const enrichedCollections = collections.edges.map(({ node }) => ({
+        id: node.id,
+        title: node.handle.replace('-', ' ').toUpperCase(),
+        image: node.image || { url: 'https://via.placeholder.com/150', altText: 'Placeholder Image' },
+    }));
 
-                const enrichedCollections = manualCollections.map((collection) => {
-                    const fetchedCollection = collections.edges.find(
-                        (edge) => edge.node.handle === collection.handle
-                    );
+    return defer({ enrichedCollections });
+}
 
-                    return {
-                        ...collection,
-                        image: fetchedCollection?.node.image || {
-                            url: 'https://via.placeholder.com/150',
-                            altText: 'Placeholder Image',
-                        },
-                    };
-                });
-
-                setCollectionsWithImages(enrichedCollections);
-            } catch (error) {
-                console.error('Failed to fetch collection images:', error);
-            }
+const GET_COLLECTION_IMAGES_QUERY = `#graphql
+  query GetCollectionImages($handles: [String!]) {
+    collections(first: 10, query: $handles) {
+      edges {
+        node {
+          id
+          handle
+          image {
+            url
+            altText
+          }
         }
+      }
+    }
+  }
+`;
 
-        fetchCollectionImages();
-    }, [context]);
+/**
+ * Component to display collections.
+ */
+export function MenuCollectionDisplay() {
+    const { enrichedCollections } = useLoaderData();
 
-    if (collectionsWithImages.length === 0) {
+    if (!enrichedCollections || enrichedCollections.length === 0) {
         return <p>No collections available.</p>;
     }
 
@@ -51,8 +53,8 @@ export function MenuCollectionDisplay({ context }) {
         <div className="slide-con">
             <h3 className="cat-h3">Menu Collections</h3>
             <div className="category-slider">
-                {collectionsWithImages.map((collection) => (
-                    <div key={collection.handle} className="category-container">
+                {enrichedCollections.map((collection) => (
+                    <div key={collection.id} className="category-container">
                         <img
                             src={collection.image.url}
                             alt={collection.image.altText}
@@ -65,19 +67,3 @@ export function MenuCollectionDisplay({ context }) {
         </div>
     );
 }
-
-const GET_COLLECTION_IMAGES_QUERY = `#graphql
-  query GetCollectionImages($handles: [String!]) {
-    collections(first: 10, query: $handles) {
-      edges {
-        node {
-          handle
-          image {
-            url
-            altText
-          }
-        }
-      }
-    }
-  }
-`;

@@ -1,8 +1,8 @@
 import { defer } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { Link, useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import { MenuCollectionDisplay } from '../components/MenuCollectionDisplay';
+import { MenuCollectionDisplay, loader } from '../components/MenuCollectionDisplay';
 
 /**
  * @type {MetaFunction}
@@ -17,6 +17,12 @@ export const meta = () => {
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
   return defer({ ...criticalData });
+}
+
+export { loader };
+
+export default function MenuCollectionsRoute() {
+  return <MenuCollectionDisplay />;
 }
 
 /**
@@ -70,7 +76,7 @@ async function fetchCollectionsByHandles(context, handles) {
   return collections;
 }
 
-export default function Homepage({ context }) {
+export default function Homepage() {
   const { collections, header } = useLoaderData();
 
   const banners = [
@@ -93,7 +99,7 @@ export default function Homepage({ context }) {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <MenuCollectionDisplay context={header} />
+      <Link to="/menu-collections">View Menu Collections</Link>
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
