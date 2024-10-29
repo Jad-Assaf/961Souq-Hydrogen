@@ -56,7 +56,7 @@ export default function CollectionSlider() {
                 {collections && collections.length > 0 ? (
                     collections.map((collection) => {
                         const imageUrl = collection.image?.nodes[0].url
-                            ? `${collection.image.nodes[0].url}?width=300&height=300`
+                            ? 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple---iPad-mini-_A17-Pro-chip.jpg?v=1730204758'
                             : 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg';
 
                         return (
