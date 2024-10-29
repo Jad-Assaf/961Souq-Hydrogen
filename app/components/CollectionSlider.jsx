@@ -58,7 +58,6 @@ export default function CollectionSlider() {
                             to={`/collections/${collection.handle}`}
                             className="category-container"
                         >
-                            {collection.image ? (
                                 <img
                                     src={`${collection.image.url}?width=300&height=300`}
                                     alt={collection.image.altText || collection.title}
@@ -67,9 +66,6 @@ export default function CollectionSlider() {
                                     width="175"
                                     height="175"
                                 />
-                            ) : (
-                                <div>Loading image...</div>
-                            )}
                             <div className="category-title">{collection.title}</div>
                         </Link>
                     ))
