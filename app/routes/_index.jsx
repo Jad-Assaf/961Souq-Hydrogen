@@ -2,6 +2,7 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
+import { MenuCollectionDisplay } from '~/components/MenuCollectionDisplay';
 
 /**
  * @type {MetaFunction}
@@ -70,7 +71,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections } = useLoaderData();
+  const { collections, header } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -92,6 +93,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
+      <MenuCollectionDisplay menu={header.menu} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
@@ -139,15 +141,14 @@ const GET_MENU_QUERY = `#graphql
         id
         title
         url
+        image {
+          url
+          altText
+        }
         items {
           id
           title
           url
-          items {
-            id
-            title
-            url
-          }
         }
       }
     }
