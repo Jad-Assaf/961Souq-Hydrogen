@@ -123,30 +123,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               altText
             }
           }
-          variants(first: 5) {
-            nodes {
-              id
-              title
-              availableForSale
-              sku
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              selectedOptions {
-                name
-                value
-              }
-              image {
-                url
-                altText
-              }
-            }
-          }
         }
       }
     }
