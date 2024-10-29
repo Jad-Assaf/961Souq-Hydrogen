@@ -2,7 +2,6 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import { MenuCollectionDisplay } from '../components/MenuCollectionDisplay';
 
 /**
  * @type {MetaFunction}
@@ -14,43 +13,10 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-// Existing Homepage Loader with Added Collection Query
 export async function loader(args) {
-  const criticalData = await loadCriticalData(args); // Keep original data fetching
-
-  const handles = ['apple-products', 'gaming-consoles', 'fitness-watches'];
-  const { context } = args;
-
-  const { collections } = await context.storefront.query(GET_COLLECTION_IMAGES_QUERY, {
-    variables: { handles },
-  });
-
-  const enrichedCollections = collections.edges.map(({ node }) => ({
-    id: node.id,
-    title: node.handle.replace('-', ' ').toUpperCase(),
-    image: node.image || { url: 'https://via.placeholder.com/150', altText: 'Placeholder Image' },
-  }));
-
-  // Combine critical data with collections
-  return defer({ ...criticalData, enrichedCollections });
+  const criticalData = await loadCriticalData(args);
+  return defer({ ...criticalData });
 }
-
-const GET_COLLECTION_IMAGES_QUERY = `#graphql
-  query GetCollectionImages($handles: [String!]) {
-    collections(first: 10, query: $handles) {
-      edges {
-        node {
-          id
-          handle
-          image {
-            url
-            altText
-          }
-        }
-      }
-    }
-  }
-`;
 
 /**
  * Load critical collections data by their handles.
@@ -104,7 +70,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections, header, enrichedCollections } = useLoaderData();
+  const { collections } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -126,7 +92,6 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <MenuCollectionDisplay collections={enrichedCollections} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
