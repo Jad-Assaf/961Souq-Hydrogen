@@ -1,5 +1,6 @@
 // components/MenuCollectionDisplay.jsx
 import { useEffect, useState } from 'react';
+import '../styles/MenuCollectionDisplay.css'
 
 export function MenuCollectionDisplay({ context }) {
     const [collections, setCollections] = useState([]);
