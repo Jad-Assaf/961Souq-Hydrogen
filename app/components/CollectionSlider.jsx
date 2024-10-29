@@ -21,11 +21,13 @@ async function fetchCollectionsByHandles(context, handles) {
             GET_COLLECTION_BY_HANDLE_QUERY,
             { variables: { handle } }
         );
-        if (collectionByHandle) collections.push(collectionByHandle);
-        console.log(collection.image.url);  // Check if this returns the correct URL.
+        if (collectionByHandle) {
+            console.log(collectionByHandle.image?.url);  // Log the correct URL.
+            collections.push(collectionByHandle);
+        }
     }
     return collections;
-}
+}.0
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
