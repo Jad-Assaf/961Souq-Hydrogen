@@ -1,11 +1,9 @@
-// routes/slider.jsx
-import { fetchCollectionsLoader } from '~/components/CollectionSlider';
-import CollectionSlider from '~/components/CollectionSlider';
+import CollectionSlider, { fetchCollectionsLoader } from '~/components/CollectionSlider';
 
-// Export the loader to be used by this route
+// Export the loader for this route
 export const loader = fetchCollectionsLoader;
 
-// Define the component to render
+// Route component
 export default function SliderRoute() {
     return <CollectionSlider />;
 }
