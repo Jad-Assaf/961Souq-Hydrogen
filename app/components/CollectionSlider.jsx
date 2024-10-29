@@ -52,25 +52,29 @@ export default function CollectionSlider() {
             <h3 className="cat-h3">Shop By Categories</h3>
             <div className="category-slider">
                 {collections && collections.length > 0 ? (
-                    collections.map((collection) => (
-                        <Link
-                            key={collection.id}
-                            to={`/collections/${collection.handle}`}
-                            className="category-container"
-                        >
-                            <img
-                                src={
-                                     `${collection.image?.url}?width=300&height=300`
-                                }
-                                alt={collection.image?.altText || collection.title}
-                                className="category-image"
-                                loading="lazy"
-                                width="175"
-                                height="175"
-                            />
-                            <div className="category-title">{collection.title}</div>
-                        </Link>
-                    ))
+                    collections.map((collection) => {
+                        const imageUrl = collection.image?.url
+                            ? `${collection.image.url}?width=300&height=300`
+                            : 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg';
+
+                        return (
+                            <Link
+                                key={collection.id}
+                                to={`/collections/${collection.handle}`}
+                                className="category-container"
+                            >
+                                <img
+                                    src={imageUrl}
+                                    alt={collection.image?.altText || collection.title}
+                                    className="category-image"
+                                    loading="lazy"
+                                    width="175"
+                                    height="175"
+                                />
+                                <div className="category-title">{collection.title}</div>
+                            </Link>
+                        );
+                    })
                 ) : (
                     <div>No collections found.</div>
                 )}
