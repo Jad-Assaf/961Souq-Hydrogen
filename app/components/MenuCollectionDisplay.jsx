@@ -1,3 +1,6 @@
+import { useLoaderData } from '@remix-run/react';
+import { defer } from '@shopify/remix-oxygen';
+import '../styles/MenuCollectionDisplay.css';
 /**
  * Fetch menu collections inside the component’s loader.
  * @param {LoaderFunctionArgs} args
