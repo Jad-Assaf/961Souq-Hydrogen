@@ -128,17 +128,18 @@ img {
     flex-direction: column !important;
   }  
   .row-image {
-    height: auto;
+    height: unset !important;
+    margin: 0 auto !important;
   }
   .product-card img{
     width: 155px !important;
   }
   .product-item{
-    min-width: unset;
+    min-width: unset !important;
     width: 175px !important;
   }
   .product-title{
-    font-size: 12px;
+    font-size: 12px !important;
   }
 }
 
