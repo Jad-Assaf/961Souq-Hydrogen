@@ -1,6 +1,6 @@
 import { useLoaderData } from '@remix-run/react';
 import { defer } from '@shopify/remix-oxygen';
-import { Link } from 'react-router-dom'; // Use Link for navigation
+import { Link } from 'react-router-dom';
 import '../styles/CollectionSlider.css'
 
 export async function loader({ context }) {
@@ -33,7 +33,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       title
       handle
       image {
-        src
+        url  # Fetches the correct URL for the collection image
         altText
       }
     }
@@ -55,7 +55,7 @@ export default function CollectionSlider() {
                     >
                         <img
                             src={
-                                collection.image?.src ||
+                                collection.image?.url ||
                                 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg'
                             }
                             alt={collection.image?.altText || collection.title}
