@@ -2,6 +2,7 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
+import CollectionSlider from '~/components/CollectionSlider';
 
 /**
  * @type {MetaFunction}
@@ -92,6 +93,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
+      <CollectionSlider />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
