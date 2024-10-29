@@ -2,7 +2,7 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import CollectionSlider from '~/components/CollectionSlider';
+import { Link } from 'react-router-dom';
 
 /**
  * @type {MetaFunction}
@@ -34,7 +34,6 @@ async function loadCriticalData({ context }) {
     throw new Response('No matching collections found.', { status: 404 });
   }
 
-  // Fetch the "new-main-menu" menu
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
@@ -44,29 +43,20 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Return the fetched menu inside a "header" object, as expected by the Header component
   const header = { menu, shop: { primaryDomain: { url: 'https://example.com' } } };
 
   return { collections, header };
 }
 
-/**
- * Fetch multiple collections using `collectionByHandle`.
- */
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
-
   for (const handle of handles) {
     const { collectionByHandle } = await context.storefront.query(
       GET_COLLECTION_BY_HANDLE_QUERY,
       { variables: { handle } }
     );
-
-    if (collectionByHandle) {
-      collections.push(collectionByHandle);
-    }
+    if (collectionByHandle) collections.push(collectionByHandle);
   }
-
   return collections;
 }
 
@@ -93,15 +83,14 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionSlider />
+      <Link to="/slider" className="view-slider-link">
+        View Category Slider
+      </Link>
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
 }
 
-/**
- * GraphQL query to fetch a single collection by handle.
- */
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
     collectionByHandle(handle: $handle) {
@@ -131,9 +120,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
-/**
- * GraphQL query to fetch the menu by handle.
- */
 const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
     menu(handle: $handle) {

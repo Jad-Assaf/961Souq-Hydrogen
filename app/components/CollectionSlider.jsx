@@ -1,54 +1,16 @@
-import { useLoaderData } from '@remix-run/react';
-import { defer } from '@shopify/remix-oxygen';
-import { Link } from 'react-router-dom';
-import '../styles/CollectionSlider.css';
+import { useEffect, useState } from 'react';
+import { fetchCollectionsLoader } from './CollectionSlider'; // Import the loader function
 
-// Loader renamed to fetchCollectionsLoader
-export async function fetchCollectionsLoader({ context }) {
-    const handles = [
-        'apple', 'gaming', 'gaming-laptops',
-        'laptops', 'mobiles', 'apple-iphone', 'samsung',
-        'monitors', 'fitness watches'
-    ];
+export default function CollectionSlider({ context }) {
+    const [collections, setCollections] = useState([]);
 
-    const collections = await getCollectionsByHandle(context, handles); // Renamed function call
-    return defer({ collections });
-}
-
-// Function renamed to getCollectionsByHandle
-async function getCollectionsByHandle(context, handles) {
-    const collections = [];
-    for (const handle of handles) {
-        const { collectionByHandle } = await context.storefront.query(
-            FETCH_COLLECTION_QUERY, // New query name
-            { variables: { handle } }
-        );
-        if (collectionByHandle) {
-            console.log(collectionByHandle.image?.url); // Log the correct URL.
-            collections.push(collectionByHandle);
+    useEffect(() => {
+        async function fetchData() {
+            const data = await fetchCollectionsLoader({ context });
+            setCollections(data.collections);
         }
-    }
-    return collections;
-}
-
-// Query renamed to FETCH_COLLECTION_QUERY
-const FETCH_COLLECTION_QUERY = `#graphql
-  query FetchCollection($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-        id
-      }
-    }
-  }
-`;
-
-export default function CollectionSlider() {
-    const { collections } = useLoaderData();
+        fetchData();
+    }, [context]);
 
     return (
         <div className="slide-con">
