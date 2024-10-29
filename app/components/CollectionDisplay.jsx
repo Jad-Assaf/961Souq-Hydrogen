@@ -29,8 +29,8 @@ export function CollectionDisplay({ collections, sliderCollections }) {
                                 src={collection.image?.url || 'https://via.placeholder.com/150'}
                                 alt={collection.image?.altText || collection.title}
                                 className="category-image"
-                                width="150px"
-                                height="150px"
+                                width="120px"
+                                height="120px"
                             />
                             <div className="category-title">{collection.title}</div>
                         </Link>
