@@ -93,7 +93,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <MenuCollectionDisplay menu={header.menu} />
+      <MenuCollectionDisplay context={header} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
@@ -141,14 +141,15 @@ const GET_MENU_QUERY = `#graphql
         id
         title
         url
-        image {
-          url
-          altText
-        }
         items {
           id
           title
           url
+          items {
+            id
+            title
+            url
+          }
         }
       }
     }
