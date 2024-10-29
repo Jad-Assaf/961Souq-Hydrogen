@@ -120,6 +120,28 @@ img {
   /* padding: 2rem; */
 }
 
+@media (max-width: 768px) {
+  .image-row{
+    display: flex;
+    gap: 0rem;
+    width: 90vw;
+    flex-direction: column;
+  }  
+  .row-image {
+    height: auto;
+  }
+  .product-card img{
+    width: 155px !important;
+  }
+  .product-item{
+    min-width: 0 !important;
+    width: 175px !important;
+  }
+  .product-title{
+    font-size: 12px;
+  }
+}
+
 .image-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
