@@ -12,7 +12,7 @@ function truncateText(text, maxWords) {
         : text;
 }
 
-export function CollectionDisplay({ collections, sliderCollections }) {
+export function CollectionDisplay({ collections, sliderCollections, images }) {
     return (
         <div className="collections-container">
             {/* Slide container using 'new-main-menu' handles */}
@@ -25,12 +25,10 @@ export function CollectionDisplay({ collections, sliderCollections }) {
                             to={`/collections/${collection.handle}`}
                             className="category-container"
                         >
-                            <AnimatedImage
+                            <img
                                 src={collection.image?.url || 'https://via.placeholder.com/150'}
                                 alt={collection.image?.altText || collection.title}
                                 className="category-image"
-                                width="150px"
-                                height="150px"
                             />
                             <div className="category-title">{collection.title}</div>
                         </Link>
@@ -39,10 +37,27 @@ export function CollectionDisplay({ collections, sliderCollections }) {
             </div>
 
             {/* Product rows using hardcoded handles */}
-            {collections.map((collection) => (
-                <div key={collection.id} className="collection-section">
-                    <h3>{collection.title}</h3>
-                    <ProductRow products={collection.products.nodes} />
+            {collections.map((collection, index) => (
+                <div key={collection.id}>
+                    <div className="collection-section">
+                        <h3>{collection.title}</h3>
+                        <ProductRow products={collection.products.nodes} />
+                    </div>
+
+                    {/* Inter-row images */}
+                    <div className="image-row">
+                        {images.slice(index * 2, index * 2 + 2).map((image, i) => (
+                            <div key={`${collection.id}-${i}`} className="row-image">
+                                <AnimatedImage
+                                    src={image}
+                                    alt={`Collection ${index + 1} Image ${i + 1}`}
+                                    loading="lazy"
+                                    width="100%"
+                                    height="100%"
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             ))}
         </div>
