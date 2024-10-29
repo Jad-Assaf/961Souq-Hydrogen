@@ -1,24 +1,24 @@
-// components/MenuCollectionDisplay.jsx
-import { useLoaderData } from '@remix-run/react';
-import { defer } from '@shopify/remix-oxygen';
-import '../styles/MenuCollectionDisplay.css'
-
 /**
  * Fetch menu collections inside the component’s loader.
  * @param {LoaderFunctionArgs} args
  */
 export async function loader({ context }) {
-    const menuHandle = 'new-main-menu';
+    try {
+        const menuHandle = 'new-main-menu';
+        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+            variables: { handle: menuHandle },
+        });
 
-    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-        variables: { handle: menuHandle },
-    });
+        if (!menu) {
+            console.error('Menu not found');
+            return defer({ menu: null });
+        }
 
-    if (!menu) {
-        throw new Response('Menu not found', { status: 404 });
+        return defer({ menu });
+    } catch (error) {
+        console.error('Error fetching menu:', error);
+        return defer({ menu: null });
     }
-
-    return defer({ menu });
 }
 
 /**
@@ -27,7 +27,9 @@ export async function loader({ context }) {
 export function MenuCollectionDisplay() {
     const { menu } = useLoaderData();
 
-    if (!menu.items || menu.items.length === 0) return <p>No collections available.</p>;
+    if (!menu || !menu.items || menu.items.length === 0) {
+        return <p>No collections available.</p>;
+    }
 
     return (
         <div className="slide-con">
