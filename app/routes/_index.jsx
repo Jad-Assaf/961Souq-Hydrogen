@@ -24,7 +24,7 @@ export async function loader(args) {
  */
 async function loadCriticalData({ context }) {
   const handles = [
-    'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
+    'apple', 'gaming', 'gaming-laptops',
     'laptops', 'mobiles', 'apple-iphone', 'samsung',
     'monitors', 'fitness watches'
   ];
