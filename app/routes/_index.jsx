@@ -1,5 +1,5 @@
 import { defer } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { Await, useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import CollectionSlider, { collectionSliderLoader } from '~/components/CollectionSlider';
