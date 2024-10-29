@@ -122,10 +122,10 @@ img {
 
 @media (max-width: 768px) {
   .image-row{
-    display: flex;
-    gap: 0rem;
-    width: 90vw;
-    flex-direction: column;
+    display: flex !important;
+    gap: 0rem !important;
+    width: 90vw !important;
+    flex-direction: column !important;
   }  
   .row-image {
     height: auto;
