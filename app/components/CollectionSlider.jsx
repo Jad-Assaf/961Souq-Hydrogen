@@ -1,20 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { defer } from '@shopify/remix-oxygen';
 
-// Loader function exported for both route and component use
-export async function fetchCollectionsLoader({ context }) {
-    const handles = [
-        'apple', 'gaming', 'gaming-laptops',
-        'laptops', 'mobiles', 'samsung', 'monitors'
-    ];
-
-    const collections = await getCollectionsByHandle(context, handles);
-    return defer({ collections });
-}
-
-// Helper function to fetch collections by handle
-async function getCollectionsByHandle(context, handles) {
+// Helper function to fetch collections (now local to this component)
+async function fetchCollections(context, handles) {
     const collections = [];
     for (const handle of handles) {
         const { collectionByHandle } = await context.storefront.query(
@@ -26,7 +14,7 @@ async function getCollectionsByHandle(context, handles) {
     return collections;
 }
 
-// GraphQL query to fetch collections by handle
+// GraphQL query to fetch collection by handle
 const FETCH_COLLECTION_QUERY = `#graphql
   query FetchCollection($handle: String!) {
     collectionByHandle(handle: $handle) {
@@ -41,18 +29,23 @@ const FETCH_COLLECTION_QUERY = `#graphql
   }
 `;
 
-// Component definition
 export default function CollectionSlider({ context }) {
     const [collections, setCollections] = useState([]);
 
-    // Fetch data with useEffect when the component mounts
     useEffect(() => {
-        async function fetchData() {
-            const data = await fetchCollectionsLoader({ context });
-            setCollections(data.collections);
+        const handles = [
+            'apple', 'gaming', 'gaming-laptops',
+            'laptops', 'mobiles', 'samsung', 'monitors'
+        ];
+
+        // Fetch collections when component mounts
+        async function loadCollections() {
+            const data = await fetchCollections(context, handles);
+            setCollections(data);
         }
-        fetchData();
-    }, [context]); // Run only when context changes
+
+        loadCollections();
+    }, [context]); // Runs whenever the context changes
 
     return (
         <div className="slide-con">
@@ -66,7 +59,7 @@ export default function CollectionSlider({ context }) {
                             className="category-container"
                         >
                             <img
-                                srcSet={collection.image?.url}
+                                src={collection.image?.url}
                                 alt={collection.image?.altText || collection.title}
                                 className="category-image"
                                 loading="lazy"
