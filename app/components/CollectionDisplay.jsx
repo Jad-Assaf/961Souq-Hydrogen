@@ -68,9 +68,33 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductRow({ products }) {
+function ProductRow({ products, image }) {
     const rowRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
     const [isAdding, setIsAdding] = useState(false);
+
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        setStartX(e.pageX - rowRef.current.offsetLeft);
+        setScrollLeft(rowRef.current.scrollLeft);
+    };
+
+    const handleMouseLeave = () => setIsDragging(false);
+    const handleMouseUp = () => setIsDragging(false);
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - rowRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        rowRef.current.scrollLeft = scrollLeft - walk;
+    };
+
+    const scrollRow = (distance) => {
+        rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
+    };
 
     const handleAddToCart = async (variantId) => {
         setIsAdding(true);
@@ -98,30 +122,53 @@ function ProductRow({ products }) {
 
     return (
         <div className="product-row-container">
-            {products.map((product) => {
-                const firstVariant = product.variants?.nodes[0];
-                return (
-                    <div key={product.id} className="product-card">
-                        <img
-                            src={product.images.nodes[0].url}
-                            alt={product.images.nodes[0].altText || 'Product Image'}
-                            width="180px"
-                            height="180px"
-                        />
-                        <h4 className="product-title">{product.title}</h4>
-                        <div className="product-price">
-                            <Money data={product.priceRange.minVariantPrice} />
+            <button className="prev-button" onClick={() => scrollRow(-300)}>
+                <LeftArrowIcon />
+            </button>
+            <div
+                className="collection-products-row"
+                ref={rowRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+            >
+                {products.map((product) => {
+                    const firstVariant = product.variants?.nodes[0];
+                    return (
+                        <div key={product.id} className="product-card">
+                            <Link to={`/products/${product.handle}`}>
+                                <AnimatedImage
+                                    data={product.images.nodes[0]}
+                                    aspectRatio="1/1"
+                                    sizes="(min-width: 45em) 20vw, 40vw"
+                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                    alt={product.images.nodes[0].altText || 'Product Image'}
+                                    width="180px"
+                                    height="180px"
+                                />
+                                <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                                <div className="product-price">
+                                    <Money data={product.priceRange.minVariantPrice} />
+                                </div>
+                            </Link>
+                            {/* Add to Cart Button Below the Price */}
+                            <button
+                                onClick={() => handleAddToCart(firstVariant.id)}
+                                disabled={isAdding}
+                                className="add-to-cart-button"
+                            >
+                                {isAdding ? 'Adding...' : 'Add to Cart'}
+                            </button>
                         </div>
-                        <button
-                            onClick={() => handleAddToCart(firstVariant.id)}
-                            disabled={isAdding}
-                        >
-                            {isAdding ? 'Adding...' : 'Add to Cart'}
-                        </button>
-                    </div>
-                );
-            })}
+                    );
+                })}
+            </div>
+            <button className="next-button" onClick={() => scrollRow(300)}>
+                <RightArrowIcon />
+            </button>
         </div>
     );
 }
-
