@@ -12,8 +12,9 @@ export async function loader({ context }) {
             variables: { handle: menuHandle },
         });
 
+        console.log('Menu Query Response:', menu);
+
         if (!menu) {
-            console.error('Menu not found');
             return defer({ menu: null });
         }
 
