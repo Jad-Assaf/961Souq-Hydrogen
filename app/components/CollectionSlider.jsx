@@ -28,16 +28,17 @@ async function fetchCollectionsByHandles(context, handles) {
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
-    collectionByHandle(handle: $handle) {
+  collectionByHandle(handle: $handle) {
+    id
+    title
+    handle
+    image {
+      url
+      altText
       id
-      title
-      handle
-      image {
-        url
-        altText
-      }
     }
   }
+}
 `;
 
 export default function CollectionSlider() {
