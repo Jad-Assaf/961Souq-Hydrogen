@@ -33,7 +33,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       title
       handle
       image {
-        url
+        src
         altText
       }
     }
@@ -54,10 +54,7 @@ export default function CollectionSlider() {
                         className="category-container"
                     >
                         <img
-                            src={
-                                collection.image.url ||
-                                'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg'
-                            }
+                            src={collection.image.src}
                             alt={collection.image.altText || collection.title}
                             className="category-image"
                         />
