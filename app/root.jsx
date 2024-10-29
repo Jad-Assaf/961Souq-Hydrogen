@@ -9,7 +9,7 @@ import {
   useRouteLoaderData,
   ScrollRestoration,
   isRouteErrorResponse,
-  useNavigation,  // Updated import
+  useNavigation,  // Added useNavigation for route tracking
 } from '@remix-run/react';
 import favicon from '~/assets/favicon.svg';
 import resetStyles from '~/styles/reset.css?url';
@@ -18,53 +18,41 @@ import tailwindCss from './styles/tailwind.css?url';
 import { PageLayout } from '~/components/PageLayout';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css';
+import NProgress from 'nprogress';  // Import NProgress
+import 'nprogress/nprogress.css';  // Import NProgress styles
 
 // Configure NProgress (Optional: Disable spinner)
-NProgress.configure({ showSpinner: false });
+// NProgress.configure({ showSpinner: false });
 
-export function Layout({ children }) {
-  const nonce = useNonce();
-  const data = useRouteLoaderData('root');
-  const navigation = useNavigation();  // Updated hook
+/**
+ * This is important to avoid re-fetching root queries on sub-navigations
+ * @type {ShouldRevalidateFunction}
+ */
+export const shouldRevalidate = ({
+  formMethod,
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}) => {
+  if (formMethod && formMethod !== 'GET') return true;
+  if (currentUrl.toString() === nextUrl.toString()) return true;
+  return defaultShouldRevalidate;
+};
 
-  // Start and stop NProgress on route transitions
-  useEffect(() => {
-    if (navigation.state === 'loading') {
-      NProgress.start();
-    } else {
-      NProgress.done();
-    }
-  }, [navigation.state]);
-
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        {data ? (
-          <Analytics.Provider
-            cart={data.cart}
-            shop={data.shop}
-            consent={data.consent}
-          >
-            <PageLayout {...data}>{children}</PageLayout>
-          </Analytics.Provider>
-        ) : (
-          children
-        )}
-        <ScrollRestoration nonce={nonce} />
-        <Scripts nonce={nonce} />
-      </body>
-    </html>
-  );
+export function links() {
+  return [
+    { rel: 'stylesheet', href: tailwindCss },
+    { rel: 'stylesheet', href: resetStyles },
+    { rel: 'stylesheet', href: appStyles },
+    { rel: 'preconnect', href: 'https://cdn.shopify.com' },
+    { rel: 'preconnect', href: 'https://shop.app' },
+    { rel: 'icon', type: 'image/svg+xml', href: favicon },
+  ];
 }
 
+/**
+ * @param {LoaderFunctionArgs} args
+ */
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
@@ -88,6 +76,9 @@ export async function loader(args) {
   });
 }
 
+/**
+ * Load data necessary for rendering content above the fold.
+ */
 async function loadCriticalData({ context }) {
   const { storefront } = context;
   const [header] = await Promise.all([
@@ -99,15 +90,21 @@ async function loadCriticalData({ context }) {
   return { header };
 }
 
+/**
+ * Load data for rendering content below the fold.
+ */
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
-  const footer = storefront.query(FOOTER_QUERY, {
-    cache: storefront.CacheLong(),
-    variables: { footerMenuHandle: 'footer' },
-  }).catch((error) => {
-    console.error(error);
-    return null;
-  });
+
+  const footer = storefront
+    .query(FOOTER_QUERY, {
+      cache: storefront.CacheLong(),
+      variables: { footerMenuHandle: 'footer' },
+    })
+    .catch((error) => {
+      console.error(error);
+      return null;
+    });
 
   return {
     cart: cart.get(),
@@ -116,10 +113,60 @@ function loadDeferredData({ context }) {
   };
 }
 
+/**
+ * Layout component for the application.
+ */
+export function Layout({ children }) {
+  const nonce = useNonce();
+  const data = useRouteLoaderData('root');
+  const navigation = useNavigation();  // Use useNavigation hook
+
+  // Manage NProgress on route transitions
+  useEffect(() => {
+    if (navigation.state === 'loading') {
+      NProgress.start();
+    } else {
+      NProgress.done();
+    }
+  }, [navigation.state]);
+
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {data ? (
+          <Analytics.Provider
+            cart={data.cart}
+            shop={data.shop}
+            consent={data.consent}
+          >
+            <PageLayout {...data}>{children}</PageLayout>
+          </Analytics.Provider>
+        ) : (
+          children
+        )}
+        <ScrollRestoration nonce={nonce} />
+        <Scripts nonce={nonce} />
+      </body>
+    </html>
+  );
+}
+
+/**
+ * Main app component rendering the current route.
+ */
 export default function App() {
   return <Outlet />;
 }
 
+/**
+ * Error boundary component for catching route errors.
+ */
 export function ErrorBoundary() {
   const error = useRouteError();
   let errorMessage = 'Unknown error';
@@ -144,3 +191,10 @@ export function ErrorBoundary() {
     </div>
   );
 }
+
+
+/** @typedef {LoaderReturnData} RootLoader */
+
+/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
+/** @typedef {import('@remix-run/react').ShouldRevalidateFunction} ShouldRevalidateFunction */
+/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
