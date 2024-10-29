@@ -55,8 +55,7 @@ export default function CollectionSlider() {
                     >
                         <img
                             src={
-                                collection.image?.src ||
-                                'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fallback-image.jpg'
+                                collection.image?.src
                             }
                             alt={collection.image?.altText || collection.title}
                             className="category-image"
