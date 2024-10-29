@@ -106,6 +106,10 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       id
       title
       handle
+      image {
+        url
+        altText
+      }
       products(first: 30) {
         nodes {
           id
@@ -128,6 +132,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
     }
   }
 `;
+
 
 /**
  * GraphQL query to fetch the menu by handle.
