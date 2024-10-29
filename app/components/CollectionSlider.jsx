@@ -3,34 +3,29 @@ import { defer } from '@shopify/remix-oxygen';
 import { Link } from 'react-router-dom';
 import '../styles/CollectionSlider.css';
 
-export async function fetchCollectionsLoader({ context }) {
-    const handles = [
-        'apple', 'gaming', 'gaming-laptops',
-        'laptops', 'mobiles', 'apple-iphone', 'samsung',
-        'monitors', 'fitness watches'
-    ];
-
-    const collections = await getCollectionsByHandle(context, handles);
+// Self-contained loader for CollectionSlider
+export async function collectionSliderLoader({ context }) {
+    const sliderHandles = ['apple', 'gaming', 'laptops', 'monitors']; // Slider-specific handles
+    const collections = await fetchCollectionsForSlider(context, sliderHandles);
     return defer({ collections });
 }
 
-async function getCollectionsByHandle(context, handles) {
+// Fetch only slider collections
+async function fetchCollectionsForSlider(context, handles) {
     const collections = [];
     for (const handle of handles) {
         const { collectionByHandle } = await context.storefront.query(
-            FETCH_COLLECTION_QUERY,
+            SLIDER_COLLECTION_QUERY,
             { variables: { handle } }
         );
-        if (collectionByHandle) {
-            console.log(collectionByHandle.image?.url);
-            collections.push(collectionByHandle);
-        }
+        if (collectionByHandle) collections.push(collectionByHandle);
     }
     return collections;
 }
 
-const FETCH_COLLECTION_QUERY = `#graphql
-  query FetchCollection($handle: String!) {
+// Query for CollectionSlider-specific collections
+const SLIDER_COLLECTION_QUERY = `#graphql
+  query GetSliderCollection($handle: String!) {
     collectionByHandle(handle: $handle) {
       id
       title
@@ -38,7 +33,6 @@ const FETCH_COLLECTION_QUERY = `#graphql
       image {
         url
         altText
-        id
       }
     }
   }
@@ -51,28 +45,23 @@ export default function CollectionSlider() {
         <div className="slide-con">
             <h3 className="cat-h3">Shop By Categories</h3>
             <div className="category-slider">
-                {collections && collections.length > 0 ? (
-                    collections.map((collection) => (
-                        <Link
-                            key={collection.id}
-                            to={`/collections/${collection.handle}`}
-                            className="category-container"
-                        >
-                            <img
-                                data={collection.image}
-                                srcSet={collection.image?.url}
-                                alt={collection.image?.altText || collection.title}
-                                className="category-image"
-                                loading="lazy"
-                                width="175"
-                                height="175"
-                            />
-                            <div className="category-title">{collection.title}</div>
-                        </Link>
-                    ))
-                ) : (
-                    <div>No collections found.</div>
-                )}
+                {collections.map((collection) => (
+                    <Link
+                        key={collection.id}
+                        to={`/collections/${collection.handle}`}
+                        className="category-container"
+                    >
+                        <img
+                            src={collection.image?.url || 'fallback-image.jpg'}
+                            alt={collection.image?.altText || collection.title}
+                            className="category-image"
+                            loading="lazy"
+                            width="175"
+                            height="175"
+                        />
+                        <div className="category-title">{collection.title}</div>
+                    </Link>
+                ))}
             </div>
         </div>
     );

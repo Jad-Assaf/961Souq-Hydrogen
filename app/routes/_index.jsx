@@ -2,7 +2,8 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import CollectionSlider from '~/components/CollectionSlider';
+import CollectionSlider, { collectionSliderLoader } from '~/components/CollectionSlider';
+
 
 /**
  * @type {MetaFunction}
@@ -16,15 +17,16 @@ export const meta = () => {
  */
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData });
+  return defer({ ...criticalData, sliderData: collectionSliderLoader(args) });
 }
+
 
 /**
  * Load critical collections data by their handles.
  */
 async function loadCriticalData({ context }) {
   const handles = [
-    'apple', 'gaming', 'gaming-laptops',
+    'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
     'laptops', 'mobiles', 'apple-iphone', 'samsung',
     'monitors', 'fitness watches'
   ];
@@ -71,7 +73,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections } = useLoaderData();
+  const { collections, sliderData } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -93,7 +95,11 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionSlider />
+      <Suspense fallback={<div>Loading Slider...</div>}>
+        <Await resolve={sliderData}>
+          {(resolvedSliderData) => <CollectionSlider data={resolvedSliderData} />}
+        </Await>
+      </Suspense>
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
