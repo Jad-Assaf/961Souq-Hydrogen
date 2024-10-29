@@ -24,8 +24,8 @@ export async function loader(args) {
 async function loadCriticalData({ context }) {
   const handles = [
     'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
-    'laptops', 'mobiles', 'apple-iphone', 'samsung',
-    'monitors', 'fitness watches'
+    'laptops', 'apple-iphone', 'samsung',
+    'monitors', 'car-accessories', 'fitness watches', 'garmin-smart-watch', 'apple-watch', 'samsung-watches', 'kitchen-appliances', 'cleaning-devices'
   ];
   const collections = await fetchCollectionsByHandles(context, handles);
 
