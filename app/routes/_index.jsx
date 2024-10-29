@@ -3,7 +3,7 @@ import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import CollectionSlider, { collectionSliderLoader } from '~/components/CollectionSlider';
-
+import { Suspense } from 'react';
 
 /**
  * @type {MetaFunction}
