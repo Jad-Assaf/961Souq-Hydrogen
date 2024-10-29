@@ -1,6 +1,7 @@
 import { useLoaderData } from '@remix-run/react';
 import { defer } from '@shopify/remix-oxygen';
 import { Link } from 'react-router-dom'; // Use Link for navigation
+import '../styles/CollectionSlider.css'
 
 export async function loader({ context }) {
     const handles = [
