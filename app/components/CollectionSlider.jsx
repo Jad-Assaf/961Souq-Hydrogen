@@ -33,9 +33,16 @@ export default function CollectionSlider({ context }) {
     const [collections, setCollections] = useState([]);
 
     useEffect(() => {
+        if (!context) {
+            console.error("Context is not available.");
+            return;
+        }
+
         // Fetch the data when the component mounts
         fetchSliderCollections(context).then((data) => {
             setCollections(data);
+        }).catch((error) => {
+            console.error("Failed to fetch collections:", error);
         });
     }, [context]);
 
