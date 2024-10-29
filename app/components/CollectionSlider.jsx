@@ -33,7 +33,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       title
       handle
       image {
-        src
+        url
         altText
       }
     }
@@ -54,7 +54,7 @@ export default function CollectionSlider() {
                         className="category-container"
                     >
                         <img
-                            src={collection.image?.src}
+                            src={collection.image?.url}
                             alt={collection.image?.altText || collection.title}
                             className="category-image"
                         />
