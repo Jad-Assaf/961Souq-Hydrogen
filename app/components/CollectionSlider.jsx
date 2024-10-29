@@ -1,9 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useLoaderData } from '@remix-run/react';
+import { defer } from '@shopify/remix-oxygen';
 import { Link } from 'react-router-dom';
 import '../styles/CollectionSlider.css';
 
-const SLIDER_COLLECTION_QUERY = `#graphql
-  query GetSliderCollection($handle: String!) {
+// Loader renamed to fetchCollectionsLoader
+export async function fetchCollectionsLoader({ context }) {
+    const handles = [
+        'apple', 'gaming', 'gaming-laptops',
+        'laptops', 'mobiles', 'apple-iphone', 'samsung',
+        'monitors', 'fitness watches'
+    ];
+
+    const collections = await getCollectionsByHandle(context, handles); // Renamed function call
+    return defer({ collections });
+}
+
+// Function renamed to getCollectionsByHandle
+async function getCollectionsByHandle(context, handles) {
+    const collections = [];
+    for (const handle of handles) {
+        const { collectionByHandle } = await context.storefront.query(
+            FETCH_COLLECTION_QUERY, // New query name
+            { variables: { handle } }
+        );
+        if (collectionByHandle) {
+            console.log(collectionByHandle.image?.url); // Log the correct URL.
+            collections.push(collectionByHandle);
+        }
+    }
+    return collections;
+}
+
+// Query renamed to FETCH_COLLECTION_QUERY
+const FETCH_COLLECTION_QUERY = `#graphql
+  query FetchCollection($handle: String!) {
     collectionByHandle(handle: $handle) {
       id
       title
@@ -11,62 +41,41 @@ const SLIDER_COLLECTION_QUERY = `#graphql
       image {
         url
         altText
+        id
       }
     }
   }
 `;
 
-async function fetchSliderCollections(context) {
-    const handles = ['apple', 'gaming', 'laptops', 'monitors']; // Slider-specific handles
-    const collections = [];
-    for (const handle of handles) {
-        const { collectionByHandle } = await context.storefront.query(
-            SLIDER_COLLECTION_QUERY,
-            { variables: { handle } }
-        );
-        if (collectionByHandle) collections.push(collectionByHandle);
-    }
-    return collections;
-}
-
-export default function CollectionSlider({ context }) {
-    const [collections, setCollections] = useState([]);
-
-    useEffect(() => {
-        if (!context) {
-            console.error("Context is not available.");
-            return;
-        }
-
-        // Fetch the data when the component mounts
-        fetchSliderCollections(context).then((data) => {
-            setCollections(data);
-        }).catch((error) => {
-            console.error("Failed to fetch collections:", error);
-        });
-    }, [context]);
+export default function CollectionSlider() {
+    const { collections } = useLoaderData();
 
     return (
         <div className="slide-con">
             <h3 className="cat-h3">Shop By Categories</h3>
             <div className="category-slider">
-                {collections.map((collection) => (
-                    <Link
-                        key={collection.id}
-                        to={`/collections/${collection.handle}`}
-                        className="category-container"
-                    >
-                        <img
-                            src={collection.image?.url || 'fallback-image.jpg'}
-                            alt={collection.image?.altText || collection.title}
-                            className="category-image"
-                            loading="lazy"
-                            width="175"
-                            height="175"
-                        />
-                        <div className="category-title">{collection.title}</div>
-                    </Link>
-                ))}
+                {collections && collections.length > 0 ? (
+                    collections.map((collection) => (
+                        <Link
+                            key={collection.id}
+                            to={`/collections/${collection.handle}`}
+                            className="category-container"
+                        >
+                            <img
+                                data={collection.image}
+                                srcSet={collection.image?.url}
+                                alt={collection.image?.altText || collection.title}
+                                className="category-image"
+                                loading="lazy"
+                                width="175"
+                                height="175"
+                            />
+                            <div className="category-title">{collection.title}</div>
+                        </Link>
+                    ))
+                ) : (
+                    <div>No collections found.</div>
+                )}
             </div>
         </div>
     );

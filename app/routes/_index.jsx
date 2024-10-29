@@ -16,7 +16,7 @@ export const meta = () => {
  */
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, context: args.context });
+  return defer({ ...criticalData });
 }
 
 /**
@@ -71,7 +71,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections, context } = useLoaderData();
+  const { collections } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -93,7 +93,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionSlider context={context} />
+      <CollectionSlider />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
