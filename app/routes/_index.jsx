@@ -2,7 +2,7 @@ import { defer } from '@shopify/remix-oxygen';
 import { Link, useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import { MenuCollectionDisplay, loader } from '../components/MenuCollectionDisplay';
+import { MenuCollectionDisplay } from '../components/MenuCollectionDisplay';
 
 /**
  * @type {MetaFunction}
@@ -17,12 +17,6 @@ export const meta = () => {
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
   return defer({ ...criticalData });
-}
-
-export { loader };
-
-export default function MenuCollectionsRoute() {
-  return <MenuCollectionDisplay />;
 }
 
 /**

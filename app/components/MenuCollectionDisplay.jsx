@@ -1,11 +1,7 @@
-// components/MenuCollectionDisplay.jsx
 import { useLoaderData } from '@remix-run/react';
 import { defer } from '@shopify/remix-oxygen';
 import '../styles/MenuCollectionDisplay.css';
 
-/**
- * Loader function to fetch collection images.
- */
 export async function loader({ context }) {
     const handles = ['apple-products', 'gaming-consoles', 'fitness-watches'];
 
@@ -39,9 +35,6 @@ const GET_COLLECTION_IMAGES_QUERY = `#graphql
   }
 `;
 
-/**
- * Component to display collections.
- */
 export function MenuCollectionDisplay() {
     const { enrichedCollections } = useLoaderData();
 
