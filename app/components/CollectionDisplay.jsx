@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
+import { ProductForm } from './ProductForm';
 
 function truncateText(text, maxWords) {
     const words = text.split(' ');
@@ -126,6 +127,12 @@ function ProductRow({ products, image }) {
                             <div className="product-price">
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
+                            {/* Add ProductForm Below the Price */}
+                            <ProductForm
+                                product={product}
+                                selectedVariant={product.variants.nodes[0]}
+                                variants={product.variants.nodes}
+                            />
                         </div>
                     </Link>
                 ))}
