@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AnimatedImage } from './AnimatedImage';
+import '../styles/CollectionSlider.css'
 
 // Truncate text to fit within the given max word count
 function truncateText(text, maxWords) {
@@ -14,25 +15,26 @@ function truncateText(text, maxWords) {
 export function CollectionDisplay({ collections, images }) {
     return (
         <div className="collections-container">
-            {/* Top row to display all collections with title and main image */}
-            <div className="top-collection-row">
-                {collections.map((collection) => (
-                    <div key={collection.id} className="top-collection-item">
-                        <h4 className="collection-title">{collection.title}</h4>
-                        <Link to={`/collections/${collection.handle}`}>
-                            <AnimatedImage
-                                src={collection.image?.url || ''}
+            <div className="slide-con">
+                <h3 className="cat-h3">Shop By Categories</h3>
+                <div className="category-slider">
+                    {collections.map((collection) => (
+                        <Link
+                            key={collection.id}
+                            to={`/collections/${collection.handle}`}
+                            className="category-container"
+                        >
+                            <img
+                                src={collection.image?.url || 'https://via.placeholder.com/150'}
                                 alt={collection.image?.altText || collection.title}
-                                width="150px"
-                                height="150px"
-                                loading="lazy"
+                                className="category-image"
                             />
+                            <div className="category-title">{collection.title}</div>
                         </Link>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
-            {/* Existing collections with products and images between rows */}
             {collections.map((collection, index) => (
                 <div key={collection.id}>
                     <div className="collection-section">
