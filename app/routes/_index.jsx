@@ -2,7 +2,6 @@ import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import CollectionSlider from '~/components/CollectionSlider';
 
 /**
  * @type {MetaFunction}
@@ -14,16 +13,10 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader({ context }) {
-  if (!context || !context.storefront) {
-    console.error("Context or storefront missing!");
-    throw new Response("Context is not properly initialized.", { status: 500 });
-  }
-
-  const criticalData = await loadCriticalData({ context });
-  return defer({ ...criticalData, context });
+export async function loader(args) {
+  const criticalData = await loadCriticalData(args);
+  return defer({ ...criticalData });
 }
-
 
 /**
  * Load critical collections data by their handles.
@@ -40,6 +33,7 @@ async function loadCriticalData({ context }) {
     throw new Response('No matching collections found.', { status: 404 });
   }
 
+  // Fetch the "new-main-menu" menu
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
@@ -49,6 +43,7 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  // Return the fetched menu inside a "header" object, as expected by the Header component
   const header = { menu, shop: { primaryDomain: { url: 'https://example.com' } } };
 
   return { collections, header };
@@ -59,6 +54,7 @@ async function loadCriticalData({ context }) {
  */
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
+
   for (const handle of handles) {
     const { collectionByHandle } = await context.storefront.query(
       GET_COLLECTION_BY_HANDLE_QUERY,
@@ -69,18 +65,13 @@ async function fetchCollectionsByHandles(context, handles) {
       collections.push(collectionByHandle);
     }
   }
+
   return collections;
 }
 
 export default function Homepage() {
-  const loaderData = useLoaderData(); // Destructure later to avoid TypeErrors
-  const { collections, context } = loaderData;
+  const { collections } = useLoaderData();
 
-  if (!context || !context.storefront) {
-    console.error("Context or storefront missing in Homepage!");
-    return <div>Error loading context or collections.</div>;
-  }
-  
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601' },
@@ -101,7 +92,6 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionSlider context={context} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
