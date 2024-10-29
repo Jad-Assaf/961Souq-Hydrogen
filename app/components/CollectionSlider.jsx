@@ -33,19 +33,23 @@ export default function CollectionSlider({ context }) {
     const [collections, setCollections] = useState([]);
 
     useEffect(() => {
-        const handles = [
-            'apple', 'gaming', 'gaming-laptops',
-            'laptops', 'mobiles', 'samsung', 'monitors'
-        ];
+        if (!context || !context.storefront) {
+            console.error("Context or storefront missing in CollectionSlider!");
+            return; // Exit early if context is missing
+        }
 
-        // Fetch collections when component mounts
         async function loadCollections() {
-            const data = await fetchCollections(context, handles);
-            setCollections(data);
+            try {
+                const handles = ['apple', 'gaming', 'laptops'];
+                const data = await fetchCollections(context, handles);
+                setCollections(data);
+            } catch (error) {
+                console.error("Error fetching collections:", error);
+            }
         }
 
         loadCollections();
-    }, [context]); // Runs whenever the context changes
+    }, [context]);
 
     return (
         <div className="slide-con">

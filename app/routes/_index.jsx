@@ -14,10 +14,16 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader(args) {
-  const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData });
+export async function loader({ context }) {
+  if (!context || !context.storefront) {
+    console.error("Context or storefront missing!");
+    throw new Response("Context is not properly initialized.", { status: 500 });
+  }
+
+  const criticalData = await loadCriticalData({ context });
+  return defer({ ...criticalData, context });
 }
+
 
 /**
  * Load critical collections data by their handles.
@@ -67,8 +73,14 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections, context } = useLoaderData();
+  const loaderData = useLoaderData(); // Destructure later to avoid TypeErrors
+  const { collections, context } = loaderData;
 
+  if (!context || !context.storefront) {
+    console.error("Context or storefront missing in Homepage!");
+    return <div>Error loading context or collections.</div>;
+  }
+  
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601' },
