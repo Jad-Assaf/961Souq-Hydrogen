@@ -18,22 +18,23 @@ export function CollectionDisplay({ collections, images }) {
             <div className="slide-con">
                 <h3 className="cat-h3">Shop By Categories</h3>
                 <div className="category-slider">
-                    {collections.map((collection) => (
+                    {categories.map((category) => (
                         <Link
-                            key={collection.id}
-                            to={`/collections/${collection.handle}`}
+                            key={category.id}
+                            to={category.url}
                             className="category-container"
                         >
                             <img
-                                src={collection.image?.url || 'https://via.placeholder.com/150'}
-                                alt={collection.image?.altText || collection.title}
+                                src={category.image?.url || 'https://via.placeholder.com/150'}
+                                alt={category.image?.altText || category.title}
                                 className="category-image"
                             />
-                            <div className="category-title">{collection.title}</div>
+                            <div className="category-title">{category.title}</div>
                         </Link>
                     ))}
                 </div>
             </div>
+
 
             {collections.map((collection, index) => (
                 <div key={collection.id}>

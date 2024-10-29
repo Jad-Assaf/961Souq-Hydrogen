@@ -25,15 +25,17 @@ async function loadCriticalData({ context }) {
   const handles = [
     'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
     'laptops', 'apple-iphone', 'samsung',
-    'monitors', 'car-accessories', 'fitness watches', 'garmin-smart-watch', 'apple-watch', 'samsung-watches', 'kitchen-appliances', 'cleaning-devices'
+    'monitors', 'car-accessories', 'fitness watches',
+    'garmin-smart-watch', 'apple-watch', 'samsung-watches',
+    'kitchen-appliances', 'cleaning-devices'
   ];
+
   const collections = await fetchCollectionsByHandles(context, handles);
 
   if (collections.length === 0) {
     throw new Response('No matching collections found.', { status: 404 });
   }
 
-  // Fetch the "new-main-menu" menu
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
@@ -43,10 +45,11 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Return the fetched menu inside a "header" object, as expected by the Header component
+  const categories = menu.items; // Extract categories from the menu
+
   const header = { menu, shop: { primaryDomain: { url: 'https://example.com' } } };
 
-  return { collections, header };
+  return { collections, header, categories }; // Include categories in the return
 }
 
 /**
@@ -70,7 +73,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections } = useLoaderData();
+  const { collections, categories } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -92,7 +95,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CollectionDisplay collections={collections} images={images} />
+      <CollectionDisplay collections={collections} images={images} categories={categories} />
     </div>
   );
 }
@@ -138,21 +141,24 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
  * GraphQL query to fetch the menu by handle.
  */
 const GET_MENU_QUERY = `#graphql
-  query GetMenu($handle: String!) {
+  query GetMenuWithImages($handle: String!) {
     menu(handle: $handle) {
       items {
         id
         title
         url
+        object {
+          ... on Collection {
+            image {
+              url
+              altText
+            }
+          }
+        }
         items {
           id
           title
           url
-          items {
-            id
-            title
-            url
-          }
         }
       }
     }
