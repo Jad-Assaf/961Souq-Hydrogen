@@ -1,5 +1,5 @@
 import { defer } from '@shopify/remix-oxygen';
-import { Link, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import { MenuCollectionDisplay } from '../components/MenuCollectionDisplay';
@@ -16,8 +16,45 @@ export const meta = () => {
  */
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData });
+
+  // Fetch the collection images dynamically.
+  const handles = ['apple-products', 'gaming-consoles', 'fitness-watches'];
+  const { context } = args;
+
+  const { collections } = await context.storefront.query(GET_COLLECTION_IMAGES_QUERY, {
+    variables: { handles },
+  });
+
+  const enrichedCollections = collections.edges.map(({ node }) => ({
+    id: node.id,
+    title: node.handle.replace('-', ' ').toUpperCase(),
+    image: node.image || {
+      url: 'https://via.placeholder.com/150',
+      altText: 'Placeholder Image',
+    },
+  }));
+
+  // Combine critical data with the new collections data.
+  return defer({ ...criticalData, enrichedCollections });
 }
+
+const GET_COLLECTION_IMAGES_QUERY = `#graphql
+  query GetCollectionImages($handles: [String!]) {
+    collections(first: 1000, query: $handles) {
+      edges {
+        node {
+          id
+          handle
+          image {
+            url
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
 
 /**
  * Load critical collections data by their handles.
@@ -71,7 +108,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections, header } = useLoaderData();
+  const { collections, header, enrichedCollections } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -93,7 +130,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <Link to="/menu-collections">View Menu Collections</Link>
+      <MenuCollectionDisplay collections={enrichedCollections} />
       <CollectionDisplay collections={collections} images={images} />
     </div>
   );
