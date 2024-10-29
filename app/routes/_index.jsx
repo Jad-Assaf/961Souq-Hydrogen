@@ -18,9 +18,6 @@ export async function loader(args) {
   return defer({ ...criticalData });
 }
 
-/**
- * Load critical collections data by their handles.
- */
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
@@ -31,10 +28,13 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from the new-main-menu items for the slider.
+  // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
+
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -48,39 +48,20 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  if (collections.length === 0) {
-    throw new Response('No matching collections found.', { status: 404 });
-  }
-
-  // Prepare header data
-  const header = {
-    menu,
-    shop: { primaryDomain: { url: 'https://example.com' } }
-  };
-
-  return { collections, menuHandles, header };
+  return { collections, sliderCollections, header: { menu } };
 }
 
-/**
- * Fetch multiple collections using `collectionByHandle`.
- */
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
-
   for (const handle of handles) {
     const { collectionByHandle } = await context.storefront.query(
       GET_COLLECTION_BY_HANDLE_QUERY,
       { variables: { handle } }
     );
-
-    if (collectionByHandle) {
-      collections.push(collectionByHandle);
-    }
+    if (collectionByHandle) collections.push(collectionByHandle);
   }
-
   return collections;
 }
-
 export default function Homepage() {
   const { collections, menuHandles } = useLoaderData();
 
