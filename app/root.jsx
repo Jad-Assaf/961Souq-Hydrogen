@@ -9,6 +9,7 @@ import {
   useRouteLoaderData,
   ScrollRestoration,
   isRouteErrorResponse,
+  useNavigation,  // Updated import
 } from '@remix-run/react';
 import favicon from '~/assets/favicon.svg';
 import resetStyles from '~/styles/reset.css?url';
@@ -17,7 +18,6 @@ import tailwindCss from './styles/tailwind.css?url';
 import { PageLayout } from '~/components/PageLayout';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
-import { useTransition } from '@remix-run/react';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
@@ -27,16 +27,16 @@ NProgress.configure({ showSpinner: false });
 export function Layout({ children }) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
-  const transition = useTransition();
+  const navigation = useNavigation();  // Updated hook
 
   // Start and stop NProgress on route transitions
   useEffect(() => {
-    if (transition.state === 'loading') {
+    if (navigation.state === 'loading') {
       NProgress.start();
     } else {
       NProgress.done();
     }
-  }, [transition.state]);
+  }, [navigation.state]);
 
   return (
     <html lang="en">
