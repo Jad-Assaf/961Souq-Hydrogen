@@ -440,8 +440,8 @@ button.reset:hover:not(:has(> *)) {
   .header-menu-mobile-toggle {
     position: absolute;
     left: 10px;
-    font-size: 40px;
-    color: #2172af
+    font-size: 40px !important;
+    color: #2172af !important;
   }
 
   /* Logo Centered on Mobile */
@@ -455,12 +455,12 @@ button.reset:hover:not(:has(> *)) {
     position: absolute;
     right: 10px;
     display: flex;
-    gap: 10px;
+    gap: 10px !important;
   }
 
   .header-ctas svg {
-    width: 25px;
-    height: 25px;
+    width: 25px !important;
+    height: 25px !important;
   }
 }
 
