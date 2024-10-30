@@ -8,7 +8,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
 
   return (
-    <header className="header">
+    <><header className="header">
       <div className="header-top">
         <NavLink prefetch="intent" to="/" className="logo-link" end>
           <AnimatedImage
@@ -16,21 +16,17 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             alt={`${shop.name} Logo`}
             className="header-logo"
             width='200px'
-            height='100px'
-          />
+            height='100px' />
         </NavLink>
         <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
       </div>
-
-      <div className="header-bottom">
+    </header><div className="header-bottom">
         <HeaderMenu
           menu={menu}
           viewport="desktop"
           primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
-      </div>
-    </header>
+          publicStoreDomain={publicStoreDomain} />
+      </div></>
   );
 }
 
