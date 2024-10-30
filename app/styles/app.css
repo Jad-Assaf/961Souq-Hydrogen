@@ -407,16 +407,6 @@ button.reset:hover:not(:has(> *)) {
 */
 /* Header Container */
 
-/* Logo Styling */
-.header-logo {
-  max-width: 100px;
-  height: auto;
-
-  @media (min-width: 768px) {
-    max-width: 200px;
-  }
-}
-
 /* Header Container */
 .header {
   background: #fff;
@@ -442,6 +432,7 @@ button.reset:hover:not(:has(> *)) {
   .header-top {
     justify-content: center;
     position: relative;
+    width: 95vw !important;
     /* Allows precise positioning for other elements */
   }
 
@@ -449,12 +440,13 @@ button.reset:hover:not(:has(> *)) {
   .header-menu-mobile-toggle {
     position: absolute;
     left: 10px;
-    font-size: 24px;
+    font-size: 40px;
+    color: #2172af
   }
 
   /* Logo Centered on Mobile */
   .header-logo {
-    max-width: 150px;
+    max-width: 200px;
     height: auto;
   }
 
@@ -464,6 +456,11 @@ button.reset:hover:not(:has(> *)) {
     right: 10px;
     display: flex;
     gap: 10px;
+  }
+
+  .header-ctas svg {
+    width: 25px;
+    height: 25px;
   }
 }
 
@@ -619,24 +616,6 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
   width: 30px;
   height: 30px;
-}
-
-/* Responsive Adjustments for Logo */
-.header-logo {
-  max-width: 100px;
-  height: auto;
-
-  @media (min-width: 768px) {
-    max-width: 200px;
-  }
-}
-
-/* Adjust Icons for Smaller Screens */
-@media (max-width: 768px) {
-  .header-ctas svg {
-    width: 35px;
-    height: 35px;
-  }
 }
 
 /*
