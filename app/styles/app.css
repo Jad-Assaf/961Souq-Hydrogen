@@ -400,7 +400,6 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 /* Header Container */
-/* General Header Styles */
 .header {
   background: #fff;
   z-index: 1;
@@ -420,7 +419,36 @@ button.reset:hover:not(:has(> *)) {
   margin: 20px auto;
 }
 
-/* Mobile Styles */
+/* Desktop Header Layout */
+@media (min-width: 769px) {
+  .header-top {
+    justify-content: flex-start;
+    /* Align logo to the left */
+  }
+
+  /* Desktop Logo Alignment */
+  .header-logo {
+    margin-right: auto;
+  }
+
+  /* Hide Mobile Menu Toggle on Desktop */
+  .mobile-menu-toggle {
+    display: none;
+  }
+
+  /* Display Desktop CTA Icons */
+  .header-ctas {
+    display: flex;
+    gap: 1rem;
+  }
+
+  /* Mobile-only elements hidden */
+  .mobile-menu-overlay {
+    display: none !important;
+  }
+}
+
+/* Mobile Header Layout */
 @media (max-width: 768px) {
   .header-top {
     justify-content: center;
@@ -450,7 +478,7 @@ button.reset:hover:not(:has(> *)) {
     height: auto;
   }
 
-  /* CTA Icons (Search, Cart) on the Right */
+  /* CTA Icons on the Right for Mobile */
   .header-ctas {
     position: absolute;
     right: 10px;
@@ -488,14 +516,12 @@ button.reset:hover:not(:has(> *)) {
   height: 100vh;
   background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
-  /* Blur effect */
   z-index: 9999;
   display: flex;
   flex-direction: column;
   padding: 20px;
   transition: opacity 0.5s ease-in-out;
   overflow-y: auto;
-  /* Allow scrolling inside the menu */
 }
 
 /* Disable Page Scrolling When Menu is Open */
@@ -512,8 +538,6 @@ button.reset:hover:not(:has(> *)) {
 .mobile-submenu-drawer {
   position: absolute;
   top: 0;
-  /* left: 100%; */
-  /* Start offscreen */
   width: 100vw;
   height: 100vh;
   background-color: white;
@@ -521,16 +545,13 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
   padding: 20px;
   transform: translateX(100%);
-  /* Default offscreen */
   transition: transform 0.3s ease-in-out;
   overflow-y: auto;
-  /* Allow submenu scrolling */
 }
 
 /* Active Submenu Drawer - Slides into View */
 .mobile-submenu-drawer.active {
   transform: translateX(0);
-  /* Slide into view */
 }
 
 /* Back Button for Submenu */
@@ -549,7 +570,6 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
   gap: 15px;
   width: 100%;
-  /* Full width of the drawer */
 }
 
 /* Mobile Menu Item */
@@ -577,13 +597,6 @@ button.reset:hover:not(:has(> *)) {
   border: none;
   color: black;
   cursor: pointer;
-}
-
-/* Mobile Header Menu Title */
-.mobile-menu-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
 }
 
 /* Menu Content */
@@ -669,11 +682,6 @@ button.reset:hover:not(:has(> *)) {
 .submenu .submenu {
   left: 100%;
   top: 0;
-}
-
-/* Nested Submenu Links */
-.menu-item .submenu .menu-item a {
-  color: #000 !important;
 }
 
 /* Header CTA Buttons (Search, Cart) */
