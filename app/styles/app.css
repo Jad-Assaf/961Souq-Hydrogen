@@ -490,7 +490,7 @@ button.reset:hover:not(:has(> *)) {
     width: 25px;
     height: 25px;
   }
-  .header-ctas sign-in-link{
+  .header-ctas .sign-in-link{
     display: none;
   }
 }
@@ -903,10 +903,11 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .products-grid {
-  display: grid;
-  grid-gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(var(--grid-item-width), 1fr));
-  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .product-item img {
