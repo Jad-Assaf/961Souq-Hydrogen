@@ -14,8 +14,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     setActiveSubmenu(null); // Close any open submenu when menu is closed
   };
 
-  const openSubmenu = (itemId) => setActiveSubmenu(itemId); // Open submenu
-  const closeSubmenu = () => setActiveSubmenu(null); // Close submenu
+  const openSubmenu = (itemId) => setActiveSubmenu(itemId); // Open the submenu drawer
+  const closeSubmenu = () => setActiveSubmenu(null); // Close the submenu drawer
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -89,27 +89,26 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             ))}
           </div>
 
-          <div
-            className={`submenu-drawer ${activeSubmenu ? 'open' : 'closed'
-              }`}
-          >
-            <button className="back-button" onClick={closeSubmenu}>
-              ‹ Back
-            </button>
-            <div className="submenu-list">
-              {menu.items
-                .find((item) => item.id === activeSubmenu)
-                ?.items.map((subItem) => (
-                  <NavLink
-                    key={subItem.id}
-                    to={new URL(subItem.url).pathname}
-                    onClick={closeMobileMenu}
-                  >
-                    {subItem.title}
-                  </NavLink>
-                ))}
+          {activeSubmenu && (
+            <div className="submenu-drawer">
+              <button className="back-button" onClick={closeSubmenu}>
+                ‹ Back
+              </button>
+              <div className="submenu-list">
+                {menu.items
+                  .find((item) => item.id === activeSubmenu)
+                  ?.items.map((subItem) => (
+                    <NavLink
+                      key={subItem.id}
+                      to={new URL(subItem.url).pathname}
+                      onClick={closeMobileMenu}
+                    >
+                      {subItem.title}
+                    </NavLink>
+                  ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </>
