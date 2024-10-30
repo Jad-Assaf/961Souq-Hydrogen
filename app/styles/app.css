@@ -494,19 +494,23 @@ button.reset:hover:not(:has(> *)) {
   width: 100vw;
   height: 100vh;
   background-color: rgba(255, 255, 255, 0.85);
-  /* Slightly transparent white */
+  /* White with slight transparency */
   backdrop-filter: blur(10px);
   /* Blur effect */
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  /* Push content to top and bottom */
+  justify-content: center;
+  align-items: flex-start;
+  /* Align links to the left */
   padding: 20px;
+  /* Add padding for better alignment */
   transition: opacity 0.3s ease-in-out;
+  opacity: 1;
+  visibility: visible;
 }
 
-/* Close Button */
+/* Close Button for Mobile Menu */
 .close-mobile-menu {
   position: absolute;
   top: 20px;
@@ -518,90 +522,16 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
 }
 
-/* Menu Title */
-.mobile-menu-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
+/* Mobile Menu Links */
+.header-menu-mobile .menu-item {
+  margin-bottom: 10px;
 }
 
-/* Menu Item List */
-.mobile-menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 100%;
-}
-
-/* Menu Item */
-.menu-item {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-/* Menu Item Button */
-.menu-item-button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: none;
-  border: none;
-  padding: 10px 0;
-  font-size: 18px;
-  cursor: pointer;
-  width: 100%;
-}
-
-/* Submenu */
-.submenu {
-  margin-top: 10px !important;
-  padding-left: 15px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-}
-
-/* Submenu Item */
-.submenu-item {
+.header-menu-mobile .menu-item a {
+  text-decoration: none;
   font-size: 16px;
-  text-decoration: none;
   color: black;
-}
-
-/* Menu Item Link */
-.menu-item a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  font-size: 18px;
-  color: #232323 !important;
-}
-
-/* Arrow Icon */
-.menu-item-arrow {
-  font-size: 18px;
-  color: #232323 !important;
-}
-
-/* Footer Actions (Sign-in & Create Account) */
-.mobile-menu-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.mobile-menu-footer a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 18px;
-  text-decoration: none;
-  color: black;
+  font-weight: 500;
 }
 
 .mobile-menu-overlay.visible {
