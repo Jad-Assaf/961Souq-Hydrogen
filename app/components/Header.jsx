@@ -6,29 +6,59 @@ import { AnimatedImage } from './AnimatedImage';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev);
+  };
 
   return (
-    <><header className="header">
-      <div className="header-top">
-        <NavLink prefetch="intent" to="/" className="logo-link" end>
-          <AnimatedImage
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
-            alt={`${shop.name} Logo`}
-            className="header-logo"
-            width='200px'
-            height='100px' />
-        </NavLink>
-        <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
-      </div>
-    </header><div className="header-bottom">
-        <HeaderMenu
-          menu={menu}
-          viewport="desktop"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain} />
-      </div></>
+    <>
+      <header className="header">
+        <div className="header-top">
+          <NavLink prefetch="intent" to="/" className="logo-link" end>
+            <AnimatedImage
+              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
+              alt={`${shop.name} Logo`}
+              className="header-logo"
+              width="200px"
+              height="100px"
+            />
+          </NavLink>
+          <div className="header-ctas">
+            <HeaderMenuMobileToggle toggleMobileMenu={toggleMobileMenu} />
+            <SearchToggle />
+            <CartToggle cart={cart} />
+          </div>
+        </div>
+        <div className="header-bottom">
+          <HeaderMenu
+            menu={menu}
+            viewport="desktop"
+            primaryDomainUrl={header.shop.primaryDomain.url}
+            publicStoreDomain={publicStoreDomain}
+          />
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay">
+          <button className="close-mobile-menu" onClick={toggleMobileMenu}>
+            ✕
+          </button>
+          <HeaderMenu
+            menu={menu}
+            viewport="mobile"
+            primaryDomainUrl={header.shop.primaryDomain.url}
+            publicStoreDomain={publicStoreDomain}
+          />
+        </div>
+      )}
+    </>
   );
 }
+
 
 export function HeaderMenu({ menu, viewport }) {
   const { close } = useAside();
@@ -104,12 +134,11 @@ function HeaderCtas({ isLoggedIn, cart }) {
   );
 }
 
-function HeaderMenuMobileToggle() {
-  const { open } = useAside();
+function HeaderMenuMobileToggle({ toggleMobileMenu }) {
   return (
     <button
       className="header-menu-mobile-toggle reset"
-      onClick={() => open('mobile')}
+      onClick={toggleMobileMenu}
     >
       <h3>☰</h3>
     </button>
