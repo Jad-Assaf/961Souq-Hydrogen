@@ -421,12 +421,6 @@ button.reset:hover:not(:has(> *)) {
   margin: 20px auto;
 }
 
-.no-scroll {
-    position: fixed;
-    width: 100%;
-    overflow: hidden;
-}
-
 /* Center the Logo and Adjust Layout on Mobile */
 @media (max-width: 768px) {
   .header-top {
@@ -517,8 +511,6 @@ button.reset:hover:not(:has(> *)) {
 /* Disable scrolling on the main page */
 .no-scroll {
   overflow: hidden;
-  width: 100%;
-  position: fixed;
 }
 
 /* Hide the main menu list when a submenu is active */
