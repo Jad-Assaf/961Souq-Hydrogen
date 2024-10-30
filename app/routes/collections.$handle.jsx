@@ -81,7 +81,7 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      <p className="collection-description">{collection.description}</p>
+      {/* <p className="collection-description">{collection.description}</p> */}
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"

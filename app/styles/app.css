@@ -490,7 +490,7 @@ button.reset:hover:not(:has(> *)) {
     width: 25px;
     height: 25px;
   }
-  .header-ctas a sign-in-link{
+  .header-ctas sign-in-link{
     display: none;
   }
 }
