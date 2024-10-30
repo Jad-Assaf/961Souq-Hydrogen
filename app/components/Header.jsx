@@ -8,15 +8,36 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
 
-  const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-    setActiveSubmenu(null);
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev);
+    if (!isMobileMenuOpen) setActiveSubmenu(null); // Reset submenu when closing
   };
 
-  const openSubmenu = (itemId) => setActiveSubmenu(itemId);
-  const closeSubmenu = () => setActiveSubmenu(null);
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    setActiveSubmenu(null); // Ensure all submenus close
+  };
 
+  const openSubmenu = (itemId) => {
+    setActiveSubmenu(itemId);
+    // Ensure submenu drawer slides in with a slight delay after rendering
+    setTimeout(() => {
+      const drawer = document.querySelector(
+        `.mobile-submenu-drawer[data-id="${itemId}"]`
+      );
+      if (drawer) drawer.classList.add('active');
+    }, 10);
+  };
+
+  const closeSubmenu = () => {
+    const activeDrawer = document.querySelector('.mobile-submenu-drawer.active');
+    if (activeDrawer) {
+      activeDrawer.classList.remove('active');
+      setTimeout(() => setActiveSubmenu(null), 300); // Allow animation time
+    }
+  };
+
+  // Prevent page scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.documentElement.classList.add('no-scroll');
@@ -24,6 +45,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       document.documentElement.classList.remove('no-scroll');
     }
   }, [isMobileMenuOpen]);
+
 
   return (
     <>
