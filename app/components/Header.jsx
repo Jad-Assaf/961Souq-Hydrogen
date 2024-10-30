@@ -6,29 +6,38 @@ import { AnimatedImage } from './AnimatedImage';
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openSubmenus, setOpenSubmenus] = useState({}); // State to track open submenus
 
   const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  const toggleSubmenu = (itemId) => {
+    setOpenSubmenus((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId], // Toggle submenu for the clicked item
+    }));
+  };
 
   return (
     <>
       <header className="header">
         <div className="header-top">
-          <button className="header-menu-mobile-toggle" onClick={toggleMobileMenu}>
-            ☰
-          </button>
-
           <NavLink prefetch="intent" to="/" className="logo-link" end>
             <AnimatedImage
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
               alt={`${shop.name} Logo`}
               className="header-logo"
-              width="150px"
-              height="auto"
+              width="200px"
+              height="100px"
             />
           </NavLink>
-
           <div className="header-ctas">
+            <button
+              className="header-menu-mobile-toggle"
+              onClick={toggleMobileMenu}
+            >
+              ☰
+            </button>
             <NavLink prefetch="intent" to="/account" className="sign-in-link">
               <Suspense fallback={<UserIcon />}>
                 <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
@@ -56,30 +65,34 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           <button className="close-mobile-menu" onClick={closeMobileMenu}>
             ✕
           </button>
+          <div className="mobile-menu-list">
+            {menu.items.map((item) => (
+              <div key={item.id} className="menu-item">
+                <button
+                  className="menu-item-button"
+                  onClick={() => toggleSubmenu(item.id)}
+                >
+                  <span>{item.title}</span>
+                  <span className="menu-item-arrow">
+                    {openSubmenus[item.id] ? '▲' : '›'}
+                  </span>
+                </button>
 
-          <div>
-            <div className="mobile-menu-title">Menu</div>
-            <div className="mobile-menu-list">
-              {menu.items.map((item) => (
-                <div key={item.id} className="menu-item">
-                  <NavLink to={new URL(item.url).pathname}>
-                    <img src={item.icon} alt="" width="24" height="24" /> {/* Icon */}
-                    {item.title}
-                  </NavLink>
-                  <span className="menu-item-arrow">›</span> {/* Arrow Icon */}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mobile-menu-footer">
-            <NavLink to="/account">
-              <UserIcon />
-              Sign In
-            </NavLink>
-            <NavLink to="/account/register">
-              Create an Account
-            </NavLink>
+                {openSubmenus[item.id] && item.items?.length > 0 && (
+                  <div className="submenu">
+                    {item.items.map((subItem) => (
+                      <NavLink
+                        key={subItem.id}
+                        to={new URL(subItem.url).pathname}
+                        className="submenu-item"
+                      >
+                        {subItem.title}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
