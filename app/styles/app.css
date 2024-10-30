@@ -412,57 +412,50 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
-/* Header Bottom */
+/* Header Container */
+.header {
+  background: #fff;
+  z-index: 1;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Top Section */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  width: 90vw;
+  max-width: 1500px;
+  margin: 20px auto;
+}
+
+/* Header Bottom Section */
 .header-bottom {
-  width: 100%;
+  width: 100vw;
+  padding: 0 1rem;
   background-color: #2172af;
   position: sticky;
   top: 0;
   z-index: 999;
 }
 
-/* CTAs and Icons for Smaller Screens */
-.header-ctas {
-  flex-wrap: wrap;
-  justify-content: flex-end;
+/* Global Header Text Styling */
+.header * {
+  color: #fff;
 }
 
-/* Adjust CTAs for Mobile */
-@media (max-width: 768px) {
-  .header-ctas svg {
-    width: 30px;
-    height: 30px;
-  }
-}
-
-.header {
-  background: #fff;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  z-index: 100;
-}
-
-/* Header Top */
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  width: 100%;
-  max-width: 1500px;
-  margin: 0 auto;
-}
-
-/* Mobile Menu Toggle Button */
+/* Mobile Menu Toggle (Visible on Small Screens Only) */
 .header-menu-mobile-toggle {
-  font-size: 24px;
-  cursor: pointer;
   display: block;
+  font-size: 24px;
   background: none;
   border: none;
+  cursor: pointer;
 
-  @media (min-width: 768px) {
+  @media (min-width: 48em) {
     display: none;
   }
 }
@@ -496,50 +489,106 @@ button.reset:hover:not(:has(> *)) {
 /* Header Menu for Desktop */
 .header-menu-desktop {
   display: none;
+  gap: 1rem;
+  margin: auto;
 
-  @media (min-width: 768px) {
+  @media (min-width: 45em) {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     padding: 15px 0;
+    max-width: 1500px;
   }
 }
 
-/* Header CTAs */
-.header-ctas {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Search, Cart, and Sign-In Icons */
-.header-ctas svg {
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-}
-
-/* Mobile Menu */
+/* Header Menu for Mobile */
 .header-menu-mobile {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* General Menu Item Styling */
-.menu-item {
-  font-size: 1.2rem;
-  color: white;
+/* Header CTA Buttons (Search, Cart, Sign-in) */
+.header-ctas {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
+/* Individual Menu Item */
+.menu-item {
+  position: relative;
+}
+
+/* Menu Item Links */
 .menu-item a {
-  color: white;
+  color: #fff;
   text-decoration: none;
 }
 
 .menu-item a:hover {
   text-decoration: underline;
+}
+
+/* Submenu Styling */
+.submenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  z-index: 1000;
+  width: max-content;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.menu-item:hover>.submenu {
+  display: block;
+}
+
+.submenu .menu-item {
+  padding: 5px;
+}
+
+/* Submenu Inside Another Submenu */
+.submenu .submenu {
+  left: 100%;
+  top: 0;
+}
+
+/* Submenu Links */
+.menu-item .submenu .menu-item a {
+  color: #000 !important;
+}
+
+/* Search, Cart, and Sign-in Icons Styling */
+.sign-in-link svg,
+.search-toggle svg,
+.cart-button svg {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+/* Responsive Adjustments for Logo */
+.header-logo {
+  max-width: 100px;
+  height: auto;
+
+  @media (min-width: 768px) {
+    max-width: 200px;
+  }
+}
+
+/* Adjust Icons for Smaller Screens */
+@media (max-width: 768px) {
+  .header-ctas svg {
+    width: 35px;
+    height: 35px;
+  }
 }
 /*
 * --------------------------------------------------

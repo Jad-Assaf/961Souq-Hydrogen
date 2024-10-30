@@ -26,6 +26,13 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           </NavLink>
           <div className="header-ctas">
             <HeaderMenuMobileToggle toggleMobileMenu={toggleMobileMenu} />
+            <NavLink prefetch="intent" to="/account" className="sign-in-link">
+              <Suspense fallback={<UserIcon />}>
+                <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
+                  {() => <UserIcon />}
+                </Await>
+              </Suspense>
+            </NavLink>
             <SearchToggle />
             <CartToggle cart={cart} />
           </div>
@@ -60,6 +67,32 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
 export function HeaderMenu({ menu, viewport }) {
   const { close } = useAside();
+
+  useEffect(() => {
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    const handleMouseEnter = (event) => {
+      const submenu = event.currentTarget.querySelector('.submenu');
+      if (submenu) submenu.style.display = 'block';
+    };
+
+    const handleMouseLeave = (event) => {
+      const submenu = event.currentTarget.querySelector('.submenu');
+      if (submenu) submenu.style.display = 'none';
+    };
+
+    menuItems.forEach((item) => {
+      item.addEventListener('mouseenter', handleMouseEnter);
+      item.addEventListener('mouseleave', handleMouseLeave);
+    });
+
+    return () => {
+      menuItems.forEach((item) => {
+        item.removeEventListener('mouseenter', handleMouseEnter);
+        item.removeEventListener('mouseleave', handleMouseLeave);
+      });
+    };
+  }, []);
 
   const renderMenuItems = (items) =>
     items.map((item) => (
@@ -124,7 +157,6 @@ function CartToggle({ cart }) {
     </button>
   );
 }
-
 
 function UserIcon() {
   return (
