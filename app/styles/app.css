@@ -473,8 +473,10 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  transition: opacity 0.3s ease-in-out;
 }
 
+/* Close Button for Mobile Menu */
 .close-mobile-menu {
   position: absolute;
   top: 20px;
@@ -484,6 +486,13 @@ button.reset:hover:not(:has(> *)) {
   background: none;
   border: none;
   cursor: pointer;
+}
+
+/* Mobile Header Menu */
+.header-menu-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* Header Menu for Desktop */
@@ -503,26 +512,12 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
-/* Header Menu for Mobile */
-.header-menu-mobile {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Header CTA Buttons (Search, Cart, Sign-in) */
-.header-ctas {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Individual Menu Item */
+/* Menu Items */
 .menu-item {
   position: relative;
 }
 
-/* Menu Item Links */
+/* Links in the Menu Items */
 .menu-item a {
   color: #fff;
   text-decoration: none;
@@ -562,6 +557,13 @@ button.reset:hover:not(:has(> *)) {
 /* Submenu Links */
 .menu-item .submenu .menu-item a {
   color: #000 !important;
+}
+
+/* Header CTA Buttons (Search, Cart, Sign-in) */
+.header-ctas {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Search, Cart, and Sign-in Icons Styling */
