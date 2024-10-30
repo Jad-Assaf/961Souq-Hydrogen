@@ -1,6 +1,5 @@
-import { Suspense, useEffect } from 'react';
-import { Await, NavLink, useAsyncValue } from '@remix-run/react';
-import { useAnalytics, useOptimisticCart } from '@shopify/hydrogen';
+import { Suspense, useEffect, useState } from 'react';
+import { Await, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
 import { AnimatedImage } from './AnimatedImage';
 
@@ -59,35 +58,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   );
 }
 
-
 export function HeaderMenu({ menu, viewport }) {
   const { close } = useAside();
-
-  useEffect(() => {
-    const menuItems = document.querySelectorAll('.menu-item');
-
-    const handleMouseEnter = (event) => {
-      const submenu = event.currentTarget.querySelector('.submenu');
-      if (submenu) submenu.style.display = 'block';
-    };
-
-    const handleMouseLeave = (event) => {
-      const submenu = event.currentTarget.querySelector('.submenu');
-      if (submenu) submenu.style.display = 'none';
-    };
-
-    menuItems.forEach((item) => {
-      item.addEventListener('mouseenter', handleMouseEnter);
-      item.addEventListener('mouseleave', handleMouseLeave);
-    });
-
-    return () => {
-      menuItems.forEach((item) => {
-        item.removeEventListener('mouseenter', handleMouseEnter);
-        item.removeEventListener('mouseleave', handleMouseLeave);
-      });
-    };
-  }, []);
 
   const renderMenuItems = (items) =>
     items.map((item) => (
@@ -103,9 +75,7 @@ export function HeaderMenu({ menu, viewport }) {
         </NavLink>
 
         {item.items?.length > 0 && (
-          <div className="submenu">
-            {renderMenuItems(item.items)}
-          </div>
+          <div className="submenu">{renderMenuItems(item.items)}</div>
         )}
       </div>
     ));
@@ -113,23 +83,6 @@ export function HeaderMenu({ menu, viewport }) {
   return (
     <nav className={`header-menu-${viewport}`} role="navigation">
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
-    </nav>
-  );
-}
-
-function HeaderCtas({ isLoggedIn, cart }) {
-  return (
-    <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" className="sign-in-link">
-        <Suspense fallback={<UserIcon />}>
-          <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
-            {() => <UserIcon />}
-          </Await>
-        </Suspense>
-      </NavLink>
-      <SearchToggle />
-      <CartToggle cart={cart} />
     </nav>
   );
 }
@@ -171,6 +124,7 @@ function CartToggle({ cart }) {
     </button>
   );
 }
+
 
 function UserIcon() {
   return (
