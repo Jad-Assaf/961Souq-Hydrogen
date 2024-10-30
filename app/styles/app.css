@@ -74,7 +74,8 @@
 /* nprogress.css */
 #nprogress .bar {
   background: #2172af;
-  height: 5px;
+  height: 4px;
+  border-radius: 10px;
 }
 
 body{
