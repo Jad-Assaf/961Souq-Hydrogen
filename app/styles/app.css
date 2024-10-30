@@ -400,8 +400,7 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 /* Header Container */
-
-/* Header Container */
+/* General Header Styles */
 .header {
   background: #fff;
   z-index: 1;
@@ -421,7 +420,7 @@ button.reset:hover:not(:has(> *)) {
   margin: 20px auto;
 }
 
-/* Center the Logo and Adjust Layout on Mobile */
+/* Mobile Styles */
 @media (max-width: 768px) {
   .header-top {
     justify-content: center;
@@ -434,34 +433,34 @@ button.reset:hover:not(:has(> *)) {
     display: none;
   }
 
-  /* Mobile Menu Toggle on the Left */
+  /* Mobile Menu Toggle Button */
   .mobile-menu-toggle {
     position: absolute;
     left: 10px;
-    font-size: 34px !important;
-    color: #2172af !important;
+    font-size: 34px;
+    color: #2172af;
     background: none;
     border: none;
     cursor: pointer;
   }
 
-  /* Logo Centered on Mobile */
+  /* Centered Logo on Mobile */
   .header-logo {
     max-width: 200px;
     height: auto;
   }
 
-  /* CTA Icons on the Right */
+  /* CTA Icons (Search, Cart) on the Right */
   .header-ctas {
     position: absolute;
     right: 10px;
     display: flex;
-    gap: 10px !important;
+    gap: 10px;
   }
 
   .header-ctas svg {
-    width: 25px !important;
-    height: 25px !important;
+    width: 25px;
+    height: 25px;
   }
 }
 
@@ -475,7 +474,7 @@ button.reset:hover:not(:has(> *)) {
   z-index: 999;
 }
 
-/* Global Header Text Styling */
+/* Global Header Text Color */
 .header * {
   color: #fff;
 }
@@ -496,53 +495,45 @@ button.reset:hover:not(:has(> *)) {
   padding: 20px;
   transition: opacity 0.5s ease-in-out;
   overflow-y: auto;
+  /* Allow scrolling inside the menu */
 }
 
-/* Disable scrolling on the main page when menu is open */
+/* Disable Page Scrolling When Menu is Open */
 .no-scroll {
   overflow: hidden;
 }
 
-/* Hide the main menu content when a submenu is active */
+/* Hide Menu Content When Submenu is Active */
 .mobile-menu-content.hidden {
   display: none;
 }
 
+/* Submenu Drawer */
 .mobile-submenu-drawer {
   position: absolute;
   top: 0;
   left: 100%;
-  /* Start offscreen to the right */
+  /* Start offscreen */
   width: 100vw;
   height: 100vh;
   background-color: white;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
   padding: 20px;
   transform: translateX(100%);
-  /* Stay offscreen by default */
+  /* Default offscreen */
   transition: transform 0.3s ease-in-out;
   overflow-y: auto;
-  /* Allow scrolling inside the submenu */
+  /* Allow submenu scrolling */
 }
 
-/* Active Submenu Drawer */
+/* Active Submenu Drawer - Slides into View */
 .mobile-submenu-drawer.active {
   transform: translateX(0);
   /* Slide into view */
 }
 
 /* Back Button for Submenu */
-.submenu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 100%; /* Full width of the drawer */
-}
-
-/* Back Button */
 .back-button {
   align-self: flex-start;
   background: none;
@@ -550,6 +541,30 @@ button.reset:hover:not(:has(> *)) {
   font-size: 18px;
   cursor: pointer;
   margin-bottom: 20px;
+}
+
+/* Submenu List */
+.submenu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  /* Full width of the drawer */
+}
+
+/* Mobile Menu Item */
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Menu Item Arrow */
+.mobile-menu-arrow {
+  font-size: 18px;
+  color: #232323;
 }
 
 /* Mobile Menu Close Button */
@@ -564,14 +579,14 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
 }
 
-/* Menu Title */
+/* Mobile Header Menu Title */
 .mobile-menu-title {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 20px;
 }
 
-/* Menu Item List */
+/* Menu Content */
 .mobile-menu-content {
   display: flex;
   flex-direction: column;
@@ -579,32 +594,7 @@ button.reset:hover:not(:has(> *)) {
   width: 100%;
 }
 
-/* Individual Menu Item */
-.mobile-menu-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-/* Menu Item Link */
-.mobile-menu-item a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  font-size: 18px;
-  color: #232323 !important;
-}
-
-/* Arrow Icon */
-.mobile-menu-arrow {
-  font-size: 18px;
-  color: #232323;
-}
-
-/* Footer Actions (Sign-in & Create Account) */
+/* Mobile Menu Footer */
 .mobile-menu-footer {
   display: flex;
   flex-direction: column;
@@ -620,13 +610,6 @@ button.reset:hover:not(:has(> *)) {
   font-size: 18px;
   text-decoration: none;
   color: black;
-}
-
-/* Mobile Header Menu */
-.mobile-header-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 }
 
 /* Header Menu for Desktop */
@@ -651,7 +634,7 @@ button.reset:hover:not(:has(> *)) {
   position: relative;
 }
 
-/* Links in the Menu Items */
+/* Menu Links */
 .menu-item a {
   color: #fff;
   text-decoration: none;
@@ -661,7 +644,7 @@ button.reset:hover:not(:has(> *)) {
   text-decoration: underline;
 }
 
-/* Submenu Styling */
+/* Submenu */
 .submenu {
   display: none;
   position: absolute;
@@ -678,29 +661,29 @@ button.reset:hover:not(:has(> *)) {
   display: block;
 }
 
+/* Nested Submenu */
 .submenu .menu-item {
   padding: 5px;
 }
 
-/* Submenu Inside Another Submenu */
 .submenu .submenu {
   left: 100%;
   top: 0;
 }
 
-/* Submenu Links */
+/* Nested Submenu Links */
 .menu-item .submenu .menu-item a {
   color: #000 !important;
 }
 
-/* Header CTA Buttons (Search, Cart, Sign-in) */
+/* Header CTA Buttons (Search, Cart) */
 .header-ctas {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-/* Search, Cart, and Sign-in Icons Styling */
+/* CTA Icons Styling */
 .sign-in-link svg,
 .search-toggle svg,
 .cart-button svg {

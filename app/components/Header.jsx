@@ -21,7 +21,9 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const openSubmenu = (itemId) => {
     setActiveSubmenu(itemId);
     requestAnimationFrame(() => {
-      const drawer = document.querySelector(`.mobile-submenu-drawer[data-id="${itemId}"]`);
+      const drawer = document.querySelector(
+        `.mobile-submenu-drawer[data-id="${itemId}"]`
+      );
       if (drawer) drawer.classList.add('active');
     });
   };
@@ -47,10 +49,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     <>
       <header className="header">
         <div className="header-top">
-          <button
-            className="mobile-menu-toggle"
-            onClick={toggleMobileMenu}
-          >
+          <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
             ☰
           </button>
 
@@ -127,7 +126,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               </div>
             </div>
           )}
-
         </div>
       )}
     </>
