@@ -7,9 +7,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen((prev) => !prev);
-  };
+  const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <>
@@ -25,7 +24,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             />
           </NavLink>
           <div className="header-ctas">
-            <HeaderMenuMobileToggle toggleMobileMenu={toggleMobileMenu} />
+            <button
+              className="header-menu-mobile-toggle"
+              onClick={toggleMobileMenu}
+            >
+              ☰
+            </button>
             <NavLink prefetch="intent" to="/account" className="sign-in-link">
               <Suspense fallback={<UserIcon />}>
                 <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
@@ -37,6 +41,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             <CartToggle cart={cart} />
           </div>
         </div>
+
         <div className="header-bottom">
           <HeaderMenu
             menu={menu}
@@ -47,21 +52,19 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
-      <div
-        className={`mobile-menu-overlay ${isMobileMenuOpen ? 'visible' : 'hidden'
-          }`}
-      >
-        <button className="close-mobile-menu" onClick={toggleMobileMenu}>
-          ✕
-        </button>
-        <HeaderMenu
-          menu={menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
-      </div>
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay">
+          <button className="close-mobile-menu" onClick={closeMobileMenu}>
+            ✕
+          </button>
+          <HeaderMenu
+            menu={menu}
+            viewport="mobile"
+            primaryDomainUrl={header.shop.primaryDomain.url}
+            publicStoreDomain={publicStoreDomain}
+          />
+        </div>
+      )}
     </>
   );
 }
@@ -98,16 +101,9 @@ export function HeaderMenu({ menu, viewport }) {
   const renderMenuItems = (items) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to={new URL(item.url).pathname}
-        >
+        <NavLink to={new URL(item.url).pathname}>
           {item.title}
         </NavLink>
-
         {item.items?.length > 0 && (
           <div className="submenu">{renderMenuItems(item.items)}</div>
         )}
@@ -119,6 +115,7 @@ export function HeaderMenu({ menu, viewport }) {
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
     </nav>
   );
+
 }
 
 function HeaderMenuMobileToggle({ toggleMobileMenu }) {
