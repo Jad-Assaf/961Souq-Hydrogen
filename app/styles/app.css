@@ -529,7 +529,7 @@ button.reset:hover:not(:has(> *)) {
 
 /* Active Submenu Drawer - Slides into View */
 .mobile-submenu-drawer.active {
-  left: 0;
+  left: -100%;
   /* Slide into view */
 }
 
