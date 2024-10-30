@@ -48,19 +48,20 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       </header>
 
       {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay">
-          <button className="close-mobile-menu" onClick={toggleMobileMenu}>
-            ✕
-          </button>
-          <HeaderMenu
-            menu={menu}
-            viewport="mobile"
-            primaryDomainUrl={header.shop.primaryDomain.url}
-            publicStoreDomain={publicStoreDomain}
-          />
-        </div>
-      )}
+      <div
+        className={`mobile-menu-overlay ${isMobileMenuOpen ? 'visible' : 'hidden'
+          }`}
+      >
+        <button className="close-mobile-menu" onClick={toggleMobileMenu}>
+          ✕
+        </button>
+        <HeaderMenu
+          menu={menu}
+          viewport="mobile"
+          primaryDomainUrl={header.shop.primaryDomain.url}
+          publicStoreDomain={publicStoreDomain}
+        />
+      </div>
     </>
   );
 }

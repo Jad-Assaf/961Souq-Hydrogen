@@ -473,7 +473,20 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  opacity: 0;
+  visibility: hidden;
   transition: opacity 0.3s ease-in-out;
+}
+
+.mobile-menu-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Hide the overlay when not active */
+.mobile-menu-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* Close Button for Mobile Menu */
