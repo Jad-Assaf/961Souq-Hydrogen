@@ -652,7 +652,7 @@ button.reset:hover:not(:has(> *)) {
 
 /* Menu Links */
 .menu-item a {
-  color: #fff;
+  color: #000 !important;
   text-decoration: none;
 }
 
