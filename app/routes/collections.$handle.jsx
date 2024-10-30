@@ -128,8 +128,8 @@ function ProductItem({ product, loading }) {
           src={product.featuredImage.url} // Ensure src is passed correctly
           alt={product.featuredImage.altText || product.title}
           loading={loading}
-          width="200px"
-          height="200px"
+          width="100%"
+          height="auto"
         />
       )}
       <h4>{product.title}</h4>
