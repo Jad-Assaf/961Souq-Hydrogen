@@ -512,7 +512,7 @@ button.reset:hover:not(:has(> *)) {
 .mobile-submenu-drawer {
   position: absolute;
   top: 0;
-  left: 100%;
+  /* left: 100%; */
   /* Start offscreen */
   width: 100vw;
   height: 100vh;
@@ -529,7 +529,7 @@ button.reset:hover:not(:has(> *)) {
 
 /* Active Submenu Drawer - Slides into View */
 .mobile-submenu-drawer.active {
-  left: -100%;
+  transform: translateX(0);
   /* Slide into view */
 }
 
