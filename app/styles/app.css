@@ -422,7 +422,7 @@ button.reset:hover:not(:has(> *)) {
 /* Desktop Header Layout */
 @media (min-width: 769px) {
   .header-top {
-    justify-content: flex-start;
+    justify-content: space-between;
     /* Align logo to the left */
   }
 
@@ -466,7 +466,7 @@ button.reset:hover:not(:has(> *)) {
     position: absolute;
     left: 10px;
     font-size: 34px;
-    color: #2172af;
+    color: #2172af !important;
     background: none;
     border: none;
     cursor: pointer;
@@ -489,6 +489,9 @@ button.reset:hover:not(:has(> *)) {
   .header-ctas svg {
     width: 25px;
     height: 25px;
+  }
+  .header-ctas a sign-in-link{
+    display: none;
   }
 }
 
@@ -677,6 +680,7 @@ button.reset:hover:not(:has(> *)) {
 /* Nested Submenu */
 .submenu .menu-item {
   padding: 5px;
+  color: #000 !important;
 }
 
 .submenu .submenu {
