@@ -23,7 +23,7 @@ import 'nprogress/nprogress.css';  // Import NProgress styles
 import 'public/fonts.css'
 
 // Configure NProgress (Optional: Disable spinner)
-NProgress.configure({ showSpinner: false });
+NProgress.configure({ showSpinner: true });
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations

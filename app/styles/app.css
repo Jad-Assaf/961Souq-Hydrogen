@@ -10,9 +10,36 @@
 
 /* nprogress.css */
 #nprogress .bar {
-  background: #2172af;
+  background: #29d;
   height: 4px;
   border-radius: 10px;
+}
+
+#nprogress .spinner {
+  position: fixed;
+  right: 15px;
+  top: 15px;
+  z-index: 1031;
+}
+
+#nprogress .spinner-icon {
+  width: 18px;
+  height: 18px;
+  border: 2px solid transparent;
+  border-top-color: #29d;
+  border-left-color: #29d;
+  border-radius: 50%;
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+@keyframes nprogress-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 body{
