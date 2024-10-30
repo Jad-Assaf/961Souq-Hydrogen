@@ -6,12 +6,18 @@ import { AnimatedImage } from './AnimatedImage';
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSubmenu, setActiveSubmenu] = useState(null); // Track active submenu
 
   const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    setActiveSubmenu(null); // Close any open submenu when menu is closed
+  };
+
+  const openSubmenu = (itemId) => setActiveSubmenu(itemId); // Open the submenu drawer
+  const closeSubmenu = () => setActiveSubmenu(null); // Close the submenu drawer
 
   useEffect(() => {
-    // Disable body scrolling but allow scrolling inside the mobile menu
     if (isMobileMenuOpen) {
       document.documentElement.classList.add('no-scroll');
     } else {
@@ -73,31 +79,36 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             ✕
           </button>
 
-          <div>
-            <div className="mobile-menu-title">Menu</div>
-            <div className="mobile-menu-list">
-              {menu.items.map((item) => (
-                <div key={item.id} className="menu-item">
-                  <NavLink
-                    to={new URL(item.url).pathname}
-                    onClick={closeMobileMenu} // Close menu when link is clicked
-                  >
-                    <img src={item.icon} alt="" width="24" height="24" />{' '}
-                    {item.title}
-                  </NavLink>
-                  <span className="menu-item-arrow">›</span>
-                </div>
-              ))}
-            </div>
+          <div className={`mobile-menu-list ${activeSubmenu ? 'hidden' : ''}`}>
+            {menu.items.map((item) => (
+              <div key={item.id} className="menu-item">
+                <button onClick={() => openSubmenu(item.id)}>
+                  {item.title} <span className="menu-item-arrow">›</span>
+                </button>
+              </div>
+            ))}
           </div>
 
-          <div className="mobile-menu-footer">
-            <NavLink to="/account">
-              <UserIcon />
-              Sign In
-            </NavLink>
-            <NavLink to="/account/register">Create an Account</NavLink>
-          </div>
+          {activeSubmenu && (
+            <div className="submenu-drawer">
+              <button className="back-button" onClick={closeSubmenu}>
+                ‹ Back
+              </button>
+              <div className="submenu-list">
+                {menu.items
+                  .find((item) => item.id === activeSubmenu)
+                  ?.items.map((subItem) => (
+                    <NavLink
+                      key={subItem.id}
+                      to={new URL(subItem.url).pathname}
+                      onClick={closeMobileMenu}
+                    >
+                      {subItem.title}
+                    </NavLink>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

@@ -515,6 +515,42 @@ button.reset:hover:not(:has(> *)) {
   overflow-y: auto;
 }
 
+.mobile-menu-list.hidden {
+  display: none;
+}
+
+/* Submenu Drawer */
+.submenu-drawer {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Back Button */
+.back-button {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+/* Submenu List */
+.submenu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
 /* Close Button */
 .close-mobile-menu {
   position: absolute;
