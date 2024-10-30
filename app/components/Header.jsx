@@ -15,15 +15,13 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-    setActiveSubmenu(null); // Ensure all submenus close
+    setActiveSubmenu(null); // Close all submenus when menu is closed
   };
 
   const openSubmenu = (itemId) => {
     setActiveSubmenu(itemId);
     requestAnimationFrame(() => {
-      const drawer = document.querySelector(
-        `.mobile-submenu-drawer[data-id="${itemId}"]`
-      );
+      const drawer = document.querySelector(`.mobile-submenu-drawer[data-id="${itemId}"]`);
       if (drawer) drawer.classList.add('active');
     });
   };
@@ -32,7 +30,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     const activeDrawer = document.querySelector('.mobile-submenu-drawer.active');
     if (activeDrawer) {
       activeDrawer.classList.remove('active');
-      setTimeout(() => setActiveSubmenu(null), 300); // Allow animation time
+      setTimeout(() => setActiveSubmenu(null), 300); // Wait for animation
     }
   };
 
@@ -110,10 +108,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           </div>
 
           {activeSubmenu && (
-            <div
-              className="mobile-submenu-drawer"
-              data-id={activeSubmenu}
-            >
+            <div className="mobile-submenu-drawer" data-id={activeSubmenu}>
               <button className="back-button" onClick={closeSubmenu}>
                 ‹ Back
               </button>
@@ -132,6 +127,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               </div>
             </div>
           )}
+
         </div>
       )}
     </>
