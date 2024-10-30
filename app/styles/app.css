@@ -508,12 +508,11 @@ button.reset:hover:not(:has(> *)) {
   display: none;
 }
 
-/* Submenu Drawer */
 .mobile-submenu-drawer {
   position: absolute;
   top: 0;
   left: 100%;
-  /* Offscreen by default */
+  /* Initially offscreen */
   width: 100vw;
   height: 100vh;
   background-color: white;
@@ -521,10 +520,10 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
   padding: 20px;
   transform: translateX(100%);
+  /* Offscreen by default */
   transition: transform 0.3s ease-in-out;
 }
 
-/* Slide in the submenu when active */
 .mobile-submenu-drawer.active {
   transform: translateX(0);
 }

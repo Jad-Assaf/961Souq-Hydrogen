@@ -20,13 +20,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
   const openSubmenu = (itemId) => {
     setActiveSubmenu(itemId);
-    // Ensure submenu drawer slides in with a slight delay after rendering
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       const drawer = document.querySelector(
         `.mobile-submenu-drawer[data-id="${itemId}"]`
       );
       if (drawer) drawer.classList.add('active');
-    }, 10);
+    });
   };
 
   const closeSubmenu = () => {
@@ -45,7 +44,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       document.documentElement.classList.remove('no-scroll');
     }
   }, [isMobileMenuOpen]);
-
 
   return (
     <>
@@ -112,11 +110,14 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           </div>
 
           {activeSubmenu && (
-            <div className="mobile-submenu-drawer">
-              <button className="mobile-back-button" onClick={closeSubmenu}>
+            <div
+              className="mobile-submenu-drawer"
+              data-id={activeSubmenu}
+            >
+              <button className="back-button" onClick={closeSubmenu}>
                 ‹ Back
               </button>
-              <div className="mobile-submenu-list">
+              <div className="submenu-list">
                 {menu.items
                   .find((item) => item.id === activeSubmenu)
                   ?.items.map((subItem) => (
