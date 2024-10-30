@@ -78,7 +78,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               Sign In
             </NavLink>
             <NavLink to="/account/register">
-              <CreateAccountIcon />
               Create an Account
             </NavLink>
           </div>
