@@ -13,12 +13,14 @@
   background: #29d;
   height: 4px;
   border-radius: 10px;
+  position: fixed;
+  bottom: 0;
 }
 
 #nprogress .spinner {
   position: fixed;
   right: 15px;
-  top: 15px;
+  bottom: 15px;
   z-index: 1031;
 }
 
@@ -42,7 +44,7 @@
   }
 }
 
-body{
+body {
   font-family: "Montserrat", sans-serif;
 }
 
@@ -92,20 +94,23 @@ img {
 }
 
 @media (max-width: 768px) {
-  .image-row{
+  .image-row {
     display: flex !important;
     gap: 2rem !important;
     width: 90vw !important;
     flex-direction: column !important;
-  }  
+  }
+
   .row-image {
     height: unset !important;
     margin: 0 auto !important;
   }
-  .product-card img{
+
+  .product-card img {
     width: 155px !important;
   }
-  .product-item{
+
+  .product-item {
     min-width: unset !important;
     width: 175px !important;
   }
@@ -432,6 +437,36 @@ button.reset:hover:not(:has(> *)) {
   margin: 20px auto;
 }
 
+/* Center the Logo and Adjust Layout on Mobile */
+@media (max-width: 768px) {
+  .header-top {
+    justify-content: center;
+    position: relative;
+    /* Allows precise positioning for other elements */
+  }
+
+  /* Mobile Menu Toggle on the Left */
+  .header-menu-mobile-toggle {
+    position: absolute;
+    left: 10px;
+    font-size: 24px;
+  }
+
+  /* Logo Centered on Mobile */
+  .header-logo {
+    max-width: 150px;
+    height: auto;
+  }
+
+  /* CTA Icons (User, Search, Cart) on the Right */
+  .header-ctas {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+  }
+}
+
 /* Header Bottom Section */
 .header-bottom {
   width: 100vw;
@@ -603,6 +638,7 @@ button.reset:hover:not(:has(> *)) {
     height: 35px;
   }
 }
+
 /*
 * --------------------------------------------------
 * components/Footer

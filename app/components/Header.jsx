@@ -14,6 +14,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     <>
       <header className="header">
         <div className="header-top">
+          <button className="header-menu-mobile-toggle" onClick={toggleMobileMenu}>
+            ☰
+          </button>
+
           <NavLink prefetch="intent" to="/" className="logo-link" end>
             <AnimatedImage
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
@@ -23,13 +27,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               height="100px"
             />
           </NavLink>
+
           <div className="header-ctas">
-            <button
-              className="header-menu-mobile-toggle"
-              onClick={toggleMobileMenu}
-            >
-              ☰
-            </button>
             <NavLink prefetch="intent" to="/account" className="sign-in-link">
               <Suspense fallback={<UserIcon />}>
                 <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
