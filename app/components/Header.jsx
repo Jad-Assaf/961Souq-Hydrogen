@@ -56,12 +56,32 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           <button className="close-mobile-menu" onClick={closeMobileMenu}>
             ✕
           </button>
-          <HeaderMenu
-            menu={menu}
-            viewport="mobile"
-            primaryDomainUrl={header.shop.primaryDomain.url}
-            publicStoreDomain={publicStoreDomain}
-          />
+
+          <div>
+            <div className="mobile-menu-title">Menu</div>
+            <div className="mobile-menu-list">
+              {menu.items.map((item) => (
+                <div key={item.id} className="menu-item">
+                  <NavLink to={new URL(item.url).pathname}>
+                    <img src={item.icon} alt="" width="24" height="24" /> {/* Icon */}
+                    {item.title}
+                  </NavLink>
+                  <span className="menu-item-arrow">›</span> {/* Arrow Icon */}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mobile-menu-footer">
+            <NavLink to="/account">
+              <UserIcon />
+              Sign In
+            </NavLink>
+            <NavLink to="/account/register">
+              <CreateAccountIcon />
+              Create an Account
+            </NavLink>
+          </div>
         </div>
       )}
     </>
