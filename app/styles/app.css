@@ -494,23 +494,19 @@ button.reset:hover:not(:has(> *)) {
   width: 100vw;
   height: 100vh;
   background-color: rgba(255, 255, 255, 0.85);
-  /* White with slight transparency */
+  /* Slightly transparent white */
   backdrop-filter: blur(10px);
   /* Blur effect */
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  /* Align links to the left */
+  justify-content: space-between;
+  /* Push content to top and bottom */
   padding: 20px;
-  /* Add padding for better alignment */
   transition: opacity 0.3s ease-in-out;
-  opacity: 1;
-  visibility: visible;
 }
 
-/* Close Button for Mobile Menu */
+/* Close Button */
 .close-mobile-menu {
   position: absolute;
   top: 20px;
@@ -522,16 +518,62 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
 }
 
-/* Mobile Menu Links */
-.header-menu-mobile .menu-item {
-  margin-bottom: 10px;
+/* Menu Title */
+.mobile-menu-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
-.header-menu-mobile .menu-item a {
+/* Menu Item List */
+.mobile-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+/* Individual Menu Item */
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Menu Item Link */
+.menu-item a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 18px;
+  color: #232323 !important;
+}
+
+/* Arrow Icon */
+.menu-item-arrow {
+  font-size: 18px;
+  color: #232323;
+}
+
+/* Footer Actions (Sign-in & Create Account) */
+.mobile-menu-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.mobile-menu-footer a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  text-decoration: none;
   color: black;
-  font-weight: 500;
 }
 
 .mobile-menu-overlay.visible {
