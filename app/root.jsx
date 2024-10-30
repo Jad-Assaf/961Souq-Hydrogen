@@ -20,6 +20,7 @@ import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
 import NProgress from 'nprogress';  // Import NProgress
 import 'nprogress/nprogress.css';  // Import NProgress styles
+import 'public/fonts.css'
 
 // Configure NProgress (Optional: Disable spinner)
 NProgress.configure({ showSpinner: false });
