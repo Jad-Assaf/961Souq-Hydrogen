@@ -6,16 +6,16 @@ import { AnimatedImage } from './AnimatedImage';
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSubmenu, setActiveSubmenu] = useState(null); // Track active submenu
+  const [activeSubmenu, setActiveSubmenu] = useState(null);
 
   const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-    setActiveSubmenu(null); // Close any open submenu when menu is closed
+    setActiveSubmenu(null);
   };
 
-  const openSubmenu = (itemId) => setActiveSubmenu(itemId); // Open the submenu drawer
-  const closeSubmenu = () => setActiveSubmenu(null); // Close the submenu drawer
+  const openSubmenu = (itemId) => setActiveSubmenu(itemId);
+  const closeSubmenu = () => setActiveSubmenu(null);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -30,7 +30,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       <header className="header">
         <div className="header-top">
           <button
-            className="header-menu-mobile-toggle"
+            className="mobile-menu-toggle"
             onClick={toggleMobileMenu}
           >
             ☰
@@ -50,7 +50,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             <NavLink
               prefetch="intent"
               to="/account"
-              className="sign-in-link user-icon-header"
+              className="sign-in-link mobile-user-icon"
             >
               <Suspense fallback={<UserIcon />}>
                 <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
@@ -75,26 +75,26 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
       {isMobileMenuOpen && (
         <div className="mobile-menu-overlay">
-          <button className="close-mobile-menu" onClick={closeMobileMenu}>
+          <button className="mobile-menu-close" onClick={closeMobileMenu}>
             ✕
           </button>
 
-          <div className={`mobile-menu-list ${activeSubmenu ? 'hidden' : ''}`}>
+          <div className={`mobile-menu-content ${activeSubmenu ? 'hidden' : ''}`}>
             {menu.items.map((item) => (
-              <div key={item.id} className="menu-item">
+              <div key={item.id} className="mobile-menu-item">
                 <button onClick={() => openSubmenu(item.id)}>
-                  {item.title} <span className="menu-item-arrow">›</span>
+                  {item.title} <span className="mobile-menu-arrow">›</span>
                 </button>
               </div>
             ))}
           </div>
 
           {activeSubmenu && (
-            <div className="submenu-drawer">
-              <button className="back-button" onClick={closeSubmenu}>
+            <div className="mobile-submenu-drawer">
+              <button className="mobile-back-button" onClick={closeSubmenu}>
                 ‹ Back
               </button>
-              <div className="submenu-list">
+              <div className="mobile-submenu-list">
                 {menu.items
                   .find((item) => item.id === activeSubmenu)
                   ?.items.map((subItem) => (

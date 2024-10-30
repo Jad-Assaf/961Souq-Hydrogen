@@ -427,19 +427,22 @@ button.reset:hover:not(:has(> *)) {
     justify-content: center;
     position: relative;
     width: 95vw !important;
-    /* Allows precise positioning for other elements */
   }
 
+  /* Hide User Icon in Header on Mobile */
   .user-icon-header {
     display: none;
   }
 
   /* Mobile Menu Toggle on the Left */
-  .header-menu-mobile-toggle {
+  .mobile-menu-toggle {
     position: absolute;
     left: 10px;
     font-size: 34px !important;
     color: #2172af !important;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
 
   /* Logo Centered on Mobile */
@@ -448,7 +451,7 @@ button.reset:hover:not(:has(> *)) {
     height: auto;
   }
 
-  /* CTA Icons (User, Search, Cart) on the Right */
+  /* CTA Icons on the Right */
   .header-ctas {
     position: absolute;
     right: 10px;
@@ -477,19 +480,6 @@ button.reset:hover:not(:has(> *)) {
   color: #fff;
 }
 
-/* Mobile Menu Toggle (Visible on Small Screens Only) */
-.header-menu-mobile-toggle {
-  display: block;
-  font-size: 24px;
-  background: none;
-  border: none;
-  cursor: pointer;
-
-  @media (min-width: 48em) {
-    display: none;
-  }
-}
-
 /* Mobile Menu Overlay */
 .mobile-menu-overlay {
   position: fixed;
@@ -508,18 +498,18 @@ button.reset:hover:not(:has(> *)) {
   overflow-y: auto;
 }
 
-/* Disable scrolling on the main page */
+/* Disable scrolling on the main page when menu is open */
 .no-scroll {
   overflow: hidden;
 }
 
-/* Hide the main menu list when a submenu is active */
-.mobile-menu-list.hidden {
+/* Hide the main menu content when a submenu is active */
+.mobile-menu-content.hidden {
   display: none;
 }
 
 /* Submenu Drawer */
-.submenu-drawer {
+.mobile-submenu-drawer {
   position: absolute;
   top: 0;
   left: 100%;
@@ -529,12 +519,17 @@ button.reset:hover:not(:has(> *)) {
   display: flex;
   flex-direction: column;
   padding: 20px;
-  transform: translateX(0);
+  transform: translateX(100%);
   transition: transform 0.3s ease-in-out;
 }
 
-/* Back Button */
-.back-button {
+/* Slide in the submenu when active */
+.mobile-submenu-drawer.active {
+  transform: translateX(0);
+}
+
+/* Back Button for Submenu */
+.mobile-back-button {
   align-self: flex-start;
   background: none;
   border: none;
@@ -543,15 +538,15 @@ button.reset:hover:not(:has(> *)) {
   margin-bottom: 20px;
 }
 
-/* Submenu List */
-.submenu-list {
+/* Mobile Submenu List */
+.mobile-submenu-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-/* Close Button */
-.close-mobile-menu {
+/* Mobile Menu Close Button */
+.mobile-menu-close {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -570,7 +565,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Menu Item List */
-.mobile-menu-list {
+.mobile-menu-content {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -578,7 +573,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Individual Menu Item */
-.menu-item {
+.mobile-menu-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -587,7 +582,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Menu Item Link */
-.menu-item a {
+.mobile-menu-item a {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -597,7 +592,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Arrow Icon */
-.menu-item-arrow {
+.mobile-menu-arrow {
   font-size: 18px;
   color: #232323;
 }
@@ -620,19 +615,8 @@ button.reset:hover:not(:has(> *)) {
   color: black;
 }
 
-.mobile-menu-overlay.visible {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Hide the overlay when not active */
-.mobile-menu-overlay.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
 /* Mobile Header Menu */
-.header-menu-mobile {
+.mobile-header-menu {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
