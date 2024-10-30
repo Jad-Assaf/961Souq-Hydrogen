@@ -7,20 +7,15 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen((prev) => !prev);
-  };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
+  const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   useEffect(() => {
-    // Add or remove the "no-scroll" class to body based on menu state
+    // Disable body scrolling but allow scrolling inside the mobile menu
     if (isMobileMenuOpen) {
-      document.body.classList.add('no-scroll');
+      document.documentElement.classList.add('no-scroll');
     } else {
-      document.body.classList.remove('no-scroll');
+      document.documentElement.classList.remove('no-scroll');
     }
   }, [isMobileMenuOpen]);
 
@@ -88,10 +83,9 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     onClick={closeMobileMenu} // Close menu when link is clicked
                   >
                     <img src={item.icon} alt="" width="24" height="24" />{' '}
-                    {/* Icon */}
                     {item.title}
                   </NavLink>
-                  <span className="menu-item-arrow">›</span> {/* Arrow Icon */}
+                  <span className="menu-item-arrow">›</span>
                 </div>
               ))}
             </div>

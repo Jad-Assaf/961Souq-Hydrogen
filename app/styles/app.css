@@ -422,7 +422,9 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .no-scroll {
-  overflow: hidden;
+    position: fixed;
+    width: 100%;
+    overflow: hidden;
 }
 
 /* Center the Logo and Adjust Layout on Mobile */
@@ -502,16 +504,15 @@ button.reset:hover:not(:has(> *)) {
   width: 100vw;
   height: 100vh;
   background-color: rgba(255, 255, 255, 0.85);
-  /* Slightly transparent white */
   backdrop-filter: blur(10px);
   /* Blur effect */
   z-index: 9999;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* Push content to top and bottom */
   padding: 20px;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
+  overflow-y: auto;
 }
 
 /* Close Button */
