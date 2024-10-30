@@ -421,6 +421,10 @@ button.reset:hover:not(:has(> *)) {
   margin: 20px auto;
 }
 
+.no-scroll {
+  overflow: hidden;
+}
+
 /* Center the Logo and Adjust Layout on Mobile */
 @media (max-width: 768px) {
   .header-top {
@@ -428,6 +432,10 @@ button.reset:hover:not(:has(> *)) {
     position: relative;
     width: 95vw !important;
     /* Allows precise positioning for other elements */
+  }
+
+  .user-icon-header {
+    display: none;
   }
 
   /* Mobile Menu Toggle on the Left */

@@ -7,14 +7,31 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    // Add or remove the "no-scroll" class to body based on menu state
+    if (isMobileMenuOpen) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+  }, [isMobileMenuOpen]);
 
   return (
     <>
       <header className="header">
         <div className="header-top">
-          <button className="header-menu-mobile-toggle" onClick={toggleMobileMenu}>
+          <button
+            className="header-menu-mobile-toggle"
+            onClick={toggleMobileMenu}
+          >
             ☰
           </button>
 
@@ -29,7 +46,11 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           </NavLink>
 
           <div className="header-ctas">
-            <NavLink prefetch="intent" to="/account" className="sign-in-link">
+            <NavLink
+              prefetch="intent"
+              to="/account"
+              className="sign-in-link user-icon-header"
+            >
               <Suspense fallback={<UserIcon />}>
                 <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
                   {() => <UserIcon />}
@@ -62,8 +83,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             <div className="mobile-menu-list">
               {menu.items.map((item) => (
                 <div key={item.id} className="menu-item">
-                  <NavLink to={new URL(item.url).pathname}>
-                    <img src={item.icon} alt="" width="24" height="24" /> {/* Icon */}
+                  <NavLink
+                    to={new URL(item.url).pathname}
+                    onClick={closeMobileMenu} // Close menu when link is clicked
+                  >
+                    <img src={item.icon} alt="" width="24" height="24" />{' '}
+                    {/* Icon */}
                     {item.title}
                   </NavLink>
                   <span className="menu-item-arrow">›</span> {/* Arrow Icon */}
@@ -77,9 +102,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               <UserIcon />
               Sign In
             </NavLink>
-            <NavLink to="/account/register">
-              Create an Account
-            </NavLink>
+            <NavLink to="/account/register">Create an Account</NavLink>
           </div>
         </div>
       )}
