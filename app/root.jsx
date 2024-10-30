@@ -135,15 +135,15 @@ export function Layout({ children }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="preload" href="./styles/fonts/Montserrat-Thin.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-ExtraLight.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-Light.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-Medium.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-SemiBold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-ExtraBold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="./styles/fonts/Montserrat-Black.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-Thin.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-ExtraLight.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-Light.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-Medium.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-SemiBold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-ExtraBold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+        <link rel="preload" href="/styles/fonts/Montserrat-Black.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
         <Meta />
         <Links />
       </head>
