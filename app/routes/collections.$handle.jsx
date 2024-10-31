@@ -42,19 +42,22 @@ async function loadCriticalData({ context, params, request }) {
     throw redirect('/collections');
   }
 
-  const [{ collection }] = await Promise.all([
-    storefront.query(COLLECTION_QUERY, {
+  // First query for collection with pagination
+  const { collection: paginatedCollection } = await storefront.query(
+    COLLECTION_QUERY,
+    {
       variables: { handle, ...paginationVariables },
-    }),
-  ]);
+    }
+  );
 
-  if (!collection) {
+  if (!paginatedCollection) {
     throw new Response(`Collection ${handle} not found`, {
       status: 404,
     });
   }
 
-  const { collection } = await storefront.query(
+  // Second query for filters
+  const { collection: filterCollection } = await storefront.query(
     `#graphql
       query CollectionFilters($handle: String!) {
         collection(handle: $handle) {
@@ -97,8 +100,12 @@ async function loadCriticalData({ context, params, request }) {
     { variables: { handle } }
   );
 
+  // Return both paginated collection data and filters
   return {
-    collection,
+    collection: {
+      ...paginatedCollection,
+      filters: filterCollection.filters,
+    },
   };
 }
 
