@@ -6,6 +6,7 @@ import {
   Money,
   Analytics,
 } from '@shopify/hydrogen';
+import { useEffect } from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
