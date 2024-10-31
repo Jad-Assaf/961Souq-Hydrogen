@@ -1,45 +1,38 @@
-import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
+import { defer, redirect } from '@shopify/remix-oxygen';
+import { useLoaderData, Link } from '@remix-run/react';
 import { useState } from 'react';
 import {
   getPaginationVariables,
-  Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { useVariantUrl } from '~/lib/variants';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+export const meta = ({ data }) => {
+  return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
 };
 
 /**
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
-  return defer({...deferredData, ...criticalData});
+  return defer({ ...deferredData, ...criticalData });
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- * @param {LoaderFunctionArgs}
+ * Load critical data for the page
  */
-async function loadCriticalData({context, params, request}) {
-  const {handle} = params;
-  const {storefront} = context;
+async function loadCriticalData({ context, params, request }) {
+  const { handle } = params;
+  const { storefront } = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 15,
   });
@@ -48,31 +41,20 @@ async function loadCriticalData({context, params, request}) {
     throw redirect('/collections');
   }
 
-  const [{collection}] = await Promise.all([
+  const [{ collection }] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: {handle, ...paginationVariables},
-      // Add other queries here, so that they are loaded in parallel
+      variables: { handle, ...paginationVariables },
     }),
   ]);
 
   if (!collection) {
-    throw new Response(`Collection ${handle} not found`, {
-      status: 404,
-    });
+    throw new Response(`Collection ${handle} not found`, { status: 404 });
   }
 
-  return {
-    collection,
-  };
+  return { collection };
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- * @param {LoaderFunctionArgs}
- */
-function loadDeferredData({context}) {
+function loadDeferredData({ context }) {
   return {};
 }
 
@@ -84,7 +66,6 @@ export default function Collection() {
   const [selectedProcessorSubFilter, setSelectedProcessorSubFilter] = useState('');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
-  // Filtered products based on selected criteria
   const filteredProducts = collection.products.nodes.filter((product) => {
     const matchesTag = selectedTag ? product.tags.includes(selectedTag) : true;
     const matchesBrand = selectedBrand ? product.vendor === selectedBrand : true;
@@ -102,7 +83,6 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {/* Filter Menu */}
       <FilterMenu
         tags={Array.from(new Set(collection.products.nodes.flatMap((product) => product.tags)))}
         brands={Array.from(new Set(collection.products.nodes.map((product) => product.vendor)))}
@@ -150,7 +130,6 @@ function FilterMenu({
 }) {
   return (
     <div className="filter-menu">
-      {/* Tag Filter */}
       <label>Tag:</label>
       <select onChange={(e) => onTagChange(e.target.value)} defaultValue="">
         <option value="">All</option>
@@ -159,7 +138,6 @@ function FilterMenu({
         ))}
       </select>
 
-      {/* Brand Filter */}
       <label>Brand:</label>
       <select onChange={(e) => onBrandChange(e.target.value)} defaultValue="">
         <option value="">All Brands</option>
@@ -168,7 +146,6 @@ function FilterMenu({
         ))}
       </select>
 
-      {/* Processor Filter */}
       <label>Processor Type:</label>
       <select onChange={(e) => onProcessorChange(e.target.value)} defaultValue="">
         <option value="">All Processors</option>
@@ -177,7 +154,6 @@ function FilterMenu({
         ))}
       </select>
 
-      {/* Processor Sub-Filter */}
       {processors.includes(selectedProcessor) && (
         <div>
           <label>Processor Sub-Type:</label>
@@ -190,7 +166,6 @@ function FilterMenu({
         </div>
       )}
 
-      {/* Price Range Filter */}
       <label>Price Range:</label>
       <input
         type="number"
@@ -208,12 +183,11 @@ function FilterMenu({
   );
 }
 
-// Helper function to get sub-filters for each processor
+// Helper function for processor sub-filters
 function getSubFiltersForProcessor(processor) {
   const processorSubFilters = {
-    'Intel Core Ultra': ['Sub1', 'Sub2'], // Replace with actual sub-filters
+    'Intel Core Ultra': ['Sub1', 'Sub2'],
     'Intel Core i9': ['Sub1', 'Sub2'],
-    // Add sub-filters for each processor as needed
   };
   return processorSubFilters[processor] || [];
 }
@@ -279,7 +253,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
