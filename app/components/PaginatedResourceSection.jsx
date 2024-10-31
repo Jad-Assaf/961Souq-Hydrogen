@@ -8,26 +8,24 @@ export function PaginatedResourceSection({
 }) {
   const observerRef = React.useRef(null);
 
-  // Observe the NextLink for automatic fetching
   React.useEffect(() => {
-    if (!observerRef.current) return;
+    if (observerRef.current) observerRef.current.disconnect();
 
-    const observer = new IntersectionObserver(
+    observerRef.current = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && observerRef.current) {
-          observerRef.current.click(); // Trigger NextLink click
+        if (entry.isIntersecting) {
+          entry.target.click(); // Trigger click on `NextLink`
         }
       },
       { threshold: 1.0 }
     );
 
-    if (observerRef.current) observer.observe(observerRef.current);
+    const nextLinkElement = document.querySelector('.next-link');
+    if (nextLinkElement) observerRef.current.observe(nextLinkElement);
 
-    return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
-    };
-  }, []);
+    return () => observerRef.current.disconnect();
+  }, [connection.pageInfo.endCursor]); // Re-run when the page changes
 
   return (
     <Pagination connection={connection}>
@@ -41,19 +39,13 @@ export function PaginatedResourceSection({
             <PreviousLink>
               {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
             </PreviousLink>
-
             {resourcesClassName ? (
               <div className={resourcesClassName}>{resourcesMarkup}</div>
             ) : (
               resourcesMarkup
             )}
-
-            <NextLink>
-              {isLoading ? (
-                'Loading...'
-              ) : (
-                <span ref={observerRef}>Load more ↓</span>
-              )}
+            <NextLink className="next-link">
+              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
             </NextLink>
           </div>
         );
