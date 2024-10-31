@@ -1,59 +1,83 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link, useFetcher, useSearchParams } from '@remix-run/react';
-import { useEffect, useState } from 'react';
-import { Money, Analytics } from '@shopify/hydrogen';
+import { useLoaderData, Link } from '@remix-run/react';
+import { useState } from 'react';
+import {
+  getPaginationVariables,
+  Money,
+  Analytics,
+} from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 
+/**
+ * @type {MetaFunction<typeof loader>}
+ */
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
 };
 
-// Loader function that fetches products based on current filters
-export async function loader({ request, context, params }) {
-  const url = new URL(request.url);
-  const minPrice = parseFloat(url.searchParams.get('minPrice')) || 0;
-  const maxPrice = parseFloat(url.searchParams.get('maxPrice')) || Infinity;
+/**
+ * @param {LoaderFunctionArgs} args
+ */
+export async function loader(args) {
+  const deferredData = loadDeferredData(args);
+  const criticalData = await loadCriticalData(args);
 
-  const paginationVariables = getPaginationVariables(request, { pageBy: 15 });
-
-  const { handle } = params;
-  const { storefront } = context;
-
-  if (!handle) throw redirect('/collections');
-
-  const { collection } = await storefront.query(COLLECTION_QUERY, {
-    variables: {
-      handle,
-      minPrice,
-      maxPrice,
-      ...paginationVariables
-    },
-  });
-
-  if (!collection) throw new Response(`Collection ${handle} not found`, { status: 404 });
-
-  return defer({ collection });
+  return defer({ ...deferredData, ...criticalData });
 }
 
-// Component for Price Filter
-function PriceFilter({ minPrice, maxPrice, onFilterChange }) {
+/**
+ * Load data necessary for rendering content above the fold.
+ */
+async function loadCriticalData({ context, params, request }) {
+  const { handle } = params;
+  const { storefront } = context;
+  const paginationVariables = getPaginationVariables(request, {
+    pageBy: 15,
+  });
+
+  if (!handle) {
+    throw redirect('/collections');
+  }
+
+  const [{ collection }] = await Promise.all([
+    storefront.query(COLLECTION_QUERY, {
+      variables: { handle, ...paginationVariables },
+    }),
+  ]);
+
+  if (!collection) {
+    throw new Response(`Collection ${handle} not found`, {
+      status: 404,
+    });
+  }
+
+  return {
+    collection,
+  };
+}
+
+function loadDeferredData({ context }) {
+  return {};
+}
+
+function PriceFilterMenu({ priceRange, onPriceChange }) {
   return (
     <div className="filter-menu">
       <label>Price Range:</label>
       <input
         type="number"
         placeholder="Min Price"
-        value={minPrice || ''}
-        onChange={(e) => onFilterChange('minPrice', e.target.value)}
+        value={priceRange.min}
+        onChange={(e) => onPriceChange({ ...priceRange, min: e.target.value })}
       />
       <input
         type="number"
         placeholder="Max Price"
-        value={maxPrice || ''}
-        onChange={(e) => onFilterChange('maxPrice', e.target.value)}
+        value={priceRange.max}
+        onChange={(e) => onPriceChange({ ...priceRange, max: e.target.value })}
       />
     </div>
   );
@@ -61,36 +85,26 @@ function PriceFilter({ minPrice, maxPrice, onFilterChange }) {
 
 export default function Collection() {
   const { collection } = useLoaderData();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const fetcher = useFetcher();
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
-  const minPrice = searchParams.get('minPrice') || '';
-  const maxPrice = searchParams.get('maxPrice') || '';
-
-  const handleFilterChange = (key, value) => {
-    searchParams.set(key, value || '');
-    setSearchParams(searchParams);
-  };
-
-  useEffect(() => {
-    fetcher.load(window.location.pathname + '?' + searchParams.toString());
-  }, [searchParams, fetcher]);
+  // Filter products based on price range
+  const filteredProducts = collection.products.nodes.filter((product) => {
+    const productPrice = parseFloat(product.priceRange.minVariantPrice.amount);
+    const matchesMinPrice = priceRange.min ? productPrice >= parseFloat(priceRange.min) : true;
+    const matchesMaxPrice = priceRange.max ? productPrice <= parseFloat(priceRange.max) : true;
+    return matchesMinPrice && matchesMaxPrice;
+  });
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      <PriceFilter minPrice={minPrice} maxPrice={maxPrice} onFilterChange={handleFilterChange} />
+      {/* Price Filter Menu */}
+      <PriceFilterMenu priceRange={priceRange} onPriceChange={setPriceRange} />
 
       <PaginatedResourceSection
-        connection={fetcher.data?.collection.products || collection.products}
+        connection={{ ...collection.products, nodes: filteredProducts }}
         resourcesClassName="products-grid"
-        onLoadMore={() => {
-          fetcher.load(
-            `${window.location.pathname}?${searchParams.toString()}&page=${collection.products.pageInfo.endCursor
-            }`
-          );
-        }}
       >
         {({ node: product, index }) => (
           <ProductItem
@@ -113,7 +127,12 @@ export default function Collection() {
   );
 }
 
-// Product Item Component
+/**
+ * @param {{
+ *   product: ProductItemFragment;
+ *   loading?: 'eager' | 'lazy';
+ * }}
+ */
 function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
@@ -144,63 +163,6 @@ function ProductItem({ product, loading }) {
   );
 }
 
-const COLLECTION_QUERY = `#graphql
-  query Collection(
-    $handle: String!
-    $minPrice: Float!
-    $maxPrice: Float!
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) {
-    collection(handle: $handle) {
-      id
-      handle
-      title
-      description
-      products(
-        first: $first,
-        last: $last,
-        before: $startCursor,
-        after: $endCursor
-        query: "price:>=${minPrice} AND price:<=${maxPrice}"
-      ) {
-        nodes {
-          id
-          handle
-          title
-          tags
-          featuredImage {
-            id
-            altText
-            url
-            width
-            height
-          }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-            maxVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-        }
-        pageInfo {
-          hasPreviousPage
-          hasNextPage
-          endCursor
-          startCursor
-        }
-      }
-    }
-  }
-`;
-
-
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
     amount
@@ -230,6 +192,42 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         selectedOptions {
           name
           value
+        }
+      }
+    }
+  }
+`;
+
+const COLLECTION_QUERY = `#graphql
+  ${PRODUCT_ITEM_FRAGMENT}
+  query Collection(
+    $handle: String!
+    $country: CountryCode
+    $language: LanguageCode
+    $first: Int
+    $last: Int
+    $startCursor: String
+    $endCursor: String
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      description
+      products(
+        first: $first,
+        last: $last,
+        before: $startCursor,
+        after: $endCursor
+      ) {
+        nodes {
+          ...ProductItem
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
         }
       }
     }
