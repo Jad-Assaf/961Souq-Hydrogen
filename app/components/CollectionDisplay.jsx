@@ -5,7 +5,7 @@ import { AnimatedImage } from './AnimatedImage';
 import '../styles/CollectionSlider.css';
 
 // Truncate text to fit within the given max word count
-function truncateText(text, maxWords) {
+export function truncateText(text, maxWords) {
     const words = text.split(' ');
     return words.length > maxWords
         ? words.slice(0, maxWords).join(' ') + '...'

@@ -9,6 +9,7 @@ import {
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
+import { truncateText } from '~/components/CollectionDisplay';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -135,7 +136,7 @@ function ProductItem({ product, loading }) {
           height="180px"
         />
       )}
-      <h4>{product.title}</h4>
+      <h4>{truncateText(product.title, 20)}</h4>
       <small>
         <Money data={product.priceRange.minVariantPrice} />
       </small>
