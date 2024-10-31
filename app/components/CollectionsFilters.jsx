@@ -1,69 +1,75 @@
-// ProductFilters.client.jsx
-import React, { useState } from 'react';
-import { useShopQuery, CacheLong } from '@shopify/hydrogen';
+import { useLoaderData } from '@remix-run/react';
+import { json } from '@shopify/remix-oxygen';
+import { useState } from 'react';
 
-export function ProductFilters({ collectionHandle, onFilter }) {
-  // Define the query to fetch filters
-  const FACETS_QUERY =  `#graphql
-    query Facets($handle: String!) {
-      collection(handle: $handle) {
-        products(first: 250) { 
-          filters {
-            id
+// GraphQL query using #graphql
+const GET_FILTERS_QUERY = `#graphql
+  query AvailableFilters($collectionHandle: String!) {
+    collection(handle: $collectionHandle) {
+      products(first: 250) {
+        filters {
+          label
+          type
+          values {
             label
-            type
-            values {
-              id
-              label
-              count
-              input
-            }
+            value
           }
         }
       }
     }
-  `;
+  }
+`;
 
-  const { data } = useShopQuery({
-    query: FACETS_QUERY,
-    variables: { handle: collectionHandle },
-    cache: CacheLong(),
+// Loader function to fetch data server-side
+export async function loader({ params, context }) {
+  const collectionHandle = params.handle; // Adjust or pass handle as needed
+  const { data } = await context.storefront.query(GET_FILTERS_QUERY, {
+    variables: { collectionHandle },
   });
 
-  const filters = data?.collection?.products?.filters || [];
-  const [selectedFilters, setSelectedFilters] = useState([]);
+  return json(data.collection.products.filters);
+}
 
-  const handleFilterChange = (filterId, valueId) => {
-    const updatedFilters = selectedFilters.includes(valueId)
-      ? selectedFilters.filter((id) => id !== valueId)
-      : [...selectedFilters, valueId];
+// Main ProductFilter component
+export default function ProductFilter() {
+  const filters = useLoaderData(); // Access the filters data
+  const [selectedFilters, setSelectedFilters] = useState({});
 
-    setSelectedFilters(updatedFilters);
-    onFilter(updatedFilters);  // Pass selected filters back to the parent component
+  // Handle filter changes
+  const handleFilterChange = (type, value) => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      [type]: value,
+    }));
+    // Here you would trigger the fetching of filtered products in the parent component or context
   };
 
   return (
-    <div className="product-filters">
+    <div className="product-filter">
       {filters.map((filter) => (
-        <div key={filter.id} className="filter">
-          <h3>{filter.label}</h3>
-          {filter.type === 'LIST' && (
-            <ul>
-              {filter.values.map((value) => (
-                <li key={value.id}>
-                  <input
-                    type="checkbox"
-                    id={value.id}
-                    checked={selectedFilters.includes(value.id)}
-                    onChange={() => handleFilterChange(filter.id, value.id)}
-                  />
-                  <label htmlFor={value.id}>
-                    {value.label} ({value.count})
-                  </label>
-                </li>
+        <div key={filter.label}>
+          <label>{filter.label}</label>
+          {filter.type === 'LIST' ? (
+            <select
+              onChange={(e) => handleFilterChange(filter.label, e.target.value)}
+              defaultValue=""
+            >
+              <option value="">All</option>
+              {filter.values.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
               ))}
-            </ul>
-          )}
+            </select>
+          ) : filter.type === 'PRICE_RANGE' ? (
+            <input
+              type="range"
+              min={0}
+              max={100} // Adjust as needed
+              onChange={(e) => handleFilterChange(filter.label, e.target.value)}
+              value={selectedFilters[filter.label] || ''}
+            />
+          ) : null}
         </div>
       ))}
     </div>
