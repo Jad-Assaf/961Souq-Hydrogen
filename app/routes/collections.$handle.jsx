@@ -40,7 +40,7 @@ async function loadCriticalData({context, params, request}) {
   const {handle} = params;
   const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 16,
+    pageBy: 15,
   });
 
   if (!handle) {
@@ -91,7 +91,7 @@ export default function Collection() {
           <ProductItem
             key={product.id}
             product={product}
-            loading={index < 16 ? 'eager' : undefined}
+            loading={index < 15 ? 'eager' : undefined}
           />
         )}
       </PaginatedResourceSection>
