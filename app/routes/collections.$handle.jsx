@@ -1,21 +1,21 @@
-import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
+import { defer, redirect } from '@shopify/remix-oxygen';
+import { useLoaderData, Link } from '@remix-run/react';
 import {
   getPaginationVariables,
-  Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { useVariantUrl } from '~/lib/variants';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
+import { useEffect, useState } from 'react';
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+export const meta = ({ data }) => {
+  return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
 };
 
 /**
@@ -28,7 +28,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return defer({...deferredData, ...criticalData});
+  return defer({ ...deferredData, ...criticalData });
 }
 
 /**
@@ -36,9 +36,9 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({context, params, request}) {
-  const {handle} = params;
-  const {storefront} = context;
+async function loadCriticalData({ context, params, request }) {
+  const { handle } = params;
+  const { storefront } = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 15,
   });
@@ -47,9 +47,9 @@ async function loadCriticalData({context, params, request}) {
     throw redirect('/collections');
   }
 
-  const [{collection}] = await Promise.all([
+  const [{ collection }] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: {handle, ...paginationVariables},
+      variables: { handle, ...paginationVariables },
       // Add other queries here, so that they are loaded in parallel
     }),
   ]);
@@ -71,23 +71,31 @@ async function loadCriticalData({context, params, request}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
-function loadDeferredData({context}) {
+function loadDeferredData({ context }) {
   return {};
 }
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
-  const {collection} = useLoaderData();
+  const { collection } = useLoaderData();
+  const [activeFilters, setActiveFilters] = useState({});
+
+  const handleFilterChange = (filterType, filterValue) => {
+    setActiveFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterType]: filterValue,
+    }));
+  };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      {/* <p className="collection-description">{collection.description}</p> */}
+      <FilterMenu filters={collection.filters} onFilterChange={handleFilterChange} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
       >
-        {({node: product, index}) => (
+        {({ node: product, index }) => (
           <ProductItem
             key={product.id}
             product={product}
@@ -103,6 +111,27 @@ export default function Collection() {
           },
         }}
       />
+    </div>
+  );
+}
+
+/**
+ * FilterMenu Component to render filters
+ */
+function FilterMenu({ filters, onFilterChange }) {
+  return (
+    <div className="filter-menu">
+      {filters.map((filter) => (
+        <div key={filter.label}>
+          <label>{filter.label}</label>
+          <select onChange={(e) => onFilterChange(filter.label, e.target.value)}>
+            <option value="">All</option>
+            {filter.values.map((value) => (
+              <option key={value} value={value}>{value}</option>
+            ))}
+          </select>
+        </div>
+      ))}
     </div>
   );
 }
@@ -180,7 +209,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
@@ -197,6 +225,11 @@ const COLLECTION_QUERY = `#graphql
       handle
       title
       description
+      filters {
+        label
+        type
+        values
+      }
       products(
         first: $first,
         last: $last,
