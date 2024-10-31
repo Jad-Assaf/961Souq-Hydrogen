@@ -118,18 +118,36 @@ function ProductFilter({ minPrice, maxPrice, products }) {
 export default function Collection() {
   const { collection } = useLoaderData();
 
-  // Calculate min and max prices from products
-  const prices = collection.products.nodes.map((product) =>
+  // Check if products exist in the collection
+  const products = collection.products?.nodes || [];
+  const pageInfo = collection.products?.pageInfo || {};
+
+  // Calculate min and max prices from products if they exist
+  const prices = products.map((product) =>
     parseFloat(product.priceRange.minVariantPrice.amount)
   );
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
+  const minPrice = prices.length ? Math.min(...prices) : 0;
+  const maxPrice = prices.length ? Math.max(...prices) : 0;
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      <ProductFilter minPrice={minPrice} maxPrice={maxPrice} products={collection.products.nodes} />
+      {/* Render ProductFilter after collection title */}
+      <ProductFilter minPrice={minPrice} maxPrice={maxPrice} products={products} />
+
+      <PaginatedResourceSection
+        connection={{ edges: products.map((product) => ({ node: product })), pageInfo }}
+        resourcesClassName="products-grid"
+      >
+        {({ node: product, index }) => (
+          <ProductItem
+            key={product.id}
+            product={product}
+            loading={index < 15 ? 'eager' : undefined}
+          />
+        )}
+      </PaginatedResourceSection>
 
       <Analytics.CollectionView
         data={{
