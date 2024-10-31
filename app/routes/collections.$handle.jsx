@@ -118,16 +118,18 @@ function ProductFilter({ minPrice, maxPrice, products }) {
 export default function Collection() {
   const { collection } = useLoaderData();
 
+  // Calculate min and max prices from products
+  const prices = collection.products.nodes.map((product) =>
+    parseFloat(product.priceRange.minVariantPrice.amount)
+  );
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {/* Render ProductFilter after collection title */}
-      <ProductFilter
-        minPrice={parseFloat(collection.priceRange.minVariantPrice.amount)}
-        maxPrice={parseFloat(collection.priceRange.maxVariantPrice.amount)}
-        products={collection.products.nodes}
-      />
+      <ProductFilter minPrice={minPrice} maxPrice={maxPrice} products={collection.products.nodes} />
 
       <Analytics.CollectionView
         data={{
@@ -227,14 +229,6 @@ const COLLECTION_QUERY = `#graphql
       id
       handle
       title
-      priceRange {
-        minVariantPrice {
-          amount
-        }
-        maxVariantPrice {
-          amount
-        }
-      }
       products(
         first: $first,
         last: $last,
