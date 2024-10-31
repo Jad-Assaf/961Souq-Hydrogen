@@ -1,22 +1,21 @@
-import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
-import { useState } from 'react';
+import { defer, redirect } from '@shopify/remix-oxygen';
+import { useLoaderData, Link } from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { useVariantUrl } from '~/lib/variants';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+export const meta = ({ data }) => {
+  return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
 };
 
 /**
@@ -29,7 +28,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return defer({...deferredData, ...criticalData});
+  return defer({ ...deferredData, ...criticalData });
 }
 
 /**
@@ -37,9 +36,9 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({context, params, request}) {
-  const {handle} = params;
-  const {storefront} = context;
+async function loadCriticalData({ context, params, request }) {
+  const { handle } = params;
+  const { storefront } = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 15,
   });
@@ -48,10 +47,21 @@ async function loadCriticalData({context, params, request}) {
     throw redirect('/collections');
   }
 
-  const [{collection}] = await Promise.all([
+  // Extract filter parameters from the URL
+  const url = new URL(request.url);
+  const tag = url.searchParams.get('tag') || '';
+  const minPrice = parseFloat(url.searchParams.get('minPrice')) || 0;
+  const maxPrice = parseFloat(url.searchParams.get('maxPrice')) || 1000;
+
+  const [{ collection }] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: {handle, ...paginationVariables},
-      // Add other queries here, so that they are loaded in parallel
+      variables: {
+        handle,
+        ...paginationVariables,
+        tag,
+        minPrice,
+        maxPrice,
+      },
     }),
   ]);
 
@@ -72,46 +82,20 @@ async function loadCriticalData({context, params, request}) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
-function loadDeferredData({context}) {
+function loadDeferredData({ context }) {
   return {};
-}
-
-function FilterMenu({ tags, onFilterChange }) {
-  return (
-    <div className="filter-menu">
-      <label>Filter by Tag:</label>
-      <select onChange={(e) => onFilterChange(e.target.value)}>
-        <option value="">All</option>
-        {tags.map((tag) => (
-          <option key={tag} value={tag}>{tag}</option>
-        ))}
-      </select>
-    </div>
-  );
 }
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
-  const [selectedTag, setSelectedTag] = useState('');
-
-  // Filter products based on selected tag
-  const filteredProducts = selectedTag
-    ? collection.products.nodes.filter((product) => product.tags.includes(selectedTag))
-    : collection.products.nodes;
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
-
-      <FilterMenu
-        tags={Array.from(new Set(collection.products.nodes.flatMap((product) => product.tags)))}
-        onFilterChange={setSelectedTag}
-      />
-
       <PaginatedResourceSection
-        connection={{ ...collection.products, nodes: filteredProducts }} // Pass only filtered products
+        connection={collection.products}
         resourcesClassName="products-grid"
       >
         {({ node: product, index }) => (
@@ -122,7 +106,6 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
-
       <Analytics.CollectionView
         data={{
           collection: {
@@ -219,6 +202,9 @@ const COLLECTION_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
+    $tag: String
+    $minPrice: Float
+    $maxPrice: Float
   ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
@@ -229,11 +215,17 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor
+        after: $endCursor,
+        filters: {
+          tag: $tag,
+          priceRange: {
+            min: $minPrice,
+            max: $maxPrice
+          }
+        }
       ) {
         nodes {
           ...ProductItem
-          tags
         }
         pageInfo {
           hasPreviousPage
