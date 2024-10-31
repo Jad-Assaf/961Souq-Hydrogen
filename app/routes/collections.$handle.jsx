@@ -1,16 +1,11 @@
-import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
-import {
-  getPaginationVariables,
-  Image,
-  Money,
-  Analytics,
-} from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { defer, redirect } from '@shopify/remix-oxygen';
+import { useLoaderData, Link } from '@remix-run/react';
+import { getPaginationVariables, Money, Analytics } from '@shopify/hydrogen';
+import { useState } from 'react';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import ProductFilter from '~/components/CollectionsFilters';
+import { useVariantUrl } from '~/lib/variants';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -35,19 +30,16 @@ export async function loader(args) {
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 15,
-  });
+  const paginationVariables = getPaginationVariables(request, { pageBy: 15 });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  const [{ collection }] = await Promise.all([
-    storefront.query(COLLECTION_QUERY, {
-      variables: { handle, ...paginationVariables },
-    }),
-  ]);
+  // Fetch collection data with product price range and products
+  const { collection } = await storefront.query(COLLECTION_QUERY, {
+    variables: { handle, ...paginationVariables },
+  });
 
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {
@@ -55,9 +47,7 @@ async function loadCriticalData({ context, params, request }) {
     });
   }
 
-  return {
-    collection,
-  };
+  return { collection };
 }
 
 /**
@@ -68,21 +58,47 @@ function loadDeferredData({ context }) {
   return {};
 }
 
-export default function Collection() {
-  const { collection } = useLoaderData();
+// ProductFilter Component
+function ProductFilter({ minPrice, maxPrice, products }) {
+  const [selectedMinPrice, setSelectedMinPrice] = useState(minPrice);
+  const [selectedMaxPrice, setSelectedMaxPrice] = useState(maxPrice);
+
+  // Filter products within the selected price range
+  const filteredProducts = products.filter((product) => {
+    const price = parseFloat(product.priceRange.minVariantPrice.amount);
+    return price >= selectedMinPrice && price <= selectedMaxPrice;
+  });
 
   return (
-    <div className="collection">
-      <h1>{collection.title}</h1>
-
-      <ProductFilter
-        minPrice={parseFloat(collection.priceRange.minVariantPrice.amount)}
-        maxPrice={parseFloat(collection.priceRange.maxVariantPrice.amount)}
-        products={collection.products.nodes}
-      />
+    <div>
+      <h2>Filter by Price</h2>
+      <div>
+        <label>
+          Min Price:
+          <input
+            type="number"
+            value={selectedMinPrice}
+            min={minPrice}
+            max={selectedMaxPrice}
+            onChange={(e) => setSelectedMinPrice(parseFloat(e.target.value))}
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          Max Price:
+          <input
+            type="number"
+            value={selectedMaxPrice}
+            min={selectedMinPrice}
+            max={maxPrice}
+            onChange={(e) => setSelectedMaxPrice(parseFloat(e.target.value))}
+          />
+        </label>
+      </div>
 
       <PaginatedResourceSection
-        connection={{ edges: collection.products.edges }}
+        connection={{ edges: filteredProducts.map((product) => ({ node: product })) }}
         resourcesClassName="products-grid"
       >
         {({ node: product, index }) => (
@@ -93,6 +109,24 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
+    </div>
+  );
+}
+
+export default function Collection() {
+  const { collection } = useLoaderData();
+
+  return (
+    <div className="collection">
+      <h1>{collection.title}</h1>
+
+      {/* Render ProductFilter after collection title */}
+      <ProductFilter
+        minPrice={parseFloat(collection.priceRange.minVariantPrice.amount)}
+        maxPrice={parseFloat(collection.priceRange.maxVariantPrice.amount)}
+        products={collection.products.nodes}
+      />
+
       <Analytics.CollectionView
         data={{
           collection: {
@@ -140,7 +174,6 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
-
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
@@ -192,7 +225,14 @@ const COLLECTION_QUERY = `#graphql
       id
       handle
       title
-      description
+      priceRange {
+        minVariantPrice {
+          amount
+        }
+        maxVariantPrice {
+          amount
+        }
+      }
       products(
         first: $first,
         last: $last,
