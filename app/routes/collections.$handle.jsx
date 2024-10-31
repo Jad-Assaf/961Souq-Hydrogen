@@ -11,10 +11,16 @@ import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 
+/**
+ * @type {MetaFunction<typeof loader>}
+ */
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
 };
 
+/**
+ * @param {LoaderFunctionArgs} args
+ */
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
@@ -22,6 +28,9 @@ export async function loader(args) {
   return defer({ ...deferredData, ...criticalData });
 }
 
+/**
+ * Load data necessary for rendering content above the fold.
+ */
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
@@ -54,7 +63,8 @@ function loadDeferredData({ context }) {
   return {};
 }
 
-function PriceFilterMenu({ priceRange, onPriceChange }) {
+// PriceFilterMenu component for entering min and max price
+function PriceFilterMenu({ priceRange, onPriceChange, onApplyFilter }) {
   return (
     <div className="filter-menu">
       <label>Price Range:</label>
@@ -70,6 +80,7 @@ function PriceFilterMenu({ priceRange, onPriceChange }) {
         value={priceRange.max}
         onChange={(e) => onPriceChange({ ...priceRange, max: e.target.value })}
       />
+      <button onClick={onApplyFilter}>Apply Filter</button>
     </div>
   );
 }
@@ -79,7 +90,8 @@ export default function Collection() {
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [filteredProducts, setFilteredProducts] = useState(collection.products.nodes);
 
-  const handleApplyFilter = () => {
+  // Function to apply price filter on all products
+  const applyPriceFilter = () => {
     const newFilteredProducts = collection.products.nodes.filter((product) => {
       const productPrice = parseFloat(product.priceRange.minVariantPrice.amount);
       const matchesMinPrice = priceRange.min ? productPrice >= parseFloat(priceRange.min) : true;
@@ -94,8 +106,11 @@ export default function Collection() {
       <h1>{collection.title}</h1>
 
       {/* Price Filter Menu */}
-      <PriceFilterMenu priceRange={priceRange} onPriceChange={setPriceRange} />
-      <button onClick={handleApplyFilter}>Apply Price Filter</button>
+      <PriceFilterMenu
+        priceRange={priceRange}
+        onPriceChange={setPriceRange}
+        onApplyFilter={applyPriceFilter}
+      />
 
       <PaginatedResourceSection
         connection={{ ...collection.products, nodes: filteredProducts }}
@@ -122,6 +137,9 @@ export default function Collection() {
   );
 }
 
+/**
+ * ProductItem component renders individual products
+ */
 function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
@@ -152,6 +170,7 @@ function ProductItem({ product, loading }) {
   );
 }
 
+// GraphQL fragments and collection query
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
     amount
