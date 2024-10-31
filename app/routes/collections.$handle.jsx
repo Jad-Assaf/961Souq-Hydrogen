@@ -1,5 +1,5 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link } from '@remix-run/react';
+import { useLoaderData, Link, useLocation, useNavigate } from '@remix-run/react';
 import {
   getPaginationVariables,
   Money,
@@ -79,18 +79,37 @@ export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
   const [activeFilters, setActiveFilters] = useState({});
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleFilterChange = (filterType, filterValue) => {
-    setActiveFilters((prevFilters) => ({
-      ...prevFilters,
+    const updatedFilters = {
+      ...activeFilters,
       [filterType]: filterValue,
-    }));
+    };
+
+    setActiveFilters(updatedFilters);
+
+    // Navigate to a new URL including filter query parameters
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set(filterType, filterValue);
+    navigate(`${location.pathname}?${searchParams.toString()}`);
   };
+
+  useEffect(() => {
+    // Reset filters on initial load from URL
+    const params = new URLSearchParams(location.search);
+    const filtersFromUrl = {};
+    for (const [key, value] of params.entries()) {
+      filtersFromUrl[key] = value;
+    }
+    setActiveFilters(filtersFromUrl);
+  }, [location.search]);
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      <FilterMenu filters={collection.filters} onFilterChange={handleFilterChange} />
+      <FilterMenu filters={collection.filters} activeFilters={activeFilters} onFilterChange={handleFilterChange} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
@@ -118,13 +137,13 @@ export default function Collection() {
 /**
  * FilterMenu Component to render filters
  */
-function FilterMenu({ filters, onFilterChange }) {
+function FilterMenu({ filters, activeFilters, onFilterChange }) {
   return (
     <div className="filter-menu">
       {filters.map((filter) => (
         <div key={filter.label}>
           <label>{filter.label}</label>
-          <select onChange={(e) => onFilterChange(filter.label, e.target.value)}>
+          <select value={activeFilters[filter.label] || ''} onChange={(e) => onFilterChange(filter.label, e.target.value)}>
             <option value="">All</option>
             {filter.values.map((value) => (
               <option key={value} value={value}>{value}</option>
@@ -158,7 +177,6 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -172,7 +190,6 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
-
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
