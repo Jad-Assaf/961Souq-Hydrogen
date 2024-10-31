@@ -10,6 +10,8 @@ import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
+import { ProductFilters } from '~/components/CollectionsFilters';
+import { useState } from 'react';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -78,13 +80,26 @@ function loadDeferredData({context}) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
+  const [activeFilters, setActiveFilters] = useState([]);
+
+  // Filter products based on selected filters
+  const filteredProducts = collection.products.edges.filter(({ node }) => {
+    if (activeFilters.length === 0) return true;
+    return node.tags.some((tag) => activeFilters.includes(tag));
+  });
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
+
+      <ProductFilters
+        collectionHandle={collection.handle}
+        onFilter={(filters) => setActiveFilters(filters)}
+      />
+
       <PaginatedResourceSection
-        connection={collection.products}
+        connection={{ edges: filteredProducts }}
         resourcesClassName="products-grid"
       >
         {({node: product, index}) => (
