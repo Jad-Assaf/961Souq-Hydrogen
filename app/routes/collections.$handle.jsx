@@ -1,11 +1,12 @@
 import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
+import {useLoaderData, Link, useLocation} from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
+import { useEffect } from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
@@ -78,6 +79,16 @@ function loadDeferredData({context}) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Reset to the first page if URL changes or page reloads
+    if (location.pathname === '/collections') {
+      // Scroll to top or reset pagination
+      window.scrollTo(0, 0);
+      // Optional: trigger any additional reset actions here
+    }
+  }, [location]);
 
   return (
     <div className="collection">
