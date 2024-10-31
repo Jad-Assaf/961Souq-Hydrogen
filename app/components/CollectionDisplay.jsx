@@ -52,9 +52,9 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                     data={image}
                                     aspectRatio="1/1"
                                     sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${image}?width=300&quality=30 300w,
-                                             ${image}?width=600&quality=30 600w,
-                                             ${image}?width=1200&quality=30 1200w`}
+                                    srcSet={`${image}?width=300&quality=20 300w,
+                                             ${image}?width=600&quality=20 600w,
+                                             ${image}?width=1200&quality=20 1200w`}
                                     // src={image}
                                     alt={`Collection ${index + 1} Image ${i + 1}`}
                                     loading="lazy"
