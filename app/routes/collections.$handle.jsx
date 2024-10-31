@@ -1,6 +1,6 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link } from '@remix-run/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   getPaginationVariables,
   Money,
@@ -11,16 +11,10 @@ import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 
-/**
- * @type {MetaFunction<typeof loader>}
- */
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
 };
 
-/**
- * @param {LoaderFunctionArgs} args
- */
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
@@ -28,19 +22,12 @@ export async function loader(args) {
   return defer({ ...deferredData, ...criticalData });
 }
 
-/**
- * Load data necessary for rendering content above the fold.
- */
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 15,
-  });
+  const paginationVariables = getPaginationVariables(request, { pageBy: 15 });
 
-  if (!handle) {
-    throw redirect('/collections');
-  }
+  if (!handle) throw redirect('/collections');
 
   const [{ collection }] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
@@ -48,21 +35,16 @@ async function loadCriticalData({ context, params, request }) {
     }),
   ]);
 
-  if (!collection) {
-    throw new Response(`Collection ${handle} not found`, {
-      status: 404,
-    });
-  }
+  if (!collection) throw new Response(`Collection ${handle} not found`, { status: 404 });
 
-  return {
-    collection,
-  };
+  return { collection };
 }
 
 function loadDeferredData({ context }) {
   return {};
 }
 
+// Price Filter Component
 function PriceFilterMenu({ priceRange, onPriceChange }) {
   return (
     <div className="filter-menu">
@@ -86,14 +68,19 @@ function PriceFilterMenu({ priceRange, onPriceChange }) {
 export default function Collection() {
   const { collection } = useLoaderData();
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+  const [filteredProducts, setFilteredProducts] = useState(collection.products.nodes);
 
-  // Filter products based on price range
-  const filteredProducts = collection.products.nodes.filter((product) => {
-    const productPrice = parseFloat(product.priceRange.minVariantPrice.amount);
-    const matchesMinPrice = priceRange.min ? productPrice >= parseFloat(priceRange.min) : true;
-    const matchesMaxPrice = priceRange.max ? productPrice <= parseFloat(priceRange.max) : true;
-    return matchesMinPrice && matchesMaxPrice;
-  });
+  // Update filtered products on price range change
+  useEffect(() => {
+    setFilteredProducts(
+      collection.products.nodes.filter((product) => {
+        const productPrice = parseFloat(product.priceRange.minVariantPrice.amount);
+        const matchesMinPrice = priceRange.min ? productPrice >= parseFloat(priceRange.min) : true;
+        const matchesMaxPrice = priceRange.max ? productPrice <= parseFloat(priceRange.max) : true;
+        return matchesMinPrice && matchesMaxPrice;
+      })
+    );
+  }, [priceRange, collection.products.nodes]);
 
   return (
     <div className="collection">
@@ -105,6 +92,16 @@ export default function Collection() {
       <PaginatedResourceSection
         connection={{ ...collection.products, nodes: filteredProducts }}
         resourcesClassName="products-grid"
+        onLoadMore={(newProducts) => {
+          // Apply filters to the new products before adding them to the existing filtered list
+          const newFilteredProducts = newProducts.nodes.filter((product) => {
+            const productPrice = parseFloat(product.priceRange.minVariantPrice.amount);
+            const matchesMinPrice = priceRange.min ? productPrice >= parseFloat(priceRange.min) : true;
+            const matchesMaxPrice = priceRange.max ? productPrice <= parseFloat(priceRange.max) : true;
+            return matchesMinPrice && matchesMaxPrice;
+          });
+          setFilteredProducts((prev) => [...prev, ...newFilteredProducts]);
+        }}
       >
         {({ node: product, index }) => (
           <ProductItem
@@ -127,12 +124,7 @@ export default function Collection() {
   );
 }
 
-/**
- * @param {{
- *   product: ProductItemFragment;
- *   loading?: 'eager' | 'lazy';
- * }}
- */
+// Product Item Component
 function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
