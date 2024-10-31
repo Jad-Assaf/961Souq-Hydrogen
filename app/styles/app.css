@@ -893,15 +893,6 @@ button.reset:hover:not(:has(> *)) {
 * routes/collections.$handle.tsx
 * --------------------------------------------------
 */
-.collection-description {
-  margin-bottom: 1rem;
-  max-width: 95%;
-
-  @media (min-width: 45em) {
-    max-width: 600px;
-  }
-}
-
 .products-grid {
   display: flex;
   justify-content: center;
@@ -927,8 +918,15 @@ button.reset:hover:not(:has(> *)) {
 .collection h4{
   max-height: 85px;
   font-size: 14px;
+  font-weight: 500;
   min-height: 85px;
   overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .product-item-collection {
+    max-width: 170px;
+  }
 }
 
 /*
