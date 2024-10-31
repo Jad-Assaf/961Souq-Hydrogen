@@ -1,11 +1,16 @@
-import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link } from '@remix-run/react';
-import { getPaginationVariables, Money, Analytics } from '@shopify/hydrogen';
-import { useVariantUrl } from '~/lib/variants';
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import {defer, redirect} from '@shopify/remix-oxygen';
+import {useLoaderData, Link} from '@remix-run/react';
+import {
+  getPaginationVariables,
+  Image,
+  Money,
+  Analytics,
+} from '@shopify/hydrogen';
+import {useVariantUrl} from '~/lib/variants';
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import CollectionFilters from '~/components/CollectionsFilters';
+import ProductFilter from '~/components/CollectionsFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -30,21 +35,29 @@ export async function loader(args) {
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-  const paginationVariables = getPaginationVariables(request, { pageBy: 15 });
+  const paginationVariables = getPaginationVariables(request, {
+    pageBy: 15,
+  });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  const { collection } = await storefront.query(COLLECTION_QUERY, {
-    variables: { handle, ...paginationVariables },
-  });
+  const [{ collection }] = await Promise.all([
+    storefront.query(COLLECTION_QUERY, {
+      variables: { handle, ...paginationVariables },
+    }),
+  ]);
 
   if (!collection) {
-    throw new Response(`Collection ${handle} not found`, { status: 404 });
+    throw new Response(`Collection ${handle} not found`, {
+      status: 404,
+    });
   }
 
-  return { collection };
+  return {
+    collection,
+  };
 }
 
 /**
@@ -62,10 +75,12 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {/* Filters Component */}
-      <CollectionFilters filters={collection.filters} />
+      <ProductFilter
+        minPrice={parseFloat(collection.priceRange.minVariantPrice.amount)}
+        maxPrice={parseFloat(collection.priceRange.maxVariantPrice.amount)}
+        products={collection.products.nodes}
+      />
 
-      {/* Products Section */}
       <PaginatedResourceSection
         connection={{ edges: collection.products.edges }}
         resourcesClassName="products-grid"
@@ -126,6 +141,7 @@ function ProductItem({ product, loading }) {
   );
 }
 
+
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
     amount
@@ -163,42 +179,20 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
-  query CollectionWithFilters($handle: String!, $first: Int, $last: Int, $startCursor: String, $endCursor: String) {
+  query Collection(
+    $handle: String!
+    $country: CountryCode
+    $language: LanguageCode
+    $first: Int
+    $last: Int
+    $startCursor: String
+    $endCursor: String
+  ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
       handle
       title
-      filters {
-        label
-        type
-        param_name
-        values {
-          label
-          value
-          active
-          count
-        }
-        true_value {
-          label
-          value
-          active
-          count
-        }
-        false_value {
-          label
-          value
-          active
-          count
-        }
-        min_value {
-          param_name
-          value
-        }
-        max_value {
-          param_name
-          value
-        }
-      }
+      description
       products(
         first: $first,
         last: $last,
@@ -218,3 +212,8 @@ const COLLECTION_QUERY = `#graphql
     }
   }
 `;
+
+/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
+/** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
+/** @typedef {import('storefrontapi.generated').ProductItemFragment} ProductItemFragment */
+/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
