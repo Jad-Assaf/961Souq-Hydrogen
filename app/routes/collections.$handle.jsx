@@ -10,9 +10,6 @@ import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { ProductFilters } from '~/components/CollectionsFilters';
-import { useState } from 'react';
-import { ProductFilter } from '@shopify/hydrogen/storefront-api-types';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -57,6 +54,49 @@ async function loadCriticalData({ context, params, request }) {
     });
   }
 
+  const { collection } = await storefront.query(
+    `#graphql
+      query CollectionFilters($handle: String!) {
+        collection(handle: $handle) {
+          id
+          title
+          filters {
+            label
+            type
+            param_name
+            values {
+              label
+              value
+              active
+              count
+            }
+            true_value {
+              label
+              value
+              active
+              count
+            }
+            false_value {
+              label
+              value
+              active
+              count
+            }
+            min_value {
+              param_name
+              value
+            }
+            max_value {
+              param_name
+              value
+            }
+          }
+        }
+      }
+    `,
+    { variables: { handle } }
+  );
+
   return {
     collection,
   };
@@ -76,8 +116,6 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-
-      <ProductFilter collectionHandle={collection.handle} />
 
       <PaginatedResourceSection
         connection={{ edges: collection.products.edges }}
