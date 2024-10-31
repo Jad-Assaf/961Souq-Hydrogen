@@ -31,7 +31,7 @@ export async function loader({ params, context }) {
 }
 
 // Main ProductFilter component
-export default function ProductFilter() {
+export default function ProductFilters() {
   const filters = useLoaderData(); // Access the filters data
   const [selectedFilters, setSelectedFilters] = useState({});
 
