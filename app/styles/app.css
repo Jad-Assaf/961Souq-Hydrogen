@@ -904,10 +904,12 @@ button.reset:hover:not(:has(> *)) {
 
 .products-grid {
   display: flex;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
   flex-wrap: wrap;
   gap: 1.5rem;
+  max-width: 1500px;
+  margin: auto;
 }
 
 .product-item img {
