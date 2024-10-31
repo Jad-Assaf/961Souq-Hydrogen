@@ -1,21 +1,21 @@
-import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link } from '@remix-run/react';
+import {defer, redirect} from '@shopify/remix-oxygen';
+import {useLoaderData, Link} from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
-import { useVariantUrl } from '~/lib/variants';
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import {useVariantUrl} from '~/lib/variants';
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({ data }) => {
-  return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
+export const meta = ({data}) => {
+  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
 };
 
 /**
@@ -28,7 +28,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return defer({ ...deferredData, ...criticalData });
+  return defer({...deferredData, ...criticalData});
 }
 
 /**
@@ -36,9 +36,9 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({ context, params, request }) {
-  const { handle } = params;
-  const { storefront } = context;
+async function loadCriticalData({context, params, request}) {
+  const {handle} = params;
+  const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 15,
   });
@@ -47,21 +47,10 @@ async function loadCriticalData({ context, params, request }) {
     throw redirect('/collections');
   }
 
-  // Extract filter parameters from the URL
-  const url = new URL(request.url);
-  const tag = url.searchParams.get('tag') || '';
-  const minPrice = parseFloat(url.searchParams.get('minPrice')) || 0;
-  const maxPrice = parseFloat(url.searchParams.get('maxPrice')) || 1000;
-
-  const [{ collection }] = await Promise.all([
+  const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: {
-        handle,
-        ...paginationVariables,
-        tag,
-        minPrice,
-        maxPrice,
-      },
+      variables: {handle, ...paginationVariables},
+      // Add other queries here, so that they are loaded in parallel
     }),
   ]);
 
@@ -82,13 +71,13 @@ async function loadCriticalData({ context, params, request }) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
-function loadDeferredData({ context }) {
+function loadDeferredData({context}) {
   return {};
 }
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
-  const { collection } = useLoaderData();
+  const {collection} = useLoaderData();
 
   return (
     <div className="collection">
@@ -98,7 +87,7 @@ export default function Collection() {
         connection={collection.products}
         resourcesClassName="products-grid"
       >
-        {({ node: product, index }) => (
+        {({node: product, index}) => (
           <ProductItem
             key={product.id}
             product={product}
@@ -202,9 +191,6 @@ const COLLECTION_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
-    $tag: String
-    $minPrice: Float
-    $maxPrice: Float
   ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
@@ -215,14 +201,7 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor,
-        filters: {
-          tag: $tag,
-          priceRange: {
-            min: $minPrice,
-            max: $maxPrice
-          }
-        }
+        after: $endCursor
       ) {
         nodes {
           ...ProductItem
