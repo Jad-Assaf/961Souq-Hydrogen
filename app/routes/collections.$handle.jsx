@@ -1,5 +1,5 @@
 import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
+import { useLoaderData, Link, useLocation, useNavigate } from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
