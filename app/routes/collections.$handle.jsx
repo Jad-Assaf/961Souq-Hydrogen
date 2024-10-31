@@ -78,6 +78,15 @@ function loadDeferredData({context}) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Remove pagination query parameters on page load or refresh
+    if (location.search.includes('cursor')) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
 
   return (
     <div className="collection">
