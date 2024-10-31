@@ -1,5 +1,6 @@
 import {defer, redirect} from '@shopify/remix-oxygen';
 import {useLoaderData, Link} from '@remix-run/react';
+import { useState } from 'react';
 import {
   getPaginationVariables,
   Image,
@@ -75,14 +76,37 @@ function loadDeferredData({context}) {
   return {};
 }
 
+function FilterMenu({ tags, onFilterChange }) {
+  return (
+    <div className="filter-menu">
+      <label>Filter by Tag:</label>
+      <select onChange={(e) => onFilterChange(e.target.value)}>
+        <option value="">All</option>
+        {tags.map((tag) => (
+          <option key={tag} value={tag}>{tag}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
+  const [selectedTag, setSelectedTag] = useState('');
+
+  const filteredProducts = selectedTag
+    ? collection.products.nodes.filter((product) => product.tags.includes(selectedTag))
+    : collection.products.nodes;
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
+      <FilterMenu
+        tags={Array.from(new Set(collection.products.nodes.flatMap((product) => product.tags)))}
+        onFilterChange={setSelectedTag}
+      />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
@@ -205,6 +229,7 @@ const COLLECTION_QUERY = `#graphql
       ) {
         nodes {
           ...ProductItem
+          tags
         }
         pageInfo {
           hasPreviousPage
