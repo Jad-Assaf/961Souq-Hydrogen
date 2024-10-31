@@ -92,9 +92,10 @@ function FilterMenu({ tags, onFilterChange }) {
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
-  const {collection} = useLoaderData();
+  const { collection } = useLoaderData();
   const [selectedTag, setSelectedTag] = useState('');
 
+  // Filter products based on selected tag
   const filteredProducts = selectedTag
     ? collection.products.nodes.filter((product) => product.tags.includes(selectedTag))
     : collection.products.nodes;
@@ -103,15 +104,17 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
+
       <FilterMenu
         tags={Array.from(new Set(collection.products.nodes.flatMap((product) => product.tags)))}
         onFilterChange={setSelectedTag}
       />
+
       <PaginatedResourceSection
-        connection={collection.products}
+        connection={{ ...collection.products, nodes: filteredProducts }} // Pass only filtered products
         resourcesClassName="products-grid"
       >
-        {({node: product, index}) => (
+        {({ node: product, index }) => (
           <ProductItem
             key={product.id}
             product={product}
@@ -119,6 +122,7 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
+
       <Analytics.CollectionView
         data={{
           collection: {
