@@ -36,7 +36,6 @@ async function loadCriticalData({ context, params, request }) {
     throw redirect('/collections');
   }
 
-  // Fetch collection data with product price range and products
   const { collection } = await storefront.query(COLLECTION_QUERY, {
     variables: { handle, ...paginationVariables },
   });
@@ -63,7 +62,7 @@ function ProductFilter({ minPrice, maxPrice, products }) {
   const [selectedMinPrice, setSelectedMinPrice] = useState(minPrice);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(maxPrice);
 
-  // Filter products within the selected price range
+  // Filter products based on selected price range
   const filteredProducts = products.filter((product) => {
     const price = parseFloat(product.priceRange.minVariantPrice.amount);
     return price >= selectedMinPrice && price <= selectedMaxPrice;
