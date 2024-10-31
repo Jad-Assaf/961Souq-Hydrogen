@@ -37,35 +37,32 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({ context, params, request }) {
-  const { handle } = params;
-  const { storefront } = context;
+async function loadCriticalData({context, params, request}) {
+  const {handle} = params;
+  const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 15, tag: selectedTag || undefined,
+    pageBy: 15,
   });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  const [{ collection }, tagsData] = await Promise.all([
+  const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: { handle, ...paginationVariables },
-    }),
-    storefront.query(COLLECTION_TAGS_QUERY, {
-      variables: { handle },
+      variables: {handle, ...paginationVariables},
+      // Add other queries here, so that they are loaded in parallel
     }),
   ]);
 
   if (!collection) {
-    throw new Response(`Collection ${handle} not found`, { status: 404 });
+    throw new Response(`Collection ${handle} not found`, {
+      status: 404,
+    });
   }
-
-  const allTags = Array.from(new Set(tagsData.collection.products.nodes.flatMap((product) => product.tags)));
 
   return {
     collection,
-    allTags, // Pass all tags as part of the initial loader data
   };
 }
 
@@ -94,36 +91,44 @@ function FilterMenu({ tags, onFilterChange }) {
 }
 
 export default function Collection() {
-  const { collection, allTags } = useLoaderData();
+  /** @type {LoaderReturnData} */
+  const { collection } = useLoaderData();
   const [selectedTag, setSelectedTag] = useState('');
 
-  // Add filter to pagination variables for the next paginated fetch
-  const paginationVariables = selectedTag ? { tag: selectedTag } : {};
+  // Filter products based on selected tag
+  const filteredProducts = selectedTag
+    ? collection.products.nodes.filter((product) => product.tags.includes(selectedTag))
+    : collection.products.nodes;
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
+      {/* <p className="collection-description">{collection.description}</p> */}
 
-      <FilterMenu tags={allTags} onFilterChange={setSelectedTag} />
+      <FilterMenu
+        tags={Array.from(new Set(collection.products.nodes.flatMap((product) => product.tags)))}
+        onFilterChange={setSelectedTag}
+      />
 
       <PaginatedResourceSection
-        connection={{
-          ...collection.products,
-          nodes: collection.products.nodes.filter((product) =>
-            !selectedTag || product.tags.includes(selectedTag)
-          ),
-        }}
+        connection={{ ...collection.products, nodes: filteredProducts }} // Pass only filtered products
         resourcesClassName="products-grid"
-        paginationVariables={paginationVariables}
       >
         {({ node: product, index }) => (
-          <ProductItem key={product.id} product={product} loading={index < 15 ? 'eager' : undefined} />
+          <ProductItem
+            key={product.id}
+            product={product}
+            loading={index < 15 ? 'eager' : undefined}
+          />
         )}
       </PaginatedResourceSection>
 
       <Analytics.CollectionView
         data={{
-          collection: { id: collection.id, handle: collection.handle },
+          collection: {
+            id: collection.id,
+            handle: collection.handle,
+          },
         }}
       />
     </div>
@@ -167,17 +172,6 @@ function ProductItem({ product, loading }) {
   );
 }
 
-const COLLECTION_TAGS_QUERY = `#graphql
-  query CollectionTags($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      products(first: 100) {  // Adjust the number as needed
-        nodes {
-          tags
-        }
-      }
-    }
-  }
-`;
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
