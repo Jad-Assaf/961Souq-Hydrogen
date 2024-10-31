@@ -125,11 +125,14 @@ function ProductItem({ product, loading }) {
     >
       {product.featuredImage && (
         <AnimatedImage
-          src={product.featuredImage.url} // Ensure src is passed correctly
+          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+                   ${product.featuredImage.url}?width=600&quality=30 600w,
+                   ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
-          width="100%"
-          height="auto"
+          width="180px"
+          height="180px"
         />
       )}
       <h4>{product.title}</h4>
