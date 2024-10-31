@@ -1,12 +1,11 @@
 import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link, useLocation} from '@remix-run/react';
+import {useLoaderData, Link} from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
-import { useEffect } from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
@@ -22,14 +21,34 @@ export const meta = ({data}) => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader(args) {
-  // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
+export async function loader({ context, params, request }) {
+  const { handle } = params;
+  const { storefront } = context;
 
-  // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
+  // On a fresh load, we start from the initial pagination state.
+  const paginationVariables = getPaginationVariables(new Request(''), {
+    pageBy: 15, // Adjust as needed
+  });
 
-  return defer({...deferredData, ...criticalData});
+  if (!handle) {
+    throw redirect('/collections');
+  }
+
+  const [{ collection }] = await Promise.all([
+    storefront.query(COLLECTION_QUERY, {
+      variables: { handle, ...paginationVariables },
+    }),
+  ]);
+
+  if (!collection) {
+    throw new Response(`Collection ${handle} not found`, {
+      status: 404,
+    });
+  }
+
+  return defer({
+    collection,
+  });
 }
 
 /**
@@ -79,16 +98,6 @@ function loadDeferredData({context}) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
-  const location = useLocation();
-
-  useEffect(() => {
-    // Reset to the first page if URL changes or page reloads
-    if (location.pathname === '/collections') {
-      // Scroll to top or reset pagination
-      window.scrollTo(0, 0);
-      // Optional: trigger any additional reset actions here
-    }
-  }, [location]);
 
   return (
     <div className="collection">
