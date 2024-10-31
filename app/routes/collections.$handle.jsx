@@ -1,7 +1,7 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link } from '@remix-run/react';
 import { getPaginationVariables, Money, Analytics } from '@shopify/hydrogen';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
@@ -61,12 +61,15 @@ function loadDeferredData({ context }) {
 function ProductFilter({ minPrice, maxPrice, products }) {
   const [selectedMinPrice, setSelectedMinPrice] = useState(minPrice);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(maxPrice);
+  const [filteredProducts, setFilteredProducts] = useState(products);
 
-  // Filter products based on selected price range
-  const filteredProducts = products.filter((product) => {
-    const price = parseFloat(product.priceRange.minVariantPrice.amount);
-    return price >= selectedMinPrice && price <= selectedMaxPrice;
-  });
+  useEffect(() => {
+    const filtered = products.filter((product) => {
+      const price = parseFloat(product.priceRange.minVariantPrice.amount);
+      return price >= selectedMinPrice && price <= selectedMaxPrice;
+    });
+    setFilteredProducts(filtered);
+  }, [selectedMinPrice, selectedMaxPrice, products]);
 
   return (
     <div>
