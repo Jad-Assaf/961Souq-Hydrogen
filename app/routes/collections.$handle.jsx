@@ -7,7 +7,6 @@ import {
   Analytics,
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
-import { useEffect, useState, useRef, useCallback } from 'react';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
@@ -77,61 +76,33 @@ function loadDeferredData({context}) {
 }
 
 export default function Collection() {
-  const { collection: initialCollection } = useLoaderData();
-  const [collection, setCollection] = useState(initialCollection);
-  const [loading, setLoading] = useState(false);
-  const sentinelRef = useRef();
-
-  const fetchNextPage = useCallback(async () => {
-    if (loading || !collection.products.pageInfo.hasNextPage) return;
-
-    setLoading(true);
-    const nextCursor = collection.products.pageInfo.endCursor;
-
-    // Fetch next page with endCursor
-    const response = await fetch(`/api/collections/paginate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cursor: nextCursor }),
-    });
-
-    const data = await response.json();
-    setCollection((prevCollection) => ({
-      ...prevCollection,
-      products: {
-        ...prevCollection.products,
-        nodes: [...prevCollection.products.nodes, ...data.collection.products.nodes],
-        pageInfo: data.collection.products.pageInfo,
-      },
-    }));
-    setLoading(false);
-  }, [collection, loading]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) fetchNextPage();
-      },
-      { threshold: 1 }
-    );
-
-    if (sentinelRef.current) observer.observe(sentinelRef.current);
-
-    return () => observer.disconnect();
-  }, [fetchNextPage]);
+  /** @type {LoaderReturnData} */
+  const {collection} = useLoaderData();
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      <PaginatedResourceSection connection={collection.products} resourcesClassName="products-grid">
-        {({ node: product }) => (
-          <ProductItem key={product.id} product={product} />
+      {/* <p className="collection-description">{collection.description}</p> */}
+      <PaginatedResourceSection
+        connection={collection.products}
+        resourcesClassName="products-grid"
+      >
+        {({node: product, index}) => (
+          <ProductItem
+            key={product.id}
+            product={product}
+            loading={index < 15 ? 'eager' : undefined}
+          />
         )}
       </PaginatedResourceSection>
-
-      {/* Sentinel for IntersectionObserver */}
-      <div ref={sentinelRef} style={{ height: '20px' }} />
-      {loading && <p>Loading more products...</p>}
+      <Analytics.CollectionView
+        data={{
+          collection: {
+            id: collection.id,
+            handle: collection.handle,
+          },
+        }}
+      />
     </div>
   );
 }

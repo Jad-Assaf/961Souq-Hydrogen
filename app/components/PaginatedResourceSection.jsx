@@ -1,21 +1,39 @@
 import * as React from 'react';
-import {Pagination} from '@shopify/hydrogen';
-
-/**
- * <PaginatedResourceSection > is a component that encapsulate how the previous and next behaviors throughout your application.
- * @param {Class<Pagination<NodesType>>['connection']>}
- */
+import { Pagination } from '@shopify/hydrogen';
 
 export function PaginatedResourceSection({
   connection,
   children,
   resourcesClassName,
 }) {
+  const observerRef = React.useRef(null);
+
+  // Observe the NextLink for automatic fetching
+  React.useEffect(() => {
+    if (!observerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && observerRef.current) {
+          observerRef.current.click(); // Trigger NextLink click
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, []);
+
   return (
     <Pagination connection={connection}>
-      {({nodes, isLoading, PreviousLink, NextLink}) => {
-        const resoucesMarkup = nodes.map((node, index) =>
-          children({node, index}),
+      {({ nodes, isLoading, PreviousLink, NextLink }) => {
+        const resourcesMarkup = nodes.map((node, index) =>
+          children({ node, index })
         );
 
         return (
@@ -23,13 +41,19 @@ export function PaginatedResourceSection({
             <PreviousLink>
               {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
             </PreviousLink>
+
             {resourcesClassName ? (
-              <div className={resourcesClassName}>{resoucesMarkup}</div>
+              <div className={resourcesClassName}>{resourcesMarkup}</div>
             ) : (
-              resoucesMarkup
+              resourcesMarkup
             )}
+
             <NextLink>
-              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+              {isLoading ? (
+                'Loading...'
+              ) : (
+                <span ref={observerRef}>Load more ↓</span>
+              )}
             </NextLink>
           </div>
         );
