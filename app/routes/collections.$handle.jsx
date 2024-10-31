@@ -1,12 +1,18 @@
-import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link } from '@remix-run/react';
-import { getPaginationVariables, Image, Money, Analytics } from '@shopify/hydrogen';
-import { useState } from 'react';
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import {defer, redirect} from '@shopify/remix-oxygen';
+import {useLoaderData, Link} from '@remix-run/react';
+import {
+  getPaginationVariables,
+  Image,
+  Money,
+  Analytics,
+} from '@shopify/hydrogen';
+import {useVariantUrl} from '~/lib/variants';
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { ProductFilters } from '~/components/CollectionsFilters';
-import { useVariantUrl } from '~/lib/variants';
+import { useState } from 'react';
+import { ProductFilter } from '@shopify/hydrogen/storefront-api-types';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -25,12 +31,15 @@ export async function loader(args) {
 }
 
 /**
- * Load critical data for rendering content above the fold.
+ * Load data necessary for rendering content above the fold.
+ * @param {LoaderFunctionArgs}
  */
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-  const paginationVariables = getPaginationVariables(request, { pageBy: 15 });
+  const paginationVariables = getPaginationVariables(request, {
+    pageBy: 15,
+  });
 
   if (!handle) {
     throw redirect('/collections');
@@ -43,38 +52,35 @@ async function loadCriticalData({ context, params, request }) {
   ]);
 
   if (!collection) {
-    throw new Response(`Collection ${handle} not found`, { status: 404 });
+    throw new Response(`Collection ${handle} not found`, {
+      status: 404,
+    });
   }
 
-  return { collection };
+  return {
+    collection,
+  };
 }
 
+/**
+ * Load data for rendering content below the fold.
+ * @param {LoaderFunctionArgs}
+ */
 function loadDeferredData({ context }) {
   return {};
 }
 
 export default function Collection() {
   const { collection } = useLoaderData();
-  const [activeFilters, setActiveFilters] = useState([]);
-
-  // Filter products based on selected filters
-  const filteredProducts = collection.products.nodes.filter((product) =>
-    activeFilters.length === 0
-      ? true
-      : product.tags.some((tag) => activeFilters.includes(tag))
-  );
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      <ProductFilters
-        collectionHandle={collection.handle}
-        onFilter={(filters) => setActiveFilters(filters)}
-      />
+      <ProductFilter collectionHandle={collection.handle} />
 
       <PaginatedResourceSection
-        connection={{ nodes: filteredProducts }}
+        connection={{ edges: collection.products.edges }}
         resourcesClassName="products-grid"
       >
         {({ node: product, index }) => (
@@ -85,7 +91,6 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
-
       <Analytics.CollectionView
         data={{
           collection: {
@@ -99,7 +104,10 @@ export default function Collection() {
 }
 
 /**
- * ProductItem component for rendering individual products.
+ * @param {{
+ *   product: ProductItemFragment;
+ *   loading?: 'eager' | 'lazy';
+ * }}
  */
 function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
@@ -130,6 +138,7 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
+
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
@@ -190,7 +199,6 @@ const COLLECTION_QUERY = `#graphql
       ) {
         nodes {
           ...ProductItem
-          tags
         }
         pageInfo {
           hasPreviousPage
