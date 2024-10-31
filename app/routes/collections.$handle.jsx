@@ -1,12 +1,11 @@
 import {defer, redirect} from '@shopify/remix-oxygen';
-import { useLoaderData, Link, useLocation, useNavigate } from '@remix-run/react';
+import {useLoaderData, Link} from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
-import { useEffect } from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
@@ -79,15 +78,6 @@ function loadDeferredData({context}) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const {collection} = useLoaderData();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Remove pagination query parameters on page load or refresh
-    if (location.search.includes('cursor')) {
-      navigate(location.pathname, { replace: true });
-    }
-  }, [location, navigate]);
 
   return (
     <div className="collection">
