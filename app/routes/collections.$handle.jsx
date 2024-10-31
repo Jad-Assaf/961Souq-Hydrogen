@@ -76,50 +76,51 @@ function loadDeferredData({context}) {
   return {};
 }
 
-function FilterMenu({ tags, onFilterChange }) {
-  return (
-    <div className="filter-menu">
-      <label>Filter by Tag:</label>
-      <select onChange={(e) => onFilterChange(e.target.value)}>
-        <option value="">All</option>
-        {tags.map((tag) => (
-          <option key={tag} value={tag}>{tag}</option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
 export default function Collection() {
-  /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
   const [selectedTag, setSelectedTag] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [selectedProcessor, setSelectedProcessor] = useState('');
+  const [selectedProcessorSubFilter, setSelectedProcessorSubFilter] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
-  // Filter products based on selected tag
-  const filteredProducts = selectedTag
-    ? collection.products.nodes.filter((product) => product.tags.includes(selectedTag))
-    : collection.products.nodes;
+  // Filtered products based on selected criteria
+  const filteredProducts = collection.products.nodes.filter((product) => {
+    const matchesTag = selectedTag ? product.tags.includes(selectedTag) : true;
+    const matchesBrand = selectedBrand ? product.vendor === selectedBrand : true;
+    const matchesProcessor = selectedProcessor ? product.metafields.processor_type === selectedProcessor : true;
+    const matchesProcessorSubFilter = selectedProcessorSubFilter
+      ? product.metafields.processor_subtype === selectedProcessorSubFilter
+      : true;
+    const matchesPrice =
+      (priceRange.min ? parseFloat(product.priceRange.minVariantPrice.amount) >= priceRange.min : true) &&
+      (priceRange.max ? parseFloat(product.priceRange.minVariantPrice.amount) <= priceRange.max : true);
+    return matchesTag && matchesBrand && matchesProcessor && matchesProcessorSubFilter && matchesPrice;
+  });
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      {/* <p className="collection-description">{collection.description}</p> */}
 
+      {/* Filter Menu */}
       <FilterMenu
         tags={Array.from(new Set(collection.products.nodes.flatMap((product) => product.tags)))}
-        onFilterChange={setSelectedTag}
+        brands={Array.from(new Set(collection.products.nodes.map((product) => product.vendor)))}
+        processors={[
+          'Intel Core Ultra', 'Intel Core i9', 'Intel Core i7', 'Intel Core i5',
+          'Intel Core i3', 'AMD Ryzen 9', 'AMD Ryzen 7', 'AMD Ryzen 5', 'AMD Ryzen 3'
+        ]}
+        onTagChange={setSelectedTag}
+        onBrandChange={setSelectedBrand}
+        onProcessorChange={setSelectedProcessor}
+        onProcessorSubFilterChange={setSelectedProcessorSubFilter}
+        priceRange={priceRange}
+        onPriceChange={setPriceRange}
       />
 
-      <PaginatedResourceSection
-        connection={{ ...collection.products, nodes: filteredProducts }} // Pass only filtered products
-        resourcesClassName="products-grid"
-      >
+      <PaginatedResourceSection connection={filteredProducts} resourcesClassName="products-grid">
         {({ node: product, index }) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 15 ? 'eager' : undefined}
-          />
+          <ProductItem key={product.id} product={product} loading={index < 15 ? 'eager' : undefined} />
         )}
       </PaginatedResourceSection>
 
@@ -135,29 +136,100 @@ export default function Collection() {
   );
 }
 
-/**
- * @param {{
- *   product: ProductItemFragment;
- *   loading?: 'eager' | 'lazy';
- * }}
- */
+// Filter Menu Component
+function FilterMenu({
+  tags,
+  brands,
+  processors,
+  priceRange,
+  onTagChange,
+  onBrandChange,
+  onProcessorChange,
+  onProcessorSubFilterChange,
+  onPriceChange,
+}) {
+  return (
+    <div className="filter-menu">
+      {/* Tag Filter */}
+      <label>Tag:</label>
+      <select onChange={(e) => onTagChange(e.target.value)} defaultValue="">
+        <option value="">All</option>
+        {tags.map((tag) => (
+          <option key={tag} value={tag}>{tag}</option>
+        ))}
+      </select>
+
+      {/* Brand Filter */}
+      <label>Brand:</label>
+      <select onChange={(e) => onBrandChange(e.target.value)} defaultValue="">
+        <option value="">All Brands</option>
+        {brands.map((brand) => (
+          <option key={brand} value={brand}>{brand}</option>
+        ))}
+      </select>
+
+      {/* Processor Filter */}
+      <label>Processor Type:</label>
+      <select onChange={(e) => onProcessorChange(e.target.value)} defaultValue="">
+        <option value="">All Processors</option>
+        {processors.map((processor) => (
+          <option key={processor} value={processor}>{processor}</option>
+        ))}
+      </select>
+
+      {/* Processor Sub-Filter */}
+      {processors.includes(selectedProcessor) && (
+        <div>
+          <label>Processor Sub-Type:</label>
+          <select onChange={(e) => onProcessorSubFilterChange(e.target.value)} defaultValue="">
+            <option value="">All Sub-Types</option>
+            {getSubFiltersForProcessor(selectedProcessor).map((subFilter) => (
+              <option key={subFilter} value={subFilter}>{subFilter}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Price Range Filter */}
+      <label>Price Range:</label>
+      <input
+        type="number"
+        placeholder="Min Price"
+        value={priceRange.min}
+        onChange={(e) => onPriceChange({ ...priceRange, min: e.target.value })}
+      />
+      <input
+        type="number"
+        placeholder="Max Price"
+        value={priceRange.max}
+        onChange={(e) => onPriceChange({ ...priceRange, max: e.target.value })}
+      />
+    </div>
+  );
+}
+
+// Helper function to get sub-filters for each processor
+function getSubFiltersForProcessor(processor) {
+  const processorSubFilters = {
+    'Intel Core Ultra': ['Sub1', 'Sub2'], // Replace with actual sub-filters
+    'Intel Core i9': ['Sub1', 'Sub2'],
+    // Add sub-filters for each processor as needed
+  };
+  return processorSubFilters[processor] || [];
+}
+
+// Product Item Component
 function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
 
   return (
-    <Link
-      className="product-item-collection"
-      key={product.id}
-      prefetch="intent"
-      to={variantUrl}
-    >
+    <Link className="product-item-collection" key={product.id} prefetch="intent" to={variantUrl}>
       {product.featuredImage && (
         <AnimatedImage
-          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                   ${product.featuredImage.url}?width=600&quality=30 600w,
+          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w, 
+                   ${product.featuredImage.url}?width=600&quality=30 600w, 
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -171,7 +243,6 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
-
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
