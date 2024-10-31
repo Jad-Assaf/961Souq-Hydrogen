@@ -1,15 +1,11 @@
-import {defer, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
-import {
-  getPaginationVariables,
-  Image,
-  Money,
-  Analytics,
-} from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { defer, redirect } from '@shopify/remix-oxygen';
+import { useLoaderData, Link } from '@remix-run/react';
+import { getPaginationVariables, Money, Analytics } from '@shopify/hydrogen';
+import { useVariantUrl } from '~/lib/variants';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
+import CollectionFilters from './CollectionFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -34,79 +30,21 @@ export async function loader(args) {
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 15,
-  });
+  const paginationVariables = getPaginationVariables(request, { pageBy: 15 });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  // First query for collection with pagination
-  const { collection: paginatedCollection } = await storefront.query(
-    COLLECTION_QUERY,
-    {
-      variables: { handle, ...paginationVariables },
-    }
-  );
+  const { collection } = await storefront.query(COLLECTION_QUERY, {
+    variables: { handle, ...paginationVariables },
+  });
 
-  if (!paginatedCollection) {
-    throw new Response(`Collection ${handle} not found`, {
-      status: 404,
-    });
+  if (!collection) {
+    throw new Response(`Collection ${handle} not found`, { status: 404 });
   }
 
-  // Second query for filters
-  const { collection: filterCollection } = await storefront.query(
-    `#graphql
-      query CollectionFilters($handle: String!) {
-        collection(handle: $handle) {
-          id
-          title
-          filters {
-            label
-            type
-            param_name
-            values {
-              label
-              value
-              active
-              count
-            }
-            true_value {
-              label
-              value
-              active
-              count
-            }
-            false_value {
-              label
-              value
-              active
-              count
-            }
-            min_value {
-              param_name
-              value
-            }
-            max_value {
-              param_name
-              value
-            }
-          }
-        }
-      }
-    `,
-    { variables: { handle } }
-  );
-
-  // Return both paginated collection data and filters
-  return {
-    collection: {
-      ...paginatedCollection,
-      filters: filterCollection.filters,
-    },
-  };
+  return { collection };
 }
 
 /**
@@ -124,6 +62,10 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
+      {/* Filters Component */}
+      <CollectionFilters filters={collection.filters} />
+
+      {/* Products Section */}
       <PaginatedResourceSection
         connection={{ edges: collection.products.edges }}
         resourcesClassName="products-grid"
@@ -184,7 +126,6 @@ function ProductItem({ product, loading }) {
   );
 }
 
-
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
     amount
@@ -222,20 +163,42 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
-  query Collection(
-    $handle: String!
-    $country: CountryCode
-    $language: LanguageCode
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
+  query CollectionWithFilters($handle: String!, $first: Int, $last: Int, $startCursor: String, $endCursor: String) {
     collection(handle: $handle) {
       id
       handle
       title
-      description
+      filters {
+        label
+        type
+        param_name
+        values {
+          label
+          value
+          active
+          count
+        }
+        true_value {
+          label
+          value
+          active
+          count
+        }
+        false_value {
+          label
+          value
+          active
+          count
+        }
+        min_value {
+          param_name
+          value
+        }
+        max_value {
+          param_name
+          value
+        }
+      }
       products(
         first: $first,
         last: $last,
@@ -255,8 +218,3 @@ const COLLECTION_QUERY = `#graphql
     }
   }
 `;
-
-/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
-/** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
-/** @typedef {import('storefrontapi.generated').ProductItemFragment} ProductItemFragment */
-/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */

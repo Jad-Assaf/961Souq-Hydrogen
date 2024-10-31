@@ -1,25 +1,17 @@
-import { useState } from 'react';
-import { useLoaderData, Form } from '@remix-run/react';
+// CollectionFilters.jsx
+import { Form } from '@remix-run/react';
 
-export default function CollectionFilters() {
-  const { collection } = useLoaderData();
-  const [selectedFilters, setSelectedFilters] = useState({});
-
-  const handleFilterChange = (filterName, value) => {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [filterName]: value,
-    }));
-  };
-
+export default function CollectionFilters({ filters }) {
   return (
     <Form method="get">
-      {collection.filters.map((filter) => (
+      {filters.map((filter) => (
         <details key={filter.label}>
           <summary>
             <div>
               <span>{filter.label}</span>
-              {filter.active_values?.length > 0 && <span>({filter.active_values.length})</span>}
+              {filter.active_values?.length > 0 && (
+                <span>({filter.active_values.length})</span>
+              )}
             </div>
           </summary>
           <div>
@@ -38,8 +30,7 @@ export default function CollectionFilters() {
                         type="checkbox"
                         name={filter.param_name}
                         value={option.value}
-                        checked={option.active}
-                        onChange={() => handleFilterChange(filter.param_name, option.value)}
+                        defaultChecked={option.active}
                       />
                       {option.label}
                     </label>
@@ -56,8 +47,7 @@ export default function CollectionFilters() {
                         type="checkbox"
                         name={option.param_name}
                         value={option.value}
-                        checked={option.active}
-                        onChange={() => handleFilterChange(option.param_name, option.value)}
+                        defaultChecked={option.active}
                       />
                       {option.label}
                     </label>
@@ -72,10 +62,7 @@ export default function CollectionFilters() {
                   <input
                     type="number"
                     name={filter.min_value.param_name}
-                    value={selectedFilters[filter.min_value.param_name] || ''}
-                    onChange={(e) =>
-                      handleFilterChange(filter.min_value.param_name, e.target.value)
-                    }
+                    defaultValue={filter.min_value.value || ''}
                   />
                 </label>
                 <label>
@@ -83,10 +70,7 @@ export default function CollectionFilters() {
                   <input
                     type="number"
                     name={filter.max_value.param_name}
-                    value={selectedFilters[filter.max_value.param_name] || ''}
-                    onChange={(e) =>
-                      handleFilterChange(filter.max_value.param_name, e.target.value)
-                    }
+                    defaultValue={filter.max_value.value || ''}
                   />
                 </label>
               </div>
@@ -95,9 +79,7 @@ export default function CollectionFilters() {
         </details>
       ))}
       <button type="submit">Apply Filters</button>
-      <button type="reset" onClick={() => setSelectedFilters({})}>
-        Clear all
-      </button>
+      <button type="reset">Clear all</button>
     </Form>
   );
 }
