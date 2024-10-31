@@ -119,7 +119,7 @@ function ProductItem({ product, loading }) {
 
   return (
     <Link
-      className="product-item"
+      className="product-item-collection"
       key={product.id}
       prefetch="intent"
       to={variantUrl}
