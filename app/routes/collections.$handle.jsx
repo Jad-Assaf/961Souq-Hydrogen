@@ -5,7 +5,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import CollectionFilters from './CollectionFilters';
+import CollectionFilters from '~/components/CollectionsFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
