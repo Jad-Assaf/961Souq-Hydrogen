@@ -1,11 +1,15 @@
-import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link } from '@remix-run/react';
-import { getPaginationVariables, Money, Analytics } from '@shopify/hydrogen';
-import { useState, useEffect } from 'react';
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import {defer, redirect} from '@shopify/remix-oxygen';
+import {useLoaderData, Link} from '@remix-run/react';
+import {
+  getPaginationVariables,
+  Image,
+  Money,
+  Analytics,
+} from '@shopify/hydrogen';
+import {useVariantUrl} from '~/lib/variants';
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { useVariantUrl } from '~/lib/variants';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -30,15 +34,19 @@ export async function loader(args) {
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-  const paginationVariables = getPaginationVariables(request, { pageBy: 15 });
+  const paginationVariables = getPaginationVariables(request, {
+    pageBy: 15,
+  });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  const { collection } = await storefront.query(COLLECTION_QUERY, {
-    variables: { handle, ...paginationVariables },
-  });
+  const [{ collection }] = await Promise.all([
+    storefront.query(COLLECTION_QUERY, {
+      variables: { handle, ...paginationVariables },
+    }),
+  ]);
 
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {
@@ -46,7 +54,9 @@ async function loadCriticalData({ context, params, request }) {
     });
   }
 
-  return { collection };
+  return {
+    collection,
+  };
 }
 
 /**
@@ -57,87 +67,16 @@ function loadDeferredData({ context }) {
   return {};
 }
 
-// ProductFilter Component
-function ProductFilter({ minPrice, maxPrice, products }) {
-  const [selectedMinPrice, setSelectedMinPrice] = useState(minPrice);
-  const [selectedMaxPrice, setSelectedMaxPrice] = useState(maxPrice);
-  const [filteredProducts, setFilteredProducts] = useState(products);
-
-  useEffect(() => {
-    const filtered = products.filter((product) => {
-      const price = parseFloat(product.priceRange.minVariantPrice.amount);
-      return price >= selectedMinPrice && price <= selectedMaxPrice;
-    });
-    setFilteredProducts(filtered);
-  }, [selectedMinPrice, selectedMaxPrice, products]);
-
-  return (
-    <div>
-      <h2>Filter by Price</h2>
-      <div>
-        <label>
-          Min Price:
-          <input
-            type="number"
-            value={selectedMinPrice}
-            min={minPrice}
-            max={selectedMaxPrice}
-            onChange={(e) => setSelectedMinPrice(parseFloat(e.target.value))}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Max Price:
-          <input
-            type="number"
-            value={selectedMaxPrice}
-            min={selectedMinPrice}
-            max={maxPrice}
-            onChange={(e) => setSelectedMaxPrice(parseFloat(e.target.value))}
-          />
-        </label>
-      </div>
-
-      <PaginatedResourceSection
-        connection={{ edges: filteredProducts.map((product) => ({ node: product })) }}
-        resourcesClassName="products-grid"
-      >
-        {({ node: product, index }) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 15 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
-    </div>
-  );
-}
-
 export default function Collection() {
   const { collection } = useLoaderData();
-
-  // Check if products exist in the collection
-  const products = collection.products?.nodes || [];
-  const pageInfo = collection.products?.pageInfo || {};
-
-  // Calculate min and max prices from products if they exist
-  const prices = products.map((product) =>
-    parseFloat(product.priceRange.minVariantPrice.amount)
-  );
-  const minPrice = prices.length ? Math.min(...prices) : 0;
-  const maxPrice = prices.length ? Math.max(...prices) : 0;
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {/* Render ProductFilter after collection title */}
-      <ProductFilter minPrice={minPrice} maxPrice={maxPrice} products={products} />
 
       <PaginatedResourceSection
-        connection={{ edges: products.map((product) => ({ node: product })), pageInfo }}
+        connection={{ edges: collection.products.edges }}
         resourcesClassName="products-grid"
       >
         {({ node: product, index }) => (
@@ -148,7 +87,6 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
-
       <Analytics.CollectionView
         data={{
           collection: {
@@ -196,6 +134,7 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
+
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
@@ -247,6 +186,7 @@ const COLLECTION_QUERY = `#graphql
       id
       handle
       title
+      description
       products(
         first: $first,
         last: $last,
