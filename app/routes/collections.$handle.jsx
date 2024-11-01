@@ -195,36 +195,50 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
-  $handle: String!
-  $filters: [ProductFilter!]
-  $first: Int
-  $after: String
-) {
-  collection(handle: $handle) {
-    id
-    title
-    products(first: $first, after: $after, filters: $filters) {
-      nodes {
-        title
-        vendor
-      }
-      filters {
-        id
-        label
-        type
-        values {
+    $handle: String!
+    $filters: [ProductFilter!]
+    $country: CountryCode
+    $language: LanguageCode
+    $first: Int
+    $last: Int
+    $startCursor: String
+    $endCursor: String
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      description
+      products(
+        first: $first,
+        last: $last,
+        before: $startCursor,
+        after: $endCursor,
+        filters: $filters
+      ) {
+        filters {
           id
           label
-          count
+          type
+          values {
+            id
+            label
+            count
+            input
+          }
         }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
+        nodes {
+          ...ProductItem
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
+        }
       }
     }
   }
-}
 `;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
