@@ -43,7 +43,6 @@ async function loadCriticalData({ context, params, request }) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
-  // Extract filter parameters from the query string
   const filters = [];
   if (searchParams.has('productType')) {
     filters.push({ productType: searchParams.get('productType') });
@@ -60,23 +59,28 @@ async function loadCriticalData({ context, params, request }) {
     throw redirect('/collections');
   }
 
-  const [{ collection }] = await Promise.all([
-    storefront.query(COLLECTION_QUERY, {
-      variables: { handle, filters, ...paginationVariables },
-      // Add other queries here, so that they are loaded in parallel
-    }),
-  ]);
+  try {
+    const [{ collection }] = await Promise.all([
+      storefront.query(COLLECTION_QUERY, {
+        variables: { handle, filters, ...paginationVariables },
+      }),
+    ]);
 
-  if (!collection) {
-    throw new Response(`Collection ${handle} not found`, {
-      status: 404,
+    if (!collection) {
+      throw new Response(`Collection ${handle} not found`, {
+        status: 404,
+      });
+    }
+
+    return { collection };
+  } catch (error) {
+    console.error("Error fetching collection:", error);
+    throw new Response(`Error fetching collection: ${error.message}`, {
+      status: 500,
     });
   }
-
-  return {
-    collection,
-  };
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
