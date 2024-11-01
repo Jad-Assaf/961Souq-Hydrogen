@@ -4,7 +4,19 @@ export function FilterComponent({ availableFilters }) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handleFilterChange = (filterType, value) => {
-    searchParams.set(filterType, value);
+    const filterKey = `filter.${filterType}`;
+
+    // Manage multiple filters for the same type
+    const currentValues = searchParams.getAll(filterKey);
+    const isSelected = currentValues.includes(value);
+
+    if (isSelected) {
+      searchParams.delete(filterKey);
+      currentValues.filter((v) => v !== value).forEach((v) => searchParams.append(filterKey, v));
+    } else {
+      searchParams.append(filterKey, value);
+    }
+
     setSearchParams(searchParams);
   };
 
@@ -17,7 +29,7 @@ export function FilterComponent({ availableFilters }) {
             <label key={value.id}>
               <input
                 type="checkbox"
-                checked={searchParams.get(filter.type) === value.id}
+                checked={searchParams.getAll(`filter.${filter.type}`).includes(value.id)}
                 onChange={() => handleFilterChange(filter.type, value.id)}
               />
               {value.label} ({value.count})

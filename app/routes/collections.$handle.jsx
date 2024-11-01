@@ -44,11 +44,13 @@ async function loadCriticalData({ context, params, request }) {
   const searchParams = new URLSearchParams(url.search);
 
   const filters = [];
-  if (searchParams.has('productType')) {
-    filters.push({ productType: searchParams.get('productType') });
-  }
-  if (searchParams.has('productVendor')) {
-    filters.push({ productVendor: searchParams.get('productVendor') });
+
+  // Extract and format filter parameters
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith('filter.')) {
+      const filterType = key.replace('filter.', ''); // e.g., productVendor
+      filters.push({ [filterType]: value });
+    }
   }
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
@@ -192,6 +194,7 @@ const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
     $handle: String!
+    $filters: [ProductFilter!]
     $country: CountryCode
     $language: LanguageCode
     $first: Int
@@ -204,7 +207,13 @@ const COLLECTION_QUERY = `#graphql
       handle
       title
       description
-      products(first: $first, last: $last, before: $startCursor, after: $endCursor) {
+      products(
+        first: $first
+        last: $last
+        before: $startCursor
+        after: $endCursor
+        filters: $filters
+      ) {
         filters {
           id
           label
