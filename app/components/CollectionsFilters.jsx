@@ -6,7 +6,7 @@ export function FilterComponent({ availableFilters }) {
 
   const handleFilterChange = (filterType, value) => {
     const searchParams = new URLSearchParams(location.search);
-    searchParams.set(`filter.${filterType}`, value);
+    searchParams.set(`${filterType}`, value);
     navigate(`${location.pathname}?${searchParams.toString()}`);
   };
 
