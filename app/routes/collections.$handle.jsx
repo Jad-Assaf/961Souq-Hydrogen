@@ -99,22 +99,24 @@ export default function Collection() {
     }));
 
     // Construct URL with selected filters for fetcher
-    const searchParams = new URLSearchParams(selectedFilters);
-    searchParams.set(filterId, value);
+    const newFilters = { ...selectedFilters, [filterId]: value };
+    const searchParams = new URLSearchParams(newFilters).toString();
 
-    fetcher.load(`/collections/${collection.handle}?${searchParams.toString()}`);
+    fetcher.load(`/collections/${collection.handle}?${searchParams}`);
   }
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      <ProductFilter
-        filters={collection.products.filters}
-        selectedFilters={selectedFilters}
-        onFilterChange={handleFilterChange}
-      />
+      {collection.products && (
+        <ProductFilter
+          filters={collection.products.filters}
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+        />
+      )}
       <PaginatedResourceSection
-        connection={fetcher.data?.collection.products || collection.products}
+        connection={fetcher.data?.collection?.products || collection.products}
         resourcesClassName="products-grid"
       >
         {({ node: product, index }) => (
