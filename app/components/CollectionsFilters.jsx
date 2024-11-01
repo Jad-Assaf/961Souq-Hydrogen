@@ -1,23 +1,21 @@
-import { useState } from 'react';
+import { useLocation, useNavigate } from '@remix-run/react';
 
-export function FilterComponent({ availableFilters, onApplyFilters }) {
-  const [selectedFilters, setSelectedFilters] = useState({});
+export function FilterComponent({ availableFilters }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
 
   const handleFilterChange = (filterType, value) => {
-    setSelectedFilters((prevFilters) => {
-      // Toggle filter selection
-      const updatedFilters = { ...prevFilters };
-      if (updatedFilters[filterType] === value) {
-        delete updatedFilters[filterType];
-      } else {
-        updatedFilters[filterType] = value;
-      }
-      return updatedFilters;
-    });
-  };
+    // Toggle filter selection
+    const current = searchParams.get(`filter.${filterType}`);
+    if (current === value) {
+      searchParams.delete(`filter.${filterType}`); // Remove if already selected
+    } else {
+      searchParams.set(`filter.${filterType}`, value); // Add new filter
+    }
 
-  const applyFilters = () => {
-    onApplyFilters(selectedFilters);
+    // Update URL to trigger re-fetching of filtered data
+    navigate(`${location.pathname}?${searchParams.toString()}`);
   };
 
   return (
@@ -31,7 +29,7 @@ export function FilterComponent({ availableFilters, onApplyFilters }) {
                 <button
                   onClick={() => handleFilterChange(filter.type, value.input)}
                   style={{
-                    backgroundColor: selectedFilters[filter.type] === value.input ? 'blue' : 'gray',
+                    backgroundColor: searchParams.get(`filter.${filter.type}`) === value.input ? 'blue' : 'gray',
                   }}
                 >
                   {value.label} ({value.count})
@@ -41,7 +39,6 @@ export function FilterComponent({ availableFilters, onApplyFilters }) {
           </ul>
         </div>
       ))}
-      <button onClick={applyFilters}>Apply Filters</button>
     </div>
   );
 }
