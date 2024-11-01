@@ -31,7 +31,6 @@ import { Drawer, useDrawer } from "./drawer";
 import { IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid } from "./icon";
 import { Input } from "./input";
 
-
 type DrawerFilterProps = {
   productNumber?: number;
   filters: Filter[];
