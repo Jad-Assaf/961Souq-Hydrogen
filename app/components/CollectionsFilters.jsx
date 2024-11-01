@@ -1,4 +1,4 @@
-import { useSearchParams } from '@remix-run/react';
+import { useLocation, useNavigate, useSearchParams } from '@remix-run/react';
 
 export function FilterComponent({ availableFilters }) {
   const location = useLocation();
