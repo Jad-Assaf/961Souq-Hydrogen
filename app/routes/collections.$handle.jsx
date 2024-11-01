@@ -10,6 +10,7 @@ import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import CollectionFilter from '~/components/CollectionsFilters';
+import { COLLECTION_BY_HANDLE_QUERY } from '~/components/CoolectionQuery';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -34,20 +35,18 @@ export async function loader(args) {
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 16,
-  });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  const [{ collection }] = await Promise.all([
-    storefront.query(COLLECTION_QUERY, {
-      variables: { handle, ...paginationVariables },
-      // Add other queries here, so that they are loaded in parallel
-    }),
-  ]);
+  const paginationVariables = getPaginationVariables(request, {
+    pageBy: 16,
+  });
+
+  const { collectionByHandle: collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+    variables: { handle, ...paginationVariables },
+  });
 
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {
@@ -55,9 +54,7 @@ async function loadCriticalData({ context, params, request }) {
     });
   }
 
-  return {
-    collection,
-  };
+  return { collection };
 }
 
 /**
@@ -75,8 +72,8 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {/* Add the CollectionFilter component for filtering by price */}
-      <CollectionFilter collectionHandle={collection.handle} />
+      {/* Render CollectionFilter and pass in fetched product data */}
+      <CollectionFilter products={collection.products.edges.map((edge) => edge.node)} />
 
       <PaginatedResourceSection
         connection={collection.products}

@@ -1,26 +1,10 @@
+// CollectionFilter.jsx
 import React, { useState, useEffect } from 'react';
-import { useShopQuery } from '@shopify/hydrogen';
-import { COLLECTION_BY_HANDLE_QUERY } from './CoolectionQuery';
 
-function CollectionFilter({ collectionHandle }) {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+function CollectionFilter({ products }) {
+  const [filteredProducts, setFilteredProducts] = useState(products);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100);
-
-  // Fetch products when the component mounts
-  const { data } = useShopQuery({
-    query: COLLECTION_BY_HANDLE_QUERY,
-    variables: { handle: collectionHandle },
-  });
-
-  useEffect(() => {
-    if (data?.collectionByHandle?.products) {
-      const fetchedProducts = data.collectionByHandle.products.edges.map(edge => edge.node);
-      setProducts(fetchedProducts);
-      setFilteredProducts(fetchedProducts); // Initialize filteredProducts with the fetched list
-    }
-  }, [data]);
 
   useEffect(() => {
     const filtered = products.filter((product) => {
