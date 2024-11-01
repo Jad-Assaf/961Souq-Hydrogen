@@ -130,7 +130,7 @@ function ProductItem({ product, loading }) {
 }
 
 
-const COLLECTION_QUERY = `#graphql
+const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
     amount
     currencyCode
@@ -140,8 +140,11 @@ const COLLECTION_QUERY = `#graphql
     handle
     title
     featuredImage {
-      url
+      id
       altText
+      url
+      width
+      height
     }
     priceRange {
       minVariantPrice {
@@ -160,22 +163,31 @@ const COLLECTION_QUERY = `#graphql
       }
     }
   }
+`;
+
+// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
+const COLLECTION_QUERY = `#graphql
+  ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
     $handle: String!
     $filters: [ProductFilter!]
+    $country: CountryCode
+    $language: LanguageCode
     $first: Int
     $last: Int
     $startCursor: String
     $endCursor: String
-  ) {
+  ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
+      handle
       title
+      description
       products(
-        first: $first
-        last: $last
-        before: $startCursor
-        after: $endCursor
+        first: $first,
+        last: $last,
+        before: $startCursor,
+        after: $endCursor,
         filters: $filters
       ) {
         filters {
@@ -193,14 +205,15 @@ const COLLECTION_QUERY = `#graphql
           ...ProductItem
         }
         pageInfo {
-          hasNextPage
           hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
         }
       }
     }
   }
 `;
-
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
