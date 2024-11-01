@@ -208,10 +208,10 @@ const COLLECTION_QUERY = `#graphql
       title
       description
       products(
-        first: $first
-        last: $last
-        before: $startCursor
-        after: $endCursor
+        first: $first,
+        last: $last,
+        before: $startCursor,
+        after: $endCursor,
         filters: $filters
       ) {
         filters {
