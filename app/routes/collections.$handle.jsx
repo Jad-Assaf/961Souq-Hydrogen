@@ -1,8 +1,8 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link } from '@remix-run/react';
+import { useState } from 'react';
 import {
   getPaginationVariables,
-  Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
@@ -16,26 +16,21 @@ import { FilterComponent } from '~/components/CollectionsFilters';
  * @type {MetaFunction<typeof loader>}
  */
 export const meta = ({ data }) => {
-  return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
+  return [{ title: `Hydrogen | ${data?.collection?.title ?? ''} Collection` }];
 };
 
 /**
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
   return defer({ ...deferredData, ...criticalData });
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- * @param {LoaderFunctionArgs}
+ * Load data necessary for rendering content above the fold.
  */
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
@@ -54,29 +49,33 @@ async function loadCriticalData({ context, params, request }) {
     throw redirect('/collections');
   }
 
-  const { collection } = await context.storefront.query(COLLECTION_QUERY, {
-    variables: { handle: params.handle, filters },
-  });
+  try {
+    const { collection } = await context.storefront.query(COLLECTION_QUERY, {
+      variables: { handle, filters, ...paginationVariables },
+    });
 
-  return { collection };
+    if (!collection) {
+      throw new Response(`Collection ${handle} not found`, { status: 404 });
+    }
+
+    return { collection };
+  } catch (error) {
+    console.error("Error fetching collection:", error);
+    throw new Response("Error fetching collection", { status: 500 });
+  }
 }
 
-
 /**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- * @param {LoaderFunctionArgs}
+ * Load data for rendering content below the fold.
  */
 function loadDeferredData({ context }) {
   return {};
 }
 
-
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
-  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({});
 
   const handleFilterChange = (filterId, value) => {
     setSelectedFilters((prevFilters) => ({
@@ -85,11 +84,10 @@ export default function Collection() {
     }));
   };
 
-  // Apply selected filters to the `filters` variable in the query
-  const filters = Object.entries(selectedFilters).map(([id, input]) => ({
-    id,
-    input,
-  }));
+  // If collection is not loaded, show a loading or error message.
+  if (!collection) {
+    return <p>Collection not found or an error occurred.</p>;
+  }
 
   return (
     <div className="collection">
@@ -142,7 +140,6 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -156,7 +153,6 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
-
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
@@ -193,7 +189,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
