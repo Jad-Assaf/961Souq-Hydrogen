@@ -46,11 +46,16 @@ export async function loadCriticalData({ context, params, request }) {
 
   const url = new URL(request.url);
   const filters = [];
+
+  // Extract only `filter.p.*` parameters from the URL
   url.searchParams.forEach((value, key) => {
-    filters.push({ name: key, value });
+    if (key.startsWith("filter.p.")) {
+      const filterName = key.replace("filter.p.", "");
+      filters.push({ name: filterName, value });
+    }
   });
 
-  console.log("Filters being sent to GraphQL:", filters);
+  console.log("Sanitized Filters:", filters);
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
@@ -98,11 +103,14 @@ export default function Collection() {
       [filterId]: value,
     }));
 
-    // Construct URL with selected filters for fetcher
-    const newFilters = { ...selectedFilters, [filterId]: value };
-    const searchParams = new URLSearchParams(newFilters).toString();
+    // Construct URL with sanitized filter parameters for fetcher
+    const searchParams = new URLSearchParams();
 
-    fetcher.load(`/collections/${collection.handle}?${searchParams}`);
+    Object.entries({ ...selectedFilters, [filterId]: value }).forEach(([key, val]) => {
+      searchParams.append(`filter.p.${key}`, val); // Produces filter.p.vendor=Apple format
+    });
+
+    fetcher.load(`/collections/${collection.handle}?${searchParams.toString()}`);
   }
 
   return (
