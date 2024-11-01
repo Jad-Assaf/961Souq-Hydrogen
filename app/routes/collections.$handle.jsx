@@ -10,7 +10,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { FilterComponent } from '~/components/CollectionsFilters';
+import { VendorProductTypeFilter } from '~/components/CollectionsFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -37,20 +37,22 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-export async function loadCriticalData({ context, params, request }) {
+async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
-  // Build the filters array to match Shopify's required structure
   const filters = [];
-  searchParams.forEach((value, key) => {
-    if (key.startsWith('filter.')) {
-      const filterType = key.replace('filter.', '');
-      filters.push({ [filterType]: value });
-    }
-  });
+  const vendor = searchParams.get('vendor');
+  const productType = searchParams.get('productType');
+
+  if (vendor) {
+    filters.push({ vendor });
+  }
+  if (productType) {
+    filters.push({ productType });
+  }
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
@@ -89,11 +91,22 @@ export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
 
+  const vendors = Array.from(
+    new Set(
+      collection.products.nodes.map((product) => product.vendor)
+    )
+  );
+  const productTypes = Array.from(
+    new Set(
+      collection.products.nodes.map((product) => product.productType)
+    )
+  );
+
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
-      <FilterComponent availableFilters={collection.products.filters} />
+      <VendorProductTypeFilter vendors={vendors} productTypes={productTypes} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
@@ -194,52 +207,51 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 // NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
-query Collection(
-  $handle: String!
-  $filters: [ProductFilter!]
-  $country: CountryCode
-  $language: LanguageCode
-  $first: Int
-  $last: Int
-  $startCursor: String
-  $endCursor: String
-) @inContext(country: $country, language: $language) {
-  collection(handle: $handle) {
-    id
-    handle
-    title
-    description
-    products(
-      first: $first,
-      last: $last,
-      before: $startCursor,
-      after: $endCursor,
-      filters: $filters
-    ) {
-      filters {
-        id
-        label
-        type
-        values {
+  query Collection(
+    $handle: String!
+    $filters: [ProductFilter!]
+    $country: CountryCode
+    $language: LanguageCode
+    $first: Int
+    $last: Int
+    $startCursor: String
+    $endCursor: String
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      description
+      products(
+        first: $first,
+        last: $last,
+        before: $startCursor,
+        after: $endCursor,
+        filters: $filters
+      ) {
+        filters {
           id
           label
-          count
-          input
+          type
+          values {
+            id
+            label
+            count
+            input
+          }
         }
-      }
-      nodes {
-        ...ProductItem
-      }
-      pageInfo {
-        hasPreviousPage
-        hasNextPage
-        endCursor
-        startCursor
+        nodes {
+          ...ProductItem
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
+        }
       }
     }
   }
-}
-
 `;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
