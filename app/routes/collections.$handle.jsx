@@ -9,7 +9,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import CollectionFilter from '~/components/CollectionFilter';
+import CollectionFilter from '~/components/CollectionsFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
