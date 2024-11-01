@@ -78,12 +78,26 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
+  const [selectedFilters, setSelectedFilters] = useState({});
+
+  // Function to update selected filters
+  function handleFilterChange(filterId, value) {
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterId]: value,
+    }));
+  }
+
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
-      <ProductFilter filters={collection.products.filters} />
+      <ProductFilter
+        filters={collection.products.filters}
+        selectedFilters={selectedFilters}
+        onFilterChange={handleFilterChange}
+      />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"

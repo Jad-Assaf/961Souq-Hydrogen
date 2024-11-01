@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function ProductFilter({ filters }) {
+export function ProductFilter({ filters, selectedFilters, onFilterChange }) {
   return (
     <div className="product-filters">
       {filters.map((filter) => (
@@ -10,7 +10,8 @@ export function ProductFilter({ filters }) {
             <label key={value.id}>
               <input
                 type={filter.type === 'PRICE_RANGE' ? 'range' : 'checkbox'}
-                value={value.input}
+                checked={selectedFilters[filter.id] === value.input}
+                onChange={() => onFilterChange(filter.id, value.input)}
               />
               {value.label} ({value.count})
             </label>
