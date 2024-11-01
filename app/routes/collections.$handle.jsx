@@ -10,7 +10,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { DynamicFilterComponent } from '~/components/CollectionsFilters';
+import { FilterComponent } from '~/components/CollectionsFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -22,21 +22,35 @@ export const meta = ({ data }) => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader({ context, params, request }) {
+export async function loader(args) {
+  // Start fetching non-critical data without blocking time to first byte
+  const deferredData = loadDeferredData(args);
+
+  // Await the critical data required to render initial state of the page
+  const criticalData = await loadCriticalData(args);
+
+  return defer({ ...deferredData, ...criticalData });
+}
+
+/**
+ * Load data necessary for rendering content above the fold. This is the critical data
+ * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * @param {LoaderFunctionArgs}
+ */
+export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
+  // Build the filters array to match Shopify's required structure
   const filters = [];
-
-  // Ensure each filter is passed in a simple Shopify-compatible format
-  for (const [key, value] of searchParams.entries()) {
+  searchParams.forEach((value, key) => {
     if (key.startsWith('filter.')) {
       const filterType = key.replace('filter.', '');
-      filters.push({ key: filterType, value });
+      filters.push({ [filterType]: value });
     }
-  }
+  });
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
@@ -72,12 +86,14 @@ function loadDeferredData({ context }) {
 
 
 export default function Collection() {
+  /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      <DynamicFilterComponent filters={collection.products.filters} />
+      {/* <p className="collection-description">{collection.description}</p> */}
+      <FilterComponent availableFilters={collection.products.filters} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
@@ -124,6 +140,7 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"

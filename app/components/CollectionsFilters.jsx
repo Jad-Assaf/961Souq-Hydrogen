@@ -1,37 +1,33 @@
-import { useLocation, useNavigate } from '@remix-run/react';
+// Inside FilterComponent.jsx
+import { Link, useLocation } from '@remix-run/react';
 
-export function DynamicFilterComponent({ filters }) {
+export function FilterComponent({ availableFilters }) {
   const location = useLocation();
-  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
 
   const handleFilterChange = (filterType, value) => {
-    // Apply filter directly as a key-value pair
-    if (value) {
-      searchParams.set(`filter.${filterType}`, value);
-    } else {
-      searchParams.delete(`filter.${filterType}`);
-    }
-    navigate(`?${searchParams.toString()}`);
+    // Update search params based on filter change
+    searchParams.set(`filter.${filterType}`, value);
+    // Navigate with updated filters
+    window.history.pushState({}, '', `${location.pathname}?${searchParams.toString()}`);
   };
 
   return (
     <div>
-      {filters.map((filter) => (
+      {availableFilters.map((filter) => (
         <div key={filter.id}>
-          <h3>{filter.label}</h3>
-          <button onClick={() => handleFilterChange(filter.type, '')}>All {filter.label}</button>
-          {filter.values.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => handleFilterChange(filter.type, option.input)}
-              style={{
-                fontWeight: option.input === searchParams.get(`filter.${filter.type}`) ? 'bold' : 'normal',
-              }}
-            >
-              {option.label} ({option.count})
-            </button>
-          ))}
+          <h4>{filter.label}</h4>
+          <ul>
+            {filter.values.map((value) => (
+              <li key={value.id}>
+                <button
+                  onClick={() => handleFilterChange(filter.type, value.input)}
+                >
+                  {value.label} ({value.count})
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       ))}
     </div>
