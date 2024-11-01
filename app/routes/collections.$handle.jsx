@@ -11,6 +11,7 @@ import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { Filter } from '@shopify/storefront-api-client'
+import { ProductFilter } from '~/components/CollectionsFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -82,6 +83,7 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
+      <ProductFilter filters={collection.products.filters} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
