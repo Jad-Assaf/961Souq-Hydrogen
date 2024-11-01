@@ -6,6 +6,7 @@ export function DynamicFilterComponent({ filters }) {
   const searchParams = new URLSearchParams(location.search);
 
   const handleFilterChange = (filterType, value) => {
+    // Apply filter directly as a key-value pair
     if (value) {
       searchParams.set(`filter.${filterType}`, value);
     } else {
@@ -19,7 +20,7 @@ export function DynamicFilterComponent({ filters }) {
       {filters.map((filter) => (
         <div key={filter.id}>
           <h3>{filter.label}</h3>
-          <button onClick={() => handleFilterChange(filter.type, null)}>All {filter.label}</button>
+          <button onClick={() => handleFilterChange(filter.type, '')}>All {filter.label}</button>
           {filter.values.map((option) => (
             <button
               key={option.id}

@@ -28,12 +28,13 @@ export async function loader({ context, params, request }) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
-  // Dynamically build filters array based on any `filter.` parameters in the URL
   const filters = [];
+
+  // Ensure each filter is passed in a simple Shopify-compatible format
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter.')) {
       const filterType = key.replace('filter.', '');
-      filters.push({ [filterType]: value });
+      filters.push({ key: filterType, value });
     }
   }
 
