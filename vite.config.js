@@ -21,8 +21,9 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   build: {
-    // Allow a strict Content-Security-Policy
-    // withtout inlining assets as base64:
+    rollupOptions: {
+      external: ['~/components/icons'], // Only do this if the above steps do not resolve the issue
+    },
     assetsInlineLimit: 0,
   },
   ssr: {
@@ -38,11 +39,6 @@ export default defineConfig({
        * @see https://vitejs.dev/config/dep-optimization-options
        */
       include: [],
-    },
-  },
-  resolve: {
-    alias: {
-      '~': path.resolve(__dirname, 'app'), // or 'app' if that’s the root folder
     },
   },
 });
