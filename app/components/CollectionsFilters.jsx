@@ -9,7 +9,7 @@ export function FilterComponent({ availableFilters }) {
     // Update search params based on filter change
     searchParams.set(`filter.${filterType}`, value);
     // Navigate with updated filters
-    window.history.pushState({}, '', `${location.pathname}?${searchParams.toString()}`);
+    window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
   };
 
   return (
