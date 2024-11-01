@@ -5,15 +5,13 @@ export function FilterComponent({ availableFilters }) {
 
   const handleFilterChange = (filterType, value) => {
     const filterKey = `filter.${filterType}`;
+    const currentValue = searchParams.get(filterKey);
 
-    // Check if the current filter is already selected
-    const isSelected = searchParams.get(filterKey) === value;
-
-    if (isSelected) {
-      // Remove the filter if it's already selected
+    if (currentValue === value) {
+      // Remove filter if already selected
       searchParams.delete(filterKey);
     } else {
-      // Set the filter with the correct key-value pair
+      // Set the correct key-value pair for the filter
       searchParams.set(filterKey, value);
     }
 

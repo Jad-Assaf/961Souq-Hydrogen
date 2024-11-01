@@ -37,19 +37,20 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({ context, params, request }) {
+export async function loader({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
+  // Build the filters array to match Shopify's required structure
   const filters = [];
-  for (const [key, value] of searchParams.entries()) {
+  searchParams.forEach((value, key) => {
     if (key.startsWith('filter.')) {
       const filterType = key.replace('filter.', '');
       filters.push({ [filterType]: value });
     }
-  }
+  });
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
@@ -72,7 +73,6 @@ async function loadCriticalData({ context, params, request }) {
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
-
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -195,50 +195,36 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
-    $handle: String!
-    $filters: [ProductFilter!]
-    $country: CountryCode
-    $language: LanguageCode
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      id
-      handle
-      title
-      description
-      products(
-        first: $first,
-        last: $last,
-        before: $startCursor,
-        after: $endCursor,
-        filters: $filters
-      ) {
-        filters {
+  $handle: String!
+  $filters: [ProductFilter!]
+  $first: Int
+  $after: String
+) {
+  collection(handle: $handle) {
+    id
+    title
+    products(first: $first, after: $after, filters: $filters) {
+      nodes {
+        title
+        vendor
+      }
+      filters {
+        id
+        label
+        type
+        values {
           id
           label
-          type
-          values {
-            id
-            label
-            count
-            input
-          }
+          count
         }
-        nodes {
-          ...ProductItem
-        }
-        pageInfo {
-          hasPreviousPage
-          hasNextPage
-          endCursor
-          startCursor
-        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }
+}
 `;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
