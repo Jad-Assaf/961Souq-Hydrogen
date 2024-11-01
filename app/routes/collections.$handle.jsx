@@ -211,8 +211,7 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor,
-        filters: $filters
+        after: $endCursor
       ) {
         filters {
           id
