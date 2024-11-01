@@ -888,22 +888,23 @@ button.reset:hover:not(:has(> *)) {
   height: auto;
 }
 
-.collection-page {
-  display: flex;
-}
-
-.filter-panel {
-  width: 250px;
-  padding: 20px;
-  background-color: #333;
-  color: #fff;
-}
-
-.products-list {
-  flex: 1;
+.products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  gap: 1rem;
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /*

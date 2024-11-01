@@ -1,19 +1,18 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link } from '@remix-run/react';
+import { useLoaderData, Link, useSearchParams, useLocation } from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
-import { useState } from 'react';
-import { useFetcher } from '@remix-run/react';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { Filter } from '@shopify/storefront-api-client'
-import { ProductFilter } from '~/components/CollectionsFilters';
+import { DrawerFilter } from '~/modules/drawer-filter';
+import { FILTER_URL_PREFIX } from '~/lib/const';
+import { useState } from 'react';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -43,21 +42,17 @@ export async function loader(args) {
 export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-
-  const url = new URL(request.url);
-  const filters = [];
-
-  // Extract only `filter.p.*` parameters from the URL
-  url.searchParams.forEach((value, key) => {
-    if (key.startsWith("filter.p.")) {
-      const filterName = key.replace("filter.p.", "");
-      filters.push({ name: filterName, value });
-    }
-  });
-
-  console.log("Sanitized Filters:", filters);
-
+  const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
+
+  // Extract filters from URL
+  const filters = [];
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith(FILTER_URL_PREFIX)) {
+      const filterKey = key.replace(FILTER_URL_PREFIX, '');
+      filters.push({ [filterKey]: JSON.parse(value) });
+    }
+  }
 
   if (!handle) {
     throw redirect('/collections');
@@ -65,17 +60,33 @@ export async function loadCriticalData({ context, params, request }) {
 
   try {
     const { collection } = await storefront.query(COLLECTION_QUERY, {
-      variables: { handle, filters, ...paginationVariables },
+      variables: {
+        handle,
+        ...paginationVariables,
+        filters: filters.length ? filters : undefined,
+      },
     });
 
     if (!collection) {
-      console.error(`Collection ${handle} not found`);
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    return { collection };
+    // Process applied filters
+    const appliedFilters = [];
+    searchParams.forEach((value, key) => {
+      if (key.startsWith(FILTER_URL_PREFIX)) {
+        const filterKey = key.replace(FILTER_URL_PREFIX, '');
+        const filterValue = JSON.parse(value);
+        appliedFilters.push({
+          label: `${filterKey}: ${value}`,
+          filter: { [filterKey]: filterValue },
+        });
+      }
+    });
+
+    return { collection, appliedFilters };
   } catch (error) {
-    console.error("Error fetching collection:", error.message || error);
+    console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
@@ -92,40 +103,28 @@ function loadDeferredData({ context }) {
 
 
 export default function Collection() {
-  /** @type {LoaderReturnData} */
-  const { collection } = useLoaderData();
-  const fetcher = useFetcher();
-  const [selectedFilters, setSelectedFilters] = useState({});
+  const { collection, appliedFilters } = useLoaderData();
+  const [numberInRow, setNumberInRow] = useState(4);
 
-  function handleFilterChange(filterId, value) {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [filterId]: value,
-    }));
-
-    // Construct URL with sanitized filter parameters for fetcher
-    const searchParams = new URLSearchParams();
-
-    Object.entries({ ...selectedFilters, [filterId]: value }).forEach(([key, val]) => {
-      searchParams.append(`filter.p.${key}`, val); // Produces filter.p.vendor=Apple format
-    });
-
-    fetcher.load(`/collections/${collection.handle}?${searchParams.toString()}`);
-  }
+  const handleLayoutChange = (number) => {
+    setNumberInRow(number);
+  };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      {collection.products && (
-        <ProductFilter
-          filters={collection.products.filters}
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-        />
-      )}
+
+      <DrawerFilter
+        filters={collection.products.filters}
+        appliedFilters={appliedFilters}
+        numberInRow={numberInRow}
+        onLayoutChange={handleLayoutChange}
+        productNumber={collection.products.nodes.length}
+      />
+
       <PaginatedResourceSection
-        connection={fetcher.data?.collection?.products || collection.products}
-        resourcesClassName="products-grid"
+        connection={collection.products}
+        resourcesClassName={`products-grid grid-cols-${numberInRow}`}
       >
         {({ node: product, index }) => (
           <ProductItem
@@ -135,6 +134,7 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
+
       <Analytics.CollectionView
         data={{
           collection: {
@@ -169,7 +169,6 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -183,7 +182,6 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
-
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
