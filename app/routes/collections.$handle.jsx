@@ -2,6 +2,7 @@ import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link } from '@remix-run/react';
 import {
   getPaginationVariables,
+  Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
@@ -9,8 +10,6 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import CollectionFilter from '~/components/CollectionsFilters';
-import { COLLECTION_BY_HANDLE_QUERY } from '~/components/CoolectionQuery';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -23,30 +22,37 @@ export const meta = ({ data }) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
+  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
+
+  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
+
   return defer({ ...deferredData, ...criticalData });
 }
 
 /**
- * Load data necessary for rendering content above the fold.
+ * Load data necessary for rendering content above the fold. This is the critical data
+ * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
+  const paginationVariables = getPaginationVariables(request, {
+    pageBy: 16,
+  });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 16,
-  });
-
-  const { collectionByHandle: collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-    variables: { handle, ...paginationVariables },
-  });
+  const [{ collection }] = await Promise.all([
+    storefront.query(COLLECTION_QUERY, {
+      variables: { handle, ...paginationVariables },
+      // Add other queries here, so that they are loaded in parallel
+    }),
+  ]);
 
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {
@@ -54,11 +60,15 @@ async function loadCriticalData({ context, params, request }) {
     });
   }
 
-  return { collection };
+  return {
+    collection,
+  };
 }
 
 /**
- * Load data for rendering content below the fold.
+ * Load data for rendering content below the fold. This data is deferred and will be
+ * fetched after the initial page load. If it's unavailable, the page should still 200.
+ * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
 function loadDeferredData({ context }) {
@@ -66,15 +76,13 @@ function loadDeferredData({ context }) {
 }
 
 export default function Collection() {
+  /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-
-      {/* Render CollectionFilter and pass in fetched product data */}
-      <CollectionFilter products={collection.products.edges.map((edge) => edge.node)} />
-
+      {/* <p className="collection-description">{collection.description}</p> */}
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
@@ -87,7 +95,6 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
-
       <Analytics.CollectionView
         data={{
           collection: {
@@ -122,6 +129,7 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -135,6 +143,7 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
+
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
