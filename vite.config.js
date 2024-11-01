@@ -26,6 +26,7 @@ export default defineConfig({
       '~/components/button', 
       '~/components/checkbox', 
       '~/lib/const', 
+      '~/lib/cn', 
       '~/lib/filter'] 
     },
     assetsInlineLimit: 0,
