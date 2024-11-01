@@ -37,7 +37,7 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-export async function loader({ context, params, request }) {
+export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const url = new URL(request.url);
