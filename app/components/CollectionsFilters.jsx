@@ -1,15 +1,16 @@
-// Inside FilterComponent.jsx
-import { Link, useLocation } from '@remix-run/react';
+import { useLocation, useNavigate } from '@remix-run/react';
 
 export function FilterComponent({ availableFilters }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
 
   const handleFilterChange = (filterType, value) => {
-    // Update search params based on filter change
+    // Set or update the filter in the search params
     searchParams.set(`filter.${filterType}`, value);
-    // Navigate with updated filters
-    window.history.pushState({}, '', `${location.pathname}?${searchParams.toString()}`);
+
+    // Trigger navigation to update the URL and trigger data reloading
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
   };
 
   return (

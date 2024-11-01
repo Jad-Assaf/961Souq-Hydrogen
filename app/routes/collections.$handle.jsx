@@ -43,7 +43,7 @@ export async function loadCriticalData({ context, params, request }) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
-  // Build the filters array to match Shopify's required structure
+  // Build the filters array based on URL search params
   const filters = [];
   searchParams.forEach((value, key) => {
     if (key.startsWith('filter.')) {
