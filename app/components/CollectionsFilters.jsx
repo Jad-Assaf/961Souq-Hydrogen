@@ -5,17 +5,16 @@ export function FilterComponent({ availableFilters }) {
 
   const handleFilterChange = (filterType, value) => {
     const filterKey = `filter.${filterType}`;
-    const currentValues = searchParams.getAll(filterKey);
-    const isSelected = currentValues.includes(value);
 
-    // Update URL parameters dynamically for multi-select
+    // Check if the current filter is already selected
+    const isSelected = searchParams.get(filterKey) === value;
+
     if (isSelected) {
+      // Remove the filter if it's already selected
       searchParams.delete(filterKey);
-      currentValues
-        .filter((v) => v !== value)
-        .forEach((v) => searchParams.append(filterKey, v));
     } else {
-      searchParams.append(filterKey, value);
+      // Set the filter with the correct key-value pair
+      searchParams.set(filterKey, value);
     }
 
     setSearchParams(searchParams);
@@ -30,7 +29,7 @@ export function FilterComponent({ availableFilters }) {
             <label key={value.id}>
               <input
                 type="checkbox"
-                checked={searchParams.getAll(`filter.${filter.type}`).includes(value.id)}
+                checked={searchParams.get(`filter.${filter.type}`) === value.id}
                 onChange={() => handleFilterChange(filter.type, value.id)}
               />
               {value.label} ({value.count})
