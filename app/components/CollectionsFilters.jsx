@@ -6,7 +6,15 @@ export function FilterComponent({ availableFilters }) {
   const searchParams = new URLSearchParams(location.search);
 
   const handleFilterChange = (filterType, value) => {
-    searchParams.set(`filter.${filterType}`, value);
+    // Toggle filter selection
+    const current = searchParams.get(`filter.${filterType}`);
+    if (current === value) {
+      searchParams.delete(`filter.${filterType}`); // Remove if already selected
+    } else {
+      searchParams.set(`filter.${filterType}`, value); // Add new filter
+    }
+
+    // Update URL to trigger re-fetching of filtered data
     navigate(`${location.pathname}?${searchParams.toString()}`);
   };
 
@@ -20,6 +28,9 @@ export function FilterComponent({ availableFilters }) {
               <li key={value.id}>
                 <button
                   onClick={() => handleFilterChange(filter.type, value.input)}
+                  style={{
+                    backgroundColor: searchParams.get(`filter.${filter.type}`) === value.input ? 'blue' : 'gray',
+                  }}
                 >
                   {value.label} ({value.count})
                 </button>
