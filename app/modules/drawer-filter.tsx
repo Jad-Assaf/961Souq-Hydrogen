@@ -20,7 +20,7 @@ import type {
 } from "@shopify/hydrogen/storefront-api-types";
 import clsx from "clsx";
 import type { SyntheticEvent } from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import Button from "../components/button";
 import { Checkbox } from "../components/checkbox";
 import { IconCaretDown, IconCaretRight } from "../components/icons";
