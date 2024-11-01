@@ -36,6 +36,7 @@
     "react-dom": "^18.2.0",
     "react-image-lightbox": "^5.1.4",
     "react-lazy-load-image-component": "^1.6.2",
+    "tailwind-merge": "^2.5.4",
     "yet-another-react-lightbox": "^3.21.6"
   },
   "devDependencies": {
