@@ -10,7 +10,6 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { useState } from 'react';
 import { FilterComponent } from '~/components/CollectionsFilters';
 
 /**
@@ -83,24 +82,12 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
-  const [filteredProducts, setFilteredProducts] = useState(collection.products);
-
-  const handleApplyFilters = async (filters) => {
-    // Fetch products based on selected filters
-    const response = await fetch(`/getFilteredProducts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filters, handle: collection.handle }),
-    });
-    const data = await response.json();
-    setFilteredProducts(data.products);
-  };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
-      <FilterComponent availableFilters={collection.products.filters} onApplyFilters={handleApplyFilters} />
+      <FilterComponent availableFilters={collection.products.filters} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
