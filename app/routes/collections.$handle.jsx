@@ -10,6 +10,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
+import { FilterComponent } from '~/components/CollectionsFilters';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -39,6 +40,18 @@ export async function loader(args) {
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
+  const url = new URL(request.url);
+  const searchParams = new URLSearchParams(url.search);
+
+  // Extract filter parameters from the query string
+  const filters = [];
+  if (searchParams.has('productType')) {
+    filters.push({ productType: searchParams.get('productType') });
+  }
+  if (searchParams.has('productVendor')) {
+    filters.push({ productVendor: searchParams.get('productVendor') });
+  }
+
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 16,
   });
@@ -49,7 +62,7 @@ async function loadCriticalData({ context, params, request }) {
 
   const [{ collection }] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: { handle, ...paginationVariables },
+      variables: { handle, filters, ...paginationVariables },
       // Add other queries here, so that they are loaded in parallel
     }),
   ]);
@@ -79,10 +92,27 @@ export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
 
+  const availableFilters = [
+    {
+      id: 'productType',
+      label: 'Product Type',
+      type: 'productType',
+      values: ['Shoes', 'Accessories', 'Clothing'],
+    },
+    {
+      id: 'productVendor',
+      label: 'Vendor',
+      type: 'productVendor',
+      values: ['BestShop', 'AnotherVendor'],
+    },
+    // Add more filters as needed
+  ];
+
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
+      <FilterComponent availableFilters={availableFilters} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
@@ -201,7 +231,8 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor
+        after: $endCursor,
+        filters: $filters
       ) {
         nodes {
           ...ProductItem
