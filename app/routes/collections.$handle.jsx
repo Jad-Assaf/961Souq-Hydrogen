@@ -194,7 +194,6 @@ const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
     $handle: String!
-    $filters: [ProductFilter!]
     $country: CountryCode
     $language: LanguageCode
     $first: Int
