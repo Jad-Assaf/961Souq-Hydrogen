@@ -24,6 +24,7 @@
     "@shopify/shopify-api": "^11.6.0",
     "@shopify/shopify-app-remix": "^3.4.0",
     "@shopify/storefront-api-client": "^1.0.3",
+    "@weaverse/hydrogen": "^3.4.2",
     "class-variance-authority": "^0.7.0",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
