@@ -1,6 +1,6 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link } from '@remix-run/react';
-import { useState } from 'react';
+import { useLoaderData, Link, useNavigate } from '@remix-run/react';
+import { useState, useEffect } from 'react';
 import {
   getPaginationVariables,
   Money,
@@ -75,16 +75,18 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
-  const [selectedFilters, setSelectedFilters] = useState({});
+  const navigate = useNavigate();
 
   const handleFilterChange = (filterId, value) => {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [filterId]: value,
-    }));
+    const searchParams = new URLSearchParams(window.location.search);
+    if (value) {
+      searchParams.set(filterId, value);
+    } else {
+      searchParams.delete(filterId);
+    }
+    navigate(`?${searchParams.toString()}`, { replace: true });
   };
 
-  // If collection is not loaded, show a loading or error message.
   if (!collection) {
     return <p>Collection not found or an error occurred.</p>;
   }
@@ -92,7 +94,6 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      {/* <p className="collection-description">{collection.description}</p> */}
       <FilterComponent availableFilters={collection.products.filters} onFilterChange={handleFilterChange} />
       <PaginatedResourceSection
         connection={collection.products}

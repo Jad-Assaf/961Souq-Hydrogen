@@ -1,15 +1,25 @@
 import React from 'react';
 
+/**
+ * FilterComponent renders available filters and calls onFilterChange when a filter is selected.
+ * @param {Object} props
+ * @param {Array} props.availableFilters - Filters available for the collection.
+ * @param {Function} props.onFilterChange - Callback to handle filter changes.
+ */
 export function FilterComponent({ availableFilters, onFilterChange }) {
+  if (!availableFilters || availableFilters.length === 0) {
+    return null; // No filters available, return nothing
+  }
+
   return (
-    <div className="filter-panel">
-      <h3>Filter By</h3>
+    <div className="filter-component">
+      <h2>Filter By</h2>
       {availableFilters.map((filter) => (
         <div key={filter.id} className="filter-group">
-          <label>{filter.label}</label>
+          <label htmlFor={filter.id}>{filter.label}</label>
           <select
+            id={filter.id}
             onChange={(e) => onFilterChange(filter.id, e.target.value)}
-            defaultValue=""
           >
             <option value="">All</option>
             {filter.values.map((value) => (

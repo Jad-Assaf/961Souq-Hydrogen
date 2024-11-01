@@ -888,6 +888,24 @@ button.reset:hover:not(:has(> *)) {
   height: auto;
 }
 
+.collection-page {
+  display: flex;
+}
+
+.filter-panel {
+  width: 250px;
+  padding: 20px;
+  background-color: #333;
+  color: #fff;
+}
+
+.products-list {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
 /*
 * --------------------------------------------------
 * routes/collections.$handle.tsx
