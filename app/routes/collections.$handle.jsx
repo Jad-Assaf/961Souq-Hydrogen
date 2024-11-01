@@ -10,6 +10,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
+import { Filter } from '@shopify/storefront-api-client'
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -39,6 +40,7 @@ export async function loader(args) {
 export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
+
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
   if (!handle) {
@@ -46,7 +48,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
+    const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: { handle, ...paginationVariables },
     });
 
@@ -54,15 +56,7 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Returning collection details with filters
-    return {
-      collection,
-      collections: collections.map((col) => ({
-        handle: col.handle,
-        title: col.title,
-      })),
-      appliedFilters: [], // You may need to initialize or fetch applied filters here
-    };
+    return { collection };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
@@ -82,20 +76,12 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
-  const { collection, collections, appliedFilters } = useLoaderData();
+  const { collection } = useLoaderData();
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
-      <CollectionFilters
-        showCollectionDescription={true}
-        loadPrevText="Previous"
-        loadMoreText="Load More"
-        collection={collection}
-        collections={collections}
-        appliedFilters={appliedFilters}
-      />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
