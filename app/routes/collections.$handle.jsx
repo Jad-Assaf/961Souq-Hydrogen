@@ -46,11 +46,11 @@ async function loadCriticalData({ context, params, request }) {
   const filters = [];
 
   // Parse filters from URL search parameters
-  searchParams.forEach((value, key) => {
-    if (key.startsWith('filter.')) {
-      filters.push({ [filterType]: value });
-    }
-  });
+  // searchParams.forEach((value, key) => {
+  //   if (key.startsWith('filter.')) {
+  //     filters.push({ [filterType]: value });
+  //   }
+  // });
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
