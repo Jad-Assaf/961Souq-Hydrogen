@@ -1,6 +1,11 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link } from '@remix-run/react';
-import { getPaginationVariables, Money, Analytics } from '@shopify/hydrogen';
+import {
+  getPaginationVariables,
+  Image,
+  Money,
+  Analytics,
+} from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
@@ -35,7 +40,7 @@ async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 15,
+    pageBy: 16,
   });
 
   if (!handle) {
@@ -77,16 +82,16 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-
+      {/* <p className="collection-description">{collection.description}</p> */}
       <PaginatedResourceSection
-        connection={{ edges: collection.products.edges }}
+        connection={collection.products}
         resourcesClassName="products-grid"
       >
         {({ node: product, index }) => (
           <ProductItem
             key={product.id}
             product={product}
-            loading={index < 15 ? 'eager' : undefined}
+            loading={index < 16 ? 'eager' : undefined}
           />
         )}
       </PaginatedResourceSection>
@@ -124,6 +129,7 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -174,6 +180,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
+// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
