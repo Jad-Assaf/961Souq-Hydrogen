@@ -40,4 +40,9 @@ export default defineConfig({
       include: [],
     },
   },
+  resolve: {
+    alias: {
+      '~': path.resolve(__dirname, 'app'), // or 'app' if that’s the root folder
+    },
+  },
 });
