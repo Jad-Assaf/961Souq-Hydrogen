@@ -1,35 +1,36 @@
-// Inside FilterComponent.jsx
-import { Link, useLocation } from '@remix-run/react';
+import { useLocation, useNavigate } from '@remix-run/react';
 
-export function FilterComponent({ availableFilters }) {
+export function FilterComponent({ availableFilters, appliedFilters = [] }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
 
   const handleFilterChange = (filterType, value) => {
-    // Update search params based on filter change
     searchParams.set(`filter.${filterType}`, value);
-    // Navigate with updated filters
-    window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
+    navigate(`?${searchParams.toString()}`);
   };
 
   return (
     <div>
-      {availableFilters.map((filter) => (
-        <div key={filter.id}>
-          <h4>{filter.label}</h4>
-          <ul>
-            {filter.values.map((value) => (
-              <li key={value.id}>
-                <button
-                  onClick={() => handleFilterChange(filter.type, value.input)}
-                >
-                  {value.label} ({value.count})
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <h4>Filter By</h4>
+      <nav>
+        {availableFilters.map((filter) => (
+          <div key={filter.id}>
+            <h5>{filter.label}</h5>
+            <ul>
+              {filter.values.map((value) => (
+                <li key={value.id}>
+                  <button
+                    onClick={() => handleFilterChange(filter.type, value.input)}
+                  >
+                    {value.label} ({value.count})
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
     </div>
   );
 }
