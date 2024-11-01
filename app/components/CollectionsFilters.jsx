@@ -1,21 +1,13 @@
 import { useSearchParams } from '@remix-run/react';
 
 export function FilterComponent({ availableFilters }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleFilterChange = (filterType, value) => {
-    const filterKey = `filter.${filterType}`;
-    const currentValue = searchParams.get(filterKey);
-
-    if (currentValue === value) {
-      // Remove filter if already selected
-      searchParams.delete(filterKey);
-    } else {
-      // Set the correct key-value pair for the filter
-      searchParams.set(filterKey, value);
-    }
-
-    setSearchParams(searchParams);
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set(`filter.${filterType}`, value);
+    navigate(`${location.pathname}?${searchParams.toString()}`);
   };
 
   return (
@@ -23,15 +15,13 @@ export function FilterComponent({ availableFilters }) {
       {availableFilters.map((filter) => (
         <div key={filter.id} className="filter-group">
           <h4>{filter.label}</h4>
-          {filter.values.map((value) => (
-            <label key={value.id}>
-              <input
-                type="checkbox"
-                checked={searchParams.get(`filter.${filter.type}`) === value.id}
-                onChange={() => handleFilterChange(filter.type, value.id)}
-              />
-              {value.label} ({value.count})
-            </label>
+          {filter.values.map((option) => (
+            <button
+              key={option.id}
+              onClick={() => handleFilterChange(filter.id, option.input)}
+            >
+              {option.label} ({option.count})
+            </button>
           ))}
         </div>
       ))}

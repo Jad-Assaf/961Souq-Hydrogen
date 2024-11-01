@@ -37,20 +37,19 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-export async function loadCriticalData({ context, params, request }) {
+async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
-  // Build the filters array to match Shopify's required structure
   const filters = [];
-  searchParams.forEach((value, key) => {
+  for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter.')) {
       const filterType = key.replace('filter.', '');
       filters.push({ [filterType]: value });
     }
-  });
+  }
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
