@@ -28,7 +28,7 @@ import { FILTER_URL_PREFIX } from "../lib/const";
 import type { AppliedFilter, SortParam } from "../lib/filter";
 import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
 import { Drawer, useDrawer } from "./drawer";
-import { IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid } from "./icon";
+import { IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid } from "./icons";
 import { Input } from "./input";
 
 type DrawerFilterProps = {
