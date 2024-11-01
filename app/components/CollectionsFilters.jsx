@@ -1,60 +1,38 @@
 import { useLocation, useNavigate } from '@remix-run/react';
 
-export function VendorProductTypeFilter({ vendors, productTypes }) {
+export function DynamicFilterComponent({ filters }) {
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
 
-  const handleVendorChange = (vendor) => {
-    if (vendor) {
-      searchParams.set('vendor', vendor);
+  const handleFilterChange = (filterType, value) => {
+    if (value) {
+      searchParams.set(`filter.${filterType}`, value);
     } else {
-      searchParams.delete('vendor');
-    }
-    navigate(`?${searchParams.toString()}`);
-  };
-
-  const handleProductTypeChange = (productType) => {
-    if (productType) {
-      searchParams.set('productType', productType);
-    } else {
-      searchParams.delete('productType');
+      searchParams.delete(`filter.${filterType}`);
     }
     navigate(`?${searchParams.toString()}`);
   };
 
   return (
     <div>
-      <div>
-        <h3>Filter by Vendor</h3>
-        <button onClick={() => handleVendorChange(null)}>All Vendors</button>
-        {vendors.map((vendor) => (
-          <button
-            key={vendor}
-            onClick={() => handleVendorChange(vendor)}
-            style={{
-              fontWeight: vendor === searchParams.get('vendor') ? 'bold' : 'normal',
-            }}
-          >
-            {vendor}
-          </button>
-        ))}
-      </div>
-      <div>
-        <h3>Filter by Product Type</h3>
-        <button onClick={() => handleProductTypeChange(null)}>All Types</button>
-        {productTypes.map((type) => (
-          <button
-            key={type}
-            onClick={() => handleProductTypeChange(type)}
-            style={{
-              fontWeight: type === searchParams.get('productType') ? 'bold' : 'normal',
-            }}
-          >
-            {type}
-          </button>
-        ))}
-      </div>
+      {filters.map((filter) => (
+        <div key={filter.id}>
+          <h3>{filter.label}</h3>
+          <button onClick={() => handleFilterChange(filter.type, null)}>All {filter.label}</button>
+          {filter.values.map((option) => (
+            <button
+              key={option.id}
+              onClick={() => handleFilterChange(filter.type, option.input)}
+              style={{
+                fontWeight: option.input === searchParams.get(`filter.${filter.type}`) ? 'bold' : 'normal',
+              }}
+            >
+              {option.label} ({option.count})
+            </button>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
