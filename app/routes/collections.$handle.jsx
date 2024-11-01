@@ -231,13 +231,18 @@ const COLLECTION_QUERY = `#graphql
       handle
       title
       description
-      products(
-        first: $first,
-        last: $last,
-        before: $startCursor,
-        after: $endCursor,
-        filters: $filters
-      ) {
+      products(first: $first, last: $last, before: $startCursor, after: $endCursor) {
+        filters {
+          id
+          label
+          type
+          values {
+            id
+            label
+            count
+            input
+          }
+        }
         nodes {
           ...ProductItem
         }
