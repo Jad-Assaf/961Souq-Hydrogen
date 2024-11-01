@@ -6,10 +6,10 @@ export function FilterComponent({ availableFilters }) {
   const searchParams = new URLSearchParams(location.search);
 
   const handleFilterChange = (filterType, value) => {
-    // Set or update the filter in the search params
+    // Set or update the filter as a key-value pair
     searchParams.set(`filter.${filterType}`, value);
 
-    // Trigger navigation to update the URL and trigger data reloading
+    // Trigger navigation to update the URL and reload the data
     navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
   };
 

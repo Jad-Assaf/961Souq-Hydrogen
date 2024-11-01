@@ -43,14 +43,16 @@ export async function loadCriticalData({ context, params, request }) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
-  // Build the filters array based on URL search params
-  const filters = [];
-  searchParams.forEach((value, key) => {
-    if (key.startsWith('filter.')) {
-      const filterType = key.replace('filter.', '');
-      filters.push({ [filterType]: value });
-    }
-  });
+  // Construct the filters array as Shopify expects
+  const filters = searchParams
+    .entries()
+    .reduce((acc, [key, value]) => {
+      if (key.startsWith('filter.')) {
+        const filterType = key.replace('filter.', ''); // Remove 'filter.' prefix
+        acc.push({ [filterType]: value });
+      }
+      return acc;
+    }, []);
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
