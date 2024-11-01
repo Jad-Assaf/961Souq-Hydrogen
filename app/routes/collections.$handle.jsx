@@ -51,36 +51,24 @@ async function loadCriticalData({ context, params, request }) {
     filters.push({ productVendor: searchParams.get('productVendor') });
   }
 
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 16,
-  });
+  const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
-  try {
-    const [{ collection }] = await Promise.all([
-      storefront.query(COLLECTION_QUERY, {
-        variables: { handle, filters, ...paginationVariables },
-      }),
-    ]);
+  const [{ collection }] = await Promise.all([
+    storefront.query(COLLECTION_QUERY, {
+      variables: { handle, filters, ...paginationVariables },
+    }),
+  ]);
 
-    if (!collection) {
-      throw new Response(`Collection ${handle} not found`, {
-        status: 404,
-      });
-    }
-
-    return { collection };
-  } catch (error) {
-    console.error("Error fetching collection:", error);
-    throw new Response(`Error fetching collection: ${error.message}`, {
-      status: 500,
-    });
+  if (!collection) {
+    throw new Response(`Collection ${handle} not found`, { status: 404 });
   }
-}
 
+  return { collection };
+}
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -92,31 +80,16 @@ function loadDeferredData({ context }) {
   return {};
 }
 
+
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
-
-  const availableFilters = [
-    {
-      id: 'productType',
-      label: 'Product Type',
-      type: 'productType',
-      values: ['Shoes', 'Accessories', 'Clothing'],
-    },
-    {
-      id: 'productVendor',
-      label: 'Vendor',
-      type: 'productVendor',
-      values: ['BestShop', 'AnotherVendor'],
-    },
-    // Add more filters as needed
-  ];
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
-      <FilterComponent availableFilters={availableFilters} />
+      <FilterComponent availableFilters={collection.products.filters} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"

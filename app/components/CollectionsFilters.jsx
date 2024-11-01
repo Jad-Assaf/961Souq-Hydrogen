@@ -1,4 +1,4 @@
-import { useSearchParams } from "@remix-run/react";
+import { useSearchParams } from '@remix-run/react';
 
 export function FilterComponent({ availableFilters }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,16 +11,16 @@ export function FilterComponent({ availableFilters }) {
   return (
     <div className="filters">
       {availableFilters.map((filter) => (
-        <div key={filter.id}>
+        <div key={filter.id} className="filter-group">
           <h4>{filter.label}</h4>
           {filter.values.map((value) => (
-            <label key={value}>
+            <label key={value.id}>
               <input
                 type="checkbox"
-                checked={searchParams.get(filter.type) === value}
-                onChange={() => handleFilterChange(filter.type, value)}
+                checked={searchParams.get(filter.type) === value.id}
+                onChange={() => handleFilterChange(filter.type, value.id)}
               />
-              {value}
+              {value.label} ({value.count})
             </label>
           ))}
         </div>
