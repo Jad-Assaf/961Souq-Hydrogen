@@ -44,7 +44,9 @@ async function loadCriticalData({ context, params, request }) {
   const searchParams = new URLSearchParams(url.search);
 
   const filters = [];
-
+  for (const [key, value] of searchParams.entries()) {
+    filters.push({ id: key, input: value });
+  }
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
@@ -52,21 +54,13 @@ async function loadCriticalData({ context, params, request }) {
     throw redirect('/collections');
   }
 
-  try {
-    const { collection } = await storefront.query(COLLECTION_QUERY, {
-      variables: { handle, filters, ...paginationVariables },
-    });
+  const { collection } = await context.storefront.query(COLLECTION_QUERY, {
+    variables: { handle: params.handle, filters },
+  });
 
-    if (!collection) {
-      throw new Response(`Collection ${handle} not found`, { status: 404 });
-    }
-
-    return { collection };
-  } catch (error) {
-    console.error("Error fetching collection:", error);
-    throw new Response("Error fetching collection", { status: 500 });
-  }
+  return { collection };
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -82,12 +76,26 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
+  const [selectedFilters, setSelectedFilters] = useState([]);
+
+  const handleFilterChange = (filterId, value) => {
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterId]: value,
+    }));
+  };
+
+  // Apply selected filters to the `filters` variable in the query
+  const filters = Object.entries(selectedFilters).map(([id, input]) => ({
+    id,
+    input,
+  }));
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
-      <FilterComponent availableFilters={collection.products.filters} />
+      <FilterComponent availableFilters={collection.products.filters} onFilterChange={handleFilterChange} />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"

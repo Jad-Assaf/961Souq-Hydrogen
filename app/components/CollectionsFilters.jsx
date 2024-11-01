@@ -1,42 +1,23 @@
-import { useLocation, useNavigate } from '@remix-run/react';
+import React from 'react';
 
-export function FilterComponent({ availableFilters }) {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const searchParams = new URLSearchParams(location.search);
-
-  const handleFilterChange = (filterType, value) => {
-    // Toggle filter selection
-    const current = searchParams.get(`filter.${filterType}`);
-    if (current === value) {
-      searchParams.delete(`filter.${filterType}`); // Remove if already selected
-    } else {
-      searchParams.set(`filter.${filterType}`, value); // Add new filter
-    }
-
-    // Update URL to trigger re-fetching of filtered data
-    navigate(`${location.pathname}?${searchParams.toString()}`);
-  };
-
+export function FilterComponent({ availableFilters, onFilterChange }) {
   return (
-    <div>
+    <div className="filter-panel">
+      <h3>Filter By</h3>
       {availableFilters.map((filter) => (
-        <div key={filter.id}>
-          <h4>{filter.label}</h4>
-          <ul>
+        <div key={filter.id} className="filter-group">
+          <label>{filter.label}</label>
+          <select
+            onChange={(e) => onFilterChange(filter.id, e.target.value)}
+            defaultValue=""
+          >
+            <option value="">All</option>
             {filter.values.map((value) => (
-              <li key={value.id}>
-                <button
-                  onClick={() => handleFilterChange(filter.type, value.input)}
-                  style={{
-                    backgroundColor: searchParams.get(`filter.${filter.type}`) === value.input ? 'blue' : 'gray',
-                  }}
-                >
-                  {value.label} ({value.count})
-                </button>
-              </li>
+              <option key={value.id} value={value.input}>
+                {value.label} ({value.count})
+              </option>
             ))}
-          </ul>
+          </select>
         </div>
       ))}
     </div>
