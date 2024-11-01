@@ -44,11 +44,9 @@ async function loadCriticalData({ context, params, request }) {
   const searchParams = new URLSearchParams(url.search);
 
   const filters = [];
-
-  // Extract and format filter parameters
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter.')) {
-      const filterType = key.replace('filter.', ''); // e.g., productVendor
+      const filterType = key.replace('filter.', '');
       filters.push({ [filterType]: value });
     }
   }
@@ -59,17 +57,24 @@ async function loadCriticalData({ context, params, request }) {
     throw redirect('/collections');
   }
 
-  const [{ collection }] = await Promise.all([
-    storefront.query(COLLECTION_QUERY, {
-      variables: { handle, filters, ...paginationVariables },
-    }),
-  ]);
+  try {
+    // Perform storefront query with filters and pagination
+    const [{ collection }] = await Promise.all([
+      storefront.query(COLLECTION_QUERY, {
+        variables: { handle, filters, ...paginationVariables },
+      }),
+    ]);
 
-  if (!collection) {
-    throw new Response(`Collection ${handle} not found`, { status: 404 });
+    // Check if collection exists; if not, return 404
+    if (!collection) {
+      throw new Response(`Collection ${handle} not found`, { status: 404 });
+    }
+
+    return { collection };
+  } catch (error) {
+    console.error("Error fetching collection:", error);
+    throw new Response("Error fetching collection", { status: 500 });
   }
-
-  return { collection };
 }
 
 /**
@@ -194,6 +199,7 @@ const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
     $handle: String!
+    $filters: [ProductFilter!]
     $country: CountryCode
     $language: LanguageCode
     $first: Int
@@ -210,7 +216,8 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor
+        after: $endCursor,
+        filters: $filters
       ) {
         filters {
           id

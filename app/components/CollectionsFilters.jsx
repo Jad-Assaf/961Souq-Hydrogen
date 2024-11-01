@@ -5,14 +5,15 @@ export function FilterComponent({ availableFilters }) {
 
   const handleFilterChange = (filterType, value) => {
     const filterKey = `filter.${filterType}`;
-
-    // Manage multiple filters for the same type
     const currentValues = searchParams.getAll(filterKey);
     const isSelected = currentValues.includes(value);
 
+    // Update URL parameters dynamically for multi-select
     if (isSelected) {
       searchParams.delete(filterKey);
-      currentValues.filter((v) => v !== value).forEach((v) => searchParams.append(filterKey, v));
+      currentValues
+        .filter((v) => v !== value)
+        .forEach((v) => searchParams.append(filterKey, v));
     } else {
       searchParams.append(filterKey, value);
     }
