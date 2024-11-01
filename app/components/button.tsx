@@ -10,6 +10,7 @@ import { forwardRef } from "react";
 import { cn } from "../lib/cn";
 import { IconCircleNotch } from "./icons";
 import { Link } from "./link";
+import React from "react";
 
 let variants = cva(
   [

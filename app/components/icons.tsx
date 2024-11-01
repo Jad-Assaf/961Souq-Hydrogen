@@ -1,3 +1,5 @@
+import React from "react";
+
 type IconProps = JSX.IntrinsicElements["svg"];
 
 // Using icons from https://phosphoricons.com/
