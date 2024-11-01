@@ -48,7 +48,6 @@ async function loadCriticalData({ context, params, request }) {
   // Parse filters from URL search parameters
   searchParams.forEach((value, key) => {
     if (key.startsWith('filter.')) {
-      const filterType = key.replace('filter.', ''); // Remove 'filter.' prefix
       filters.push({ [filterType]: value });
     }
   });
