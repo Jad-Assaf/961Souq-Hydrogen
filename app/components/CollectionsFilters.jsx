@@ -7,7 +7,7 @@ export function FilterComponent({ availableFilters }) {
 
   const handleFilterChange = (filterType, value) => {
     // Update search params based on filter change
-    searchParams.set(`${filterType}`, value);
+    searchParams.set(`filter.${filterType}`, value);
     // Navigate with updated filters
     window.history.pushState({}, '', `${location.pathname}?${searchParams.toString()}`);
   };
