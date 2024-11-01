@@ -7,6 +7,7 @@ import {
   Analytics,
 } from '@shopify/hydrogen';
 import { useState } from 'react';
+import { useFetcher } from '@remix-run/react';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
@@ -43,6 +44,14 @@ export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
 
+  // Extract filter parameters from the request URL
+  const url = new URL(request.url);
+  const filters = []; // Initialize an empty array to hold filters
+
+  url.searchParams.forEach((value, key) => {
+    filters.push({ id: key, value });
+  });
+
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
   if (!handle) {
@@ -51,7 +60,7 @@ export async function loadCriticalData({ context, params, request }) {
 
   try {
     const { collection } = await storefront.query(COLLECTION_QUERY, {
-      variables: { handle, ...paginationVariables },
+      variables: { handle, filters, ...paginationVariables },
     });
 
     if (!collection) {
@@ -64,6 +73,7 @@ export async function loadCriticalData({ context, params, request }) {
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -79,16 +89,23 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   /** @type {LoaderReturnData} */
   const { collection } = useLoaderData();
+  const fetcher = useFetcher();
   const [selectedFilters, setSelectedFilters] = useState({});
 
-  // Function to update selected filters
   function handleFilterChange(filterId, value) {
     setSelectedFilters((prevFilters) => ({
       ...prevFilters,
       [filterId]: value,
     }));
-  }
 
+    // Re-fetch with updated filters
+    fetcher.load(`/collections/${collection.handle}`, {
+      method: 'get',
+      searchParams: {
+        ...selectedFilters,
+      },
+    });
+  }
 
   return (
     <div className="collection">
