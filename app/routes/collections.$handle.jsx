@@ -58,14 +58,10 @@ async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    // Perform storefront query with filters and pagination
-    const [{ collection }] = await Promise.all([
-      storefront.query(COLLECTION_QUERY, {
-        variables: { handle, filters, ...paginationVariables },
-      }),
-    ]);
+    const { collection } = await storefront.query(COLLECTION_QUERY, {
+      variables: { handle, filters, ...paginationVariables },
+    });
 
-    // Check if collection exists; if not, return 404
     if (!collection) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
@@ -76,6 +72,7 @@ async function loadCriticalData({ context, params, request }) {
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
