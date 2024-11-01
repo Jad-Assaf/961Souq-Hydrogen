@@ -22,11 +22,11 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
-      external: ['~/components/icons'], // Only do this if the above steps do not resolve the issue
-      external: ['~/components/button'], // Only do this if the above steps do not resolve the issue
-      external: ['~/components/checkbox'], // Only do this if the above steps do not resolve the issue
-      external: ['~/lib/const'], // Only do this if the above steps do not resolve the issue
-      external: ['~/lib/filter'], // Only do this if the above steps do not resolve the issue
+      external: ['~/components/icons', 
+      '~/components/button', 
+      '~/components/checkbox', 
+      '~/lib/const', 
+      '~/lib/filter'] 
     },
     assetsInlineLimit: 0,
   },
