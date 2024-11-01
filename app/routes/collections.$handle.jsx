@@ -44,13 +44,13 @@ export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
 
-  // Extract filter parameters from the request URL
   const url = new URL(request.url);
-  const filters = []; // Initialize an empty array to hold filters
-
+  const filters = [];
   url.searchParams.forEach((value, key) => {
-    filters.push({ id: key, value });
+    filters.push({ name: key, value });
   });
+
+  console.log("Filters being sent to GraphQL:", filters);
 
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
@@ -64,16 +64,16 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     if (!collection) {
+      console.error(`Collection ${handle} not found`);
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
     return { collection };
   } catch (error) {
-    console.error("Error fetching collection:", error);
+    console.error("Error fetching collection:", error.message || error);
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
-
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
