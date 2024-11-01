@@ -39,7 +39,6 @@ export async function loader(args) {
 export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
-
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
   if (!handle) {
@@ -47,7 +46,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection } = await storefront.query(COLLECTION_QUERY, {
+    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
       variables: { handle, ...paginationVariables },
     });
 
@@ -55,7 +54,15 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    return { collection };
+    // Returning collection details with filters
+    return {
+      collection,
+      collections: collections.map((col) => ({
+        handle: col.handle,
+        title: col.title,
+      })),
+      appliedFilters: [], // You may need to initialize or fetch applied filters here
+    };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
@@ -75,12 +82,20 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   /** @type {LoaderReturnData} */
-  const { collection } = useLoaderData();
+  const { collection, collections, appliedFilters } = useLoaderData();
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
       {/* <p className="collection-description">{collection.description}</p> */}
+      <CollectionFilters
+        showCollectionDescription={true}
+        loadPrevText="Previous"
+        loadMoreText="Load More"
+        collection={collection}
+        collections={collections}
+        appliedFilters={appliedFilters}
+      />
       <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName="products-grid"
