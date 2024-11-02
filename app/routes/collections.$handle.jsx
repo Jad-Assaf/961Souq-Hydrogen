@@ -122,7 +122,7 @@ export default function Collection() {
         productNumber={collection.products.nodes.length}
       />
 
-      <PaginatedResourceSection
+      <PaginationResourceSection
         connection={collection.products}
         resourcesClassName={`products-grid grid-cols-${numberInRow}`}
       >
@@ -133,7 +133,7 @@ export default function Collection() {
             loading={index < 16 ? 'eager' : undefined}
           />
         )}
-      </PaginatedResourceSection>
+      </PaginationResourceSection>
 
       <Analytics.CollectionView
         data={{
