@@ -14,6 +14,7 @@ import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
+import { FiltersDrawer } from '../modules/drawer-filter';
 
 /**
  * @type {MetaFunction<typeof loader>}
