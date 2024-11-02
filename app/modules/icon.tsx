@@ -27,9 +27,7 @@ function Icon({
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconMenu(props: IconProps) {
   return (
     <Icon {...props} stroke={props.stroke || "currentColor"}>
@@ -41,9 +39,7 @@ export function IconMenu(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconClose(props: IconProps) {
   return (
     <Icon {...props} stroke={props.stroke || "currentColor"}>
@@ -66,9 +62,7 @@ export function IconClose(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconArrow({ direction = "right" }: IconProps) {
   let rotate;
 
@@ -97,9 +91,7 @@ export function IconArrow({ direction = "right" }: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconCaret({
   direction = "down",
   stroke = "currentColor",
@@ -137,9 +129,7 @@ export function IconCaret({
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconSelect(props: IconProps) {
   return (
     <Icon {...props}>
@@ -150,9 +140,7 @@ export function IconSelect(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconBag(props: IconProps) {
   return (
     <Icon {...props}>
@@ -165,9 +153,7 @@ export function IconBag(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconLogin(props: IconProps) {
   return (
     <Icon {...props}>
@@ -187,9 +173,7 @@ export function IconLogin(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconAccount(props: IconProps) {
   return (
     <Icon {...props}>
@@ -202,9 +186,7 @@ export function IconAccount(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconHelp(props: IconProps) {
   return (
     <Icon {...props}>
@@ -214,9 +196,7 @@ export function IconHelp(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconSearch(props: IconProps) {
   return (
     <Icon {...props}>
@@ -229,9 +209,7 @@ export function IconSearch(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconCheck({
   stroke = "currentColor",
   ...props
@@ -250,9 +228,7 @@ export function IconCheck({
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconXMark({
   stroke = "currentColor",
   ...props
@@ -269,9 +245,7 @@ export function IconXMark({
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconRemove(props: IconProps) {
   return (
     <Icon {...props} fill="transparent" stroke={props.stroke || "currentColor"}>
@@ -298,9 +272,7 @@ export function IconRemove(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconFilters(props: IconProps) {
   return (
     <Icon {...props} fill="transparent" stroke={props.stroke || "currentColor"}>
@@ -315,9 +287,7 @@ export function IconFilters(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconPinterest(props: IconProps) {
   return (
     <Icon {...props} fill="transparent" stroke={props.stroke || "currentColor"}>
@@ -336,9 +306,7 @@ export function IconPinterest(props: IconProps) {
     </Icon>
   );
 }
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconFacebook(props: IconProps) {
   return (
     <Icon {...props} fill="transparent" stroke={props.stroke || "currentColor"}>
@@ -381,9 +349,7 @@ export function IconMapBlank(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconImageBlank(props: IconProps) {
   return (
     <Icon {...props} fill="none" stroke={props.stroke || "currentColor"}>
@@ -455,9 +421,7 @@ export function IconArrowInput(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconFilledStar(props: IconProps) {
   return (
     <Icon
@@ -476,9 +440,7 @@ export function IconFilledStar(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */ // Lucide icons
+ // Lucide icons
 export function IconStar(props: IconProps) {
   return (
     <svg
@@ -498,9 +460,7 @@ export function IconStar(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconStarHalf(props: IconProps) {
   return (
     <svg
@@ -525,9 +485,7 @@ export function IconStarHalf(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconBadgeCheck(props: IconProps) {
   return (
     <svg
@@ -548,9 +506,7 @@ export function IconBadgeCheck(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconX(props: IconProps) {
   return (
     <svg
@@ -571,9 +527,7 @@ export function IconX(props: IconProps) {
   );
 }
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 export function IconSliders(props: IconProps) {
   return (
     <Icon {...props} viewBox="0 0 16 16" fill="none">
