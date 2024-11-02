@@ -99,7 +99,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection } = await storefront.query(COLLECTION_QUERY, {
+    const { collection } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -282,10 +282,11 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 `;
 
 // NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
-const COLLECTION_QUERY = `#graphql
+const COLLECTION_AND_MENU_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
-  query Collection(
+  query CollectionAndMenu(
     $handle: String!
+    $menuHandle: String!
     $filters: [ProductFilter!]
     $sortKey: ProductCollectionSortKeys
     $reverse: Boolean
