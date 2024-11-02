@@ -30,7 +30,6 @@ export default defineConfig({
     rollupOptions: {
       external: [
         '~/components/icons',
-        '~/components/button',
         '~/components/checkbox',
         '~/lib/const',
         '~/lib/cn',
