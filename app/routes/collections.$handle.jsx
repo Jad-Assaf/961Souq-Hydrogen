@@ -130,12 +130,15 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
 
+  // Get filters from collection.products
+  const filters = collection.products.filters || [];
+
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
       <SortFilter
-        filters={filters}
+        filters={filters}  // Pass the filters from collection.products
         appliedFilters={appliedFilters}
         productCount={collection.products.nodes.length}
       >
