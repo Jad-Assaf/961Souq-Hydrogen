@@ -877,6 +877,10 @@ button.reset:hover:not(:has(> *)) {
 * routes/collections._index.tsx
 * --------------------------------------------------
 */
+.collection {
+  max-width: 1500px;
+  margin: auto;
+}
 .collections-grid {
   display: grid;
   grid-gap: 1.5rem;
@@ -905,6 +909,9 @@ button.reset:hover:not(:has(> *)) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  button#headlessui-menu-button-\:R3lab5\: span {
+    font-size: 12px;
+  }
 }
 
 .bg-background{
@@ -919,9 +926,12 @@ button#headlessui-menu-button-\:R3lab5\:{
   border-radius: 30px;
 }
 
-@media (max-width: 768px){
-  button#headlessui-menu-button-\:R3lab5\: span{
-    font-size: 12px;
+@media (min-width: 768px){
+  .border.border-line\/30.py-4.z-10.bg-white\/10.sticky.top-\[15px\].rounded-full.backdrop-blur-lg.max-w-\[1500px\].m-auto{
+    backdrop-filter: none !important;
+    background-color: none !important;
+    border: none !important;
+    position: relative !important;
   }
 }
 
