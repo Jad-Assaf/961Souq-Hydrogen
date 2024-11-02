@@ -304,50 +304,36 @@ export default function SortMenu({
 }: {
   showSearchSort?: boolean;
 }) {
-  const productShortItems: { label: string; key: SortParam }[] = [
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const location = useLocation();
+
+  const productSortItems: { label: string; key: SortParam }[] = [
     { label: "Featured", key: "featured" },
-    {
-      label: "Price: Low - High",
-      key: "price-low-high",
-    },
-    {
-      label: "Price: High - Low",
-      key: "price-high-low",
-    },
-    {
-      label: "Best Selling",
-      key: "best-selling",
-    },
-    {
-      label: "Newest",
-      key: "newest",
-    },
+    { label: "Price: Low - High", key: "price-low-high" },
+    { label: "Price: High - Low", key: "price-high-low" },
+    { label: "Best Selling", key: "best-selling" },
+    { label: "Newest", key: "newest" },
   ];
 
   const searchSortItems: { label: string; key: SortParam }[] = [
-    {
-      label: "Price: Low - High",
-      key: "price-low-high",
-    },
-    {
-      label: "Price: High - Low",
-      key: "price-high-low",
-    },
-    {
-      label: "Relevance",
-      key: "relevance",
-    },
+    { label: "Price: Low - High", key: "price-low-high" },
+    { label: "Price: High - Low", key: "price-high-low" },
+    { label: "Relevance", key: "relevance" },
   ];
-  const items = showSearchSort ? searchSortItems : productShortItems;
-  const [params] = useSearchParams();
-  const location = useLocation();
-  const activeItem =
-    items.find((item) => item.key === params.get("sort")) || items[0];
+
+  const items = showSearchSort ? searchSortItems : productSortItems;
+  const activeItem = items.find((item) => item.key === params.get("sort")) || items[0];
+
+  const handleSort = (sortKey: SortParam) => {
+    const newUrl = getSortLink(sortKey, params, location);
+    navigate(newUrl);
+  };
 
   return (
     <Menu as="div" className="relative z-10">
       <MenuButton className="flex items-center gap-1.5 h-10 border px-4 py-2.5">
-        <span className="font-medium">Sort by</span>
+        <span className="font-medium">Sort by: {activeItem.label}</span>
         <CaretDown />
       </MenuButton>
       <MenuItems
@@ -357,16 +343,15 @@ export default function SortMenu({
         {items.map((item) => (
           <MenuItem key={item.label}>
             {() => (
-              <Link to={getSortLink(item.key, params, location)}>
-                <p
-                  className={clsx(
-                    "block text-base hover:underline underline-offset-4",
-                    activeItem?.key === item.key ? "font-bold" : "font-normal"
-                  )}
-                >
-                  {item.label}
-                </p>
-              </Link>
+              <button
+                onClick={() => handleSort(item.key)}
+                className={clsx(
+                  "block w-full text-left text-base hover:underline underline-offset-4",
+                  activeItem.key === item.key ? "font-bold" : "font-normal"
+                )}
+              >
+                {item.label}
+              </button>
             )}
           </MenuItem>
         ))}

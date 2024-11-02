@@ -41,3 +41,11 @@ export interface SingleMenuItem {
     };
   };
 }
+
+export type SortParam =
+  | "featured"
+  | "price-low-high"
+  | "price-high-low"
+  | "best-selling"
+  | "newest"
+  | "relevance";

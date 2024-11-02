@@ -45,6 +45,32 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
+  const sort = searchParams.get('sort');
+  let sortKey;
+  let reverse = false;
+
+  // Map sort values to Shopify's sortKey and reverse
+  switch (sort) {
+    case 'price-low-high':
+      sortKey = 'PRICE';
+      break;
+    case 'price-high-low':
+      sortKey = 'PRICE';
+      reverse = true;
+      break;
+    case 'best-selling':
+      sortKey = 'BEST_SELLING';
+      break;
+    case 'newest':
+      sortKey = 'CREATED';
+      reverse = true;
+      break;
+    case 'featured':
+    default:
+      sortKey = 'MANUAL';
+      break;
+  }
+
   // Extract filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
@@ -62,8 +88,10 @@ export async function loadCriticalData({ context, params, request }) {
     const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
-        ...paginationVariables,
         filters: filters.length ? filters : undefined,
+        sortKey,
+        reverse,
+        ...paginationVariables,
       },
     });
 
@@ -225,24 +253,25 @@ const COLLECTION_QUERY = `#graphql
   query Collection(
     $handle: String!
     $filters: [ProductFilter!]
-    $country: CountryCode
-    $language: LanguageCode
+    $sortKey: ProductCollectionSortKeys
+    $reverse: Boolean
     $first: Int
     $last: Int
     $startCursor: String
     $endCursor: String
-  ) @inContext(country: $country, language: $language) {
+  ) {
     collection(handle: $handle) {
       id
       handle
       title
-      description
       products(
         first: $first,
         last: $last,
         before: $startCursor,
         after: $endCursor,
-        filters: $filters
+        filters: $filters,
+        sortKey: $sortKey,
+        reverse: $reverse
       ) {
         filters {
           id

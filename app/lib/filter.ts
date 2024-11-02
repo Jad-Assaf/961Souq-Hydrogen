@@ -31,11 +31,13 @@ export function getAppliedFilterLink(
 export function getSortLink(
   sort: SortParam,
   params: URLSearchParams,
-  location: Location,
+  location: Location
 ) {
-  params.set("sort", sort);
-  return `${location.pathname}?${params.toString()}`;
+  const newParams = new URLSearchParams(params);
+  newParams.set('sort', sort);
+  return `${location.pathname}?${newParams.toString()}`;
 }
+
 
 export function getFilterLink(
   rawInput: string | ProductFilter,
