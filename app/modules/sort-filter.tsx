@@ -20,7 +20,7 @@ import type {
 } from "@shopify/hydrogen/storefront-api-types";
 import clsx from "clsx";
 import type { SyntheticEvent } from "react";
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Button from "../components/button";
 import { Checkbox } from "../components/checkbox";
 import { IconCaretDown, IconCaretRight } from "../components/icons";
@@ -28,11 +28,10 @@ import { FILTER_URL_PREFIX } from "../lib/const";
 import type { AppliedFilter, SortParam } from "../lib/filter";
 import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
 import { Drawer, useDrawer } from "./drawer";
-import { IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid } from "./icon";
+import { IconCaret, IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid, IconXMark } from "./icon";
 import { Input } from "./input";
-import React from "react";
-import { FiltersDrawer } from "./drawer-filter";
-
+import { Props } from "@headlessui/react/dist/types";
+import { useDebounce } from "react-use";
 
 type SortFilterProps = {
   filters: Filter[];
@@ -117,9 +116,8 @@ export function SortFilter({
             <div className="px-5 w-[360px]">
               <FiltersDrawer
                 filters={filters}
-                appliedFilters={appliedFilters} onLayoutChange={function (number: number): void {
-                  throw new Error("Function not implemented.");
-                } }              />
+                appliedFilters={appliedFilters}
+              />
             </div>
           </Drawer>
         </div>
@@ -131,7 +129,246 @@ export function SortFilter({
   );
 }
 
-// ... (keep the rest of your components like FiltersDrawer, ListItemFilter, PriceRangeFilter, etc.)
+export function FiltersDrawer({
+  filters = [],
+  appliedFilters = [],
+}: Omit<Props, "children">) {
+  const [params] = useSearchParams();
+  const location = useLocation();
+
+  const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
+    switch (filter.type) {
+      case "PRICE_RANGE": {
+        const priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
+        const price = priceFilter
+          ? (JSON.parse(priceFilter) as ProductFilter["price"])
+          : undefined;
+        const min = Number.isNaN(Number(price?.min))
+          ? undefined
+          : Number(price?.min);
+        const max = Number.isNaN(Number(price?.max))
+          ? undefined
+          : Number(price?.max);
+
+        return <PriceRangeFilter min={min} max={max} />;
+      }
+
+      default: {
+        const to = getFilterLink(option.input as string, params, location);
+        return (
+          <Link
+            className="focus:underline hover:underline"
+            prefetch="intent"
+            to={to}
+          >
+            {option.label}
+          </Link>
+        );
+      }
+    }
+  };
+
+  return (
+    <>
+      <nav className="py-8">
+        {appliedFilters.length > 0 ? (
+          <div className="pb-8">
+            <AppliedFilters filters={appliedFilters} />
+          </div>
+        ) : null}
+
+        <Heading as="h4" size="lead" className="pb-4">
+          Filter By
+        </Heading>
+        <div className="divide-y">
+          {filters.map((filter: Filter) => (
+            <Disclosure as="div" key={filter.id} className="w-full">
+              {({ open }) => (
+                <>
+                  <Disclosure.Button className="flex justify-between w-full py-4">
+                    <Text size="lead">{filter.label}</Text>
+                    <IconCaret direction={open ? "up" : "down"} />
+                  </Disclosure.Button>
+                  <Disclosure.Panel key={filter.id}>
+                    <ul key={filter.id} className="py-2">
+                      {filter.values?.map((option) => {
+                        return (
+                          <li key={option.id} className="pb-4">
+                            {filterMarkup(filter, option)}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </Disclosure.Panel>
+                </>
+              )}
+            </Disclosure>
+          ))}
+        </div>
+      </nav>
+    </>
+  );
+}
+
+function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
+  const [params] = useSearchParams();
+  const location = useLocation();
+  return (
+    <>
+      <Heading as="h4" size="lead" className="pb-4">
+        Applied filters
+      </Heading>
+      <div className="flex flex-wrap gap-2">
+        {filters.map((filter: AppliedFilter) => {
+          return (
+            <Link
+              to={getAppliedFilterLink(filter, params, location)}
+              className="flex px-2 border rounded-full gap"
+              key={`${filter.label}-${JSON.stringify(filter.filter)}`}
+            >
+              <span className="flex-grow">{filter.label}</span>
+              <span>
+                <IconXMark />
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+function getAppliedFilterLink(
+  filter: AppliedFilter,
+  params: URLSearchParams,
+  location: Location,
+) {
+  let paramsClone = new URLSearchParams(params);
+  for (let [key, value] of Object.entries(filter.filter)) {
+    let fullKey = FILTER_URL_PREFIX + key;
+    paramsClone.delete(fullKey, JSON.stringify(value));
+  }
+  return `${location.pathname}?${paramsClone.toString()}`;
+}
+
+function getSortLink(
+  sort: SortParam,
+  params: URLSearchParams,
+  location: Location,
+) {
+  params.set("sort", sort);
+  return `${location.pathname}?${params.toString()}`;
+}
+
+function getFilterLink(
+  rawInput: string | ProductFilter,
+  params: URLSearchParams,
+  location: ReturnType<typeof useLocation>,
+) {
+  const paramsClone = new URLSearchParams(params);
+  const newParams = filterInputToParams(rawInput, paramsClone);
+  return `${location.pathname}?${newParams.toString()}`;
+}
+
+const PRICE_RANGE_FILTER_DEBOUNCE = 500;
+
+function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
+  const location = useLocation();
+  const params = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const navigate = useNavigate();
+
+  const [minPrice, setMinPrice] = useState(min);
+  const [maxPrice, setMaxPrice] = useState(max);
+
+  useDebounce(
+    () => {
+      if (minPrice === undefined && maxPrice === undefined) {
+        params.delete(`${FILTER_URL_PREFIX}price`);
+        navigate(`${location.pathname}?${params.toString()}`);
+        return;
+      }
+
+      const price = {
+        ...(minPrice === undefined ? {} : { min: minPrice }),
+        ...(maxPrice === undefined ? {} : { max: maxPrice }),
+      };
+      const newParams = filterInputToParams({ price }, params);
+      navigate(`${location.pathname}?${newParams.toString()}`);
+    },
+    PRICE_RANGE_FILTER_DEBOUNCE,
+    [minPrice, maxPrice],
+  );
+
+  const onChangeMax = (event: SyntheticEvent) => {
+    const value = (event.target as HTMLInputElement).value;
+    const newMaxPrice = Number.isNaN(Number.parseFloat(value))
+      ? undefined
+      : Number.parseFloat(value);
+    setMaxPrice(newMaxPrice);
+  };
+
+  const onChangeMin = (event: SyntheticEvent) => {
+    const value = (event.target as HTMLInputElement).value;
+    const newMinPrice = Number.isNaN(Number.parseFloat(value))
+      ? undefined
+      : Number.parseFloat(value);
+    setMinPrice(newMinPrice);
+  };
+
+  return (
+    <div className="flex flex-col">
+      <label className="mb-4">
+        <span>from</span>
+        <input
+          name="minPrice"
+          className="text-black"
+          type="number"
+          value={minPrice ?? ""}
+          placeholder={"$"}
+          onChange={onChangeMin}
+        />
+      </label>
+      <label>
+        <span>to</span>
+        <input
+          name="maxPrice"
+          className="text-black"
+          type="number"
+          value={maxPrice ?? ""}
+          placeholder={"$"}
+          onChange={onChangeMax}
+        />
+      </label>
+    </div>
+  );
+}
+
+function filterInputToParams(
+  rawInput: string | ProductFilter,
+  params: URLSearchParams,
+) {
+  let input =
+    typeof rawInput === "string"
+      ? (JSON.parse(rawInput) as ProductFilter)
+      : rawInput;
+
+  for (let [key, value] of Object.entries(input)) {
+    if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))) {
+      continue;
+    }
+    if (key === "price") {
+      // For price, we want to overwrite
+      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+    } else {
+      params.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+    }
+  }
+
+  return params;
+}
 
 function SortMenu() {
   const items: { label: string; key: SortParam }[] = [
