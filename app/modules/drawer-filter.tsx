@@ -53,7 +53,7 @@ export function DrawerFilter({
   return (
     <div className="border-y border-line/30 py-4">
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
-        <div className="flex gap-1 flex-1">
+        {/* <div className="flex gap-1 flex-1">
           <button
             type="button"
             className={clsx(
@@ -94,14 +94,14 @@ export function DrawerFilter({
           >
             <IconOneGrid className="w-10 h-10" />
           </button>
-        </div>
+        </div> */}
         {/* <span className="flex-1 text-center">{productNumber} Products</span> */}
         <div className="flex gap-2 justify-end">
           <SortMenu showSearchSort={showSearchSort} />
           <Button
             onClick={openDrawer}
             variant="outline"
-            className="flex items-center gap-1.5 border py-2"
+            className="flex items-center gap-4 border py-2"
           >
             <Sliders size={18} />
             <span>Filter</span>
