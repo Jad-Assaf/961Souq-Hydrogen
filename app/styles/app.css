@@ -911,6 +911,10 @@ button.reset:hover:not(:has(> *)) {
   background-color: #fff !important;
 }
 
+#headlessui-portal-root{
+  z-index: 999;
+}
+
 /*
 * --------------------------------------------------
 * routes/collections.$handle.tsx
