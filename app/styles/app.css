@@ -907,6 +907,10 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
+.bg-background{
+  background-color: #fff !important;
+}
+
 /*
 * --------------------------------------------------
 * routes/collections.$handle.tsx
