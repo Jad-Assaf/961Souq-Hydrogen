@@ -51,7 +51,7 @@ export function DrawerFilter({
 }: DrawerFilterProps) {
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
   return (
-    <div className="border-y border-line/30 py-4 z-10 bg-white sticky top-0">
+    <div className="border-y border-line/30 py-4 z-10 bg-white/50 sticky top-0 rounded-full blur-lg">
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
         {/* <div className="flex gap-1 flex-1">
           <button
@@ -101,7 +101,7 @@ export function DrawerFilter({
           <Button
             onClick={openDrawer}
             variant="outline"
-            className="flex items-center gap-4 border py-2"
+            className="flex items-center gap-4 border py-2 rounded-3xl"
           >
             <Sliders size={18} />
             <span>Filter</span>
@@ -112,7 +112,7 @@ export function DrawerFilter({
             openFrom="left"
             heading="Filter"
           >
-            <div className="px-5 w-[360px]">
+            <div className="px-5 w-[360px] rounded-3xl">
               <FiltersDrawer
                 filters={filters}
                 appliedFilters={appliedFilters}
