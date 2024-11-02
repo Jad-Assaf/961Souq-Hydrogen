@@ -47,6 +47,17 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
+  const { collection, menu } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
+    variables: {
+      handle,
+      menuHandle: "new-main-menu",
+      filters: filters.length ? filters : undefined,
+      sortKey,
+      reverse,
+      ...paginationVariables,
+    },
+  });
+
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
@@ -114,7 +125,7 @@ export async function loadCriticalData({ context, params, request }) {
       }
     });
 
-    return { collection, appliedFilters };
+    return { collection, appliedFilters, menu };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
@@ -132,9 +143,10 @@ function loadDeferredData({ context }) {
 }
 
 export default function Collection() {
-  const { collection, appliedFilters } = useLoaderData();
+  const { collection, appliedFilters, menu } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
-  const isDesktop = useMediaQuery({ minWidth: 1024 }); // Adjust this breakpoint as needed
+  const isDesktop = useMediaQuery({ minWidth: 1024 });
+  const location = useLocation();
 
   const handleLayoutChange = (number) => {
     setNumberInRow(number);
@@ -147,6 +159,10 @@ export default function Collection() {
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
           <div className="w-1/4 pr-4">
+            <CategoriesMenu
+              menuData={menu}
+              currentPath={location.pathname}
+            />
             <FiltersDrawer
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
@@ -309,6 +325,19 @@ const COLLECTION_QUERY = `#graphql
           hasNextPage
           endCursor
           startCursor
+        }
+      }
+    }
+    menu(handle: $menuHandle) {
+      id
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
         }
       }
     }
