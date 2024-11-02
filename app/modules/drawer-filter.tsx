@@ -52,7 +52,7 @@ export function DrawerFilter({
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
   return (
     <div className="border border-line/30 py-4 z-10 bg-white/10 sticky top-[15px] rounded-full backdrop-blur-lg max-w-[1500px] m-auto">
-      <div className="gap-4 md:gap-8 flex flex-row-reverse w-full items-center justify-between">
+      <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
         {/* <div className="flex gap-1 flex-1">
           <button
             type="button"
@@ -96,7 +96,16 @@ export function DrawerFilter({
           </button>
         </div> */}
         {/* <span className="flex-1 text-center">{productNumber} Products</span> */}
-        <div className="flex gap-2 justify-between m-auto w-11/12 rounded-3xl">
+        <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
+          <SortMenu showSearchSort={showSearchSort} />
+          <Button
+            onClick={openDrawer}
+            variant="outline"
+            className="flex items-center gap-4 border py-2 rounded-3xl"
+          >
+            <Sliders size={18} />
+            <span>Filter</span>
+          </Button>
           <Drawer
             open={isOpen}
             onClose={closeDrawer}
@@ -107,19 +116,10 @@ export function DrawerFilter({
               <FiltersDrawer
                 filters={filters}
                 appliedFilters={appliedFilters}
-                onLayoutChange={console.log}
+                onLayoutChange={console.log} 
               />
             </div>
           </Drawer>
-          <SortMenu showSearchSort={showSearchSort} />
-          <Button
-            onClick={openDrawer}
-            variant="outline"
-            className="flex items-center gap-4 border py-2 rounded-3xl"
-          >
-            <Sliders size={18} />
-            <span>Filter</span>
-          </Button>
         </div>
       </div>
     </div>
