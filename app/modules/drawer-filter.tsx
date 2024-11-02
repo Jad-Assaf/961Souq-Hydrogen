@@ -51,7 +51,7 @@ export function DrawerFilter({
 }: DrawerFilterProps) {
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
   return (
-    <div className="border-y border-line/30 py-4">
+    <div className="border-y border-line/30 py-4 z-999 bg-white sticky top-0">
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
         {/* <div className="flex gap-1 flex-1">
           <button
@@ -96,7 +96,7 @@ export function DrawerFilter({
           </button>
         </div> */}
         {/* <span className="flex-1 text-center">{productNumber} Products</span> */}
-        <div className="flex gap-2 justify-end">
+        <div className="flex gap-2 justify-between m-auto w-11/12">
           <SortMenu showSearchSort={showSearchSort} />
           <Button
             onClick={openDrawer}
