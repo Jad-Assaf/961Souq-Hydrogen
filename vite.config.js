@@ -27,15 +27,15 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
-      external: [
-        '~/components/icons',
-        '~/components/checkbox',
-        '~/lib/const',
-        '~/lib/cn',
-        '~/lib/filter',
-      ],
-    },
+    // rollupOptions: {
+    //   external: [
+    //     '~/components/icons',
+    //     '~/components/checkbox',
+    //     '~/lib/const',
+    //     '~/lib/cn',
+    //     '~/lib/filter',
+    //   ],
+    // },
     assetsInlineLimit: 0,
   },
   ssr: {
