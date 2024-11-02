@@ -7,7 +7,7 @@ import {
   Analytics,
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import { PaginationResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
@@ -44,31 +44,6 @@ export async function loadCriticalData({ context, params, request }) {
   const { storefront } = context;
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
-
-  const sort = searchParams.get('sort');
-  let sortKey;
-  let reverse = false;
-
-  switch (sort) {
-    case 'price-low-high':
-      sortKey = 'PRICE';
-      break;
-    case 'price-high-low':
-      sortKey = 'PRICE';
-      reverse = true;
-      break;
-    case 'best-selling':
-      sortKey = 'BEST_SELLING';
-      break;
-    case 'newest':
-      sortKey = 'CREATED';
-      reverse = true;
-      break;
-    case 'featured':
-    default:
-      sortKey = 'MANUAL';
-      break;
-  }
 
   // Extract filters from URL
   const filters = [];
@@ -138,7 +113,7 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-
+      
       <DrawerFilter
         filters={collection.products.filters}
         appliedFilters={appliedFilters}
@@ -171,7 +146,6 @@ export default function Collection() {
     </div>
   );
 }
-
 /**
  * @param {{
  *   product: ProductItemFragment;
@@ -194,6 +168,7 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -207,6 +182,7 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
+
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
@@ -249,8 +225,6 @@ const COLLECTION_QUERY = `#graphql
   query Collection(
     $handle: String!
     $filters: [ProductFilter!]
-    $sortKey: ProductCollectionSortKeys
-    $reverse: Boolean
     $country: CountryCode
     $language: LanguageCode
     $first: Int
@@ -268,9 +242,7 @@ const COLLECTION_QUERY = `#graphql
         last: $last,
         before: $startCursor,
         after: $endCursor,
-        filters: $filters,
-        sortKey: $sortKey,
-        reverse: $reverse
+        filters: $filters
       ) {
         filters {
           id
@@ -296,6 +268,7 @@ const COLLECTION_QUERY = `#graphql
     }
   }
 `;
+
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
 /** @typedef {import('storefrontapi.generated').ProductItemFragment} ProductItemFragment */
