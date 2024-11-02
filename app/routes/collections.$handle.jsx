@@ -15,7 +15,6 @@ import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
-import { CategoriesMenu } from '../components/CategoriesMenu';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -48,7 +47,6 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
-  // Move these declarations before the first query
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
@@ -84,27 +82,14 @@ export async function loadCriticalData({ context, params, request }) {
     }
   }
 
-  // Now make the query with all variables properly defined
-  const { collection, menu } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
-    variables: {
-      handle,
-      menuHandle: "new-main-menu",
-      filters: filters.length ? filters : undefined,
-      sortKey,
-      reverse,
-      ...paginationVariables,
-    },
-  });
-
   if (!handle) {
     throw redirect('/collections');
   }
 
   try {
-    const { collection, menu } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
+    const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
-        menuHandle: "new-main-menu",
         filters: filters.length ? filters : undefined,
         sortKey,
         reverse,
@@ -129,13 +114,12 @@ export async function loadCriticalData({ context, params, request }) {
       }
     });
 
-    return { collection, appliedFilters, menu };
+    return { collection, appliedFilters };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
-
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -148,10 +132,9 @@ function loadDeferredData({ context }) {
 }
 
 export default function Collection() {
-  const { collection, appliedFilters, menu } = useLoaderData();
+  const { collection, appliedFilters } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
-  const isDesktop = useMediaQuery({ minWidth: 1024 });
-  const location = useLocation();
+  const isDesktop = useMediaQuery({ minWidth: 1024 }); // Adjust this breakpoint as needed
 
   const handleLayoutChange = (number) => {
     setNumberInRow(number);
@@ -164,10 +147,6 @@ export default function Collection() {
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
           <div className="w-1/4 pr-4">
-            <CategoriesMenu
-              menuData={menu}
-              currentPath={location.pathname}
-            />
             <FiltersDrawer
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
@@ -286,11 +265,10 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 `;
 
 // NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
-const COLLECTION_AND_MENU_QUERY = `#graphql
+const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
-  query CollectionAndMenu(
+  query Collection(
     $handle: String!
-    $menuHandle: String!
     $filters: [ProductFilter!]
     $sortKey: ProductCollectionSortKeys
     $reverse: Boolean
@@ -331,19 +309,6 @@ const COLLECTION_AND_MENU_QUERY = `#graphql
           hasNextPage
           endCursor
           startCursor
-        }
-      }
-    }
-    menu(handle: $menuHandle) {
-      id
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
         }
       }
     }
