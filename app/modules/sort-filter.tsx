@@ -1,13 +1,11 @@
 import {
   Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
   Menu,
   MenuButton,
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
-import { CaretDown, Sliders } from "@phosphor-icons/react";
+import type { Location } from "@remix-run/react";
 import {
   Link,
   useLocation,
@@ -18,123 +16,73 @@ import type {
   Filter,
   ProductFilter,
 } from "@shopify/hydrogen/storefront-api-types";
-import clsx from "clsx";
 import type { SyntheticEvent } from "react";
-import React, { useMemo, useState } from "react";
-import Button from "../components/button";
-import { Checkbox } from "../components/checkbox";
-import { IconCaretDown, IconCaretRight } from "../components/icons";
-import { FILTER_URL_PREFIX } from "../lib/const";
-import type { AppliedFilter, SortParam } from "../lib/filter";
-// import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
-import { Drawer, useDrawer } from "./drawer";
-import { IconCaret, IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid, IconXMark } from "./icon";
+import { useMemo, useState } from "react";
+import useDebounce from "react-use/esm/useDebounce";
+import { IconCaret, IconFilters, IconXMark } from "../modules/icon";
 import { Heading, Text } from "../modules/text";
-import { Input } from "./input";
-import { useDebounce } from "react-use";
+import React from "react";
 
-type SortFilterProps = {
+export type AppliedFilter = {
+  label: string;
+  filter: ProductFilter;
+};
+
+export type SortParam =
+  | "price-low-high"
+  | "price-high-low"
+  | "best-selling"
+  | "newest"
+  | "featured";
+
+type Props = {
   filters: Filter[];
   appliedFilters?: AppliedFilter[];
   children: React.ReactNode;
   collections?: Array<{ handle: string; title: string }>;
-  productCount?: number; // Add this
 };
+export const FILTER_URL_PREFIX = "filter.";
 
 export function SortFilter({
   filters,
   appliedFilters = [],
   children,
-  productCount = 0, // Add this
-}: SortFilterProps) {
-  const { openDrawer, isOpen, closeDrawer } = useDrawer();
-  const [numberInRow, setNumberInRow] = useState(4);
-  const onLayoutChange = (number: number) => {
-    setNumberInRow(number);
-  };
-
+  collections = [],
+}: Props) {
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border-y border-line/30 py-4">
-      <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
-        <div className="flex gap-1 flex-1">
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer hidden lg:block",
-              numberInRow === 4 && " bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(4)}
-          >
-            <IconFourGrid className="w-10 h-10" />
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer hidden lg:block",
-              numberInRow === 3 && " bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(3)}
-          >
-            <IconThreeGrid className="w-10 h-10" />
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer lg:hidden",
-              numberInRow === 4 && "bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(4)}
-          >
-            <IconTwoGrid className="w-10 h-10" />
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer lg:hidden",
-              numberInRow === 3 && "bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(3)}
-          >
-            <IconOneGrid className="w-10 h-10" />
-          </button>
-        </div>
-        <span className="flex-1 text-center">{productCount} Products</span>
-        <div className="flex gap-2 flex-1 justify-end">
-          <SortMenu />
-          <Button
-            onClick={openDrawer}
-            variant="outline"
-            className="flex items-center gap-1.5 border py-2"
-          >
-            <Sliders size={18} />
-            <span>Filter</span>
-          </Button>
-          <Drawer
-            open={isOpen}
-            onClose={closeDrawer}
-            openFrom="left"
-            heading="Filter"
-          >
-            <div className="px-5 w-[360px]">
-              <FiltersDrawer
-                filters={filters}
-                appliedFilters={appliedFilters}
-              />
-            </div>
-          </Drawer>
-        </div>
+    <>
+      <div className="flex items-center justify-between w-full">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={
+            "relative flex items-center justify-center w-8 h-8 focus:ring-body/5"
+          }
+        >
+          <IconFilters />
+        </button>
+        <SortMenu />
       </div>
       <div className="flex flex-col flex-wrap md:flex-row">
+        <div
+          className={`transition-all duration-200 ${
+            isOpen
+              ? "opacity-100 min-w-full md:min-w-[240px] md:w-[240px] md:pr-8 max-h-full"
+              : "opacity-0 md:min-w-[0px] md:w-[0px] pr-0 max-h-0 md:max-h-full"
+          }`}
+        >
+          <FiltersDrawer filters={filters} appliedFilters={appliedFilters} />
+        </div>
         <div className="flex-1">{children}</div>
       </div>
-    </div>
+    </>
   );
 }
 
 export function FiltersDrawer({
   filters = [],
   appliedFilters = [],
-}: Omit<SortFilterProps, "children">) {
+}: Omit<Props, "children">) {
   const [params] = useSearchParams();
   const location = useLocation();
 
@@ -372,40 +320,53 @@ function filterInputToParams(
   return params;
 }
 
-function SortMenu() {
+export default function SortMenu() {
   const items: { label: string; key: SortParam }[] = [
     { label: "Featured", key: "featured" },
-    { label: "Price: Low - High", key: "price-low-high" },
-    { label: "Price: High - Low", key: "price-high-low" },
-    { label: "Best Selling", key: "best-selling" },
-    { label: "Newest", key: "newest" },
+    {
+      label: "Price: Low - High",
+      key: "price-low-high",
+    },
+    {
+      label: "Price: High - Low",
+      key: "price-high-low",
+    },
+    {
+      label: "Best Selling",
+      key: "best-selling",
+    },
+    {
+      label: "Newest",
+      key: "newest",
+    },
   ];
   const [params] = useSearchParams();
   const location = useLocation();
-  const activeItem = items.find((item) => item.key === params.get("sort")) || items[0];
+  const activeItem = items.find((item) => item.key === params.get("sort"));
 
   return (
     <Menu as="div" className="relative z-10">
-      <MenuButton className="flex items-center gap-1.5 h-10 border px-4 py-2.5">
-        <span className="font-medium">Sort by</span>
-        <CaretDown />
+      <MenuButton className="flex items-center">
+        <span className="px-2">
+          <span className="px-2 font-medium">Sort by:</span>
+          <span>{(activeItem || items[0]).label}</span>
+        </span>
+        <IconCaret />
       </MenuButton>
       <MenuItems
         as="nav"
-        className="absolute right-0 top-12 flex h-fit w-40 flex-col gap-2 border border-line/75 bg-background p-5"
+        className="absolute right-0 flex flex-col p-4 text-right rounded-sm"
       >
         {items.map((item) => (
           <MenuItem key={item.label}>
             {() => (
-              <Link to={getSortLink(item.key, params, location)}>
-                <p
-                  className={clsx(
-                    "block text-base hover:underline underline-offset-4",
-                    activeItem.key === item.key ? "font-bold" : "font-normal"
-                  )}
-                >
-                  {item.label}
-                </p>
+              <Link
+                className={`block text-sm pb-2 px-3 ${
+                  activeItem?.key === item.key ? "font-bold" : "font-normal"
+                }`}
+                to={getSortLink(item.key, params, location)}
+              >
+                {item.label}
               </Link>
             )}
           </MenuItem>
@@ -414,6 +375,3 @@ function SortMenu() {
     </Menu>
   );
 }
-
-// Export the component
-export default SortFilter;
