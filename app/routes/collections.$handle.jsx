@@ -131,15 +131,14 @@ function loadDeferredData({ context }) {
   return {};
 }
 
-
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 }); // Adjust this breakpoint as needed
 
-  const handleLayoutChange = (number) => {
+  const handleLayoutChange = useCallback((number) => {
     setNumberInRow(number);
-  };
+  }, []);
 
   return (
     <div className="collection">
