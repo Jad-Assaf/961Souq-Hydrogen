@@ -48,17 +48,7 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
-  const { collection, menu } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
-    variables: {
-      handle,
-      menuHandle: "new-main-menu",
-      filters: filters.length ? filters : undefined,
-      sortKey,
-      reverse,
-      ...paginationVariables,
-    },
-  });
-
+  // Move these declarations before the first query
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
@@ -94,14 +84,27 @@ export async function loadCriticalData({ context, params, request }) {
     }
   }
 
+  // Now make the query with all variables properly defined
+  const { collection, menu } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
+    variables: {
+      handle,
+      menuHandle: "new-main-menu",
+      filters: filters.length ? filters : undefined,
+      sortKey,
+      reverse,
+      ...paginationVariables,
+    },
+  });
+
   if (!handle) {
     throw redirect('/collections');
   }
 
   try {
-    const { collection } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
+    const { collection, menu } = await storefront.query(COLLECTION_AND_MENU_QUERY, {
       variables: {
         handle,
+        menuHandle: "new-main-menu",
         filters: filters.length ? filters : undefined,
         sortKey,
         reverse,
@@ -132,6 +135,7 @@ export async function loadCriticalData({ context, params, request }) {
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
