@@ -4,6 +4,7 @@ import { oxygen } from '@shopify/mini-oxygen/vite';
 import { vitePlugin as remix } from '@remix-run/dev';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
+import React from 'react';
 
 export default defineConfig({
   plugins: [
