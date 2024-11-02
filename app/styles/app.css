@@ -915,6 +915,10 @@ button.reset:hover:not(:has(> *)) {
   z-index: 999;
 }
 
+button#headlessui-menu-button-\:R3lab5\:{
+  border-radius: 30px;
+}
+
 /*
 * --------------------------------------------------
 * routes/collections.$handle.tsx
