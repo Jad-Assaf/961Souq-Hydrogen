@@ -51,7 +51,7 @@ export function DrawerFilter({
 }: DrawerFilterProps) {
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
   return (
-    <div className="border-y border-line/30 py-4 z-10 bg-white/30 sticky top-[15px] rounded-full backdrop-blur-lg max-w-[1500px] m-auto">
+    <div className="border border-line/30 py-4 z-10 bg-white/10 sticky top-[15px] rounded-full backdrop-blur-lg max-w-[1500px] m-auto">
       <div className="gap-4 md:gap-8 flex flex-row-reverse w-full items-center justify-between">
         {/* <div className="flex gap-1 flex-1">
           <button
