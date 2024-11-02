@@ -10,7 +10,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { DrawerFilter } from '~/modules/drawer-filter';
+import { SortFilter } from '~/modules/sort-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 
@@ -45,6 +45,32 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
+  // Extract sort parameter
+  const sort = searchParams.get('sort');
+  let sortKey;
+  let reverse = false;
+
+  switch (sort) {
+    case 'price-low-high':
+      sortKey = 'PRICE';
+      break;
+    case 'price-high-low':
+      sortKey = 'PRICE';
+      reverse = true;
+      break;
+    case 'best-selling':
+      sortKey = 'BEST_SELLING';
+      break;
+    case 'newest':
+      sortKey = 'CREATED';
+      reverse = true;
+      break;
+    case 'featured':
+    default:
+      sortKey = 'MANUAL';
+      break;
+  }
+
   // Extract filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
@@ -64,6 +90,8 @@ export async function loadCriticalData({ context, params, request }) {
         handle,
         ...paginationVariables,
         filters: filters.length ? filters : undefined,
+        sortKey,
+        reverse,
       },
     });
 
@@ -104,36 +132,28 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
-  const [numberInRow, setNumberInRow] = useState(4);
-
-  const handleLayoutChange = (number) => {
-    setNumberInRow(number);
-  };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-
-      <DrawerFilter
+      
+      <SortFilter
         filters={collection.products.filters}
         appliedFilters={appliedFilters}
-        numberInRow={numberInRow}
-        onLayoutChange={handleLayoutChange}
-        productNumber={collection.products.nodes.length}
-      />
-
-      <PaginatedResourceSection
-        connection={collection.products}
-        resourcesClassName={`products-grid grid-cols-${numberInRow}`}
       >
-        {({ node: product, index }) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 16 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+        <PaginatedResourceSection
+          connection={collection.products}
+          resourcesClassName="products-grid"
+        >
+          {({ node: product, index }) => (
+            <ProductItem
+              key={product.id}
+              product={product}
+              loading={index < 16 ? 'eager' : undefined}
+            />
+          )}
+        </PaginatedResourceSection>
+      </SortFilter>
 
       <Analytics.CollectionView
         data={{
@@ -146,7 +166,6 @@ export default function Collection() {
     </div>
   );
 }
-
 /**
  * @param {{
  *   product: ProductItemFragment;
@@ -224,6 +243,8 @@ const COLLECTION_QUERY = `#graphql
   query Collection(
     $handle: String!
     $filters: [ProductFilter!]
+    $sortKey: ProductCollectionSortKeys
+    $reverse: Boolean
     $country: CountryCode
     $language: LanguageCode
     $first: Int
@@ -241,7 +262,9 @@ const COLLECTION_QUERY = `#graphql
         last: $last,
         before: $startCursor,
         after: $endCursor,
-        filters: $filters
+        filters: $filters,
+        sortKey: $sortKey,
+        reverse: $reverse
       ) {
         filters {
           id

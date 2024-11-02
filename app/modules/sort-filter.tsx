@@ -19,8 +19,9 @@ import type {
 import type { SyntheticEvent } from "react";
 import { useMemo, useState } from "react";
 import useDebounce from "react-use/esm/useDebounce";
-import { IconCaret, IconFilters, IconXMark } from "~/modules/icon";
-import { Heading, Text } from "~/modules/text";
+import { IconCaret, IconFilters, IconXMark } from "../modules/icon";
+import { Heading, Text } from "../modules/text";
+import React from "react";
 
 export type AppliedFilter = {
   label: string;
