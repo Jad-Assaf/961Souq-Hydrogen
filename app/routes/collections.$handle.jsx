@@ -136,9 +136,9 @@ export default function Collection() {
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 }); // Adjust this breakpoint as needed
 
-  const handleLayoutChange = useCallback((number) => {
+  const handleLayoutChange = (number) => {
     setNumberInRow(number);
-  }, []);
+  };
 
   return (
     <div className="collection">
