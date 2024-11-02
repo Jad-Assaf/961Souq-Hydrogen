@@ -95,8 +95,8 @@ export function DrawerFilter({
             <IconOneGrid className="w-10 h-10" />
           </button>
         </div>
-        <span className="flex-1 text-center">{productNumber} Products</span>
-        <div className="flex gap-2 flex-1 justify-end">
+        {/* <span className="flex-1 text-center">{productNumber} Products</span> */}
+        <div className="flex gap-2 justify-end">
           <SortMenu showSearchSort={showSearchSort} />
           <Button
             onClick={openDrawer}
