@@ -1,65 +1,41 @@
-import { Link } from "@remix-run/react";
-import { forwardRef } from "react";
-import { cn } from "../lib/cn";
-import { missingClass } from "../lib/utils";
-import React from "react";
+import { defineConfig } from 'vite';
+import { hydrogen } from '@shopify/hydrogen/vite';
+import { oxygen } from '@shopify/mini-oxygen/vite';
+import { vitePlugin as remix } from '@remix-run/dev';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
-/**
- * @deprecated
- * Use `Button` from components directory instead
- */
-export const Button = forwardRef(
-  (
-    {
-      as = "button",
-      className = "",
-      variant = "primary",
-      width = "auto",
-      ...props
-    }: {
-      as?: React.ElementType;
-      className?: string;
-      variant?: "primary" | "secondary" | "inline" | "secondary-white";
-      width?: "auto" | "full";
-      [key: string]: any;
+export default defineConfig({
+  plugins: [
+    tailwindcss(),
+    hydrogen(),
+    oxygen(),
+    remix({
+      presets: [hydrogen.preset()],
+      future: {
+        v3_fetcherPersist: true,
+        v3_relativeSplatPath: true,
+        v3_throwAbortReason: true,
+      },
+    }),
+    // Temporarily remove tsconfigPaths to check if it conflicts
+  ],
+  resolve: {
+    alias: {
+      '~': path.resolve(__dirname, 'app'), // or 'src' if that’s your main directory
     },
-    ref,
-  ) => {
-    const Component = props?.to ? Link : as;
-
-    const baseButtonClasses =
-      "inline-block rounded font-medium text-center py-3 px-4 text-sm font-medium";
-
-    const disabledClasses =
-      "disabled:opacity-50 disabled:cursor-not-allowed disabled:select-none disabled:hover:bg-btn disabled:hover:text-btn-content";
-
-    const variants = {
-      primary: `${baseButtonClasses} border-2 border-btn hover:bg-inv-btn hover:text-inv-btn-content bg-btn text-btn-content`,
-      secondary: `${baseButtonClasses} border-2 border-btn text-btnTextInverse hover:bg-btn hover:text-btn-content`,
-      "secondary-white": `${baseButtonClasses} border-2 border-inv-btn text-btn hover:bg-inv-btn hover:text-inv-btn-content`,
-      inline: "border-b border-line/10 leading-none pb-1",
-    };
-
-    const widths = {
-      auto: "w-auto",
-      full: "w-full",
-    };
-
-    const styles = cn(
-      missingClass(className, "bg-") && variants[variant],
-      missingClass(className, "w-") && widths[width],
-      disabledClasses,
-      className,
-    );
-
-    return (
-      <Component
-        // @todo: not supported until react-router makes it into Remix.
-        // preventScrollReset={true}
-        className={styles}
-        {...props}
-        ref={ref}
-      />
-    );
   },
-);
+  build: {
+    rollupOptions: {
+      external: [
+        // Explicitly list only required external packages, if any
+      ],
+    },
+    assetsInlineLimit: 0,
+  },
+  ssr: {
+    optimizeDeps: {
+      include: [],
+    },
+  },
+});

@@ -19,7 +19,7 @@
     "@radix-ui/react-checkbox": "^1.1.2",
     "@remix-run/react": "^2.13.1",
     "@remix-run/server-runtime": "^2.10.1",
-    "@shopify/hydrogen": "^2024.7.9",
+    "@shopify/hydrogen": "^2024.10.0",
     "@shopify/remix-oxygen": "^2.0.9",
     "@shopify/shopify-api": "^11.6.0",
     "@shopify/shopify-app-remix": "^3.4.0",
