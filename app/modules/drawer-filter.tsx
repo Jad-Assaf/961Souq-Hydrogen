@@ -97,15 +97,6 @@ export function DrawerFilter({
         </div> */}
         {/* <span className="flex-1 text-center">{productNumber} Products</span> */}
         <div className="flex gap-2 justify-between m-auto w-11/12 rounded-3xl">
-          <SortMenu showSearchSort={showSearchSort} />
-          <Button
-            onClick={openDrawer}
-            variant="outline"
-            className="flex items-center gap-4 border py-2 rounded-3xl"
-          >
-            <Sliders size={18} />
-            <span>Filter</span>
-          </Button>
           <Drawer
             open={isOpen}
             onClose={closeDrawer}
@@ -116,10 +107,19 @@ export function DrawerFilter({
               <FiltersDrawer
                 filters={filters}
                 appliedFilters={appliedFilters}
-                onLayoutChange={console.log} 
+                onLayoutChange={console.log}
               />
             </div>
           </Drawer>
+          <SortMenu showSearchSort={showSearchSort} />
+          <Button
+            onClick={openDrawer}
+            variant="outline"
+            className="flex items-center gap-4 border py-2 rounded-3xl"
+          >
+            <Sliders size={18} />
+            <span>Filter</span>
+          </Button>
         </div>
       </div>
     </div>
