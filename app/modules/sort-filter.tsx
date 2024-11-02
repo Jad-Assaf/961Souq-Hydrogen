@@ -26,11 +26,11 @@ import { Checkbox } from "../components/checkbox";
 import { IconCaretDown, IconCaretRight } from "../components/icons";
 import { FILTER_URL_PREFIX } from "../lib/const";
 import type { AppliedFilter, SortParam } from "../lib/filter";
-import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
+// import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
 import { Drawer, useDrawer } from "./drawer";
 import { IconCaret, IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid, IconXMark } from "./icon";
+import { Heading, Text } from "../modules/text";
 import { Input } from "./input";
-import { Props } from "@headlessui/react/dist/types";
 import { useDebounce } from "react-use";
 
 type SortFilterProps = {
@@ -38,12 +38,14 @@ type SortFilterProps = {
   appliedFilters?: AppliedFilter[];
   children: React.ReactNode;
   collections?: Array<{ handle: string; title: string }>;
+  productCount?: number; // Add this
 };
 
 export function SortFilter({
   filters,
   appliedFilters = [],
   children,
+  productCount = 0, // Add this
 }: SortFilterProps) {
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
   const [numberInRow, setNumberInRow] = useState(4);
@@ -96,7 +98,7 @@ export function SortFilter({
             <IconOneGrid className="w-10 h-10" />
           </button>
         </div>
-        <span className="flex-1 text-center">{children.length} Products</span>
+        <span className="flex-1 text-center">{productCount} Products</span>
         <div className="flex gap-2 flex-1 justify-end">
           <SortMenu />
           <Button
@@ -132,7 +134,7 @@ export function SortFilter({
 export function FiltersDrawer({
   filters = [],
   appliedFilters = [],
-}: Omit<Props, "children">) {
+}: Omit<SortFilterProps, "children">) {
   const [params] = useSearchParams();
   const location = useLocation();
 

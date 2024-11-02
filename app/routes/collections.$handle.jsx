@@ -135,8 +135,9 @@ export default function Collection() {
       <h1>{collection.title}</h1>
 
       <SortFilter
-        filters={collection.products.filters}
+        filters={filters}
         appliedFilters={appliedFilters}
+        productCount={collection.products.nodes.length}
       >
         <PaginatedResourceSection
           connection={collection.products}
