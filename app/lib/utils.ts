@@ -8,8 +8,8 @@ import type {
   ParentMenuItemFragment,
 } from "storefrontapi.generated";
 import typographicBase from "typographic-base/index";
-import { countries } from "~/data/countries";
-import type { RootLoader } from "~/root";
+import { countries } from "../data/countries";
+import type { RootLoader } from "../root";
 import type { I18nLocale } from "./type";
 
 type EnhancedMenuItemProps = {
