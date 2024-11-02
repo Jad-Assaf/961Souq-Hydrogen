@@ -10,7 +10,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { SortFilter } from '~/modules/sort-filter';
+import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 
@@ -45,7 +45,6 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 16 });
 
-  // Extract sort parameter
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
@@ -90,8 +89,6 @@ export async function loadCriticalData({ context, params, request }) {
         handle,
         ...paginationVariables,
         filters: filters.length ? filters : undefined,
-        sortKey,
-        reverse,
       },
     });
 
@@ -132,28 +129,36 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
+  const [numberInRow, setNumberInRow] = useState(4);
+
+  const handleLayoutChange = (number) => {
+    setNumberInRow(number);
+  };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      
-      <SortFilter
+
+      <DrawerFilter
         filters={collection.products.filters}
         appliedFilters={appliedFilters}
+        numberInRow={numberInRow}
+        onLayoutChange={handleLayoutChange}
+        productNumber={collection.products.nodes.length}
+      />
+
+      <PaginatedResourceSection
+        connection={collection.products}
+        resourcesClassName={`products-grid grid-cols-${numberInRow}`}
       >
-        <PaginatedResourceSection
-          connection={collection.products}
-          resourcesClassName="products-grid"
-        >
-          {({ node: product, index }) => (
-            <ProductItem
-              key={product.id}
-              product={product}
-              loading={index < 16 ? 'eager' : undefined}
-            />
-          )}
-        </PaginatedResourceSection>
-      </SortFilter>
+        {({ node: product, index }) => (
+          <ProductItem
+            key={product.id}
+            product={product}
+            loading={index < 16 ? 'eager' : undefined}
+          />
+        )}
+      </PaginatedResourceSection>
 
       <Analytics.CollectionView
         data={{
@@ -166,6 +171,7 @@ export default function Collection() {
     </div>
   );
 }
+
 /**
  * @param {{
  *   product: ProductItemFragment;
