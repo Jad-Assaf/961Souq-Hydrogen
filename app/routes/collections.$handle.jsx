@@ -13,6 +13,7 @@ import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -133,6 +134,7 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
+  const isDesktop = useMediaQuery({ minWidth: 1024 }); // Adjust this breakpoint as needed
 
   const handleLayoutChange = (number) => {
     setNumberInRow(number);
@@ -141,27 +143,41 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
-      
-      <DrawerFilter
-        filters={collection.products.filters}
-        appliedFilters={appliedFilters}
-        numberInRow={numberInRow}
-        onLayoutChange={handleLayoutChange}
-        productNumber={collection.products.nodes.length}
-      />
 
-      <PaginatedResourceSection
-        connection={collection.products}
-        resourcesClassName={`products-grid grid-cols-${numberInRow}`}
-      >
-        {({ node: product, index }) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 16 ? 'eager' : undefined}
-          />
+      <div className="flex flex-col lg:flex-row">
+        {isDesktop && (
+          <div className="w-1/4 pr-4">
+            <FiltersDrawer
+              filters={collection.products.filters}
+              appliedFilters={appliedFilters}
+            />
+          </div>
         )}
-      </PaginatedResourceSection>
+
+        <div className="flex-1">
+          <DrawerFilter
+            filters={collection.products.filters}
+            appliedFilters={appliedFilters}
+            numberInRow={numberInRow}
+            onLayoutChange={handleLayoutChange}
+            productNumber={collection.products.nodes.length}
+            isDesktop={isDesktop}
+          />
+
+          <PaginatedResourceSection
+            connection={collection.products}
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+          >
+            {({ node: product, index }) => (
+              <ProductItem
+                key={product.id}
+                product={product}
+                loading={index < 16 ? 'eager' : undefined}
+              />
+            )}
+          </PaginatedResourceSection>
+        </div>
+      </div>
 
       <Analytics.CollectionView
         data={{
@@ -174,6 +190,7 @@ export default function Collection() {
     </div>
   );
 }
+
 /**
  * @param {{
  *   product: ProductItemFragment;
