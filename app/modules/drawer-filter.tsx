@@ -48,78 +48,41 @@ export function DrawerFilter({
   appliedFilters = [],
   productNumber = 0,
   showSearchSort = false,
-}: DrawerFilterProps) {
+  isDesktop = false,
+}: DrawerFilterProps & { isDesktop: boolean }) {
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
+
   return (
     <div className="border border-line/30 py-4 z-10 bg-white/10 sticky top-[15px] rounded-full backdrop-blur-lg max-w-[1500px] m-auto">
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
-        {/* <div className="flex gap-1 flex-1">
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer hidden lg:block",
-              numberInRow === 4 && " bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(4)}
-          >
-            <IconFourGrid className="w-10 h-10" />
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer hidden lg:block",
-              numberInRow === 3 && " bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(3)}
-          >
-            <IconThreeGrid className="w-10 h-10" />
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer lg:hidden",
-              numberInRow === 4 && "bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(4)}
-          >
-            <IconTwoGrid className="w-10 h-10" />
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              "border cursor-pointer lg:hidden",
-              numberInRow === 3 && "bg-gray-200"
-            )}
-            onClick={() => onLayoutChange(3)}
-          >
-            <IconOneGrid className="w-10 h-10" />
-          </button>
-        </div> */}
-        {/* <span className="flex-1 text-center">{productNumber} Products</span> */}
         <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
           <SortMenu showSearchSort={showSearchSort} />
-          <Button
-            onClick={openDrawer}
-            variant="outline"
-            className="flex items-center gap-4 border py-2 rounded-3xl"
-          >
-            <Sliders size={18} />
-            <span>Filter</span>
-          </Button>
-          <Drawer
-            open={isOpen}
-            onClose={closeDrawer}
-            openFrom="left"
-            heading="Filter"
-          >
-            <div className="px-5 w-[360px] rounded-3xl">
-              <FiltersDrawer
-                filters={filters}
-                appliedFilters={appliedFilters}
-                onLayoutChange={console.log} 
-              />
-            </div>
-          </Drawer>
+          {!isDesktop && (
+            <Button
+              onClick={openDrawer}
+              variant="outline"
+              className="flex items-center gap-4 border py-2 rounded-3xl"
+            >
+              <Sliders size={18} />
+              <span>Filter</span>
+            </Button>
+          )}
+          {!isDesktop && (
+            <Drawer
+              open={isOpen}
+              onClose={closeDrawer}
+              openFrom="left"
+              heading="Filter"
+            >
+              <div className="px-5 w-[360px] rounded-3xl">
+                <FiltersDrawer
+                  filters={filters}
+                  appliedFilters={appliedFilters}
+                  onLayoutChange={console.log}
+                />
+              </div>
+            </Drawer>
+          )}
         </div>
       </div>
     </div>
