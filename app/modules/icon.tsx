@@ -5,9 +5,7 @@ type IconProps = JSX.IntrinsicElements["svg"] & {
   direction?: "up" | "right" | "down" | "left";
 };
 
-/**
- * @deprecated Use icon from `@/components/icons` instead
- */
+
 function Icon({
   children,
   className,
