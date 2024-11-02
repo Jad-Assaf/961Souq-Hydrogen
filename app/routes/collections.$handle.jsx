@@ -10,7 +10,7 @@ import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
-import { DrawerFilter } from '~/modules/drawer-filter';
+import { SortFilter } from '~/modules/sort-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 
@@ -129,36 +129,28 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
-  const [numberInRow, setNumberInRow] = useState(4);
-
-  const handleLayoutChange = (number) => {
-    setNumberInRow(number);
-  };
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      <DrawerFilter
+      <SortFilter
         filters={collection.products.filters}
         appliedFilters={appliedFilters}
-        numberInRow={numberInRow}
-        onLayoutChange={handleLayoutChange}
-        productNumber={collection.products.nodes.length}
-      />
-
-      <PaginatedResourceSection
-        connection={collection.products}
-        resourcesClassName={`products-grid grid-cols-${numberInRow}`}
       >
-        {({ node: product, index }) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 16 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+        <PaginatedResourceSection
+          connection={collection.products}
+          resourcesClassName="products-grid"
+        >
+          {({ node: product, index }) => (
+            <ProductItem
+              key={product.id}
+              product={product}
+              loading={index < 16 ? 'eager' : undefined}
+            />
+          )}
+        </PaginatedResourceSection>
+      </SortFilter>
 
       <Analytics.CollectionView
         data={{
@@ -171,7 +163,6 @@ export default function Collection() {
     </div>
   );
 }
-
 /**
  * @param {{
  *   product: ProductItemFragment;
