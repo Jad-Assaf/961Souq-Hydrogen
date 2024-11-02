@@ -7,7 +7,7 @@ import {
   Analytics,
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
-import { PaginationResourceSection } from '~/components/PaginatedResourceSection';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
@@ -122,7 +122,7 @@ export default function Collection() {
         productNumber={collection.products.nodes.length}
       />
 
-      <PaginationResourceSection
+      <PaginatedResourceSection
         connection={collection.products}
         resourcesClassName={`products-grid grid-cols-${numberInRow}`}
       >
@@ -133,7 +133,7 @@ export default function Collection() {
             loading={index < 16 ? 'eager' : undefined}
           />
         )}
-      </PaginationResourceSection>
+      </PaginatedResourceSection>
 
       <Analytics.CollectionView
         data={{
