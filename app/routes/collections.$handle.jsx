@@ -110,7 +110,7 @@ export async function loadCriticalData({ context, params, request }) {
         const filterValue = JSON.parse(value);
 
         // Create a more user-friendly label
-        const label = `${filterValue.value}`;
+        const label = `${filterValue.namespace} - ${filterValue.key}: ${filterValue.value}`;
 
         appliedFilters.push({
           label, // Using the user-friendly label
