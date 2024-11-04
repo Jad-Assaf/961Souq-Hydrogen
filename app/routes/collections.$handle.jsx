@@ -110,7 +110,7 @@ export async function loadCriticalData({ context, params, request }) {
         const filterValue = JSON.parse(value);
         appliedFilters.push({
           label: `${value}`,
-          filter: { [filterKey]: filterValue },
+          filter: { filterValue },
         });
       }
     });
