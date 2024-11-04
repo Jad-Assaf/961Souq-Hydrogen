@@ -153,14 +153,21 @@ export function FiltersDrawer({
         >
           {({ open }) => (
             <>
-              <DisclosureButton className="flex w-full justify-between items-center">
-                <span className="text-sm">{filter.label}</span>
-                {open ? (
-                  <IconCaretDown className="w-4 h-4" />
-                ) : (
-                  <IconCaretRight className="w-4 h-4" />
-                )}
-              </DisclosureButton>
+              <div
+                onClick={() => open ? close() : open()}
+                className="fltr-btn"
+              >
+                <DisclosureButton as="div" className="cursor-pointer">
+                  <div className="flex w-full justify-between items-center">
+                    <span className="text-sm">{filter.label}</span>
+                    {open ? (
+                      <IconCaretDown className="w-4 h-4" />
+                    ) : (
+                      <IconCaretRight className="w-4 h-4" />
+                    )}
+                  </div>
+                </DisclosureButton>
+              </div>
               <DisclosurePanel key={filter.id}>
                 <ul key={filter.id} className="space-y-5 filter-list">
                   {filter.values?.map((option) => (
@@ -353,7 +360,7 @@ export default function SortMenu({
               <button
                 onClick={() => handleSort(item.key)}
                 className={clsx(
-                  "block w-full text-left text-base hover:underline underline-offset-4 fltr-btn",
+                  "block w-full text-left text-base hover:underline underline-offset-4",
                   activeItem.key === item.key ? "font-bold" : "font-normal"
                 )}
               >
