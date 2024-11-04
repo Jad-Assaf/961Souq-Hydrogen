@@ -1,5 +1,5 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link, useSearchParams, useLocation } from '@remix-run/react';
+import { useLoaderData, Link, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
@@ -136,7 +136,7 @@ export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const navigate = navigate();
+  const navigate = useNavigate();
 
   const handleFilterRemove = (filter) => {
     const newUrl = getAppliedFilterLink(filter, searchParams, location);
