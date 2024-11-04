@@ -109,7 +109,7 @@ export async function loadCriticalData({ context, params, request }) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
         appliedFilters.push({
-          label: `${filterKey}: ${value}`,
+          label: `${value}`,
           filter: { [filterKey]: filterValue },
         });
       }
