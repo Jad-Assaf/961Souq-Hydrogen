@@ -108,9 +108,13 @@ export async function loadCriticalData({ context, params, request }) {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
+
+        // Create a more user-friendly label
+        const label = `${filterValue.namespace} - ${filterValue.key}: ${filterValue.value}`;
+
         appliedFilters.push({
-          label: `${value}`,
-          filter: { filterValue },
+          label, // Using the user-friendly label
+          filter: { [filterKey]: filterValue },
         });
       }
     });
