@@ -108,8 +108,13 @@ export async function loadCriticalData({ context, params, request }) {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
+
+        // Find the corresponding filter object in the original filters array
+        const filter = filters.find(f => f.id === filterKey);
+        const filterLabel = filter ? filter.label : filterKey; // Fallback to filterKey if not found
+
         appliedFilters.push({
-          label: `${filterKey}: ${value}`,
+          label: `${filterLabel}: ${value}`, // Use the original filter label
           filter: { [filterKey]: filterValue },
         });
       }
