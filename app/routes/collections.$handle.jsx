@@ -15,7 +15,6 @@ import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
-import { getAppliedFilterLink } from '../lib/filter';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -134,6 +133,7 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
+  const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
