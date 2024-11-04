@@ -136,7 +136,7 @@ export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const navigate = useNavigate();
+  const navigate = navigate();
 
   const handleFilterRemove = (filter) => {
     const newUrl = getAppliedFilterLink(filter, searchParams, location);
