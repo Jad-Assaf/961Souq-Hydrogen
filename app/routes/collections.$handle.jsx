@@ -102,27 +102,16 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    console.log("Processing searchParams:", searchParams);
-    console.log("FILTER_URL_PREFIX:", FILTER_URL_PREFIX);
-
-    debugger;
+    // Process applied filters
     const appliedFilters = [];
     searchParams.forEach((value, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
-
-        // Create the applied filter object
-        const appliedFilter = {
+        appliedFilters.push({
           label: `${filterKey}: ${value}`,
           filter: { [filterKey]: filterValue },
-        };
-
-        // Log the applied filter to the console
-        console.log("Final appliedFilters:", appliedFilters);
-
-        // Push the applied filter into the array
-        appliedFilters.push(appliedFilter);
+        });
       }
     });
 
