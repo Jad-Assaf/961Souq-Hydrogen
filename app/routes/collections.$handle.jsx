@@ -103,25 +103,31 @@ export async function loadCriticalData({ context, params, request }) {
     }
 
     // Process applied filters
+    // Check if `filters` is defined and populated
     const appliedFilters = [];
-    searchParams.forEach((value, key) => {
-      if (key.startsWith(FILTER_URL_PREFIX)) {
-        const filterKey = key.replace(FILTER_URL_PREFIX, '');
-        const filterValue = JSON.parse(value);
 
-        // Find the corresponding filter object in `filters` by its key
-        const matchedFilter = filters.find((filter) => filter.id === filterKey);
+    if (filters && filters.length > 0) {
+      searchParams.forEach((value, key) => {
+        if (key.startsWith(FILTER_URL_PREFIX)) {
+          const filterKey = key.replace(FILTER_URL_PREFIX, '');
+          const filterValue = JSON.parse(value);
 
-        // Use the label from `filters` if matched; fallback to the filterKey otherwise
-        const label = matchedFilter ? matchedFilter.label : filterKey;
+          // Find the corresponding filter in `filters` by key
+          const matchedFilter = filters.find((filter) => filter.id === filterKey);
 
-        appliedFilters.push({
-          label: `${label}: ${value}`, // Use matched label from Shopify data
-          filter: { [filterKey]: filterValue },
-        });
-      }
-    });
+          if (matchedFilter) {
+            // Use Shopify's exact label and value format
+            const filterLabel = matchedFilter.label;
+            const filterDisplayValue = matchedFilter.values?.find((option) => option.id === filterValue)?.label || value;
 
+            appliedFilters.push({
+              label: `${filterLabel}: ${filterDisplayValue}`,
+              filter: { [filterKey]: filterValue },
+            });
+          }
+        }
+      });
+    }
 
     return { collection, appliedFilters };
   } catch (error) {
