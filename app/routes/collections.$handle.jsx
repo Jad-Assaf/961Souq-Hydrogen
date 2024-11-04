@@ -107,20 +107,11 @@ export async function loadCriticalData({ context, params, request }) {
     searchParams.forEach((value, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
-        try {
-          const filterValue = JSON.parse(value);
-          if (filterValue) {
-            const label = `${filterValue.namespace} - ${filterValue.key}: ${filterValue.value}`;
-            appliedFilters.push({
-              label,
-              filter: { [filterKey]: filterValue },
-            });
-          } else {
-            console.warn(`Filter value is undefined for key: ${key}`);
-          }
-        } catch (error) {
-          console.error(`Error parsing filter value for key ${key}:`, error);
-        }
+        console.log(`Parsed filterValue:`, filterValue);
+        appliedFilters.push({
+          label: `${value}`,
+          filter: { [filterKey]: filterValue },
+        });
       }
     });
 
