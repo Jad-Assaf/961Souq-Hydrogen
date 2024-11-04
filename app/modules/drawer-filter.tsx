@@ -178,7 +178,7 @@ export function FiltersDrawer({
 
 const PRICE_RANGE_FILTER_DEBOUNCE = 500;
 
-function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
+const PriceRangeFilter = ({ max, min }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -188,34 +188,30 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      const price = {
+        ...(minPrice === undefined ? {} : { min: minPrice }),
+        ...(maxPrice === undefined ? {} : { max: maxPrice }),
+      };
       if (minPrice === undefined && maxPrice === undefined) {
         params.delete(`${FILTER_URL_PREFIX}price`);
       } else {
-        const price = {
-          ...(minPrice === undefined ? {} : { min: minPrice }),
-          ...(maxPrice === undefined ? {} : { max: maxPrice }),
-        };
         params.set(`${FILTER_URL_PREFIX}price`, JSON.stringify(price));
       }
       navigate(`${location.pathname}?${params.toString()}`);
-    }, PRICE_RANGE_FILTER_DEBOUNCE);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [minPrice, maxPrice, navigate, location.pathname, params]);
 
-  const onChangeMax = (event: SyntheticEvent) => {
-    const value = (event.target as HTMLInputElement).value;
-    const newMaxPrice = Number.isNaN(Number.parseFloat(value))
-      ? undefined
-      : Number.parseFloat(value);
+  const onChangeMax = (event) => {
+    const value = event.target.value;
+    const newMaxPrice = value ? parseFloat(value) : undefined;
     setMaxPrice(newMaxPrice);
   };
 
-  const onChangeMin = (event: SyntheticEvent) => {
-    const value = (event.target as HTMLInputElement).value;
-    const newMinPrice = Number.isNaN(Number.parseFloat(value))
-      ? undefined
-      : Number.parseFloat(value);
+  const onChangeMin = (event) => {
+    const value = event.target.value;
+    const newMinPrice = value ? parseFloat(value) : undefined;
     setMinPrice(newMinPrice);
   };
 

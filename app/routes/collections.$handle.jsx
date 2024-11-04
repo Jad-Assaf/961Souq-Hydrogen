@@ -145,6 +145,13 @@ export default function Collection() {
   };
 
   const handleFilterRemove = (filter) => {
+
+    if (filter.label.startsWith("price")) {
+      // Clear the price inputs by setting state to undefined or empty
+      setMinPrice(undefined);
+      setMaxPrice(undefined);
+    }
+
     const newUrl = getAppliedFilterLink(filter, searchParams, location);
     navigate(newUrl);
   };
