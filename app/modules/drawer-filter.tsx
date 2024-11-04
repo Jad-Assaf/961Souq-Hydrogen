@@ -39,6 +39,7 @@ type DrawerFilterProps = {
   showSearchSort?: boolean;
   numberInRow?: number;
   onLayoutChange: (number: number) => void;
+  onRemovePriceFilter: () => void;
 };
 
 function ListItemFilter({
@@ -92,10 +93,91 @@ function ListItemFilter({
   );
 }
 
+
+const PRICE_RANGE_FILTER_DEBOUNCE = 500;
+
+export const PriceRangeFilter = ({ onRemovePriceFilter }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+
+  // Define the state as number | undefined
+  const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+  const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    // Initialize min and max prices from URL params if they exist
+    const priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
+    if (priceFilter) {
+      const { min, max } = JSON.parse(priceFilter);
+      setMinPrice(min);
+      setMaxPrice(max);
+    }
+  }, [params]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const price = {
+        ...(minPrice === undefined ? {} : { min: minPrice }),
+        ...(maxPrice === undefined ? {} : { max: maxPrice }),
+      };
+      if (minPrice === undefined && maxPrice === undefined) {
+        onRemovePriceFilter(); // Call the function passed from parent
+      } else {
+        const newParams = new URLSearchParams(params);
+        newParams.set(`${FILTER_URL_PREFIX}price`, JSON.stringify(price));
+        navigate(`${location.pathname}?${newParams.toString()}`);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [minPrice, maxPrice, navigate, location.pathname, params, onRemovePriceFilter]);
+
+  const onChangeMax = (event) => {
+    const value = event.target.value;
+    const newMaxPrice = value ? parseFloat(value) : undefined;
+    setMaxPrice(newMaxPrice);
+  };
+
+  const onChangeMin = (event) => {
+    const value = event.target.value;
+    const newMinPrice = value ? parseFloat(value) : undefined;
+    setMinPrice(newMinPrice);
+  };
+
+  return (
+    <div>
+      <div className="flex gap-6">
+        <label className="flex items-center gap-1" htmlFor="minPrice">
+          <span>$</span>
+          <input
+            id="minPrice"
+            type="number"
+            value={minPrice ?? ""}
+            placeholder="From"
+            onChange={onChangeMin}
+          />
+        </label>
+        <label className="flex items-center gap-1" htmlFor="maxPrice">
+          <span>$</span>
+          <input
+            id="maxPrice"
+            type="number"
+            value={maxPrice ?? ""}
+            placeholder="To"
+            onChange={onChangeMax}
+          />
+        </label>
+      </div>
+    </div>
+  );
+};
+
 export function FiltersDrawer({
   filters = [],
   appliedFilters = [],
   onRemoveFilter,
+  onRemovePriceFilter
 }: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
   const [params] = useSearchParams();
   const location = useLocation();
@@ -103,17 +185,7 @@ export function FiltersDrawer({
   const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
     switch (filter.type) {
       case "PRICE_RANGE": {
-        let priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
-        let price = priceFilter
-          ? (JSON.parse(priceFilter) as ProductFilter["price"])
-          : undefined;
-        let min = Number.isNaN(Number(price?.min))
-          ? undefined
-          : Number(price?.min);
-        let max = Number.isNaN(Number(price?.max))
-          ? undefined
-          : Number(price?.max);
-        return <PriceRangeFilter min={min} max={max} />;
+        return <PriceRangeFilter onRemovePriceFilter={onRemovePriceFilter} />;
       }
 
       default:
@@ -175,81 +247,17 @@ export function FiltersDrawer({
     </div>
   );
 }
-
-const PRICE_RANGE_FILTER_DEBOUNCE = 500;
-
-const PriceRangeFilter = ({ max, min }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [params, setParams] = useSearchParams();
-
-  const [minPrice, setMinPrice] = useState(min);
-  const [maxPrice, setMaxPrice] = useState(max);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const price = {
-        ...(minPrice === undefined ? {} : { min: minPrice }),
-        ...(maxPrice === undefined ? {} : { max: maxPrice }),
-      };
-      if (minPrice === undefined && maxPrice === undefined) {
-        params.delete(`${FILTER_URL_PREFIX}price`);
-      } else {
-        params.set(`${FILTER_URL_PREFIX}price`, JSON.stringify(price));
-      }
-      navigate(`${location.pathname}?${params.toString()}`);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [minPrice, maxPrice, navigate, location.pathname, params]);
-
-  const onChangeMax = (event) => {
-    const value = event.target.value;
-    const newMaxPrice = value ? parseFloat(value) : undefined;
-    setMaxPrice(newMaxPrice);
-  };
-
-  const onChangeMin = (event) => {
-    const value = event.target.value;
-    const newMinPrice = value ? parseFloat(value) : undefined;
-    setMinPrice(newMinPrice);
-  };
-
-  return (
-    <div className="flex gap-6">
-      <label className="flex items-center gap-1" htmlFor="minPrice">
-        <span>$</span>
-        <Input
-          name="minPrice "
-          type="number"
-          value={minPrice ?? ""}
-          placeholder="From"
-          onChange={onChangeMin}
-        />
-      </label>
-      <label className="flex items-center gap-1" htmlFor="maxPrice">
-        <span>$</span>
-        <Input
-          name="maxPrice"
-          type="number"
-          value={maxPrice ?? ""}
-          placeholder="To"
-          onChange={onChangeMax}
-        />
-      </label>
-    </div>
-  );
-}
-
 export function DrawerFilter({
   filters,
   numberInRow,
-  onLayoutChange = () => { }, // Default to a no-op function
+  onLayoutChange = () => { },
   appliedFilters = [],
   productNumber = 0,
   showSearchSort = false,
   isDesktop = false,
+  onRemovePriceFilter, // Add this line
 }: DrawerFilterProps & { isDesktop: boolean }) {
+
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -292,6 +300,7 @@ export function DrawerFilter({
                   appliedFilters={appliedFilters}
                   onRemoveFilter={handleRemoveFilter}
                   onLayoutChange={onLayoutChange}
+                  onRemovePriceFilter={onRemovePriceFilter} // Add this line
                 />
               </div>
             </Drawer>

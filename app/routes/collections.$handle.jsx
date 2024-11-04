@@ -143,6 +143,11 @@ export default function Collection() {
   const handleLayoutChange = (number) => {
     setNumberInRow(number);
   };
+  
+  const handleFilterRemove = (filter) => {
+    const newUrl = getAppliedFilterLink(filter, searchParams, location);
+    navigate(newUrl);
+  };
 
   const handlePriceFilterRemove = () => {
     // This function will be passed to PriceRangeFilter
@@ -150,13 +155,6 @@ export default function Collection() {
     newParams.delete(`${FILTER_URL_PREFIX}price`);
     navigate(`${location.pathname}?${newParams.toString()}`);
   };
-
-
-  const handleFilterRemove = (filter) => {
-    const newUrl = getAppliedFilterLink(filter, searchParams, location);
-    navigate(newUrl);
-  };
-
 
   return (
     <div className="collection">
