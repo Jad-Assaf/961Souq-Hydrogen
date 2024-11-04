@@ -15,6 +15,7 @@ import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
+import { getAppliedFilterLink } from '../lib/filter';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -162,7 +163,7 @@ export default function Collection() {
           <DrawerFilter
             filters={collection.products.filters}
             appliedFilters={appliedFilters}
-            numberInRow={numberInRow}
+            // numberInRow={numberInRow}
             onLayoutChange={handleLayoutChange}
             productNumber={collection.products.nodes.length}
             isDesktop={isDesktop}
@@ -170,7 +171,7 @@ export default function Collection() {
 
           <PaginatedResourceSection
             connection={collection.products}
-            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            // resourcesClassName={`products-grid grid-cols-${numberInRow}`}
           >
             {({ node: product, index }) => (
               <ProductItem
