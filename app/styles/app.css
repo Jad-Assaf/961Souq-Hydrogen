@@ -977,6 +977,15 @@ button#headlessui-menu-button-\:R3lab5\:{
   }
 }
 
+.fltr-btn{
+  padding: 10px;
+  cursor: pointer;
+}
+
+.filter-list{
+  margin-top: 20px !important;
+}
+
 /*
 * --------------------------------------------------
 * routes/products.$handle.tsx

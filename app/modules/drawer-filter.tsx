@@ -162,7 +162,7 @@ export function FiltersDrawer({
                 )}
               </DisclosureButton>
               <DisclosurePanel key={filter.id}>
-                <ul key={filter.id} className="space-y-5 pt-8">
+                <ul key={filter.id} className="space-y-5 filter-list">
                   {filter.values?.map((option) => (
                     <li key={option.id}>{filterMarkup(filter, option)}</li>
                   ))}
@@ -353,7 +353,7 @@ export default function SortMenu({
               <button
                 onClick={() => handleSort(item.key)}
                 className={clsx(
-                  "block w-full text-left text-base hover:underline underline-offset-4",
+                  "block w-full text-left text-base hover:underline underline-offset-4 fltr-btn",
                   activeItem.key === item.key ? "font-bold" : "font-normal"
                 )}
               >
