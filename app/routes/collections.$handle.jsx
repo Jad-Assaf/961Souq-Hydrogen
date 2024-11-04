@@ -109,14 +109,22 @@ export async function loadCriticalData({ context, params, request }) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
 
-        // Find the corresponding filter object in the original filters array
-        const filter = filters.find(f => f.id === filterKey);
-        const filterLabel = filter ? filter.label : filterKey; // Fallback to filterKey if not found
+        // Find the corresponding filter in collection.products.filters
+        const filter = collection.products.filters.find(f => f.id === filterKey);
 
-        appliedFilters.push({
-          label: `${filterLabel}: ${value}`, // Use the original filter label
-          filter: { [filterKey]: filterValue },
-        });
+        if (filter) {
+          // For each filter value in the URL, find the matching option in the filter's values
+          const filterOption = filter.values.find(
+            option => JSON.stringify(JSON.parse(option.input)) === JSON.stringify(filterValue)
+          );
+
+          if (filterOption) {
+            appliedFilters.push({
+              label: filterOption.label, // Use the exact label from the filter option
+              filter: { [filterKey]: filterValue },
+            });
+          }
+        }
       }
     });
 
