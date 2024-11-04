@@ -81,13 +81,12 @@ function ListItemFilter({
   };
 
   return (
-    <div className="flex gap-2 fltr-btn">
+    <div className="flex gap-2">
       <Checkbox
         checked={checked}
         onCheckedChange={handleCheckedChange}
-      >
-        {option.label}
-      </Checkbox>
+        label={option.label}
+      />
       <span>({option.count})</span>
     </div>
   );
@@ -154,18 +153,16 @@ export function FiltersDrawer({
         >
           {({ open }) => (
             <>
-              <DisclosureButton as="div" className="cursor-pointer">
-                <div className="flex w-full justify-between items-center">
-                  <span className="text-sm">{filter.label}</span>
-                  {open ? (
-                    <IconCaretDown className="w-4 h-4" />
-                  ) : (
-                    <IconCaretRight className="w-4 h-4" />
-                  )}
-                </div>
+              <DisclosureButton className="flex w-full justify-between items-center">
+                <span className="text-sm">{filter.label}</span>
+                {open ? (
+                  <IconCaretDown className="w-4 h-4" />
+                ) : (
+                  <IconCaretRight className="w-4 h-4" />
+                )}
               </DisclosureButton>
               <DisclosurePanel key={filter.id}>
-                <ul key={filter.id} className="space-y-5 filter-list">
+                <ul key={filter.id} className="space-y-5 pt-8">
                   {filter.values?.map((option) => (
                     <li key={option.id}>{filterMarkup(filter, option)}</li>
                   ))}
@@ -356,7 +353,7 @@ export default function SortMenu({
               <button
                 onClick={() => handleSort(item.key)}
                 className={clsx(
-                  "block w-full text-left text-base hover:underline underline-offset-4",
+                  "block w-full text-left text-base hover:underline underline-offset-4 fltr-btn",
                   activeItem.key === item.key ? "font-bold" : "font-normal"
                 )}
               >
