@@ -103,37 +103,26 @@ export async function loadCriticalData({ context, params, request }) {
     }
 
     // Process applied filters
-    // Check if `filters` is defined and populated
     const appliedFilters = [];
+    searchParams.forEach((value, key) => {
+      if (key.startsWith(FILTER_URL_PREFIX)) {
+        const filterKey = key.replace(FILTER_URL_PREFIX, '');
+        const filterValue = JSON.parse(value);
 
-    if (filters && filters.length > 0) {
-      console.log('Filters data:', filters); // Debugging: Check if filters are loaded
-
-      searchParams.forEach((value, key) => {
-        if (key.startsWith(FILTER_URL_PREFIX)) {
-          const filterKey = key.replace(FILTER_URL_PREFIX, '');
-          const filterValue = JSON.parse(value);
-
-          const matchedFilter = filters.find((filter) => filter.id === filterKey);
-
-          if (matchedFilter) {
-            const filterLabel = matchedFilter.label;
-            const filterDisplayValue = matchedFilter.values?.find((option) => option.id === filterValue)?.label || value;
-
+        // Find the corresponding filter in the collection's filters
+        const filter = collection.products.filters.find(f => f.id === filterKey);
+        if (filter) {
+          // Find the matching option in the filter's values
+          const option = filter.values.find(v => JSON.stringify(v.input) === value);
+          if (option) {
             appliedFilters.push({
-              label: `${filterLabel}: ${filterDisplayValue}`,
+              label: option.label,
               filter: { [filterKey]: filterValue },
             });
-          } else {
-            console.log(`No matched filter for key: ${filterKey}`); // Debugging: Check missing matches
           }
         }
-      });
-    } else {
-      console.log('Filters not loaded or empty'); // Debugging: Check if filters is empty
-    }
-
-    console.log('Applied Filters:', appliedFilters); // Final debug output for applied filters
+      }
+    });
 
     return { collection, appliedFilters };
   } catch (error) {
@@ -141,6 +130,7 @@ export async function loadCriticalData({ context, params, request }) {
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
