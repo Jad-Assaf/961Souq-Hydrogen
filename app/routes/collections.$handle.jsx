@@ -164,7 +164,7 @@ export default function Collection() {
             filters={collection.products.filters}
             appliedFilters={appliedFilters}
             // numberInRow={numberInRow}
-            onLayoutChange={handleLayoutChange}
+            // onLayoutChange={handleLayoutChange}
             productNumber={collection.products.nodes.length}
             isDesktop={isDesktop}
           />
