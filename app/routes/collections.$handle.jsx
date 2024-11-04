@@ -102,6 +102,10 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
+    console.log("Processing searchParams:", searchParams);
+    console.log("FILTER_URL_PREFIX:", FILTER_URL_PREFIX);
+
+    debugger;
     const appliedFilters = [];
     searchParams.forEach((value, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -115,7 +119,7 @@ export async function loadCriticalData({ context, params, request }) {
         };
 
         // Log the applied filter to the console
-        console.log("Applied Filter:", appliedFilter);
+        console.log("Final appliedFilters:", appliedFilters);
 
         // Push the applied filter into the array
         appliedFilters.push(appliedFilter);
