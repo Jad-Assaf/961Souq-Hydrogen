@@ -108,12 +108,20 @@ export async function loadCriticalData({ context, params, request }) {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
+
+        // Find the corresponding filter object in `filters` by its key
+        const matchedFilter = filters.find((filter) => filter.id === filterKey);
+
+        // Use the label from `filters` if matched; fallback to the filterKey otherwise
+        const label = matchedFilter ? matchedFilter.label : filterKey;
+
         appliedFilters.push({
-          label: `${filterKey}: ${value}`,
+          label: `${label}: ${value}`, // Use matched label from Shopify data
           filter: { [filterKey]: filterValue },
         });
       }
     });
+
 
     return { collection, appliedFilters };
   } catch (error) {
