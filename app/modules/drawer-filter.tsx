@@ -20,7 +20,7 @@ import type {
 } from "@shopify/hydrogen/storefront-api-types";
 import clsx from "clsx";
 import type { SyntheticEvent } from "react";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Button from "../components/button";
 import { Checkbox } from "../components/checkbox";
 import { IconCaretDown, IconCaretRight } from "../components/icons";
@@ -51,21 +51,35 @@ function ListItemFilter({
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const location = useLocation();
-  let filter = appliedFilters.find(
-    (filter) => JSON.stringify(filter.filter) === option.input
-  );
-  let [checked, setChecked] = useState(!!filter);
 
-  let handleCheckedChange = (checked: boolean) => {
+  const isChecked = useCallback(() => {
+    return appliedFilters.some(
+      (filter) => JSON.stringify(filter.filter) === option.input
+    );
+  }, [appliedFilters, option.input]);
+
+  const [checked, setChecked] = useState(isChecked());
+
+  useEffect(() => {
+    setChecked(isChecked());
+  }, [appliedFilters, isChecked]);
+
+  const handleCheckedChange = (checked: boolean) => {
     setChecked(checked);
     if (checked) {
       const link = getFilterLink(option.input as string, params, location);
       navigate(link);
-    } else if (filter) {
-      let link = getAppliedFilterLink(filter, params, location);
-      navigate(link);
+    } else {
+      const filter = appliedFilters.find(
+        (filter) => JSON.stringify(filter.filter) === option.input
+      );
+      if (filter) {
+        let link = getAppliedFilterLink(filter, params, location);
+        navigate(link);
+      }
     }
   };
+
   return (
     <div className="flex gap-2">
       <Checkbox
@@ -73,6 +87,7 @@ function ListItemFilter({
         onCheckedChange={handleCheckedChange}
         label={option.label}
       />
+      <span>({option.count})</span>
     </div>
   );
 }
@@ -80,8 +95,12 @@ function ListItemFilter({
 export function FiltersDrawer({
   filters = [],
   appliedFilters = [],
-}: Omit<DrawerFilterProps, "children">) {
+  onRemoveFilter,
+}: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
     switch (filter.type) {
       case "PRICE_RANGE": {
@@ -107,6 +126,17 @@ export function FiltersDrawer({
 
   return (
     <div className="text-sm">
+      {appliedFilters.length > 0 && (
+        <div className="applied-filters">
+          <h3>Applied Filters:</h3>
+          {appliedFilters.map((filter, index) => (
+            <div key={index} className="applied-filter">
+              {filter.label}
+              <button onClick={() => onRemoveFilter(filter)}>X</button>
+            </div>
+          ))}
+        </div>
+      )}
       {filters.map((filter: Filter) => (
         <Disclosure
           as="div"
@@ -125,11 +155,9 @@ export function FiltersDrawer({
               </DisclosureButton>
               <DisclosurePanel key={filter.id}>
                 <ul key={filter.id} className="space-y-5 pt-8">
-                  {filter.values?.map((option) => {
-                    return (
-                      <li key={option.id}>{filterMarkup(filter, option)}</li>
-                    );
-                  })}
+                  {filter.values?.map((option) => (
+                    <li key={option.id}>{filterMarkup(filter, option)}</li>
+                  ))}
                 </ul>
               </DisclosurePanel>
             </>
@@ -140,37 +168,32 @@ export function FiltersDrawer({
   );
 }
 
-// const PRICE_RANGE_FILTER_DEBOUNCE = 500;
+const PRICE_RANGE_FILTER_DEBOUNCE = 500;
 
 function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
-  // const location = useLocation();
-  // const params = useMemo(
-  //   () => new URLSearchParams(location.search),
-  //   [location.search],
-  // );
-  // const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
 
   const [minPrice, setMinPrice] = useState(min);
   const [maxPrice, setMaxPrice] = useState(max);
 
-  // useDebounce(
-  //   () => {
-  //     if (minPrice === undefined && maxPrice === undefined) {
-  //       params.delete(`${FILTER_URL_PREFIX}price`);
-  //       navigate(`${location.pathname}?${params.toString()}`);
-  //       return;
-  //     }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (minPrice === undefined && maxPrice === undefined) {
+        params.delete(`${FILTER_URL_PREFIX}price`);
+      } else {
+        const price = {
+          ...(minPrice === undefined ? {} : { min: minPrice }),
+          ...(maxPrice === undefined ? {} : { max: maxPrice }),
+        };
+        params.set(`${FILTER_URL_PREFIX}price`, JSON.stringify(price));
+      }
+      navigate(`${location.pathname}?${params.toString()}`);
+    }, PRICE_RANGE_FILTER_DEBOUNCE);
 
-  //     const price = {
-  //       ...(minPrice === undefined ? {} : {min: minPrice}),
-  //       ...(maxPrice === undefined ? {} : {max: maxPrice}),
-  //     };
-  //     const newParams = filterInputToParams({price}, params);
-  //     navigate(`${location.pathname}?${newParams.toString()}`);
-  //   },
-  //   PRICE_RANGE_FILTER_DEBOUNCE,
-  //   [minPrice, maxPrice],
-  // );
+    return () => clearTimeout(timer);
+  }, [minPrice, maxPrice, navigate, location.pathname, params]);
 
   const onChangeMax = (event: SyntheticEvent) => {
     const value = (event.target as HTMLInputElement).value;
@@ -193,7 +216,7 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
       <label className="flex items-center gap-1" htmlFor="minPrice">
         <span>$</span>
         <Input
-          name="minPrice"
+          name="minPrice "
           type="number"
           value={minPrice ?? ""}
           placeholder="From"
@@ -224,6 +247,26 @@ export function DrawerFilter({
   isDesktop = false,
 }: DrawerFilterProps & { isDesktop: boolean }) {
   const { openDrawer, isOpen, closeDrawer } = useDrawer();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const location = useLocation();
+
+  const handleRemoveFilter = (filter: AppliedFilter) => {
+    // Remove the filter from appliedFilters
+    const updatedFilters = appliedFilters.filter(
+      (f) => f.label !== filter.label
+    );
+
+    // Update URL parameters
+    const updatedParams = new URLSearchParams(params.toString());
+    if (filter.filter) {
+      const filterKey = Object.keys(filter.filter)[0];
+      updatedParams.delete(`${FILTER_URL_PREFIX}${filterKey}`);
+    }
+
+    // Navigate to the updated URL
+    navigate(`${location.pathname}?${updatedParams.toString()}`);
+  };
 
   return (
     <div className="border border-line/30 py-4 z-10 bg-white/10 sticky top-[15px] rounded-full backdrop-blur-lg max-w-[1500px] m-auto">
@@ -231,7 +274,7 @@ export function DrawerFilter({
         <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
           <SortMenu showSearchSort={showSearchSort} />
           {!isDesktop && (
-            <Button
+            < Button
               onClick={openDrawer}
               variant="outline"
               className="flex items-center gap-4 border py-2 rounded-3xl"
@@ -251,8 +294,9 @@ export function DrawerFilter({
                 <FiltersDrawer
                   filters={filters}
                   appliedFilters={appliedFilters}
-                  onLayoutChange={console.log}
-                />
+                  onRemoveFilter={handleRemoveFilter} onLayoutChange={function (number: number): void {
+                    throw new Error("Function not implemented.");
+                  } }                />
               </div>
             </Drawer>
           )}
@@ -261,6 +305,7 @@ export function DrawerFilter({
     </div>
   );
 }
+
 
 export default function SortMenu({
   showSearchSort = false,
