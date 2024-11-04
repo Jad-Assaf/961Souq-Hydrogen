@@ -107,16 +107,16 @@ export async function loadCriticalData({ context, params, request }) {
     const appliedFilters = [];
 
     if (filters && filters.length > 0) {
+      console.log('Filters data:', filters); // Debugging: Check if filters are loaded
+
       searchParams.forEach((value, key) => {
         if (key.startsWith(FILTER_URL_PREFIX)) {
           const filterKey = key.replace(FILTER_URL_PREFIX, '');
           const filterValue = JSON.parse(value);
 
-          // Find the corresponding filter in `filters` by key
           const matchedFilter = filters.find((filter) => filter.id === filterKey);
 
           if (matchedFilter) {
-            // Use Shopify's exact label and value format
             const filterLabel = matchedFilter.label;
             const filterDisplayValue = matchedFilter.values?.find((option) => option.id === filterValue)?.label || value;
 
@@ -124,10 +124,16 @@ export async function loadCriticalData({ context, params, request }) {
               label: `${filterLabel}: ${filterDisplayValue}`,
               filter: { [filterKey]: filterValue },
             });
+          } else {
+            console.log(`No matched filter for key: ${filterKey}`); // Debugging: Check missing matches
           }
         }
       });
+    } else {
+      console.log('Filters not loaded or empty'); // Debugging: Check if filters is empty
     }
+
+    console.log('Applied Filters:', appliedFilters); // Final debug output for applied filters
 
     return { collection, appliedFilters };
   } catch (error) {
