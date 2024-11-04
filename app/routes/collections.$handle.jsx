@@ -116,7 +116,7 @@ export async function loadCriticalData({ context, params, request }) {
           const option = filter.values.find(v => JSON.stringify(v.input) === value);
           if (option) {
             appliedFilters.push({
-              label: option.label,
+              label: option.label,  // Use the label from the filter option
               filter: { [filterKey]: filterValue },
             });
           }
@@ -124,13 +124,12 @@ export async function loadCriticalData({ context, params, request }) {
       }
     });
 
-    return { collection, appliedFilters };
+    return { collection, appliedFilters };  // Ensure appliedFilters are returned
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
-
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
