@@ -28,7 +28,6 @@ import { FILTER_URL_PREFIX } from "../lib/const";
 import type { AppliedFilter, SortParam } from "../lib/filter";
 import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
 import { Drawer, useDrawer } from "./drawer";
-import { IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid } from "./icon";
 import { Input } from "./input";
 
 type DrawerFilterProps = {
@@ -149,14 +148,11 @@ export function FiltersDrawer({
         <Disclosure
           as="div"
           key={filter.id}
-          className="w-full pb-6 pt-7 border-b"
+          className="w-full pb-6 pt-7 border-b "
         >
           {({ open }) => (
             <>
-              <div
-                onClick={() => open ? close() : open()}
-                className="fltr-btn"
-              >
+              <div className="fltr-btn">
                 <DisclosureButton as="div" className="cursor-pointer">
                   <div className="flex w-full justify-between items-center">
                     <span className="text-sm">{filter.label}</span>
@@ -204,6 +200,7 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
         };
         params.set(`${FILTER_URL_PREFIX}price`, JSON.stringify(price));
       }
+      setParams(params);
       navigate(`${location.pathname}?${params.toString()}`);
     }, PRICE_RANGE_FILTER_DEBOUNCE);
 
@@ -231,7 +228,7 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
       <label className="flex items-center gap-1" htmlFor="minPrice">
         <span>$</span>
         <Input
-          name="minPrice "
+          name="minPrice"
           type="number"
           value={minPrice ?? ""}
           placeholder="From"
