@@ -134,15 +134,21 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
+  const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
 
+  const handleLayoutChange = (number) => {
+    setNumberInRow(number);
+  };
+
   const handleFilterRemove = (filter) => {
     const newUrl = getAppliedFilterLink(filter, searchParams, location);
     navigate(newUrl);
   };
+
 
   return (
     <div className="collection">
@@ -163,15 +169,15 @@ export default function Collection() {
           <DrawerFilter
             filters={collection.products.filters}
             appliedFilters={appliedFilters}
-            // numberInRow={numberInRow}
-            // onLayoutChange={handleLayoutChange}
+            numberInRow={numberInRow}
+            onLayoutChange={handleLayoutChange}
             productNumber={collection.products.nodes.length}
             isDesktop={isDesktop}
           />
 
           <PaginatedResourceSection
             connection={collection.products}
-            // resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
           >
             {({ node: product, index }) => (
               <ProductItem
