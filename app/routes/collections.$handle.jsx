@@ -112,11 +112,17 @@ export async function loadCriticalData({ context, params, request }) {
         const filter = collection.products.filters.find(f => f.id === filterKey);
         if (filter) {
           // Find the matching option
-          const option = filter.values.find(opt => JSON.stringify(JSON.parse(opt.input)) === JSON.stringify(filterValue));
+          const option = filter.values.find(opt => {
+            const optionInput = typeof opt.input === 'string'
+              ? JSON.parse(opt.input)
+              : opt.input;
+            return JSON.stringify(optionInput) === JSON.stringify(filterValue);
+          });
+
           if (option) {
             appliedFilters.push({
-              label: `${filter.label}: ${option.label}`,
-              filter: { [filterKey]: filterValue },
+              label: option.label,
+              filter: filterValue
             });
           }
         }

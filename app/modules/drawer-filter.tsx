@@ -53,9 +53,15 @@ function ListItemFilter({
   const location = useLocation();
 
   const isChecked = useCallback(() => {
-    return appliedFilters.some(
-      (filter) => JSON.stringify(filter.filter) === option.input
-    );
+    return appliedFilters.some((filter) => {
+      // Parse both the filter input and the applied filter for comparison
+      const filterInput = typeof option.input === 'string'
+        ? JSON.parse(option.input)
+        : option.input;
+
+      // Compare the actual filter values
+      return JSON.stringify(filterInput) === JSON.stringify(filter.filter);
+    });
   }, [appliedFilters, option.input]);
 
   const [checked, setChecked] = useState(isChecked());
@@ -67,14 +73,24 @@ function ListItemFilter({
   const handleCheckedChange = (checked: boolean) => {
     setChecked(checked);
     if (checked) {
-      const link = getFilterLink(option.input as string, params, location);
+      // When checking the box, apply the filter
+      const filterInput = typeof option.input === 'string'
+        ? option.input
+        : JSON.stringify(option.input);
+      const link = getFilterLink(filterInput, params, location);
       navigate(link);
     } else {
-      const filter = appliedFilters.find(
-        (filter) => JSON.stringify(filter.filter) === option.input
+      // When unchecking, find and remove the filter
+      const filterInput = typeof option.input === 'string'
+        ? JSON.parse(option.input)
+        : option.input;
+
+      const filter = appliedFilters.find((filter) =>
+        JSON.stringify(filter.filter) === JSON.stringify(filterInput)
       );
+
       if (filter) {
-        let link = getAppliedFilterLink(filter, params, location);
+        const link = getAppliedFilterLink(filter, params, location);
         navigate(link);
       }
     }
