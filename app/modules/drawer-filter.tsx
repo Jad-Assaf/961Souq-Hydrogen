@@ -98,7 +98,6 @@ export function FiltersDrawer({
   onRemoveFilter,
 }: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
   const [params] = useSearchParams();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
@@ -126,12 +125,26 @@ export function FiltersDrawer({
 
   return (
     <div className="text-sm">
-      {appliedFilters.map((filter, index) => (
-        <div key={index}>
-          {filter.label}
-          <button onClick={() => onRemoveFilter(filter)}>X</button>
+      {appliedFilters.length > 0 && (
+        <div className="applied-filters">
+          <h3>Applied Filters:</h3>
+          {appliedFilters.map((filter, index) => (
+            <div key={`${filter.label}-${index}`} className="applied-filter">
+              <span>{filter.label}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof onRemoveFilter === 'function') {
+                    onRemoveFilter(filter);
+                  }
+                }}
+              >
+                X
+              </button>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
       {filters.map((filter: Filter) => (
         <Disclosure
           as="div"
@@ -249,13 +262,11 @@ export function DrawerFilter({
   const handleRemoveFilter = (filter: AppliedFilter) => {
     console.log("Removing filter:", filter);
     const updatedParams = new URLSearchParams(params.toString());
-    if (filter.filter) {
-      const filterKey = Object.keys(filter.filter)[0];
-      updatedParams.delete(`${FILTER_URL_PREFIX}${filterKey}`);
-    }
-    navigate(`${location.pathname}?${updatedParams.toString()}`);
-  };
 
+    // Use the getAppliedFilterLink utility function instead
+    const newUrl = getAppliedFilterLink(filter, params, location);
+    navigate(newUrl);
+  };
 
   return (
     <div className="border border-line/30 py-4 z-10 bg-white/10 sticky top-[15px] rounded-full backdrop-blur-lg max-w-[1500px] m-auto">

@@ -15,6 +15,7 @@ import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
+import { getAppliedFilterLink } from '../lib/filter';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -133,11 +134,13 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters } = useLoaderData();
-  const [numberInRow, setNumberInRow] = useState(4);
-  const isDesktop = useMediaQuery({ minWidth: 1024 }); // Adjust this breakpoint as needed
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const handleLayoutChange = (number) => {
-    setNumberInRow(number);
+  const handleFilterRemove = (filter) => {
+    const newUrl = getAppliedFilterLink(filter, searchParams, location);
+    navigate(newUrl);
   };
 
   return (
@@ -150,6 +153,7 @@ export default function Collection() {
             <FiltersDrawer
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
+              onRemoveFilter={handleFilterRemove}
             />
           </div>
         )}

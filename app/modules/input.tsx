@@ -29,11 +29,7 @@ let variants = cva(
   },
 );
 
-/**
- * @deprecated
- * No need an `Input` component since we only have a few inputs in the theme.
- * Just implement where needed.
- */
+
 export let Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
