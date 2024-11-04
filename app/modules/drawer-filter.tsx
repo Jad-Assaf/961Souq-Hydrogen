@@ -240,7 +240,7 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
 export function DrawerFilter({
   filters,
   numberInRow,
-  onLayoutChange,
+  onLayoutChange = () => { }, // Default to a no-op function
   appliedFilters = [],
   productNumber = 0,
   showSearchSort = false,
@@ -252,19 +252,16 @@ export function DrawerFilter({
   const location = useLocation();
 
   const handleRemoveFilter = (filter: AppliedFilter) => {
-    // Remove the filter from appliedFilters
+    const updatedParams = new URLSearchParams(params.toString());
     const updatedFilters = appliedFilters.filter(
       (f) => f.label !== filter.label
     );
 
-    // Update URL parameters
-    const updatedParams = new URLSearchParams(params.toString());
     if (filter.filter) {
       const filterKey = Object.keys(filter.filter)[0];
       updatedParams.delete(`${FILTER_URL_PREFIX}${filterKey}`);
     }
 
-    // Navigate to the updated URL
     navigate(`${location.pathname}?${updatedParams.toString()}`);
   };
 
@@ -274,7 +271,7 @@ export function DrawerFilter({
         <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
           <SortMenu showSearchSort={showSearchSort} />
           {!isDesktop && (
-            < Button
+            <Button
               onClick={openDrawer}
               variant="outline"
               className="flex items-center gap-4 border py-2 rounded-3xl"
@@ -294,9 +291,9 @@ export function DrawerFilter({
                 <FiltersDrawer
                   filters={filters}
                   appliedFilters={appliedFilters}
-                  onRemoveFilter={handleRemoveFilter} onLayoutChange={function (number: number): void {
-                    throw new Error("Function not implemented.");
-                  } }                />
+                  onRemoveFilter={handleRemoveFilter}
+                  onLayoutChange={onLayoutChange} // Pass the function here
+                />
               </div>
             </Drawer>
           )}
@@ -305,7 +302,6 @@ export function DrawerFilter({
     </div>
   );
 }
-
 
 export default function SortMenu({
   showSearchSort = false,
