@@ -126,23 +126,32 @@ export function FiltersDrawer({
   return (
     <div className="text-sm">
       {appliedFilters.length > 0 && (
-        <div className="applied-filters">
-          <h3>Applied Filters:</h3>
-          {appliedFilters.map((filter, index) => (
-            <div key={`${filter.label}-${index}`} className="applied-filter">
-              <span>{filter.label}</span>
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof onRemoveFilter === 'function') {
-                    onRemoveFilter(filter);
-                  }
-                }}
+        <div className="applied-filters mb-4">
+          <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
+          <div className="flex flex-wrap gap-2">
+            {appliedFilters.map((filter, index) => (
+              <div
+                key={`${filter.label}-${index}`}
+                className="applied-filter bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
               >
-                X
-              </button>
-            </div>
-          ))}
+                <span className="font-medium mr-1">{filter.label}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof onRemoveFilter === 'function') {
+                      onRemoveFilter(filter);
+                    }
+                  }}
+                  className="ml-1 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  aria-label={`Remove ${filter.label} filter`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       {filters.map((filter: Filter) => (
