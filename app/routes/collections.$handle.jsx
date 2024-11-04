@@ -102,29 +102,25 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Process applied filters
     const appliedFilters = [];
     searchParams.forEach((value, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
 
-        // Find the corresponding filter in the collection's filters
-        const filter = collection.products.filters.find(f => f.id === filterKey);
-        if (filter) {
-          // Find the matching option in the filter's values
-          const option = filter.values.find(v => JSON.stringify(v.input) === value);
-          if (option) {
-            appliedFilters.push({
-              label: option.label,  // Use the label from the filter option
-              filter: { [filterKey]: filterValue },
-            });
-          }
-        }
+        // Create the applied filter object
+        const appliedFilter = {
+          label: `${filterKey}: ${value}`,
+          filter: { [filterKey]: filterValue },
+        };
+
+        // Log the applied filter to the console
+        console.log("Applied Filter:", appliedFilter);
+
+        // Push the applied filter into the array
+        appliedFilters.push(appliedFilter);
       }
     });
-
-    console.log("Applied Filters:", appliedFilters);
 
     return { collection, appliedFilters };
   } catch (error) {
