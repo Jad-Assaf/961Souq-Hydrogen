@@ -144,14 +144,15 @@ export default function Collection() {
     setNumberInRow(number);
   };
 
+  const handlePriceFilterRemove = () => {
+    // This function will be passed to PriceRangeFilter
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete(`${FILTER_URL_PREFIX}price`);
+    navigate(`${location.pathname}?${newParams.toString()}`);
+  };
+
+
   const handleFilterRemove = (filter) => {
-
-    if (filter.label.startsWith("price")) {
-      // Clear the price inputs by setting state to undefined or empty
-      setMinPrice(undefined);
-      setMaxPrice(undefined);
-    }
-
     const newUrl = getAppliedFilterLink(filter, searchParams, location);
     navigate(newUrl);
   };
@@ -168,6 +169,7 @@ export default function Collection() {
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
               onRemoveFilter={handleFilterRemove}
+              onRemovePriceFilter={handlePriceFilterRemove}
             />
           </div>
         )}
