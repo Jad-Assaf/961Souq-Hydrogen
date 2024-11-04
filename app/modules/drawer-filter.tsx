@@ -130,13 +130,13 @@ export function FiltersDrawer({
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
             {appliedFilters.map((filter, index) => {
-              const [filterName, filterValue] = filter.label.split(':');
+              const [filterValue] = filter.label.split(':');
               return (
                 <div
                   key={`${filter.label}-${index}`}
                   className="applied-filter bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
                 >
-                  <span className="font-medium mr-1">{filterName.trim()}:</span>
+                  <span className="font-medium mr-1">{filter.label}:</span>
                   <span className="mr-2">{filterValue.trim()}</span>
                   <button
                     type="button"
