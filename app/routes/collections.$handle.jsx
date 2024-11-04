@@ -78,12 +78,7 @@ export async function loadCriticalData({ context, params, request }) {
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith(FILTER_URL_PREFIX)) {
       const filterKey = key.replace(FILTER_URL_PREFIX, '');
-      filters.push({
-        price: {
-          min: minPrice,
-          max: maxPrice,
-        }
-      });
+      filters.push({ [filterKey]: JSON.parse(value) });
     }
   }
 
