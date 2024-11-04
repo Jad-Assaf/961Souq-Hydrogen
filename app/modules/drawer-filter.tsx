@@ -171,7 +171,7 @@ export function FiltersDrawer({
                 )}
               </DisclosureButton>
               <DisclosurePanel key={filter.id}>
-                <ul key={filter.id} className="space-y-5 pt-8">
+                <ul key={filter.id} className="space-y-5 pt-8 filter-list">
                   {filter.values?.map((option) => (
                     <li key={option.id}>{filterMarkup(filter, option)}</li>
                   ))}

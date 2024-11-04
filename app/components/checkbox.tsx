@@ -25,8 +25,8 @@ const Checkbox = React.forwardRef<
       >
         <IconCheck className="h-3 w-3" />
       </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
     {label ? <span>{label}</span> : null}
+    </CheckboxPrimitive.Root>
   </div>
 ));
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
