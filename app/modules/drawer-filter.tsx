@@ -85,10 +85,10 @@ function ListItemFilter({
       <Checkbox
         checked={checked}
         onCheckedChange={handleCheckedChange}
-        label={option.label}
       >
-      <span>({option.count})</span>
+        {option.label}
       </Checkbox>
+      <span>({option.count})</span>
     </div>
   );
 }
