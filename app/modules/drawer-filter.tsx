@@ -130,10 +130,10 @@ export function FiltersDrawer({
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
             {appliedFilters.map((filter, index) => {
-              const [filterName, filterValue] = filter.name.split(':');
+              const [filterName, filterValue] = filter.label.split(':');
               return (
                 <div
-                  key={`${filter.name}-${index}`}
+                  key={`${filter.label}-${index}`}
                   className="applied-filter bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
                 >
                   <span className="font-medium mr-1">{filterName.trim()}:</span>
@@ -146,7 +146,7 @@ export function FiltersDrawer({
                       }
                     }}
                     className="ml-1 text-gray-500 hover:text-gray-700 focus:outline-none"
-                    aria-label={`Remove ${filter.name} filter`}
+                    aria-label={`Remove ${filter.label} filter`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

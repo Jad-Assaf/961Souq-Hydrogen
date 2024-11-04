@@ -109,7 +109,7 @@ export async function loadCriticalData({ context, params, request }) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
         const filterValue = JSON.parse(value);
         appliedFilters.push({
-          name: `${filterKey}: ${value}`,
+          label: `${filterKey}: ${value}`,
           filter: { [filterKey]: filterValue },
         });
       }
@@ -303,11 +303,11 @@ const COLLECTION_QUERY = `#graphql
       ) {
         filters {
           id
-          name
+          label
           type
           values {
             id
-            name
+            label
             count
             input
           }
