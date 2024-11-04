@@ -113,10 +113,10 @@ export async function loadCriticalData({ context, params, request }) {
         const filter = collection.products.filters.find(f => f.id === filterKey);
 
         if (filter) {
-          // For each filter value in the URL, find the matching option in the filter's values
-          const filterOption = filter.values.find(
-            option => JSON.stringify(JSON.parse(option.input)) === JSON.stringify(filterValue)
-          );
+          // Find the matching option in the filter's values
+          const filterOption = filter.values.find(option => {
+            return JSON.stringify(JSON.parse(option.input)) === JSON.stringify(filterValue);
+          });
 
           if (filterOption) {
             appliedFilters.push({
