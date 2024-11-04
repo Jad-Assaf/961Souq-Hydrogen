@@ -124,7 +124,9 @@ export async function loadCriticalData({ context, params, request }) {
       }
     });
 
-    return { collection, appliedFilters };  // Ensure appliedFilters are returned
+    console.log("Applied Filters:", appliedFilters);
+
+    return { collection, appliedFilters };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
