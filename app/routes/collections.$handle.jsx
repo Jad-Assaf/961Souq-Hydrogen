@@ -107,7 +107,7 @@ export async function loadCriticalData({ context, params, request }) {
     searchParams.forEach((value, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
-        console.log(`Parsed filterValue:`, filterValue);
+        const filterValue = JSON.parse(value);
         appliedFilters.push({
           label: `${value}`,
           filter: { [filterKey]: filterValue },
