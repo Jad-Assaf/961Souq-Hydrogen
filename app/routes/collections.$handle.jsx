@@ -104,12 +104,12 @@ export async function loadCriticalData({ context, params, request }) {
 
     // Process applied filters
     const appliedFilters = [];
-    searchParams.forEach((value, key) => {
+    searchParams.forEach((label, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.replace(FILTER_URL_PREFIX, '');
-        const filterValue = JSON.parse(value);
+        const filterValue = JSON.parse(label);
         appliedFilters.push({
-          label: `${filterKey}: ${value}`,
+          label: `${filterKey}: ${label}`,
           filter: { [filterKey]: filterValue },
         });
       }
