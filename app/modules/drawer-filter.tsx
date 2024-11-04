@@ -130,9 +130,12 @@ export function FiltersDrawer({
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
             {appliedFilters.map((filter, index) => {
-              const filterKey = Object.keys(filter.filter)[0]; // Assuming the key is the same as in the filter list
+              const filterKey = Object.keys(filter.filter)[0]; // Get the key of the applied filter
               const filterValue = filter.filter[filterKey]; // Get the value directly
-              const filterLabel = filter.label; // Assuming this is the correct label
+
+              // Find the corresponding filter in the filters array
+              const correspondingFilter = filters.find(f => f.id === filterKey); // Assuming filterKey matches filter id
+              const filterLabel = correspondingFilter ? correspondingFilter.label : filterKey; // Use the label from the filter list
 
               return (
                 <div
