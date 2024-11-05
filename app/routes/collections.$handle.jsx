@@ -48,7 +48,7 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 50 });
 
-  // Handle sort parameters
+  // Sort and filter handling
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
@@ -74,7 +74,7 @@ export async function loadCriticalData({ context, params, request }) {
       break;
   }
 
-  // Prepare filters from URL
+  // Extract filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -83,14 +83,14 @@ export async function loadCriticalData({ context, params, request }) {
     }
   }
 
-  // Check for missing handle
+  // Redirect if no handle provided
   if (!handle) {
     console.error("No handle provided in parameters.");
     throw redirect('/collections');
   }
 
   try {
-    // Fetch main collection
+    // Fetch the main collection
     const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
@@ -106,14 +106,16 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Fetch menu for slider collections
+    // Initialize sliderCollections as an empty array
     let sliderCollections = [];
+
+    // Fetch menu items for slider collections
     try {
       const { menu } = await storefront.query(MENU_QUERY, {
         variables: { handle },
       });
 
-      if (menu && menu.items) {
+      if (menu && menu.items && menu.items.length > 0) {
         // Fetch each slider collection based on menu items
         sliderCollections = await Promise.all(
           menu.items.map(async (item) => {
@@ -122,7 +124,7 @@ export async function loadCriticalData({ context, params, request }) {
             });
             return collection;
           })
-        );
+        ).filter(Boolean); // Filter out any null or undefined collections
       } else {
         console.warn("Menu data is empty or undefined.");
       }
