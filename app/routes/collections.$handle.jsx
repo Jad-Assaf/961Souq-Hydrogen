@@ -27,9 +27,9 @@ export async function loader({ context, params, request }) {
     throw new Response(`Collection ${handle} not found`, { status: 404 });
   }
 
-  // Fetch menu items for the slider
+  // Fetch menu items using the current collection's handle
   const { menu } = await storefront.query(MENU_QUERY, {
-    variables: { handle: 'new-main-menu' }, // Replace with your actual menu handle
+    variables: { handle: handle },
   });
 
   // Fetch collections for the slider
