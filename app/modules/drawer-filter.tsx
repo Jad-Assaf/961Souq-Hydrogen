@@ -107,15 +107,10 @@ export function FiltersDrawer({
         let price = priceFilter
           ? (JSON.parse(priceFilter) as ProductFilter["price"])
           : undefined;
-        let min = Number.isNaN(Number(price?.min))
-          ? undefined
-          : Number(price?.min);
-        let max = Number.isNaN(Number(price?.max))
-          ? undefined
-          : Number(price?.max);
+        let min = price?.min ? Number(price.min) : undefined;
+        let max = price?.max ? Number(price.max) : undefined;
         return <PriceRangeFilter min={min} max={max} />;
       }
-
       default:
         return (
           <ListItemFilter appliedFilters={appliedFilters} option={option} />
@@ -218,36 +213,6 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
   const [minPrice, setMinPrice] = useState<number | undefined>(min);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(max);
 
-  const applyFilters = () => {
-    const updatedParams = new URLSearchParams(params.toString());
-
-    // Only apply the min price filter if it's a valid number
-    if (minPrice !== undefined && !isNaN(minPrice)) {
-      updatedParams.set(`${FILTER_URL_PREFIX}price_min`, JSON.stringify(minPrice));
-    } else {
-      updatedParams.delete(`${FILTER_URL_PREFIX}price_min`);
-    }
-
-    // Only apply the max price filter if it's a valid number
-    if (maxPrice !== undefined && !isNaN(maxPrice)) {
-      updatedParams.set(`${FILTER_URL_PREFIX}price_max`, JSON.stringify(maxPrice));
-    } else {
-      updatedParams.delete(`${FILTER_URL_PREFIX}price_max`);
-    }
-
-    // Navigate to the new URL with the updated filters
-    navigate(`${location.pathname}?${updatedParams.toString()}`);
-  };
-
-  const clearFilters = () => {
-    setMinPrice(undefined);
-    setMaxPrice(undefined);
-    const updatedParams = new URLSearchParams(params.toString());
-    updatedParams.delete(`${FILTER_URL_PREFIX}price_min`);
-    updatedParams.delete(`${FILTER_URL_PREFIX}price_max`);
-    navigate(`${location.pathname}?${updatedParams.toString()}`);
-  };
-
   const onChangeMax = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     const newMaxPrice = value ? parseFloat(value) : undefined;
@@ -258,6 +223,30 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
     const value = event.target.value;
     const newMinPrice = value ? parseFloat(value) : undefined;
     setMinPrice(newMinPrice);
+  };
+
+  const applyFilters = () => {
+    const updatedParams = new URLSearchParams(params.toString());
+
+    // Only apply the min price filter if it's a valid number
+    if (minPrice !== undefined && !isNaN(minPrice)) {
+      updatedParams.set(`${FILTER_URL_PREFIX}price`, JSON.stringify({ min: minPrice, max: maxPrice }));
+    } else if (maxPrice !== undefined && !isNaN(maxPrice)) {
+      updatedParams.set(`${FILTER_URL_PREFIX}price`, JSON.stringify({ max: maxPrice }));
+    } else {
+      updatedParams.delete(`${FILTER_URL_PREFIX}price`);
+    }
+
+    // Navigate to the new URL with the updated filters
+    navigate(`${location.pathname}?${updatedParams.toString()}`);
+  };
+
+  const clearFilters = () => {
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    const updatedParams = new URLSearchParams(params.toString());
+    updatedParams.delete(`${FILTER_URL_PREFIX}price`);
+    navigate(`${location.pathname}?${updatedParams.toString()}`);
   };
 
   return (
