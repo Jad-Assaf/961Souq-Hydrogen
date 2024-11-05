@@ -119,7 +119,7 @@ export function FiltersDrawer({
   };
 
   return (
-    <div className="text-sm">
+    <div className="text-sm" style={{position: 'sticky', top: '0'}}>
       {appliedFilters.length > 0 ? (
         <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
