@@ -177,11 +177,10 @@ export function FiltersDrawer({
           as="div"
           key={filter.id}
           className="w-full pb-6 pt-7 border-b"
-          style={{ position: 'sticky', top: "0" }}
         >
           {({ open }) => (
             <>
-              <DisclosureButton className="flex w-full justify-between items-center">
+              <DisclosureButton className="flex w-full justify-between items-center" style={{ position: 'sticky', top: "0" }}>
                 <span className="text-sm" style={{ textTransform: 'uppercase' }}>{filter.label}</span>
                 {open ? (
                   <IconCaretDown className="w-4 h-4" />
@@ -318,7 +317,7 @@ export function DrawerFilter({
   };
 
   return (
-    <div className="py-4 z-10 bg-white/10 sticky top-0 backdrop-blur-lg w-[100%] max-w-[1200px] m-auto">
+    <div className="py-4 z-10 bg-white/10 sticky sm:relative top-0 backdrop-blur-lg w-[100%] max-w-[1200px] m-auto">
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
         <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
           <SortMenu showSearchSort={showSearchSort} />
