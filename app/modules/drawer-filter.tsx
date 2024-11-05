@@ -141,12 +141,15 @@ export function FiltersDrawer({
                 // If parsing fails, use the original label
               }
 
+              // Remove quotes from the beginning and end of the displayLabel
+              displayLabel = displayLabel.replace(/^["'](.+(?=["']$))["']$/, '$1');
+
               return (
                 <div
                   key={`${filter.label}-${index}`}
                   className="applied-filter bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
                 >
-                  <span className="font-medium mr-1">"{displayLabel}"</span>
+                  <span className="font-medium mr-1">{displayLabel}</span>
                   <button
                     type="button"
                     onClick={() => {
