@@ -115,16 +115,24 @@ export async function loadCriticalData({ context, params, request }) {
         variables: { handle },
       });
 
+      console.log("Menu Data:", menu);
+
       if (menu && menu.items && menu.items.length > 0) {
         // Fetch each slider collection based on menu items
         sliderCollections = await Promise.all(
           menu.items.map(async (item) => {
-            const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-              variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
-            });
-            return collection;
+            try {
+              const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+                variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+              });
+              console.log("Fetched Collection for:", item.title, collection);
+              return collection;
+            } catch (error) {
+              console.error("Error fetching collection for item:", item.title, error);
+              return null; // Return null if there's an issue
+            }
           })
-        ).filter(Boolean); // Filter out any null or undefined collections
+        ).filter(Boolean); // Filter out null values
       } else {
         console.warn("Menu data is empty or undefined.");
       }
@@ -166,6 +174,7 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   // Include sliderCollections in the destructured data
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
+  console.log("Slider Collections in Component:", sliderCollections);
 
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
@@ -190,26 +199,30 @@ export default function Collection() {
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
-          {sliderCollections.map((sliderCollection) => (
-            sliderCollection && (
-              <Link
-                key={sliderCollection.id}
-                to={`/collections/${sliderCollection.handle}`}
-                className="category-container"
-              >
-                {sliderCollection.image && (
-                  <img
-                    src={sliderCollection.image.url}
-                    alt={sliderCollection.image.altText || sliderCollection.title}
-                    className="category-image"
-                    width={150}
-                    height={150}
-                  />
-                )}
-                <div className="category-title">{sliderCollection.title}</div>
-              </Link>
-            )
-          ))}
+          {sliderCollections.length > 0 ? (
+            sliderCollections.map((sliderCollection) => (
+              sliderCollection && (
+                <Link
+                  key={sliderCollection.id}
+                  to={`/collections/${sliderCollection.handle}`}
+                  className="category-container"
+                >
+                  {sliderCollection.image && (
+                    <img
+                      src={sliderCollection.image.url}
+                      alt={sliderCollection.image.altText || sliderCollection.title}
+                      className="category-image"
+                      width={150}
+                      height={150}
+                    />
+                  )}
+                  <div className="category-title">{sliderCollection.title}</div>
+                </Link>
+              )
+            ))
+          ) : (
+            <div>No slider collections available</div>
+          )}
         </div>
       </div>
 
