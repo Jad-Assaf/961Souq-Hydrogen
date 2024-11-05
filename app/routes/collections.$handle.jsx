@@ -164,6 +164,18 @@ const COLLECTION_QUERY = `#graphql
   }
 `;
 
+const MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+      }
+    }
+  }
+`;
+
 const COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
     collection(handle: $handle) {
