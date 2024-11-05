@@ -154,9 +154,9 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row" style={{ position: 'sticky', top: "0" }}>
         {isDesktop && (
-          <div className="w-[15%] pr-4" style={{ position: 'sticky', top: "0" }}>
+          <div className="w-[15%] pr-4">
             <FiltersDrawer
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
