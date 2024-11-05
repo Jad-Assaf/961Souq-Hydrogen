@@ -213,10 +213,10 @@ const PRICE_RANGE_FILTER_DEBOUNCE = 500;
 function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
 
-  const [minPrice, setMinPrice] = useState(min);
-  const [maxPrice, setMaxPrice] = useState(max);
+  const [minPrice, setMinPrice] = useState<number | undefined>(min);
+  const [maxPrice, setMaxPrice] = useState<number | undefined>(max);
 
   const applyFilters = () => {
     const updatedParams = new URLSearchParams(params.toString());
