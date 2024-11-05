@@ -171,7 +171,7 @@ export default function Collection() {
 
       {/* Slider Section */}
       <div className="slide-con">
-        <h3 className="cat-h3">{collection.title}</h3>
+        {/* <h3 className="cat-h3">{collection.title}</h3> */}
         <div className="category-slider">
           {sliderCollections.map((sliderCollection) => (
             sliderCollection && (
