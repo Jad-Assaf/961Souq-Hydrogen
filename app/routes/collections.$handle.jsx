@@ -48,11 +48,10 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 50 });
 
+  // Existing sorting and filter logic
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
-
-  // Map sort values to Shopify's sortKey and reverse
   switch (sort) {
     case 'price-low-high':
       sortKey = 'PRICE';
@@ -74,7 +73,6 @@ export async function loadCriticalData({ context, params, request }) {
       break;
   }
 
-  // Extract filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -88,6 +86,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
+    // Fetch main collection
     const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
@@ -102,20 +101,21 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Process applied filters
-    const appliedFilters = [];
-    searchParams.forEach((value, key) => {
-      if (key.startsWith(FILTER_URL_PREFIX)) {
-        const filterKey = key.replace(FILTER_URL_PREFIX, '');
-        const filterValue = JSON.parse(value);
-        appliedFilters.push({
-          label: `${value}`,
-          filter: { [filterKey]: filterValue },
-        });
-      }
+    // Fetch menu for slider collections
+    const { menu } = await storefront.query(MENU_QUERY, {
+      variables: { handle: handle },
     });
 
-    return { collection, appliedFilters };
+    const sliderCollections = await Promise.all(
+      menu.items.map(async (item) => {
+        const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+          variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+        });
+        return collection;
+      })
+    );
+
+    return { collection, appliedFilters, sliderCollections };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
@@ -153,6 +153,32 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
+
+      <div className="slide-con">
+        <h3 className="cat-h3">{collection.title}</h3>
+        <div className="category-slider">
+          {sliderCollections.map((sliderCollection) => (
+            sliderCollection && (
+              <Link
+                key={sliderCollection.id}
+                to={`/collections/${sliderCollection.handle}`}
+                className="category-container"
+              >
+                {sliderCollection.image && (
+                  <img
+                    src={sliderCollection.image.url}
+                    alt={sliderCollection.image.altText || sliderCollection.title}
+                    className="category-image"
+                    width={150}
+                    height={150}
+                  />
+                )}
+                <div className="category-title">{sliderCollection.title}</div>
+              </Link>
+            )
+          ))}
+        </div>
+      </div>
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
@@ -241,6 +267,30 @@ function ProductItem({ product, loading }) {
   );
 }
 
+const MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        title
+        url
+      }
+    }
+  }
+`;
+
+const COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collection(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+    }
+  }
+`;
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
