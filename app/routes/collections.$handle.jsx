@@ -102,42 +102,50 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Fetch the menu using the collection's menu handle
-    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-      variables: { handle: collection.menuHandle },
-    });
+    // Check if menuHandle is defined before querying for the menu
+    if (collection.menuHandle) {
+      const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+        variables: { handle: collection.menuHandle },
+      });
 
-    if (!menu) {
-      throw new Response('Menu not found', { status: 404 });
-    }
-
-    // Extract handles from the menu items
-    const menuHandles = menu.items.map((item) =>
-      item.url.split('/').pop() // Assuming the URL format is '/collections/handle'
-    );
-
-    // Fetch collections for the slider using menu handles
-    const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
-    // Process applied filters
-    const appliedFilters = [];
-    searchParams.forEach((value, key) => {
-      if (key.startsWith(FILTER_URL_PREFIX)) {
-        const filterKey = key.replace(FILTER_URL_PREFIX, '');
-        const filterValue = JSON.parse(value);
-        appliedFilters.push({
-          label: `${value}`,
-          filter: { [filterKey]: filterValue },
-        });
+      if (!menu) {
+        console.warn('Menu not found for handle:', collection.menuHandle);
+        return { collection, appliedFilters: [], sliderCollections: [] };
       }
-    });
 
-    return {
-      collection, appliedFilters, sliderCollections,
-    };
+      // Extract handles from the menu items
+      const menuHandles = menu.items.map((item) =>
+        item.url.split('/').pop() // Assuming the URL format is '/collections/handle'
+      );
+
+      // Fetch collections for the slider using menu handles
+      const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+      // Process applied filters
+      const appliedFilters = [];
+      searchParams.forEach((value, key) => {
+        if (key.startsWith(FILTER_URL_PREFIX)) {
+          const filterKey = key.replace(FILTER_URL_PREFIX, '');
+          const filterValue = JSON.parse(value);
+          appliedFilters.push({
+            label: `${value}`,
+            filter: { [filterKey]: filterValue },
+          });
+        }
+      });
+
+      return {
+        collection,
+        appliedFilters,
+        sliderCollections,
+      };
+    } else {
+      console.warn('No menuHandle found for collection:', collection.handle);
+      return { collection, appliedFilters: [], sliderCollections: [] };
+    }
   } catch (error) {
     console.error("Error fetching collection:", error);
-    throw new Response("Error fetching collection ", { status: 500 });
+    throw new Response("Error fetching collection", { status: 500 });
   }
 }
 
@@ -337,7 +345,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
         url
         altText
       }
-      menuHandle
     }
   }
 `;
@@ -400,19 +407,6 @@ const COLLECTION_QUERY = `#graphql
           hasNextPage
           endCursor
           startCursor
-        }
-      }
-    }
-    collections(first: 250) {
-      edges {
-        node {
-          id
-          handle
-          title
-          image {
-            url
-            altText
-          }
         }
       }
     }
