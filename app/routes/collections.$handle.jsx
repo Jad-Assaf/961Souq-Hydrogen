@@ -102,6 +102,7 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
+    // Fetch the menu using the collection's menu handle
     const { menu } = await context.storefront.query(GET_MENU_QUERY, {
       variables: { handle: collection.menuHandle },
     });
@@ -136,7 +137,7 @@ export async function loadCriticalData({ context, params, request }) {
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
-    throw new Response("Error fetching collection", { status: 500 });
+    throw new Response("Error fetching collection ", { status: 500 });
   }
 }
 
@@ -162,7 +163,6 @@ async function fetchCollectionsByHandles(context, handles) {
   return collections;
 }
 
-
 export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
@@ -180,10 +180,8 @@ export default function Collection() {
     navigate(newUrl);
   };
 
-
   return (
     <div className="collection">
-      
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
@@ -207,8 +205,6 @@ export default function Collection() {
           ))}
         </div>
       </div>
-
-      {/* <h1>{collection.title}</h1> */}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
@@ -282,7 +278,6 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -297,9 +292,8 @@ function ProductItem({ product, loading }) {
   );
 }
 
-
 const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
+  fragment Money ProductItem on MoneyV2 {
     amount
     currencyCode
   }
@@ -343,6 +337,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
         url
         altText
       }
+      menuHandle
     }
   }
 `;
@@ -386,7 +381,6 @@ const COLLECTION_QUERY = `#graphql
         sortKey: $sortKey,
         reverse: $reverse
       ) {
-
         filters {
           id
           label
