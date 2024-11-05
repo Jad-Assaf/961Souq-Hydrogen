@@ -951,7 +951,12 @@ button#headlessui-menu-button-\:R3lab5\:{
   flex-wrap: wrap;
   gap: 1.5rem;
   max-width: 1200px;
-  margin: auto;
+  margin: 50px auto auto auto;
+}
+
+.col-hr {
+  margin-top: 44px;
+  max-width: 1200px;
 }
 
 .product-item img {
@@ -962,6 +967,7 @@ button#headlessui-menu-button-\:R3lab5\:{
 .product-item-collection{
   min-width: 200px;
   width: 200px;
+  min-height: 350px;
   text-align: center;
   text-decoration: none;
 }

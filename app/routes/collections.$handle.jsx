@@ -175,6 +175,8 @@ export default function Collection() {
             isDesktop={isDesktop}
           />
 
+          <hr className='col-hr'></hr>
+
           <PaginatedResourceSection
             connection={collection.products}
             resourcesClassName={`products-grid grid-cols-${numberInRow}`}

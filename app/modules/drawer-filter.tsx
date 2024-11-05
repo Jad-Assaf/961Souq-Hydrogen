@@ -176,7 +176,7 @@ export function FiltersDrawer({
         <Disclosure
           as="div"
           key={filter.id}
-          className="w-full pb-6 pt-7 border-b"
+          className="w-full pb-6 pt-7 border-b border-t"
         >
           {({ open }) => (
             <>
