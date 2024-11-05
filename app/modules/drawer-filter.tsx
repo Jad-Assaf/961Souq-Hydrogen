@@ -250,11 +250,12 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex gap-6">
-        <label className="flex items-center gap-1" htmlFor="minPrice">
+    <div className="price-filter-container">
+      <div className="price-filter-inputs">
+        <label className="price-filter-label" htmlFor="minPrice">
           <span>$</span>
           <Input
+            className="price-filter-input"
             name="minPrice"
             type="number"
             value={minPrice ?? ""}
@@ -262,9 +263,10 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
             onChange={onChangeMin}
           />
         </label>
-        <label className="flex items-center gap-1" htmlFor="maxPrice">
+        <label className="price-filter-label" htmlFor="maxPrice">
           <span>$</span>
           <Input
+            className="price-filter-input"
             name="maxPrice"
             type="number"
             value={maxPrice ?? ""}
@@ -273,11 +275,17 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
           />
         </label>
       </div>
-      <div className="flex gap-4">
-        <Button onClick={applyFilters} variant="primary">
+      <div className="price-filter-buttons">
+        <Button
+          className="price-filter-button price-filter-button-apply"
+          onClick={applyFilters}
+        >
           Apply
         </Button>
-        <Button onClick={clearFilters} variant="secondary">
+        <Button
+          className="price-filter-button price-filter-button-clear"
+          onClick={clearFilters}
+        >
           Clear
         </Button>
       </div>
