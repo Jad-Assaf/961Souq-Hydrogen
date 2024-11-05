@@ -146,7 +146,7 @@ export function FiltersDrawer({
                   key={`${filter.label}-${index}`}
                   className="applied-filter bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
                 >
-                  <span className="font-medium mr-1">{displayLabel}</span>
+                  <span className="font-medium mr-1">"{displayLabel}"</span>
                   <button
                     type="button"
                     onClick={() => {
