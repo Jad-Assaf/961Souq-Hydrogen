@@ -121,18 +121,13 @@ export async function loadCriticalData({ context, params, request }) {
         // Fetch each slider collection based on menu items
         sliderCollections = await Promise.all(
           menu.items.map(async (item) => {
-            try {
-              const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-                variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
-              });
-              console.log("Fetched Collection for:", item.title, collection);
-              return collection;
-            } catch (error) {
-              console.error("Error fetching collection for item:", item.title, error);
-              return null; // Return null if there's an issue
-            }
+            const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+              variables: { handle: item.handle }, // Directly use the handle if available
+            });
+            return collection;
           })
-        ).filter(Boolean); // Filter out null values
+        ).filter(Boolean);
+
       } else {
         console.warn("Menu data is empty or undefined.");
       }
