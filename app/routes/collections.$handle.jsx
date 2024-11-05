@@ -104,18 +104,34 @@ export async function loadCriticalData({ context, params, request }) {
 
     // Fetch menu items using the current collection's handle
     const { menu } = await storefront.query(MENU_QUERY, {
-      variables: { handle: handle },
+      variables: { handle: `${handle}` },
     });
 
-    // Fetch collections for the slider
-    const sliderCollections = await Promise.all(
-      menu.items.map(async (item) => {
-        const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-          variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
-        });
-        return collection;
-      })
-    );
+    let sliderCollections = [];
+
+    // Only process menu items if menu exists and has items
+    if (menu && menu.items && menu.items.length > 0) {
+      // Fetch collections for the slider
+      const collectionPromises = menu.items.map(async (item) => {
+        if (!item || !item.title) return null;
+
+        try {
+          const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+            variables: {
+              handle: item.title.toLowerCase().replace(/\s+/g, '-')
+            },
+          });
+          return collection;
+        } catch (error) {
+          console.error(`Error fetching collection for item ${item.title}:`, error);
+          return null;
+        }
+      });
+
+      // Wait for all promises to resolve and filter out null results
+      const collections = await Promise.all(collectionPromises);
+      sliderCollections = collections.filter(collection => collection !== null);
+    }
 
     // Process applied filters
     const appliedFilters = [];
@@ -171,23 +187,25 @@ export default function Collection() {
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
-          {sliderCollections.map((collection) => (
-            <Link
-              key={collection.id}
-              to={`/collections/${collection.handle}`}
-              className="category-container"
-            >
-              {collection.image && (
-                <img
-                  src={collection.image.url}
-                  alt={collection.image.altText || collection.title}
-                  className="category-image"
-                  width={300}
-                  height={300}
-                />
-              )}
-              <div className="category-title">{collection.title}</div>
-            </Link>
+          {sliderCollections && sliderCollections.length > 0 && sliderCollections.map((collection) => (
+            collection && (
+              <Link
+                key={collection.id}
+                to={`/collections/${collection.handle}`}
+                className="category-container"
+              >
+                {collection.image && (
+                  <img
+                    src={collection.image.url}
+                    alt={collection.image.altText || collection.title}
+                    className="category-image"
+                    width={300}
+                    height={300}
+                  />
+                )}
+                <div className="category-title">{collection.title}</div>
+              </Link>
+            )
           ))}
         </div>
       </div>
