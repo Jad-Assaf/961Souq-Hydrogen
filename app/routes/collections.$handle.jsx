@@ -88,7 +88,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection } = await storefront.query(COLLECTION_QUERY, {
+    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -102,36 +102,10 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Fetch menu items using the current collection's handle
-    const { menu } = await storefront.query(MENU_QUERY, {
-      variables: { handle: `${handle}` },
-    });
-
-    let sliderCollections = [];
-
-    // Only process menu items if menu exists and has items
-    if (menu && menu.items && menu.items.length > 0) {
-      // Fetch collections for the slider
-      const collectionPromises = menu.items.map(async (item) => {
-        if (!item || !item.title) return null;
-
-        try {
-          const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-            variables: {
-              handle: item.title.toLowerCase().replace(/\s+/g, '-')
-            },
-          });
-          return collection;
-        } catch (error) {
-          console.error(`Error fetching collection for item ${item.title}:`, error);
-          return null;
-        }
-      });
-
-      // Wait for all promises to resolve and filter out null results
-      const collections = await Promise.all(collectionPromises);
-      sliderCollections = collections.filter(collection => collection !== null);
-    }
+    // Filter out the current collection from the collections list
+    const sliderCollections = collections.edges
+      .map(edge => edge.node)
+      .filter(col => col.handle !== handle); // Exclude the current collection
 
     // Process applied filters
     const appliedFilters = [];
@@ -154,6 +128,7 @@ export async function loadCriticalData({ context, params, request }) {
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -187,28 +162,27 @@ export default function Collection() {
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
-          {sliderCollections && sliderCollections.length > 0 && sliderCollections.map((collection) => (
-            collection && (
-              <Link
-                key={collection.id}
-                to={`/collections/${collection.handle}`}
-                className="category-container"
-              >
-                {collection.image && (
-                  <img
-                    src={collection.image.url}
-                    alt={collection.image.altText || collection.title}
-                    className="category-image"
-                    width={300}
-                    height={300}
-                  />
-                )}
-                <div className="category-title">{collection.title}</div>
-              </Link>
-            )
+          {sliderCollections.map((collection) => (
+            <Link
+              key={collection.id}
+              to={`/collections/${collection.handle}`}
+              className="category-container"
+            >
+              {collection.image && (
+                <img
+                  src={collection.image.url}
+                  alt={collection.image.altText || collection.title}
+                  className="category-image"
+                  width={300}
+                  height={300}
+                />
+              )}
+              <div className="category-title">{collection.title}</div>
+            </Link>
           ))}
         </div>
       </div>
+
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
