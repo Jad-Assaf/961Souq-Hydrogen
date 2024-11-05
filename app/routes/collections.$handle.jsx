@@ -171,7 +171,7 @@ export default function Collection() {
                 sliderCollection && (
                   <Link
                     key={sliderCollection.id}
-                    to={`/collections/${sliderCollection.handle}`}
+                    to={`/ collections / ${ sliderCollection.handle } `}
                     className="category-container"
                   >
                     {sliderCollection.image && (
@@ -192,7 +192,7 @@ export default function Collection() {
 
           <PaginatedResourceSection
             connection={collection.products}
-            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            resourcesClassName={`products - grid grid - cols - ${ numberInRow } `}
           >
             {({ node: product, index }) => (
               <ProductItem
@@ -230,9 +230,9 @@ function ProductItem({ product, loading }) {
     >
       {product.featuredImage && (
         <AnimatedImage
-          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                   ${product.featuredImage.url}?width=600&quality=30 600w,
-                   ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+          srcSet={`${ product.featuredImage.url }?width = 300 & quality=30 300w,
+    ${ product.featuredImage.url }?width = 600 & quality=30 600w,
+      ${ product.featuredImage.url }?width = 1200 & quality=30 1200w`}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -280,10 +280,10 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
       }
     }
   }
-`;
+  `;
 
 const COLLECTION_QUERY = `#graphql
-  ${PRODUCT_ITEM_FRAGMENT}
+  ${ PRODUCT_ITEM_FRAGMENT }
   query Collection(
     $handle: String!
     $filters: [ProductFilter!]
@@ -300,8 +300,8 @@ const COLLECTION_QUERY = `#graphql
       title
       products(
         first: $first,
-        last: $last,
-        before: $start Cursor,
+        last: $last
+        before: $startCursor,
         after: $endCursor,
         filters: $filters,
         sortKey: $sortKey,
@@ -332,7 +332,7 @@ const COLLECTION_QUERY = `#graphql
   }
 `;
 
-const MENU_QUERY = `#graphql
+      const MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
     menu(handle: $handle) {
       items {
@@ -344,7 +344,7 @@ const MENU_QUERY = `#graphql
   }
 `;
 
-const COLLECTION_BY_HANDLE_QUERY = `#graphql
+      const COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
     collection(handle: $handle) {
       id
