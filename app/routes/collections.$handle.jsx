@@ -2,11 +2,14 @@ import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
 import {
   getPaginationVariables,
+  Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import { AnimatedImage } from '~/components/AnimatedImage';
+import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
@@ -25,15 +28,21 @@ export const meta = ({ data }) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
+  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
+
+  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
+
   return defer({ ...deferredData, ...criticalData });
 }
 
 /**
+ * Load data necessary for rendering content above the fold. This is the critical data
+ * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-async function loadCriticalData({ context, params, request }) {
+export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const searchParams = new URL(request.url).searchParams;
@@ -43,7 +52,7 @@ async function loadCriticalData({ context, params, request }) {
   let sortKey;
   let reverse = false;
 
-  // Determine sorting options
+  // Map sort values to Shopify's sortKey and reverse
   switch (sort) {
     case 'price-low-high':
       sortKey = 'PRICE';
@@ -79,8 +88,7 @@ async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    // Fetch the collection using the handle
-    const { collection } = await storefront.query(COLLECTION_QUERY, {
+    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -94,8 +102,12 @@ async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Use the collection handle to fetch related collections
-    const sliderCollections = await fetchCollectionsByHandles(context, [handle]);
+    const menuHandle = collection.menuHandle;
+
+    // Filter out the current collection from the collections list
+    const sliderCollections = collections.edges
+      .map(edge => edge.node)
+      .filter(col => col.handle !== handle); // Exclude the current collection
 
     // Process applied filters
     const appliedFilters = [];
@@ -111,9 +123,7 @@ async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection,
-      appliedFilters,
-      sliderCollections,
+      collection, appliedFilters, sliderCollections, menuHandle
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -121,19 +131,12 @@ async function loadCriticalData({ context, params, request }) {
   }
 }
 
-// Fetch collections by handles function
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
-}
-
+/**
+ * Load data for rendering content below the fold. This data is deferred and will be
+ * fetched after the initial page load. If it's unavailable, the page should still 200.
+ * Make sure to not throw any errors here, as it will cause the page to 500.
+ * @param {LoaderFunctionArgs}
+ */
 function loadDeferredData({ context }) {
   return {};
 }
@@ -142,7 +145,7 @@ export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
-  const [searchParams] = useSearchParams
+  const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -155,22 +158,22 @@ export default function Collection() {
     navigate(newUrl);
   };
 
+
   return (
     <div className="collection">
+      
       <div className="slide-con">
-        <h3 className="cat-h3">Shop By Categories</h3>
+        <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
           {sliderCollections.map((collection) => (
             <Link
               key={collection.id}
-              to={`/ collections / ${ collection.handle }`}
+              to={`/collections/${collection.handle}`}
               className="category-container"
             >
               {collection.image && (
                 <img
-                  srcSet={`${ collection.image.url }?width = 300 & quality=30 300w,
-    ${ collection.image.url }?width = 600 & quality=30 600w,
-      ${ collection.image.url }?width = 1200 & quality=30 1200w`}
+                  src={collection.image.url}
                   alt={collection.image.altText || collection.title}
                   className="category-image"
                   width={300}
@@ -182,6 +185,8 @@ export default function Collection() {
           ))}
         </div>
       </div>
+
+      {/* <h1>{collection.title}</h1> */}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
@@ -208,7 +213,7 @@ export default function Collection() {
 
           <PaginatedResourceSection
             connection={collection.products}
-            resourcesClassName={`products - grid grid - cols - ${ numberInRow }`}
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
           >
             {({ node: product, index }) => (
               <ProductItem
@@ -233,6 +238,12 @@ export default function Collection() {
   );
 }
 
+/**
+ * @param {{
+ *   product: ProductItemFragment;
+ *   loading?: 'eager' | 'lazy';
+ * }}
+ */
 function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
@@ -244,23 +255,26 @@ function ProductItem({ product, loading }) {
       prefetch="intent"
       to={variantUrl}
     >
-      <div className="product-image">
-        {variant.image && (
-          <img
-            src={variant.image.url}
-            alt={variant.image.altText || product.title}
-            loading={loading}
-            className="w-full h-auto"
-          />
-        )}
-      </div>
-      <div className="product-title">{product.title}</div>
-      <div className="product-price">
-        <Money money={variant.price} />
-      </div>
+      {product.featuredImage && (
+        <AnimatedImage
+          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+                   ${product.featuredImage.url}?width=600&quality=30 600w,
+                   ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+          // src={product.featuredImage.url}
+          alt={product.featuredImage.altText || product.title}
+          loading={loading}
+          width="180px"
+          height="180px"
+        />
+      )}
+      <h4>{truncateText(product.title, 20)}</h4>
+      <small>
+        <Money data={product.priceRange.minVariantPrice} />
+      </small>
     </Link>
   );
 }
+
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
