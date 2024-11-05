@@ -27,15 +27,55 @@ export async function loader({ context, params, request }) {
     throw new Response(`Collection ${handle} not found`, { status: 404 });
   }
 
-  return json({ collection });
+  // Fetch menu items for the slider
+  const { menu } = await storefront.query(MENU_QUERY, {
+    variables: { handle: 'new-main-menu' }, // Replace with your actual menu handle
+  });
+
+  // Fetch collections for the slider
+  const sliderCollections = await Promise.all(
+    menu.items.map(async (item) => {
+      const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+        variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+      });
+      return collection;
+    })
+  );
+
+  return json({ collection, sliderCollections });
 }
 
 export default function Collection() {
-  const { collection } = useLoaderData();
+  const { collection, sliderCollections } = useLoaderData();
 
   return (
     <div className="collection">
-      <h1>{collection.title}</h1>
+      <div className="slide-con">
+        <h3 className="cat-h3">{collection.title}</h3>
+        <div className="category-slider">
+          {sliderCollections.map((sliderCollection) => (
+            sliderCollection && (
+              <Link
+                key={sliderCollection.id}
+                to={`/collections/${sliderCollection.handle}`}
+                className="category-container"
+              >
+                {sliderCollection.image && (
+                  <img
+                    src={sliderCollection.image.url}
+                    alt={sliderCollection.image.altText || sliderCollection.title}
+                    className="category-image"
+                    width={150}
+                    height={150}
+                  />
+                )}
+                <div className="category-title">{sliderCollection.title}</div>
+              </Link>
+            )
+          ))}
+        </div>
+      </div>
+
       <div className="products-grid">
         {collection.products.nodes.map((product) => (
           <ProductItem key={product.id} product={product} />
@@ -119,6 +159,32 @@ const COLLECTION_QUERY = `#graphql
           startCursor
           endCursor
         }
+      }
+    }
+  }
+`;
+
+const MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+      }
+    }
+  }
+`;
+
+const COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collection(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
       }
     }
   }
