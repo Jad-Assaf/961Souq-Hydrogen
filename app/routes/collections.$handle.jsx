@@ -102,6 +102,10 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
+    const sliderCollections = collections.edges
+      .map(edge => edge.node)
+      .filter(col => col.handle !== handle); // Exclude the current collection
+
     // Process applied filters
     const appliedFilters = [];
     searchParams.forEach((value, key) => {
@@ -116,7 +120,8 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection, appliedFilters, sliderCollections: collections.edges.map(edge => edge.node)};
+      collection, appliedFilters, sliderCollections
+    };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
@@ -153,8 +158,7 @@ export default function Collection() {
 
   return (
     <div className="collection">
-      <h1>{collection.title}</h1>
-
+      
       <div className="slide-con">
         <h3 className="cat-h3">Shop By Categories</h3>
         <div className="category-slider">
@@ -178,7 +182,9 @@ export default function Collection() {
           ))}
         </div>
       </div>
-      
+
+      <h1>{collection.title}</h1>
+
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
           <div className="w-[15%] pr-4">
