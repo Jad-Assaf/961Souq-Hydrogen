@@ -2,14 +2,11 @@ import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
 import {
   getPaginationVariables,
-  Image,
   Money,
   Analytics,
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
-import { AnimatedImage } from '~/components/AnimatedImage';
-import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
@@ -46,6 +43,7 @@ async function loadCriticalData({ context, params, request }) {
   let sortKey;
   let reverse = false;
 
+  // Determine sorting options
   switch (sort) {
     case 'price-low-high':
       sortKey = 'PRICE';
@@ -67,6 +65,7 @@ async function loadCriticalData({ context, params, request }) {
       break;
   }
 
+  // Extract filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -80,6 +79,7 @@ async function loadCriticalData({ context, params, request }) {
   }
 
   try {
+    // Fetch the collection using the handle
     const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
@@ -94,9 +94,10 @@ async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    const menuHandle = handle;
-    const sliderCollections = await fetchCollectionsByHandles(context, [menuHandle]);
+    // Use the collection handle to fetch related collections
+    const sliderCollections = await fetchCollectionsByHandles(context, [handle]);
 
+    // Process applied filters
     const appliedFilters = [];
     searchParams.forEach((value, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -110,7 +111,9 @@ async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection, appliedFilters, sliderCollections
+      collection,
+      appliedFilters,
+      sliderCollections,
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -118,6 +121,7 @@ async function loadCriticalData({ context, params, request }) {
   }
 }
 
+// Fetch collections by handles function
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
   for (const handle of handles) {
@@ -138,7 +142,7 @@ export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -159,14 +163,14 @@ export default function Collection() {
           {sliderCollections.map((collection) => (
             <Link
               key={collection.id}
-              to={`/collections/${collection.handle}`}
+              to={`/ collections / ${ collection.handle }`}
               className="category-container"
             >
               {collection.image && (
                 <img
-                  srcSet={`${collection.image.url}?width=300&quality=30 300w,
-                           ${collection.image.url}?width=600&quality=30 600w,
-                           ${collection.image.url}?width=1200&quality=30 1200w`}
+                  srcSet={`${ collection.image.url }?width = 300 & quality=30 300w,
+    ${ collection.image.url }?width = 600 & quality=30 600w,
+      ${ collection.image.url }?width = 1200 & quality=30 1200w`}
                   alt={collection.image.altText || collection.title}
                   className="category-image"
                   width={300}
@@ -204,7 +208,7 @@ export default function Collection() {
 
           <PaginatedResourceSection
             connection={collection.products}
-            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            resourcesClassName={`products - grid grid - cols - ${ numberInRow }`}
           >
             {({ node: product, index }) => (
               <ProductItem
@@ -239,7 +243,7 @@ function ProductItem({ product, loading }) {
       key={product.id}
       prefetch="intent"
       to={variantUrl}
-    > ```jsx
+    >
       <div className="product-image">
         {variant.image && (
           <img
