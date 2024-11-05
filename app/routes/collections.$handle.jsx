@@ -88,7 +88,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
+    const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -102,12 +102,20 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    const menuHandle = collection.menuHandle;
+    // Fetch menu items using the current collection's handle
+    const { menu } = await storefront.query(MENU_QUERY, {
+      variables: { handle: handle },
+    });
 
-    // Filter out the current collection from the collections list
-    const sliderCollections = collections.edges
-      .map(edge => edge.node)
-      .filter(col => col.handle !== handle); // Exclude the current collection
+    // Fetch collections for the slider
+    const sliderCollections = await Promise.all(
+      menu.items.map(async (item) => {
+        const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+          variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+        });
+        return collection;
+      })
+    );
 
     // Process applied filters
     const appliedFilters = [];
@@ -123,7 +131,7 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection, appliedFilters, sliderCollections, menuHandle
+      collection, appliedFilters, sliderCollections
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -158,10 +166,8 @@ export default function Collection() {
     navigate(newUrl);
   };
 
-
   return (
     <div className="collection">
-      
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
@@ -185,8 +191,6 @@ export default function Collection() {
           ))}
         </div>
       </div>
-
-      {/* <h1>{collection.title}</h1> */}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
@@ -226,7 +230,7 @@ export default function Collection() {
         </div>
       </div>
 
-      <Analytics.CollectionView
+      <Analytics.Coll ectionView
         data={{
           collection: {
             id: collection.id,
@@ -260,7 +264,6 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -274,7 +277,6 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
-
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
@@ -370,6 +372,32 @@ const COLLECTION_QUERY = `#graphql
             altText
           }
         }
+      }
+    }
+  }
+`;
+
+const MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+      }
+    }
+  }
+`;
+
+const COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collection(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
       }
     }
   }
