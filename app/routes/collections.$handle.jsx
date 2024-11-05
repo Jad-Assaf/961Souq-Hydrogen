@@ -156,7 +156,7 @@ export default function Collection() {
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
-          <div className="w-[15%] pr-4">
+          <div className="w-[15%] pr-4" style={{ position: 'sticky', top: "0" }}>
             <FiltersDrawer
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
