@@ -34,7 +34,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return defer({ ...deferredData, ...criticalData, sliderCollections: criticalData.sliderCollections });
+  return defer({ ...deferredData, ...criticalData });
 }
 
 /**
@@ -48,11 +48,11 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 50 });
 
-  // Sort and filter handling
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
 
+  // Map sort values to Shopify's sortKey and reverse
   switch (sort) {
     case 'price-low-high':
       sortKey = 'PRICE';
@@ -83,14 +83,12 @@ export async function loadCriticalData({ context, params, request }) {
     }
   }
 
-  // Redirect if no handle provided
   if (!handle) {
-    console.error("No handle provided in parameters.");
     throw redirect('/collections');
   }
 
   try {
-    // Fetch the main collection
+    // Fetch main collection
     const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
@@ -102,38 +100,23 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     if (!collection) {
-      console.error(`Collection with handle "${handle}" not found.`);
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Initialize sliderCollections as an empty array
-    let sliderCollections = [];
+    // Fetch menu for slider collections
+    const { menu } = await storefront.query(MENU_QUERY, {
+      variables: { handle },
+    });
 
-    // Fetch menu items for slider collections
-    try {
-      const { menu } = await storefront.query(MENU_QUERY, {
-        variables: { handle },
-      });
-
-      console.log("Menu Data:", menu);
-
-      if (menu && menu.items && menu.items.length > 0) {
-        // Fetch each slider collection based on menu items
-        sliderCollections = await Promise.all(
-          menu.items.map(async (item) => {
-            const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-              variables: { handle: item.handle }, // Directly use the handle if available
-            });
-            return collection;
-          })
-        ).filter(Boolean);
-
-      } else {
-        console.warn("Menu data is empty or undefined.");
-      }
-    } catch (menuError) {
-      console.error("Error fetching menu data:", menuError);
-    }
+    // Fetch collections for the slider based on the menu items
+    const sliderCollections = await Promise.all(
+      menu.items.map(async (item) => {
+        const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+          variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+        });
+        return collection;
+      })
+    );
 
     // Process applied filters
     const appliedFilters = [];
@@ -149,9 +132,8 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     return { collection, appliedFilters, sliderCollections };
-
   } catch (error) {
-    console.error("Error fetching collection or processing data:", error);
+    console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
@@ -167,10 +149,7 @@ function loadDeferredData({ context }) {
 }
 
 export default function Collection() {
-  // Include sliderCollections in the destructured data
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
-  console.log("Slider Collections in Component:", sliderCollections);
-
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
@@ -194,34 +173,29 @@ export default function Collection() {
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
-          {sliderCollections.length > 0 ? (
-            sliderCollections.map((sliderCollection) => (
-              sliderCollection && (
-                <Link
-                  key={sliderCollection.id}
-                  to={`/collections/${sliderCollection.handle}`}
-                  className="category-container"
-                >
-                  {sliderCollection.image && (
-                    <img
-                      src={sliderCollection.image.url}
-                      alt={sliderCollection.image.altText || sliderCollection.title}
-                      className="category-image"
-                      width={150}
-                      height={150}
-                    />
-                  )}
-                  <div className="category-title">{sliderCollection.title}</div>
-                </Link>
-              )
-            ))
-          ) : (
-            <div>No slider collections available</div>
-          )}
+          {sliderCollections.map((sliderCollection) => (
+            sliderCollection && (
+              <Link
+                key={sliderCollection.id}
+                to={`/collections/${sliderCollection.handle}`}
+                className="category-container"
+              >
+                {sliderCollection.image && (
+                  <img
+                    src={sliderCollection.image.url}
+                    alt={sliderCollection.image.altText || sliderCollection.title}
+                    className="category-image"
+                    width={150}
+                    height={150}
+                  />
+                )}
+                <div className="category-title">{sliderCollection.title}</div>
+              </Link>
+            )
+          ))}
         </div>
       </div>
 
-      {/* Existing Collection Layout */}
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
           <div className="w-[15%] pr-4">
@@ -232,6 +206,7 @@ export default function Collection() {
             />
           </div>
         )}
+
         <div className="flex-1">
           <DrawerFilter
             filters={collection.products.filters}
@@ -293,7 +268,6 @@ function ProductItem({ product, loading }) {
           srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                    ${product.featuredImage.url}?width=600&quality=30 600w,
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
           width="180px"
@@ -307,6 +281,7 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
+
 
 const MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
@@ -368,7 +343,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
