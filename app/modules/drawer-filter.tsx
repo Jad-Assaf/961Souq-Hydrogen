@@ -317,7 +317,7 @@ export function DrawerFilter({
   };
 
   return (
-    <div className="border border-line/30 py-4 z-10 bg-white/10 sticky top-[15px] rounded-full backdrop-blur-lg max-w-[1500px] m-auto">
+    <div className="border border-line/30 py-4 z-10 bg-white/10 sticky top-0 backdrop-blur-lg w-[100%] max-w-[1200px] m-auto">
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
         <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
           <SortMenu showSearchSort={showSearchSort} />
@@ -387,7 +387,7 @@ export default function SortMenu({
 
   return (
     <Menu as="div" className="relative z-10">
-      <MenuButton className="flex items-center gap-1.5 h-10 border px-4 py-2.5">
+      <MenuButton className="flex items-center gap-1.5 h-10 border px-4 py-2.5 rounded-full">
         <span className="font-medium">Sort by: {activeItem.label}</span>
         <CaretDown />
       </MenuButton>
