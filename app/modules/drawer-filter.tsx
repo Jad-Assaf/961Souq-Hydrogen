@@ -220,16 +220,22 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
 
   const applyFilters = () => {
     const updatedParams = new URLSearchParams(params.toString());
-    if (minPrice !== undefined) {
+
+    // Only apply the min price filter if it's a valid number
+    if (minPrice !== undefined && !isNaN(minPrice)) {
       updatedParams.set(`${FILTER_URL_PREFIX}price_min`, JSON.stringify(minPrice));
     } else {
       updatedParams.delete(`${FILTER_URL_PREFIX}price_min`);
     }
-    if (maxPrice !== undefined) {
+
+    // Only apply the max price filter if it's a valid number
+    if (maxPrice !== undefined && !isNaN(maxPrice)) {
       updatedParams.set(`${FILTER_URL_PREFIX}price_max`, JSON.stringify(maxPrice));
     } else {
       updatedParams.delete(`${FILTER_URL_PREFIX}price_max`);
     }
+
+    // Navigate to the new URL with the updated filters
     navigate(`${location.pathname}?${updatedParams.toString()}`);
   };
 
@@ -242,19 +248,15 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
     navigate(`${location.pathname}?${updatedParams.toString()}`);
   };
 
-  const onChangeMax = (event: SyntheticEvent) => {
-    const value = (event.target as HTMLInputElement).value;
-    const newMaxPrice = Number.isNaN(Number.parseFloat(value))
-      ? undefined
-      : Number.parseFloat(value);
+  const onChangeMax = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    const newMaxPrice = value ? parseFloat(value) : undefined;
     setMaxPrice(newMaxPrice);
   };
 
-  const onChangeMin = (event: SyntheticEvent) => {
-    const value = (event.target as HTMLInputElement).value;
-    const newMinPrice = Number.isNaN(Number.parseFloat(value))
-      ? undefined
-      : Number.parseFloat(value);
+  const onChangeMin = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    const newMinPrice = value ? parseFloat(value) : undefined;
     setMinPrice(newMinPrice);
   };
 
