@@ -1,15 +1,8 @@
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { useLoaderData, Link, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
-import {
-  getPaginationVariables,
-  Image,
-  Money,
-  Analytics,
-} from '@shopify/hydrogen';
+import { getPaginationVariables, Money, Analytics } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
-import { AnimatedImage } from '~/components/AnimatedImage';
-import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
 import { useState } from 'react';
@@ -28,12 +21,8 @@ export const meta = ({ data }) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
   return defer({ ...deferredData, ...criticalData });
 }
 
@@ -88,7 +77,8 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
+    // Fetch the collection using the handle
+    const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -102,12 +92,8 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    const menuHandle = collection.menuHandle;
-
-    // Filter out the current collection from the collections list
-    const sliderCollections = collections.edges
-      .map(edge => edge.node)
-      .filter(col => col.handle !== handle); // Exclude the current collection
+    // Use the collection handle for fetching related collections
+    const sliderCollections = await fetchCollectionsByHandles(context, [handle]);
 
     // Process applied filters
     const appliedFilters = [];
@@ -123,12 +109,27 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection, appliedFilters, sliderCollections, menuHandle
+      collection,
+      appliedFilters,
+      sliderCollections,
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
   }
+}
+
+// Fetch collections by handles function
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
 }
 
 /**
@@ -158,35 +159,31 @@ export default function Collection() {
     navigate(newUrl);
   };
 
-
   return (
     <div className="collection">
-      
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
-          {sliderCollections.map((collection) => (
+          {sliderCollections.map((sliderCollection) => (
             <Link
-              key={collection.id}
-              to={`/collections/${collection.handle}`}
+              key={sliderCollection.id}
+              to={`/collections/${sliderCollection.handle}`}
               className="category-container"
             >
-              {collection.image && (
+              {sliderCollection.image && (
                 <img
-                  src={collection.image.url}
-                  alt={collection.image.altText || collection.title}
+                  src={sliderCollection.image.url}
+                  alt={sliderCollection.image.altText || sliderCollection.title}
                   className="category-image"
                   width={300}
                   height={300}
                 />
               )}
-              <div className="category-title">{collection.title}</div>
+              <div className="category-title">{sliderCollection.title}</div>
             </Link>
           ))}
         </div>
       </div>
-
-      {/* <h1>{collection.title}</h1> */}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
@@ -256,26 +253,22 @@ function ProductItem({ product, loading }) {
       to={variantUrl}
     >
       {product.featuredImage && (
-        <AnimatedImage
-          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                   ${product.featuredImage.url}?width=600&quality=30 600w,
-                   ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
+        <img
+          src={product.featuredImage.url}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
-          width="180px"
-          height="180px"
+          className="w-full h-auto"
         />
       )}
-      <h4>{truncateText(product.title, 20)}</h4>
+      <h4>{product.title}</h4>
       <small>
-        <Money data={product.priceRange.minVariantPrice} />
+        <Money money={variant.price} />
       </small>
     </Link>
   );
 }
 
-
+// GraphQL queries and fragments
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
     amount
@@ -311,7 +304,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
