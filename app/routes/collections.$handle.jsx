@@ -103,20 +103,32 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Fetch menu for slider collections
-    const { menu } = await storefront.query(MENU_QUERY, {
-      variables: { handle },
-    });
+    // Initialize sliderCollections as an empty array to handle missing menu
+    let sliderCollections = [];
 
-    // Fetch collections for the slider based on the menu items
-    const sliderCollections = await Promise.all(
-      menu.items.map(async (item) => {
-        const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-          variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
-        });
-        return collection;
-      })
-    );
+    try {
+      // Fetch menu for slider collections
+      const { menu } = await storefront.query(MENU_QUERY, {
+        variables: { handle },
+      });
+
+      // Only populate sliderCollections if menu and items are valid
+      if (menu && menu.items) {
+        sliderCollections = await Promise.all(
+          menu.items.map(async (item) => {
+            const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+              variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+            });
+            return collection;
+          })
+        ).filter(Boolean); // Remove any null collections
+      } else {
+        console.warn(`No menu found for handle: ${handle}`);
+      }
+    } catch (menuError) {
+      console.error("Error fetching menu:", menuError);
+      // Log the error and continue with empty sliderCollections
+    }
 
     // Process applied filters
     const appliedFilters = [];
@@ -137,6 +149,7 @@ export async function loadCriticalData({ context, params, request }) {
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -169,32 +182,34 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {/* Slider Section */}
-      <div className="slide-con">
-        <h3 className="cat-h3">{collection.title}</h3>
-        <div className="category-slider">
-          {sliderCollections.map((sliderCollection) => (
-            sliderCollection && (
-              <Link
-                key={sliderCollection.id}
-                to={`/collections/${sliderCollection.handle}`}
-                className="category-container"
-              >
-                {sliderCollection.image && (
-                  <img
-                    src={sliderCollection.image.url}
-                    alt={sliderCollection.image.altText || sliderCollection.title}
-                    className="category-image"
-                    width={150}
-                    height={150}
-                  />
-                )}
-                <div className="category-title">{sliderCollection.title}</div>
-              </Link>
-            )
-          ))}
+      {/* Only render slide-con if sliderCollections has items */}
+      {sliderCollections.length > 0 && (
+        <div className="slide-con">
+          <h3 className="cat-h3">{collection.title}</h3>
+          <div className="category-slider">
+            {sliderCollections.map((sliderCollection) => (
+              sliderCollection && (
+                <Link
+                  key={sliderCollection.id}
+                  to={`/collections/${sliderCollection.handle}`}
+                  className="category-container"
+                >
+                  {sliderCollection.image && (
+                    <img
+                      src={sliderCollection.image.url}
+                      alt={sliderCollection.image.altText || sliderCollection.title}
+                      className="category-image"
+                      width={150}
+                      height={150}
+                    />
+                  )}
+                  <div className="category-title">{sliderCollection.title}</div>
+                </Link>
+              )
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
