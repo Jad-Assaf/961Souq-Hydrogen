@@ -102,6 +102,9 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
+    const menuHandle = collection.menuHandle;
+
+    // Filter out the current collection from the collections list
     const sliderCollections = collections.edges
       .map(edge => edge.node)
       .filter(col => col.handle !== handle); // Exclude the current collection
@@ -120,7 +123,7 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection, appliedFilters, sliderCollections
+      collection, appliedFilters, sliderCollections, menuHandle
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -160,7 +163,7 @@ export default function Collection() {
     <div className="collection">
       
       <div className="slide-con">
-        <h3 className="cat-h3">Shop By Categories</h3>
+        <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
           {sliderCollections.map((collection) => (
             <Link
@@ -183,7 +186,7 @@ export default function Collection() {
         </div>
       </div>
 
-      <h1>{collection.title}</h1>
+      {/* <h1>{collection.title}</h1> */}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
@@ -356,7 +359,7 @@ const COLLECTION_QUERY = `#graphql
         }
       }
     }
-    collections(first: 10) {
+    collections(first: 250) {
       edges {
         node {
           id
