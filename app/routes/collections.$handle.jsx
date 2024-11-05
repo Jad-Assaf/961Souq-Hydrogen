@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
+import { GET_MENU_QUERY } from './_index';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -92,8 +93,21 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Use the collection handle for fetching related collections
-    const sliderCollections = await fetchCollectionsByHandles(context, [handle]);
+    // Fetch the menu to get related collections
+    const menuHandle = 'new-main-menu'; // Update with your actual menu handle
+    const { menu } = await storefront.query(GET_MENU_QUERY, {
+      variables: { handle: menuHandle },
+    });
+
+    if (!menu) {
+      throw new Response('Menu not found', { status: 404 });
+    }
+
+    // Extract handles from the menu items
+    const menuHandles = menu.items.map(item => item.title.toLowerCase().replace(/\s+/g, '-'));
+
+    // Fetch related collections based on the menu handles
+    const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
     // Process applied filters
     const appliedFilters = [];
