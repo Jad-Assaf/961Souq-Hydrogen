@@ -34,7 +34,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return defer({ ...deferredData, ...criticalData });
+  return defer({ ...deferredData, ...criticalData, sliderCollections: criticalData.sliderCollections });
 }
 
 /**
@@ -164,7 +164,9 @@ function loadDeferredData({ context }) {
 }
 
 export default function Collection() {
-  const { collection, appliedFilters } = useLoaderData();
+  // Include sliderCollections in the destructured data
+  const { collection, appliedFilters, sliderCollections } = useLoaderData();
+
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
@@ -180,11 +182,11 @@ export default function Collection() {
     navigate(newUrl);
   };
 
-
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
 
+      {/* Slider Section */}
       <div className="slide-con">
         <h3 className="cat-h3">{collection.title}</h3>
         <div className="category-slider">
@@ -211,6 +213,7 @@ export default function Collection() {
         </div>
       </div>
 
+      {/* Existing Collection Layout */}
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
           <div className="w-[15%] pr-4">
@@ -221,7 +224,6 @@ export default function Collection() {
             />
           </div>
         )}
-
         <div className="flex-1">
           <DrawerFilter
             filters={collection.products.filters}
