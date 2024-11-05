@@ -133,7 +133,7 @@ function loadDeferredData({ context }) {
 }
 
 export default function Collection() {
-  const { collection, appliedFilters } = useLoaderData();
+  const { collection, appliedFilters, sliderCollections } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(4);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
@@ -153,6 +153,31 @@ export default function Collection() {
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
+
+      <div className="slide-con">
+        <h3 className="cat-h3">Shop By Categories</h3>
+        <div className="category-slider">
+          {sliderCollections.map((collection) => (
+            <Link
+              key={collection.id}
+              to={`/collections/${collection.handle}`}
+              className="category-container"
+            >
+              <img
+                data={collection.image}
+                aspectRatio="1/1"
+                sizes="(min-width: 45em) 20vw, 40vw"
+                srcSet={`${collection.image?.url}?width=300&quality=30 300w,
+                         ${collection.image?.url}?width=600&quality=30 600w,
+                         ${collection.image?.url}?width=1200&quality=30 1200w`}
+                alt={collection.image?.altText || collection.title}
+                className="category-image"
+              />
+              <div className="category-title">{collection.title}</div>
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
