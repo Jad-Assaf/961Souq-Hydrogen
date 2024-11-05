@@ -48,10 +48,11 @@ export async function loadCriticalData({ context, params, request }) {
   const searchParams = new URL(request.url).searchParams;
   const paginationVariables = getPaginationVariables(request, { pageBy: 50 });
 
-  // Existing sorting and filter logic
+  // Handle sort parameters
   const sort = searchParams.get('sort');
   let sortKey;
   let reverse = false;
+
   switch (sort) {
     case 'price-low-high':
       sortKey = 'PRICE';
@@ -73,6 +74,7 @@ export async function loadCriticalData({ context, params, request }) {
       break;
   }
 
+  // Prepare filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -81,7 +83,9 @@ export async function loadCriticalData({ context, params, request }) {
     }
   }
 
+  // Check for missing handle
   if (!handle) {
+    console.error("No handle provided in parameters.");
     throw redirect('/collections');
   }
 
@@ -98,26 +102,51 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     if (!collection) {
+      console.error(`Collection with handle "${handle}" not found.`);
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
     // Fetch menu for slider collections
-    const { menu } = await storefront.query(MENU_QUERY, {
-      variables: { handle: handle },
+    let sliderCollections = [];
+    try {
+      const { menu } = await storefront.query(MENU_QUERY, {
+        variables: { handle },
+      });
+
+      if (menu && menu.items) {
+        // Fetch each slider collection based on menu items
+        sliderCollections = await Promise.all(
+          menu.items.map(async (item) => {
+            const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+              variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+            });
+            return collection;
+          })
+        );
+      } else {
+        console.warn("Menu data is empty or undefined.");
+      }
+    } catch (menuError) {
+      console.error("Error fetching menu data:", menuError);
+    }
+
+    // Process applied filters
+    const appliedFilters = [];
+    searchParams.forEach((value, key) => {
+      if (key.startsWith(FILTER_URL_PREFIX)) {
+        const filterKey = key.replace(FILTER_URL_PREFIX, '');
+        const filterValue = JSON.parse(value);
+        appliedFilters.push({
+          label: `${value}`,
+          filter: { [filterKey]: filterValue },
+        });
+      }
     });
 
-    const sliderCollections = await Promise.all(
-      menu.items.map(async (item) => {
-        const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-          variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
-        });
-        return collection;
-      })
-    );
-
     return { collection, appliedFilters, sliderCollections };
+
   } catch (error) {
-    console.error("Error fetching collection:", error);
+    console.error("Error fetching collection or processing data:", error);
     throw new Response("Error fetching collection", { status: 500 });
   }
 }
