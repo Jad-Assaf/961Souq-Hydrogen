@@ -125,8 +125,8 @@ export function FiltersDrawer({
 
   return (
     <div className="text-sm">
-      {appliedFilters.length > 0 && (
-        <div className="applied-filters mb-4">
+      {appliedFilters.length > 0 ? (
+        <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
             {appliedFilters.map((filter, index) => {
@@ -167,6 +167,13 @@ export function FiltersDrawer({
                 </div>
               );
             })}
+          </div>
+        </div>
+      ) : (
+        <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
+          <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
+          <div className="flex flex-wrap gap-2">
+            {/* You can add a placeholder or message here if desired */}
           </div>
         </div>
       )}
