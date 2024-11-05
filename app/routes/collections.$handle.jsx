@@ -28,21 +28,15 @@ export const meta = ({ data }) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
   return defer({ ...deferredData, ...criticalData });
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-export async function loadCriticalData({ context, params, request }) {
+async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const searchParams = new URL(request.url).searchParams;
@@ -52,7 +46,6 @@ export async function loadCriticalData({ context, params, request }) {
   let sortKey;
   let reverse = false;
 
-  // Map sort values to Shopify's sortKey and reverse
   switch (sort) {
     case 'price-low-high':
       sortKey = 'PRICE';
@@ -74,7 +67,6 @@ export async function loadCriticalData({ context, params, request }) {
       break;
   }
 
-  // Extract filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -88,7 +80,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
+    const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -103,14 +95,8 @@ export async function loadCriticalData({ context, params, request }) {
     }
 
     const menuHandle = handle;
+    const sliderCollections = await fetchCollectionsByHandles(context, [menuHandle]);
 
-    const menuItems = collection.menu?.items || [];
-    const sliderCollections = collections.edges
-      .map(edge => edge.node)
-      .filter(col => menuItems.some(item => item.url.includes(col.handle)))
-      .filter(col => col.handle !== handle); // Exclude the current collection
-
-    // Process applied filters
     const appliedFilters = [];
     searchParams.forEach((value, key) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
@@ -124,7 +110,7 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection, appliedFilters, sliderCollections, menuHandle
+      collection, appliedFilters, sliderCollections
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -132,12 +118,18 @@ export async function loadCriticalData({ context, params, request }) {
   }
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- * @param {LoaderFunctionArgs}
- */
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
+
 function loadDeferredData({ context }) {
   return {};
 }
@@ -159,12 +151,10 @@ export default function Collection() {
     navigate(newUrl);
   };
 
-
   return (
     <div className="collection">
-      
       <div className="slide-con">
-        <h3 className="cat-h3">{collection.title}</h3>
+        <h3 className="cat-h3">Shop By Categories</h3>
         <div className="category-slider">
           {sliderCollections.map((collection) => (
             <Link
@@ -188,7 +178,6 @@ export default function Collection() {
           ))}
         </div>
       </div>
-      {/* <h1>{collection.title}</h1> */}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
@@ -240,12 +229,6 @@ export default function Collection() {
   );
 }
 
-/**
- * @param {{
- *   product: ProductItemFragment;
- *   loading?: 'eager' | 'lazy';
- * }}
- */
 function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
@@ -256,27 +239,24 @@ function ProductItem({ product, loading }) {
       key={product.id}
       prefetch="intent"
       to={variantUrl}
-    >
-      {product.featuredImage && (
-        <AnimatedImage
-          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                   ${product.featuredImage.url}?width=600&quality=30 600w,
-                   ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          // src={product.featuredImage.url}
-          alt={product.featuredImage.altText || product.title}
-          loading={loading}
-          width="180px"
-          height="180px"
-        />
-      )}
-      <h4>{truncateText(product.title, 20)}</h4>
-      <small>
-        <Money data={product.priceRange.minVariantPrice} />
-      </small>
+    > ```jsx
+      <div className="product-image">
+        {variant.image && (
+          <img
+            src={variant.image.url}
+            alt={variant.image.altText || product.title}
+            loading={loading}
+            className="w-full h-auto"
+          />
+        )}
+      </div>
+      <div className="product-title">{product.title}</div>
+      <div className="product-price">
+        <Money money={variant.price} />
+      </div>
     </Link>
   );
 }
-
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
   fragment MoneyProductItem on MoneyV2 {
@@ -330,13 +310,6 @@ const COLLECTION_QUERY = `#graphql
       id
       handle
       title
-      menu {
-        items {
-          id
-          title
-          url
-        }
-      }
       products(
         first: $first,
         last: $last,
