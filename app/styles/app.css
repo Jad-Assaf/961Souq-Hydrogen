@@ -52,6 +52,10 @@ img {
   border-radius: 4px;
 }
 
+button{
+  cursor: pointer !important;
+}
+
 .banner-slideshow {
   position: relative;
   width: 100vw;
