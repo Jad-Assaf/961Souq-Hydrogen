@@ -88,7 +88,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection } = await storefront.query(COLLECTION_QUERY, {
+    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -115,7 +115,8 @@ export async function loadCriticalData({ context, params, request }) {
       }
     });
 
-    return { collection, appliedFilters };
+    return {
+      collection, appliedFilters, sliderCollections: collections.edges.map(edge => edge.node)};
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
@@ -163,22 +164,21 @@ export default function Collection() {
               to={`/collections/${collection.handle}`}
               className="category-container"
             >
-              <img
-                data={collection.image}
-                aspectRatio="1/1"
-                sizes="(min-width: 45em) 20vw, 40vw"
-                srcSet={`${collection.image?.url}?width=300&quality=30 300w,
-                         ${collection.image?.url}?width=600&quality=30 600w,
-                         ${collection.image?.url}?width=1200&quality=30 1200w`}
-                alt={collection.image?.altText || collection.title}
-                className="category-image"
-              />
+              {collection.image && (
+                <img
+                  src={collection.image.url}
+                  alt={collection.image.altText || collection.title}
+                  className="category-image"
+                  width={300}
+                  height={300}
+                />
+              )}
               <div className="category-title">{collection.title}</div>
             </Link>
           ))}
         </div>
       </div>
-
+      
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
           <div className="w-[15%] pr-4">
@@ -347,6 +347,19 @@ const COLLECTION_QUERY = `#graphql
           hasNextPage
           endCursor
           startCursor
+        }
+      }
+    }
+    collections(first: 10) {
+      edges {
+        node {
+          id
+          handle
+          title
+          image {
+            url
+            altText
+          }
         }
       }
     }
