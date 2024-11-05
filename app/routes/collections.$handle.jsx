@@ -102,11 +102,12 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    const menuHandle = collection.menuHandle;
+    const menuHandle = handle;
 
-    // Filter out the current collection from the collections list
+    const menuItems = collection.menu?.items || [];
     const sliderCollections = collections.edges
       .map(edge => edge.node)
+      .filter(col => menuItems.some(item => item.url.includes(col.handle)))
       .filter(col => col.handle !== handle); // Exclude the current collection
 
     // Process applied filters
@@ -173,7 +174,9 @@ export default function Collection() {
             >
               {collection.image && (
                 <img
-                  src={collection.image.url}
+                  srcSet={`${collection.image.url}?width=300&quality=30 300w,
+                           ${collection.image.url}?width=600&quality=30 600w,
+                           ${collection.image.url}?width=1200&quality=30 1200w`}
                   alt={collection.image.altText || collection.title}
                   className="category-image"
                   width={300}
@@ -185,7 +188,6 @@ export default function Collection() {
           ))}
         </div>
       </div>
-
       {/* <h1>{collection.title}</h1> */}
 
       <div className="flex flex-col lg:flex-row">
@@ -328,6 +330,13 @@ const COLLECTION_QUERY = `#graphql
       id
       handle
       title
+      menu {
+        items {
+          id
+          title
+          url
+        }
+      }
       products(
         first: $first,
         last: $last,
