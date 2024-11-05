@@ -218,22 +218,29 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
   const [minPrice, setMinPrice] = useState(min);
   const [maxPrice, setMaxPrice] = useState(max);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (minPrice === undefined && maxPrice === undefined) {
-        params.delete(`${FILTER_URL_PREFIX}price`);
-      } else {
-        const price = {
-          ...(minPrice === undefined ? {} : { min: minPrice }),
-          ...(maxPrice === undefined ? {} : { max: maxPrice }),
-        };
-        params.set(`${FILTER_URL_PREFIX}price`, JSON.stringify(price));
-      }
-      navigate(`${location.pathname}?${params.toString()}`);
-    }, PRICE_RANGE_FILTER_DEBOUNCE);
+  const applyFilters = () => {
+    const updatedParams = new URLSearchParams(params.toString());
+    if (minPrice !== undefined) {
+      updatedParams.set(`${FILTER_URL_PREFIX}price_min`, JSON.stringify(minPrice));
+    } else {
+      updatedParams.delete(`${FILTER_URL_PREFIX}price_min`);
+    }
+    if (maxPrice !== undefined) {
+      updatedParams.set(`${FILTER_URL_PREFIX}price_max`, JSON.stringify(maxPrice));
+    } else {
+      updatedParams.delete(`${FILTER_URL_PREFIX}price_max`);
+    }
+    navigate(`${location.pathname}?${updatedParams.toString()}`);
+  };
 
-    return () => clearTimeout(timer);
-  }, [minPrice, maxPrice, navigate, location.pathname, params]);
+  const clearFilters = () => {
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    const updatedParams = new URLSearchParams(params.toString());
+    updatedParams.delete(`${FILTER_URL_PREFIX}price_min`);
+    updatedParams.delete(`${FILTER_URL_PREFIX}price_max`);
+    navigate(`${location.pathname}?${updatedParams.toString()}`);
+  };
 
   const onChangeMax = (event: SyntheticEvent) => {
     const value = (event.target as HTMLInputElement).value;
@@ -252,27 +259,37 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
   };
 
   return (
-    <div className="flex gap-6">
-      <label className="flex items-center gap-1" htmlFor="minPrice">
-        <span>$</span>
-        <Input
-          name="minPrice "
-          type="number"
-          value={minPrice ?? ""}
-          placeholder="From"
-          onChange={onChangeMin}
-        />
-      </label>
-      <label className="flex items-center gap-1" htmlFor="maxPrice">
-        <span>$</span>
-        <Input
-          name="maxPrice"
-          type="number"
-          value={maxPrice ?? ""}
-          placeholder="To"
-          onChange={onChangeMax}
-        />
-      </label>
+    <div className="flex flex-col gap-4">
+      <div className="flex gap-6">
+        <label className="flex items-center gap-1" htmlFor="minPrice">
+          <span>$</span>
+          <Input
+            name="minPrice"
+            type="number"
+            value={minPrice ?? ""}
+            placeholder="From"
+            onChange={onChangeMin}
+          />
+        </label>
+        <label className="flex items-center gap-1" htmlFor="maxPrice">
+          <span>$</span>
+          <Input
+            name="maxPrice"
+            type="number"
+            value={maxPrice ?? ""}
+            placeholder="To"
+            onChange={onChangeMax}
+          />
+        </label>
+      </div>
+      <div className="flex gap-4">
+        <Button onClick={applyFilters} variant="primary">
+          Apply
+        </Button>
+        <Button onClick={clearFilters} variant="secondary">
+          Clear
+        </Button>
+      </div>
     </div>
   );
 }
