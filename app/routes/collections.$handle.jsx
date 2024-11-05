@@ -88,7 +88,7 @@ export async function loadCriticalData({ context, params, request }) {
   }
 
   try {
-    const { collection, collections } = await storefront.query(COLLECTION_QUERY, {
+    const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         filters: filters.length ? filters : undefined,
@@ -102,12 +102,21 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    const menuHandle = collection.menuHandle;
+    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+      variables: { handle: collection.menuHandle },
+    });
 
-    // Filter out the current collection from the collections list
-    const sliderCollections = collections.edges
-      .map(edge => edge.node)
-      .filter(col => col.handle !== handle); // Exclude the current collection
+    if (!menu) {
+      throw new Response('Menu not found', { status: 404 });
+    }
+
+    // Extract handles from the menu items
+    const menuHandles = menu.items.map((item) =>
+      item.url.split('/').pop() // Assuming the URL format is '/collections/handle'
+    );
+
+    // Fetch collections for the slider using menu handles
+    const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
     // Process applied filters
     const appliedFilters = [];
@@ -123,7 +132,7 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     return {
-      collection, appliedFilters, sliderCollections, menuHandle
+      collection, appliedFilters, sliderCollections,
     };
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -140,6 +149,19 @@ export async function loadCriticalData({ context, params, request }) {
 function loadDeferredData({ context }) {
   return {};
 }
+
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
+
 
 export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
@@ -311,6 +333,32 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+    }
+  }
+`;
+
+const GET_MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+      }
+    }
+  }
+`;
+
 // NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
@@ -328,6 +376,7 @@ const COLLECTION_QUERY = `#graphql
       id
       handle
       title
+      menuHandle
       products(
         first: $first,
         last: $last,
@@ -337,6 +386,7 @@ const COLLECTION_QUERY = `#graphql
         sortKey: $sortKey,
         reverse: $reverse
       ) {
+
         filters {
           id
           label
