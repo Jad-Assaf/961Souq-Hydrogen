@@ -5,7 +5,6 @@ import {
   Image,
   Money,
   Analytics,
-  useOptimisticCart,
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
@@ -17,6 +16,7 @@ import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
+import { useCart } from '@shopify/hydrogen';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -288,7 +288,7 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
-  const { status, optimisticState, addLineItem } = useOptimisticCart(); // Correct usage
+  const { lines, status, addLine } = useCart();
   const [isAdding, setIsAdding] = useState(false);
 
   const variant = product.variants.nodes[0];
@@ -303,7 +303,7 @@ function ProductItem({ product, loading }) {
     e.preventDefault();
     setIsAdding(true);
     try {
-      await addLineItem({
+      await addLine({
         merchandiseId: variant.id,
         quantity: 1
       });
