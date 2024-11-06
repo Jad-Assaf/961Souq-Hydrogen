@@ -324,7 +324,12 @@ function ProductItem({ product, loading }) {
         </div>
       </Link>
       <ProductForm
-        product={product}
+        product={{
+          ...product,
+          handle: product.handle, // Make sure handle is explicitly passed
+          title: product.title,
+          id: product.id,
+        }}
         selectedVariant={selectedVariant}
         setSelectedVariant={setSelectedVariant}
       />
@@ -340,7 +345,7 @@ function ProductItem({ product, loading }) {
  * }}
  */
 function ProductForm({ product, selectedVariant, setSelectedVariant }) {
-  const { open } = useAside(); // Add this line
+  const { open } = useAside();
 
   return (
     <div className="product-form">
@@ -354,7 +359,7 @@ function ProductForm({ product, selectedVariant, setSelectedVariant }) {
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
-          open('cart'); // Add this line
+          open('cart');
         }}
         lines={
           selectedVariant
@@ -362,7 +367,12 @@ function ProductForm({ product, selectedVariant, setSelectedVariant }) {
               {
                 merchandiseId: selectedVariant.id,
                 quantity: 1,
-                selectedVariant, // Add this line
+                attributes: [], // Add this
+                product: {     // Add this product information
+                  ...product,
+                  selectedVariant,
+                  handle: product.handle,
+                },
               },
             ]
             : []
