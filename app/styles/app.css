@@ -941,6 +941,9 @@ button#headlessui-menu-button-\:R3lab5\:{
     border: none !important;
     position: relative !important;
   }
+  .products-grid {
+    justify-content: flex-start;
+  }
 }
 
 /*

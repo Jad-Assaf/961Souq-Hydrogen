@@ -230,7 +230,7 @@ export default function Collection() {
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row w-[100%]">
         {isDesktop && (
           <div className="w-[220px]">
             <FiltersDrawer
