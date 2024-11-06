@@ -279,13 +279,13 @@ button{
 
 .add-to-cart-button {
   width: 90%;
-  background-color: #007bd8;
+  background-color: #2172af;
   color: #fff;
-  padding: 10px 24px;
+  padding: 12px 10px;
   border: none;
   border-radius: 30px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   transition: all .3s ease;
   text-transform: uppercase;
