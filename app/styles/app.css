@@ -273,55 +273,100 @@ button{
   text-decoration: line-through;
 }
 
-.product-image-container {
+.add-to-cart-button {
+  width: 100%;
+  background-color: #000;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
 }
 
-.add-to-cart-overlay {
-  position: absolute;
-  bottom: -100%;
-  left: 0;
-  right: 0;
-  background-color: rgba(255, 255, 255, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  transition: bottom 0.3s ease-in-out;
-}
-
-.add-to-cart-overlay.visible {
-  bottom: 0;
-}
-
-.add-to-cart-button {
-  background-color: #000;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
 .add-to-cart-button:hover {
   background-color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-to-cart-button:active {
+  transform: translateY(0);
+}
+
+.add-to-cart-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
 }
 
 .add-to-cart-button.loading {
-  opacity: 0.7;
+  background-color: #666;
   cursor: wait;
 }
 
-.product-item-collection {
-  display: block;
-  text-decoration: none;
-  transition: transform 0.2s;
+/* Optional: Add a loading animation */
+.add-to-cart-button.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
 }
 
-.product-item-collection:hover {
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Alternative style with border */
+.add-to-cart-button.bordered {
+  background-color: transparent;
+  color: #000;
+  border: 2px solid #000;
+}
+
+.add-to-cart-button.bordered:hover {
+  background-color: #000;
+  color: white;
+}
+
+/* Success state */
+.add-to-cart-button.success {
+  background-color: #4CAF50;
+}
+
+/* For smaller screens */
+@media (max-width: 768px) {
+  .add-to-cart-button {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}
+
+/* Optional: Add a container for better spacing */
+.product-form {
+  margin-top: 15px;
+  padding: 0 10px;
+}
+
+/* Optional: Add hover effect for the entire product card */
+.product-item-collection:hover .add-to-cart-button:not(.disabled) {
+  opacity: 1;
   transform: translateY(-2px);
 }
 

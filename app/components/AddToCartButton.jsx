@@ -17,7 +17,7 @@ export function AddToCartButton({
   onClick,
 }) {
   return (
-    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm route="/cart" inputs={{ lines }} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher) => (
         <>
           <input
@@ -29,6 +29,8 @@ export function AddToCartButton({
             type="submit"
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
+            className={`add-to-cart-button ${disabled ? 'disabled' : ''} ${fetcher.state !== 'idle' ? 'loading' : ''
+              }`}
           >
             {children}
           </button>
@@ -37,6 +39,7 @@ export function AddToCartButton({
     </CartForm>
   );
 }
+
 
 /** @typedef {import('@remix-run/react').FetcherWithComponents} FetcherWithComponents */
 /** @typedef {import('@shopify/hydrogen').OptimisticCartLineInput} OptimisticCartLineInput */
