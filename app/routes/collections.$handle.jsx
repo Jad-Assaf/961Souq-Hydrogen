@@ -30,12 +30,8 @@ export const meta = ({ data }) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
   return defer({ ...deferredData, ...criticalData });
 }
 
@@ -220,8 +216,7 @@ export default function Collection() {
                       src={sliderCollection.image.url}
                       alt={sliderCollection.image.altText || sliderCollection.title}
                       className="category-image"
-                      width={150}
-                      height={150}
+                      width={150} height={150}
                     />
                   )}
                   <div className="category-title">{sliderCollection.title}</div>
@@ -288,15 +283,8 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-/**
- * @param {{
- *   product: ProductFragment;
- *   loading: boolean;
- * }}
- */
 function ProductItem({ product, loading }) {
   const [selectedVariant, setSelectedVariant] = useState(() => {
-    // Find the first available variant, or default to the first variant
     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
   });
   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
@@ -457,6 +445,10 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
       width
       height
     }
+    options {
+      name
+      values
+    }
     priceRange {
       minVariantPrice {
         ...MoneyProductItem
@@ -473,18 +465,32 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 1) {
+    variants(first: 250) {
       nodes {
         id
+        availableForSale
         selectedOptions {
           name
           value
+        }
+        image {
+          id
+          url
+          altText
+          width
+          height
         }
         price {
           amount
           currencyCode
         }
         compareAtPrice {
+          amount
+          currencyCode
+        }
+        sku
+        title
+        unitPrice {
           amount
           currencyCode
         }
