@@ -1067,36 +1067,27 @@ button#headlessui-menu-button-\:R3lab5\:{
   background-color: #e5e7eb;
 }
 
-.filter-scroll {
+.filter-scroll{
   max-height: 350px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  transition: all 0.5s ease-in-out;
+  /* margin-top: 20px !important; */
 }
 
-/* Add these new classes */
-.disclosure-panel-enter {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
+.transition-all {
+  transition-property: all;
 }
 
-.disclosure-panel-enter-active {
-  opacity: 1;
-  max-height: 350px;
-  transition: all 0.5s ease-in-out;
+.duration-300 {
+  transition-duration: 300ms;
 }
 
-.disclosure-panel-exit {
-  opacity: 1;
-  max-height: 350px;
+.ease-out {
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 
-.disclosure-panel-exit-active {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: all 0.5s ease-in-out;
+.ease-in {
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
 }
 
 /*

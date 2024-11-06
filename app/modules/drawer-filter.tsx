@@ -190,20 +190,20 @@ export function FiltersDrawer({
                 )}
               </DisclosureButton>
               <Transition
-                enter="transition duration-500 ease-out"
-                enterFrom="transform scale-y-0 origin-top"
-                enterTo="transform scale-y-100 origin-top"
-                leave="transition duration-500 ease-in"
-                leaveFrom="transform scale-y-100 origin-top"
-                leaveTo="transform scale-y-0 origin-top"
+                enter="transition-all duration-500 ease-out"
+                enterFrom="transform opacity-0 max-h-0"
+                enterTo="transform opacity-100 max-h-[500px]"
+                leave="transition-all duration-500 ease-in"
+                leaveFrom="transform opacity-100 max-h-[500px]"
+                leaveTo="transform opacity-0 max-h-0"
               >
-              <DisclosurePanel key={filter.id}>
-                <ul key={filter.id} className="space-y-5 pt-8 filter-scroll">
-                  {filter.values?.map((option) => (
-                    <li key={option.id}>{filterMarkup(filter, option)}</li>
-                  ))}
-                </ul>
-              </DisclosurePanel>
+                <DisclosurePanel key={filter.id}>
+                  <ul key={filter.id} className="space-y-5 filter-scroll overflow-hidden">
+                    {filter.values?.map((option) => (
+                      <li key={option.id}>{filterMarkup(filter, option)}</li>
+                    ))}
+                  </ul>
+                </DisclosurePanel>
               </Transition>
             </>
           )}
