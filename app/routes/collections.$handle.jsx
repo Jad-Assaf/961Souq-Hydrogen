@@ -201,83 +201,92 @@ export default function Collection() {
   };
 
   return (
-    <div className="collection">
-      <h1>{collection.title}</h1>
+    <CartProvider
+      onLineAdd={() => {
+        console.log('A line is being added');
+      }}
+      onLineAddComplete={() => {
+        console.log('A line has been added');
+      }}
+    >
+      <div className="collection">
+        <h1>{collection.title}</h1>
 
-      {sliderCollections && sliderCollections.length > 0 && (
-        <div className="slide-con">
-          <div className="category-slider">
-            {sliderCollections.map((sliderCollection) => (
-              sliderCollection && (
-                <Link
-                  key={sliderCollection.id}
-                  to={`/collections/${sliderCollection.handle}`}
-                  className="category-container"
-                >
-                  {sliderCollection.image && (
-                    <img
-                      src={sliderCollection.image.url}
-                      alt={sliderCollection.image.altText || sliderCollection.title}
-                      className="category-image"
-                      width={150}
-                      height={150}
-                    />
-                  )}
-                  <div className="category-title">{sliderCollection.title}</div>
-                </Link>
-              )
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col lg:flex-row w-[100%]">
-        {isDesktop && (
-          <div className="w-[220px]">
-            <FiltersDrawer
-              filters={collection.products.filters}
-              appliedFilters={appliedFilters}
-              onRemoveFilter={handleFilterRemove}
-            />
+        {sliderCollections && sliderCollections.length > 0 && (
+          <div className="slide-con">
+            <div className="category-slider">
+              {sliderCollections.map((sliderCollection) => (
+                sliderCollection && (
+                  <Link
+                    key={sliderCollection.id}
+                    to={`/collections/${sliderCollection.handle}`}
+                    className="category-container"
+                  >
+                    {sliderCollection.image && (
+                      <img
+                        src={sliderCollection.image.url}
+                        alt={sliderCollection.image.altText || sliderCollection.title}
+                        className="category-image"
+                        width={150}
+                        height={150}
+                      />
+                    )}
+                    <div className="category-title">{sliderCollection.title}</div>
+                  </Link>
+                )
+              ))}
+            </div>
           </div>
         )}
 
-        <div className="flex-1">
-          <DrawerFilter
-            filters={collection.products.filters}
-            appliedFilters={appliedFilters}
-            numberInRow={numberInRow}
-            onLayoutChange={handleLayoutChange}
-            productNumber={collection.products.nodes.length}
-            isDesktop={isDesktop}
-          />
-
-          <hr className='col-hr'></hr>
-
-          <PaginatedResourceSection
-            connection={collection.products}
-            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
-          >
-            {({ node: product, index }) => (
-              <ProductItem
-                key={product.id}
-                product={product}
-                loading={index < 50 ? 'eager' : undefined}
+        <div className="flex flex-col lg:flex-row w-[100%]">
+          {isDesktop && (
+            <div className="w-[220px]">
+              <FiltersDrawer
+                filters={collection.products.filters}
+                appliedFilters={appliedFilters}
+                onRemoveFilter={handleFilterRemove}
               />
-            )}
-          </PaginatedResourceSection>
-        </div>
-      </div>
+            </div>
+          )}
 
-      <Analytics.CollectionView
-        data={{
-          collection: {
-            id: collection.id,
-            handle: collection.handle,
-          },
-        }}
-      />
-    </div>
+          <div className="flex-1">
+            <DrawerFilter
+              filters={collection.products.filters}
+              appliedFilters={appliedFilters}
+              numberInRow={numberInRow}
+              onLayoutChange={handleLayoutChange}
+              productNumber={collection.products.nodes.length}
+              isDesktop={isDesktop}
+            />
+
+            <hr className='col-hr'></hr>
+
+            <PaginatedResourceSection
+              connection={collection.products}
+              resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            >
+              {({ node: product, index }) => (
+                <ProductItem
+                  key={product.id}
+                  product={product}
+                  loading={index < 50 ? 'eager' : undefined}
+                />
+              )}
+            </PaginatedResourceSection>
+          </div>
+        </div>
+
+        <Analytics.CollectionView
+          data={{
+            collection: {
+              id: collection.id,
+              handle: collection.handle,
+            },
+          }}
+        />
+      </div>
+    </CartProvider>
   );
 }
 
