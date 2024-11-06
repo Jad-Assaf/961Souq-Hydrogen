@@ -992,10 +992,6 @@ button#headlessui-menu-button-\:R3lab5\:{
   cursor: pointer;
 }
 
-.filter-list{
-  margin-top: 20px !important;
-}
-
 /* Add these styles to your CSS file */
 
 /* Input styles */
@@ -1071,10 +1067,37 @@ button#headlessui-menu-button-\:R3lab5\:{
   background-color: #e5e7eb;
 }
 
-.filter-scroll{
+.filter-scroll {
   max-height: 350px;
   overflow-y: auto;
   scroll-behavior: smooth;
+  margin-top: 20px !important;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Add these new classes */
+.disclosure-panel-enter {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.disclosure-panel-enter-active {
+  opacity: 1;
+  max-height: 350px;
+  transition: all 0.3s ease-in-out;
+}
+
+.disclosure-panel-exit {
+  opacity: 1;
+  max-height: 350px;
+}
+
+.disclosure-panel-exit-active {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
 }
 
 /*

@@ -6,6 +6,7 @@ import {
   MenuButton,
   MenuItem,
   MenuItems,
+  Transition,
 } from "@headlessui/react";
 import { CaretDown, Sliders } from "@phosphor-icons/react";
 import {
@@ -168,7 +169,7 @@ export function FiltersDrawer({
         <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
-            {/* You can add a placeholder or message here if desired */}
+            <p>Apply Some Filters</p>
           </div>
         </div>
       )}
@@ -176,7 +177,7 @@ export function FiltersDrawer({
         <Disclosure
           as="div"
           key={filter.id}
-          className="w-full pb-6 pt-7 border-t filter-scroll"
+          className="w-full pb-6 pt-7 border-t"
         >
           {({ open }) => (
             <>
@@ -188,13 +189,23 @@ export function FiltersDrawer({
                   <IconCaretRight className="w-4 h-4" />
                 )}
               </DisclosureButton>
+              <Transition
+                show={open}
+                enter="transition duration-300 ease-out"
+                enterFrom="transform opacity-0 max-h-0"
+                enterTo="transform opacity-100 max-h-[350px]"
+                leave="transition duration-300 ease-out"
+                leaveFrom="transform opacity-100 max-h-[350px]"
+                leaveTo="transform opacity-0 max-h-0"
+              >
               <DisclosurePanel key={filter.id}>
-                <ul key={filter.id} className="space-y-5 pt-8 filter-list">
+                <ul key={filter.id} className="space-y-5 pt-8 filter-scroll">
                   {filter.values?.map((option) => (
                     <li key={option.id}>{filterMarkup(filter, option)}</li>
                   ))}
                 </ul>
               </DisclosurePanel>
+              </Transition>
             </>
           )}
         </Disclosure>
