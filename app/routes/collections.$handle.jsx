@@ -103,20 +103,44 @@ export async function loadCriticalData({ context, params, request }) {
       throw new Response(`Collection ${handle} not found`, { status: 404 });
     }
 
-    // Fetch menu for slider collections
-    const { menu } = await storefront.query(MENU_QUERY, {
-      variables: { handle },
-    });
+    let menu = null;
+    let sliderCollections = [];
 
-    // Fetch collections for the slider based on the menu items
-    const sliderCollections = await Promise.all(
-      menu.items.map(async (item) => {
-        const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-          variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
-        });
-        return collection;
-      })
-    );
+    try {
+      // Fetch menu for slider collections
+      const menuResult = await storefront.query(MENU_QUERY, {
+        variables: { handle },
+      });
+      menu = menuResult.menu;
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+      // Don't throw here, just log the error and continue with an empty menu
+    }
+
+    // Only fetch slider collections if menu exists and has items
+    if (menu && menu.items && menu.items.length > 0) {
+      try {
+        // Fetch collections for the slider based on the menu items
+        sliderCollections = await Promise.all(
+          menu.items.map(async (item) => {
+            try {
+              const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
+                variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+              });
+              return collection;
+            } catch (error) {
+              console.error(`Error fetching collection for ${item.title}:`, error);
+              return null; // Return null for failed collection fetches
+            }
+          })
+        );
+        // Filter out any null results
+        sliderCollections = sliderCollections.filter(collection => collection !== null);
+      } catch (error) {
+        console.error("Error fetching slider collections:", error);
+        // If there's an error fetching slider collections, we'll just use an empty array
+      }
+    }
 
     // Process applied filters
     const appliedFilters = [];
@@ -173,8 +197,9 @@ export default function Collection() {
       <div className="slide-con">
         {/* <h3 className="cat-h3">{collection.title}</h3> */}
         <div className="category-slider">
-          {sliderCollections.map((sliderCollection) => (
-            sliderCollection && (
+          {sliderCollections && sliderCollections.length > 0 ? (
+            sliderCollections.map((sliderCollection) => (
+              sliderCollection && (
               <Link
                 key={sliderCollection.id}
                 to={`/collections/${sliderCollection.handle}`}
@@ -192,7 +217,10 @@ export default function Collection() {
                 <div className="category-title">{sliderCollection.title}</div>
               </Link>
             )
-          ))}
+          ))
+          ) : (
+            <p>No Collections to Display</p>
+        )}
         </div>
       </div>
 
