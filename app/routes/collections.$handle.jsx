@@ -5,6 +5,7 @@ import {
   Image,
   Money,
   Analytics,
+  VariantSelector,
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
@@ -16,7 +17,7 @@ import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
-import { CartProvider, useCart } from '@shopify/hydrogen-react';
+import { AddToCartButton } from '@shopify/hydrogen-react';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -201,94 +202,83 @@ export default function Collection() {
   };
 
   return (
-    <CartProvider
-      cartFragment={CART_FRAGMENT}
-      countryCode="LB" // Replace with your country code
-      onLineAdd={() => {
-        console.log('A line is being added');
-      }}
-      onLineAddComplete={() => {
-        console.log('A line has been added');
-      }}
-    >
-      <div className="collection">
-        <h1>{collection.title}</h1>
+    <div className="collection">
+      <h1>{collection.title}</h1>
 
-        {sliderCollections && sliderCollections.length > 0 && (
-          <div className="slide-con">
-            <div className="category-slider">
-              {sliderCollections.map((sliderCollection) => (
-                sliderCollection && (
-                  <Link
-                    key={sliderCollection.id}
-                    to={`/collections/${sliderCollection.handle}`}
-                    className="category-container"
-                  >
-                    {sliderCollection.image && (
-                      <img
-                        src={sliderCollection.image.url}
-                        alt={sliderCollection.image.altText || sliderCollection.title}
-                        className="category-image"
-                        width={150}
-                        height={150}
-                      />
-                    )}
-                    <div className="category-title">{sliderCollection.title}</div>
-                  </Link>
-                )
-              ))}
-            </div>
+      {sliderCollections && sliderCollections.length > 0 && (
+        <div className="slide-con">
+          <div className="category-slider">
+            {sliderCollections.map((sliderCollection) => (
+              sliderCollection && (
+                <Link
+                  key={sliderCollection.id}
+                  to={`/collections/${sliderCollection.handle}`}
+                  className="category-container"
+                >
+                  {sliderCollection.image && (
+                    <img
+                      src={sliderCollection.image.url}
+                      alt={sliderCollection.image.altText || sliderCollection.title}
+                      className="category-image"
+                      width={150}
+                      height={150}
+                    />
+                  )}
+                  <div className="category-title">{sliderCollection.title}</div>
+                </Link>
+              )
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col lg:flex-row w-[100%]">
+        {isDesktop && (
+          <div className="w-[220px]">
+            <FiltersDrawer
+              filters={collection.products.filters}
+              appliedFilters={appliedFilters}
+              onRemoveFilter={handleFilterRemove}
+            />
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row w-[100%]">
-          {isDesktop && (
-            <div className="w-[220px]">
-              <FiltersDrawer
-                filters={collection.products.filters}
-                appliedFilters={appliedFilters}
-                onRemoveFilter={handleFilterRemove}
+        <div className="flex-1">
+          <DrawerFilter
+            filters={collection.products.filters}
+            appliedFilters={appliedFilters}
+            numberInRow={numberInRow}
+            onLayoutChange={handleLayoutChange}
+            productNumber={collection.products.nodes.length}
+            isDesktop={isDesktop}
+          />
+
+          <hr className='col-hr'></hr>
+
+          <PaginatedResourceSection
+            connection={collection.products}
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+          >
+            {({ node: product, index }) => (
+              <ProductItem
+                key={product.id}
+                product={product}
+                loading={index < 50 ? 'eager' : undefined}
               />
-            </div>
-          )}
-
-          <div className="flex-1">
-            <DrawerFilter
-              filters={collection.products.filters}
-              appliedFilters={appliedFilters}
-              numberInRow={numberInRow}
-              onLayoutChange={handleLayoutChange}
-              productNumber={collection.products.nodes.length}
-              isDesktop={isDesktop}
-            />
-
-            <hr className='col-hr'></hr>
-
-            <PaginatedResourceSection
-              connection={collection.products}
-              resourcesClassName={`products-grid grid-cols-${numberInRow}`}
-            >
-              {({ node: product, index }) => (
-                <ProductItem
-                  key={product.id}
-                  product={product}
-                  loading={index < 50 ? 'eager' : undefined}
-                />
-              )}
-            </PaginatedResourceSection>
-          </div>
+            )}
+          </PaginatedResourceSection>
         </div>
-
-        <Analytics.CollectionView
-          data={{
-            collection: {
-              id: collection.id,
-              handle: collection.handle,
-            },
-          }}
-        />
       </div>
-    </CartProvider>
+
+      <Analytics.CollectionView
+        data={{
+          collection: {
+            id: collection.id,
+            handle: collection.handle,
+          },
+        }}
+      />
+    </div>
   );
 }
 
@@ -299,47 +289,20 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
-  const { linesAdd, status } = useCart();
-  const [isAdding, setIsAdding] = useState(false);
-
-  const variant = product.variants.nodes[0];
-  const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
-  const [isHovered, setIsHovered] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState(product.variants.nodes[0]);
+  const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
 
   const hasDiscount = product.compareAtPriceRange &&
     product.compareAtPriceRange.minVariantPrice.amount >
     product.priceRange.minVariantPrice.amount;
 
-  const handleAddToCart = async (e) => {
-    e.preventDefault();
-    setIsAdding(true);
-    try {
-      await linesAdd([
-        {
-          merchandiseId: variant.id,
-          quantity: 1,
-        },
-      ]);
-      // Optionally, add some feedback here, like a toast notification
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      // Optionally, show an error message to the user
-    } finally {
-      setIsAdding(false);
-    }
-  };
-
-
   return (
-    <Link
-      className="product-item-collection relative"
-      key={product.id}
-      prefetch="intent"
-      to={variantUrl}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="product-image-container relative">
+    <div className="product-item-collection">
+      <Link
+        key={product.id}
+        prefetch="intent"
+        to={variantUrl}
+      >
         {product.featuredImage && (
           <AnimatedImage
             srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
@@ -351,34 +314,86 @@ function ProductItem({ product, loading }) {
             height="auto"
           />
         )}
-
-        {/* Add to Cart Button */}
-        <div
-          className={`add-to-cart-overlay ${isHovered ? 'visible' : ''}`}
-        >
-          <button
-            onClick={handleAddToCart}
-            className={`add-to-cart-button ${isAdding ? 'loading' : ''}`}
-            disabled={isAdding || status === 'updating'}
-            aria-label="Add to Cart"
-          >
-            {isAdding ? 'Adding...' : 'Add to Cart'}
-          </button>
-        </div>
-      </div>
-
-      <h4>{truncateText(product.title, 20)}</h4>
-      <div className="price-container">
-        <small className={`current-price ${hasDiscount ? 'discounted' : ''}`}>
-          <Money data={product.priceRange.minVariantPrice} />
-        </small>
-        {hasDiscount && (
-          <small className="original-price">
-            <Money data={product.compareAtPriceRange.minVariantPrice} />
+        <h4>{truncateText(product.title, 20)}</h4>
+        <div className="price-container">
+          <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+            <Money data={selectedVariant.price} />
           </small>
-        )}
+          {hasDiscount && (
+            <small className="discountedPrice">
+              <Money data={selectedVariant.compareAtPrice} />
+            </small>
+          )}
+        </div>
+      </Link>
+      <ProductForm
+        product={product}
+        selectedVariant={selectedVariant}
+        setSelectedVariant={setSelectedVariant}
+      />
+    </div>
+  );
+}
+
+function ProductForm({ product, selectedVariant, setSelectedVariant }) {
+  const handleVariantChange = (variant) => {
+    setSelectedVariant(variant);
+  };
+
+  return (
+    <div className="product-form">
+      <VariantSelector
+        handle={product.handle}
+        options={product.options}
+        variants={product.variants.nodes}
+        onVariantChange={handleVariantChange}
+      >
+        {({ option }) => <ProductOptions key={option.name} option={option} />}
+      </VariantSelector>
+      <AddToCartButton
+        disabled={!selectedVariant || !selectedVariant.availableForSale}
+        lines={
+          selectedVariant
+            ? [
+              {
+                merchandiseId: selectedVariant.id,
+                quantity: 1,
+              },
+            ]
+            : []
+        }
+      >
+        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+      </AddToCartButton>
+    </div>
+  );
+}
+
+function ProductOptions({ option }) {
+  return (
+    <div className="product-options" key={option.name}>
+      <h5>{option.name}</h5>
+      <div className="product-options-grid">
+        {option.values.map(({ value, isAvailable, isActive, to }) => {
+          return (
+            <Link
+              className="product-options-item"
+              key={option.name + value}
+              prefetch="intent"
+              preventScrollReset
+              replace
+              to={to}
+              style={{
+                border: isActive ? '1px solid black' : '1px solid transparent',
+                opacity: isAvailable ? 1 : 0.3,
+              }}
+            >
+              {value}
+            </Link>
+          );
+        })}
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -508,68 +523,6 @@ const COLLECTION_QUERY = `#graphql
     }
   }
 `;
-
-const CART_FRAGMENT = `#graphql
-  fragment CartFragment on Cart {
-    id
-    checkoutUrl
-    totalQuantity
-    buyerIdentity {
-      countryCode
-      customer {
-        id
-        email
-        firstName
-        lastName
-        displayName
-      }
-      email
-      phone
-    }
-    lines(first: 100) {
-      edges {
-        node {
-          id
-          quantity
-          attributes {
-            key
-            value
-          }
-          merchandise {
-            ... on ProductVariant {
-              id
-              title
-              selectedOptions {
-                name
-                value
-              }
-              product {
-                id
-                title
-                handle
-              }
-            }
-          }
-        }
-      }
-    }
-    cost {
-      subtotalAmount {
-        amount
-        currencyCode
-      }
-      totalAmount {
-        amount
-        currencyCode
-      }
-      totalTaxAmount {
-        amount
-        currencyCode
-      }
-    }
-  }
-`;
-
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
