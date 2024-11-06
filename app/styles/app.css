@@ -273,101 +273,41 @@ button{
   text-decoration: line-through;
 }
 
-.add-to-cart-button {
-  width: 100%;
-  background-color: #000;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
+/* Modern flat design */
+.add-to-cart-button.modern {
+  background-color: #007AFF;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 500;
+  padding: 14px 28px;
+}
+
+/* Gradient style */
+.add-to-cart-button.gradient {
+  background: linear-gradient(45deg, #007AFF, #5856D6);
+  border-radius: 25px;
+  font-weight: 500;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  overflow: hidden;
 }
 
-.add-to-cart-button:hover {
-  background-color: #333;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.add-to-cart-button.gradient:hover {
+  background: linear-gradient(45deg, #5856D6, #007AFF);
+  transform: translateY(-2px) scale(1.02);
 }
 
-.add-to-cart-button:active {
-  transform: translateY(0);
-}
-
-.add-to-cart-button.disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  transform: none;
-  opacity: 0.7;
-}
-
-.add-to-cart-button.loading {
-  background-color: #666;
-  cursor: wait;
-}
-
-/* Optional: Add a loading animation */
-.add-to-cart-button.loading::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  border: 2px solid #fff;
-  border-radius: 50%;
-  border-top-color: transparent;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: translateY(-50%) rotate(360deg);
-  }
-}
-
-/* Alternative style with border */
-.add-to-cart-button.bordered {
+/* Minimal style */
+.add-to-cart-button.minimal {
   background-color: transparent;
   color: #000;
-  border: 2px solid #000;
+  border: 1px solid #000;
+  padding: 10px 20px;
+  font-weight: 400;
 }
 
-.add-to-cart-button.bordered:hover {
+.add-to-cart-button.minimal:hover {
   background-color: #000;
   color: white;
-}
-
-/* Success state */
-.add-to-cart-button.success {
-  background-color: #4CAF50;
-}
-
-/* For smaller screens */
-@media (max-width: 768px) {
-  .add-to-cart-button {
-    padding: 10px 20px;
-    font-size: 13px;
-  }
-}
-
-/* Optional: Add a container for better spacing */
-.product-form {
-  margin-top: 15px;
-  padding: 0 10px;
-}
-
-/* Optional: Add hover effect for the entire product card */
-.product-item-collection:hover .add-to-cart-button:not(.disabled) {
-  opacity: 1;
-  transform: translateY(-2px);
 }
 
 /*
