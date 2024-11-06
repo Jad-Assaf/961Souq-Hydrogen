@@ -202,6 +202,8 @@ export default function Collection() {
 
   return (
     <CartProvider
+      cartFragment={CART_FRAGMENT}
+      countryCode="LB" // Replace with your country code
       onLineAdd={() => {
         console.log('A line is being added');
       }}
@@ -312,7 +314,12 @@ function ProductItem({ product, loading }) {
     e.preventDefault();
     setIsAdding(true);
     try {
-      await linesAdd([{ merchandiseId: variant.id, quantity: 1 }]);
+      await linesAdd([
+        {
+          merchandiseId: variant.id,
+          quantity: 1,
+        },
+      ]);
       // Optionally, add some feedback here, like a toast notification
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -321,6 +328,7 @@ function ProductItem({ product, loading }) {
       setIsAdding(false);
     }
   };
+
 
   return (
     <Link
@@ -500,6 +508,68 @@ const COLLECTION_QUERY = `#graphql
     }
   }
 `;
+
+const CART_FRAGMENT = `#graphql
+  fragment CartFragment on Cart {
+    id
+    checkoutUrl
+    totalQuantity
+    buyerIdentity {
+      countryCode
+      customer {
+        id
+        email
+        firstName
+        lastName
+        displayName
+      }
+      email
+      phone
+    }
+    lines(first: 100) {
+      edges {
+        node {
+          id
+          quantity
+          attributes {
+            key
+            value
+          }
+          merchandise {
+            ... on ProductVariant {
+              id
+              title
+              selectedOptions {
+                name
+                value
+              }
+              product {
+                id
+                title
+                handle
+              }
+            }
+          }
+        }
+      }
+    }
+    cost {
+      subtotalAmount {
+        amount
+        currencyCode
+      }
+      totalAmount {
+        amount
+        currencyCode
+      }
+      totalTaxAmount {
+        amount
+        currencyCode
+      }
+    }
+  }
+`;
+
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
