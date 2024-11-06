@@ -18,7 +18,7 @@ import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
 import { AddToCartButton } from '../components/AddToCartButton';
-
+import { useAside } from '~/components/Aside';
 /**
  * @type {MetaFunction<typeof loader>}
  */
@@ -340,28 +340,29 @@ function ProductItem({ product, loading }) {
  * }}
  */
 function ProductForm({ product, selectedVariant, setSelectedVariant }) {
-  const handleVariantChange = (variant) => {
-    setSelectedVariant(variant);
-  };
+  const { open } = useAside(); // Add this line
 
   return (
     <div className="product-form">
       <VariantSelector
         handle={product.handle}
-        options={product.options}
+        options={product.options.filter((option) => option.values.length > 1)}
         variants={product.variants.nodes}
-        onVariantChange={handleVariantChange}
       >
         {({ option }) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
+        onClick={() => {
+          open('cart'); // Add this line
+        }}
         lines={
           selectedVariant
             ? [
               {
                 merchandiseId: selectedVariant.id,
                 quantity: 1,
+                selectedVariant, // Add this line
               },
             ]
             : []
@@ -390,6 +391,10 @@ function ProductOptions({ option }) {
               preventScrollReset
               replace
               to={to}
+              onClick={(e) => {
+                e.preventDefault(); // Add this line
+                // Handle variant selection here if needed
+              }}
               style={{
                 border: isActive ? '1px solid black' : '1px solid transparent',
                 opacity: isAvailable ? 1 : 0.3,
