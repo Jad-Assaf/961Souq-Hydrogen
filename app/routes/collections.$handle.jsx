@@ -288,7 +288,7 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
-  const { addLines } = useOptimisticCart(); // Use useOptimisticCart hook
+  const { cartAdd } = useOptimisticCart(); // Correct way to destructure
   const [isAdding, setIsAdding] = useState(false);
 
   const variant = product.variants.nodes[0];
@@ -303,7 +303,7 @@ function ProductItem({ product, loading }) {
     e.preventDefault();
     setIsAdding(true);
     try {
-      await addLines([{
+      await cartAdd([{
         merchandiseId: variant.id,
         quantity: 1
       }]);

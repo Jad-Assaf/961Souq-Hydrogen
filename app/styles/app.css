@@ -273,10 +273,14 @@ button{
   text-decoration: line-through;
 }
 
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
 .add-to-cart-overlay {
   position: absolute;
   bottom: -100%;
-  /* Start hidden below the image */
   left: 0;
   right: 0;
   background-color: rgba(255, 255, 255, 0.9);
@@ -289,7 +293,6 @@ button{
 
 .add-to-cart-overlay.visible {
   bottom: 0;
-  /* Slide up when visible */
 }
 
 .add-to-cart-button {
@@ -307,7 +310,6 @@ button{
   background-color: #333;
 }
 
-/* Optional: Add a loading state */
 .add-to-cart-button.loading {
   opacity: 0.7;
   cursor: wait;
