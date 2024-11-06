@@ -295,7 +295,10 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
-  const [selectedVariant, setSelectedVariant] = useState(product.variants.nodes[0]);
+  const [selectedVariant, setSelectedVariant] = useState(() => {
+    // Find the first available variant, or default to the first variant
+    return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+  });
   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
 
   const hasDiscount = product.compareAtPriceRange &&
@@ -325,7 +328,7 @@ function ProductItem({ product, loading }) {
           <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
             <Money data={selectedVariant.price} />
           </small>
-          {hasDiscount && (
+          {hasDiscount && selectedVariant.compareAtPrice && (
             <small className="discountedPrice">
               <Money data={selectedVariant.compareAtPrice} />
             </small>
