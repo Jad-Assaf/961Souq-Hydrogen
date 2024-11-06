@@ -1071,7 +1071,6 @@ button#headlessui-menu-button-\:R3lab5\:{
   max-height: 350px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  margin-top: 20px !important;
   transition: all 0.5s ease-in-out;
 }
 
@@ -1085,7 +1084,7 @@ button#headlessui-menu-button-\:R3lab5\:{
 .disclosure-panel-enter-active {
   opacity: 1;
   max-height: 350px;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 .disclosure-panel-exit {
@@ -1097,7 +1096,7 @@ button#headlessui-menu-button-\:R3lab5\:{
   opacity: 0;
   max-height: 0;
   overflow: hidden;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 /*

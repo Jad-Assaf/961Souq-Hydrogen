@@ -181,7 +181,7 @@ export function FiltersDrawer({
         >
           {({ open }) => (
             <>
-              <DisclosureButton className="flex w-full justify-between items-center">
+              <DisclosureButton className="flex w-full justify-between items-center mb-[20px]">
                 <span className="text-sm" style={{ textTransform: 'uppercase' }}>{filter.label}</span>
                 {open ? (
                   <IconCaretDown className="w-4 h-4" />
