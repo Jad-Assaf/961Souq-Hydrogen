@@ -324,12 +324,7 @@ function ProductItem({ product, loading }) {
         </div>
       </Link>
       <ProductForm
-        product={{
-          ...product,
-          handle: product.handle, // Make sure handle is explicitly passed
-          title: product.title,
-          id: product.id,
-        }}
+        product={product}
         selectedVariant={selectedVariant}
         setSelectedVariant={setSelectedVariant}
       />
@@ -346,29 +341,28 @@ function ProductItem({ product, loading }) {
  */
 function ProductForm({ product, selectedVariant, setSelectedVariant }) {
   const { open } = useAside();
+  const hasVariants = product.variants.nodes.length > 1;
 
   return (
     <div className="product-form">
-      <VariantSelector
-        handle={product.handle}
-        options={product.options.filter((option) => option.values.length > 1)}
-        variants={product.variants.nodes}
-      >
-        {({ option }) => <ProductOptions key={option.name} option={option} />}
-      </VariantSelector>
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
-          open('cart');
+          if (hasVariants) {
+            // Navigate to product page
+            window.location.href = `/products/${product.handle}`;
+          } else {
+            open('cart');
+          }
         }}
         lines={
-          selectedVariant
+          selectedVariant && !hasVariants
             ? [
               {
                 merchandiseId: selectedVariant.id,
                 quantity: 1,
-                attributes: [], // Add this
-                product: {     // Add this product information
+                attributes: [],
+                product: {
                   ...product,
                   selectedVariant,
                   handle: product.handle,
@@ -378,7 +372,11 @@ function ProductForm({ product, selectedVariant, setSelectedVariant }) {
             : []
         }
       >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        {!selectedVariant?.availableForSale
+          ? 'Sold out'
+          : hasVariants
+            ? 'Select Options'
+            : 'Add to cart'}
       </AddToCartButton>
     </div>
   );

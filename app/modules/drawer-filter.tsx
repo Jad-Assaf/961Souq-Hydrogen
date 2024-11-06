@@ -327,7 +327,7 @@ export function DrawerFilter({
   };
 
   return (
-    <div className="py-4 z-[10] bg-white/10 sticky sm:relative top-0 backdrop-blur-lg w-[100%] max-w-[1200px] m-auto">
+    <div className="py-4 z-[9] bg-white/10 sticky sm:relative top-0 backdrop-blur-lg w-[100%] max-w-[1200px] m-auto">
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
         <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
           <SortMenu showSearchSort={showSearchSort} />
