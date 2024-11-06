@@ -167,6 +167,7 @@ function sanitizeHandle(handle) {
   return handle
     .toLowerCase()
     .replace(/"/g, '')  // Remove all quotes
+    .replace(/&/g, '')  // Remove all quotes
     .replace(/\./g, '-')  // Replace periods with hyphens
     .replace(/\s+/g, '-');  // Replace spaces with hyphens (keeping this from the original code)
 }
