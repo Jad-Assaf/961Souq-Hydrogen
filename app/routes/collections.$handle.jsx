@@ -288,7 +288,7 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
-  const { cartAdd } = useOptimisticCart(); // Correct way to destructure
+  const { status, optimisticState, addLineItem } = useOptimisticCart(); // Correct usage
   const [isAdding, setIsAdding] = useState(false);
 
   const variant = product.variants.nodes[0];
@@ -303,10 +303,10 @@ function ProductItem({ product, loading }) {
     e.preventDefault();
     setIsAdding(true);
     try {
-      await cartAdd([{
+      await addLineItem({
         merchandiseId: variant.id,
         quantity: 1
-      }]);
+      });
       // Optionally, you can add some feedback here, like a toast notification
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -345,7 +345,7 @@ function ProductItem({ product, loading }) {
           <button
             onClick={handleAddToCart}
             className={`add-to-cart-button ${isAdding ? 'loading' : ''}`}
-            disabled={isAdding}
+            disabled={isAdding || status === 'updating'}
             aria-label="Add to Cart"
           >
             {isAdding ? 'Adding...' : 'Add to Cart'}
