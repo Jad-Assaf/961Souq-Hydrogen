@@ -169,7 +169,7 @@ export function FiltersDrawer({
         <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
-            <p>Apply Some Filters</p>
+            {/* <p>Apply Some Filters</p> */}
           </div>
         </div>
       )}

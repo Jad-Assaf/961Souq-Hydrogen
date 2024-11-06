@@ -883,7 +883,11 @@ button.reset:hover:not(:has(> *)) {
 */
 .collection {
   max-width: 1500px;
-  margin: auto;
+  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .collections-grid {
   display: grid;
