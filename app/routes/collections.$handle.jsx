@@ -124,8 +124,9 @@ export async function loadCriticalData({ context, params, request }) {
         sliderCollections = await Promise.all(
           menu.items.map(async (item) => {
             try {
+              const sanitizedHandle = sanitizeHandle(item.title);
               const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-                variables: { handle: item.title.toLowerCase().replace(/\s+/g, '-') },
+                variables: { handle: sanitizedHandle },
               });
               return collection;
             } catch (error) {
@@ -160,6 +161,14 @@ export async function loadCriticalData({ context, params, request }) {
     console.error("Error fetching collection:", error);
     throw new Response("Error fetching collection", { status: 500 });
   }
+}
+
+function sanitizeHandle(handle) {
+  return handle
+    .toLowerCase()
+    .replace(/"/g, '')  // Remove all quotes
+    .replace(/\./g, '-')  // Replace periods with hyphens
+    .replace(/\s+/g, '-');  // Replace spaces with hyphens (keeping this from the original code)
 }
 
 /**
