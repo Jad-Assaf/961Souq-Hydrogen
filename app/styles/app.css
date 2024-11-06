@@ -269,6 +269,7 @@ button{
 /* Product Price Styling */
 .product-price {
   font-size: 1rem;
+  font-weight: 600;
   color: #ff5722;
 }
 
@@ -284,7 +285,7 @@ button{
   padding: 12px 10px;
   border: none;
   border-radius: 30px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12px;
   cursor: pointer;
   transition: all .3s ease;
