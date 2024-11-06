@@ -263,13 +263,64 @@ button{
 }
 
 /* Product Price Styling */
-.product-price, .productPrice {
+.product-price {
   font-size: 1rem;
   color: #ff5722;
 }
 
 .discountedPrice{
   color: #4a4a4a;
+  text-decoration: line-through;
+}
+
+.add-to-cart-overlay {
+  position: absolute;
+  bottom: -100%;
+  /* Start hidden below the image */
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  transition: bottom 0.3s ease-in-out;
+}
+
+.add-to-cart-overlay.visible {
+  bottom: 0;
+  /* Slide up when visible */
+}
+
+.add-to-cart-button {
+  background-color: #000;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.add-to-cart-button:hover {
+  background-color: #333;
+}
+
+/* Optional: Add a loading state */
+.add-to-cart-button.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.product-item-collection {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.product-item-collection:hover {
+  transform: translateY(-2px);
 }
 
 /*

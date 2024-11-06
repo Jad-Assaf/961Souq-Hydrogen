@@ -5,6 +5,7 @@ import {
   Image,
   Money,
   Analytics,
+  useOptimisticCart,
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
@@ -287,38 +288,78 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
+  const { addLines } = useOptimisticCart(); // Use useOptimisticCart hook
+  const [isAdding, setIsAdding] = useState(false);
+
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
+  const [isHovered, setIsHovered] = useState(false);
 
   const hasDiscount = product.compareAtPriceRange &&
     product.compareAtPriceRange.minVariantPrice.amount >
     product.priceRange.minVariantPrice.amount;
 
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    setIsAdding(true);
+    try {
+      await addLines([{
+        merchandiseId: variant.id,
+        quantity: 1
+      }]);
+      // Optionally, you can add some feedback here, like a toast notification
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      // Optionally, show an error message to the user
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <Link
-      className="product-item-collection"
+      className="product-item-collection relative"
       key={product.id}
       prefetch="intent"
       to={variantUrl}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {product.featuredImage && (
-        <AnimatedImage
-          srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                   ${product.featuredImage.url}?width=600&quality=30 600w,
-                   ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-          alt={product.featuredImage.altText || product.title}
-          loading={loading}
-          width="100%"
-          height="auto"
-        />
-      )}
+      <div className="product-image-container relative">
+        {product.featuredImage && (
+          <AnimatedImage
+            srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+                     ${product.featuredImage.url}?width=600&quality=30 600w,
+                     ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+            alt={product.featuredImage.altText || product.title}
+            loading={loading}
+            width="100%"
+            height="auto"
+          />
+        )}
+
+        {/* Add to Cart Button */}
+        <div
+          className={`add-to-cart-overlay ${isHovered ? 'visible' : ''}`}
+        >
+          <button
+            onClick={handleAddToCart}
+            className={`add-to-cart-button ${isAdding ? 'loading' : ''}`}
+            disabled={isAdding}
+            aria-label="Add to Cart"
+          >
+            {isAdding ? 'Adding...' : 'Add to Cart'}
+          </button>
+        </div>
+      </div>
+
       <h4>{truncateText(product.title, 20)}</h4>
       <div className="price-container">
-        <small className={`productPrice ${hasDiscount ? 'discounted' : ''}`}>
+        <small className={`current-price ${hasDiscount ? 'discounted' : ''}`}>
           <Money data={product.priceRange.minVariantPrice} />
         </small>
         {hasDiscount && (
-          <small className="discountedPrice">
+          <small className="original-price">
             <Money data={product.compareAtPriceRange.minVariantPrice} />
           </small>
         )}
@@ -326,7 +367,6 @@ function ProductItem({ product, loading }) {
     </Link>
   );
 }
-
 
 const MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
@@ -387,9 +427,18 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     }
     variants(first: 1) {
       nodes {
+        id
         selectedOptions {
           name
           value
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
         }
       }
     }
