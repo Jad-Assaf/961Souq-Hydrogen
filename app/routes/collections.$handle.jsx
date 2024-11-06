@@ -193,36 +193,32 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {/* Slider Section */}
-      <div className="slide-con">
-        {/* <h3 className="cat-h3">{collection.title}</h3> */}
-        <div className="category-slider">
-          {sliderCollections && sliderCollections.length > 0 ? (
-            sliderCollections.map((sliderCollection) => (
+      {sliderCollections && sliderCollections.length > 0 && (
+        <div className="slide-con">
+          <div className="category-slider">
+            {sliderCollections.map((sliderCollection) => (
               sliderCollection && (
-              <Link
-                key={sliderCollection.id}
-                to={`/collections/${sliderCollection.handle}`}
-                className="category-container"
-              >
-                {sliderCollection.image && (
-                  <img
-                    src={sliderCollection.image.url}
-                    alt={sliderCollection.image.altText || sliderCollection.title}
-                    className="category-image"
-                    width={150}
-                    height={150}
-                  />
-                )}
-                <div className="category-title">{sliderCollection.title}</div>
-              </Link>
-            )
-          ))
-          ) : (
-            <p>No Collections to Display</p>
-        )}
+                <Link
+                  key={sliderCollection.id}
+                  to={`/collections/${sliderCollection.handle}`}
+                  className="category-container"
+                >
+                  {sliderCollection.image && (
+                    <img
+                      src={sliderCollection.image.url}
+                      alt={sliderCollection.image.altText || sliderCollection.title}
+                      className="category-image"
+                      width={150}
+                      height={150}
+                    />
+                  )}
+                  <div className="category-title">{sliderCollection.title}</div>
+                </Link>
+              )
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex flex-col lg:flex-row">
         {isDesktop && (
