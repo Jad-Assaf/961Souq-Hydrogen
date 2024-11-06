@@ -190,13 +190,12 @@ export function FiltersDrawer({
                 )}
               </DisclosureButton>
               <Transition
-                show={open}
                 enter="transition duration-500 ease-out"
-                enterFrom="transform opacity-0 max-h-0"
-                enterTo="transform opacity-100 max-h-[350px]"
-                leave="transition duration-500 ease-out"
-                leaveFrom="transform opacity-100 max-h-[350px]"
-                leaveTo="transform opacity-0 max-h-0"
+                enterFrom="transform scale-y-0 origin-top"
+                enterTo="transform scale-y-100 origin-top"
+                leave="transition duration-500 ease-in"
+                leaveFrom="transform scale-y-100 origin-top"
+                leaveTo="transform scale-y-0 origin-top"
               >
               <DisclosurePanel key={filter.id}>
                 <ul key={filter.id} className="space-y-5 pt-8 filter-scroll">
