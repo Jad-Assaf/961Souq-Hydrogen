@@ -17,7 +17,7 @@ import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
-import { AddToCartButton } from '@shopify/hydrogen-react';
+import { AddToCartButton } from '../components/AddToCartButton';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -288,6 +288,12 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
+/**
+ * @param {{
+ *   product: ProductFragment;
+ *   loading: boolean;
+ * }}
+ */
 function ProductItem({ product, loading }) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants.nodes[0]);
   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
@@ -335,6 +341,13 @@ function ProductItem({ product, loading }) {
   );
 }
 
+/**
+ * @param {{
+ *   product: ProductFragment;
+ *   selectedVariant: ProductVariantFragment;
+ *   setSelectedVariant: (variant: ProductVariantFragment) => void;
+ * }}
+ */
 function ProductForm({ product, selectedVariant, setSelectedVariant }) {
   const handleVariantChange = (variant) => {
     setSelectedVariant(variant);
@@ -369,6 +382,9 @@ function ProductForm({ product, selectedVariant, setSelectedVariant }) {
   );
 }
 
+/**
+ * @param {{ option: VariantOption }}
+ */
 function ProductOptions({ option }) {
   return (
     <div className="product-options" key={option.name}>
