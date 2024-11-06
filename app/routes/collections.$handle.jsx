@@ -314,14 +314,14 @@ function ProductItem({ product, loading }) {
       )}
       <h4>{truncateText(product.title, 20)}</h4>
       <div className="price-container">
+        <small className={`productPrice ${hasDiscount ? 'discounted' : ''}`}>
+          <Money data={product.priceRange.minVariantPrice} />
+        </small>
         {hasDiscount && (
-          <small className="original-price">
+          <small className="discountedPrice">
             <Money data={product.compareAtPriceRange.minVariantPrice} />
           </small>
         )}
-        <small className={`current-price ${hasDiscount ? 'discounted' : ''}`}>
-          <Money data={product.priceRange.minVariantPrice} />
-        </small>
       </div>
     </Link>
   );

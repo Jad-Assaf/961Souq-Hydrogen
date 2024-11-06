@@ -268,6 +268,10 @@ button{
   color: #ff5722;
 }
 
+.discountedPrice{
+  color: #4a4a4a;
+}
+
 /*
 * --------------------------------------------------
 * components/Aside
