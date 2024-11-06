@@ -39,10 +39,10 @@ async function loadCriticalData({ context }) {
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
     'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
-    'laptops', 'apple-iphone', 'samsung', 'monitors',
-    'car-accessories', 'fitness watches', 'garmin-smart-watch',
-    'apple-watch', 'samsung-watches', 'kitchen-appliances',
-    'cleaning-devices'
+    'laptops', 'apple-iphone', 'samsung-mobile-phones', 'monitors',
+    // 'car-accessories', 'fitness watches', 'garmin-smart-watch',
+    // 'apple-watch', 'samsung-watches', 'kitchen-appliances',
+    // 'cleaning-devices'
   ];
 
   // Fetch collections for product rows.

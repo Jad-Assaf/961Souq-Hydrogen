@@ -191,10 +191,10 @@ export function FiltersDrawer({
               </DisclosureButton>
               <Transition
                 show={open}
-                enter="transition duration-300 ease-out"
+                enter="transition duration-500 ease-out"
                 enterFrom="transform opacity-0 max-h-0"
                 enterTo="transform opacity-100 max-h-[350px]"
-                leave="transition duration-300 ease-out"
+                leave="transition duration-500 ease-out"
                 leaveFrom="transform opacity-100 max-h-[350px]"
                 leaveTo="transform opacity-0 max-h-0"
               >
