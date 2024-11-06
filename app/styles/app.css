@@ -1037,8 +1037,8 @@ button#headlessui-menu-button-\:R3lab5\:{
   display: flex;
   /* gap: 0.5rem; */
   justify-content: flex-start;
-  margin-left: 9px;
-  gap: 1rem;
+  margin-left: 12px;
+  gap: 1.3rem;
 }
 
 .price-filter-button {
@@ -1071,6 +1071,11 @@ button#headlessui-menu-button-\:R3lab5\:{
   background-color: #e5e7eb;
 }
 
+.filter-scroll{
+  max-height: 350px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
 
 /*
 * --------------------------------------------------
