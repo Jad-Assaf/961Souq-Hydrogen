@@ -290,6 +290,10 @@ function ProductItem({ product, loading }) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
 
+  const hasDiscount = product.compareAtPriceRange &&
+    product.compareAtPriceRange.minVariantPrice.amount >
+    product.priceRange.minVariantPrice.amount;
+
   return (
     <Link
       className="product-item-collection"
@@ -309,9 +313,16 @@ function ProductItem({ product, loading }) {
         />
       )}
       <h4>{truncateText(product.title, 20)}</h4>
-      <small>
-        <Money data={product.priceRange.minVariantPrice} className="productPrice"/>
-      </small>
+      <div className="price-container">
+        {hasDiscount && (
+          <small className="original-price">
+            <Money data={product.compareAtPriceRange.minVariantPrice} />
+          </small>
+        )}
+        <small className={`current-price ${hasDiscount ? 'discounted' : ''}`}>
+          <Money data={product.priceRange.minVariantPrice} />
+        </small>
+      </div>
     </Link>
   );
 }
