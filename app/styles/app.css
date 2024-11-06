@@ -942,7 +942,7 @@ button#headlessui-menu-button-\:R3lab5\:{
     position: relative !important;
   }
   .products-grid {
-    justify-content: flex-start;
+    justify-content: flex-start !important;
   }
 }
 

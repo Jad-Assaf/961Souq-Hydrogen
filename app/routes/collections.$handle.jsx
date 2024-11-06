@@ -304,8 +304,8 @@ function ProductItem({ product, loading }) {
                    ${product.featuredImage.url}?width=1200&quality=30 1200w`}
           alt={product.featuredImage.altText || product.title}
           loading={loading}
-          width="180px"
-          height="180px"
+          width="100%"
+          height="auto"
         />
       )}
       <h4>{truncateText(product.title, 20)}</h4>
