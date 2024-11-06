@@ -177,7 +177,7 @@ export function FiltersDrawer({
         <Disclosure
           as="div"
           key={filter.id}
-          className="w-full pb-6 pt-7 border-t"
+          className="w-full pt-7 border-t"
         >
           {({ open }) => (
             <>
@@ -190,11 +190,11 @@ export function FiltersDrawer({
                 )}
               </DisclosureButton>
               <Transition
-                enter="transition-all duration-500 ease-out"
+                enter="transition-all duration-300 ease-out"
                 enterFrom="transform opacity-0 max-h-0"
-                enterTo="transform opacity-100 max-h-[500px]"
-                leave="transition-all duration-500 ease-in"
-                leaveFrom="transform opacity-100 max-h-[500px]"
+                enterTo="transform opacity-100 max-h-[350px]"
+                leave="transition-all duration-300 ease-in"
+                leaveFrom="transform opacity-100 max-h-[350px]"
                 leaveTo="transform opacity-0 max-h-0"
               >
                 <DisclosurePanel key={filter.id}>
