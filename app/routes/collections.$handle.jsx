@@ -310,7 +310,7 @@ function ProductItem({ product, loading }) {
       )}
       <h4>{truncateText(product.title, 20)}</h4>
       <small>
-        <Money data={product.priceRange.minVariantPrice} />
+        <Money data={product.priceRange.minVariantPrice} className="productPrice"/>
       </small>
     </Link>
   );

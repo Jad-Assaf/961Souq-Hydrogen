@@ -263,7 +263,7 @@ button{
 }
 
 /* Product Price Styling */
-.product-price {
+.product-price, .productPrice {
   font-size: 1rem;
   color: #ff5722;
 }
