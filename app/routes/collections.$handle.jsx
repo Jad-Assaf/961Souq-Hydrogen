@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
-import { useCart } from '@shopify/hydrogen';
+import { CartProvider, useCart } from '@shopify/hydrogen-react';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -288,7 +288,7 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
-  const { lines, status, addLine } = useCart();
+  const { linesAdd, status } = useCart();
   const [isAdding, setIsAdding] = useState(false);
 
   const variant = product.variants.nodes[0];
@@ -303,11 +303,8 @@ function ProductItem({ product, loading }) {
     e.preventDefault();
     setIsAdding(true);
     try {
-      await addLine({
-        merchandiseId: variant.id,
-        quantity: 1
-      });
-      // Optionally, you can add some feedback here, like a toast notification
+      await linesAdd([{ merchandiseId: variant.id, quantity: 1 }]);
+      // Optionally, add some feedback here, like a toast notification
     } catch (error) {
       console.error('Error adding to cart:', error);
       // Optionally, show an error message to the user
