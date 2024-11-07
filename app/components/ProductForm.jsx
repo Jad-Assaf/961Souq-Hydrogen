@@ -13,9 +13,8 @@ import {useAside} from '~/components/Aside';
 export function ProductForm({product, selectedVariant, variants, quantity = 1}) { // Provide default value
   const {open} = useAside();
 
-  console.log('Received quantity:', quantity);
+  // Ensure quantity is a valid number and at least 1
   const safeQuantity = typeof quantity === 'number' && quantity > 0 ? quantity : 1;
-  console.log('Safe quantity:', safeQuantity);
 
   return (
     <div className="product-form">
@@ -30,7 +29,6 @@ export function ProductForm({product, selectedVariant, variants, quantity = 1}) 
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
-          console.log('Adding to cart with quantity:', safeQuantity);
           open('cart');
         }}
         lines={
