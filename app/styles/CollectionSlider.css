@@ -6,6 +6,7 @@
 }
 
 .slide-con {
+    width: 100vw;
     max-width: 1350px;
     display: flex;
     flex-direction: column;
