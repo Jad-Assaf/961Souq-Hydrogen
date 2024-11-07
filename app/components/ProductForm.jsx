@@ -15,9 +15,13 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1, 
   const {open} = useAside();
 
   const handleBuyNow = () => {
-    const checkoutUrl = `/checkout?variantId=${selectedVariant.id}&quantity=${quantity}`;
-    window.location.href = checkoutUrl;
+    if (selectedVariant && selectedVariant.availableForSale) {
+      // Use the checkoutUrl from the selected variant
+      const checkoutUrl = `${selectedVariant.checkoutUrl}?quantity=${quantity}`;
+      window.location.href = checkoutUrl;
+    }
   };
+
 
 
   const safeQuantity = typeof quantity === 'number' && quantity > 0 ? quantity : 1;
@@ -51,7 +55,7 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1, 
       >
         {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
       </AddToCartButton>
-      {showBuyNow && (
+      {showBuyNow && selectedVariant && selectedVariant.availableForSale && (
         <button type="button" onClick={handleBuyNow} className="buy-now-btn">
           Buy Now
         </button>
