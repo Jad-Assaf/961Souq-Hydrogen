@@ -54,18 +54,3 @@
     font-size: 12px;
     color: #333;
 }
-
-.buy-now-btn {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-    border-radius: 5px;
-}
-
-.buy-now-btn:hover {
-    background-color: #218838;
-}

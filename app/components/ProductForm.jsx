@@ -11,18 +11,8 @@ import {useAside} from '~/components/Aside';
  *   variants: Array<ProductVariantFragment>;
  * }}
  */
-export function ProductForm({ product, selectedVariant, variants, quantity = 1, showBuyNow }) {
+export function ProductForm({product, selectedVariant, variants, quantity = 1}) {
   const {open} = useAside();
-
-  const handleBuyNow = () => {
-    if (selectedVariant && selectedVariant.availableForSale) {
-      // Construct the checkout URL with the quantity
-      const checkoutUrl = `${selectedVariant.checkoutUrl}?quantity=${quantity}`;
-      window.location.href = checkoutUrl;
-    }
-  };
-
-
 
   const safeQuantity = typeof quantity === 'number' && quantity > 0 ? quantity : 1;
 
@@ -55,15 +45,6 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1, 
       >
         {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
       </AddToCartButton>
-      {showBuyNow && selectedVariant && selectedVariant.availableForSale && (
-        <button
-          type="button"
-          onClick={handleBuyNow}
-          className="buy-now-button"
-        >
-          Buy Now
-        </button>
-      )}
     </div>
   );
 }
