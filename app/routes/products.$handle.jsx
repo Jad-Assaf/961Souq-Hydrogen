@@ -11,6 +11,7 @@ import { ProductPrice } from '~/components/ProductPrice';
 import { ProductImages } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
+import { DirectCheckoutButton } from '../components/ProductForm';
 
 
 export const meta = ({ data }) => {
