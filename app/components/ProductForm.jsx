@@ -1,5 +1,6 @@
 import {Link} from '@remix-run/react';
 import {VariantSelector} from '@shopify/hydrogen';
+import React from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 
@@ -10,10 +11,15 @@ import {useAside} from '~/components/Aside';
  *   variants: Array<ProductVariantFragment>;
  * }}
  */
-export function ProductForm({product, selectedVariant, variants, quantity = 1}) { // Provide default value
+export function ProductForm({ product, selectedVariant, variants, quantity = 1, showBuyNow }) {
   const {open} = useAside();
 
-  // Ensure quantity is a valid number and at least 1
+  const handleBuyNow = () => {
+    const checkoutUrl = `/checkout?variantId=${selectedVariant.id}&quantity=${quantity}`;
+    window.location.href = checkoutUrl;
+  };
+
+
   const safeQuantity = typeof quantity === 'number' && quantity > 0 ? quantity : 1;
 
   return (
@@ -45,6 +51,11 @@ export function ProductForm({product, selectedVariant, variants, quantity = 1}) 
       >
         {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
       </AddToCartButton>
+      {showBuyNow && (
+        <button type="button" onClick={handleBuyNow} className="buy-now-btn">
+          Buy Now
+        </button>
+      )}
     </div>
   );
 }
