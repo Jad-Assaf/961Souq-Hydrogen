@@ -175,7 +175,7 @@ button {
   scroll-behavior: smooth;
   cursor: grab;
   position: relative;
-  /* Ensure buttons are aligned correctly */
+  scrollbar-width: none;
 }
 
 .collection-products-row:active {
@@ -283,15 +283,14 @@ button {
 }
 
 .add-to-cart-button {
-  width: 300px;
+  width: 50%;
   background-color: #2172af;
   color: #f5f5f5;
   padding: 12px 10px;
   border: none;
   border-radius: 30px;
   font-weight: 500;
-  font-size: 12px;
-  cursor: pointer;
+  font-size: 14px;
   transition: all .3s ease;
   text-transform: uppercase;
   letter-spacing: .5px;
