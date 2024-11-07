@@ -44,6 +44,10 @@
   }
 }
 
+html{
+  scrollbar-color: #2171af83 #00000014;
+}
+
 body {
   font-family: "Montserrat", sans-serif;
 }
