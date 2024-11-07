@@ -61,7 +61,7 @@
 }
 
 .buy-now-button {
-    width: 400px;
+    width: 95%;
     background-color: #f5f5f5;
     color: #2172af;
     padding: 12px 10px;
@@ -76,6 +76,7 @@
     overflow: hidden;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     margin: 15px 0;
+    max-width: 450px;
 }
 
 .buy-now-button:hover {
