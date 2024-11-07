@@ -1050,12 +1050,6 @@ button#headlessui-menu-button-\:R3lab5\: {
   }
 }
 
-@media (min-width: 1024px) {
-  .products-grid {
-    justify-content: flex-start !important;
-  }
-}
-
 /*
 * --------------------------------------------------
 * routes/collections.$handle.tsx
