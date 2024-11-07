@@ -177,7 +177,6 @@ export default function Product() {
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
-    id
     availableForSale
     checkoutUrl
     compareAtPrice {
