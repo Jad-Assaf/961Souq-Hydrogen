@@ -1,3 +1,17 @@
+.ProductPageTop{
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+
+.product-images-container{
+    width: 50%;
+}
+
+.product-main{
+    width: 50%;
+}
+
 .product-price{
     font-size: 18px;
     font-weight: 600;
