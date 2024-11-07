@@ -1104,6 +1104,12 @@ button#headlessui-menu-button-\:R3lab5\:{
     max-width: 170px;
   }
 }
+@media (max-width: 360px) {
+  .product-item-collection {
+    min-width: 160px;
+    max-width: 160px;
+  }
+}
 
 .fltr-btn{
   padding: 10px;
