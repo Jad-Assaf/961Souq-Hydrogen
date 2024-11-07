@@ -1062,7 +1062,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   flex-wrap: wrap;
   gap: 1.5rem;
   max-width: 1200px;
-  margin: 50px auto auto auto;
+  margin: 20px auto auto auto;
   row-gap: 30px;
 }
 
@@ -1087,10 +1087,11 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .collection h4 {
   max-height: 85px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   min-height: 85px;
-  overflow: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 .products-grid a .image-wrapper span.lazy-load-image-background.blur.lazy-load-image-loaded {
