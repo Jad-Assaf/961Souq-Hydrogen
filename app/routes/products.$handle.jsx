@@ -33,8 +33,15 @@ async function loadCriticalData({ context, params, request }) {
   }
 
   const { product } = await storefront.query(PRODUCT_QUERY, {
-    variables: { handle, selectedOptions: getSelectedProductOptions(request) || [] },
+    variables: {
+      handle,
+      selectedOptions: getSelectedProductOptions(request) || [],
+      country: context.storefront.i18n?.country,
+      language: context.storefront.i18n?.language,
+    },
   });
+
+  console.log('Product Response:', product);
 
   if (!product?.id) {
     throw new Response('Product not found', { status: 404 });
