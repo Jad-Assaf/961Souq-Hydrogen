@@ -95,50 +95,54 @@ export default function Product() {
     <div className="product">
       <ProductImages images={images.edges} />
       <div className="product-main">
-        <h1>{title}</h1>
-        <ProductPrice
-          price={selectedVariant?.price}
-          compareAtPrice={selectedVariant?.compareAtPrice}
-        />
-        <br />
-        <Suspense
-          fallback={
-            <ProductForm
-              product={product}
-              selectedVariant={selectedVariant}
-              variants={[]}
-            />
-          }
-        >
-          <Await resolve={variants} errorElement="There was a problem loading product variants">
-            {(data) => (
+        <div className="ProductPageTop">
+          <h1>{title}</h1>
+          <ProductPrice
+            price={selectedVariant?.price}
+            compareAtPrice={selectedVariant?.compareAtPrice}
+          />
+          <br />
+          <Suspense
+            fallback={
               <ProductForm
                 product={product}
                 selectedVariant={selectedVariant}
-                variants={data?.product?.variants.nodes || []}
+                variants={[]}
               />
-            )}
-          </Await>
-        </Suspense>
-        <br />
-        <p><strong>Description</strong></p>
-        <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
-        <Analytics.ProductView
-          data={{
-            products: [
-              {
-                id: product.id,
-                title: product.title,
-                price: selectedVariant?.price.amount || '0',
-                vendor: product.vendor,
-                variantId: selectedVariant?.id || '',
-                variantTitle: selectedVariant?.title || '',
-                quantity: 1,
-              },
-            ],
-          }}
-        />
-      </div>
+            }
+          >
+            <Await resolve={variants} errorElement="There was a problem loading product variants">
+              {(data) => (
+                <ProductForm
+                  product={product}
+                  selectedVariant={selectedVariant}
+                  variants={data?.product?.variants.nodes || []}
+                />
+              )}
+            </Await>
+          </Suspense>
+        </div>
+      <br />
+        <div className="ProductPageBottom">
+          <p><strong>Description</strong></p>
+          <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
+            <Analytics.ProductView
+              data={{
+                products: [
+                  {
+                    id: product.id,
+                    title: product.title,
+                    price: selectedVariant?.price.amount || '0',
+                    vendor: product.vendor,
+                    variantId: selectedVariant?.id || '',
+                    variantTitle: selectedVariant?.title || '',
+                    quantity: 1,
+                  },
+                ],
+              }}
+            />
+          </div>
+        </div>
     </div>
   );
 }
