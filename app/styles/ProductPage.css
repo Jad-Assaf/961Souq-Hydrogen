@@ -57,19 +57,87 @@
 }
 
 .buy-now-button {
-    display: block;
-    width: 100%;
-    padding: 10px 20px;
-    margin-top: 20px;
-    background-color: #000;
-    color: #fff;
+    width: 95%;
+    background-color: #232323;
+    color: #2172af;
+    padding: 12px 10px;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 12px;
     cursor: pointer;
+    transition: all .3s ease;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    position: relative;
+    overflow: hidden;
 }
 
-.buy-now-button:disabled {
+.buy-now-button:hover {
+    background-color: #2172af;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.buy-now-button:active {
+    transform: translateY(0);
+}
+
+.buy-now-button.disabled {
     background-color: #ccc;
     cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+.buy-now-button.loading {
+    background-color: #666;
+    cursor: wait;
+}
+
+/* Optional: Add a loading animation */
+.buy-now-button.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+/* Alternative style with border */
+.buy-now-button.bordered {
+    background-color: transparent;
+    color: #000;
+    border: 2px solid #000;
+}
+
+.buy-now-button.bordered:hover {
+    background-color: #000;
+    color: white;
+}
+
+/* Success state */
+.buy-now-button.success {
+    background-color: #4CAF50;
+}
+
+/* For smaller screens */
+@media (max-width: 768px) {
+    .buy-now-button {
+        padding: 10px 10px;
+        width: 100%;
+    }
 }
