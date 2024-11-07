@@ -307,7 +307,7 @@ function ProductItem({ product, loading }) {
                      ${product.featuredImage.url}?width=1200&quality=30 1200w`}
             alt={product.featuredImage.altText || product.title}
             loading={loading}
-            width="100%"
+            width="180px"
             height="auto"
           />
         )}
