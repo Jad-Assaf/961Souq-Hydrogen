@@ -139,12 +139,15 @@ export default function Product() {
           >
             <Await resolve={variants} errorElement="There was a problem loading product variants">
               {(data) => (
-                <ProductForm
+                <><ProductForm
                   product={product}
                   selectedVariant={selectedVariant}
                   variants={data?.product?.variants.nodes || []}
-                  quantity={quantity}
-                />
+                  quantity={quantity} />
+                  <DirectCheckoutButton
+                    selectedVariant={selectedVariant}
+                    quantity={quantity} />
+                </>
               )}
             </Await>
           </Suspense>

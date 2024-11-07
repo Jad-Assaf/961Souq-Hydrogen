@@ -1,5 +1,5 @@
 import {Link} from '@remix-run/react';
-import {VariantSelector} from '@shopify/hydrogen';
+import {CartForm, VariantSelector} from '@shopify/hydrogen';
 import React from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
@@ -78,6 +78,45 @@ function ProductOptions({option}) {
       </div>
       <br />
     </div>
+  );
+}
+
+export function DirectCheckoutButton({ selectedVariant, quantity }) {
+  if (!selectedVariant || !selectedVariant.availableForSale) return null;
+
+  return (
+    <CartForm
+      route="/cart"
+      action={CartForm.ACTIONS.LinesAdd}
+      inputs={{
+        lines: [
+          {
+            merchandiseId: selectedVariant.id,
+            quantity: quantity,
+          },
+        ],
+      }}
+    >
+      {(fetcher) => {
+        if (fetcher.state === 'submitting') {
+          return <p>Processing...</p>;
+        }
+
+        if (fetcher.data?.cart?.checkoutUrl) {
+          window.location.href = fetcher.data.cart.checkoutUrl;
+        }
+
+        return (
+          <button
+            type="submit"
+            disabled={!selectedVariant || !selectedVariant.availableForSale}
+            className="buy-now-button"
+          >
+            Buy Now
+          </button>
+        );
+      }}
+    </CartForm>
   );
 }
 
