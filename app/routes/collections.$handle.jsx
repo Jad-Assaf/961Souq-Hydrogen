@@ -328,7 +328,7 @@ function ProductItem({ product, loading }) {
             height={180}
           />
         )}
-        <h4>{truncateText(product.title, 20)}</h4>
+        <h4>{truncateText(product.title, 50)}</h4>
         <div className="price-container">
           <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
             <Money data={selectedVariant.price} />

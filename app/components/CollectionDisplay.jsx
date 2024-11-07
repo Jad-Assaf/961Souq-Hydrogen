@@ -158,7 +158,7 @@ function ProductRow({ products }) {
                                 width="180px"
                                 height="180px"
                             />
-                            <h4 className="product-title">{truncateText(product.title, 20)}</h4>
+                            <h4 className="product-title">{truncateText(product.title, 50)}</h4>
                             <div className="product-price">
                                 <Money data={product.priceRange.minVariantPrice} />
                             </div>
