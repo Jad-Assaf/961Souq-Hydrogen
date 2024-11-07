@@ -119,7 +119,7 @@ export default function Product() {
             compareAtPrice={selectedVariant?.compareAtPrice}
           />
           <div className="quantity-selector">
-            <p style={fontSize= "14px"}>Quantity</p>
+            <p>Quantity</p>
             <button onClick={decrementQuantity} className="quantity-btn">-</button>
             <span className="quantity-display">{quantity}</span>
             <button onClick={incrementQuantity} className="quantity-btn">+</button>

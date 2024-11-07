@@ -30,6 +30,10 @@
     justify-content: center;
 }
 
+.quantity-selector p{
+    font-size: 14px;
+}
+
 .quantity-btn {
     background-color: #f5f5f5;
     border: 1px solid #ddd;
