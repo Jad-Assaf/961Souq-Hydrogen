@@ -126,7 +126,7 @@ export default function Product() {
                 product={product}
                 selectedVariant={selectedVariant}
                 variants={[]}
-                quantity={quantity}
+                quantity={Number(quantity)}
               />
             }
           >
