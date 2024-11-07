@@ -144,6 +144,7 @@ export default function Product() {
                   selectedVariant={selectedVariant}
                   variants={data?.product?.variants.nodes || []}
                   quantity={quantity}
+                  showBuyNow={true}
                 />
               )}
             </Await>
