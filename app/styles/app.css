@@ -1093,6 +1093,11 @@ button#headlessui-menu-button-\:R3lab5\:{
   overflow: hidden;
 }
 
+.products-grid a .image-wrapper span.lazy-load-image-background.blur.lazy-load-image-loaded{
+  width: 100% !important;
+  height: auto !important;
+}
+
 @media (max-width: 768px) {
   .product-item-collection {
     min-width: 170px;
