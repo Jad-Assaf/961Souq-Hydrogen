@@ -76,8 +76,7 @@ export function ProductImages({ images }) {
               alt={image.altText || 'Thumbnail Image'}
               aspectRatio="1/1"
               data={image}
-              width={100}
-              height={100}
+              sizes="200px"
             />
           </div>
         ))}
