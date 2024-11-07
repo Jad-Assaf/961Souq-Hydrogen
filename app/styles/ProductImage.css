@@ -10,6 +10,8 @@
     display: flex;
     flex-direction: row;
     gap: 10px;
+    max-width: 75%;
+    overflow-x: auto;
 }
 
 .thumbnail {
@@ -19,8 +21,6 @@
     border: 2px solid transparent;
     border-radius: 8px;
     transition: border 0.3s, transform 0.2s;
-    max-width: 75%;
-    overflow-x: auto;
 }
 
 .thumbnail.active {
