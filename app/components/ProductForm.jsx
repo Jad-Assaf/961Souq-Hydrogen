@@ -10,8 +10,12 @@ import {useAside} from '~/components/Aside';
  *   variants: Array<ProductVariantFragment>;
  * }}
  */
-export function ProductForm({product, selectedVariant, variants}) {
+export function ProductForm({product, selectedVariant, variants, quantity = 1}) { // Provide default value
   const {open} = useAside();
+
+  // Ensure quantity is a valid number and at least 1
+  const safeQuantity = typeof quantity === 'number' && quantity > 0 ? quantity : 1;
+
   return (
     <div className="product-form">
       <VariantSelector
@@ -32,7 +36,7 @@ export function ProductForm({product, selectedVariant, variants}) {
             ? [
                 {
                   merchandiseId: selectedVariant.id,
-                  quantity: 1,
+                  quantity: safeQuantity, // Use safeQuantity instead of quantity
                   selectedVariant,
                 },
               ]
