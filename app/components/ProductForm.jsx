@@ -93,6 +93,8 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
           {
             merchandiseId: selectedVariant.id,
             quantity: quantity,
+            selectedOptions: selectedVariant.selectedOptions,
+            selectedVariant: selectedVariant,
           },
         ],
       }}
