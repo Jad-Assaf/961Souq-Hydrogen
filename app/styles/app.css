@@ -104,10 +104,6 @@ button{
     margin: 0 auto !important;
   }
 
-  .product-card img {
-    width: 155px !important;
-  }
-
   .product-item {
     min-width: unset !important;
     width: 175px !important;
@@ -279,7 +275,7 @@ button{
 }
 
 .add-to-cart-button {
-  width: 90%;
+  width: 95%;
   background-color: #2172af;
   color: #fff;
   padding: 12px 10px;
@@ -359,8 +355,8 @@ button{
 /* For smaller screens */
 @media (max-width: 768px) {
   .add-to-cart-button {
-    padding: 10px 20px;
-    font-size: 13px;
+    padding: 10px 10px;
+    width: 100%;
   }
 }
 
