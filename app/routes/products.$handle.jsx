@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { Await, useLoaderData } from '@remix-run/react';
 import {
@@ -10,6 +10,7 @@ import { getVariantUrl } from '~/lib/variants';
 import { ProductPrice } from '~/components/ProductPrice';
 import { ProductImages } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
+import "../styles/ProductPage.css"
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -89,6 +90,17 @@ export default function Product() {
     variants
   );
 
+  const [quantity, setQuantity] = useState(1);
+
+  // Add these handler functions
+  const incrementQuantity = () => {
+    setQuantity(prev => prev + 1);
+  };
+
+  const decrementQuantity = () => {
+    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  };
+
   const { title, descriptionHtml, images } = product;
 
   return (
@@ -101,6 +113,11 @@ export default function Product() {
             price={selectedVariant?.price}
             compareAtPrice={selectedVariant?.compareAtPrice}
           />
+          <div className="quantity-selector">
+            <button onClick={decrementQuantity} className="quantity-btn">-</button>
+            <span className="quantity-display">{quantity}</span>
+            <button onClick={incrementQuantity} className="quantity-btn">+</button>
+          </div>
           <br />
           <Suspense
             fallback={
@@ -108,6 +125,7 @@ export default function Product() {
                 product={product}
                 selectedVariant={selectedVariant}
                 variants={[]}
+                quantity={quantity}
               />
             }
           >
