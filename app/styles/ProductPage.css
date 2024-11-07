@@ -75,7 +75,7 @@
     position: relative;
     overflow: hidden;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-    margin: 10px 0 0 10px;
+    margin: 15px 0;
 }
 
 .buy-now-button:hover {
