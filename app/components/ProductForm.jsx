@@ -16,7 +16,7 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1, 
 
   const handleBuyNow = () => {
     if (selectedVariant && selectedVariant.availableForSale) {
-      // Use the checkoutUrl from the selected variant
+      // Construct the checkout URL with the quantity
       const checkoutUrl = `${selectedVariant.checkoutUrl}?quantity=${quantity}`;
       window.location.href = checkoutUrl;
     }
@@ -56,7 +56,11 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1, 
         {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
       </AddToCartButton>
       {showBuyNow && selectedVariant && selectedVariant.availableForSale && (
-        <button type="button" onClick={handleBuyNow} className="buy-now-btn">
+        <button
+          type="button"
+          onClick={handleBuyNow}
+          className="buy-now-button"
+        >
           Buy Now
         </button>
       )}
