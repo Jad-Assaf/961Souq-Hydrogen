@@ -1098,7 +1098,7 @@ button#headlessui-menu-button-\:R3lab5\:{
   height: auto !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 425px) {
   .product-item-collection {
     min-width: 170px;
     max-width: 170px;
