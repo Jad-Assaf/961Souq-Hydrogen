@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Pagination } from '@shopify/hydrogen';
+import '../styles/Pagination.css'
 
 export function PaginatedResourceSection({
   connection,
@@ -36,17 +37,21 @@ export function PaginatedResourceSection({
 
         return (
           <div>
-            <PreviousLink>
-              {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-            </PreviousLink>
+            <div className="pagination-buttons">
+              <PreviousLink className="pagination-button">
+                {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+              </PreviousLink>
+            </div>
             {resourcesClassName ? (
               <div className={resourcesClassName}>{resourcesMarkup}</div>
             ) : (
               resourcesMarkup
             )}
-            <NextLink className="next-link">
-              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-            </NextLink>
+            <div className="pagination-buttons">
+              <NextLink className="pagination-button next-link">
+                {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+              </NextLink>
+            </div>
           </div>
         );
       }}

@@ -1004,10 +1004,10 @@ button.reset:hover:not(:has(> *)) {
   height: auto;
 }
 
-.products-grid {
+/* .products-grid {
   display: grid;
   gap: 1rem;
-}
+} */
 
 .grid-cols-4 {
   grid-template-columns: repeat(4, 1fr);
@@ -1063,6 +1063,7 @@ button#headlessui-menu-button-\:R3lab5\:{
   gap: 1.5rem;
   max-width: 1200px;
   margin: 50px auto auto auto;
+  row-gap: 30px;
 }
 
 .col-hr {
@@ -1081,7 +1082,7 @@ button#headlessui-menu-button-\:R3lab5\:{
   min-height: 350px;
   text-align: center;
   text-decoration: none;
-  margin-bottom: 50px;
+  /* margin-bottom: 30px; */
 }
 
 .collection h4{
