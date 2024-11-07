@@ -45,7 +45,9 @@
 }
 
 html{
-  scrollbar-color: #2171af83 #00000014;
+  scrollbar-color: #0492ff54 #00000014;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable both-edges;
 }
 
 body {
@@ -259,7 +261,9 @@ button {
   white-space: pre-wrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 130px;
+  min-height: 100px;
+  max-height: 100px;
+  overflow-y: auto;
 }
 
 .price-container {
@@ -1090,10 +1094,10 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 .collection h4 {
-  max-height: 85px;
+  max-height: 80px;
   font-size: 13px;
   font-weight: 500;
-  min-height: 85px;
+  min-height: 80px;
   overflow-y: auto;
   scroll-behavior: smooth;
 }
