@@ -197,6 +197,20 @@ export default function Collection() {
     navigate(newUrl);
   };
 
+  const sortedProducts = React.useMemo(() => {
+    const products = [...collection.products.nodes];
+    return products.sort((a, b) => {
+      // Check if any variant is available for sale
+      const aInStock = a.variants.nodes.some(variant => variant.availableForSale);
+      const bInStock = b.variants.nodes.some(variant => variant.availableForSale);
+
+      if (aInStock && !bInStock) return -1;
+      if (!aInStock && bInStock) return 1;
+      return 0;
+    });
+  }, [collection.products.nodes]);
+
+
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
@@ -251,7 +265,10 @@ export default function Collection() {
           <hr className='col-hr'></hr>
 
           <PaginatedResourceSection
-            connection={collection.products}
+            connection={{
+              ...collection.products,
+              nodes: sortedProducts, // Use sortedProducts instead of collection.products.nodes
+            }}
             resourcesClassName={`products-grid grid-cols-${numberInRow}`}
           >
             {({ node: product, index }) => (
@@ -534,8 +551,8 @@ const COLLECTION_QUERY = `#graphql
         before: $startCursor,
         after: $endCursor,
         filters: $filters,
-        sortKey: INVENTORY_TOTAL,
-        reverse: true
+        sortKey: $sortKey,
+        reverse: $reverse
       ) {
         filters {
           id
@@ -550,6 +567,7 @@ const COLLECTION_QUERY = `#graphql
         }
         nodes {
           ...ProductItem
+          availableForSale
         }
         pageInfo {
           hasPreviousPage
