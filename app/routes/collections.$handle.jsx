@@ -534,8 +534,8 @@ const COLLECTION_QUERY = `#graphql
         before: $startCursor,
         after: $endCursor,
         filters: $filters,
-        sortKey: $sortKey,
-        reverse: $reverse
+        sortKey: INVENTORY_TOTAL,
+        reverse: true
       ) {
         filters {
           id
