@@ -1228,14 +1228,12 @@ button#headlessui-menu-button-\:R3lab5\: {
 * --------------------------------------------------
 */
 .product {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
   max-width: 1500px;
   margin: 5vw auto;
-
-  @media (min-width: 45em) {
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 4rem;
-  }
 }
 
 .product h1 {
@@ -1249,7 +1247,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .product-main {
   align-self: start;
-  position: sticky;
+  /* position: sticky; */
   top: 6rem;
 }
 

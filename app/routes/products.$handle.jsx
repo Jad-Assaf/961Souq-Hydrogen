@@ -93,9 +93,9 @@ export default function Product() {
 
   return (
     <div className="product">
-      <ProductImages images={images.edges} />
-      <div className="product-main">
-        <div className="ProductPageTop">
+      <div className="ProductPageTop">
+        <ProductImages images={images.edges} />
+        <div className="product-main">
           <h1>{title}</h1>
           <ProductPrice
             price={selectedVariant?.price}
@@ -122,7 +122,7 @@ export default function Product() {
             </Await>
           </Suspense>
         </div>
-    </div>
+      </div>
       <div className="ProductPageBottom">
         <p><strong>Description</strong></p>
         <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
