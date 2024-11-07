@@ -294,7 +294,7 @@ function ProductItem({ product, loading }) {
     product.priceRange.minVariantPrice.amount;
 
   return (
-    <div className="product-item-collection">
+    <div className="product-item-collection product-card">
       <Link
         key={product.id}
         prefetch="intent"
