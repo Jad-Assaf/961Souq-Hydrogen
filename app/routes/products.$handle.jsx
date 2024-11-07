@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { defer, redirect } from '@shopify/remix-oxygen';
 import { Await, useLoaderData } from '@remix-run/react';
 import {
@@ -11,6 +11,7 @@ import { ProductPrice } from '~/components/ProductPrice';
 import { ProductImages } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
+
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -91,9 +92,18 @@ export default function Product() {
   );
 
   const [quantity, setQuantity] = useState(1);
+  const [subtotal, setSubtotal] = useState(0);
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+
+  useEffect(() => {
+    if (selectedVariant && selectedVariant.price) {
+      const price = parseFloat(selectedVariant.price.amount);
+      setSubtotal(price * quantity);
+    }
+  }, [quantity, selectedVariant]);
+
 
   const { title, descriptionHtml, images } = product;
 
@@ -113,7 +123,10 @@ export default function Product() {
             <span className="quantity-display">{quantity}</span>
             <button onClick={incrementQuantity} className="quantity-btn">+</button>
           </div>
-          <br />
+          <div className="subtotal">
+            <strong>Subtotal: </strong>
+            {subtotal.toLocaleString('en-US', { style: 'currency', currency: selectedVariant?.price?.currencyCode || 'USD' })}
+          </div>
           <Suspense
             fallback={
               <ProductForm

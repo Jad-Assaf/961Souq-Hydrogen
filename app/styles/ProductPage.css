@@ -43,3 +43,9 @@
     min-width: 2rem;
     text-align: center;
 }
+
+.subtotal {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: #333;
+}
