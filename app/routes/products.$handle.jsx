@@ -92,14 +92,8 @@ export default function Product() {
 
   const [quantity, setQuantity] = useState(1);
 
-  // Add these handler functions
-  const incrementQuantity = () => {
-    setQuantity(prev => prev + 1);
-  };
-
-  const decrementQuantity = () => {
-    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
-  };
+  const incrementQuantity = () => setQuantity(prev => prev + 1);
+  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const { title, descriptionHtml, images } = product;
 
@@ -136,6 +130,7 @@ export default function Product() {
                   product={product}
                   selectedVariant={selectedVariant}
                   variants={data?.product?.variants.nodes || []}
+                  quantity={quantity}
                 />
               )}
             </Await>
