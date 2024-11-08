@@ -88,13 +88,11 @@ function redirectToFirstVariant({ product, request }) {
 
 export default function Product() {
   const { product, variants } = useLoaderData();
-  const selectedVariant = useOptimisticVariant(
-    product.selectedVariant,
-    variants
-  );
+  const selectedVariant = useOptimisticVariant(product.selectedVariant, variants);
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
+  const [currentImage, setCurrentImage] = useState(product.images.edges[0].node); // Initialize with the first image
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
@@ -105,8 +103,12 @@ export default function Product() {
     if (selectedVariant && selectedVariant.price) {
       const price = parseFloat(selectedVariant.price.amount);
       setSubtotal(price * quantity);
+      // Update the current image based on the selected variant
+      const variantImage = selectedVariant.image || product.images.edges[0].node; // Fallback to first image if no variant image
+      setCurrentImage(variantImage);
     }
-  }, [quantity, selectedVariant]);
+  }, [quantity, selectedVariant, product.images]);
+
 
 
   const { title, descriptionHtml, images } = product;
@@ -117,7 +119,7 @@ export default function Product() {
   return (
     <div className="product">
       <div className="ProductPageTop">
-        <ProductImages images={images.edges} />
+        <ProductImages images={[currentImage]} /> {/* Display only the current variant image */}
         <div className="product-main">
           <h1>{title}</h1>
           <div className="price-container">
@@ -152,14 +154,22 @@ export default function Product() {
           >
             <Await resolve={variants} errorElement="There was a problem loading product variants">
               {(data) => (
-                <><ProductForm
-                  product={product}
-                  selectedVariant={selectedVariant}
-                  variants={data?.product?.variants.nodes || []}
-                  quantity={quantity} />
+                <>
+                  <ProductForm
+                    product={product}
+                    selectedVariant={selectedVariant}
+                    variants={data?.product?.variants.nodes || []}
+                    quantity={quantity}
+                    onVariantChange={(variant) => {
+                      // Update the current image when the variant changes
+                      const variantImage = variant.image || product.images.edges[0].node; // Fallback to first image if no variant image
+                      setCurrentImage(variantImage);
+                    }}
+                  />
                   <DirectCheckoutButton
                     selectedVariant={selectedVariant}
-                    quantity={quantity} />
+                    quantity={quantity}
+                  />
                 </>
               )}
             </Await>
