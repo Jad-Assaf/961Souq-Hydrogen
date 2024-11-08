@@ -1,15 +1,21 @@
+@media (max-width: 1028px){
+    .ProductPageTop{
+        flex-direction: column;
+    }
+    .product-images-container,
+    .product-main{
+        width: 100% !important;
+    }
+}
 .ProductPageTop{
     display: flex;
     justify-content: center;
     align-items: start;
-    width: 100%
+    width: 100%;
+    row-gap: 50px;
 }
 
-.product-images-container{
-    width: 50%;
-}
-
-.product-main{
+.product-images-container, .product-main{
     width: 50%;
 }
 
