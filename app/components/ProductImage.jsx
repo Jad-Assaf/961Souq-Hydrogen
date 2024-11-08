@@ -42,10 +42,12 @@ export function ProductImages({ images }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  // Check if images array is valid
   if (!images || images.length === 0) {
     return <div className="product-images" />;
   }
 
+  // Ensure selectedImageIndex is within bounds
   const selectedImage = images[selectedImageIndex]?.node;
 
   const handlePrevImage = () => {
@@ -64,22 +66,26 @@ export function ProductImages({ images }) {
     <div className="product-images-container">
       <div className='thumbContainer'>
         <div className="thumbnails">
-          {images.map(({ node: image }, index) => (
-            <div
-              key={image.id}
-              className={`thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
-              onClick={() => setSelectedImageIndex(index)}
-            >
-              <Image
-                data={image}
-                alt={image?.altText || 'Thumbnail Image'} // Safe access with optional chaining
-                aspectRatio="1/1"
-                width={100}
-                height={100}
-                loading="lazy"
-              />
-            </div>
-          ))}
+          {images.map(({ node: image }, index) => {
+            // Ensure image node is defined before accessing properties
+            if (!image) return null; // Skip if image is undefined
+            return (
+              <div
+                key={image.id}
+                className={`thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
+                onClick={() => setSelectedImageIndex(index)}
+              >
+                <Image
+                  data={image}
+                  alt={image.altText || 'Thumbnail Image'} // Safe access with optional chaining
+                  aspectRatio="1/1"
+                  width={100}
+                  height={100}
+                  loading="lazy"
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -92,7 +98,7 @@ export function ProductImages({ images }) {
         {selectedImage && (
           <Image
             data={selectedImage}
-            alt={selectedImage?.altText || 'Product Image'} // Safe access with optional chaining
+            alt={selectedImage.altText || 'Product Image'} // Safe access with optional chaining
             aspectRatio="1/1"
             sizes="(min-width: 45em) 50vw, 100vw"
             width="100%"
@@ -101,7 +107,7 @@ export function ProductImages({ images }) {
           />
         )}
         <div className="ImageArrows">
-          <button className="prev-button"
+          <button className="prev -button"
             onClick={(e) => {
               e.stopPropagation();
               handlePrevImage();
@@ -127,7 +133,7 @@ export function ProductImages({ images }) {
           open={isLightboxOpen}
           close={() => setIsLightboxOpen(false)}
           index={selectedImageIndex}
-          slides={images.map(({ node }) => ({ src: node.url }))}
+          slides={images.map(({ node }) => ({ src: node?.url }))} // Safe access with optional chaining
           onIndexChange={setSelectedImageIndex}
           plugins={[Fullscreen]}
         />
