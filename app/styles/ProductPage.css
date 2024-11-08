@@ -15,6 +15,13 @@
         height: 75px !important;
     }
 }
+
+.thumbContainer{
+    width: 95vw;
+    max-width: 90%;
+    overflow-x: auto;
+}
+
 .ProductPageTop{
     display: flex;
     justify-content: center;
