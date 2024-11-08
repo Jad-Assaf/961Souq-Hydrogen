@@ -70,7 +70,7 @@ function ProductOptions({option}) {
                 border: isActive ? '1px solid #2172af' : '1px solid transparent',
                 opacity: isAvailable ? 1 : 0.3,
                 borderRadius: '20px',
-                transition: 'all 0.3s ease-in-out'
+                transition: 'all 0.5s ease-in-out'
               }}
             >
               {value}

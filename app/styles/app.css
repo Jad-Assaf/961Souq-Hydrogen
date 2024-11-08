@@ -1269,6 +1269,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 .product-options-grid {
   display: flex;
   flex-wrap: wrap;
+  gap: 5px;
 }
 
 .product-options-item {
