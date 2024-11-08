@@ -148,13 +148,22 @@
     }
 }
 
-a.product-options-item::after {
-    content: "";
+.product-options-item {
+    position: relative;
+    text-decoration: none;
+}
+
+.product-options-item::after {
+    content: '';
     position: absolute;
-    bottom: 10px;
+    bottom: -2px;
     left: 0;
     width: 0;
-    height: 2px;
-    background-color: #f39c12;
-    transition: width .3s ease;
+    height: 1px;
+    background-color: currentColor;
+    transition: width 0.3s ease-in-out;
+}
+
+.product-options-item:hover::after {
+    width: 100%;
 }
