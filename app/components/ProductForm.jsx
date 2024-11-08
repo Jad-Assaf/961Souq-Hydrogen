@@ -30,21 +30,19 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
   const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613963961&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
 
   return (
-    <div className="product-form">
-      <VariantSelector
-        handle={product.handle}
-        options={product.options.filter((option) => option.values.length > 1)}
-        variants={variants}
-      >
-        {({ option }) => <ProductOptions key={option.name} option={option} />}
-      </VariantSelector>
-      <AddToCartButton
-        disabled={!selectedVariant || !selectedVariant.availableForSale}
-        onClick={() => {
-          open('cart');
-        }}
-        lines={
-          selectedVariant
+    <><VariantSelector
+      handle={product.handle}
+      options={product.options.filter((option) => option.values.length > 1)}
+      variants={variants}
+    >
+      {({ option }) => <ProductOptions key={option.name} option={option} />}
+    </VariantSelector><div className="product-form">
+        <AddToCartButton
+          disabled={!selectedVariant || !selectedVariant.availableForSale}
+          onClick={() => {
+            open('cart');
+          }}
+          lines={selectedVariant
             ? [
               {
                 merchandiseId: selectedVariant.id,
@@ -52,23 +50,22 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
                 selectedVariant,
               },
             ]
-            : []
-        }
-      >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
-      </AddToCartButton>
-      {isProductPage && (
-        <a
-          href={whatsappShareUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="whatsapp-share-button"
-          aria-label="Share on WhatsApp"
+            : []}
         >
-          <WhatsAppIcon />
-        </a>
-      )}
-    </div>
+          {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+          {isProductPage && (
+            <a
+              href={whatsappShareUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="whatsapp-share-button"
+              aria-label="Share on WhatsApp"
+            >
+              <WhatsAppIcon />
+            </a>
+          )}
+        </AddToCartButton>
+      </div></>
   );
 }
 
