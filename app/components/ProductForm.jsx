@@ -36,9 +36,7 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
       variants={variants}
     >
       {({ option }) => <ProductOptions key={option.name} option={option} />}
-    </VariantSelector>
-    <div>
-    <div className="product-form">
+    </VariantSelector><div className="product-form">
         <AddToCartButton
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => {
@@ -56,8 +54,6 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
         >
           {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
         </AddToCartButton>
-        </div>
-        <div>
         {isProductPage && (
           <a
             href={whatsappShareUrl}
@@ -69,7 +65,6 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
             <WhatsAppIcon />
           </a>
         )}
-      </div>
       </div></>
   );
 }
