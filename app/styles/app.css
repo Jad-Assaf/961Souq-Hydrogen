@@ -1240,6 +1240,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   align-items: start;
   max-width: 1500px;
   margin: 5vw auto;
+  row-gap: 50px;
 }
 
 .product h1 {
