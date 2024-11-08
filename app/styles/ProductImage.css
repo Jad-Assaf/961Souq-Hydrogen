@@ -1,6 +1,6 @@
 @media (max-width: 1024px){
     .ImageArrows{
-        width: 95vw;
+        width: 95vw !important;
         transform: translateX(-12.5%);
     }
 }
