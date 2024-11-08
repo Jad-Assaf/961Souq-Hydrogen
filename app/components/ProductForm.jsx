@@ -165,10 +165,15 @@ export function ProductShareButton({ product }) {
   const handleCopyClick = () => {
     if (inputRef.current) {
       inputRef.current.select();
-      navigator.clipboard.writeText(productUrl).then(() => {
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 3000);
-      });
+      navigator.clipboard.writeText(productUrl)
+        .then(() => {
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 3000);
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err);
+          alert('Failed to copy the URL. Please try again.');
+        });
     }
   };
 
@@ -240,7 +245,7 @@ export function ProductShareButton({ product }) {
               <div className="social-share-icons">
                 {/* WhatsApp Share */}
                 <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.title} - ${productUrl}`)}`}
+                  href={`https://api.whatsapp.com/send ?text=${encodeURIComponent(`Check out ${product.title} - ${productUrl}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-share-icon whatsapp"
