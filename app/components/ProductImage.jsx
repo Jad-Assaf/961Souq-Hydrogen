@@ -4,7 +4,6 @@ import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import 'yet-another-react-lightbox/styles.css';
 import '../styles/ProductImage.css';
-import { AnimatedImage } from './AnimatedImage';
 
 const LeftArrowIcon = () => (
   <svg
@@ -47,7 +46,7 @@ export function ProductImages({ images }) {
     return <div className="product-images" />;
   }
 
-  const selectedImage = images[selectedImageIndex]?.node; // Safely access the selected image
+  const selectedImage = images[selectedImageIndex]?.node;
 
   const handlePrevImage = () => {
     setSelectedImageIndex((prevIndex) =>
@@ -71,13 +70,13 @@ export function ProductImages({ images }) {
             className={`thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
             onClick={() => setSelectedImageIndex(index)}
           >
-            <AnimatedImage
-              src={image.url}
+            <Image
+              data={image}
               alt={image.altText || 'Thumbnail Image'}
               aspectRatio="1/1"
-              data={image}
-              width="100px"
-              height="100px"
+              width={100}
+              height={100}
+              loading="lazy"
             />
           </div>
         ))}
@@ -90,14 +89,14 @@ export function ProductImages({ images }) {
         style={{ cursor: 'grab' }}
       >
         {selectedImage && (
-          <AnimatedImage
-            src={selectedImage.url} // Use selectedImage.url instead of image.url
+          <Image
+            data={selectedImage}
             alt={selectedImage.altText || 'Product Image'}
             aspectRatio="1/1"
-            data={selectedImage}
             sizes="(min-width: 45em) 50vw, 100vw"
             width="100%"
             height="auto"
+            loading="eager"
           />
         )}
         <button
@@ -134,6 +133,5 @@ export function ProductImages({ images }) {
     </div>
   );
 }
-
 
 /** @typedef {import('storefrontapi.generated').ProductFragment} ProductFragment */
