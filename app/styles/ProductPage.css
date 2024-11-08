@@ -7,7 +7,7 @@
         width: 100% !important;
     }
     .thumbnails{
-        max-width: 100%;
+        max-width: 95%;
         overflow-y: hidden;
     }
     .thumbnail{
