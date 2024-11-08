@@ -247,6 +247,10 @@
     background-color: #f9f9f9;
 }
 
+.ProductPageBottom{
+    width: 100%;
+}
+
 .ProductPageBottom *{
     line-height: 2;
     list-style: inside;
