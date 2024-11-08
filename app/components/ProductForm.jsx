@@ -70,7 +70,12 @@ function ProductOptions({option}) {
                 border: isActive ? '1px solid #2172af' : '1px solid transparent',
                 opacity: isAvailable ? 1 : 0.3,
                 borderRadius: '20px',
-                transition: 'all 0.5s ease-in-out'
+                transition: 'all 0.5s ease-in-out',
+                backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0', // Lighter blue when active
+                boxShadow: isActive
+                  ? '0 2px 4px rgba(0,0,0,0.1)'
+                  : 'none',
+                transform: isActive ? 'scale(0.95)' : 'scale(1)',
               }}
             >
               {value}

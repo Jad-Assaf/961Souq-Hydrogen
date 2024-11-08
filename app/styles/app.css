@@ -1274,6 +1274,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .product-options-item {
   padding: 0.25rem 1rem;
+  transition: all 0.3s ease;
 }
 
 /*
