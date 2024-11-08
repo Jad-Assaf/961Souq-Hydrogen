@@ -14,6 +14,7 @@ import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 
+
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
 };
@@ -87,12 +88,13 @@ function redirectToFirstVariant({ product, request }) {
 
 export default function Product() {
   const { product, variants } = useLoaderData();
-  const selectedVariant = useOptimisticVariant(product.selectedVariant, variants);
+  const selectedVariant = useOptimisticVariant(
+    product.selectedVariant,
+    variants
+  );
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
-  const initialImage = product.images.edges.length > 0 ? product.images.edges[0].node : null;
-  const [currentImage, setCurrentImage] = useState(initialImage);
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
@@ -103,11 +105,9 @@ export default function Product() {
     if (selectedVariant && selectedVariant.price) {
       const price = parseFloat(selectedVariant.price.amount);
       setSubtotal(price * quantity);
-      // Update the current image based on the selected variant
-      const variantImage = selectedVariant.image || (product.images.edges.length > 0 ? product.images.edges[0].node : null);
-      setCurrentImage(variantImage);
     }
-  }, [quantity, selectedVariant, product.images]);
+  }, [quantity, selectedVariant]);
+
 
   const { title, descriptionHtml, images } = product;
 
@@ -117,7 +117,7 @@ export default function Product() {
   return (
     <div className="product">
       <div className="ProductPageTop">
-        <ProductImages images={currentImage ? [currentImage] : []} />
+        <ProductImages images={images.edges} />
         <div className="product-main">
           <h1>{title}</h1>
           <div className="price-container">
@@ -125,7 +125,7 @@ export default function Product() {
               <Money data={selectedVariant.price} />
             </small>
             {hasDiscount && selectedVariant.compareAtPrice && (
-              <small className="discountedPrice"> 
+              <small className="discountedPrice">
                 <Money data={selectedVariant.compareAtPrice} />
               </small>
             )}
@@ -152,22 +152,14 @@ export default function Product() {
           >
             <Await resolve={variants} errorElement="There was a problem loading product variants">
               {(data) => (
-                <>
-                  <ProductForm
-                    product={product}
-                    selectedVariant={selectedVariant}
-                    variants={data?.product?.variants.nodes || []}
-                    quantity={quantity}
-                    onVariantChange={(variant) => {
-                      // Update the current image when the variant changes
-                      const variantImage = variant.image || (product.images.edges.length > 0 ? product.images.edges[0].node : null);
-                      setCurrentImage(variantImage);
-                    }}
-                  />
+                <><ProductForm
+                  product={product}
+                  selectedVariant={selectedVariant}
+                  variants={data?.product?.variants.nodes || []}
+                  quantity={quantity} />
                   <DirectCheckoutButton
                     selectedVariant={selectedVariant}
-                    quantity={quantity}
-                  />
+                    quantity={quantity} />
                 </>
               )}
             </Await>
@@ -229,7 +221,7 @@ export default function Product() {
             <h3>What is Covered</h3>
             <p>During the warranty period, 961 Souq will repair or replace, at no charge, any parts that are found to be defective due to faulty materials or poor workmanship. This warranty is valid only for the original purchaser and is non-transferable.</p>
             <h3>What is Not Covered</h3>
-            <p>This warranty does not cover:</p>
+            <p >This warranty does not cover:</p>
             <ul>
               <li>Any Physical Damage, damage due to misuse, abuse, accidents, modifications, or unauthorized repairs.</li>
               <li>Wear and tear from regular usage, including cosmetic damage like scratches or dents.</li>
@@ -262,10 +254,11 @@ export default function Product() {
             ],
           }}
         />
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
+
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
@@ -381,7 +374,8 @@ const PRODUCT_VARIANTS_FRAGMENT = `#graphql
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
 
-const VARIANTS_QUERY = `#graphql ${PRODUCT_VARIANTS_FRAGMENT}
+const VARIANTS_QUERY = `#graphql
+  ${PRODUCT_VARIANTS_FRAGMENT}
   query ProductVariants(
     $country: CountryCode
     $language: LanguageCode
@@ -392,6 +386,7 @@ const VARIANTS_QUERY = `#graphql ${PRODUCT_VARIANTS_FRAGMENT}
     }
   }
 `;
+
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
