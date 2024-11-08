@@ -12,7 +12,7 @@
     }
     .tab-button{
         font-size: 14px !important;
-        padding: 0 9px;
+        padding: 0 9px !important;
     }
     .product-options-item{
         font-size: 14px;

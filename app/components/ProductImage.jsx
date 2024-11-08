@@ -101,24 +101,26 @@ export function ProductImages({ images }) {
             loading="eager"
           />
         )}
-        <button
-          className="prev-button"
-          onClick={(e) => {
-            e.stopPropagation();
-            handlePrevImage();
-          }}
-        >
-          <LeftArrowIcon />
-        </button>
-        <button
-          className="next-button"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleNextImage();
-          }}
-        >
-          <RightArrowIcon />
-        </button>
+        <div className="ImageArrows">
+          <button
+            className="prev-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrevImage();
+            }}
+          >
+            <LeftArrowIcon />
+          </button>
+          <button
+            className="next-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNextImage();
+            }}
+          >
+            <RightArrowIcon />
+          </button>
+        </div>
       </div>
 
       {/* Lightbox without Thumbnails */}

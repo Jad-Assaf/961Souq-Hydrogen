@@ -58,10 +58,11 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: rgba(255, 255, 255, 0.253);
+    background-color: #ffffff41;
     border: none;
     border-radius: 50%;
     color: #000;
+    -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     width: 40px;
     height: 40px;
@@ -70,12 +71,12 @@
     justify-content: center;
     cursor: pointer;
     z-index: 1;
-    transition: background-color 0.3s ease;
+    transition: background-color .3s ease;
 }
 
 .prev-button:hover,
 .next-button:hover {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: #00000045;
 }
 
 .prev-button svg,
@@ -96,4 +97,14 @@
 .yarl__container {
     background-color: #000000ab !important;
     backdrop-filter: blur(15px) !important;
+}
+
+.ImageArrows{
+    width: 95vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    transform: translateX(-12.5%);
 }
