@@ -53,27 +53,28 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(255, 255, 255, 0.253);
     /* Subtle transparency */
     border: none;
     border-radius: 50%;
-    /* Rounded buttons */
-    color: white;
+    /* Circular buttons */
+    color: #000;
+    backdrop-filter: blur(20px);
     width: 40px;
     height: 40px;
-    /* Make the buttons circular */
+    /* Ensure buttons are circular */
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 10;
+    z-index: 1;
     transition: background-color 0.3s ease;
 }
 
 .prev-button:hover,
 .next-button:hover {
     background-color: rgba(0, 0, 0, 0.7);
-    /* Darker on hover */
+    /* Darker background on hover */
 }
 
 .prev-button svg,
@@ -81,7 +82,7 @@
     width: 20px;
     height: 20px;
     fill: currentColor;
-    /* Make SVG icon color match the button text color */
+    /* SVG icon matches button text color */
 }
 
 .prev-button {
