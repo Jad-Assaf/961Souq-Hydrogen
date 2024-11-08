@@ -62,7 +62,6 @@ export function ProductImages({ images }) {
 
   return (
     <div className="product-images-container">
-      {/* Thumbnails on the Left */}
       <div className='thumbContainer'>
         <div className="thumbnails">
           {images.map(({ node: image }, index) => (
