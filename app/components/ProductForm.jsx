@@ -30,7 +30,7 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
   const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613963961&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
 
   return (
-    <><VariantSelector
+      <><VariantSelector
       handle={product.handle}
       options={product.options.filter((option) => option.values.length > 1)}
       variants={variants}
@@ -41,7 +41,7 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => {
             open('cart');
-          }}
+          } }
           lines={selectedVariant
             ? [
               {
@@ -53,18 +53,20 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
             : []}
         >
           {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
-          {isProductPage && (
-            <a
-              href={whatsappShareUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="whatsapp-share-button"
-              aria-label="Share on WhatsApp"
-            >
-              <WhatsAppIcon />
-            </a>
-          )}
         </AddToCartButton>
+        </div>
+        <div>
+        {isProductPage && (
+          <a
+            href={whatsappShareUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="whatsapp-share-button"
+            aria-label="Share on WhatsApp"
+          >
+            <WhatsAppIcon />
+          </a>
+        )}
       </div></>
   );
 }

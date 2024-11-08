@@ -10,6 +10,9 @@
         width: 75px !important;
         height: 75px !important;
     }
+    .tab-button{
+        font-size: 14px !important;
+    }
 }
 
 .ProductPageTop{
@@ -244,10 +247,10 @@
     background-color: #f9f9f9;
 }
 
-.techspecs-rowheader *{
+.ProductPageBottom *{
     line-height: 2;
 }
 
-.techspecs-rowheader p{
+.ProductPageBottom p{
     margin-top: 17px;
 }
