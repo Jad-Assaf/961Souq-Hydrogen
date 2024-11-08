@@ -1,3 +1,9 @@
+@media (max-width: 1024px){
+    .ImageArrows{
+        width: 95vw;
+    }
+}
+
 .product-images-container {
     display: flex;
     gap: 20px;
@@ -100,11 +106,10 @@
 }
 
 .ImageArrows{
-    width: 95vw;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: absolute;
     top: 50%;
-    transform: translateX(-12.5%);
 }
