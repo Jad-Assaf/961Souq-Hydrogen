@@ -150,20 +150,20 @@
 
 .product-options-item {
     position: relative;
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 .product-options-item::after {
     content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: 4px;
     left: 0;
     width: 0;
-    height: 1px;
-    background-color: currentColor;
+    height: 2px;
+    background-color: #f39c12;
     transition: width 0.3s ease-in-out;
 }
 
 .product-options-item:hover::after {
-    width: 100%;
+    width: 90%;
 }
