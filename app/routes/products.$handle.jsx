@@ -104,7 +104,7 @@ export default function Product() {
       const price = parseFloat(selectedVariant.price.amount);
       setSubtotal(price * quantity);
       // Update the current image based on the selected variant
-      const variantImage = selectedVariant.image || product.images.edges[0].node; // Fallback to first image if no variant image
+      const variantImage = selectedVariant.image || product.images.edges[0]?.node || {}; // Fallback to first image if no variant image
       setCurrentImage(variantImage);
     }
   }, [quantity, selectedVariant, product.images]);
@@ -119,7 +119,7 @@ export default function Product() {
   return (
     <div className="product">
       <div className="ProductPageTop">
-        <ProductImages images={[currentImage]} /> {/* Display only the current variant image */}
+        <ProductImages images={currentImage ? [currentImage] : []} />
         <div className="product-main">
           <h1>{title}</h1>
           <div className="price-container">
