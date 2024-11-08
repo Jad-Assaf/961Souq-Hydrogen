@@ -1,4 +1,4 @@
-import { Link } from '@remix-run/react';
+import { Link, useLocation } from '@remix-run/react';
 import { CartForm, VariantSelector } from '@shopify/hydrogen';
 import React from 'react';
 import { AddToCartButton } from '~/components/AddToCartButton';
