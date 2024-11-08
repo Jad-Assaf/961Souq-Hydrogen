@@ -72,7 +72,7 @@ export function ProductImages({ images }) {
             >
               <Image
                 data={image}
-                alt={image.altText || 'Thumbnail Image'}
+                alt={image?.altText || 'Thumbnail Image'} // Safe access with optional chaining
                 aspectRatio="1/1"
                 width={100}
                 height={100}
@@ -92,7 +92,7 @@ export function ProductImages({ images }) {
         {selectedImage && (
           <Image
             data={selectedImage}
-            alt={selectedImage.altText || 'Product Image'}
+            alt={selectedImage?.altText || 'Product Image'} // Safe access with optional chaining
             aspectRatio="1/1"
             sizes="(min-width: 45em) 50vw, 100vw"
             width="100%"
@@ -101,8 +101,7 @@ export function ProductImages({ images }) {
           />
         )}
         <div className="ImageArrows">
-          <button
-            className="prev-button"
+          <button className="prev-button"
             onClick={(e) => {
               e.stopPropagation();
               handlePrevImage();
