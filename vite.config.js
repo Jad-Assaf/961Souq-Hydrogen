@@ -8,7 +8,13 @@ import path from 'path'; // Import path for alias resolution
 
 export default defineConfig({
   plugins: [
-    tailwindcss(),
+    tailwindcss({
+      theme: {
+        fontFamily: {
+          sans: ['Montserrat', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif'],
+        },
+      },
+    }),
     hydrogen(),
     oxygen(),
     remix({
