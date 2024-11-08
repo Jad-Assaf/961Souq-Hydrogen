@@ -1,3 +1,7 @@
+body {
+  font-family: "Montserrat", sans-serif !important;
+}
+
 :root {
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
@@ -48,10 +52,6 @@ html{
   scrollbar-color: #0492ff54 #00000014;
   scrollbar-width: thin;
   scrollbar-gutter: stable both-edges;
-}
-
-body {
-  font-family: "Montserrat", sans-serif;
 }
 
 img {

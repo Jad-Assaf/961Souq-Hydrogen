@@ -42,9 +42,9 @@ export const shouldRevalidate = ({
 
 export function links() {
   return [
+    { rel: 'preload', href: appStyles },
     { rel: 'stylesheet', href: tailwindCss },
     { rel: 'stylesheet', href: resetStyles },
-    { rel: 'stylesheet', href: appStyles },
     { rel: 'preconnect', href: 'https://cdn.shopify.com' },
     { rel: 'preconnect', href: 'https://shop.app' },
     { rel: 'icon', type: 'image/svg+xml', href: favicon },
