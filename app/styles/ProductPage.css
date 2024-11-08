@@ -249,8 +249,18 @@
 
 .ProductPageBottom *{
     line-height: 2;
+    list-style: inside;
+}
+
+.ProductPageBottom h3{
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .ProductPageBottom p{
-    margin-top: 17px;
+    margin-bottom: 20px;
+}
+
+strong{
+    font-weight: bold;
 }
