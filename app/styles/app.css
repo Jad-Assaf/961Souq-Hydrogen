@@ -1238,6 +1238,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   flex-direction: column;
   justify-content: center;
   align-items: start;
+  width: 95vw;
   max-width: 1500px;
   margin: 5vw auto;
   row-gap: 50px;
