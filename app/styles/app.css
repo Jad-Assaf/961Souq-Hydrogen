@@ -236,7 +236,6 @@ button {
 }
 
 .add-to-cart-button {
-  width: 75%;
   max-width: 350px;
   background-color: #f5f5f5;
   color: #2172af;
@@ -322,12 +321,18 @@ button {
   }
 }
 
-/* Optional: Add a container for better spacing */
 .product-form {
   margin-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-/* Optional: Add hover effect for the entire product card */
+.product-form form{
+  width: 70%;
+  max-width: 350px;
+}
+
 .product-item-collection:hover .add-to-cart-button:not(.disabled) {
   opacity: 1;
   transform: translateY(-2px);

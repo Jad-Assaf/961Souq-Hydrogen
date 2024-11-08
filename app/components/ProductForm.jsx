@@ -3,6 +3,7 @@ import { CartForm, VariantSelector } from '@shopify/hydrogen';
 import React from 'react';
 import { AddToCartButton } from '~/components/AddToCartButton';
 import { useAside } from '~/components/Aside';
+import { ProductShareButton } from './ProductShareButton';
 
 /**
  * @param {{
@@ -67,6 +68,7 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
           aria-label="Share on WhatsApp"
         >
           <WhatsAppIcon />
+          <ProductShareButton product={product} />
         </a>
       )}
     </div>
