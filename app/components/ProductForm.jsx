@@ -55,7 +55,7 @@ export function ProductForm({product, selectedVariant, variants, quantity = 1}) 
 function ProductOptions({option}) {
   return (
     <div className="product-options" key={option.name}>
-      <h5>{option.name}</h5>
+      <h5 className='OptionName'>{option.name}: {option.value}</h5>
       <div className="product-options-grid">
         {option.values.map(({value, isAvailable, isActive, to}) => {
           return (

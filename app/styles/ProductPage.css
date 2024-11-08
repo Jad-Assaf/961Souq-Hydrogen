@@ -168,3 +168,8 @@
 .product-options-item:hover::after {
     width: 80%;
 }
+
+.OptionName{
+    font-size: 14px;
+    font-weight: 500;
+}
