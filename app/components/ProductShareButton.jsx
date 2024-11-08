@@ -1,3 +1,6 @@
+import React, { useState, useRef } from 'react';
+import { useLocation } from '@remix-run/react';
+
 export function ProductShareButton({ product }) {
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
