@@ -92,24 +92,24 @@ export default function Product() {
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
-  const [currentImage, setCurrentImage] = useState(product.images.edges[0].node); // Initialize with the first image
+
+  // Safely initialize currentImage
+  const initialImage = product.images.edges.length > 0 ? product.images.edges[0].node : null;
+  const [currentImage, setCurrentImage] = useState(initialImage);
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
-
-  const [activeTab, setActiveTab] = useState('description');
 
   useEffect(() => {
     if (selectedVariant && selectedVariant.price) {
       const price = parseFloat(selectedVariant.price.amount);
       setSubtotal(price * quantity);
+
       // Update the current image based on the selected variant
-      const variantImage = selectedVariant.image || product.images.edges[0]?.node || {}; // Fallback to first image if no variant image
+      const variantImage = selectedVariant.image || (product.images.edges.length > 0 ? product.images.edges[0].node : null);
       setCurrentImage(variantImage);
     }
   }, [quantity, selectedVariant, product.images]);
-
-
 
   const { title, descriptionHtml, images } = product;
 
@@ -161,8 +161,7 @@ export default function Product() {
                     variants={data?.product?.variants.nodes || []}
                     quantity={quantity}
                     onVariantChange={(variant) => {
-                      // Update the current image when the variant changes
-                      const variantImage = variant.image || product.images.edges[0].node; // Fallback to first image if no variant image
+                      const variantImage = variant.image || (product.images.edges.length > 0 ? product.images.edges[0].node : null);
                       setCurrentImage(variantImage);
                     }}
                   />
