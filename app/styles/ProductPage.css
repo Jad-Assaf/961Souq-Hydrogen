@@ -77,7 +77,7 @@
 }
 
 .buy-now-button {
-    width: 95%;
+    width: 90%;
     background-color: #2172af;
     color: #f5f5f5;
     padding: 12px 10px;
@@ -193,4 +193,25 @@
 
 .OptionValue{
     font-weight: 300;
+}
+
+.whatsapp-share-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #25D366;
+    transition: background-color 0.3s ease;
+}
+
+.whatsapp-share-button svg {
+    width: 30px;
+    height: 30px;
+}
+
+.whatsapp-share-button:hover {
+    background-color: #128C7E;
 }
