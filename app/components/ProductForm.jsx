@@ -38,7 +38,6 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
       >
         {({ option }) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
-      <br />
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
