@@ -165,5 +165,5 @@
 }
 
 .product-options-item:hover::after {
-    width: 90%;
+    width: max-content;
 }
