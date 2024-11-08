@@ -6,20 +6,10 @@
     .product-main{
         width: 100% !important;
     }
-    .thumbnails{
-        max-width: 95%;
-        overflow-y: hidden;
-    }
     .thumbnail{
         width: 75px !important;
         height: 75px !important;
     }
-}
-
-.thumbContainer{
-    width: 95vw;
-    max-width: 90%;
-    overflow-x: auto;
 }
 
 .ProductPageTop{

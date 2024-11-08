@@ -6,12 +6,16 @@
     flex-direction: column-reverse;
 }
 
+.thumbContainer {
+    width: 95vw;
+    max-width: 90%;
+    overflow-x: auto;
+}
+
 .thumbnails {
     display: flex;
     flex-direction: row;
     gap: 10px;
-    max-width: 75%;
-    overflow-x: auto;
     width: max-content;
 }
 
