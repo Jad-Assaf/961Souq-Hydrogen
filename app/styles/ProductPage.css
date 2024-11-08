@@ -257,7 +257,7 @@
     font-weight: 600;
 }
 
-.ProductPageBottom p{
+.ProductPageBottom h2, .ProductPageBottom h3, .ProductPageBottom h4, .ProductPageBottom ul, .ProductPageBottom p{
     margin-bottom: 20px;
 }
 
