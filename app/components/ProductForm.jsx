@@ -67,8 +67,9 @@ function ProductOptions({option}) {
               replace
               to={to}
               style={{
-                border: isActive ? '1px solid black' : '1px solid transparent',
+                border: isActive ? '1px solid #2172af' : '1px solid transparent',
                 opacity: isAvailable ? 1 : 0.3,
+                borderRadius: '20px',
               }}
             >
               {value}
