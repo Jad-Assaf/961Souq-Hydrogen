@@ -1101,6 +1101,12 @@ button#headlessui-menu-button-\:R3lab5\: {
   scroll-behavior: smooth;
 }
 
+.image-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .products-grid a .image-wrapper span.lazy-load-image-background.blur.lazy-load-image-loaded {
   width: 100% !important;
   height: auto !important;

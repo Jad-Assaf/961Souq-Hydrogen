@@ -18,13 +18,13 @@
     width: 100px;
     height: auto;
     cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 8px;
+    border: 1px solid transparent;
+    border-radius: 3px;
     transition: border 0.3s, transform 0.2s;
 }
 
 .thumbnail.active {
-    border-color: #000;
+    border-color: #2172af;
     transform: scale(1.1);
 }
 
