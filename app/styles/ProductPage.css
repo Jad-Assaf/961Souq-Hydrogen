@@ -163,9 +163,9 @@
     height: 2px;
     background-color: #f39c12;
     transition: width 0.3s ease-in-out;
-    max-width: 95%;
+    max-width: 90%;
 }
 
 .product-options-item:hover::after {
-    width: 95%;
+    width: 90%;
 }
