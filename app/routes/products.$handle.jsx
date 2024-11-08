@@ -108,16 +108,25 @@ export default function Product() {
 
   const { title, descriptionHtml, images } = product;
 
+  const hasDiscount = selectedVariant?.compareAtPrice &&
+    selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
+
   return (
     <div className="product">
       <div className="ProductPageTop">
         <ProductImages images={images.edges} />
         <div className="product-main">
           <h1>{title}</h1>
-          <ProductPrice
-            price={selectedVariant?.price}
-            compareAtPrice={selectedVariant?.compareAtPrice}
-          />
+          <div className="price-container">
+            <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+              <Money data={selectedVariant.price} />
+            </small>
+            {hasDiscount && selectedVariant.compareAtPrice && (
+              <small className="discountedPrice">
+                <Money data={selectedVariant.compareAtPrice} />
+              </small>
+            )}
+          </div>
           <div className="quantity-selector">
             <p>Quantity</p>
             <button onClick={decrementQuantity} className="quantity-btn">-</button>
