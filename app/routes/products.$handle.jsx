@@ -92,19 +92,18 @@ export default function Product() {
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
-
-  // Safely initialize currentImage
   const initialImage = product.images.edges.length > 0 ? product.images.edges[0].node : null;
   const [currentImage, setCurrentImage] = useState(initialImage);
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
+  const [activeTab, setActiveTab] = useState('description');
+
   useEffect(() => {
     if (selectedVariant && selectedVariant.price) {
       const price = parseFloat(selectedVariant.price.amount);
       setSubtotal(price * quantity);
-
       // Update the current image based on the selected variant
       const variantImage = selectedVariant.image || (product.images.edges.length > 0 ? product.images.edges[0].node : null);
       setCurrentImage(variantImage);
@@ -161,6 +160,7 @@ export default function Product() {
                     variants={data?.product?.variants.nodes || []}
                     quantity={quantity}
                     onVariantChange={(variant) => {
+                      // Update the current image when the variant changes
                       const variantImage = variant.image || (product.images.edges.length > 0 ? product.images.edges[0].node : null);
                       setCurrentImage(variantImage);
                     }}
