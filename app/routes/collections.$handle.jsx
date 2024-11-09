@@ -212,6 +212,16 @@ export default function Collection() {
     });
   }, [collection.products.nodes]);
 
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1, // Delay between each child product animation
+      },
+    },
+  };
+
 
   return (
     <div className="collection">
@@ -266,21 +276,30 @@ export default function Collection() {
 
           <hr className='col-hr'></hr>
 
-          <PaginatedResourceSection
-            connection={{
-              ...collection.products,
-              nodes: sortedProducts, // Use sortedProducts instead of collection.products.nodes
-            }}
-            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+          <motion.div
+            className="flex flex-col lg:flex-row w-[100%]"
+            initial="hidden"
+            animate="show"
+            variants={staggerContainer}
           >
-            {({ node: product, index }) => (
-              <ProductItem
-                key={product.id}
-                product={product}
-                loading={index < 50 ? 'eager' : undefined}
-              />
-            )}
-          </PaginatedResourceSection>
+
+            <PaginatedResourceSection
+              connection={{
+                ...collection.products,
+                nodes: sortedProducts, // Use sortedProducts instead of collection.products.nodes
+              }}
+              resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            >
+              {({ node: product, index }) => (
+                <ProductItem
+                  key={product.id}
+                  product={product}
+                  index={index} // Pass index for delay adjustment if needed
+                  loading={index < 50 ? 'eager' : undefined}
+                />
+              )}
+            </PaginatedResourceSection>
+          </motion.div>
         </div>
       </div>
 
