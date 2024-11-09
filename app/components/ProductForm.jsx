@@ -72,12 +72,15 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
 /**
  * @param {{option: VariantOption}}
  */
+/**
+ * @param {{option: VariantOption}}
+ */
 function ProductOptions({ option }) {
   return (
     <div className="product-options" key={option.name}>
-      <h5 className='OptionName'>{option.name}: <span className='OptionValue'>{option.value}</span></h5>
+      <h5 className='OptionName'>{option.name}:</h5>
       <div className="product-options-grid">
-        {option.values.map(({ value, isAvailable, isActive, to }) => {
+        {option.values.map(({ value, isAvailable, isActive, to, image }) => {
           return (
             <Link
               className="product-options-item"
@@ -91,14 +94,20 @@ function ProductOptions({ option }) {
                 opacity: isAvailable ? 1 : 0.3,
                 borderRadius: '20px',
                 transition: 'all 0.3s ease-in-out',
-                backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0', // Lighter blue when active
-                boxShadow: isActive
-                  ? '0 2px 4px rgba(0,0,0,0.1)'
-                  : 'none',
+                backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0',
+                boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
                 transform: isActive ? 'scale(0.98)' : 'scale(1)',
+                display: 'flex', // Use flex to align items
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
               }}
             >
-              {value}
+              {option.name === 'Color' ? (
+                <img src={image.url} alt={value} style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
+              ) : (
+                value
+              )}
             </Link>
           );
         })}
