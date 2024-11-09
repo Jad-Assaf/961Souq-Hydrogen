@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from '@remix-run/react';
 import { Money } from '@shopify/hydrogen';
-import { AnimatedImage } from './AnimatedImage';
+import { motion, useAnimation } from 'framer-motion';
+import { Image } from './Image'; //
 import '../styles/CollectionSlider.css';
 
-// Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
     const words = text.split(' ');
     return words.length > maxWords
@@ -15,59 +15,62 @@ export function truncateText(text, maxWords) {
 export function CollectionDisplay({ collections, sliderCollections, images }) {
     return (
         <div className="collections-container">
-            {/* Slide container using 'new-main-menu' handles */}
             <div className="slide-con">
                 <h3 className="cat-h3">Shop By Categories</h3>
                 <div className="category-slider">
-                    {sliderCollections.map((collection) => (
-                        <Link
+                    {sliderCollections.map((collection, index) => (
+                        <motion.div
                             key={collection.id}
-                            to={`/collections/${collection.handle}`}
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1, duration: 0.5 }}
                             className="category-container"
                         >
-                            <img
-                                data={collection.image}
-                                aspectRatio="1/1"
-                                sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${collection.image?.url}?width=300&quality=30 300w,
-                                             ${collection.image?.url}?width=600&quality=30 600w,
-                                             ${collection.image?.url}?width=1200&quality=30 1200w`}
-                                // src={collection.image?.url || 'https://via.placeholder.com/150'}
-                                alt={collection.image?.altText || collection.title}
-                                className="category-image"
-                            />
-                            <div className="category-title">{collection.title}</div>
-                        </Link>
+                            <Link to={`/collections/${collection.handle}`}>
+                                <motion.div
+                                    initial={{ filter: 'blur(10px)', opacity: 0 }}
+                                    animate={{ filter: 'blur(0px)', opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <Image
+                                        srcSet={`${collection.image?.url}?width=300&quality=30 300w,
+                                                 ${collection.image?.url}?width=600&quality=30 600w,
+                                                 ${collection.image?.url}?width=1200&quality=30 1200w`}
+                                        alt={collection.image?.altText || collection.title}
+                                        className="category-image"
+                                    />
+                                </motion.div>
+                                <div className="category-title">{collection.title}</div>
+                            </Link>
+                        </motion.div>
                     ))}
                 </div>
             </div>
 
-            {/* Product rows using hardcoded handles */}
             {collections.map((collection, index) => (
                 <div key={collection.id}>
                     <div className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
                     </div>
-
-                    {/* Inter-row images */}
                     <div className="image-row">
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
-                            <div key={`${collection.id}-${i}`} className="row-image">
-                                <AnimatedImage
-                                    data={image}
-                                    aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
+                            <motion.div
+                                key={`${collection.id}-${i}`}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: i * 0.1 + 0.2 }}
+                                className="row-image"
+                            >
+                                <Image
                                     srcSet={`${image}?width=300&quality=30 300w,
                                              ${image}?width=600&quality=30 600w,
                                              ${image}?width=1200&quality=30 1200w`}
-                                    // src={image}
                                     alt={`Collection ${index + 1} Image ${i + 1}`}
-                                    loading="lazy"
                                     width="100%"
                                     height="100%"
                                 />
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
@@ -77,29 +80,13 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
 }
 
 const LeftArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
     </svg>
 );
 
 const RightArrowIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
 );
@@ -144,26 +131,36 @@ function ProductRow({ products }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product) => (
-                    <Link key={product.id} className="product-item" to={`/products/${product.handle}`}>
-                        <div className="product-card">
-                            <AnimatedImage
-                                data={product.images.nodes[0]}
-                                aspectRatio="1/1"
-                                sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                         ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                         ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                                alt={product.images.nodes[0].altText || 'Product Image'}
-                                width="180px"
-                                height="180px"
-                            />
-                            <h4 className="product-title">{truncateText(product.title, 50)}</h4>
-                            <div className="product-price">
-                                <Money data={product.priceRange.minVariantPrice} />
-                            </div>
-                        </div>
-                    </Link>
+                {products.map((product, index) => (
+                    <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                        className="product-item"
+                    >
+                        <Link to={`/products/${product.handle}`}>
+                            <motion.div
+                                initial={{ filter: 'blur(10px)', opacity: 0 }}
+                                animate={{ filter: 'blur(0px)', opacity: 1 }}
+                                transition={{ duration: 0.5 }}
+                                className="product-card"
+                            >
+                                <Image
+                                    srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                             ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                             ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                                    alt={product.images.nodes[0].altText || 'Product Image'}
+                                    width="180px"
+                                    height="180px"
+                                />
+                                <h4 className="product-title">{truncateText(product.title, 50)}</h4>
+                                <div className="product-price">
+                                    <Money data={product.priceRange.minVariantPrice} />
+                                </div>
+                            </motion.div>
+                        </Link>
+                    </motion.div>
                 ))}
             </div>
             <button className="next-button" onClick={() => scrollRow(300)}>
