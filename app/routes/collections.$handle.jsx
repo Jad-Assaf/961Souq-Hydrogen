@@ -268,7 +268,7 @@ export default function Collection() {
           <PaginatedResourceSection
             connection={{
               ...collection.products,
-              nodes: collection.products.nodes,
+              nodes: sortedProducts,
             }}
             resourcesClassName={`products-grid grid-cols-${numberInRow}`}
           >
