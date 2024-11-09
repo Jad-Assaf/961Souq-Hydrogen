@@ -1,10 +1,10 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money } from '@shopify/hydrogen';
-import { motion, useAnimation } from 'framer-motion';
-import { Image } from './Image'; //
+import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
+import { motion } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 
+// Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
     const words = text.split(' ');
     return words.length > maxWords
@@ -15,6 +15,7 @@ export function truncateText(text, maxWords) {
 export function CollectionDisplay({ collections, sliderCollections, images }) {
     return (
         <div className="collections-container">
+            {/* Slide container using 'new-main-menu' handles */}
             <div className="slide-con">
                 <h3 className="cat-h3">Shop By Categories</h3>
                 <div className="category-slider">
@@ -33,6 +34,9 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                     transition={{ duration: 0.5 }}
                                 >
                                     <Image
+                                        data={collection.image}
+                                        aspectRatio="1/1"
+                                        sizes="(min-width: 45em) 20vw, 40vw"
                                         srcSet={`${collection.image?.url}?width=300&quality=30 300w,
                                                  ${collection.image?.url}?width=600&quality=30 600w,
                                                  ${collection.image?.url}?width=1200&quality=30 1200w`}
@@ -47,12 +51,15 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                 </div>
             </div>
 
+            {/* Product rows using hardcoded handles */}
             {collections.map((collection, index) => (
                 <div key={collection.id}>
                     <div className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
                     </div>
+
+                    {/* Inter-row images */}
                     <div className="image-row">
                         {images.slice(index * 2, index * 2 + 2).map((image, i) => (
                             <motion.div
@@ -63,6 +70,9 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                 className="row-image"
                             >
                                 <Image
+                                    data={image}
+                                    aspectRatio="1/1"
+                                    sizes="(min-width: 45em) 20vw, 40vw"
                                     srcSet={`${image}?width=300&quality=30 300w,
                                              ${image}?width=600&quality=30 600w,
                                              ${image}?width=1200&quality=30 1200w`}
@@ -147,6 +157,9 @@ function ProductRow({ products }) {
                                 className="product-card"
                             >
                                 <Image
+                                    data={product.images.nodes[0]}
+                                    aspectRatio="1/1"
+                                    sizes="(min-width: 45em) 20vw, 40vw"
                                     srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
                                              ${product.images.nodes[0].url}?width=600&quality=30 600w,
                                              ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
