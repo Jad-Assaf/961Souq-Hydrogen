@@ -1,5 +1,5 @@
 import {CartForm} from '@shopify/hydrogen';
-
+import React from 'react';
 /**
  * @param {{
  *   analytics?: unknown;

@@ -1,5 +1,4 @@
-import {createContext, useContext, useEffect, useState} from 'react';
-
+import React, {createContext, useContext, useEffect, useState} from 'react';
 /**
  * A side bar component with Overlay
  * @example

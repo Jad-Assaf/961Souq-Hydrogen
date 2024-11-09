@@ -1,3 +1,5 @@
+import React from "react";
+
 export const PAGINATION_SIZE = 16;
 export const DEFAULT_GRID_IMG_LOAD_EAGER_COUNT = 4;
 export const ATTR_LOADING_EAGER = "eager";

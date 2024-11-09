@@ -1,6 +1,5 @@
 import {useLocation} from '@remix-run/react';
-import {useMemo} from 'react';
-
+import React, {useMemo} from 'react';
 /**
  * @param {string} handle
  * @param {SelectedOption[]} selectedOptions
