@@ -19,7 +19,7 @@ import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
 import { AddToCartButton } from '../components/AddToCartButton';
 import { useAside } from '~/components/Aside';
-import { motion, useInView } from 'framer-motion';
+import { motion, useAnimation, useInView } from 'framer-motion';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -268,7 +268,7 @@ export default function Collection() {
           <PaginatedResourceSection
             connection={{
               ...collection.products,
-              nodes: sortedProducts, // Use sortedProducts instead of collection.products.nodes
+              nodes: collection.products.nodes,
             }}
             resourcesClassName={`products-grid grid-cols-${numberInRow}`}
           >
@@ -305,6 +305,11 @@ function ProductItem({ product, index }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
+  const controls = useAnimation();
+
+  React.useEffect(() => {
+    if (isInView) controls.start("visible");
+  }, [isInView, controls]);
 
   const [selectedVariant, setSelectedVariant] = useState(() => {
     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
@@ -316,16 +321,24 @@ function ProductItem({ product, index }) {
     product.priceRange.minVariantPrice.amount;
 
   return (
-    <div className="product-item-collection product-card" ref={ref}>
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={controls}
+      variants={staggerVariants}
+      custom={index}
+      className="product-item-collection product-card"
+    >
       <Link key={product.id} prefetch="intent" to={variantUrl}>
-        {product.featuredImage && isInView && ( // Only load the image if it's in view
+        {product.featuredImage && isInView && (
           <motion.div
-            initial={{ filter: 'blur(20px)' }}
-            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
-            transition={{ 
+            initial={{ filter: 'blur(10px)', opacity: 0 }}
+            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
+            transition={{
               duration: 0.5,
-              delay: index * 0.1,
+              delay: index * 0.05,
             }}
+            style={{ width: '180px', height: '180px' }}
           >
             <Image
               srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
@@ -335,7 +348,7 @@ function ProductItem({ product, index }) {
               loading="lazy"
               width="180px"
               height="180px"
-              onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
+              onLoad={() => setIsImageLoaded(true)}
             />
           </motion.div>
         )}
@@ -356,9 +369,25 @@ function ProductItem({ product, index }) {
         selectedVariant={selectedVariant}
         setSelectedVariant={setSelectedVariant}
       />
-    </div>
+    </motion.div>
   );
 }
+
+// Animation variants for staggered loading
+const staggerVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.8,
+  },
+  visible: (index) => ({
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delay: index * 0.05,
+      duration: 0.3,
+    },
+  }),
+};
 
 /**
  * @param {{
