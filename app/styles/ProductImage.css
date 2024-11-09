@@ -50,6 +50,16 @@
     width: 75%;
     cursor: grab;
     transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.main-image img {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.main-image img.fade-in {
+    opacity: 1;
 }
 
 .main-image:active {
@@ -57,7 +67,7 @@
 }
 
 .main-image:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .prev-button,

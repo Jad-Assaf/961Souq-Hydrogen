@@ -41,44 +41,45 @@ const RightArrowIcon = () => (
 export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [fadeClass, setFadeClass] = useState('fade-in');
 
-  // Keep track of whether the variant image was just selected
   const [isVariantSelected, setIsVariantSelected] = useState(false);
 
-  // Effect to set the variant image initially when it changes
   useEffect(() => {
     if (selectedVariantImage) {
       const variantImageIndex = images.findIndex(({ node }) => node.id === selectedVariantImage.id);
       if (variantImageIndex >= 0 && !isVariantSelected) {
         setSelectedImageIndex(variantImageIndex);
-        setIsVariantSelected(true); // Prevents resetting on every re-render
+        setIsVariantSelected(true);
       }
     }
   }, [selectedVariantImage, images, isVariantSelected]);
 
-  // Reset isVariantSelected when the variant image changes
   useEffect(() => {
     setIsVariantSelected(false);
   }, [selectedVariantImage]);
 
-  if (!images || images.length === 0) {
-    return <div className="product-images" />;
-  }
-
   const selectedImage = images[selectedImageIndex]?.node;
+
+  // Trigger fade effect by toggling fadeClass
+  useEffect(() => {
+    setFadeClass(''); // Remove class
+    const timeout = setTimeout(() => setFadeClass('fade-in'), 50); // Add class back after a short delay
+    return () => clearTimeout(timeout);
+  }, [selectedImageIndex]);
 
   const handlePrevImage = () => {
     setSelectedImageIndex((prevIndex) =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
-    setIsVariantSelected(false); // Allow navigation
+    setIsVariantSelected(false);
   };
 
   const handleNextImage = () => {
     setSelectedImageIndex((prevIndex) =>
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
     );
-    setIsVariantSelected(false); // Allow navigation
+    setIsVariantSelected(false);
   };
 
   return (
@@ -118,6 +119,7 @@ export function ProductImages({ images, selectedVariantImage }) {
             width="100%"
             height="auto"
             loading="eager"
+            className={fadeClass}
           />
         )}
         <div className="ImageArrows">
