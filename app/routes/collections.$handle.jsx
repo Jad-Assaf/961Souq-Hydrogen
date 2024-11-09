@@ -320,14 +320,24 @@ function ProductItem({ product, index }) {
       <Link key={product.id} prefetch="intent" to={variantUrl}>
         {product.featuredImage && isInView && (
           <motion.div
-            className={`shimmer ${isImageLoaded ? '' : 'loading'}`} // Apply shimmer while loading
-            initial={{ filter: 'blur(20px)' }}
-            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
+            className="shimmer" // Apply shimmer until image loads
+            initial={{ opacity: 1, filter: 'blur(10px)' }}
+            animate={{
+              opacity: isImageLoaded ? 1 : 0.5,
+              filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)',
+            }}
             transition={{
-              duration: 0.5,
+              opacity: { duration: 0.4, ease: 'easeInOut' },
+              filter: { duration: 0.5, ease: 'easeInOut' },
               delay: index * 0.1,
             }}
-            style={{ width: '180px', height: '180px' }}
+            style={{
+              width: '180px',
+              height: '180px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
           >
             <Image
               srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
@@ -337,8 +347,10 @@ function ProductItem({ product, index }) {
               loading="lazy"
               width={180}
               height={180}
-              onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
-              style={{ display: isImageLoaded ? 'block' : 'none' }} // Hide until loaded
+              onLoad={() => setIsImageLoaded(true)} // Trigger image load completion
+              style={{
+                display: isImageLoaded ? 'block' : 'none', // Hide until loaded
+              }}
             />
           </motion.div>
         )}
