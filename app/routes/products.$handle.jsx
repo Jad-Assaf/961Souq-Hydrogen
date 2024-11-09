@@ -15,6 +15,7 @@ import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 
+
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
 };
@@ -65,7 +66,7 @@ function loadDeferredData({ context, params }) {
     variables: { handle: params.handle },
   }).catch((error) => {
     console.error(error);
-    return { variants: [] }; // Return an empty array instead of null
+    return null;
   });
 
   return { variants };
@@ -152,17 +153,14 @@ export default function Product() {
           >
             <Await resolve={variants} errorElement="There was a problem loading product variants">
               {(data) => (
-                <>
-                  <ProductForm
-                    product={product}
-                    selectedVariant={selectedVariant}
-                    variants={data || []} // Use data directly if it's just variants
-                    quantity={quantity}
-                  />
+                <><ProductForm
+                  product={product}
+                  selectedVariant={selectedVariant}
+                  variants={data?.product?.variants.nodes || []}
+                  quantity={quantity} />
                   <DirectCheckoutButton
                     selectedVariant={selectedVariant}
-                    quantity={quantity}
-                  />
+                    quantity={quantity} />
                 </>
               )}
             </Await>

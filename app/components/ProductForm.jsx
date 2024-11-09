@@ -72,15 +72,16 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
 /**
  * @param {{option: VariantOption}}
  */
-/**
- * @param {{option: VariantOption}}
- */
 function ProductOptions({ option }) {
   return (
     <div className="product-options" key={option.name}>
-      <h5 className='OptionName'>{option.name}:</h5>
+      <h5 className='OptionName'>{option.name}: <span className='OptionValue'>{option.value}</span></h5>
       <div className="product-options-grid">
-        {option.values.map(({ value, isAvailable, isActive, to, image }) => {
+        {option.values.map(({ value, isAvailable, isActive, to, variant }) => {
+          // Check if the option is 'Color' and if the variant has an image
+          const isColorOption = option.name.toLowerCase() === 'color';
+          const variantImage = isColorOption && variant?.image?.url;
+
           return (
             <Link
               className="product-options-item"
@@ -97,14 +98,14 @@ function ProductOptions({ option }) {
                 backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0',
                 boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
                 transform: isActive ? 'scale(0.98)' : 'scale(1)',
-                display: 'flex', // Use flex to align items
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
               }}
             >
-              {option.name === 'Color' ? (
-                <img src={image.url} alt={value} style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
+              {variantImage ? (
+                <img
+                  src={variantImage}
+                  alt={value}
+                  style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                />
               ) : (
                 value
               )}
