@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
+import { AddToCartButton } from '../components/AddToCartButton'; // Import ProductForm dependencies
+import { useAside } from '~/components/Aside';
 import '../styles/CollectionSlider.css';
 
 // Truncate text to fit within the given max word count
@@ -169,9 +171,12 @@ const RightArrowIcon = () => (
 function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
-    const hasDiscount = product.compareAtPriceRange &&
-        product.compareAtPriceRange.minVariantPrice.amount >
-        product.priceRange.minVariantPrice.amount;
+    const { open } = useAside();
+
+    const [selectedVariant, setSelectedVariant] = useState(
+        product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0]
+    );
+    const hasDiscount = selectedVariant.compareAtPrice && selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
     return (
         <motion.div
@@ -202,23 +207,52 @@ function ProductItem({ product, index }) {
                         height="180px"
                     />
                     <h4 className="product-title">{truncateText(product.title, 50)}</h4>
+
+                    {/* Price and Discounted Price */}
                     <div className="price-container">
                         <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
                             <Money data={selectedVariant.price} />
                         </small>
-                        {hasDiscount && selectedVariant.compareAtPrice && (
+                        {hasDiscount && (
                             <small className="discountedPrice">
                                 <Money data={selectedVariant.compareAtPrice} />
                             </small>
                         )}
                     </div>
-                    <ProductForm
-                        product={product}
-                        selectedVariant={selectedVariant}
-                        setSelectedVariant={setSelectedVariant}
-                    />
                 </motion.div>
             </Link>
+
+            {/* ProductForm */}
+            <div className="product-form">
+                <AddToCartButton
+                    disabled={!selectedVariant || !selectedVariant.availableForSale}
+                    onClick={() => {
+                        open('cart'); // Open cart or product page depending on availability
+                    }}
+                    lines={
+                        selectedVariant
+                            ? [
+                                {
+                                    merchandiseId: selectedVariant.id,
+                                    quantity: 1,
+                                    attributes: [],
+                                    product: {
+                                        ...product,
+                                        selectedVariant,
+                                        handle: product.handle,
+                                    },
+                                },
+                            ]
+                            : []
+                    }
+                >
+                    {!selectedVariant?.availableForSale
+                        ? 'Sold out'
+                        : product.variants.nodes.length > 1
+                            ? 'Select Options'
+                            : 'Add to cart'}
+                </AddToCartButton>
+            </div>
         </motion.div>
     );
 }
