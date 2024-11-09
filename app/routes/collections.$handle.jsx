@@ -318,52 +318,26 @@ function ProductItem({ product, index }) {
   return (
     <div className="product-item-collection product-card" ref={ref}>
       <Link key={product.id} prefetch="intent" to={variantUrl}>
-        {product.featuredImage && isInView && (
-          <div style={{ position: 'relative', width: '180px', height: '180px' }}>
-            {/* Shimmer Animation */}
-            {!isImageLoaded && (
-              <motion.div
-                className="shimmer"
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.2) 75%)',
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 1.5s infinite',
-                  zIndex: 10,
-                }}
-              />
-            )}
-
-            {/* Blurred Image that Sharpens on Load */}
-            <motion.div
-              initial={{ filter: 'blur(10px)', opacity: 0 }}
-              animate={{ filter: 'blur(0px)', opacity: 1 }}
-              transition={{
-                filter: { duration: 0.5, ease: 'easeInOut' },
-                opacity: { duration: 0.5 },
-                delay: index * 0.1,
-              }}
-              style={{ position: 'relative', zIndex: 2 }}
-            >
-              <Image
-                srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                         ${product.featuredImage.url}?width=600&quality=30 600w,
-                         ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-                alt={product.featuredImage.altText || product.title}
-                loading="lazy"
-                width={180}
-                height={180}
-                onLoad={() => setIsImageLoaded(true)}
-              />
-            </motion.div>
-          </div>
+        {product.featuredImage && isInView && ( // Only load the image if it's in view
+          <motion.div
+            initial={{ filter: 'blur(20px)' }}
+            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
+            transition={{ 
+              duration: 0.5,
+              delay: index * 0.1,
+            }}
+          >
+            <Image
+              srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+                       ${product.featuredImage.url}?width=600&quality=30 600w,
+                       ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+              alt={product.featuredImage.altText || product.title}
+              loading="lazy"
+              width={180}
+              height={180}
+              onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
+            />
+          </motion.div>
         )}
         <h4>{truncateText(product.title, 50)}</h4>
         <div className="price-container">
