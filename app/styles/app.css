@@ -728,6 +728,10 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Menu Links */
+.menu-item a:first-of-type {
+  color: #fff !important;
+}
+
 .menu-item a {
   color: #000 !important;
   text-decoration: none;
