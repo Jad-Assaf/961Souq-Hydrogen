@@ -217,11 +217,10 @@ export default function Collection() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2, // Delay between each child product animation
+        staggerChildren: 0.15, // Delay between each child product animation
       },
     },
   };
-
 
   return (
     <div className="collection">
@@ -321,7 +320,7 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-function ProductItem({ product }) {
+function ProductItem({ product, index }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
@@ -336,9 +335,18 @@ function ProductItem({ product }) {
     product.priceRange.minVariantPrice.amount;
 
   return (
-    <div className="product-item-collection product-card" ref={ref}>
+    <motion.div
+      className="product-item-collection product-card"
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.3,
+        delay: index * 0.05, // Increase delay for each product
+      }}
+    >
       <Link key={product.id} prefetch="intent" to={variantUrl}>
-        {product.featuredImage && isInView && ( // Only load the image if it's in view
+        {product.featuredImage && isInView && (
           <motion.div
             initial={{ filter: 'blur(20px)' }}
             animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
@@ -352,7 +360,7 @@ function ProductItem({ product }) {
               loading="lazy"
               width={180}
               height={180}
-              onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
+              onLoad={() => setIsImageLoaded(true)}
             />
           </motion.div>
         )}
@@ -373,7 +381,7 @@ function ProductItem({ product }) {
         selectedVariant={selectedVariant}
         setSelectedVariant={setSelectedVariant}
       />
-    </div>
+    </motion.div>
   );
 }
 
