@@ -3,7 +3,6 @@ import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
-import { ProductItem } from '~/routes/collections.$handle';
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
@@ -167,44 +166,56 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-// function ProductItem({ product, index }) {
-//     const ref = useRef(null);
-//     const isInView = useInView(ref, { once: true });
+function ProductItem({ product, index }) {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
 
-//     return (
-//         <motion.div
-//             ref={ref}
-//             initial={{ opacity: 0, x: -20 }}
-//             animate={isInView ? { opacity: 1, x: 0 } : {}}
-//             transition={{ delay: index * 0.01, duration: 0.5 }}
-//             className="product-item"
-//         >
-//             <Link to={`/products/${product.handle}`}>
-//                 <motion.div
-//                     initial={{ filter: 'blur(10px)', opacity: 0 }}
-//                     animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
-//                     transition={{ duration: 0.5 }}
-//                     className="product-card"
-//                     width="180px"
-//                     height="180px"
-//                 >
-//                     <Image
-//                         data={product.images.nodes[0]}
-//                         aspectRatio="1/1"
-//                         sizes="(min-width: 45em) 20vw, 40vw"
-//                         srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-//                                  ${product.images.nodes[0].url}?width=600&quality=30 600w,
-//                                  ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-//                         alt={product.images.nodes[0].altText || 'Product Image'}
-//                         width="180px"
-//                         height="180px"
-//                     />
-//                     <h4 className="product-title">{truncateText(product.title, 50)}</h4>
-//                     <div className="product-price">
-//                         <Money data={product.priceRange.minVariantPrice} />
-//                     </div>
-//                 </motion.div>
-//             </Link>
-//         </motion.div>
-//     );
-// }
+    return (
+        <motion.div
+            ref={ref}
+            initial={{ opacity: 0, x: -20 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ delay: index * 0.01, duration: 0.5 }}
+            className="product-item"
+        >
+            <Link to={`/products/${product.handle}`}>
+                <motion.div
+                    initial={{ filter: 'blur(10px)', opacity: 0 }}
+                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                    transition={{ duration: 0.5 }}
+                    className="product-card"
+                    width="180px"
+                    height="180px"
+                >
+                    <Image
+                        data={product.images.nodes[0]}
+                        aspectRatio="1/1"
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                        alt={product.images.nodes[0].altText || 'Product Image'}
+                        width="180px"
+                        height="180px"
+                    />
+                    <h4 className="product-title">{truncateText(product.title, 50)}</h4>
+                    <div className="price-container">
+                        <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+                            <Money data={selectedVariant.price} />
+                        </small>
+                        {hasDiscount && selectedVariant.compareAtPrice && (
+                            <small className="discountedPrice">
+                                <Money data={selectedVariant.compareAtPrice} />
+                            </small>
+                        )}
+                    </div>
+                    <ProductForm
+                        product={product}
+                        selectedVariant={selectedVariant}
+                        setSelectedVariant={setSelectedVariant}
+                    />
+                </motion.div>
+            </Link>
+        </motion.div>
+    );
+}
