@@ -43,7 +43,7 @@ export function ProductImages({ images, selectedVariantImage }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [fadeClass, setFadeClass] = useState('');
   const [imageKey, setImageKey] = useState(0);
-  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track loading status
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const [isVariantSelected, setIsVariantSelected] = useState(false);
 
@@ -114,7 +114,8 @@ export function ProductImages({ images, selectedVariantImage }) {
         onClick={() => setIsLightboxOpen(true)}
         style={{ cursor: 'grab', position: 'relative' }}
       >
-        {!isImageLoaded && <div className="shimmer" />} {/* Shimmer Effect */}
+        {/* Check if the shimmer placeholder is visible */}
+        <div className={`shimmer ${isImageLoaded ? 'hidden' : ''}`} />
 
         {selectedImage && (
           <Image
