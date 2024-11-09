@@ -301,7 +301,7 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-function ProductItem({ product, index }) {
+function ProductItem({ product }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
@@ -318,13 +318,13 @@ function ProductItem({ product, index }) {
   return (
     <div className="product-item-collection product-card" ref={ref}>
       <Link key={product.id} prefetch="intent" to={variantUrl}>
-        {product.featuredImage && isInView && (
+        {product.featuredImage && isInView && ( // Only load the image if it's in view
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
+            initial={{ filter: 'blur(20px)' }}
+            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
+            transition={{ 
               duration: 0.5,
-              delay: index * 0.1, // Apply staggered delay based on the index
+              delay: index * 0.5,
             }}
           >
             <Image
@@ -335,7 +335,7 @@ function ProductItem({ product, index }) {
               loading="lazy"
               width={180}
               height={180}
-              onLoad={() => setIsImageLoaded(true)}
+              onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
             />
           </motion.div>
         )}
