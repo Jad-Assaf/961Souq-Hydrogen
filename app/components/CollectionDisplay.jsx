@@ -184,8 +184,6 @@ function ProductItem({ product, index }) {
                     animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
                     transition={{ duration: 0.5 }}
                     className="product-card"
-                    width="180px"
-                    height="180px"
                 >
                     <Image
                         data={product.images.nodes[0]}
