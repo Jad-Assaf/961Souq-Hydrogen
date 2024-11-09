@@ -304,7 +304,7 @@ export default function Collection() {
 function ProductItem({ product, index, numberInRow }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
+  const isInView = useInView(ref, { once: true, margin: '0px 0px 100px 0px' });
   const controls = useAnimation();
 
   // Calculate delay for staggered animation based on row and column
