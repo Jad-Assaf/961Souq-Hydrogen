@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image } from '@shopify/hydrogen';
 import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
@@ -42,11 +42,19 @@ export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  // Effect to set the variant image as the main image when it changes
+  useEffect(() => {
+    if (selectedVariantImage) {
+      const variantImageIndex = images.findIndex(({ node }) => node.id === selectedVariantImage.id);
+      setSelectedImageIndex(variantImageIndex >= 0 ? variantImageIndex : 0);
+    }
+  }, [selectedVariantImage, images]);
+
   if (!images || images.length === 0) {
     return <div className="product-images" />;
   }
 
-  const selectedImage = selectedVariantImage || images[selectedImageIndex]?.node;
+  const selectedImage = images[selectedImageIndex]?.node;
 
   const handlePrevImage = () => {
     setSelectedImageIndex((prevIndex) =>
@@ -134,5 +142,6 @@ export function ProductImages({ images, selectedVariantImage }) {
     </div>
   );
 }
+
 
 /** @typedef {import('storefrontapi.generated').ProductFragment} ProductFragment */
