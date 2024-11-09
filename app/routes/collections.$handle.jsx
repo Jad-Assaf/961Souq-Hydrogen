@@ -319,6 +319,21 @@ function ProductItem({ product, index, numberInRow }) {
   const columnIndex = index % numberInRow;
   const delay = rowIndex * 0.3 + columnIndex * 0.1;
 
+  useEffect(() => {
+    if (isInView) {
+      controls.start("visible");
+    }
+  }, [isInView, controls, index, numberInRow]);
+
+  const [selectedVariant, setSelectedVariant] = useState(() => {
+    return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+  });
+  const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
+
+  const hasDiscount = product.compareAtPriceRange &&
+    product.compareAtPriceRange.minVariantPrice.amount >
+    product.priceRange.minVariantPrice.amount;
+
   return (
     <div className="product-item-collection product-card" ref={ref}>
       <motion.div
@@ -372,6 +387,20 @@ function ProductItem({ product, index, numberInRow }) {
     </div>
   );
 }
+
+
+// Animation variants for staggered loading
+const staggerVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.8,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3 },
+  },
+};
 
 /**
  * @param {{
