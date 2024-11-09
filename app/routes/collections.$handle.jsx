@@ -301,7 +301,7 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-function ProductItem({ product, index, numberInRow }) {
+export function ProductItem({ product, index, numberInRow }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 100px 0px' });
