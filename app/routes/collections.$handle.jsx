@@ -333,8 +333,8 @@ function ProductItem({ product, index }) {
                        ${product.featuredImage.url}?width=1200&quality=30 1200w`}
               alt={product.featuredImage.altText || product.title}
               loading="lazy"
-              width={180}
-              height={180}
+              width="180px"
+              height="180px"
               onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
             />
           </motion.div>
