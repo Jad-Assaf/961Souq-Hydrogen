@@ -65,7 +65,7 @@ function loadDeferredData({ context, params }) {
     variables: { handle: params.handle },
   }).catch((error) => {
     console.error(error);
-    return null;
+    return { variants: [] }; // Return an empty array instead of null
   });
 
   return { variants };
@@ -152,14 +152,17 @@ export default function Product() {
           >
             <Await resolve={variants} errorElement="There was a problem loading product variants">
               {(data) => (
-                <><ProductForm
-                  product={product}
-                  selectedVariant={selectedVariant}
-                  variants={data?.product?.variants.nodes || []}
-                  quantity={quantity} />
+                <>
+                  <ProductForm
+                    product={product}
+                    selectedVariant={selectedVariant}
+                    variants={data || []} // Use data directly if it's just variants
+                    quantity={quantity}
+                  />
                   <DirectCheckoutButton
                     selectedVariant={selectedVariant}
-                    quantity={quantity} />
+                    quantity={quantity}
+                  />
                 </>
               )}
             </Await>
