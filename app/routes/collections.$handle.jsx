@@ -318,14 +318,16 @@ function ProductItem({ product, index }) {
   return (
     <div className="product-item-collection product-card" ref={ref}>
       <Link key={product.id} prefetch="intent" to={variantUrl}>
-        {product.featuredImage && isInView && ( // Only load the image if it's in view
+        {product.featuredImage && isInView && (
           <motion.div
+            className={`shimmer ${isImageLoaded ? '' : 'loading'}`} // Apply shimmer while loading
             initial={{ filter: 'blur(20px)' }}
             animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
-            transition={{ 
+            transition={{
               duration: 0.5,
-              delay: index * 0.5,
+              delay: index * 0.1,
             }}
+            style={{ width: '180px', height: '180px' }}
           >
             <Image
               srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
@@ -336,6 +338,7 @@ function ProductItem({ product, index }) {
               width={180}
               height={180}
               onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
+              style={{ display: isImageLoaded ? 'block' : 'none' }} // Hide until loaded
             />
           </motion.div>
         )}
