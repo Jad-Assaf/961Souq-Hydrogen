@@ -2,8 +2,6 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
-import { AddToCartButton } from '../components/AddToCartButton'; // Import ProductForm dependencies
-import { useAside } from '~/components/Aside';
 import '../styles/CollectionSlider.css';
 
 // Truncate text to fit within the given max word count
@@ -171,20 +169,6 @@ const RightArrowIcon = () => (
 function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
-    const { open } = useAside();
-
-    const images = product.images?.nodes || []; // Ensure product images exist
-    const variants = product.variants?.nodes || []; // Ensure product variants exist
-
-    // Check for available variants and select the first available or fallback to the first variant
-    const [selectedVariant, setSelectedVariant] = useState(
-        variants.find(variant => variant.availableForSale) || variants[0]
-    );
-
-    const hasDiscount =
-        selectedVariant &&
-        selectedVariant.compareAtPrice &&
-        selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
     return (
         <motion.div
@@ -203,70 +187,23 @@ function ProductItem({ product, index }) {
                     width="180px"
                     height="180px"
                 >
-                    {images[0] && ( // Check if there is at least one image
-                        <Image
-                            data={images[0]}
-                            aspectRatio="1/1"
-                            sizes="(min-width: 45em) 20vw, 40vw"
-                            srcSet={`${images[0].url}?width=300&quality=30 300w,
-                                     ${images[0].url}?width=600&quality=30 600w,
-                                     ${images[0].url}?width=1200&quality=30 1200w`}
-                            alt={images[0].altText || 'Product Image'}
-                            width="180px"
-                            height="180px"
-                        />
-                    )}
+                    <Image
+                        data={product.images.nodes[0]}
+                        aspectRatio="1/1"
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                        alt={product.images.nodes[0].altText || 'Product Image'}
+                        width="180px"
+                        height="180px"
+                    />
                     <h4 className="product-title">{truncateText(product.title, 50)}</h4>
-
-                    {/* Price and Discounted Price */}
-                    <div className="price-container">
-                        {selectedVariant && (
-                            <>
-                                <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
-                                    <Money data={selectedVariant.price} />
-                                </small>
-                                {hasDiscount && (
-                                    <small className="discountedPrice">
-                                        <Money data={selectedVariant.compareAtPrice} />
-                                    </small>
-                                )}
-                            </>
-                        )}
+                    <div className="product-price">
+                        <Money data={product.priceRange.minVariantPrice} />
                     </div>
                 </motion.div>
             </Link>
-
-            {/* ProductForm */}
-            <div className="product-form">
-                <AddToCartButton
-                    disabled={!selectedVariant || !selectedVariant.availableForSale}
-                    onClick={() => {
-                        open('cart'); // Open cart or product page depending on availability
-                    }}
-                    lines={
-                        selectedVariant
-                            ? [
-                                {
-                                    merchandiseId: selectedVariant.id,
-                                    quantity: 1,
-                                    attributes: [],
-                                    product: {
-                                        ...product,
-                                        selectedVariant,
-                                        handle: product.handle,
-                                    },
-                                },
-                            ]
-                            : []
-                    }
-                >
-                    {!selectedVariant?.availableForSale
-                        ? 'Sold out'
-                        : variants.length > 1
-                            ? 'Select Options'
-                            : 'Add to cart'}
-                </AddToCartButton>
-            </div>
         </motion.div>
     );
 }
