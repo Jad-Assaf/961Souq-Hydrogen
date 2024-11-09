@@ -212,16 +212,6 @@ export default function Collection() {
     });
   }, [collection.products.nodes]);
 
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  };
-  
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
@@ -275,30 +265,21 @@ export default function Collection() {
 
           <hr className='col-hr'></hr>
 
-          <motion.div
-            className="flex flex-col lg:flex-row w-[100%]"
-            initial="hidden"
-            animate="show"
-            variants={staggerContainer}
+          <PaginatedResourceSection
+            connection={{
+              ...collection.products,
+              nodes: sortedProducts, // Use sortedProducts instead of collection.products.nodes
+            }}
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
           >
-
-            <PaginatedResourceSection
-              connection={{
-                ...collection.products,
-                nodes: sortedProducts, // Use sortedProducts instead of collection.products.nodes
-              }}
-              resourcesClassName={`products-grid grid-cols-${numberInRow}`}
-            >
-              {({ node: product, index }) => (
-                <ProductItem
-                  key={product.id}
-                  product={product}
-                  index={index} // Pass index for delay adjustment if needed
-                  loading={index < 50 ? 'eager' : undefined}
-                />
-              )}
-            </PaginatedResourceSection>
-          </motion.div>
+            {({ node: product, index }) => (
+              <ProductItem
+                key={product.id}
+                product={product}
+                loading={index < 50 ? 'eager' : undefined}
+              />
+            )}
+          </PaginatedResourceSection>
         </div>
       </div>
 
@@ -320,7 +301,7 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-function ProductItem({ product, index, baseDelay = 0 }) {
+function ProductItem({ product, index }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
@@ -335,22 +316,16 @@ function ProductItem({ product, index, baseDelay = 0 }) {
     product.priceRange.minVariantPrice.amount;
 
   return (
-    <motion.div
-      className="product-item-collection product-card"
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.5,
-        delay: baseDelay, // Only use delay for initial load
-      }}
-    >
+    <div className="product-item-collection product-card" ref={ref}>
       <Link key={product.id} prefetch="intent" to={variantUrl}>
         {product.featuredImage && isInView && (
           <motion.div
-            initial={{ filter: 'blur(20px)' }}
-            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.5,
+              delay: index * 0.1, // Apply staggered delay based on the index
+            }}
           >
             <Image
               srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
@@ -381,7 +356,7 @@ function ProductItem({ product, index, baseDelay = 0 }) {
         selectedVariant={selectedVariant}
         setSelectedVariant={setSelectedVariant}
       />
-    </motion.div>
+    </div>
   );
 }
 
