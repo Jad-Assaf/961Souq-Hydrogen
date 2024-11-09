@@ -370,7 +370,7 @@ strong{
 
 .fade-enter-active {
     opacity: 1;
-    transition: opacity 300ms ease-in;
+    transition: opacity 200ms ease;
 }
 
 .fade-exit {
@@ -379,5 +379,5 @@ strong{
 
 .fade-exit-active {
     opacity: 0;
-    transition: opacity 300ms ease-in;
+    transition: opacity 200ms ease;
 }
