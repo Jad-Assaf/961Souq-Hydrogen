@@ -197,6 +197,7 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   padding: 10px;
+  min-width: 175px;
   min-height: 400px;
 }
 
