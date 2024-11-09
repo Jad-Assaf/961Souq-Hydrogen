@@ -190,7 +190,7 @@ export default function Product() {
 
           <CSSTransition
             in={activeTab === 'description'}
-            timeout={300}
+            timeout={200}
             classNames="fade"
             unmountOnExit
           >
@@ -201,7 +201,7 @@ export default function Product() {
 
           <CSSTransition
             in={activeTab === 'shipping'}
-            timeout={300}
+            timeout={200}
             classNames="fade"
             unmountOnExit
           >
@@ -225,7 +225,7 @@ export default function Product() {
 
           <CSSTransition
             in={activeTab === 'warranty'}
-            timeout={300}
+            timeout={200}
             classNames="fade"
             unmountOnExit
           >
