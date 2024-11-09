@@ -70,7 +70,7 @@ export async function loadCriticalData({ context, params, request }) {
       break;
     case 'featured':
     default:
-      sortKey = 'MANUAL';
+      sortKey = 'CREATED';
       break;
   }
 
