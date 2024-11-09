@@ -39,6 +39,7 @@
     "react-image-lightbox": "^5.1.4",
     "react-lazy-load-image-component": "^1.6.2",
     "react-responsive": "^10.0.0",
+    "react-transition-group": "^4.4.5",
     "react-use": "^17.5.1",
     "tailwind-merge": "^2.5.4",
     "typographic-base": "^1.0.4",

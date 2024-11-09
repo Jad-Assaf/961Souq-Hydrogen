@@ -13,7 +13,7 @@ import { ProductImages } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
-
+import { CSSTransition } from 'react-transition-group';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -189,12 +189,25 @@ export default function Product() {
         </div>
 
         {activeTab === 'description' && (
+          <CSSTransition
+            in={activeTab === 'description'}
+            timeout={300}
+            classNames="fade"
+            unmountOnExit
+          >
           <div className="product-section">
             <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
           </div>
+          </CSSTransition>
         )}
 
         {activeTab === 'shipping' && (
+          <CSSTransition
+            in={activeTab === 'description'}
+            timeout={300}
+            classNames="fade"
+            unmountOnExit
+          >
           <div className="product-section">
             <h3>Shipping Policy</h3>
             <p>We offer shipping across all Lebanon, facilitated by our dedicated delivery team servicing the Beirut district and through our partnership with Wakilni for orders beyond Beirut.</p>
@@ -211,9 +224,16 @@ export default function Product() {
             <h5>Exchanges</h5>
             <p>The most efficient method to secure the item you desire is to exchange the original item, and upon acceptance of your exchange, proceed with a separate purchase for the desired replacement.</p>
           </div>
+          </CSSTransition>
         )}
 
         {activeTab === 'warranty' && (
+          <CSSTransition
+            in={activeTab === 'description'}
+            timeout={300}
+            classNames="fade"
+            unmountOnExit
+          >
           <div className="product-section">
             <h3>Operational Warranty Terms and Conditions</h3>
             <h3>Warranty Coverage</h3>
@@ -238,6 +258,7 @@ export default function Product() {
             <h3>Limitations and Exclusions</h3>
             <p>This warranty is limited to repair or replacement. 961 Souq will not be liable for any indirect, consequential, or incidental damages, including loss of data or loss of profits.</p>
           </div>
+          </CSSTransition>
         )}
         <Analytics.ProductView
           data={{
