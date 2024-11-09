@@ -42,13 +42,24 @@ export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  // Effect to set the variant image as the main image when it changes
+  // Keep track of whether the variant image was just selected
+  const [isVariantSelected, setIsVariantSelected] = useState(false);
+
+  // Effect to set the variant image initially when it changes
   useEffect(() => {
     if (selectedVariantImage) {
       const variantImageIndex = images.findIndex(({ node }) => node.id === selectedVariantImage.id);
-      setSelectedImageIndex(variantImageIndex >= 0 ? variantImageIndex : 0);
+      if (variantImageIndex >= 0 && !isVariantSelected) {
+        setSelectedImageIndex(variantImageIndex);
+        setIsVariantSelected(true); // Prevents resetting on every re-render
+      }
     }
-  }, [selectedVariantImage, images]);
+  }, [selectedVariantImage, images, isVariantSelected]);
+
+  // Reset isVariantSelected when the variant image changes
+  useEffect(() => {
+    setIsVariantSelected(false);
+  }, [selectedVariantImage]);
 
   if (!images || images.length === 0) {
     return <div className="product-images" />;
@@ -60,12 +71,14 @@ export function ProductImages({ images, selectedVariantImage }) {
     setSelectedImageIndex((prevIndex) =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
+    setIsVariantSelected(false); // Allow navigation
   };
 
   const handleNextImage = () => {
     setSelectedImageIndex((prevIndex) =>
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
     );
+    setIsVariantSelected(false); // Allow navigation
   };
 
   return (
@@ -142,6 +155,5 @@ export function ProductImages({ images, selectedVariantImage }) {
     </div>
   );
 }
-
 
 /** @typedef {import('storefrontapi.generated').ProductFragment} ProductFragment */
