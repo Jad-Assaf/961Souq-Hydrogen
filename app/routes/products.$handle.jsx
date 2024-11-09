@@ -188,7 +188,6 @@ export default function Product() {
           </button>
         </div>
 
-        {activeTab === 'description' && (
           <CSSTransition
             in={activeTab === 'description'}
             timeout={300}
@@ -199,9 +198,7 @@ export default function Product() {
             <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
           </div>
           </CSSTransition>
-        )}
 
-        {activeTab === 'shipping' && (
           <CSSTransition
             in={activeTab === 'shipping'}
             timeout={300}
@@ -225,9 +222,7 @@ export default function Product() {
             <p>The most efficient method to secure the item you desire is to exchange the original item, and upon acceptance of your exchange, proceed with a separate purchase for the desired replacement.</p>
           </div>
           </CSSTransition>
-        )}
 
-        {activeTab === 'warranty' && (
           <CSSTransition
             in={activeTab === 'warranty'}
             timeout={300}
@@ -259,7 +254,6 @@ export default function Product() {
             <p>This warranty is limited to repair or replacement. 961 Souq will not be liable for any indirect, consequential, or incidental damages, including loss of data or loss of profits.</p>
           </div>
           </CSSTransition>
-        )}
         <Analytics.ProductView
           data={{
             products: [
