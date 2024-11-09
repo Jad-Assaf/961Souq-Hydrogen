@@ -42,6 +42,8 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: i * 0.1 + 0.2 }}
                                 className="row-image"
+                                width="150px"
+                                height="150px"
                             >
                                 <Image
                                     data={image}
@@ -51,8 +53,8 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                              ${image}?width=600&quality=30 600w,
                                              ${image}?width=1200&quality=30 1200w`}
                                     alt={`Collection ${index + 1} Image ${i + 1}`}
-                                    width="100%"
-                                    height="100%"
+                                    width="150px"
+                                    height="150px"
                                 />
                             </motion.div>
                         ))}
@@ -149,6 +151,18 @@ function ProductRow({ products }) {
     );
 }
 
+const LeftArrowIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+);
+
+const RightArrowIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);
+
 function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
@@ -167,6 +181,8 @@ function ProductItem({ product, index }) {
                     animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
                     transition={{ duration: 0.5 }}
                     className="product-card"
+                    width="180px"
+                    height="180px"
                 >
                     <Image
                         data={product.images.nodes[0]}
