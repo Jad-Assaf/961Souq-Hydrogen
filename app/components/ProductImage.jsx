@@ -41,7 +41,7 @@ const RightArrowIcon = () => (
 export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [fadeClass, setFadeClass] = useState('fade-in');
+  const [fadeClass, setFadeClass] = useState('');
 
   const [isVariantSelected, setIsVariantSelected] = useState(false);
 
@@ -61,10 +61,10 @@ export function ProductImages({ images, selectedVariantImage }) {
 
   const selectedImage = images[selectedImageIndex]?.node;
 
-  // Trigger fade effect by toggling fadeClass
+  // Trigger fade effect
   useEffect(() => {
-    setFadeClass(''); // Remove class
-    const timeout = setTimeout(() => setFadeClass('fade-in'), 50); // Add class back after a short delay
+    setFadeClass(''); // Reset class to force reflow
+    const timeout = setTimeout(() => setFadeClass('fade-in'), 50); // Reapply fade-in
     return () => clearTimeout(timeout);
   }, [selectedImageIndex]);
 
@@ -116,8 +116,8 @@ export function ProductImages({ images, selectedVariantImage }) {
             alt={selectedImage.altText || 'Product Image'}
             aspectRatio="1/1"
             sizes="(min-width: 45em) 50vw, 100vw"
-            width="100%"
-            height="auto"
+            width="570px"
+            height="570px"
             loading="eager"
             className={fadeClass}
           />
