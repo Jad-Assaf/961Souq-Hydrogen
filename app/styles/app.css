@@ -1318,28 +1318,25 @@ button#headlessui-menu-button-\:R3lab5\: {
   }
 }
 
-.product-row-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
 .home-prev-button,
 .home-next-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: transparent;
+  background: #00000063;
   border: none;
   cursor: pointer;
-  z-index: 10;
+  z-index: 2;
+  border-radius: 50%;
+  padding: 5px;
+  backdrop-filter: blur(15px);
 }
 
 .home-prev-button {
   left: 0;
 }
 
-.home-ext-button {
+.home-next-button {
   right: 0;
 }
 
@@ -1347,5 +1344,5 @@ button#headlessui-menu-button-\:R3lab5\: {
 .home-next-button svg {
   width: 24px;
   height: 24px;
-  stroke: #000;
+  stroke: #fff;
 }
