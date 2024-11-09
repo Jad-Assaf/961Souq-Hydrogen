@@ -42,7 +42,8 @@ export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [fadeClass, setFadeClass] = useState('');
-  const [imageKey, setImageKey] = useState(0); // Track unique key
+  const [imageKey, setImageKey] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false); // Track loading status
 
   const [isVariantSelected, setIsVariantSelected] = useState(false);
 
@@ -64,9 +65,10 @@ export function ProductImages({ images, selectedVariantImage }) {
 
   // Trigger fade effect and unique key change
   useEffect(() => {
-    setFadeClass(''); // Reset class to force reflow
-    setImageKey(prevKey => prevKey + 1); // Update key to re-render image
-    const timeout = setTimeout(() => setFadeClass('fade-in'), 50); // Reapply fade-in
+    setFadeClass('');
+    setImageKey(prevKey => prevKey + 1);
+    setIsImageLoaded(false); // Reset loading status when image changes
+    const timeout = setTimeout(() => setFadeClass('fade-in'), 50);
     return () => clearTimeout(timeout);
   }, [selectedImageIndex]);
 
@@ -110,11 +112,13 @@ export function ProductImages({ images, selectedVariantImage }) {
       <div
         className="main-image"
         onClick={() => setIsLightboxOpen(true)}
-        style={{ cursor: 'grab' }}
+        style={{ cursor: 'grab', position: 'relative' }}
       >
+        {!isImageLoaded && <div className="shimmer" />} {/* Shimmer Effect */}
+
         {selectedImage && (
           <Image
-            key={imageKey} // Unique key to force re-render
+            key={imageKey}
             data={selectedImage}
             alt={selectedImage.altText || 'Product Image'}
             aspectRatio="1/1"
@@ -123,8 +127,10 @@ export function ProductImages({ images, selectedVariantImage }) {
             height="570px"
             loading="eager"
             className={fadeClass}
+            onLoad={() => setIsImageLoaded(true)} // Hide shimmer when loaded
           />
         )}
+
         <div className="ImageArrows">
           <button
             className="prev-button"
