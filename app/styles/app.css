@@ -1317,3 +1317,35 @@ button#headlessui-menu-button-\:R3lab5\: {
     transform: translateX(100%);
   }
 }
+
+.product-row-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.home-prev-button,
+.home-next-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.home-prev-button {
+  left: 0;
+}
+
+.home-ext-button {
+  right: 0;
+}
+
+.home-prev-button svg,
+.home-next-button svg {
+  width: 24px;
+  height: 24px;
+  stroke: #000;
+}

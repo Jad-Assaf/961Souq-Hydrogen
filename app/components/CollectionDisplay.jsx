@@ -132,7 +132,7 @@ function ProductRow({ products }) {
 
     return (
         <div className="product-row-container">
-            <button className="prev-button" onClick={() => scrollRow(-300)}>
+            <button className="home-prev-button" onClick={() => scrollRow(-300)}>
                 <LeftArrowIcon />
             </button>
             <div
@@ -147,7 +147,7 @@ function ProductRow({ products }) {
                     <ProductItem key={product.id} product={product} index={index} />
                 ))}
             </div>
-            <button className="next-button" onClick={() => scrollRow(300)}>
+            <button className="home-next-button" onClick={() => scrollRow(300)}>
                 <RightArrowIcon />
             </button>
         </div>
