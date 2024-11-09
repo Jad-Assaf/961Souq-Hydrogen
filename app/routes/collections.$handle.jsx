@@ -217,11 +217,11 @@ export default function Collection() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15, // Delay between each child product animation
+        staggerChildren: 0.15,
       },
     },
   };
-
+  
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
@@ -320,7 +320,7 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-function ProductItem({ product, index }) {
+function ProductItem({ product, index, baseDelay = 0 }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
@@ -341,8 +341,8 @@ function ProductItem({ product, index }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.3,
-        delay: index * 0.05, // Increase delay for each product
+        duration: 0.5,
+        delay: baseDelay, // Only use delay for initial load
       }}
     >
       <Link key={product.id} prefetch="intent" to={variantUrl}>
