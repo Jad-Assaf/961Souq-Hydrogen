@@ -1,5 +1,5 @@
-@media (max-width: 1024px) {
-    .ImageArrows {
+@media (max-width: 1024px){
+    .ImageArrows{
         width: 95vw !important;
         transform: translateX(-12.5%);
     }
@@ -50,16 +50,6 @@
     width: 75%;
     cursor: grab;
     transition: transform 0.3s ease;
-    overflow: hidden;
-}
-
-.main-image img {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.main-image img.fade-in {
-    opacity: 1;
 }
 
 .main-image:active {
@@ -67,7 +57,7 @@
 }
 
 .main-image:hover {
-    transform: scale(1.02);
+    transform: scale(1.01);
 }
 
 .prev-button,
@@ -116,7 +106,7 @@
     backdrop-filter: blur(15px) !important;
 }
 
-.ImageArrows {
+.ImageArrows{
     width: 100%;
     display: flex;
     justify-content: space-between;
