@@ -42,8 +42,8 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: i * 0.1 + 0.2 }}
                                 className="row-image"
-                                width="150px"
-                                height="150px"
+                                width="740px"
+                                height="300px"
                             >
                                 <Image
                                     data={image}
@@ -53,8 +53,8 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                              ${image}?width=600&quality=30 600w,
                                              ${image}?width=1200&quality=30 1200w`}
                                     alt={`Collection ${index + 1} Image ${i + 1}`}
-                                    width="150px"
-                                    height="150px"
+                                    width="740px"
+                                    height="300px"
                                 />
                             </motion.div>
                         ))}
@@ -82,6 +82,8 @@ function CategoryItem({ collection, index }) {
                     initial={{ filter: 'blur(10px)', opacity: 0 }}
                     animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
                     transition={{ duration: 0.5 }}
+                    width="150px"
+                    height="150px"
                 >
                     <Image
                         data={collection.image}
@@ -92,6 +94,8 @@ function CategoryItem({ collection, index }) {
                                  ${collection.image?.url}?width=1200&quality=30 1200w`}
                         alt={collection.image?.altText || collection.title}
                         className="category-image"
+                        width="150px"
+                        height="150px"
                     />
                 </motion.div>
                 <div className="category-title">{collection.title}</div>
