@@ -118,7 +118,8 @@ export default function Product() {
   return (
     <div className="product">
       <div className="ProductPageTop">
-        <ProductImages images={images.edges} />
+        <ProductImages images={images.edges}
+          selectedVariantImage={selectedVariant?.image} />
         <div className="product-main">
           <h1>{title}</h1>
           <div className="price-container">

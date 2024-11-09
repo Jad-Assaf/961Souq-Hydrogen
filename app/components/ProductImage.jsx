@@ -38,7 +38,7 @@ const RightArrowIcon = () => (
  *   images: Array<{node: ProductFragment['images']['edges'][0]['node']}>;
  * }}
  */
-export function ProductImages({ images }) {
+export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -46,7 +46,7 @@ export function ProductImages({ images }) {
     return <div className="product-images" />;
   }
 
-  const selectedImage = images[selectedImageIndex]?.node;
+  const selectedImage = selectedVariantImage || images[selectedImageIndex]?.node;
 
   const handlePrevImage = () => {
     setSelectedImageIndex((prevIndex) =>
@@ -62,7 +62,7 @@ export function ProductImages({ images }) {
 
   return (
     <div className="product-images-container">
-      <div className='thumbContainer'>
+      <div className="thumbContainer">
         <div className="thumbnails">
           {images.map(({ node: image }, index) => (
             <div
@@ -83,7 +83,6 @@ export function ProductImages({ images }) {
         </div>
       </div>
 
-      {/* Main Image with Prev/Next Buttons */}
       <div
         className="main-image"
         onClick={() => setIsLightboxOpen(true)}
@@ -122,7 +121,6 @@ export function ProductImages({ images }) {
         </div>
       </div>
 
-      {/* Lightbox without Thumbnails */}
       {isLightboxOpen && (
         <Lightbox
           open={isLightboxOpen}
