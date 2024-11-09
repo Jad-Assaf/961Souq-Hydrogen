@@ -42,6 +42,7 @@ export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [fadeClass, setFadeClass] = useState('');
+  const [imageKey, setImageKey] = useState(0); // Track unique key
 
   const [isVariantSelected, setIsVariantSelected] = useState(false);
 
@@ -61,9 +62,10 @@ export function ProductImages({ images, selectedVariantImage }) {
 
   const selectedImage = images[selectedImageIndex]?.node;
 
-  // Trigger fade effect
+  // Trigger fade effect and unique key change
   useEffect(() => {
     setFadeClass(''); // Reset class to force reflow
+    setImageKey(prevKey => prevKey + 1); // Update key to re-render image
     const timeout = setTimeout(() => setFadeClass('fade-in'), 50); // Reapply fade-in
     return () => clearTimeout(timeout);
   }, [selectedImageIndex]);
@@ -112,6 +114,7 @@ export function ProductImages({ images, selectedVariantImage }) {
       >
         {selectedImage && (
           <Image
+            key={imageKey} // Unique key to force re-render
             data={selectedImage}
             alt={selectedImage.altText || 'Product Image'}
             aspectRatio="1/1"
