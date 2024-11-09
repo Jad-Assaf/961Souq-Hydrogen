@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Image } from '@shopify/hydrogen';
 import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
+import { motion } from 'framer-motion';
 import 'yet-another-react-lightbox/styles.css';
 import '../styles/ProductImage.css';
 
@@ -41,7 +42,6 @@ const RightArrowIcon = () => (
 export function ProductImages({ images, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [fadeClass, setFadeClass] = useState('');
   const [imageKey, setImageKey] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -63,13 +63,10 @@ export function ProductImages({ images, selectedVariantImage }) {
 
   const selectedImage = images[selectedImageIndex]?.node;
 
-  // Trigger fade effect and unique key change
+  // Trigger a unique key change on each image change
   useEffect(() => {
-    setFadeClass('');
     setImageKey(prevKey => prevKey + 1);
     setIsImageLoaded(false); // Reset loading status when image changes
-    const timeout = setTimeout(() => setFadeClass('fade-in'), 50);
-    return () => clearTimeout(timeout);
   }, [selectedImageIndex]);
 
   const handlePrevImage = () => {
@@ -112,26 +109,27 @@ export function ProductImages({ images, selectedVariantImage }) {
       <div
         className="main-image"
         onClick={() => setIsLightboxOpen(true)}
-        style={{ cursor: 'grab', position: 'relative' }}
+        style={{ cursor: 'grab' }}
       >
-        {/* Check if the shimmer placeholder is visible */}
-        <div className={`shimmer ${isImageLoaded ? 'hidden' : ''}`} />
-
         {selectedImage && (
-          <Image
-            key={imageKey}
-            data={selectedImage}
-            alt={selectedImage.altText || 'Product Image'}
-            aspectRatio="1/1"
-            sizes="(min-width: 45em) 50vw, 100vw"
-            width="570px"
-            height="570px"
-            loading="eager"
-            className={fadeClass}
-            onLoad={() => setIsImageLoaded(true)} // Hide shimmer when loaded
-          />
+          <motion.div
+            initial={{ filter: 'blur(20px)' }}
+            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
+            transition={{ duration: 0.5 }}
+          >
+            <Image
+              key={imageKey}
+              data={selectedImage}
+              alt={selectedImage.altText || 'Product Image'}
+              aspectRatio="1/1"
+              sizes="(min-width: 45em) 50vw, 100vw"
+              width="570px"
+              height="570px"
+              loading="eager"
+              onLoad={() => setIsImageLoaded(true)}
+            />
+          </motion.div>
         )}
-
         <div className="ImageArrows">
           <button
             className="prev-button"
