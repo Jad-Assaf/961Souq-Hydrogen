@@ -19,8 +19,7 @@ import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
 import { AddToCartButton } from '../components/AddToCartButton';
 import { useAside } from '~/components/Aside';
-import { motion } from 'framer-motion';
-import { useInView } from '~/hooks/useInView';
+import { motion, useInView } from 'framer-motion';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -305,7 +304,8 @@ export default function Collection() {
  */
 function ProductItem({ product }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [ref, isInView] = useInView({ threshold: 0.1 }); // Adjust threshold as needed
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
 
   const [selectedVariant, setSelectedVariant] = useState(() => {
     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
