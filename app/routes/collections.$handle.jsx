@@ -336,7 +336,7 @@ function ProductItem({ product, index }) {
                   background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.2) 75%)',
                   backgroundSize: '200% 100%',
                   animation: 'shimmer 1.5s infinite',
-                  zIndex: 1,
+                  zIndex: 10,
                 }}
               />
             )}
