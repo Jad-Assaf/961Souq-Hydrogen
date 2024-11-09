@@ -728,7 +728,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Menu Links */
-.menu-item a:first-of-type {
+.header-menu-desktop .nav-links a{
   color: #fff !important;
 }
 

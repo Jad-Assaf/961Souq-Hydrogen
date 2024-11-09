@@ -12,7 +12,7 @@ export function CategoriesMenu({ menuData, currentPath }) {
           const hasChildren = item.items && item.items.length > 0;
 
           return (
-            <li key={item.id} className="menu-item">
+            <li key={item.id} className="menu-item nav-links">
               <Link
                 to={item.url}
                 className={`block py-2 ${isActive ? 'font-bold text-primary' : 'text-gray-700'}`}
