@@ -307,9 +307,15 @@ function ProductItem({ product, index }) {
   const isInView = useInView(ref, { once: true, margin: '0px 0px 200px 0px' });
   const controls = useAnimation();
 
-  React.useEffect(() => {
-    if (isInView) controls.start("visible");
-  }, [isInView, controls]);
+  useEffect(() => {
+    // Delay each item's animation start
+    if (isInView) {
+      const timeout = setTimeout(() => {
+        controls.start("visible");
+      }, index * 100); // Adjust the multiplier for stagger effect speed
+      return () => clearTimeout(timeout);
+    }
+  }, [isInView, controls, index]);
 
   const [selectedVariant, setSelectedVariant] = useState(() => {
     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
@@ -326,7 +332,6 @@ function ProductItem({ product, index }) {
       initial="hidden"
       animate={controls}
       variants={staggerVariants}
-      custom={index}
       className="product-item-collection product-card"
     >
       <Link key={product.id} prefetch="intent" to={variantUrl}>
@@ -334,10 +339,7 @@ function ProductItem({ product, index }) {
           <motion.div
             initial={{ filter: 'blur(10px)', opacity: 0 }}
             animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
-            transition={{
-              duration: 0.5,
-              delay: index * 0.05,
-            }}
+            transition={{ duration: 0.5 }}
             style={{ width: '180px', height: '180px' }}
           >
             <Image
@@ -379,14 +381,11 @@ const staggerVariants = {
     opacity: 0,
     scale: 0.8,
   },
-  visible: (index) => ({
+  visible: {
     opacity: 1,
     scale: 1,
-    transition: {
-      delay: index * 0.05,
-      duration: 0.3,
-    },
-  }),
+    transition: { duration: 0.3 },
+  },
 };
 
 /**
