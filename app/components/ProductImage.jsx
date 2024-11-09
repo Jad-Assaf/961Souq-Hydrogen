@@ -115,7 +115,7 @@ export function ProductImages({ images, selectedVariantImage }) {
           <motion.div
             initial={{ filter: 'blur(15px)' }}
             animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(15px)' }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
           >
             <Image
               key={imageKey}

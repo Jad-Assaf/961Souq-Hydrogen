@@ -19,6 +19,8 @@ import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
 import { AddToCartButton } from '../components/AddToCartButton';
 import { useAside } from '~/components/Aside';
+import { motion } from 'framer-motion';
+
 /**
  * @type {MetaFunction<typeof loader>}
  */
@@ -301,6 +303,7 @@ export default function Collection() {
  * }}
  */
 function ProductItem({ product, loading }) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState(() => {
     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
   });
@@ -318,15 +321,22 @@ function ProductItem({ product, loading }) {
         to={variantUrl}
       >
         {product.featuredImage && (
-          <AnimatedImage
-            srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                     ${product.featuredImage.url}?width=600&quality=30 600w,
-                     ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-            alt={product.featuredImage.altText || product.title}
-            loading={loading}
-            width={180}
-            height={180}
-          />
+          <motion.div
+            initial={{ filter: 'blur(20px)' }}
+            animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
+            transition={{ duration: 0.5 }}
+          >
+            <Image
+              srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+                       ${product.featuredImage.url}?width=600&quality=30 600w,
+                       ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+              alt={product.featuredImage.altText || product.title}
+              loading={loading}
+              width={180}
+              height={180}
+              onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
+            />
+          </motion.div>
         )}
         <h4>{truncateText(product.title, 50)}</h4>
         <div className="price-container">
