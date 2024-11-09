@@ -13,7 +13,7 @@ import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { getAppliedFilterLink } from '../lib/filter';
