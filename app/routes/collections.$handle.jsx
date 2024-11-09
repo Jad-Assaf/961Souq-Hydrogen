@@ -20,6 +20,7 @@ import { getAppliedFilterLink } from '../lib/filter';
 import { AddToCartButton } from '../components/AddToCartButton';
 import { useAside } from '~/components/Aside';
 import { motion } from 'framer-motion';
+import { useInView } from '~/hooks/useInView';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -302,8 +303,10 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-function ProductItem({ product, loading }) {
+function ProductItem({ product }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [ref, isInView] = useInView({ threshold: 0.1 }); // Adjust threshold as needed
+
   const [selectedVariant, setSelectedVariant] = useState(() => {
     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
   });
@@ -314,13 +317,9 @@ function ProductItem({ product, loading }) {
     product.priceRange.minVariantPrice.amount;
 
   return (
-    <div className="product-item-collection product-card">
-      <Link
-        key={product.id}
-        prefetch="intent"
-        to={variantUrl}
-      >
-        {product.featuredImage && (
+    <div className="product-item-collection product-card" ref={ref}>
+      <Link key={product.id} prefetch="intent" to={variantUrl}>
+        {product.featuredImage && isInView && ( // Only load the image if it's in view
           <motion.div
             initial={{ filter: 'blur(20px)' }}
             animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(20px)' }}
@@ -331,7 +330,7 @@ function ProductItem({ product, loading }) {
                        ${product.featuredImage.url}?width=600&quality=30 600w,
                        ${product.featuredImage.url}?width=1200&quality=30 1200w`}
               alt={product.featuredImage.altText || product.title}
-              loading={loading}
+              loading="lazy"
               width={180}
               height={180}
               onLoad={() => setIsImageLoaded(true)} // Set image as loaded once fully loaded
