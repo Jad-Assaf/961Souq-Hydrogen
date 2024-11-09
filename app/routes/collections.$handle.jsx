@@ -320,12 +320,12 @@ function ProductItem({ product, index }) {
       <Link key={product.id} prefetch="intent" to={variantUrl}>
         {product.featuredImage && isInView && (
           <div style={{ position: 'relative', width: '180px', height: '180px' }}>
-            {/* Shimmer Overlay */}
+            {/* Shimmer Animation */}
             {!isImageLoaded && (
               <motion.div
-                className="shimmer" // Shimmer overlay
+                className="shimmer"
                 initial={{ opacity: 1 }}
-                animate={{ opacity: isImageLoaded ? 0 : 1 }}
+                animate={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                 style={{
                   position: 'absolute',
@@ -333,16 +333,21 @@ function ProductItem({ product, index }) {
                   left: 0,
                   right: 0,
                   bottom: 0,
+                  background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.2) 75%)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 1.5s infinite',
                   zIndex: 1,
                 }}
               />
             )}
-            {/* Image with Blur Transition */}
+
+            {/* Blurred Image that Sharpens on Load */}
             <motion.div
-              initial={{ filter: 'blur(10px)' }}
-              animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)' }}
+              initial={{ filter: 'blur(10px)', opacity: 0 }}
+              animate={{ filter: 'blur(0px)', opacity: 1 }}
               transition={{
                 filter: { duration: 0.5, ease: 'easeInOut' },
+                opacity: { duration: 0.5 },
                 delay: index * 0.1,
               }}
               style={{ position: 'relative', zIndex: 2 }}
@@ -356,7 +361,6 @@ function ProductItem({ product, index }) {
                 width={180}
                 height={180}
                 onLoad={() => setIsImageLoaded(true)}
-                style={{ display: isImageLoaded ? 'block' : 'none' }}
               />
             </motion.div>
           </div>
