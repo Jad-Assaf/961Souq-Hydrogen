@@ -319,40 +319,47 @@ function ProductItem({ product, index }) {
     <div className="product-item-collection product-card" ref={ref}>
       <Link key={product.id} prefetch="intent" to={variantUrl}>
         {product.featuredImage && isInView && (
-          <motion.div
-            className="shimmer" // Apply shimmer until image loads
-            initial={{ opacity: 1, filter: 'blur(10px)' }}
-            animate={{
-              opacity: isImageLoaded ? 1 : 0.5,
-              filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)',
-            }}
-            transition={{
-              opacity: { duration: 0.4, ease: 'easeInOut' },
-              filter: { duration: 0.5, ease: 'easeInOut' },
-              delay: index * 0.1,
-            }}
-            style={{
-              width: '180px',
-              height: '180px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Image
-              srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                       ${product.featuredImage.url}?width=600&quality=30 600w,
-                       ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-              alt={product.featuredImage.altText || product.title}
-              loading="lazy"
-              width={180}
-              height={180}
-              onLoad={() => setIsImageLoaded(true)} // Trigger image load completion
-              style={{
-                display: isImageLoaded ? 'block' : 'none', // Hide until loaded
+          <div style={{ position: 'relative', width: '180px', height: '180px' }}>
+            {/* Shimmer Overlay */}
+            {!isImageLoaded && (
+              <motion.div
+                className="shimmer" // Shimmer overlay
+                initial={{ opacity: 1 }}
+                animate={{ opacity: isImageLoaded ? 0 : 1 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 1,
+                }}
+              />
+            )}
+            {/* Image with Blur Transition */}
+            <motion.div
+              initial={{ filter: 'blur(10px)' }}
+              animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)' }}
+              transition={{
+                filter: { duration: 0.5, ease: 'easeInOut' },
+                delay: index * 0.1,
               }}
-            />
-          </motion.div>
+              style={{ position: 'relative', zIndex: 2 }}
+            >
+              <Image
+                srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+                         ${product.featuredImage.url}?width=600&quality=30 600w,
+                         ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+                alt={product.featuredImage.altText || product.title}
+                loading="lazy"
+                width={180}
+                height={180}
+                onLoad={() => setIsImageLoaded(true)}
+                style={{ display: isImageLoaded ? 'block' : 'none' }}
+              />
+            </motion.div>
+          </div>
         )}
         <h4>{truncateText(product.title, 50)}</h4>
         <div className="price-container">

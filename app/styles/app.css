@@ -1305,7 +1305,7 @@ button#headlessui-menu-button-\:R3lab5\: {
     rgba(173, 173, 173, 0.4) 50%,
     rgba(173, 173, 173, 0) 100%
   );
-  animation: shimmer 1.6s infinite linear;
+  animation: shimmer 1.6s alternate-reverse infinite linear;
 }
 
 @keyframes shimmer {
