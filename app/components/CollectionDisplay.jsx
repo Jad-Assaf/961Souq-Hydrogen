@@ -169,6 +169,9 @@ const RightArrowIcon = () => (
 function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
+    const hasDiscount = product.compareAtPriceRange &&
+        product.compareAtPriceRange.minVariantPrice.amount >
+        product.priceRange.minVariantPrice.amount;
 
     return (
         <motion.div
