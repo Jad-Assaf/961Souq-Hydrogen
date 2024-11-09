@@ -73,7 +73,7 @@ function CategoryItem({ collection, index }) {
             ref={ref}
             initial={{ opacity: 0, x: -30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
+            transition={{ delay: index * 0.05, duration: 0.2 }}
             className="category-container"
         >
             <Link to={`/collections/${collection.handle}`}>
@@ -175,7 +175,7 @@ function ProductItem({ product, index }) {
             ref={ref}
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
+            transition={{ delay: index * 0.05, duration: 0.2 }}
             className="product-item"
         >
             <Link to={`/products/${product.handle}`}>
