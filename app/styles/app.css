@@ -814,25 +814,29 @@ button.reset:hover:not(:has(> *)) {
   border-right: none;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  background-color: #fff;
 }
 
 .search-bar-submit {
   position: relative;
-    top: -2px;
-    border: 1px solid #2172af;
-    border-top-right-radius: 30px;
-    border-bottom-right-radius: 30px;
-    border-left: none;
-    height: 46px;
-    padding: 0px 15px;
+  top: -2px;
+  border: 1px solid #2172af;
+  border-top-right-radius: 30px;
+  border-bottom-right-radius: 30px;
+  border-left: none;
+  height: 46px;
+  padding: 0px 15px;
+  background: #fff;
 }
 
 .search-results-container{
     width: 70%;
-    background: white;
+    background: #efefef8c;
     z-index: 9999;
-    padding: 24px;
-    margin-top: -3%;
+    padding: 42px 24px;
+    margin-top: -6%;
+    backdrop-filter: blur(15px);
+    border-radius: 30px;
 }
 
 /*
