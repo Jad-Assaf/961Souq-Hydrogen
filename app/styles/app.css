@@ -788,15 +788,29 @@ button.reset:hover:not(:has(> *)) {
   height: 30px;
 }
 
+.search-container {
+  display: flex;
+  align-items: center;
+}
+
 .search-bar {
-  width: 100vw;
-  max-width: 500px;
-  border-radius: 30px;
+  position: relative;
+  top: -2px;
+  border: 1px solid #2172af;
+  border-top-right-radius: 30px;
+  border-bottom-right-radius: 30px;
+  border-left: none;
+  height: 46px;
+  padding: 0px 15px;
 }
 
 .search-container .search-bar {
+  border: 1px solid #2172af;
   color: #000 !important;
   padding: 10px 15px;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .search-bar-submit {
