@@ -849,6 +849,11 @@ button.reset:hover:not(:has(> *)) {
   border-radius: 30px;
 }
 
+.no-results{
+  padding: 50px;
+  text-align: center;
+}
+
 /*
 * --------------------------------------------------
 * components/Footer

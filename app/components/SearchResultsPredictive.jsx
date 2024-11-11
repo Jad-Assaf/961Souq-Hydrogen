@@ -239,7 +239,7 @@ function SearchResultsPredictiveEmpty({term}) {
   }
 
   return (
-    <p>
+    <p className='no-results'>
       No results found for <q>{term.current}</q>
     </p>
   );
