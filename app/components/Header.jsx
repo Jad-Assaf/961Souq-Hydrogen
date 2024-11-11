@@ -1,9 +1,11 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Await, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
-import { AnimatedImage } from './AnimatedImage';
 import { Image } from '@shopify/hydrogen-react';
-import { SearchFormPredictive } from './SearchFormPredictive';
+import {
+  SEARCH_ENDPOINT,
+  SearchFormPredictive,
+} from './SearchFormPredictive';
 import { SearchResultsPredictive } from './SearchResultsPredictive';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
