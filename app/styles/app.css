@@ -856,9 +856,10 @@ align-items: center;
 .cart-line-quantity {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-.increase-quanity, .decrease-quantity{
+.increase-quantity, .decrease-quantity{
   background-color: #f1f1f1;
   border-radius: 30px;
   border: 1px solid #2172af;
@@ -885,6 +886,10 @@ align-items: center;
 .cart-subtotal {
   align-items: center;
   display: flex;
+}
+
+li.cart-line .product-price{
+  min-height: 30px;
 }
 
 /*
