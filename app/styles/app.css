@@ -794,6 +794,7 @@ button.reset:hover:not(:has(> *)) {
   height: 4vh;
   justify-content: start;
   align-items: center;
+  max-width: 500px;
 }
 
 .search-container {
@@ -828,7 +829,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .search-results-container {
-  width: 70%;
+  width: 105%;
   background: #ffffffc2;
   z-index: 9999;
   margin-top: -3%;
@@ -841,7 +842,7 @@ button.reset:hover:not(:has(> *)) {
 .view-all-results {
   display: block;
   margin: 20px auto;
-  width: 100%;
+  width: 90%;
   text-align: center;
   padding: 10px;
   border: 1px solid #2172af;
@@ -988,7 +989,7 @@ li.cart-line .product-price {
 
 .predictive-search-result {
   margin-bottom: 1rem;
-  padding: 40px 24px 0 24px;
+  padding: 20px 24px 0 24px;
 }
 
 .predictive-search-result h5 {
