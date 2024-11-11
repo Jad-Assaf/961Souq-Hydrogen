@@ -190,13 +190,13 @@ function ProductItem({ product, index }) {
             transition={{ delay: index * 0.01, duration: 0.5 }}
             className="product-item"
         >
-            <Link to={`/products/${product.handle}`}>
                 <motion.div
                     initial={{ filter: 'blur(10px)', opacity: 0 }}
                     animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
                     transition={{ duration: 0.5 }}
                     className="product-card"
                 >
+            <Link to={`/products/${product.handle}`}>
                     <Image
                         data={product.images.nodes[0]}
                         aspectRatio="1/1"
@@ -212,12 +212,11 @@ function ProductItem({ product, index }) {
                     <div className="product-price">
                         <Money data={selectedVariant.price} />
                         {hasDiscount && (
-                            <small className="discounted-price">
+                            <small className="discountedPrice">
                                 <Money data={selectedVariant.compareAtPrice} />
                             </small>
                         )}
                     </div>
-                </motion.div>
             </Link>
 
             {/* Add to Cart Button */}
@@ -233,26 +232,27 @@ function ProductItem({ product, index }) {
                 }}
                 lines={
                     selectedVariant && !hasVariants
-                        ? [
-                            {
-                                merchandiseId: selectedVariant.id,
-                                quantity: 1,
-                                product: {
-                                    ...product,
-                                    selectedVariant,
-                                    handle: product.handle,
-                                },
+                    ? [
+                        {
+                            merchandiseId: selectedVariant.id,
+                            quantity: 1,
+                            product: {
+                                ...product,
+                                selectedVariant,
+                                handle: product.handle,
                             },
-                        ]
-                        : []
+                        },
+                    ]
+                    : []
                 }
-            >
+                >
                 {!selectedVariant?.availableForSale
                     ? 'Sold out'
                     : hasVariants
-                        ? 'Select Options'
-                        : 'Add to cart'}
-            </AddToCartButton>
+                    ? 'Select Options'
+                    : 'Add to cart'}
+                </AddToCartButton>
+            </motion.div>
         </motion.div>
     );
 }
