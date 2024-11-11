@@ -65,24 +65,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             />
           </NavLink>
 
-          {/* Adding SearchFormPredictive Component */}
-          <SearchFormPredictive className="header-search">
-            {({ inputRef, fetchResults, goToSearch }) => (
-              <div className="search-container">
-                <input
-                  ref={inputRef}
-                  type="search"
-                  placeholder="Search products"
-                  onChange={fetchResults}
-                  className="search-bar"
-                />
-                <button onClick={goToSearch} className="search-bar-submit">
-                  <SearchIcon />
-                </button>
-              </div>
-            )}
-          </SearchFormPredictive>
-
           <SearchFormPredictive className="header-search">
             {({ inputRef, fetchResults, goToSearch, fetcher }) => (
               <div className="search-container">
