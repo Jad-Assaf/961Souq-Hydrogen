@@ -98,11 +98,7 @@ function SearchResultsProducts({term, products}) {
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const ItemsMarkup = nodes.map((product) => {
-            const productUrl = urlWithTrackingParams({
-              baseUrl: `/products/${product.handle}`,
-              trackingParams: product.trackingParameters,
-              term,
-            });
+            const productUrl = '/products/${product.handle}';
 
             return (
               <div className="search-results-item" key={product.id}>
