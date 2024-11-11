@@ -342,7 +342,7 @@ export default function SortMenu() {
   ];
   const [params] = useSearchParams();
   const location = useLocation();
-  const activeItem = items.find((item) => item.key === params.get("sort"));
+  const activeItem = items.find((item) => item.key === params.get("sort")) || items.find(item => item.key === "newest");
 
   return (
     <Menu as="div" className="relative z-10">
