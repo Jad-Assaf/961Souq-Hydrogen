@@ -340,8 +340,11 @@ export default function SortMenu() {
       key: "newest",
     },
   ];
+
   const [params] = useSearchParams();
   const location = useLocation();
+
+  // Set "newest" as default if no sort parameter is found
   const activeItem = items.find((item) => item.key === params.get("sort")) || items.find(item => item.key === "newest");
 
   return (
@@ -349,7 +352,7 @@ export default function SortMenu() {
       <MenuButton className="flex items-center">
         <span className="px-2">
           <span className="px-2 font-medium">Sort by:</span>
-          <span>{(activeItem || items[0]).label}</span>
+          <span>{activeItem?.label}</span>
         </span>
         <IconCaret />
       </MenuButton>
@@ -361,9 +364,8 @@ export default function SortMenu() {
           <MenuItem key={item.label}>
             {() => (
               <Link
-                className={`block text-sm pb-2 px-3 ${
-                  activeItem?.key === item.key ? "font-bold" : "font-normal"
-                }`}
+                className={`block text-sm pb-2 px-3 ${activeItem?.key === item.key ? "font-bold" : "font-normal"
+                  }`}
                 to={getSortLink(item.key, params, location)}
               >
                 {item.label}
@@ -375,3 +377,4 @@ export default function SortMenu() {
     </Menu>
   );
 }
+
