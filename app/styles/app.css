@@ -826,12 +826,16 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .cart-line {
-  display: flex;
-  padding: 0.75rem 0;
+display: flex;
+padding: .75rem 0;
+flex-direction: column;
+justify-content: center;
+align-items: center;
 }
 
 .cart-line img {
-  height: 100%;
+  width: 150px;
+  height: auto;
   display: block;
   margin-right: 0.75rem;
 }
