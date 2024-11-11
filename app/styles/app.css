@@ -487,6 +487,10 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
 }
 
+.header-menu-desktop>.menu-item{
+  color: #fff;
+}
+
 /* Header Top Section */
 .header-top {
   display: flex;
@@ -583,11 +587,6 @@ button.reset:hover:not(:has(> *)) {
   position: sticky;
   top: 0;
   z-index: 999;
-}
-
-/* Global Header Text Color */
-.header * {
-  color: #fff;
 }
 
 /* Mobile Menu Overlay */
@@ -730,13 +729,16 @@ button.reset:hover:not(:has(> *)) {
   position: relative;
 }
 
+.menu-item:first{
+
+}
+
 /* Menu Links */
 .header-menu-desktop .nav-links a {
   color: #fff !important;
 }
 
 .menu-item a {
-  color: #000 !important;
   text-decoration: none;
 }
 
@@ -797,6 +799,7 @@ button.reset:hover:not(:has(> *)) {
   width: 100vw;
   max-width: 500px;
   border: 1px solid #2172af;
+  border-radius: 30px;
   color: #000 !important;
   padding: 10px 15px;
   border-right: none;
