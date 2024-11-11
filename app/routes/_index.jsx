@@ -112,10 +112,34 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               currencyCode
             }
           }
+          compareAtPriceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
           images(first: 1) {
             nodes {
               url
               altText
+            }
+          }
+          variants(first: 10) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
             }
           }
         }
