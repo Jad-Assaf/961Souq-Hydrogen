@@ -73,9 +73,9 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   type="search"
                   placeholder="Search products"
                   onChange={fetchResults}
-                  className="search-input"
+                  className="search-bar"
                 />
-                <button onClick={goToSearch} className="search-submit">
+                <button onClick={goToSearch} className="search-bar-submit">
                   <SearchIcon />
                 </button>
               </div>

@@ -48,7 +48,7 @@ html {
   }
 }
 
-html{
+html {
   scrollbar-color: #0492ff54 #00000014;
   scrollbar-width: thin;
   scrollbar-gutter: stable both-edges;
@@ -332,7 +332,7 @@ button {
   max-width: 420px;
 }
 
-.product-form form{
+.product-form form {
   width: 100%;
   max-width: 400px;
 }
@@ -731,7 +731,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Menu Links */
-.header-menu-desktop .nav-links a{
+.header-menu-desktop .nav-links a {
   color: #fff !important;
 }
 
@@ -788,6 +788,23 @@ button.reset:hover:not(:has(> *)) {
   height: 30px;
 }
 
+.search-bar {
+  width: 100vw;
+  max-width: 500px;
+  border-radius: 30px;
+}
+
+.search-container .search-bar {
+  color: #000 !important;
+  padding: 10px 15px;
+}
+
+.search-bar-submit {
+  position: relative;
+  top: 8px;
+  right: 40px;
+}
+
 /*
 * --------------------------------------------------
 * components/Footer
@@ -826,11 +843,11 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .cart-line {
-display: flex;
-padding: .75rem 0;
-flex-direction: column;
-justify-content: center;
-align-items: start;
+  display: flex;
+  padding: .75rem 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
 }
 
 .cart-line img {
@@ -859,7 +876,8 @@ align-items: start;
   gap: 10px;
 }
 
-.increase-quantity, .decrease-quantity{
+.increase-quantity,
+.decrease-quantity {
   background-color: #f1f1f1;
   border-radius: 30px;
   border: 1px solid #2172af;
@@ -870,7 +888,7 @@ align-items: start;
   font-weight: 500;
 }
 
-.cart-remove{
+.cart-remove {
   border: 1px solid #2172af;
   width: 90px;
   border-radius: 30px;
@@ -888,11 +906,11 @@ align-items: start;
   display: flex;
 }
 
-li.cart-line .product-price{
+li.cart-line .product-price {
   min-height: 30px;
 }
 
-.cart-checkout-container{
+.cart-checkout-container {
   border: 1px solid #2172af;
   display: flex;
   justify-content: center;
@@ -901,7 +919,7 @@ li.cart-line .product-price{
   border-radius: 30px;
 }
 
-.cart-checkout-button{
+.cart-checkout-button {
   display: block;
   width: 100%;
   text-align: center;
@@ -1114,7 +1132,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   scroll-behavior: smooth;
 }
 
-.image-wrapper{
+.image-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1351,12 +1369,10 @@ button#headlessui-menu-button-\:R3lab5\: {
   left: -150%;
   width: 250%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(173, 173, 173, 0) 0%,
-    rgba(173, 173, 173, 0.4) 50%,
-    rgba(173, 173, 173, 0) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(173, 173, 173, 0) 0%,
+      rgba(173, 173, 173, 0.4) 50%,
+      rgba(173, 173, 173, 0) 100%);
   animation: shimmer 1.6s alternate-reverse infinite linear;
 }
 
