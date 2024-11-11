@@ -892,6 +892,23 @@ li.cart-line .product-price{
   min-height: 30px;
 }
 
+.cart-checkout-container{
+  border: 1px solid #2172af;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  border-radius: 30px;
+}
+
+.cart-checkout-button{
+  display: block;
+  width: 100%;
+  text-align: center;
+  height: 40px;
+  align-content: center;
+}
+
 /*
 * --------------------------------------------------
 * components/Search
