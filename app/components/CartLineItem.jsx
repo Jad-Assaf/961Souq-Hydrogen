@@ -24,9 +24,6 @@ export function CartLineItem({ layout, line }) {
         <Image
           data={image}
           sizes="(min-width: 45em) 20vw, 40vw"
-          srcSet={`${image}?width=300&quality=30 300w,
-                   ${image}?width=600&quality=30 600w,
-                   ${image}?width=1200&quality=30 1200w`}
           alt={title}
           width="150px"
           height="150px"
@@ -53,7 +50,7 @@ export function CartLineItem({ layout, line }) {
           {selectedOptions.map((option) => (
             <li key={option.name}>
               <small>
-                {option.name}: {option.value}
+                <strong>{option.name}:</strong> {option.value}
               </small>
             </li>
           ))}
@@ -78,13 +75,14 @@ function CartLineQuantity({ line }) {
 
   return (
     <div className="cart-line-quantity">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
+      <small><strong>Quantity:</strong> {quantity} &nbsp;&nbsp;</small>
       <div style={{display: 'flex', gap: '10px'}}>
         <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
           <button
             aria-label="Decrease quantity"
             disabled={quantity <= 1 || !!isOptimistic}
             name="decrease-quantity"
+            className="decrease-quantity"
             value={prevQuantity}
           >
             <span>&#8722; </span>
@@ -95,6 +93,7 @@ function CartLineQuantity({ line }) {
           <button
             aria-label="Increase quantity"
             name="increase-quantity"
+            className="increase-quantity"
             value={nextQuantity}
             disabled={!!isOptimistic}
           >
@@ -123,7 +122,7 @@ function CartLineRemoveButton({ lineIds, disabled }) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds }}
     >
-      <button disabled={disabled} type="submit">
+      <button disabled={disabled} type="submit" className='cart-remove'>
         Remove
       </button>
     </CartForm>
