@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
-import { Await, NavLink } from '@remix-run/react';
+import { Await, Link, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
 import { Image } from '@shopify/hydrogen-react';
 import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
