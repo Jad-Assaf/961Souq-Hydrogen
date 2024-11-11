@@ -2,6 +2,9 @@ import { Suspense, useEffect, useState } from 'react';
 import { Await, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
 import { AnimatedImage } from './AnimatedImage';
+import { Image } from '@shopify/hydrogen-react';
+import { SearchFormPredictive } from './SearchFormPredictive';
+import { SearchResultsPredictive } from './SearchResultsPredictive';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
@@ -54,14 +57,89 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           </button>
 
           <NavLink prefetch="intent" to="/" className="logo-link" end>
-            <AnimatedImage
+            <Image
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logonew_1c8474b8-d0a3-4a90-a3fa-494ce9ca846f.jpg?v=1619452140"
               alt={`${shop.name} Logo`}
               className="header-logo"
               width="150px"
-              height="auto"
+              height="79px"
             />
           </NavLink>
+
+          <div className="predictive-search">
+            <br />
+            <SearchFormPredictive>
+              {({ fetchResults, goToSearch, inputRef }) => (
+                <>
+                  <input
+                    name="q"
+                    onChange={fetchResults}
+                    onFocus={fetchResults}
+                    placeholder="Search"
+                    ref={inputRef}
+                    type="search"
+                    list={queriesDatalistId}
+                  />
+                  &nbsp;
+                  <button onClick={goToSearch}>Search</button>
+                </>
+              )}
+            </SearchFormPredictive>
+
+            <SearchResultsPredictive>
+              {({ items, total, term, state, closeSearch }) => {
+                const { articles, collections, pages, products, queries } = items;
+
+                if (state === 'loading' && term.current) {
+                  return <div>Loading...</div>;
+                }
+
+                if (!total) {
+                  return <SearchResultsPredictive.Empty term={term} />;
+                }
+
+                return (
+                  <>
+                    <SearchResultsPredictive.Queries
+                      queries={queries}
+                      queriesDatalistId={queriesDatalistId}
+                    />
+                    <SearchResultsPredictive.Products
+                      products={products}
+                      closeSearch={closeSearch}
+                      term={term}
+                    />
+                    <SearchResultsPredictive.Collections
+                      collections={collections}
+                      closeSearch={closeSearch}
+                      term={term}
+                    />
+                    <SearchResultsPredictive.Pages
+                      pages={pages}
+                      closeSearch={closeSearch}
+                      term={term}
+                    />
+                    <SearchResultsPredictive.Articles
+                      articles={articles}
+                      closeSearch={closeSearch}
+                      term={term}
+                    />
+                    {term.current && total ? (
+                      <Link
+                        onClick={closeSearch}
+                        to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                      >
+                        <p>
+                          View all results for <q>{term.current}</q>
+                          &nbsp; →
+                        </p>
+                      </Link>
+                    ) : null}
+                  </>
+                );
+              }}
+            </SearchResultsPredictive>
+          </div>
 
           <div className="header-ctas">
             <NavLink

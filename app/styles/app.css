@@ -329,7 +329,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 450px;
+  max-width: 420px;
 }
 
 .product-form form{
