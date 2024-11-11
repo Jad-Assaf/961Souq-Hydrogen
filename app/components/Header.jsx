@@ -67,71 +67,74 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
           <SearchFormPredictive className="header-search">
             {({ inputRef, fetchResults, goToSearch, fetcher }) => (
-              <div className="search-container">
-                <input
-                  ref={inputRef}
-                  type="search"
-                  placeholder="Search products"
-                  onChange={fetchResults}
-                  className="search-bar"
-                />
-                <button onClick={goToSearch} className="search-bar-submit">
-                  <SearchIcon />
-                </button>
-
+              <div className="main-search">
+                <div className="search-container">
+                  <input
+                    ref={inputRef}
+                    type="search"
+                    placeholder="Search products"
+                    onChange={fetchResults}
+                    className="search-bar"
+                  />
+                  <button onClick={goToSearch} className="search-bar-submit">
+                    <SearchIcon />
+                  </button>
+                </div>
                 {/* Adding SearchResultsPredictive */}
-                <SearchResultsPredictive>
-                  {({ items, total, term, state, closeSearch }) => {
-                    const { products, collections, pages, articles, queries } = items;
+                <div className="search-results-container">
+                  <SearchResultsPredictive>
+                    {({ items, total, term, state, closeSearch }) => {
+                      const { products, collections, pages, articles, queries } = items;
 
-                    if (state === 'loading' && term.current) {
-                      return <div>Loading...</div>;
-                    }
+                      if (state === 'loading' && term.current) {
+                        return <div>Loading...</div>;
+                      }
 
-                    if (!total) {
-                      return <SearchResultsPredictive.Empty term={term} />;
-                    }
+                      if (!total) {
+                        return <SearchResultsPredictive.Empty term={term} />;
+                      }
 
-                    return (
-                      <>
-                        <SearchResultsPredictive.Queries
-                          queries={queries}
-                          queriesDatalistId="queries-datalist"
-                        />
-                        <SearchResultsPredictive.Products
-                          products={products}
-                          closeSearch={closeSearch}
-                          term={term}
-                        />
-                        <SearchResultsPredictive.Collections
-                          collections={collections}
-                          closeSearch={closeSearch}
-                          term={term}
-                        />
-                        <SearchResultsPredictive.Pages
-                          pages={pages}
-                          closeSearch={closeSearch}
-                          term={term}
-                        />
-                        <SearchResultsPredictive.Articles
-                          articles={articles}
-                          closeSearch={closeSearch}
-                          term={term}
-                        />
-                        {term.current && total ? (
-                          <Link
-                            onClick={closeSearch}
-                            to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                          >
-                            <p>
-                              View all results for <q>{term.current}</q> &nbsp; →
-                            </p>
-                          </Link>
-                        ) : null}
-                      </>
-                    );
-                  }}
-                </SearchResultsPredictive>
+                      return (
+                        <>
+                          <SearchResultsPredictive.Queries
+                            queries={queries}
+                            queriesDatalistId="queries-datalist"
+                          />
+                          <SearchResultsPredictive.Products
+                            products={products}
+                            closeSearch={closeSearch}
+                            term={term}
+                          />
+                          <SearchResultsPredictive.Collections
+                            collections={collections}
+                            closeSearch={closeSearch}
+                            term={term}
+                          />
+                          <SearchResultsPredictive.Pages
+                            pages={pages}
+                            closeSearch={closeSearch}
+                            term={term}
+                          />
+                          <SearchResultsPredictive.Articles
+                            articles={articles}
+                            closeSearch={closeSearch}
+                            term={term}
+                          />
+                          {term.current && total ? (
+                            <Link
+                              onClick={closeSearch}
+                              to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                            >
+                              <p>
+                                View all results for <q>{term.current}</q> &nbsp; →
+                              </p>
+                            </Link>
+                          ) : null}
+                        </>
+                      );
+                    }}
+                  </SearchResultsPredictive>
+                </div>
               </div>
             )}
           </SearchFormPredictive>
