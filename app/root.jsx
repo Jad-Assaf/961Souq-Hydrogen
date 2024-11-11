@@ -20,7 +20,6 @@ import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
 import NProgress from 'nprogress';  // Import NProgress
 import 'nprogress/nprogress.css';  // Import NProgress styles
-import 'public/fonts.css'
 
 // Configure NProgress (Optional: Disable spinner)
 NProgress.configure({ showSpinner: true });
@@ -136,15 +135,6 @@ export function Layout({ children }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="preload" href="/fonts/Montserrat-Thin.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-ExtraLight.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-Light.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-Medium.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-SemiBold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-ExtraBold.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
-        <link rel="preload" href="/fonts/Montserrat-Black.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
         <Meta />
         <Links />
       </head>
