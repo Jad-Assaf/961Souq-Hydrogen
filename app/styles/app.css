@@ -790,9 +790,18 @@ button.reset:hover:not(:has(> *)) {
   height: 30px;
 }
 
+.main-search{
+  display: flex;
+  flex-direction: column;
+  height: 4vh;
+  justify-content: start;
+  align-items: center;
+}
+
 .search-container {
   display: flex;
   align-items: center;
+  z-index: 10000
 }
 
 .search-container .search-bar {
@@ -816,6 +825,14 @@ button.reset:hover:not(:has(> *)) {
     border-left: none;
     height: 46px;
     padding: 0px 15px;
+}
+
+.search-results-container{
+    width: 70%;
+    background: white;
+    z-index: 9999;
+    padding: 24px;
+    margin-top: -3%;
 }
 
 /*
