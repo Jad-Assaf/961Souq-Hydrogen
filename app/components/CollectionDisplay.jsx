@@ -3,6 +3,7 @@ import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
+import ProductItem from './ProductItems';
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
@@ -154,6 +155,7 @@ function ProductRow({ products }) {
     );
 }
 
+
 const LeftArrowIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
@@ -166,42 +168,42 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductItem({ product, index }) {
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true });
+// function ProductItem({ product, index }) {
+//     const ref = useRef(null);
+//     const isInView = useInView(ref, { once: true });
 
-    return (
-        <motion.div
-            ref={ref}
-            initial={{ opacity: 0, x: -20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: index * 0.01, duration: 0.5 }}
-            className="product-item"
-        >
-            <Link to={`/products/${product.handle}`}>
-                <motion.div
-                    initial={{ filter: 'blur(10px)', opacity: 0 }}
-                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
-                    transition={{ duration: 0.5 }}
-                    className="product-card"
-                >
-                    <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 40vw"
-                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                        alt={product.images.nodes[0].altText || 'Product Image'}
-                        width="180px"
-                        height="180px"
-                    />
-                    <h4 className="product-title">{truncateText(product.title, 50)}</h4>
-                    <div className="product-price">
-                        <Money data={product.priceRange.minVariantPrice} />
-                    </div>
-                </motion.div>
-            </Link>
-        </motion.div>
-    );
-}
+//     return (
+//         <motion.div
+//             ref={ref}
+//             initial={{ opacity: 0, x: -20 }}
+//             animate={isInView ? { opacity: 1, x: 0 } : {}}
+//             transition={{ delay: index * 0.01, duration: 0.5 }}
+//             className="product-item"
+//         >
+//             <Link to={`/products/${product.handle}`}>
+//                 <motion.div
+//                     initial={{ filter: 'blur(10px)', opacity: 0 }}
+//                     animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+//                     transition={{ duration: 0.5 }}
+//                     className="product-card"
+//                 >
+//                     <Image
+//                         data={product.images.nodes[0]}
+//                         aspectRatio="1/1"
+//                         sizes="(min-width: 45em) 20vw, 40vw"
+//                         srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+//                                  ${product.images.nodes[0].url}?width=600&quality=30 600w,
+//                                  ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+//                         alt={product.images.nodes[0].altText || 'Product Image'}
+//                         width="180px"
+//                         height="180px"
+//                     />
+//                     <h4 className="product-title">{truncateText(product.title, 50)}</h4>
+//                     <div className="product-price">
+//                         <Money data={product.priceRange.minVariantPrice} />
+//                     </div>
+//                 </motion.div>
+//             </Link>
+//         </motion.div>
+//     );
+// }

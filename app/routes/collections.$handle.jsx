@@ -20,6 +20,7 @@ import { getAppliedFilterLink } from '../lib/filter';
 import { AddToCartButton } from '../components/AddToCartButton';
 import { useAside } from '~/components/Aside';
 import { motion, useAnimation, useInView } from 'framer-motion';
+import ProductItem from '~/components/ProductItems';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -301,92 +302,92 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-export function ProductItem({ product, index, numberInRow }) {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '0px 0px 100px 0px' });
-  const controls = useAnimation();
+// export function ProductItem({ product, index, numberInRow }) {
+//   const [isImageLoaded, setIsImageLoaded] = useState(false);
+//   const ref = useRef(null);
+//   const isInView = useInView(ref, { once: true, margin: '0px 0px 100px 0px' });
+//   const controls = useAnimation();
 
-  // Calculate delay for staggered animation based on row and column
-  useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [isInView, controls]);
+//   // Calculate delay for staggered animation based on row and column
+//   useEffect(() => {
+//     if (isInView) {
+//       controls.start("visible");
+//     }
+//   }, [isInView, controls]);
 
-  // Calculate row and column delay
-  const rowIndex = Math.floor(index / numberInRow);
-  const columnIndex = index % numberInRow;
-  const delay = rowIndex * 0.3 + columnIndex * 0.1;
+//   // Calculate row and column delay
+//   const rowIndex = Math.floor(index / numberInRow);
+//   const columnIndex = index % numberInRow;
+//   const delay = rowIndex * 0.3 + columnIndex * 0.1;
 
-  useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [isInView, controls, index, numberInRow]);
+//   useEffect(() => {
+//     if (isInView) {
+//       controls.start("visible");
+//     }
+//   }, [isInView, controls, index, numberInRow]);
 
-  const [selectedVariant, setSelectedVariant] = useState(() => {
-    return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
-  });
-  const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
+//   const [selectedVariant, setSelectedVariant] = useState(() => {
+//     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+//   });
+//   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
 
-  const hasDiscount = product.compareAtPriceRange &&
-    product.compareAtPriceRange.minVariantPrice.amount >
-    product.priceRange.minVariantPrice.amount;
+//   const hasDiscount = product.compareAtPriceRange &&
+//     product.compareAtPriceRange.minVariantPrice.amount >
+//     product.priceRange.minVariantPrice.amount;
 
-  return (
-    <div className="product-item-collection product-card" ref={ref}>
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={controls}
-        variants={{
-          visible: {
-            opacity: 1,
-            x: 0,
-            transition: { delay, duration: 0.5 }
-          }
-        }}
-      >
-        <Link key={product.id} prefetch="intent" to={variantUrl}>
-          {product.featuredImage && isInView && (
-            <motion.div
-              initial={{ filter: 'blur(10px)', opacity: 0 }}
-              animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Image
-                srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                         ${product.featuredImage.url}?width=600&quality=30 600w,
-                         ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-                alt={product.featuredImage.altText || product.title}
-                loading="lazy"
-                width="180px"
-                height="180px"
-                onLoad={() => setIsImageLoaded(true)}
-              />
-            </motion.div>
-          )}
-          <h4>{truncateText(product.title, 50)}</h4>
-          <div className="price-container">
-            <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
-              <Money data={selectedVariant.price} />
-            </small>
-            {hasDiscount && selectedVariant.compareAtPrice && (
-              <small className="discountedPrice">
-                <Money data={selectedVariant.compareAtPrice} />
-              </small>
-            )}
-          </div>
-        </Link>
-        <ProductForm
-          product={product}
-          selectedVariant={selectedVariant}
-          setSelectedVariant={setSelectedVariant}
-        />
-      </motion.div>
-    </div>
-  );
-}
+//   return (
+//     <div className="product-item-collection product-card" ref={ref}>
+//       <motion.div
+//         initial={{ opacity: 0, x: -30 }}
+//         animate={controls}
+//         variants={{
+//           visible: {
+//             opacity: 1,
+//             x: 0,
+//             transition: { delay, duration: 0.5 }
+//           }
+//         }}
+//       >
+//         <Link key={product.id} prefetch="intent" to={variantUrl}>
+//           {product.featuredImage && isInView && (
+//             <motion.div
+//               initial={{ filter: 'blur(10px)', opacity: 0 }}
+//               animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
+//               transition={{ duration: 0.5 }}
+//             >
+//               <Image
+//                 srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+//                          ${product.featuredImage.url}?width=600&quality=30 600w,
+//                          ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+//                 alt={product.featuredImage.altText || product.title}
+//                 loading="lazy"
+//                 width="180px"
+//                 height="180px"
+//                 onLoad={() => setIsImageLoaded(true)}
+//               />
+//             </motion.div>
+//           )}
+//           <h4>{truncateText(product.title, 50)}</h4>
+//           <div className="price-container">
+//             <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+//               <Money data={selectedVariant.price} />
+//             </small>
+//             {hasDiscount && selectedVariant.compareAtPrice && (
+//               <small className="discountedPrice">
+//                 <Money data={selectedVariant.compareAtPrice} />
+//               </small>
+//             )}
+//           </div>
+//         </Link>
+//         <ProductForm
+//           product={product}
+//           selectedVariant={selectedVariant}
+//           setSelectedVariant={setSelectedVariant}
+//         />
+//       </motion.div>
+//     </div>
+//   );
+// }
 
 
 // Animation variants for staggered loading
