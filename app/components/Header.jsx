@@ -3,6 +3,7 @@ import { Await, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
 import { Image } from '@shopify/hydrogen-react';
 import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
+import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
@@ -78,6 +79,77 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 <button onClick={goToSearch} className="search-bar-submit">
                   <SearchIcon />
                 </button>
+              </div>
+            )}
+          </SearchFormPredictive>
+
+          <SearchFormPredictive className="header-search">
+            {({ inputRef, fetchResults, goToSearch, fetcher }) => (
+              <div className="search-container">
+                <input
+                  ref={inputRef}
+                  type="search"
+                  placeholder="Search products"
+                  onChange={fetchResults}
+                  className="search-bar"
+                />
+                <button onClick={goToSearch} className="search-bar-submit">
+                  <SearchIcon />
+                </button>
+
+                {/* Adding SearchResultsPredictive */}
+                <SearchResultsPredictive>
+                  {({ items, total, term, state, closeSearch }) => {
+                    const { products, collections, pages, articles, queries } = items;
+
+                    if (state === 'loading' && term.current) {
+                      return <div>Loading...</div>;
+                    }
+
+                    if (!total) {
+                      return <SearchResultsPredictive.Empty term={term} />;
+                    }
+
+                    return (
+                      <>
+                        <SearchResultsPredictive.Queries
+                          queries={queries}
+                          queriesDatalistId="queries-datalist"
+                        />
+                        <SearchResultsPredictive.Products
+                          products={products}
+                          closeSearch={closeSearch}
+                          term={term}
+                        />
+                        <SearchResultsPredictive.Collections
+                          collections={collections}
+                          closeSearch={closeSearch}
+                          term={term}
+                        />
+                        <SearchResultsPredictive.Pages
+                          pages={pages}
+                          closeSearch={closeSearch}
+                          term={term}
+                        />
+                        <SearchResultsPredictive.Articles
+                          articles={articles}
+                          closeSearch={closeSearch}
+                          term={term}
+                        />
+                        {term.current && total ? (
+                          <Link
+                            onClick={closeSearch}
+                            to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                          >
+                            <p>
+                              View all results for <q>{term.current}</q> &nbsp; →
+                            </p>
+                          </Link>
+                        ) : null}
+                      </>
+                    );
+                  }}
+                </SearchResultsPredictive>
               </div>
             )}
           </SearchFormPredictive>

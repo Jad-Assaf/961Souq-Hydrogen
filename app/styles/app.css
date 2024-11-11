@@ -710,7 +710,7 @@ button.reset:hover:not(:has(> *)) {
 /* Header Menu for Desktop */
 .header-menu-desktop {
   display: none;
-  gap: 1rem;
+  gap: 1.5vw;
   margin: auto;
 
   @media (min-width: 45em) {
