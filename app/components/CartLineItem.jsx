@@ -79,7 +79,7 @@ function CartLineQuantity({ line }) {
   return (
     <div className="cart-line-quantity">
       <small>Quantity: {quantity} &nbsp;&nbsp;</small>
-      <div>
+      <div style={{display: 'flex', gap: '10px'}}>
         <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
           <button
             aria-label="Decrease quantity"

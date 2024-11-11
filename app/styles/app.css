@@ -857,6 +857,16 @@ align-items: center;
   display: flex;
 }
 
+.cart-line-quantity button{
+  background-color: #dadada;
+  border-radius: 30px;
+  border: 1px solid #2172af;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  align-content: center;
+}
+
 .cart-discount {
   align-items: center;
   display: flex;
