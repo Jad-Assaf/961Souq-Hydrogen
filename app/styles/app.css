@@ -831,11 +831,19 @@ button.reset:hover:not(:has(> *)) {
 
 .search-results-container{
     width: 70%;
-    background: #efefef8c;
+    background: #e2e2e29c;
     z-index: 9999;
     margin-top: -6%;
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(20px);
     border-radius: 30px;
+}
+
+.view-all-results{
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #2172af;
+  border-radius: 30px;
 }
 
 /*

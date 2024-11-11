@@ -124,6 +124,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                             <Link
                               onClick={closeSearch}
                               to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                              className='view-all-results'
                             >
                               <p>
                                 View all results for <q>{term.current}</q> &nbsp; →
