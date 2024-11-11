@@ -229,6 +229,7 @@ button {
   font-size: 1rem;
   font-weight: 600;
   color: #ff5722;
+  min-height: 55px;
 }
 
 .discountedPrice {
@@ -318,7 +319,7 @@ button {
 /* For smaller screens */
 @media (max-width: 768px) {
   .add-to-cart-button {
-    padding: 10px 10px;
+    padding: 10px 0px;
     width: 100%;
   }
 }
