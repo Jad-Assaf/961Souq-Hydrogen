@@ -794,6 +794,8 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .search-bar {
+  width: 100vw;
+  max-width: 500px;
   position: relative;
   top: -2px;
   border: 1px solid #2172af;
