@@ -2,11 +2,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { Await, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
 import { Image } from '@shopify/hydrogen-react';
-import {
-  SEARCH_ENDPOINT,
-  SearchFormPredictive,
-} from './SearchFormPredictive';
-import { SearchResultsPredictive } from './SearchResultsPredictive';
+import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
@@ -68,80 +64,23 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             />
           </NavLink>
 
-          <div className="predictive-search">
-            <br />
-            <SearchFormPredictive>
-              {({ fetchResults, goToSearch, inputRef }) => (
-                <>
-                  <input
-                    name="q"
-                    onChange={fetchResults}
-                    onFocus={fetchResults}
-                    placeholder="Search"
-                    ref={inputRef}
-                    type="search"
-                    list={queriesDatalistId}
-                  />
-                  &nbsp;
-                  <button onClick={goToSearch}>Search</button>
-                </>
-              )}
-            </SearchFormPredictive>
-
-            <SearchResultsPredictive>
-              {({ items, total, term, state, closeSearch }) => {
-                const { articles, collections, pages, products, queries } = items;
-
-                if (state === 'loading' && term.current) {
-                  return <div>Loading...</div>;
-                }
-
-                if (!total) {
-                  return <SearchResultsPredictive.Empty term={term} />;
-                }
-
-                return (
-                  <>
-                    <SearchResultsPredictive.Queries
-                      queries={queries}
-                      queriesDatalistId={queriesDatalistId}
-                    />
-                    <SearchResultsPredictive.Products
-                      products={products}
-                      closeSearch={closeSearch}
-                      term={term}
-                    />
-                    <SearchResultsPredictive.Collections
-                      collections={collections}
-                      closeSearch={closeSearch}
-                      term={term}
-                    />
-                    <SearchResultsPredictive.Pages
-                      pages={pages}
-                      closeSearch={closeSearch}
-                      term={term}
-                    />
-                    <SearchResultsPredictive.Articles
-                      articles={articles}
-                      closeSearch={closeSearch}
-                      term={term}
-                    />
-                    {term.current && total ? (
-                      <Link
-                        onClick={closeSearch}
-                        to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                      >
-                        <p>
-                          View all results for <q>{term.current}</q>
-                          &nbsp; →
-                        </p>
-                      </Link>
-                    ) : null}
-                  </>
-                );
-              }}
-            </SearchResultsPredictive>
-          </div>
+          {/* Adding SearchFormPredictive Component */}
+          <SearchFormPredictive className="header-search">
+            {({ inputRef, fetchResults, goToSearch }) => (
+              <div className="search-container">
+                <input
+                  ref={inputRef}
+                  type="search"
+                  placeholder="Search products"
+                  onChange={fetchResults}
+                  className="search-input"
+                />
+                <button onClick={goToSearch} className="search-submit">
+                  <SearchIcon />
+                </button>
+              </div>
+            )}
+          </SearchFormPredictive>
 
           <div className="header-ctas">
             <NavLink
