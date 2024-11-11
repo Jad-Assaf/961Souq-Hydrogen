@@ -13,8 +13,22 @@ export function ProductItem({ product, index, numberInRow = 4 }) {
     const controls = useAnimation();
     const { open } = useAside();
 
-    const selectedVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
-    const hasVariants = product.variants.nodes.length > 1;
+    // Ensure variants and images exist before accessing nodes
+    const variantsExist = product.variants && product.variants.nodes?.length > 0;
+    const imagesExist = product.images && product.images.nodes?.length > 0;
+
+    // Fallback for selected variant if no variants exist
+    const selectedVariant = variantsExist
+        ? product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0]
+        : null;
+    const hasVariants = variantsExist && product.variants.nodes.length > 1;
+
+    // Delay calculation
+    const rowIndex = Math.floor(index / numberInRow);
+    const columnIndex = index % numberInRow;
+    const delay = rowIndex * 0.3 + columnIndex * 0.1;
+
+    // Check if image is loaded
     const [isImageLoaded, setIsImageLoaded] = useState(false);
 
     useEffect(() => {
@@ -22,10 +36,6 @@ export function ProductItem({ product, index, numberInRow = 4 }) {
             controls.start("visible");
         }
     }, [isInView, controls]);
-
-    const rowIndex = Math.floor(index / numberInRow);
-    const columnIndex = index % numberInRow;
-    const delay = rowIndex * 0.3 + columnIndex * 0.1;
 
     return (
         <motion.div
@@ -48,56 +58,54 @@ export function ProductItem({ product, index, numberInRow = 4 }) {
                     transition={{ duration: 0.5 }}
                     className="product-card"
                 >
-                    <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 40vw"
-                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                        alt={product.images.nodes[0].altText || 'Product Image'}
-                        width="180px"
-                        height="180px"
-                        onLoad={() => setIsImageLoaded(true)}
-                    />
+                    {imagesExist && (
+                        <Image
+                            data={product.images.nodes[0]}
+                            aspectRatio="1/1"
+                            sizes="(min-width: 45em) 20vw, 40vw"
+                            srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
+                                     ${product.images.nodes[0].url}?width=600&quality=30 600w,
+                                     ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
+                            alt={product.images.nodes[0].altText || 'Product Image'}
+                            width="180px"
+                            height="180px"
+                            onLoad={() => setIsImageLoaded(true)}
+                        />
+                    )}
                     <h4>{truncateText(product.title, 50)}</h4>
-                    <div className="product-price">
-                        <Money data={selectedVariant.price} />
-                    </div>
+                    {selectedVariant && (
+                        <div className="product-price">
+                            <Money data={selectedVariant.price} />
+                        </div>
+                    )}
                 </motion.div>
             </Link>
 
-            <AddToCartButton
-                disabled={!selectedVariant || !selectedVariant.availableForSale}
-                onClick={() => {
-                    if (hasVariants) {
-                        window.location.href = `/products/${product.handle}`;
-                    } else {
-                        open('cart');
-                    }
-                }}
-                lines={
-                    selectedVariant && !hasVariants
-                        ? [
-                            {
-                                merchandiseId: selectedVariant.id,
-                                quantity: 1,
-                                product: {
-                                    ...product,
-                                    selectedVariant,
-                                    handle: product.handle,
-                                },
+            {selectedVariant && (
+                <AddToCartButton
+                    disabled={!selectedVariant.availableForSale}
+                    onClick={() => {
+                        if (hasVariants) {
+                            window.location.href = `/products/${product.handle}`;
+                        } else {
+                            open('cart');
+                        }
+                    }}
+                    lines={[
+                        {
+                            merchandiseId: selectedVariant.id,
+                            quantity: 1,
+                            product: {
+                                ...product,
+                                selectedVariant,
+                                handle: product.handle,
                             },
-                        ]
-                        : []
-                }
-            >
-                {!selectedVariant?.availableForSale
-                    ? 'Sold out'
-                    : hasVariants
-                        ? 'Select Options'
-                        : 'Add to cart'}
-            </AddToCartButton>
+                        },
+                    ]}
+                >
+                    {selectedVariant.availableForSale ? 'Add to cart' : 'Sold out'}
+                </AddToCartButton>
+            )}
         </motion.div>
     );
 }
