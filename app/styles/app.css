@@ -373,7 +373,8 @@ aside header h3 {
 }
 
 aside header .close {
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 30px;
   opacity: 0.8;
   text-decoration: none;
   transition: all 200ms;
