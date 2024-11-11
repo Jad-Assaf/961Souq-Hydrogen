@@ -830,7 +830,7 @@ display: flex;
 padding: .75rem 0;
 flex-direction: column;
 justify-content: center;
-align-items: center;
+align-items: start;
 }
 
 .cart-line img {

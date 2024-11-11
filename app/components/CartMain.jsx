@@ -50,11 +50,11 @@ function CartEmpty({hidden = false}) {
     <div hidden={hidden}>
       <br />
       <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
+        <strong>Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
+          started!</strong>
       </p>
       <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
+      <Link to="/collections/new-arrivals" onClick={close} prefetch="viewport">
         Continue shopping →
       </Link>
     </div>
