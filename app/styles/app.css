@@ -866,8 +866,19 @@ button.reset:hover:not(:has(> *)) {
   font-size: 14px;
   color: #3c476e;
 }
-.search-result-title:hover {
-  color: #2172af;
+
+.search-result-txt:hover {
+  .search-result-title {
+    color: #2172af;
+  }
+
+  .search-result-description {
+    color: black;
+  }
+
+  .search-result-price {
+    color: #ff5722;
+  }
 }
 
 .search-result-description{
@@ -876,9 +887,6 @@ button.reset:hover:not(:has(> *)) {
   color: #4d4d4d;
 }
 
-.search-result-description:hover {
-  color: black;
-}
 
 .search-result-price {
   font-size: 14px;
@@ -886,9 +894,6 @@ button.reset:hover:not(:has(> *)) {
   letter-spacing: 1px;
 }
 
-.search-result-price:hover {
-  color: #ff5722;
-}
 
 /*
 * --------------------------------------------------
