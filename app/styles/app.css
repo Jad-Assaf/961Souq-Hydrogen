@@ -1127,7 +1127,8 @@ input.search-bar:focus-visible{
 .predictive-search-result-item a {
   align-items: center;
   display: flex;
-  min-height: 65px;
+  min-height: 100px;
+  max-height: 150px;
   border-bottom: 1px solid #d6d6d6;
 }
 
