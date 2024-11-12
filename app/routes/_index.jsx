@@ -38,8 +38,8 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'apple', 'gaming', 'gaming-laptops',
-    'laptops', 'apple-iphone', 'samsung-mobile-phones', 'monitors',
+    'new-arrivals', 'apple', 'apple-macbook', 'apple-iphone', 'gaming', 'gaming-laptops', 'gaming-consoles',
+    'laptops', 'desktops', 'pc-parts', 'samsung-mobile-phones', 'monitors',
     // 'car-accessories', 'fitness watches', 'garmin-smart-watch',
     // 'apple-watch', 'samsung-watches', 'kitchen-appliances',
     // 'cleaning-devices'
