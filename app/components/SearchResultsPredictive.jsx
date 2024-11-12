@@ -200,7 +200,16 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                   </div>
                   <small className='search-result-price'>
                     {product?.variants?.nodes?.[0].price && (
-                      <Money data={product.variants.nodes[0].price} />
+                      <>
+                        <Money data={product.variants.nodes[0].price} />
+                        {product.variants.nodes[0].compareAtPrice && (
+                          <>
+                            &nbsp; <span className="compare-price">
+                              <Money data={product.variants.nodes[0].compareAtPrice} />
+                            </span>
+                          </>
+                        )}
+                      </>
                     )}
                   </small>
                 </div>

@@ -899,6 +899,10 @@ button.reset:hover:not(:has(> *)) {
   letter-spacing: 0.5px;
 }
 
+.search-result-compare-price{
+  text-decoration: line-through;
+  color: #888;
+}
 
 /*
 * --------------------------------------------------
