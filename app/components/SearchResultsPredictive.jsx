@@ -16,28 +16,25 @@ export function SearchResultsPredictive({children}) {
   const aside = useAside();
   const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
 
-  function truncateText(text, maxLength) {
-    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
-  }
-
+  
   /*
-   * Utility that resets the search input
-   */
-  function resetInput() {
-    if (inputRef.current) {
-      inputRef.current.blur();
-      inputRef.current.value = '';
+  * Utility that resets the search input
+  */
+ function resetInput() {
+   if (inputRef.current) {
+     inputRef.current.blur();
+     inputRef.current.value = '';
     }
   }
-
+  
   /**
    * Utility that resets the search input and closes the search aside
-   */
-  function closeSearch() {
-    resetInput();
-    aside.close();
+  */
+ function closeSearch() {
+   resetInput();
+   aside.close();
   }
-
+  
   return children({
     items,
     closeSearch,
@@ -46,6 +43,10 @@ export function SearchResultsPredictive({children}) {
     term,
     total,
   });
+}
+
+function truncateText(text, maxLength) {
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
 }
 
 SearchResultsPredictive.Articles = SearchResultsPredictiveArticles;
