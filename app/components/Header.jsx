@@ -9,8 +9,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
-  const searchContainerRef = useRef(null); // Ref for the search container
-  const [isSearchResultsVisible, setSearchResultsVisible] = useState(false); // Track visibility
+  const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
+  const searchContainerRef = useRef(null);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -40,19 +40,16 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     }
   };
 
-  // Close search results on outside click
-  const closeSearchOnOutsideClick = (e) => {
-    if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
-      setSearchResultsVisible(false); // Hide search results
-    }
-  };
-
   useEffect(() => {
-    document.addEventListener('click', closeSearchOnOutsideClick);
-    return () => document.removeEventListener('click', closeSearchOnOutsideClick);
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setSearchResultsVisible(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Prevent page scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.documentElement.classList.add('no-scroll');
@@ -81,21 +78,23 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
           <SearchFormPredictive className="header-search">
             {({ inputRef, fetchResults, goToSearch, fetcher }) => (
-              <div className="main-search" ref={searchContainerRef}>
+              <div ref={searchContainerRef} className="main-search">
                 <div className="search-container">
                   <input
                     ref={inputRef}
                     type="search"
                     placeholder="Search products"
-                    onChange={fetchResults}
-                    onFocus={() => setSearchResultsVisible(true)} // Show results on focus
+                    onChange={(e) => {
+                      fetchResults(e);
+                      setSearchResultsVisible(true);
+                    }}
+                    onFocus={() => setSearchResultsVisible(true)}
                     className="search-bar"
                   />
                   <button onClick={goToSearch} className="search-bar-submit">
                     <SearchIcon />
                   </button>
                 </div>
-                {/* Adding SearchResultsPredictive */}
                 {isSearchResultsVisible && (
                   <div className="search-results-container">
                     <SearchResultsPredictive>
@@ -116,15 +115,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                               products={products}
                               closeSearch={() => {
                                 closeSearch();
-                                setSearchResultsVisible(false); // Close results on product click
+                                setSearchResultsVisible(false);
                               }}
                               term={term}
                             />
                             {term.current && total ? (
                               <Link
-                                onClick={() => setSearchResultsVisible(false)}
+                                onClick={() => {
+                                  closeSearch();
+                                  setSearchResultsVisible(false);
+                                }}
                                 to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                                className='view-all-results'
+                                className="view-all-results"
                               >
                                 <p>
                                   View all results for <q>{term.current}</q> &nbsp; →
