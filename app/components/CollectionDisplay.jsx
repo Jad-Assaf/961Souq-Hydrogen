@@ -15,11 +15,11 @@ export function truncateText(text, maxWords) {
 }
 
 export function CollectionDisplay({ collections, sliderCollections, images }) {
-    let imageIndex = 0; // Initialize index to track images
+    let imageIndex = 0; // Index to track image rows in the sequence
 
     return (
         <div className="collections-container">
-            {/* Slide container for 'new-main-menu' */}
+            {/* Slide container for categories */}
             <div className="slide-con">
                 <h3 className="cat-h3">Shop By Categories</h3>
                 <div className="category-slider">
@@ -29,7 +29,7 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                 </div>
             </div>
 
-            {/* Loop through collections and add image rows at specified intervals */}
+            {/* Main collection display with product and image rows */}
             {collections.map((collection) => (
                 <div key={collection.id}>
                     <div className="collection-section">
@@ -51,7 +51,6 @@ function ProductRow({ products, images, imageIndex }) {
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
-    const [imageRows, setImageRows] = useState([]);
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -95,8 +94,8 @@ function ProductRow({ products, images, imageIndex }) {
                             {index === 0 && images[imageIndex] && (
                                 <ImageRow images={images.slice(imageIndex, imageIndex + 2)} />
                             )}
-                            {/* Display image rows after every 3 products following the first row */}
-                            {(index > 0 && (index + 1) % 3 === 0) && images[imageIndex + 2 + Math.floor(index / 3)] && (
+                            {/* Display an image row after every 3 product rows */}
+                            {(index + 1) % 3 === 0 && images[imageIndex + 2 + Math.floor(index / 3)] && (
                                 <ImageRow images={[images[imageIndex + 2 + Math.floor(index / 3)]]} />
                             )}
                         </React.Fragment>
