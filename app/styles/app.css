@@ -1047,6 +1047,7 @@ li.cart-line .product-price {
     top: 8% !important;
     width: 100vw !important;
     margin: auto !important;
+    left: 0;
   }
 
   .main-search {
