@@ -84,7 +84,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 <div className="search-results-container">
                   <SearchResultsPredictive>
                     {({ items, total, term, state, closeSearch }) => {
-                      const { products, collections, pages, articles, queries } = items;
+                      const { products /* , collections, pages, articles, queries */ } = items;
 
                       if (state === 'loading' && term.current) {
                         return <div>Loading...</div>;
@@ -96,15 +96,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
                       return (
                         <>
+                          {/* Uncomment if needed
                           <SearchResultsPredictive.Queries
                             queries={queries}
                             queriesDatalistId="queries-datalist"
                           />
+                          */}
                           <SearchResultsPredictive.Products
                             products={products}
                             closeSearch={closeSearch}
                             term={term}
                           />
+                          {/* Uncomment if needed
                           <SearchResultsPredictive.Collections
                             collections={collections}
                             closeSearch={closeSearch}
@@ -120,6 +123,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                             closeSearch={closeSearch}
                             term={term}
                           />
+                          */}
                           {term.current && total ? (
                             <Link
                               onClick={closeSearch}
@@ -255,7 +259,6 @@ export function HeaderMenu({ menu, viewport }) {
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
     </nav>
   );
-
 }
 
 function HeaderMenuMobileToggle({ toggleMobileMenu }) {
