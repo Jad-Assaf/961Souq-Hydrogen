@@ -1039,7 +1039,7 @@ li.cart-line .product-price {
 * --------------------------------------------------
 */
 @media (max-width: 1024px) {
-  .header-search *{
+  .header-search * {
     max-width: unset !important;
   }
 
@@ -1083,6 +1083,26 @@ li.cart-line .product-price {
     width: 95% !important;
     margin: auto !important;
     padding: 20px 0;
+  }
+
+  .predictive-search-result-item a {
+    align-items: flex-start;
+  }
+
+  .predictive-search-result-item a img {
+    width: 85px;
+  }
+
+  .search-result-txt {
+    padding: 0 0 10px 0 !important;
+  }
+
+  .search-result-title {
+    font-size: 14px;
+  }
+
+  .search-result-description {
+    font-size: 11px;
   }
 
 }
