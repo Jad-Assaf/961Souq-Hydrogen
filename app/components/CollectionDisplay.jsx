@@ -1,15 +1,25 @@
 import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money, Image } from '@shopify/hydrogen';
+import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 
+// Truncate text to fit within the given max word count
+export function truncateText(text, maxWords) {
+    const words = text.split(' ');
+    return words.length > maxWords
+        ? words.slice(0, maxWords).join(' ') + '...'
+        : text;
+}
+
 export function CollectionDisplay({ collections, sliderCollections, images }) {
+    let imageIndex = 0; // Track images used to prevent duplication
+
     return (
         <div className="collections-container">
-            {/* Slide container using 'new-main-menu' handles */}
+            {/* Slide container for 'new-main-menu' */}
             <div className="slide-con">
                 <h3 className="cat-h3">Shop By Categories</h3>
                 <div className="category-slider">
@@ -19,16 +29,27 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                 </div>
             </div>
 
-            {/* Loop through collections and conditionally add image rows */}
+            {/* Loop through collections and add image rows at specified intervals */}
             {collections.map((collection, collectionIndex) => (
                 <div key={collection.id}>
                     <div className="collection-section">
                         <h3>{collection.title}</h3>
-                        <ProductRow
-                            products={collection.products.nodes}
-                            collectionIndex={collectionIndex}
-                            images={images}
-                        />
+
+                        <ProductRow products={collection.products.nodes} />
+
+                        {/* Insert an image row after the first product row */}
+                        {collectionIndex === 0 && (
+                            <ImageRow images={images.slice(imageIndex, imageIndex + 2)} />
+                        )}
+
+                        {/* Insert image rows after every three product rows */}
+                        {collection.products.nodes.map((_, productIndex) => {
+                            if (productIndex > 0 && (productIndex + 1) % 3 === 0) {
+                                imageIndex += 1;
+                                return <ImageRow key={`${collection.id}-${productIndex}`} images={images.slice(imageIndex, imageIndex + 1)} />;
+                            }
+                            return null;
+                        })}
                     </div>
                 </div>
             ))}
@@ -36,12 +57,11 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
     );
 }
 
-function ProductRow({ products, collectionIndex, images }) {
+function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
-    const imagesToShow = images.slice(collectionIndex === 0 ? 0 : 2 + (collectionIndex - 1) * 1, 2 + collectionIndex * 1);
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -65,46 +85,45 @@ function ProductRow({ products, collectionIndex, images }) {
     };
 
     return (
-        <>
-            <div className="product-row-container">
-                <button className="home-prev-button" onClick={() => scrollRow(-600)}>
-                    <LeftArrowIcon />
-                </button>
-                <div
-                    className="collection-products-row"
-                    ref={rowRef}
-                    onMouseDown={handleMouseDown}
-                    onMouseLeave={handleMouseLeave}
-                    onMouseUp={handleMouseUp}
-                    onMouseMove={handleMouseMove}
-                >
-                    {products.map((product, index) => (
-                        <ProductItem key={product.id} product={product} index={index} />
-                    ))}
-                </div>
-                <button className="home-next-button" onClick={() => scrollRow(600)}>
-                    <RightArrowIcon />
-                </button>
+        <div className="product-row-container">
+            <button className="home-prev-button" onClick={() => scrollRow(-600)}>
+                <LeftArrowIcon />
+            </button>
+            <div
+                className="collection-products-row"
+                ref={rowRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+            >
+                {products.map((product, index) => (
+                    <ProductItem key={product.id} product={product} index={index} />
+                ))}
             </div>
-
-            {/* Display image row conditionally based on collectionIndex */}
-            {(collectionIndex === 0 || (collectionIndex > 0 && collectionIndex % 3 === 0)) && (
-                <div className="image-row">
-                    {imagesToShow.map((image, i) => (
-                        <ImageRowItem key={i} image={image} index={i} />
-                    ))}
-                </div>
-            )}
-        </>
+            <button className="home-next-button" onClick={() => scrollRow(600)}>
+                <RightArrowIcon />
+            </button>
+        </div>
     );
 }
 
-function ImageRowItem({ image, index }) {
+function ImageRow({ images }) {
+    return (
+        <div className="image-row">
+            {images.map((image, index) => (
+                <ImageRowItem key={index} image={image} />
+            ))}
+        </div>
+    );
+}
+
+function ImageRowItem({ image }) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 + 0.2 }}
+            transition={{ delay: 0.2 }}
             className="row-image"
             width="740px"
             height="300px"
@@ -115,7 +134,7 @@ function ImageRowItem({ image, index }) {
                 srcSet={`${image}?width=300&quality=30 300w,
                          ${image}?width=600&quality=30 600w,
                          ${image}?width=1200&quality=30 1200w`}
-                alt={`Collection Image ${index + 1}`}
+                alt="Collection Image"
                 width="740px"
                 height="300px"
             />
