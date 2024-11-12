@@ -41,7 +41,7 @@ export function urlWithTrackingParams({
   }).toString();
 
   if (trackingParams) {
-    search = `${search}&${trackingParams}`;
+    search = `${search}`;
   }
 
   return `${baseUrl}?${search}`;
