@@ -862,6 +862,15 @@ button.reset:hover:not(:has(> *)) {
   gap: 15px;
 }
 
+.search-result-title{
+  font-size: 14px;
+}
+
+.search-result-description{
+  font-size: 12px;
+  font-weight: 300;
+}
+
 .search-result-price {
   font-size: 14px;
   font-weight: 500;
