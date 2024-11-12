@@ -889,7 +889,7 @@ button.reset:hover:not(:has(> *)) {
 .search-result-description {
   font-size: 12px;
   font-weight: 300;
-  color: #4d4d4d;
+  color: #7f7f7f;
 }
 
 
@@ -900,14 +900,9 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .search-result-compare-price {
-  text-decoration: line-through;
-  color: #888;
-}
-
-.search-result-compare-price {
   font-size: 13px;
   text-decoration: line-through;
-  color: #888;
+  color: #7f7f7f;
   text-align: end;
 }
 
@@ -1133,7 +1128,7 @@ input.search-bar:focus-visible{
   align-items: center;
   display: flex;
   min-height: 65px;
-  border-bottom: 1px solid #ababab;
+  border-bottom: 1px solid #d6d6d6;
 }
 
 .predictive-search-result-item a img {
