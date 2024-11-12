@@ -905,6 +905,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .search-result-compare-price{
+  font-size: 13px;
   text-decoration: line-through;
   color: #888;
 }
@@ -1050,6 +1051,8 @@ li.cart-line .product-price {
 .predictive-search-result {
   margin-bottom: 1rem;
   padding: 20px 24px 0 24px;
+  max-height: 750px;
+  overflow-y: auto;
 }
 
 .predictive-search-result h5 {
