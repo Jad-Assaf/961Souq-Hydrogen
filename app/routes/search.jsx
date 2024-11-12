@@ -295,6 +295,7 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
     __typename
     id
     title
+    description
     handle
     trackingParameters
     variants(first: 1) {
