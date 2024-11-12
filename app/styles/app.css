@@ -854,6 +854,21 @@ button.reset:hover:not(:has(> *)) {
   text-align: center;
 }
 
+.search-result-txt {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 15px;
+}
+
+.search-result-txt {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+
 /*
 * --------------------------------------------------
 * components/Footer
