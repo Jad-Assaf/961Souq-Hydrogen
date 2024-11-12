@@ -1097,15 +1097,6 @@ li.cart-line .product-price {
   .search-result-txt {
     padding: 0 0 10px 0 !important;
   }
-
-  .search-result-title {
-    font-size: 14px;
-  }
-
-  .search-result-description {
-    font-size: 11px;
-  }
-
 }
 
 input.search-bar:focus-visible{
