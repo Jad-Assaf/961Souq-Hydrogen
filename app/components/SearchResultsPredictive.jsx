@@ -16,6 +16,10 @@ export function SearchResultsPredictive({children}) {
   const aside = useAside();
   const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
 
+  function truncateText(text, maxLength) {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+  }
+
   /*
    * Utility that resets the search input
    */
@@ -189,8 +193,10 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                   />
                 )}
                 <div className='search-result-txt'>
-                  <p className='search-result-title'>{product.title}</p>
-                  <p className='search-result-description'>{product.description}</p>
+                  <div className="search-result-titDesc">
+                    <p className='search-result-title'>{product.title}</p>
+                    <p className='search-result-description'>{truncateText(product.description, 30)}</p>
+                  </div>
                   <small className='search-result-price'>
                     {product?.variants?.nodes?.[0].price && (
                       <Money data={product.variants.nodes[0].price} />
