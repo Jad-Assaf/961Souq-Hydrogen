@@ -830,11 +830,11 @@ button.reset:hover:not(:has(> *)) {
 
 .search-results-container {
   width: 105%;
-  background: #ffffffc2;
+  background: #fff;
   z-index: 9999;
   margin-top: -3%;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  /* -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px); */
   border-radius: 30px;
   box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
 }
@@ -854,22 +854,27 @@ button.reset:hover:not(:has(> *)) {
   text-align: center;
 }
 
+.search-result-txt *{
+  transition: all 0.2s ease-in-out;
+}
+
 .search-result-txt {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 15px;
+  padding: 10px 0;
 }
 
 .search-result-title{
-  font-size: 14px;
+  font-size: 15px;
   color: #3c476e;
 }
 
 .search-result-txt:hover {
   .search-result-title {
-    color: #2172af;
+    color: #3b82f6;
   }
 
   .search-result-description {
@@ -889,9 +894,9 @@ button.reset:hover:not(:has(> *)) {
 
 
 .search-result-price {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 
