@@ -908,6 +908,7 @@ button.reset:hover:not(:has(> *)) {
   font-size: 13px;
   text-decoration: line-through;
   color: #888;
+  text-align: end;
 }
 
 /*
@@ -1075,11 +1076,13 @@ li.cart-line .product-price {
 
   .search-results-container {
     width: 100% !important;
+    border-radius: 0 !important;
   }
 
   .predictive-search-result {
     width: 95% !important;
     margin: auto !important;
+    padding: 20px 0;
   }
 
 }
