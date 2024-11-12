@@ -27,42 +27,57 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                 </div>
             </div>
 
-            {/* Product rows using hardcoded handles */}
+            {/* Product rows with conditional image rows */}
             {collections.map((collection, index) => (
                 <div key={collection.id}>
                     <div className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
-                    </div>
 
-                    {/* Inter-row images */}
-                    <div className="image-row">
-                        {images.slice(index * 2, index * 2 + 2).map((image, i) => (
-                            <motion.div
-                                key={`${collection.id}-${i}`}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.1 + 0.2 }}
-                                className="row-image"
-                                width="740px"
-                                height="300px"
-                            >
-                                <Image
-                                    data={image}
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${image}?width=300&quality=30 300w,
-                                             ${image}?width=600&quality=30 600w,
-                                             ${image}?width=1200&quality=30 1200w`}
-                                    alt={`Collection ${index + 1} Image ${i + 1}`}
-                                    width="740px"
-                                    height="300px"
-                                />
-                            </motion.div>
-                        ))}
+                        {/* Conditional rendering for image rows */}
+                        {index === 0 ? (
+                            // Display the first two images after the first product row
+                            <div className="image-row">
+                                {images.slice(0, 2).map((image, i) => (
+                                    <ImageRowItem key={i} image={image} index={i} />
+                                ))}
+                            </div>
+                        ) : (index % 3 === 1) ? (
+                            // Skip three product rows, then show one image row
+                            <div className="image-row">
+                                {images.slice(index, index + 1).map((image, i) => (
+                                    <ImageRowItem key={i} image={image} index={i} />
+                                ))}
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             ))}
         </div>
+    );
+}
+
+function ImageRowItem({ image, index }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 + 0.2 }}
+            className="row-image"
+            width="740px"
+            height="300px"
+        >
+            <Image
+                data={image}
+                sizes="(min-width: 45em) 20vw, 40vw"
+                srcSet={`${image}?width=300&quality=30 300w,
+                         ${image}?width=600&quality=30 600w,
+                         ${image}?width=1200&quality=30 1200w`}
+                alt={`Collection Image ${index + 1}`}
+                width="740px"
+                height="300px"
+            />
+        </motion.div>
     );
 }
 
