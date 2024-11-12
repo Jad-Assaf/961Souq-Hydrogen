@@ -10,6 +10,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const searchContainerRef = useRef(null); // Ref for the search container
+  const [isSearchResultsVisible, setSearchResultsVisible] = useState(false); // Track visibility
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -42,8 +43,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   // Close search results on outside click
   const closeSearchOnOutsideClick = (e) => {
     if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
-      const closeSearch = searchContainerRef.current.querySelector('.search-results-container');
-      if (closeSearch) closeSearch.style.display = 'none'; // Hide search results
+      setSearchResultsVisible(false); // Hide search results
     }
   };
 
@@ -88,6 +88,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     type="search"
                     placeholder="Search products"
                     onChange={fetchResults}
+                    onFocus={() => setSearchResultsVisible(true)} // Show results on focus
                     className="search-bar"
                   />
                   <button onClick={goToSearch} className="search-bar-submit">
@@ -95,65 +96,47 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   </button>
                 </div>
                 {/* Adding SearchResultsPredictive */}
-                <div className="search-results-container">
-                  <SearchResultsPredictive>
-                    {({ items, total, term, state, closeSearch }) => {
-                      const { products /* , collections, pages, articles, queries */ } = items;
+                {isSearchResultsVisible && (
+                  <div className="search-results-container">
+                    <SearchResultsPredictive>
+                      {({ items, total, term, state, closeSearch }) => {
+                        const { products /* , collections, pages, articles, queries */ } = items;
 
-                      if (state === 'loading' && term.current) {
-                        return <div>Loading...</div>;
-                      }
+                        if (state === 'loading' && term.current) {
+                          return <div>Loading...</div>;
+                        }
 
-                      if (!total) {
-                        return <SearchResultsPredictive.Empty term={term} />;
-                      }
+                        if (!total) {
+                          return <SearchResultsPredictive.Empty term={term} />;
+                        }
 
-                      return (
-                        <>
-                          {/* Uncomment if needed
-                          <SearchResultsPredictive.Queries
-                            queries={queries}
-                            queriesDatalistId="queries-datalist"
-                          />
-                          */}
-                          <SearchResultsPredictive.Products
-                            products={products}
-                            closeSearch={closeSearch}
-                            term={term}
-                          />
-                          {/* Uncomment if needed
-                          <SearchResultsPredictive.Collections
-                            collections={collections}
-                            closeSearch={closeSearch}
-                            term={term}
-                          />
-                          <SearchResultsPredictive.Pages
-                            pages={pages}
-                            closeSearch={closeSearch}
-                            term={term}
-                          />
-                          <SearchResultsPredictive.Articles
-                            articles={articles}
-                            closeSearch={closeSearch}
-                            term={term}
-                          />
-                          */}
-                          {term.current && total ? (
-                            <Link
-                              onClick={closeSearch}
-                              to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                              className='view-all-results'
-                            >
-                              <p>
-                                View all results for <q>{term.current}</q> &nbsp; →
-                              </p>
-                            </Link>
-                          ) : null}
-                        </>
-                      );
-                    }}
-                  </SearchResultsPredictive>
-                </div>
+                        return (
+                          <>
+                            <SearchResultsPredictive.Products
+                              products={products}
+                              closeSearch={() => {
+                                closeSearch();
+                                setSearchResultsVisible(false); // Close results on product click
+                              }}
+                              term={term}
+                            />
+                            {term.current && total ? (
+                              <Link
+                                onClick={() => setSearchResultsVisible(false)}
+                                to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                                className='view-all-results'
+                              >
+                                <p>
+                                  View all results for <q>{term.current}</q> &nbsp; →
+                                </p>
+                              </Link>
+                            ) : null}
+                          </>
+                        );
+                      }}
+                    </SearchResultsPredictive>
+                  </div>
+                )}
               </div>
             )}
           </SearchFormPredictive>
