@@ -15,7 +15,7 @@ export function truncateText(text, maxWords) {
 }
 
 export function CollectionDisplay({ collections, sliderCollections, images }) {
-    let imageIndex = 0; // Track images used to prevent duplication
+    let imageIndex = 0; // Initialize index to track images
 
     return (
         <div className="collections-container">
@@ -30,26 +30,15 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
             </div>
 
             {/* Loop through collections and add image rows at specified intervals */}
-            {collections.map((collection, collectionIndex) => (
+            {collections.map((collection) => (
                 <div key={collection.id}>
                     <div className="collection-section">
                         <h3>{collection.title}</h3>
-
-                        <ProductRow products={collection.products.nodes} />
-
-                        {/* Insert an image row after the first product row */}
-                        {collectionIndex === 0 && (
-                            <ImageRow images={images.slice(imageIndex, imageIndex + 2)} />
-                        )}
-
-                        {/* Insert image rows after every three product rows */}
-                        {collection.products.nodes.map((_, productIndex) => {
-                            if (productIndex > 0 && (productIndex + 1) % 3 === 0) {
-                                imageIndex += 1;
-                                return <ImageRow key={`${collection.id}-${productIndex}`} images={images.slice(imageIndex, imageIndex + 1)} />;
-                            }
-                            return null;
-                        })}
+                        <ProductRow
+                            products={collection.products.nodes}
+                            images={images}
+                            imageIndex={imageIndex}
+                        />
                     </div>
                 </div>
             ))}
@@ -57,11 +46,12 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
     );
 }
 
-function ProductRow({ products }) {
+function ProductRow({ products, images, imageIndex }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
+    const [imageRows, setImageRows] = useState([]);
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -85,26 +75,38 @@ function ProductRow({ products }) {
     };
 
     return (
-        <div className="product-row-container">
-            <button className="home-prev-button" onClick={() => scrollRow(-600)}>
-                <LeftArrowIcon />
-            </button>
-            <div
-                className="collection-products-row"
-                ref={rowRef}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
-            >
-                {products.map((product, index) => (
-                    <ProductItem key={product.id} product={product} index={index} />
-                ))}
+        <>
+            <div className="product-row-container">
+                <button className="home-prev-button" onClick={() => scrollRow(-600)}>
+                    <LeftArrowIcon />
+                </button>
+                <div
+                    className="collection-products-row"
+                    ref={rowRef}
+                    onMouseDown={handleMouseDown}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                >
+                    {products.map((product, index) => (
+                        <React.Fragment key={product.id}>
+                            <ProductItem product={product} index={index} />
+                            {/* Display the first image row after the first product */}
+                            {index === 0 && images[imageIndex] && (
+                                <ImageRow images={images.slice(imageIndex, imageIndex + 2)} />
+                            )}
+                            {/* Display image rows after every 3 products following the first row */}
+                            {(index > 0 && (index + 1) % 3 === 0) && images[imageIndex + 2 + Math.floor(index / 3)] && (
+                                <ImageRow images={[images[imageIndex + 2 + Math.floor(index / 3)]]} />
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+                <button className="home-next-button" onClick={() => scrollRow(600)}>
+                    <RightArrowIcon />
+                </button>
             </div>
-            <button className="home-next-button" onClick={() => scrollRow(600)}>
-                <RightArrowIcon />
-            </button>
-        </div>
+        </>
     );
 }
 
