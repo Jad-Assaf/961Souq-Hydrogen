@@ -1108,6 +1108,10 @@ li.cart-line .product-price {
 
 }
 
+input.search-bar:focus-visible{
+  outline: none;
+}
+
 .predictive-search {
   height: calc(100vh - var(--header-height) - 40px);
   overflow-y: auto;
