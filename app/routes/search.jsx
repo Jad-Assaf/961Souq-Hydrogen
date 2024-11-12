@@ -377,21 +377,19 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<PredictiveSearchReturn>}
  */
-async function predictiveSearch({request, context}) {
-  const {storefront} = context;
+async function predictiveSearch({ request, context }) {
+  const { storefront } = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
-  const limit = Number(url.searchParams.get('limit') || 10);
+  const limit = Number(url.searchParams.get('limit') || 15); // Set to match the limit in fetchResults
   const type = 'predictive';
 
-  if (!term) return {type, term, result: getEmptyPredictiveSearchResult()};
+  if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
-  const {predictiveSearch: items, errors} = await storefront.query(
+  const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
-        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term,
@@ -401,7 +399,7 @@ async function predictiveSearch({request, context}) {
 
   if (errors) {
     throw new Error(
-      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
+      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
     );
   }
 
@@ -414,8 +412,9 @@ async function predictiveSearch({request, context}) {
     0,
   );
 
-  return {type, term, result: {items, total}};
+  return { type, term, result: { items, total } };
 }
+
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @typedef {import('@shopify/remix-oxygen').ActionFunctionArgs} ActionFunctionArgs */
