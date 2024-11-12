@@ -37,10 +37,11 @@ export function urlWithTrackingParams({
 }) {
   let search = new URLSearchParams({
     ...extraParams,
+    q: encodeURIComponent(term),
   }).toString();
 
   if (trackingParams) {
-    search = `${search}`;
+    search = `${search}&${trackingParams}`;
   }
 
   return `${baseUrl}?${search}`;

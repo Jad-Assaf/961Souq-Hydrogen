@@ -174,11 +174,7 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
       <h5>Products</h5>
       <ul>
         {products.map((product) => {
-          const productUrl = urlWithTrackingParams({
-            baseUrl: `/products/${product.handle}`,
-            trackingParams: product.trackingParameters,
-            term: term.current,
-          });
+          const productUrl = `/products/${product.handle}`;
 
           const image = product?.variants?.nodes?.[0].image;
           return (
@@ -192,7 +188,7 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                     height={50}
                   />
                 )}
-                <div>
+                <div className='search-result-txt'>
                   <p>{product.title}</p>
                   <small>
                     {product?.variants?.nodes?.[0].price && (
