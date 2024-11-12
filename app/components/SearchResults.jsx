@@ -31,11 +31,7 @@ function SearchResultsArticles({term, articles}) {
       <h2>Articles</h2>
       <div>
         {articles?.nodes?.map((article) => {
-          const articleUrl = urlWithTrackingParams({
-            baseUrl: `/blogs/${article.handle}`,
-            trackingParams: article.trackingParameters,
-            term,
-          });
+          const articleUrl = `/blogs/${article.handle}`;
 
           return (
             <div className="search-results-item" key={article.id}>
@@ -64,11 +60,7 @@ function SearchResultsPages({term, pages}) {
       <h2>Pages</h2>
       <div>
         {pages?.nodes?.map((page) => {
-          const pageUrl = urlWithTrackingParams({
-            baseUrl: `/pages/${page.handle}`,
-            trackingParams: page.trackingParameters,
-            term,
-          });
+          const pageUrl = `/pages/${page.handle}`;
 
           return (
             <div className="search-results-item" key={page.id}>
