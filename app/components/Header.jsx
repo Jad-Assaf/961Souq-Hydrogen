@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { Await, Link, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
 import { Image } from '@shopify/hydrogen-react';
@@ -9,6 +9,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
+  const searchContainerRef = useRef(null); // Ref for the search container
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -37,6 +38,19 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       setTimeout(() => setActiveSubmenu(null), 300); // Wait for animation
     }
   };
+
+  // Close search results on outside click
+  const closeSearchOnOutsideClick = (e) => {
+    if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+      const closeSearch = searchContainerRef.current.querySelector('.search-results-container');
+      if (closeSearch) closeSearch.style.display = 'none'; // Hide search results
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', closeSearchOnOutsideClick);
+    return () => document.removeEventListener('click', closeSearchOnOutsideClick);
+  }, []);
 
   // Prevent page scroll when mobile menu is open
   useEffect(() => {
@@ -67,7 +81,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
           <SearchFormPredictive className="header-search">
             {({ inputRef, fetchResults, goToSearch, fetcher }) => (
-              <div className="main-search">
+              <div className="main-search" ref={searchContainerRef}>
                 <div className="search-container">
                   <input
                     ref={inputRef}
