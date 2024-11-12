@@ -155,7 +155,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 </Await>
               </Suspense>
             </NavLink>
-            <SearchToggle />
+            {/* <SearchToggle /> */}
             <CartToggle cart={cart} />
           </div>
         </div>
@@ -271,14 +271,14 @@ function HeaderMenuMobileToggle({ toggleMobileMenu }) {
   );
 }
 
-function SearchToggle() {
-  const { open } = useAside();
-  return (
-    <button className="search-toggle reset" onClick={() => open('search')}>
-      <SearchIcon />
-    </button>
-  );
-}
+// function SearchToggle() {
+//   const { open } = useAside();
+//   return (
+//     <button className="search-toggle reset" onClick={() => open('search')}>
+//       <SearchIcon />
+//     </button>
+//   );
+// }
 
 function CartToggle({ cart }) {
   const { open } = useAside();
