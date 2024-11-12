@@ -190,7 +190,7 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                 )}
                 <div className='search-result-txt'>
                   <p>{product.title}</p>
-                  <small>
+                  <small className='search-result-price'>
                     {product?.variants?.nodes?.[0].price && (
                       <Money data={product.variants.nodes[0].price} />
                     )}
