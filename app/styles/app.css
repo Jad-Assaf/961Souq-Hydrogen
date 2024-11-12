@@ -1044,10 +1044,10 @@ li.cart-line .product-price {
 
   .header-search {
     position: absolute !important;
-    top: 8% !important;
+    top: 70px !important;
     width: 100vw !important;
     margin: auto !important;
-    left: 0;
+    left: -10px;
   }
 
   .main-search {
@@ -1065,10 +1065,12 @@ li.cart-line .product-price {
     width: 100% !important;
     border-radius: 0 !important;
     background-color: #fff !important;
+    border-left: none !important;
   }
 
   .search-bar-submit {
     border-radius: 0 !important;
+    border-right: none !important;
   }
 
   .search-results-container {
