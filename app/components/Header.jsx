@@ -1,5 +1,3 @@
-import { defer } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { Await, Link, NavLink } from '@remix-run/react';
 import { useAside } from '~/components/Aside';
@@ -8,35 +6,33 @@ import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 
 export async function loader({ context }) {
-  const menuHandle = 'new-main-menu';
-  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+  const menuHandle = 'new-main-menu'; // Replace with your menu handle
+  const { menu } = await context.storefront.query(GETT_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
 
-  if (!menu || !menu.items) {
+  if (!menu) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  const fetchNestedItems = (items) => {
+  // Ensure nested menu items are fully processed
+  const processMenuItems = (items) => {
     return items.map((item) => {
       if (item.items?.length > 0) {
-        return {
-          ...item,
-          items: fetchNestedItems(item.items),
-        };
+        item.items = processMenuItems(item.items);
       }
       return item;
     });
   };
 
-  menu.items = fetchNestedItems(menu.items);
+  const processedMenu = { ...menu, items: processMenuItems(menu.items) };
 
-  return defer({ menu });
+  return { menu: processedMenu };
 }
 
-const GET_MENU_QUERY = `#graphql
+const GETT_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
-    menu(handle: $handle) {
+    menu(handle: "new-main-menu") {
       items {
         id
         title
@@ -70,12 +66,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
-    if (!isMobileMenuOpen) setActiveSubmenu(null);
+    if (!isMobileMenuOpen) setActiveSubmenu(null); // Reset submenu when closing
   };
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-    setActiveSubmenu(null);
+    setActiveSubmenu(null); // Close all submenus when menu is closed
   };
 
   const openSubmenu = (itemId) => {
@@ -92,9 +88,11 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     const activeDrawer = document.querySelector('.mobile-submenu-drawer.active');
     if (activeDrawer) {
       activeDrawer.classList.remove('active');
-      setTimeout(() => setActiveSubmenu(null), 300);
+      setTimeout(() => setActiveSubmenu(null), 300); // Wait for animation
     }
   };
+
+  console.log(menu);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -122,7 +120,27 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
         {/* Render submenu if available */}
         {item.items?.length > 0 && (
           <div className="submenu">
-            {renderMenuItems(item.items)}
+            {item.items.map((subItem) => (
+              <div key={subItem.id} className="submenu-item">
+                <NavLink to={new URL(subItem.url).pathname}>{subItem.title}</NavLink>
+
+                {/* Check for deeper nested submenus */}
+                {subItem.items?.length > 0 && (
+                  <div className="sub-submenu">
+                    {subItem.items.map((subSubItem) => (
+                      <div key={subSubItem.id} className="submenu-item">
+                        <NavLink to={new URL(subSubItem.url).pathname}>{subSubItem.title}</NavLink>
+
+                        {/* Check for even deeper nested submenus */}
+                        {subSubItem.items?.length > 0 && (
+                          <div className="sub-submenu">{renderMenuItems(subSubItem.items)}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -278,6 +296,77 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   );
 }
 
+export function HeaderMenu({ menu, viewport }) {
+  const { close } = useAside();
+
+  useEffect(() => {
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    const handleMouseEnter = (event) => {
+      const submenu = event.currentTarget.querySelector('.submenu');
+      if (submenu) submenu.style.display = 'block';
+    };
+
+    const handleMouseLeave = (event) => {
+      const submenu = event.currentTarget.querySelector('.submenu');
+      if (submenu) submenu.style.display = 'none';
+    };
+
+    menuItems.forEach((item) => {
+      item.addEventListener('mouseenter', handleMouseEnter);
+      item.addEventListener('mouseleave', handleMouseLeave);
+    });
+
+    return () => {
+      menuItems.forEach((item) => {
+        item.removeEventListener('mouseenter', handleMouseEnter);
+        item.removeEventListener('mouseleave', handleMouseLeave);
+      });
+    };
+  }, []);
+
+  const renderMenuItems = (items) =>
+    items.map((item) => {
+      console.log('Rendering item:', item);
+      return (
+        <div key={item.id} className="menu-item">
+          <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
+          {item.items?.length > 0 && (
+            <div className="submenu">
+              {renderMenuItems(item.items)}
+            </div>
+          )}
+        </div>
+      );
+    });
+
+  return (
+    <nav className={`header-menu-${viewport}`} role="navigation">
+      {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
+    </nav>
+  );
+}
+
+function HeaderMenuMobileToggle({ toggleMobileMenu }) {
+  return (
+    <button
+      className="header-menu-mobile-toggle reset"
+      onClick={toggleMobileMenu}
+    >
+      <h3>☰</h3>
+    </button>
+  );
+}
+
+// function SearchToggle() {
+//   const { open } = useAside();
+//   return (
+//     <button className="search-toggle reset" onClick={() => open('search')}>
+//       <SearchIcon />
+//     </button>
+//   );
+// }
+
 function CartToggle({ cart }) {
   const { open } = useAside();
 
@@ -288,7 +377,9 @@ function CartToggle({ cart }) {
       aria-label="Open Cart"
     >
       <Suspense fallback={<CartIcon />}>
-        <Await resolve={cart}>{() => <CartIcon />}</Await>
+        <Await resolve={cart}>
+          {() => <CartIcon />}
+        </Await>
       </Suspense>
     </button>
   );
