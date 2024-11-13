@@ -241,7 +241,7 @@ export function HeaderMenu({ menu, viewport }) {
     };
   }, []);
 
-  const renderMenuItems = (items) =>
+  const renderMenuItems = (items = []) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
         <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>

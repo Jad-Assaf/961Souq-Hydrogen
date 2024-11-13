@@ -79,32 +79,27 @@ export async function loader(args) {
 /**
  * Load data necessary for rendering content above the fold.
  */
+const processMenuItems = (items) => {
+  return items.map((item) => ({
+    ...item,
+    items: item.items ? processMenuItems(item.items) : [],
+  }));
+};
+
 async function loadCriticalData({ context }) {
   const { storefront } = context;
+  const header = await storefront.query(HEADER_QUERY, {
+    variables: { headerMenuHandle: 'new-main-menu' },
+  });
 
-  const processMenuItems = (items) => {
-    return items.map((item) => {
-      if (item.items?.length) {
-        item.items = processMenuItems(item.items); // Process nested items recursively
-      }
-      return item;
-    });
-  };
-
-  const [header] = await Promise.all([
-    storefront.query(HEADER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: { headerMenuHandle: 'new-main-menu' },
-    }),
-  ]);
-
-  // Ensure the menu is deeply processed
+  // Process nested menus
   if (header?.menu?.items) {
     header.menu.items = processMenuItems(header.menu.items);
   }
 
   return { header };
 }
+
 
 /**
  * Load data for rendering content below the fold.
