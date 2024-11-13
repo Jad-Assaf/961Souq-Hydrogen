@@ -33,6 +33,11 @@ const GET_MENU_QUERY = `#graphql
             id
             title
             url
+            items {
+              id
+              title
+              url
+            }
           }
         }
       }
@@ -107,7 +112,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
                 {/* Check for deeper nested submenus */}
                 {subItem.items?.length > 0 && (
-                  <div className="sub-submenu">{renderMenuItems(subItem.items)}</div>
+                  <div className="sub-submenu">
+                    {subItem.items.map((subSubItem) => (
+                      <div key={subSubItem.id} className="submenu-item">
+                        <NavLink to={new URL(subSubItem.url).pathname}>{subSubItem.title}</NavLink>
+
+                        {/* Check for even deeper nested submenus */}
+                        {subSubItem.items?.length > 0 && (
+                          <div className="sub-submenu">{renderMenuItems(subSubItem.items)}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}

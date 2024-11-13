@@ -768,6 +768,7 @@ button.reset:hover:not(:has(> *)) {
   opacity: 1;
 }
 
+
 /* Nested Submenu */
 .submenu .menu-item {
   padding: 5px;
