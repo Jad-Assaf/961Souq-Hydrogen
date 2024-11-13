@@ -6,8 +6,8 @@ import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 
 export async function loader({ context }) {
-  const menuHandle = 'your-menu-handle'; // Replace with your menu handle
-  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+  const menuHandle = 'new-main-menu'; // Replace with your menu handle
+  const { menu } = await context.storefront.query(GETT_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
 
@@ -18,7 +18,7 @@ export async function loader({ context }) {
   return { menu };
 }
 
-const GET_MENU_QUERY = `#graphql
+const GETT_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
     menu(handle: $handle) {
       items {
@@ -33,6 +33,11 @@ const GET_MENU_QUERY = `#graphql
             id
             title
             url
+            items {
+              id
+              title
+              url
+            }
           }
         }
       }
