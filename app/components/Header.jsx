@@ -254,13 +254,13 @@ export function HeaderMenu({ menu, viewport }) {
     };
   }, []);
 
-  const renderMenuItems = (items = []) =>
+  const renderMenuItems = (items = [], level = 1) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
         <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
         {item.items?.length > 0 && (
-          <div className="submenu">
-            {renderMenuItems(item.items)}
+          <div className={`submenu submenu-level-${level}`}>
+            {renderMenuItems(item.items, level + 1)}
           </div>
         )}
       </div>
