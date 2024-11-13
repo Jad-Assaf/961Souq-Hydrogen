@@ -490,7 +490,7 @@ button.reset:hover:not(:has(> *)) {
 .header-menu-desktop>.menu-item-level-1 {
   color: #fff;
   position: static;
-  padding: 15px 5px;
+  padding: 15px;
 }
 
 /* Header Top Section */
