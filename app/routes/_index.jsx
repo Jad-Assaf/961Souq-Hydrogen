@@ -159,6 +159,11 @@ export const GET_MENU_QUERY = `#graphql
           id
           title
           url
+          items {  // Nested items for the second level submenu
+            id
+            title
+            url
+          }
         }
       }
     }
