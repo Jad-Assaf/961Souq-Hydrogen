@@ -479,7 +479,7 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 /* Header Container */
-.header *::after {
+.header a::after {
   content: '';
   position: absolute;
   bottom: 4px;
@@ -492,7 +492,7 @@ button.reset:hover:not(:has(> *)) {
 
 }
 
-.header *:hover::after {
+.header a:hover::after {
   width: 100%;
 }
 
