@@ -244,23 +244,15 @@ export function HeaderMenu({ menu, viewport }) {
   const renderMenuItems = (items) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
+        {/* Top-level menu item */}
         <NavLink to={new URL(item.url).pathname}>
           {item.title}
         </NavLink>
+
+        {/* Render submenu if available */}
         {item.items?.length > 0 && (
           <div className="submenu">
-            {item.items.map((subItem) => (
-              <div key={subItem.id} className="submenu-item">
-                <NavLink to={new URL(subItem.url).pathname}>
-                  {subItem.title}
-                </NavLink>
-                {subItem.items?.length > 0 && (
-                  <div className="submenu">
-                    {renderMenuItems(subItem.items)} // Render third-level items directly
-                  </div>
-                )}
-              </div>
-            ))}
+            {renderMenuItems(item.items)} {/* Recursive call for submenus */}
           </div>
         )}
       </div>
