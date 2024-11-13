@@ -810,9 +810,9 @@ button.reset:hover:not(:has(> *)) {
   transition: width 0.3s ease; /* Smooth animation for width */
 }
 
-.menu-item-level-1:hover a::after,
-.menu-item-level-2:hover a::after,
-.menu-item-level-3:hover a::after {
+.menu-item-level-1:hover>a::after,
+.menu-item-level-2:hover>a::after,
+.menu-item-level-3:hover>a::after {
   width: 100%; /* Expands the underline on hover */
 }
 
