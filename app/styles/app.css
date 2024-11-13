@@ -489,6 +489,7 @@ button.reset:hover:not(:has(> *)) {
 
 .header-menu-desktop>.menu-item {
   color: #fff;
+  position: static;
 }
 
 /* Header Top Section */
@@ -707,7 +708,6 @@ button.reset:hover:not(:has(> *)) {
   color: black;
 }
 
-/* Header Menu for Desktop */
 .header-menu-desktop {
   display: none;
   gap: 1.5vw;
@@ -724,14 +724,10 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
-/* Menu Items */
 .menu-item {
   position: relative;
 }
 
-.menu-item:first {}
-
-/* Menu Links */
 .header-menu-desktop .nav-links a {
   color: #fff !important;
 }
@@ -746,23 +742,25 @@ button.reset:hover:not(:has(> *)) {
 
 /* Submenu */
 .submenu {
-  display: none; /* Hidden by default */
-  position: absolute; /* Position relative to the nearest positioned ancestor */
-  top: 100%; /* Position directly below the parent menu */
-  left: 0; /* Align to the left edge of the screen */
-  width: 100vw; /* Full viewport width */
-  background-color: white; /* Background for visibility */
-  z-index: 1000; /* Ensure it overlays other elements */
-  padding: 15px 0; /* Add vertical padding */
-  border-radius: 0; /* No border rounding */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Optional shadow for depth */
-  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth animation */
-  opacity: 0; /* Hidden state */
-  transform: translateY(-10px); /* Start slightly above */
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100vw;
+  background-color: white;
+  z-index: 1000;
+  padding: 15px 0;
+  border-radius: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 .menu-item:hover>.submenu {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Nested Submenu */
@@ -776,14 +774,12 @@ button.reset:hover:not(:has(> *)) {
   top: 0;
 }
 
-/* Header CTA Buttons (Search, Cart) */
 .header-ctas {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-/* CTA Icons Styling */
 .sign-in-link svg,
 .search-toggle svg,
 .cart-button svg {
