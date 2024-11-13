@@ -724,6 +724,7 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
+/* Menu item styling */
 .menu-item {
   position: relative;
 }
@@ -747,6 +748,7 @@ button.reset:hover:not(:has(> *)) {
   top: 100%;
   left: 0;
   width: 100vw;
+  /* Applies to first-level submenus */
   background-color: white;
   z-index: 1000;
   padding: 15px 0;
@@ -757,26 +759,58 @@ button.reset:hover:not(:has(> *)) {
   transform: translateY(-10px);
 }
 
+/* First-level submenu visibility */
 .menu-item:hover .submenu {
   display: flex;
   opacity: 1;
   transform: translateY(0);
 }
 
-.menu-item:hover>.submenu, .submenu-item:hover>.submenu {
+.menu-item:hover>.submenu,
+.submenu-item:hover>.submenu {
   display: block;
   opacity: 1;
 }
 
-/* Nested Submenu */
+/* Nested submenu styling */
 .submenu .menu-item {
   padding: 5px;
   color: #000 !important;
 }
 
+/* Nested submenu visibility */
+.submenu .menu-item:hover>.submenu {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Positioning nested submenus */
 .submenu .submenu {
   left: 100%;
+  /* Nested submenus appear to the right */
   top: 0;
+  width: auto;
+  /* Avoid overlapping screen width */
+  z-index: 1100;
+  /* Ensure proper stacking above parent submenu */
+}
+
+/* Transition and animation for nested submenus */
+.submenu .submenu {
+  display: none;
+  /* Initially hidden */
+  opacity: 0;
+  transform: translateX(-10px);
+  /* Slightly offset for transition */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.submenu .menu-item:hover>.submenu {
+  display: flex;
+  opacity: 1;
+  transform: translateX(0);
+  /* Reset transform */
 }
 
 .header-ctas {
