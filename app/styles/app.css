@@ -744,6 +744,7 @@ button.reset:hover:not(:has(> *)) {
 .submenu {
   display: none;
   justify-content: space-around;
+  flex-wrap: wrap;
   position: absolute;
   top: 100%;
   left: 0;
@@ -761,7 +762,7 @@ button.reset:hover:not(:has(> *)) {
 
 
 /* Specific styles for nested submenus (.submenu .submenu) */
-.submenu .submenu {
+.submenu .menu-item .submenu {
   position: relative;
   flex-direction: column;
   top: 0;
@@ -777,11 +778,8 @@ button.reset:hover:not(:has(> *)) {
 /* Styling for nested submenu links */
 .submenu .submenu a {
   color: #000;
-  /* Change link color */
   font-size: 0.9rem;
-  /* Adjust font size for nested menus */
   text-decoration: none;
-  padding: 5px 10px;
 }
 
 .submenu .submenu a:hover {
