@@ -222,7 +222,9 @@ export function HeaderMenu({ menu, viewport }) {
 
     const handleMouseEnter = (event) => {
       const submenu = event.currentTarget.querySelector('.submenu');
-      if (submenu) submenu.style.display = 'block';
+      if (submenu) submenu.style.display = 'flex';
+      if (submenu) submenu.style.opacity = '1';
+      if (submenu) submenu.style.justifyContent = 'space-evenly';
     };
 
     const handleMouseLeave = (event) => {
