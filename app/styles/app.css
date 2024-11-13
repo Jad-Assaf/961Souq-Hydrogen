@@ -479,23 +479,6 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 /* Header Container */
-.header a::after {
-  content: '';
-  position: absolute;
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 1px;
-  background-color: #f39c12;
-  transition: width 0.3s ease-in-out;
-
-}
-
-.header a:hover::after {
-  width: 100%;
-}
-
 .header {
   background: #fff;
   z-index: 5;
@@ -803,6 +786,23 @@ button.reset:hover:not(:has(> *)) {
   text-decoration: underline;
   background-color: #f0f0f0;
   /* Subtle hover background */
+}
+
+.submenu-level-1 a::after, .submenu-level-2 a::after, .menu-item-level-1 a::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background-color: #f39c12;
+  transition: width 0.3s ease-in-out;
+
+}
+
+.submenu-level-1 a:hover::after, .submenu-level-2 a:hover::after, .menu-item-level-1 a:hover::after {
+  width: 100%;
 }
 
 .header-ctas {
