@@ -757,8 +757,8 @@ button.reset:hover:not(:has(> *)) {
   transform: translateY(-10px);
 }
 
-.menu-item:hover>.submenu {
-  display: block;
+.menu-item:hover .submenu {
+  display: flex;
   opacity: 1;
   transform: translateY(0);
 }

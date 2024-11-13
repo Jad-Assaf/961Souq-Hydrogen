@@ -256,7 +256,7 @@ export function HeaderMenu({ menu, viewport }) {
                 </NavLink>
                 {subItem.items?.length > 0 && (
                   <div className="submenu">
-                    {renderMenuItems(subItem.items)} // Render third level items
+                    {renderMenuItems(subItem.items)} // Recursive call for third level items
                   </div>
                 )}
               </div>
@@ -265,7 +265,7 @@ export function HeaderMenu({ menu, viewport }) {
         )}
       </div>
     ));
-    
+
   return (
     <nav className={`header-menu-${viewport}`} role="navigation">
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
