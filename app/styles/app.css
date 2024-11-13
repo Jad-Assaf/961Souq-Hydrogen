@@ -768,16 +768,20 @@ button.reset:hover:not(:has(> *)) {
   opacity: 1;
 }
 
-
 /* Nested Submenu */
 .submenu .menu-item {
   padding: 5px;
   color: #000 !important;
 }
 
+.menu-item:hover>.submenu {
+  display: block;
+}
+
 .submenu .submenu {
   left: 100%;
   top: 0;
+  z-index: 20;
 }
 
 .header-ctas {

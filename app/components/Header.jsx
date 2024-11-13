@@ -311,22 +311,32 @@ export function HeaderMenu({ menu, viewport }) {
     };
   }, []);
 
-  const renderMenuItems = (items) =>
-    items.map((item) => (
+  const renderMenuItems = (items) => {
+    return items.map((item) => (
       <div key={item.id} className="menu-item">
-        {/* Top-level menu item */}
-        <NavLink to={new URL(item.url).pathname}>
-          {item.title}
-        </NavLink>
+        {/* Main menu link */}
+        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
 
-        {/* Render submenu if available */}
+        {/* Check for and render submenus */}
         {item.items?.length > 0 && (
           <div className="submenu">
-            {renderMenuItems(item.items)} {/* Recursive call for submenus */}
+            {item.items.map((subItem) => (
+              <div key={subItem.id} className="submenu-item">
+                <NavLink to={new URL(subItem.url).pathname}>{subItem.title}</NavLink>
+
+                {/* Recursive call for further nested submenus */}
+                {subItem.items?.length > 0 && (
+                  <div className="submenu">
+                    {renderMenuItems(subItem.items)}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
     ));
+  };
 
   return (
     <nav className={`header-menu-${viewport}`} role="navigation">
