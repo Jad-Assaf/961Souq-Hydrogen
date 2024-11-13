@@ -221,17 +221,25 @@ export function HeaderMenu({ menu, viewport }) {
     const menuItems = document.querySelectorAll('.menu-item');
 
     const handleMouseEnter = (event) => {
-      const submenu = event.currentTarget.querySelector('.submenu');
-      if (submenu) submenu.style.display = 'flex';
-      if (submenu) submenu.style.opacity = '1';
-      if (submenu) submenu.style.transform = 'translateX(0)';
+      const submenus = event.currentTarget.querySelectorAll('.submenu');
+
+      submenus.forEach((submenu) => {
+        submenu.style.display = 'flex'; // Ensure the submenu is visible
+        submenu.style.opacity = '1'; // Fade in
+        submenu.style.transform = 'translateX(0)'; // Reset animation offset
+      });
     };
 
     const handleMouseLeave = (event) => {
-      const submenu = event.currentTarget.querySelector('.submenu');
-      if (submenu) submenu.style.display = 'none';
-      if (submenu) submenu.style.transform = 'translateX(-10)';
+      const submenus = event.currentTarget.querySelectorAll('.submenu');
+
+      submenus.forEach((submenu) => {
+        submenu.style.display = 'none'; // Hide submenu
+        submenu.style.opacity = '0'; // Fade out
+        submenu.style.transform = 'translateX(-10px)'; // Offset animation
+      });
     };
+
 
     menuItems.forEach((item) => {
       item.addEventListener('mouseenter', handleMouseEnter);
