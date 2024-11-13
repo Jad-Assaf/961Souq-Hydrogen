@@ -774,31 +774,9 @@ button.reset:hover:not(:has(> *)) {
   color: #000 !important;
 }
 
-.menu-item:hover>.submenu {
-  display: block;
-  /* Show submenu on hover */
-}
-
-.submenu-items {
-  padding: 10px;
-}
-
-.submenu-item {
-  position: relative;
-}
-
-.sub-submenu {
-  position: absolute;
-  top: 0;
+.submenu .submenu {
   left: 100%;
-  /* Sub-submenu appears to the right of the parent submenu */
-  display: none;
-  /* Hidden by default */
-}
-
-.submenu-item:hover>.sub-submenu {
-  display: block;
-  /* Show sub-submenu on hover */
+  top: 0;
 }
 
 .header-ctas {

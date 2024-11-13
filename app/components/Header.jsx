@@ -5,6 +5,41 @@ import { Image } from '@shopify/hydrogen-react';
 import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 
+export async function loader({ context }) {
+  const menuHandle = 'your-menu-handle'; // Replace with your menu handle
+  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+    variables: { handle: menuHandle },
+  });
+
+  if (!menu) {
+    throw new Response('Menu not found', { status: 404 });
+  }
+
+  return { menu };
+}
+
+const GET_MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+          items {
+            id
+            title
+            url
+          }
+        }
+      }
+    }
+  }
+`;
+
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,6 +93,29 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     }
   }, [isMobileMenuOpen]);
 
+  const renderMenuItems = (items) =>
+    items.map((item) => (
+      <div key={item.id} className="menu-item">
+        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
+
+        {/* Render submenu if available */}
+        {item.items?.length > 0 && (
+          <div className="submenu">
+            {item.items.map((subItem) => (
+              <div key={subItem.id} className="submenu-item">
+                <NavLink to={new URL(subItem.url).pathname}>{subItem.title}</NavLink>
+
+                {/* Check for deeper nested submenus */}
+                {subItem.items?.length > 0 && (
+                  <div className="sub-submenu">{renderMenuItems(subItem.items)}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ));
+
   return (
     <>
       <header className="header">
@@ -99,7 +157,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   <div className="search-results-container">
                     <SearchResultsPredictive>
                       {({ items, total, term, state, closeSearch }) => {
-                        const { products /* , collections, pages, articles, queries */ } = items;
+                        const { products } = items;
 
                         if (state === 'loading' && term.current) {
                           return <div>Loading...</div>;
@@ -155,18 +213,14 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 </Await>
               </Suspense>
             </NavLink>
-            {/* <SearchToggle /> */}
             <CartToggle cart={cart} />
           </div>
         </div>
 
         <div className="header-bottom">
-          <HeaderMenu
-            menu={menu}
-            viewport="desktop"
-            primaryDomainUrl={header.shop.primaryDomain.url}
-            publicStoreDomain={publicStoreDomain}
-          />
+          <nav className="header-menu-desktop">
+            {renderMenuItems(menu.items)}
+          </nav>
         </div>
       </header>
 
@@ -244,27 +298,15 @@ export function HeaderMenu({ menu, viewport }) {
   const renderMenuItems = (items) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
-        {/* Render top-level menu item */}
-        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
+        {/* Top-level menu item */}
+        <NavLink to={new URL(item.url).pathname}>
+          {item.title}
+        </NavLink>
 
-        {/* Check if the item has a submenu */}
+        {/* Render submenu if available */}
         {item.items?.length > 0 && (
           <div className="submenu">
-            {/* Render the immediate submenu */}
-            <div className="submenu-items">
-              {item.items.map((subItem) => (
-                <div key={subItem.id} className="submenu-item">
-                  <NavLink to={new URL(subItem.url).pathname}>{subItem.title}</NavLink>
-
-                  {/* Check if the submenu item has a sub-submenu */}
-                  {subItem.items?.length > 0 && (
-                    <div className="sub-submenu">
-                      {renderMenuItems(subItem.items)}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            {renderMenuItems(item.items)} {/* Recursive call for submenus */}
           </div>
         )}
       </div>
@@ -275,7 +317,6 @@ export function HeaderMenu({ menu, viewport }) {
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
     </nav>
   );
-
 }
 
 function HeaderMenuMobileToggle({ toggleMobileMenu }) {
