@@ -753,7 +753,7 @@ button.reset:hover:not(:has(> *)) {
   padding: 15px 0;
   border-radius: 0;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: all 0.5s ease;
   opacity: 0;
   transform: translateY(-10px);
   color: #000;
@@ -769,8 +769,8 @@ button.reset:hover:not(:has(> *)) {
   box-shadow: none;
   border-radius: 20px;
   opacity: 0;
-  transform: translate(-10px);
-  transition: opacity .3s ease, transform .3s ease;
+  transform: translateY(-10px);
+  transition: all 0.5s ease;
   z-index: 2000;
 }
 

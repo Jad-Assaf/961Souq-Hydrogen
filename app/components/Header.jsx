@@ -226,7 +226,7 @@ export function HeaderMenu({ menu, viewport }) {
       submenus.forEach((submenu) => {
         submenu.style.display = 'flex'; // Ensure the submenu is visible
         submenu.style.opacity = '1'; // Fade in
-        submenu.style.transform = 'translateX(0)'; // Reset animation offset
+        submenu.style.transform = 'translateY(0)'; // Reset animation offset
       });
     };
 
@@ -236,7 +236,7 @@ export function HeaderMenu({ menu, viewport }) {
       submenus.forEach((submenu) => {
         submenu.style.display = 'none'; // Hide submenu
         submenu.style.opacity = '0'; // Fade out
-        submenu.style.transform = 'translateX(-10px)'; // Offset animation
+        submenu.style.transform = 'translateY(-10px)'; // Offset animation
       });
     };
 
