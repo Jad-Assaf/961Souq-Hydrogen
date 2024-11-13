@@ -791,36 +791,29 @@ button.reset:hover:not(:has(> *)) {
 .menu-item-level-1 a,
 .menu-item-level-2 a,
 .menu-item-level-3 a {
-  position: relative;
-  /* Required for ::after positioning */
-  display: inline-block;
-  /* Ensures proper layout */
-  padding-bottom: 5px;
-  /* Adds space for the underline */
+  position: relative; /* Required for ::after to position relative to the link */
+  display: inline-block; /* Ensures proper layout */
+  padding-bottom: 5px; /* Adds space for the underline effect */
+  text-decoration: none; /* Removes default underline */
 }
 
 .menu-item-level-1 a::after,
 .menu-item-level-2 a::after,
 .menu-item-level-3 a::after {
-  content: "";
+  content: ""; /* Adds the pseudo-element */
   position: absolute;
-  bottom: 0;
-  /* Aligns at the bottom of the link */
+  bottom: 0; /* Positions the pseudo-element at the bottom of the link */
   left: 0;
-  width: 0;
-  height: 2px;
-  background-color: #f39c12;
-  transition: width 0.3s ease;
-  /* Smooth underline effect */
-  z-index: 1;
-  /* Prevent overlapping issues */
+  width: 0; /* Initial width is 0 (hidden) */
+  height: 2px; /* Thickness of the underline */
+  background-color: #f39c12; /* Color of the underline */
+  transition: width 0.3s ease; /* Smooth animation for width */
 }
 
 .menu-item-level-1:hover a::after,
 .menu-item-level-2:hover a::after,
 .menu-item-level-3:hover a::after {
-  width: 100%;
-  /* Expands the underline on hover */
+  width: 100%; /* Expands the underline on hover */
 }
 
 .header-ctas {
