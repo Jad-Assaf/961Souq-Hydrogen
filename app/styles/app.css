@@ -479,6 +479,23 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 /* Header Container */
+.header *::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background-color: #f39c12;
+  transition: width 0.3s ease-in-out;
+
+}
+
+.header *:hover::after {
+  width: 100%;
+}
+
 .header {
   background: #fff;
   z-index: 5;
@@ -1108,7 +1125,7 @@ li.cart-line .product-price {
   }
 }
 
-input.search-bar:focus-visible{
+input.search-bar:focus-visible {
   outline: none;
 }
 

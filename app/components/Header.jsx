@@ -40,8 +40,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     }
   };
 
-  console.log("Menu Data:", menu);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
