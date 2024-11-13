@@ -737,7 +737,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .menu-item-level-1 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* Submenu */
@@ -779,13 +779,11 @@ button.reset:hover:not(:has(> *)) {
 .submenu-level-2 a {
   color: #000;
   font-size: 0.9rem;
-  text-decoration: none;
+  padding-bottom: 10px;
 }
 
-.submenu-level-2 a:hover {
-  text-decoration: underline;
-  background-color: #f0f0f0;
-  /* Subtle hover background */
+.menu-item-level-3 a {
+  padding-bottom: 5px;
 }
 
 .menu-item-level-1 a,
@@ -793,7 +791,6 @@ button.reset:hover:not(:has(> *)) {
 .menu-item-level-3 a {
   position: relative; /* Required for ::after to position relative to the link */
   display: inline-block; /* Ensures proper layout */
-  padding-bottom: 5px; /* Adds space for the underline effect */
   text-decoration: none; /* Removes default underline */
 }
 
