@@ -787,11 +787,11 @@ button.reset:hover:not(:has(> *)) {
 }
 .menu-item-level-2>a {
   font-weight: 600;
-  padding-bottom: 7px;
+  margin-bottom: 7px;
 }
 
 .menu-item-level-3>a {
-  padding-bottom: 3px;
+  margin-bottom: 3px;
 }
 
 .menu-item-level-1 a,
@@ -820,6 +820,17 @@ button.reset:hover:not(:has(> *)) {
 .menu-item-level-3:hover>a::after {
   width: 100%;
   /* Expands the underline on hover */
+}
+
+@media (max-width: 1400px) {
+  .header-menu-desktop>.menu-item-level-1{
+    padding: 15px 1vw;
+  }
+}
+@media (max-width: 1339px) {
+  .submenu-level-1{
+    top: 50%;
+  }
 }
 
 .header-ctas {
