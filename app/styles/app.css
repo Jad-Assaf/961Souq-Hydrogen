@@ -746,15 +746,19 @@ button.reset:hover:not(:has(> *)) {
 
 /* Submenu */
 .submenu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: white;
-  z-index: 1000;
-  width: max-content;
-  padding: 15px;
-  border-radius: 10px;
+  display: none; /* Hidden by default */
+  position: absolute; /* Position relative to the nearest positioned ancestor */
+  top: 100%; /* Position directly below the parent menu */
+  left: 0; /* Align to the left edge of the screen */
+  width: 100vw; /* Full viewport width */
+  background-color: white; /* Background for visibility */
+  z-index: 1000; /* Ensure it overlays other elements */
+  padding: 15px 0; /* Add vertical padding */
+  border-radius: 0; /* No border rounding */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Optional shadow for depth */
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth animation */
+  opacity: 0; /* Hidden state */
+  transform: translateY(-10px); /* Start slightly above */
 }
 
 .menu-item:hover>.submenu {
