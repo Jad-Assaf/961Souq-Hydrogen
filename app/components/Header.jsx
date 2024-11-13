@@ -248,11 +248,24 @@ export function HeaderMenu({ menu, viewport }) {
           {item.title}
         </NavLink>
         {item.items?.length > 0 && (
-          <div className="submenu">{renderMenuItems(item.items)}</div>
+          <div className="submenu">
+            {item.items.map((subItem) => (
+              <div key={subItem.id} className="submenu-item">
+                <NavLink to={new URL(subItem.url).pathname}>
+                  {subItem.title}
+                </NavLink>
+                {subItem.items?.length > 0 && (
+                  <div className="submenu">
+                    {renderMenuItems(subItem.items)} // Render third level items
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     ));
-
+    
   return (
     <nav className={`header-menu-${viewport}`} role="navigation">
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
