@@ -782,11 +782,12 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .menu-item-level-2>a {
-  padding-bottom: 10px;
+  font-weight: 600;
+  padding-bottom: 7px;
 }
 
 .menu-item-level-3>a {
-  padding-bottom: 5px;
+  padding-bottom: 3px;
 }
 
 .menu-item-level-1 a,
