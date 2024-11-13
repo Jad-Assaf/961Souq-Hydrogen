@@ -788,7 +788,7 @@ button.reset:hover:not(:has(> *)) {
   /* Subtle hover background */
 }
 
-.submenu-level-1 a::after, .submenu-level-2 a::after, .menu-item-level-1 a::after {
+a::after {
   content: '';
   position: absolute;
   bottom: 4px;
@@ -801,7 +801,7 @@ button.reset:hover:not(:has(> *)) {
 
 }
 
-.submenu-level-1 a:hover::after, .submenu-level-2 a:hover::after, .menu-item-level-1 a:hover::after {
+a:hover::after {
   width: 100%;
 }
 
