@@ -490,6 +490,7 @@ button.reset:hover:not(:has(> *)) {
 .header-menu-desktop>.menu-item {
   color: #fff;
   position: static;
+  padding: 15px 5px;
 }
 
 /* Header Top Section */
@@ -710,7 +711,7 @@ button.reset:hover:not(:has(> *)) {
 
 .header-menu-desktop {
   display: none;
-  gap: 1.5vw;
+  gap: 1vw;
   margin: auto;
 
   @media (min-width: 45em) {
@@ -719,7 +720,6 @@ button.reset:hover:not(:has(> *)) {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    padding: 15px 0;
     max-width: 1500px;
   }
 }
@@ -761,6 +761,11 @@ button.reset:hover:not(:has(> *)) {
   display: flex;
   opacity: 1;
   transform: translateY(0);
+}
+
+.menu-item:hover>.submenu, .submenu-item:hover>.submenu {
+  display: block;
+  opacity: 1;
 }
 
 /* Nested Submenu */
