@@ -743,6 +743,7 @@ button.reset:hover:not(:has(> *)) {
 /* Submenu */
 .submenu {
   display: none;
+  justify-content: space-around;
   position: absolute;
   top: 100%;
   left: 0;
@@ -755,14 +756,9 @@ button.reset:hover:not(:has(> *)) {
   transition: opacity 0.3s ease, transform 0.3s ease;
   opacity: 0;
   transform: translateY(-10px);
+  color: #000;
 }
 
-.menu-item:hover>.submenu,
-.submenu-item:hover>.submenu {
-  display: flex;
-  opacity: 1;
-  transform: translateY(0);
-}
 
 /* Specific styles for nested submenus (.submenu .submenu) */
 .submenu .submenu {
@@ -780,8 +776,8 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Display nested submenu on hover */
-.submenu .menu-item:hover>.submenu {
-  display: block;
+.menu-item:hover .submenu {
+  display: flex;
   opacity: 1;
   transform: translateX(0);
   /* Reset the offset for smooth animation */
