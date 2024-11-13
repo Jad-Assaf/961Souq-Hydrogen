@@ -763,15 +763,13 @@ button.reset:hover:not(:has(> *)) {
 /* Specific styles for nested submenus (.submenu .submenu) */
 .submenu .submenu {
   position: relative;
+  top: 0;
   width: max-content;
-  background-color: #f9f9f9;
-  padding: 10px;
-  border: 1px solid #ddd;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   border-radius: 20px;
   opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translate(-10px);
+  transition: opacity .3s ease, transform .3s ease;
   z-index: 2000;
 }
 
@@ -785,7 +783,7 @@ button.reset:hover:not(:has(> *)) {
 
 /* Styling for nested submenu links */
 .submenu .submenu a {
-  color: #333;
+  color: #000;
   /* Change link color */
   font-size: 0.9rem;
   /* Adjust font size for nested menus */
