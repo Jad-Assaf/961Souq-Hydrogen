@@ -724,7 +724,7 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
-.menu-item {
+.menu-item-level-1 {
   position: relative;
 }
 
@@ -732,11 +732,11 @@ button.reset:hover:not(:has(> *)) {
   color: #fff !important;
 }
 
-.menu-item a {
+.menu-item-level-1 a {
   text-decoration: none;
 }
 
-.menu-item a:hover {
+.menu-item-level-1 a:hover {
   text-decoration: underline;
 }
 

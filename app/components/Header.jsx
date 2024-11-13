@@ -218,7 +218,7 @@ export function HeaderMenu({ menu, viewport }) {
   const { close } = useAside();
 
   useEffect(() => {
-    const menuItems = document.querySelectorAll('.menu-item');
+    const menuItems = document.querySelectorAll('.menu-item-level-1');
 
     const handleMouseEnter = (event) => {
       const submenus = event.currentTarget.querySelectorAll('.submenu');
