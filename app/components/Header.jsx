@@ -75,6 +75,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     }
   };
 
+  console.log(menu);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
@@ -306,32 +308,20 @@ export function HeaderMenu({ menu, viewport }) {
     };
   }, []);
 
-  const renderMenuItems = (items) => {
-    return items.map((item) => (
-      <div key={item.id} className="menu-item">
-        {/* Main menu link */}
-        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
-
-        {/* Check for and render submenus */}
-        {item.items?.length > 0 && (
-          <div className="submenu">
-            {item.items.map((subItem) => (
-              <div key={subItem.id} className="submenu-item">
-                <NavLink to={new URL(subItem.url).pathname}>{subItem.title}</NavLink>
-
-                {/* Recursive call for further nested submenus */}
-                {subItem.items?.length > 0 && (
-                  <div className="submenu">
-                    {renderMenuItems(subItem.items)}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    ));
-  };
+  const renderMenuItems = (items) =>
+    items.map((item) => {
+      console.log('Rendering item:', item);
+      return (
+        <div key={item.id} className="menu-item">
+          <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
+          {item.items?.length > 0 && (
+            <div className="submenu">
+              {renderMenuItems(item.items)}
+            </div>
+          )}
+        </div>
+      );
+    });
 
   return (
     <nav className={`header-menu-${viewport}`} role="navigation">
