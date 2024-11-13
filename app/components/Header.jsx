@@ -40,8 +40,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     }
   };
 
-  console.log(menu);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
@@ -246,15 +244,13 @@ export function HeaderMenu({ menu, viewport }) {
   const renderMenuItems = (items) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
-        {/* Render top-level menu item */}
-        <NavLink to={new URL(item.url).pathname}>
-          {item.title}
-        </NavLink>
+        {/* Render the menu item */}
+        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
 
-        {/* Render submenu if available */}
+        {/* Render the submenu, if available */}
         {item.items?.length > 0 && (
-          <div className="submenu">
-            {renderMenuItems(item.items)} {/* Recursive call for submenus */}
+          <div className="submenu-container">
+            <div className="submenu">{renderMenuItems(item.items)}</div>
           </div>
         )}
       </div>
@@ -265,6 +261,7 @@ export function HeaderMenu({ menu, viewport }) {
       {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
     </nav>
   );
+
 }
 
 function HeaderMenuMobileToggle({ toggleMobileMenu }) {

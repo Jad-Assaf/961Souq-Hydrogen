@@ -779,6 +779,10 @@ button.reset:hover:not(:has(> *)) {
   top: 0;
 }
 
+.menu-item:hover>.submenu-container>.submenu {
+  display: block;
+}
+
 .header-ctas {
   display: flex;
   align-items: center;
