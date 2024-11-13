@@ -40,6 +40,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     }
   };
 
+  console.log(menu);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
@@ -227,8 +229,6 @@ export function HeaderMenu({ menu, viewport }) {
       const submenu = event.currentTarget.querySelector('.submenu');
       if (submenu) submenu.style.display = 'none';
     };
-
-    console.log(menu);
 
     menuItems.forEach((item) => {
       item.addEventListener('mouseenter', handleMouseEnter);
