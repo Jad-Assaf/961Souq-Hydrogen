@@ -244,13 +244,27 @@ export function HeaderMenu({ menu, viewport }) {
   const renderMenuItems = (items) =>
     items.map((item) => (
       <div key={item.id} className="menu-item">
-        {/* Render the menu item */}
+        {/* Render top-level menu item */}
         <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
 
-        {/* Render the submenu, if available */}
+        {/* Check if the item has a submenu */}
         {item.items?.length > 0 && (
-          <div className="submenu-container">
-            <div className="submenu">{renderMenuItems(item.items)}</div>
+          <div className="submenu">
+            {/* Render the immediate submenu */}
+            <div className="submenu-items">
+              {item.items.map((subItem) => (
+                <div key={subItem.id} className="submenu-item">
+                  <NavLink to={new URL(subItem.url).pathname}>{subItem.title}</NavLink>
+
+                  {/* Check if the submenu item has a sub-submenu */}
+                  {subItem.items?.length > 0 && (
+                    <div className="sub-submenu">
+                      {renderMenuItems(subItem.items)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
