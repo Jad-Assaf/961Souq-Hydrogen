@@ -743,15 +743,16 @@ button.reset:hover:not(:has(> *)) {
 /* Submenu */
 .submenu-level-1 {
   display: none;
-  justify-content: space-around;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  row-gap: 30px;
   position: absolute;
   top: 100%;
   left: 0;
   width: 100vw;
   background-color: white;
   z-index: 1000;
-  padding: 15px 0;
+  padding: 30px 50px;
   border-radius: 0;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   transition: all 0.5s ease;
@@ -781,6 +782,9 @@ button.reset:hover:not(:has(> *)) {
   font-size: 0.9rem;
 }
 
+.menu-item-level-2 {
+  min-width: 15%;
+}
 .menu-item-level-2>a {
   font-weight: 600;
   padding-bottom: 7px;
