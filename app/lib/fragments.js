@@ -174,7 +174,19 @@ const MENU_FRAGMENT = `#graphql
   fragment ChildMenuItem on MenuItem {
     ...MenuItem
     items {
-      ...ChildMenuItem
+      id
+      title
+      url
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+        }
+      }
     }
   }
   fragment ParentMenuItem on MenuItem {
@@ -191,28 +203,21 @@ const MENU_FRAGMENT = `#graphql
   }
 `;
 
+
 export const HEADER_QUERY = `#graphql
-  fragment MenuItem on MenuItem {
-  id
-  resourceId
-  tags
-  title
-  type
-  url
-  }
-  fragment ChildMenuItem on MenuItem {
-    ...MenuItem
-  }
-  fragment ParentMenuItem on MenuItem {
-    ...MenuItem
-    items {
-      ...ChildMenuItem
-    }
-  }
-  fragment Menu on Menu {
+  fragment Shop on Shop {
     id
-    items {
-      ...ParentMenuItem
+    name
+    description
+    primaryDomain {
+      url
+    }
+    brand {
+      logo {
+        image {
+          url
+        }
+      }
     }
   }
   query Header(
@@ -221,19 +226,7 @@ export const HEADER_QUERY = `#graphql
     $language: LanguageCode
   ) @inContext(language: $language, country: $country) {
     shop {
-      id
-      name
-      description
-      primaryDomain {
-        url
-      }
-      brand {
-        logo {
-          image {
-            url
-          }
-        }
-      }
+      ...Shop
     }
     menu(handle: $headerMenuHandle) {
       ...Menu
