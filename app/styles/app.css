@@ -741,7 +741,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Submenu */
-.submenu {
+.submenu-level-1 {
   display: none;
   justify-content: space-around;
   flex-wrap: wrap;
@@ -762,7 +762,7 @@ button.reset:hover:not(:has(> *)) {
 
 
 /* Specific styles for nested submenus (.submenu .submenu) */
-.submenu .menu-item .submenu {
+.submenu-level-2 {
   position: relative;
   flex-direction: column;
   top: 0;
@@ -776,13 +776,13 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Styling for nested submenu links */
-.submenu .submenu a {
+.submenu-level-2 a {
   color: #000;
   font-size: 0.9rem;
   text-decoration: none;
 }
 
-.submenu .submenu a:hover {
+.submenu-level-2 a:hover {
   text-decoration: underline;
   background-color: #f0f0f0;
   /* Subtle hover background */

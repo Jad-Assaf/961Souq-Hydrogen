@@ -256,7 +256,7 @@ export function HeaderMenu({ menu, viewport }) {
 
   const renderMenuItems = (items = [], level = 1) =>
     items.map((item) => (
-      <div key={item.id} className="menu-item">
+      <div key={item.id} className={`menu-item-level-${level}`}>
         <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
         {item.items?.length > 0 && (
           <div className={`submenu submenu-level-${level}`}>
