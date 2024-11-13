@@ -224,11 +224,13 @@ export function HeaderMenu({ menu, viewport }) {
       const submenu = event.currentTarget.querySelector('.submenu');
       if (submenu) submenu.style.display = 'flex';
       if (submenu) submenu.style.opacity = '1';
+      if (submenu) submenu.style.transform = 'translateX(0)';
     };
 
     const handleMouseLeave = (event) => {
       const submenu = event.currentTarget.querySelector('.submenu');
       if (submenu) submenu.style.display = 'none';
+      if (submenu) submenu.style.transform = 'translateX(-10)';
     };
 
     menuItems.forEach((item) => {

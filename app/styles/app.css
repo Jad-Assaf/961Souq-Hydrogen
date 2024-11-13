@@ -763,6 +763,7 @@ button.reset:hover:not(:has(> *)) {
 /* Specific styles for nested submenus (.submenu .submenu) */
 .submenu .submenu {
   position: relative;
+  flex-direction: column;
   top: 0;
   width: max-content;
   box-shadow: none;
@@ -771,14 +772,6 @@ button.reset:hover:not(:has(> *)) {
   transform: translate(-10px);
   transition: opacity .3s ease, transform .3s ease;
   z-index: 2000;
-}
-
-/* Display nested submenu on hover */
-.menu-item:hover .submenu {
-  display: flex;
-  opacity: 1;
-  transform: translateX(0);
-  /* Reset the offset for smooth animation */
 }
 
 /* Styling for nested submenu links */
