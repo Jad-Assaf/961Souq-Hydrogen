@@ -173,6 +173,9 @@ const MENU_FRAGMENT = `#graphql
   }
   fragment ChildMenuItem on MenuItem {
     ...MenuItem
+    items {
+      ...ChildMenuItem
+    }
   }
   fragment ParentMenuItem on MenuItem {
     ...MenuItem

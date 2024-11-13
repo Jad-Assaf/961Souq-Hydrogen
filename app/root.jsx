@@ -81,12 +81,28 @@ export async function loader(args) {
  */
 async function loadCriticalData({ context }) {
   const { storefront } = context;
+
+  const processMenuItems = (items) => {
+    return items.map((item) => {
+      if (item.items?.length) {
+        item.items = processMenuItems(item.items); // Process nested items recursively
+      }
+      return item;
+    });
+  };
+
   const [header] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: { headerMenuHandle: 'new-main-menu' },
     }),
   ]);
+
+  // Ensure the menu is deeply processed
+  if (header?.menu?.items) {
+    header.menu.items = processMenuItems(header.menu.items);
+  }
+
   return { header };
 }
 

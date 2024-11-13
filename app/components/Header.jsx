@@ -5,58 +5,6 @@ import { Image } from '@shopify/hydrogen-react';
 import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 
-export async function loader({ context }) {
-  const menuHandle = 'new-main-menu'; // Replace with your menu handle
-  const { menu } = await context.storefront.query(GETT_MENU_QUERY, {
-    variables: { handle: menuHandle },
-  });
-
-  if (!menu) {
-    throw new Response('Menu not found', { status: 404 });
-  }
-
-  // Ensure nested menu items are fully processed
-  const processMenuItems = (items) => {
-    return items.map((item) => {
-      if (item.items?.length > 0) {
-        item.items = processMenuItems(item.items);
-      }
-      return item;
-    });
-  };
-
-  const processedMenu = { ...menu, items: processMenuItems(menu.items) };
-
-  return { menu: processedMenu };
-}
-
-const GETT_MENU_QUERY = `#graphql
-  query GetMenu($handle: String!) {
-    menu(handle: "new-main-menu") {
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-            items {
-              id
-              title
-              url
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -92,8 +40,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
     }
   };
 
-  console.log(menu);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
@@ -111,40 +57,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       document.documentElement.classList.remove('no-scroll');
     }
   }, [isMobileMenuOpen]);
-
-  const renderMenuItems = (items) =>
-    items.map((item) => (
-      <div key={item.id} className="menu-item">
-        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
-
-        {/* Render submenu if available */}
-        {item.items?.length > 0 && (
-          <div className="submenu">
-            {item.items.map((subItem) => (
-              <div key={subItem.id} className="submenu-item">
-                <NavLink to={new URL(subItem.url).pathname}>{subItem.title}</NavLink>
-
-                {/* Check for deeper nested submenus */}
-                {subItem.items?.length > 0 && (
-                  <div className="sub-submenu">
-                    {subItem.items.map((subSubItem) => (
-                      <div key={subSubItem.id} className="submenu-item">
-                        <NavLink to={new URL(subSubItem.url).pathname}>{subSubItem.title}</NavLink>
-
-                        {/* Check for even deeper nested submenus */}
-                        {subSubItem.items?.length > 0 && (
-                          <div className="sub-submenu">{renderMenuItems(subSubItem.items)}</div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    ));
 
   return (
     <>
@@ -187,7 +99,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   <div className="search-results-container">
                     <SearchResultsPredictive>
                       {({ items, total, term, state, closeSearch }) => {
-                        const { products } = items;
+                        const { products /* , collections, pages, articles, queries */ } = items;
 
                         if (state === 'loading' && term.current) {
                           return <div>Loading...</div>;
@@ -243,14 +155,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 </Await>
               </Suspense>
             </NavLink>
+            {/* <SearchToggle /> */}
             <CartToggle cart={cart} />
           </div>
         </div>
 
         <div className="header-bottom">
-          <nav className="header-menu-desktop">
-            {renderMenuItems(menu.items)}
-          </nav>
+          <HeaderMenu
+            menu={menu}
+            viewport="desktop"
+            primaryDomainUrl={header.shop.primaryDomain.url}
+            publicStoreDomain={publicStoreDomain}
+          />
         </div>
       </header>
 
@@ -326,19 +242,16 @@ export function HeaderMenu({ menu, viewport }) {
   }, []);
 
   const renderMenuItems = (items) =>
-    items.map((item) => {
-      console.log('Rendering item:', item);
-      return (
-        <div key={item.id} className="menu-item">
-          <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
-          {item.items?.length > 0 && (
-            <div className="submenu">
-              {renderMenuItems(item.items)}
-            </div>
-          )}
-        </div>
-      );
-    });
+    items.map((item) => (
+      <div key={item.id} className="menu-item">
+        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
+        {item.items?.length > 0 && (
+          <div className="submenu">
+            {renderMenuItems(item.items)}
+          </div>
+        )}
+      </div>
+    ));
 
   return (
     <nav className={`header-menu-${viewport}`} role="navigation">
