@@ -228,6 +228,8 @@ export function HeaderMenu({ menu, viewport }) {
       if (submenu) submenu.style.display = 'none';
     };
 
+    console.log(menu);
+
     menuItems.forEach((item) => {
       item.addEventListener('mouseenter', handleMouseEnter);
       item.addEventListener('mouseleave', handleMouseLeave);

@@ -724,7 +724,6 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
-/* Menu item styling */
 .menu-item {
   position: relative;
 }
@@ -741,14 +740,13 @@ button.reset:hover:not(:has(> *)) {
   text-decoration: underline;
 }
 
-/* Submenu: Applies to first level and nested submenus */
+/* Submenu */
 .submenu {
   display: none;
   position: absolute;
   top: 100%;
   left: 0;
-  width: auto;
-  /* Ensure nested submenus are not 100vw */
+  width: 100vw;
   background-color: white;
   z-index: 1000;
   padding: 15px 0;
@@ -759,51 +757,26 @@ button.reset:hover:not(:has(> *)) {
   transform: translateY(-10px);
 }
 
-/* Show first-level submenu */
-.menu-item:hover>.submenu {
-  display: block;
+.menu-item:hover .submenu {
+  display: flex;
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Nested submenu styling */
+.menu-item:hover>.submenu, .submenu-item:hover>.submenu {
+  display: block;
+  opacity: 1;
+}
+
+/* Nested Submenu */
 .submenu .menu-item {
-  position: relative;
-  /* Important for nested submenu positioning */
   padding: 5px;
   color: #000 !important;
 }
 
-/* Show nested submenus */
-.submenu .menu-item:hover>.submenu {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Position nested submenus to the right */
 .submenu .submenu {
   left: 100%;
-  /* Position next to parent submenu */
   top: 0;
-  width: auto;
-  /* Avoid conflicting with parent width */
-  z-index: 1100;
-  /* Higher stacking for nested submenus */
-  transform: translateX(-10px);
-  /* Offset for transition effect */
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  opacity: 0;
-  display: none;
-  /* Initially hidden */
-}
-
-/* Display and position nested submenus on hover */
-.submenu .menu-item:hover>.submenu {
-  display: block;
-  opacity: 1;
-  transform: translateX(0);
-  /* Reset transition offset */
 }
 
 .header-ctas {
