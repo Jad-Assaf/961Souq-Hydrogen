@@ -783,7 +783,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .menu-item-level-2 {
-  min-width: 20%;
+  min-width: 15%;
 }
 .menu-item-level-2>a {
   font-weight: 600;
