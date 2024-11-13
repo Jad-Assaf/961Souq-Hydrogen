@@ -33,11 +33,6 @@ const GET_MENU_QUERY = `#graphql
             id
             title
             url
-            items {
-              id
-              title
-              url
-            }
           }
         }
       }
