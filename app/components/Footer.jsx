@@ -6,9 +6,9 @@ export function Footer({ footerMenu }) {
     const shopMenu = footerMenu?.shopMenu?.items || [];
     const policiesMenu = footerMenu?.policiesMenu?.items || [];
 
-    console.log('Footer Menu Passed to Component:', footerMenu);
-    console.log('Shop Menu Items:', shopMenu);
-    console.log('Policies Menu Items:', policiesMenu);
+    console.log('Footer Menu Passed to Component:', footerMenu); // This should log the full footerMenu object
+    console.log('Shop Menu Items:', shopMenu); // Check if this logs the shop items
+    console.log('Policies Menu Items:', policiesMenu); // Check if this logs the policies items
 
     return (
         <footer className="footer">
