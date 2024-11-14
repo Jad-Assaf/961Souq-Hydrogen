@@ -106,22 +106,32 @@ async function loadCriticalData({ context }) {
  * Load data for rendering content below the fold.
  */
 function loadDeferredData({ context }) {
-  const { storefront, customerAccount, cart } = context;
+  const { storefront, cart } = context;
 
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: { footerMenuHandle: 'footer' },
-    })
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
+  const FOOTER_QUERY = `
+        query getFooterMenu($footerHandle: String!) {
+            footerMenu: menu(handle: $footerHandle) {
+                items {
+                    id
+                    title
+                    url
+                    items {
+                        id
+                        title
+                        url
+                    }
+                }
+            }
+        }
+    `;
+
+  const variables = { footerHandle: "footer" };
+
+  const { data } = await storefront.query(FOOTER_QUERY, { variables });
 
   return {
     cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    footerMenu: data.footerMenu || { items: [] },
   };
 }
 
@@ -132,6 +142,8 @@ export function Layout({ children }) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();  // Use useNavigation hook
+  const { footerMenu } = useRouteLoaderData("root");
+
 
   // Manage NProgress on route transitions
   useEffect(() => {
@@ -162,7 +174,7 @@ export function Layout({ children }) {
         ) : (
           children
         )}
-        <Footer />
+        <Footer footerMenu={footerMenu} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

@@ -1,18 +1,11 @@
 import React from "react";
+import { Link } from "@shopify/hydrogen";
 import "../styles/Footer.css";
 
-export function Footer() {
-    // Fetch both menus using `useShopQuery`
-    const { data } = useShopQuery({
-        query: FOOTER_MENUS_QUERY,
-        variables: {
-            shopHandle: "new-main-menu", // Handle for the "Shop" menu
-            policiesHandle: "Footer-Menu1", // Handle for the "Policies" menu
-        },
-    });
-
-    const shopMenu = data?.shopMenu?.items || [];
-    const policiesMenu = data?.policiesMenu?.items || [];
+export function Footer({ footerMenu }) {
+    // Divide footerMenu into "Shop" and "Policies" dynamically
+    const shopMenu = footerMenu.items?.find((item) => item.title === "Shop")?.items || [];
+    const policiesMenu = footerMenu.items?.find((item) => item.title === "Policies")?.items || [];
 
     return (
         <footer className="footer">
@@ -24,7 +17,7 @@ export function Footer() {
                         <ul>
                             {shopMenu.map((item) => (
                                 <li key={item.id}>
-                                    <a href={item.url}>{item.title}</a>
+                                    <Link to={new URL(item.url).pathname}>{item.title}</Link>
                                 </li>
                             ))}
                         </ul>
@@ -36,7 +29,7 @@ export function Footer() {
                         <ul>
                             {policiesMenu.map((item) => (
                                 <li key={item.id}>
-                                    <a href={item.url}>{item.title}</a>
+                                    <Link to={new URL(item.url).pathname}>{item.title}</Link>
                                 </li>
                             ))}
                         </ul>
@@ -86,22 +79,3 @@ export function Footer() {
         </footer>
     );
 }
-
-const FOOTER_MENUS_QUERY = `#graphql
-    query FooterMenus($shopHandle: String!, $policiesHandle: String!) {
-        shopMenu: menu(handle: $shopHandle) {
-            items {
-                id
-                title
-                url
-            }
-        }
-        policiesMenu: menu(handle: $policiesHandle) {
-            items {
-                id
-                title
-                url
-            }
-        }
-    }
-`;
