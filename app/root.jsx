@@ -20,6 +20,7 @@ import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
 import NProgress from 'nprogress';  // Import NProgress
 import 'nprogress/nprogress.css';  // Import NProgress styles
+import { Footer } from './components/Footer';
 
 // Configure NProgress (Optional: Disable spinner)
 NProgress.configure({ showSpinner: true });
@@ -106,21 +107,40 @@ async function loadCriticalData({ context }) {
  */
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
+  const SHOP_MENU_HANDLE = "shop";
+  const POLICIES_MENU_HANDLE = "policies";
 
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: { footerMenuHandle: 'footer' },
-    })
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
+  const query = `
+    query getMenus($shopHandle: String!, $policiesHandle: String!) {
+      shopMenu: menu(handle: $shopHandle) {
+        items {
+          id
+          title
+          url
+        }
+      }
+      policiesMenu: menu(handle: $policiesHandle) {
+        items {
+          id
+          title
+          url
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    shopHandle: 'new-main-menu',
+    policiesHandle: 'Footer-Menu1',
+  };
+
+  const { data } = await context.storefront.query(query, { variables });
 
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    shopMenu: data.shopMenu,
+    policiesMenu: data.policiesMenu,
   };
 }
 
@@ -163,6 +183,7 @@ export function Layout({ children }) {
         )}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
+        <Footer />
       </body>
     </html>
   );
