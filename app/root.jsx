@@ -9,7 +9,7 @@ import {
   useRouteLoaderData,
   ScrollRestoration,
   isRouteErrorResponse,
-  useNavigation,  // Added useNavigation for route tracking
+  useNavigation,
 } from '@remix-run/react';
 import favicon from '~/assets/favicon.svg';
 import resetStyles from '~/styles/reset.css?url';
@@ -18,17 +18,13 @@ import tailwindCss from './styles/tailwind.css?url';
 import { PageLayout } from '~/components/PageLayout';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
-import NProgress from 'nprogress';  // Import NProgress
-import 'nprogress/nprogress.css';  // Import NProgress styles
-import { Footer } from './components/Footer';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+import { Footer } from '~/components/Footer';
 
-// Configure NProgress (Optional: Disable spinner)
+// Configure NProgress
 NProgress.configure({ showSpinner: true });
 
-/**
- * This is important to avoid re-fetching root queries on sub-navigations
- * @type {ShouldRevalidateFunction}
- */
 export const shouldRevalidate = ({
   formMethod,
   currentUrl,
@@ -51,21 +47,14 @@ export function links() {
   ];
 }
 
-/**
- * @param {LoaderFunctionArgs} args
- */
-/**
- * Loader Function
- */
 export async function loader(args) {
+  const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  const deferredData = await loadDeferredData(args);
-
   const { storefront, env } = args.context;
 
   return defer({
-    ...criticalData,
     ...deferredData,
+    ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -81,83 +70,51 @@ export async function loader(args) {
   });
 }
 
-/**
- * Load Critical Data
- * Fetch data necessary for rendering above-the-fold content.
- */
+const processMenuItems = (items) => {
+  return items.map((item) => ({
+    ...item,
+    items: item.items ? processMenuItems(item.items) : [],
+  }));
+};
+
 async function loadCriticalData({ context }) {
   const { storefront } = context;
+  const header = await storefront.query(HEADER_QUERY, {
+    variables: { headerMenuHandle: 'new-main-menu' },
+  });
 
-  const query = `
-    query getHeaderMenu($headerHandle: String!) {
-      headerMenu: menu(handle: $headerHandle) {
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
-  `;
+  if (header?.menu?.items) {
+    header.menu.items = processMenuItems(header.menu.items);
+  }
 
-  const variables = {
-    headerHandle: "new-main-menu",
-  };
-
-  const { data } = await storefront.query(query, { variables });
-
-  // Process and return headerMenu
-  const headerMenu = data.headerMenu || { items: [] };
-  return { header: { menu: headerMenu } };
+  return { header };
 }
 
-/**
- * Load Deferred Data
- * Fetch data necessary for rendering below-the-fold content.
- */
-async function loadDeferredData({ context }) {
-  const { storefront, cart, customerAccount } = context;
+function loadDeferredData({ context }) {
+  const { storefront, customerAccount, cart } = context;
 
-  const query = `
-    query getFooterMenu($footerHandle: String!) {
-      footerMenu: menu(handle: $footerHandle) {
-        items {
-          id
-          title
-          url
-        }
-      }
-    }
-  `;
+  const footer = storefront
+    .query(FOOTER_QUERY, {
+      cache: storefront.CacheLong(),
+      variables: { footerMenuHandle: 'Footer-Menu1' },
+    })
+    .catch((error) => {
+      console.error(error);
+      return null;
+    });
 
-  const variables = {
-    footerHandle: "Footer-Menu1",
-  };
-
-  const { data } = await storefront.query(query, { variables });
-
-  // Process and return footerMenu, cart, and isLoggedIn status
-  const footerMenu = data.footerMenu || { items: [] };
   return {
-    footerMenu,
-    cart: await cart.get(),
-    isLoggedIn: await customerAccount.isLoggedIn(),
+    cart: cart.get(),
+    isLoggedIn: customerAccount.isLoggedIn(),
+    footer,
   };
 }
-/**
- * Layout component for the application.
- */
+
 export function Layout({ children }) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
-  const navigation = useNavigation();  // Use useNavigation hook
+  const navigation = useNavigation();
 
-  // Manage NProgress on route transitions
   useEffect(() => {
     if (navigation.state === 'loading') {
       NProgress.start();
@@ -186,7 +143,7 @@ export function Layout({ children }) {
         ) : (
           children
         )}
-        <Footer />
+        <Footer footerMenu={data.footer} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
@@ -194,16 +151,10 @@ export function Layout({ children }) {
   );
 }
 
-/**
- * Main app component rendering the current route.
- */
 export default function App() {
   return <Outlet />;
 }
 
-/**
- * Error boundary component for catching route errors.
- */
 export function ErrorBoundary() {
   const error = useRouteError();
   let errorMessage = 'Unknown error';
