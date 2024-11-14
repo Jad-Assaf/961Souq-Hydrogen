@@ -108,7 +108,7 @@ async function loadCriticalData({ context }) {
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
-  const footerData = await storefront
+  const footerData = storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
