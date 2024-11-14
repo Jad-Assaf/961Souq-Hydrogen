@@ -248,11 +248,6 @@ export const FOOTER_QUERY = `#graphql
         id
         title
         url
-        items {
-          id
-          title
-          url
-        }
       }
     }
     policiesMenu: menu(handle: $policiesMenuHandle) {
@@ -261,11 +256,6 @@ export const FOOTER_QUERY = `#graphql
         id
         title
         url
-        items {
-          id
-          title
-          url
-        }
       }
     }
   }

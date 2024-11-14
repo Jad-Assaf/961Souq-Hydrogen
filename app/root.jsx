@@ -111,22 +111,16 @@ function loadDeferredData({ context }) {
   return storefront
     .query(FOOTER_QUERY, {
       variables: {
-        shopMenuHandle: 'new-main-menu', // Replace with actual "Shop" menu handle
-        policiesMenuHandle: 'footer-menu', // Replace with actual "Policies" menu handle
+        shopMenuHandle: 'shop', // Replace with actual "Shop" menu handle
+        policiesMenuHandle: 'policies', // Replace with actual "Policies" menu handle
         country: context.storefront.i18n.country,
         language: context.storefront.i18n.language,
       },
     })
     .then((footerData) => {
-      // Process nested menu items
-      if (footerData?.shopMenu?.items) {
-        footerData.shopMenu.items = processMenuItems(footerData.shopMenu.items);
-      }
-      if (footerData?.policiesMenu?.items) {
-        footerData.policiesMenu.items = processMenuItems(footerData.policiesMenu.items);
-      }
+      console.log('Footer Query Raw Response:', JSON.stringify(footerData, null, 2));
 
-      console.log('Processed Footer Menu:', JSON.stringify(footerData, null, 2));
+      // Return unprocessed menu data since no nesting is required
       return {
         footer: footerData,
         cart: cart.get(),
