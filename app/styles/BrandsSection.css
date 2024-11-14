@@ -13,7 +13,7 @@
 .brand-grid {
     display: flex;
     gap: 1rem;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     flex-wrap: wrap;
 }
@@ -26,8 +26,8 @@
     border-radius: 20px;
     transition: transform .3s ease, box-shadow .3s ease;
     text-align: center;
-    width: 186px;
-    height: 84px;
+    width: 40%;
+    height: auto;
 }
 
 .brand-item:hover {
