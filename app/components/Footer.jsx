@@ -10,27 +10,32 @@ export function Footer({ footerMenu }) {
         <footer className="footer">
             <div className="container">
                 <div className="footer-sections">
-                    {/* Shop Menu */}
                     <div className="footer-column">
                         <h3>Shop</h3>
                         <ul>
-                            {shopMenu.map((item) => (
-                                <li key={item.id}>
-                                    <Link to={new URL(item.url).pathname}>{item.title}</Link>
-                                </li>
-                            ))}
+                            {shopMenu.length > 0 ? (
+                                shopMenu.map((item) => (
+                                    <li key={item.id}>
+                                        <Link to={new URL(item.url).pathname}>{item.title}</Link>
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No items found</li>
+                            )}
                         </ul>
                     </div>
-
-                    {/* Policies Menu */}
                     <div className="footer-column">
                         <h3>Policies</h3>
                         <ul>
-                            {policiesMenu.map((item) => (
-                                <li key={item.id}>
-                                    <Link to={new URL(item.url).pathname}>{item.title}</Link>
-                                </li>
-                            ))}
+                            {policiesMenu.length > 0 ? (
+                                policiesMenu.map((item) => (
+                                    <li key={item.id}>
+                                        <Link to={new URL(item.url).pathname}>{item.title}</Link>
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No items found</li>
+                            )}
                         </ul>
                     </div>
 

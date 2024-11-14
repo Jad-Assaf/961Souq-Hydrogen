@@ -243,11 +243,30 @@ export const FOOTER_QUERY = `#graphql
     $language: LanguageCode
   ) @inContext(language: $language, country: $country) {
     shopMenu: menu(handle: $shopMenuHandle) {
-      ...Menu
+      id
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+        }
+      }
     }
     policiesMenu: menu(handle: $policiesMenuHandle) {
-      ...Menu
+      id
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+        }
+      }
     }
   }
-  ${MENU_FRAGMENT}
 `;

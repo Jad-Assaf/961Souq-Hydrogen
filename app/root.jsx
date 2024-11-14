@@ -111,11 +111,15 @@ function loadDeferredData({ context }) {
   const footerData = storefront
     .query(FOOTER_QUERY, {
       variables: {
-        shopMenuHandle: 'new-main-menu', // Replace with the actual "Shop" menu handle
-        policiesMenuHandle: 'footer-menu', // Replace with the actual "Policies" menu handle
+        shopMenuHandle: 'shop', // Correct handle for "Shop" menu
+        policiesMenuHandle: 'policies', // Correct handle for "Policies" menu
         country: context.storefront.i18n.country,
         language: context.storefront.i18n.language,
       },
+    })
+    .then((response) => {
+      console.log('Footer Query Response:', response);
+      return response;
     })
     .catch((error) => {
       console.error('Footer menu fetch failed:', error);
@@ -146,11 +150,6 @@ export function Layout({ children }) {
     }
   }, [navigation.state]);
 
-  const footerMenu = {
-    shopMenu: data.footer?.shopMenu || { items: [] },
-    policiesMenu: data.footer?.policiesMenu || { items: [] },
-  };
-
   return (
     <html lang="en">
       <head>
@@ -171,7 +170,7 @@ export function Layout({ children }) {
         ) : (
           children
         )}
-        <Footer footerMenu={footerMenu} />
+        <Footer footerMenu={data.footer} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
