@@ -53,7 +53,7 @@ async function loadCriticalData({ context }) {
 }
 
 const brandsData = [
-  { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/en_mb-logo-01_1.png?v=1617792098", link: "/collections/apple" },
+  { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
   { name: "HP", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/hp.png?v=1648112715", link: "/collections/hp-products" },
   { name: "MSI", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/msi-logo.jpg?v=1712761894", link: "/collections/msi-products" },
   { name: "Marshall", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/marshall-logo.jpg?v=1683620097", link: "/collections/marshall-collection" },

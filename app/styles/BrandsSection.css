@@ -11,23 +11,23 @@
 }
 
 .brand-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    display: flex;
     gap: 1rem;
-    justify-items: center;
+    justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .brand-item {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    transition: transform .3s ease, box-shadow .3s ease;
     text-align: center;
+    width: 186px;
+    height: 84px;
 }
 
 .brand-item:hover {
@@ -36,6 +36,7 @@
 }
 
 .brand-item img {
-    max-width: 80%;
+    width: 186px;
     height: auto;
+    border-radius: 20px;
 }
