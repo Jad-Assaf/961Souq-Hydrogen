@@ -101,7 +101,6 @@ async function loadCriticalData({ context }) {
   return { header };
 }
 
-
 /**
  * Load data for rendering content below the fold.
  */
