@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from "@shopify/hydrogen";
 import "../styles/Footer.css";
+import { Link } from "@remix-run/react";
 
 export function Footer({ footerMenu }) {
     // Divide footerMenu into "Shop" and "Policies" dynamically
