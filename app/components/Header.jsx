@@ -220,7 +220,6 @@ export function HeaderMenu({ menu, viewport }) {
 
     const handleMouseEnter = (event) => {
       const submenus = event.currentTarget.querySelectorAll('.submenu');
-
       submenus.forEach((submenu) => {
         submenu.style.display = 'flex'; // Ensure the submenu is visible
         submenu.style.opacity = '1'; // Fade in
@@ -230,7 +229,6 @@ export function HeaderMenu({ menu, viewport }) {
 
     const handleMouseLeave = (event) => {
       const submenus = event.currentTarget.querySelectorAll('.submenu');
-
       submenus.forEach((submenu) => {
         submenu.style.display = 'none'; // Hide submenu
         submenu.style.opacity = '0'; // Fade out
@@ -238,34 +236,33 @@ export function HeaderMenu({ menu, viewport }) {
       });
     };
 
-    const handleLinkClick = (event) => {
-      const parentMenu = event.target.closest('.menu-item-level-1');
-      if (parentMenu) {
-        const submenus = parentMenu.querySelectorAll('.submenu');
+    const handleLinkClick = () => {
+      menuItems.forEach((item) => {
+        const submenus = item.querySelectorAll('.submenu');
         submenus.forEach((submenu) => {
           submenu.style.display = 'none';
           submenu.style.opacity = '0';
           submenu.style.transform = 'translateY(-10px)';
         });
-      }
+      });
     };
 
     menuItems.forEach((item) => {
       item.addEventListener('mouseenter', handleMouseEnter);
       item.addEventListener('mouseleave', handleMouseLeave);
+
+      const links = item.querySelectorAll('a'); // Ensure `links` is within `menuItems.forEach`
+      links.forEach((link) => {
+        link.addEventListener('click', handleLinkClick);
+      });
     });
 
-    const links = item.querySelectorAll('a');
-    links.forEach((link) => {
-      link.addEventListener('click', handleLinkClick);
-    });
-    
     return () => {
       menuItems.forEach((item) => {
         item.removeEventListener('mouseenter', handleMouseEnter);
         item.removeEventListener('mouseleave', handleMouseLeave);
 
-        const links = item.querySelectorAll('a');
+        const links = item.querySelectorAll('a'); // Clean up properly
         links.forEach((link) => {
           link.removeEventListener('click', handleLinkClick);
         });
