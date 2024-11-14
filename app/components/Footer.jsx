@@ -6,8 +6,9 @@ export function Footer({ footerMenu }) {
     const shopMenu = footerMenu?.shopMenu?.items || [];
     const policiesMenu = footerMenu?.policiesMenu?.items || [];
 
-    console.log('Shop Menu:', shopMenu);
-    console.log('Policies Menu:', policiesMenu);
+    console.log('Footer Menu Passed to Component:', footerMenu);
+    console.log('Shop Menu Items:', shopMenu);
+    console.log('Policies Menu Items:', policiesMenu);
 
     return (
         <footer className="footer">

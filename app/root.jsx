@@ -107,6 +107,8 @@ async function loadCriticalData({ context }) {
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
+  console.log('Starting FOOTER_QUERY execution...');
+
   return storefront
     .query(FOOTER_QUERY, {
       variables: {
@@ -117,9 +119,8 @@ function loadDeferredData({ context }) {
       },
     })
     .then((footerData) => {
-      console.log('Footer Query Raw Response:', JSON.stringify(footerData, null, 2));
+      console.log('FOOTER_QUERY Raw Response:', JSON.stringify(footerData, null, 2));
 
-      // Return unprocessed menu data since no nesting is required
       return {
         footer: footerData,
         cart: cart.get(),
@@ -127,7 +128,8 @@ function loadDeferredData({ context }) {
       };
     })
     .catch((error) => {
-      console.error('Footer menu fetch failed:', error);
+      console.error('FOOTER_QUERY failed:', error);
+
       return {
         footer: { shopMenu: { items: [] }, policiesMenu: { items: [] } },
         cart: cart.get(),
