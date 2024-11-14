@@ -1,56 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "@remix-run/react";
+import React from "react";
+import { useShopQuery, gql } from "@shopify/hydrogen";
 import "../styles/Footer.css";
 
 export function Footer() {
-    const [footerMenu, setFooterMenu] = useState(null);
+    // Fetch both menus using `useShopQuery`
+    const { data } = useShopQuery({
+        query: FOOTER_MENUS_QUERY,
+        variables: {
+            shopHandle: "new-main-menu", // Handle for the "Shop" menu
+            policiesHandle: "Footer-Menu1", // Handle for the "Policies" menu
+        },
+    });
 
-    useEffect(() => {
-        const fetchFooterMenu = async () => {
-            try {
-                const response = await fetch('/api/storefront/query', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-SDK-Version': '1.0.0',
-                    },
-                    body: JSON.stringify({
-                        query: `
-                          query getFooterMenu($footerHandle: String!) {
-                              footerMenu: menu(handle: $footerHandle) {
-                                  items {
-                                      id
-                                      title
-                                      url
-                                      items {
-                                          id
-                                          title
-                                          url
-                                      }
-                                  }
-                              }
-                          }
-                        `,
-                        variables: { footerHandle: "Footer-Menu1" },
-                    }),
-                });
-                const result = await response.json();
-                setFooterMenu(result.data.footerMenu);
-            } catch (error) {
-                console.error("Failed to fetch footer menu:", error);
-            }
-        };
-
-        fetchFooterMenu();
-    }, []);
-
-    if (!footerMenu) {
-        return <div>Loading...</div>;
-    }
-
-    // Divide footerMenu into "Shop" and "Policies" dynamically
-    const shopMenu = footerMenu.items.find((item) => item.title === "Shop")?.items || [];
-    const policiesMenu = footerMenu.items.find((item) => item.title === "Policies")?.items || [];
+    const shopMenu = data?.shopMenu?.items || [];
+    const policiesMenu = data?.policiesMenu?.items || [];
 
     return (
         <footer className="footer">
@@ -62,7 +25,7 @@ export function Footer() {
                         <ul>
                             {shopMenu.map((item) => (
                                 <li key={item.id}>
-                                    <Link to={new URL(item.url).pathname}>{item.title}</Link>
+                                    <a href={item.url}>{item.title}</a>
                                 </li>
                             ))}
                         </ul>
@@ -74,7 +37,7 @@ export function Footer() {
                         <ul>
                             {policiesMenu.map((item) => (
                                 <li key={item.id}>
-                                    <Link to={new URL(item.url).pathname}>{item.title}</Link>
+                                    <a href={item.url}>{item.title}</a>
                                 </li>
                             ))}
                         </ul>
@@ -124,3 +87,22 @@ export function Footer() {
         </footer>
     );
 }
+
+const FOOTER_MENUS_QUERY = gql`
+    query FooterMenus($shopHandle: String!, $policiesHandle: String!) {
+        shopMenu: menu(handle: $shopHandle) {
+            items {
+                id
+                title
+                url
+            }
+        }
+        policiesMenu: menu(handle: $policiesHandle) {
+            items {
+                id
+                title
+                url
+            }
+        }
+    }
+`;
