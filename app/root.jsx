@@ -104,37 +104,28 @@ async function loadCriticalData({ context }) {
 /**
  * Load data for rendering content below the fold.
  */
-function loadDeferredData({ context }) {
+async function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
-  console.log('Executing FOOTER_QUERY without country and language...');
-
-  return storefront
+  const footer = storefront
     .query(FOOTER_QUERY, {
+      cache: storefront.CacheLong(),
       variables: {
-        shopMenuHandle: 'new-main-menu', // Replace with actual "Shop" menu handle
-        policiesMenuHandle: 'footer-menu', // Replace with actual "Policies" menu handle
+        shopMenuHandle: 'new-main-menu', // Updated handle for Shop menu
+        policiesMenuHandle: 'footer-menu', // Updated handle for Policies menu
       },
     })
-    .then((footerData) => {
-      console.log('FOOTER_QUERY Response:', JSON.stringify(footerData, null, 2));
-
-      return {
-        footer: footerData,
-        cart: cart.get(),
-        isLoggedIn: customerAccount.isLoggedIn(),
-      };
-    })
     .catch((error) => {
-      console.error('FOOTER_QUERY Error:', error);
-      return {
-        footer: { shopMenu: { items: [] }, policiesMenu: { items: [] } },
-        cart: cart.get(),
-        isLoggedIn: customerAccount.isLoggedIn(),
-      };
+      console.error(error);
+      return null;
     });
-}
 
+  return {
+    cart: cart.get(),
+    isLoggedIn: customerAccount.isLoggedIn(),
+    footer,
+  };
+}
 
 /**
  * Layout component for the application.
@@ -169,11 +160,14 @@ export function Layout({ children }) {
             consent={data.consent}
           >
             <PageLayout {...data}>{children}</PageLayout>
+            <Footer footerMenu={data.footer} />
           </Analytics.Provider>
         ) : (
-          children
+          <>
+            {children}
+            <Footer footerMenu={null} />
+          </>
         )}
-        <Footer footerMenu={footerMenu} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
