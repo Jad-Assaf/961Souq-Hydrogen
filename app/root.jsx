@@ -108,12 +108,13 @@ async function loadCriticalData({ context }) {
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
-  // Fetch footer menu
-  const footer = storefront
+  const footerData = storefront
     .query(FOOTER_QUERY, {
       variables: {
-        shopMenuHandle: 'new-main-menu', // Replace with your actual footer menu handle
-        policiesMenuHandle: 'footer-menu', // Replace with your actual footer menu handle
+        shopMenuHandle: 'new-main-menu', // Replace with the actual "Shop" menu handle
+        policiesMenuHandle: 'footer-menu', // Replace with the actual "Policies" menu handle
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
       },
     })
     .catch((error) => {
@@ -124,7 +125,7 @@ function loadDeferredData({ context }) {
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    footer: footerData,
   };
 }
 
@@ -144,6 +145,11 @@ export function Layout({ children }) {
       NProgress.done();
     }
   }, [navigation.state]);
+
+  const footerMenu = {
+    shopMenu: data.footer?.shopMenu || { items: [] },
+    policiesMenu: data.footer?.policiesMenu || { items: [] },
+  };
 
   return (
     <html lang="en">
@@ -165,7 +171,7 @@ export function Layout({ children }) {
         ) : (
           children
         )}
-        <Footer footerMenu={data.footer} />
+        <Footer footerMenu={footerMenu} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
