@@ -111,8 +111,8 @@ function loadDeferredData({ context }) {
   const footerData = storefront
     .query(FOOTER_QUERY, {
       variables: {
-        shopMenuHandle: 'shop', // Correct handle for "Shop" menu
-        policiesMenuHandle: 'policies', // Correct handle for "Policies" menu
+        shopMenuHandle: 'new-main-menu', // Correct handle for "Shop" menu
+        policiesMenuHandle: 'footer-menu', // Correct handle for "Policies" menu
         country: context.storefront.i18n.country,
         language: context.storefront.i18n.language,
       },
