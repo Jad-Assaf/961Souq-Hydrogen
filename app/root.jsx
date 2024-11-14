@@ -110,8 +110,8 @@ function loadDeferredData({ context }) {
   return storefront
     .query(FOOTER_QUERY, {
       variables: {
-        shopMenuHandle: 'shop', // Replace with actual "Shop" menu handle
-        policiesMenuHandle: 'policies', // Replace with actual "Policies" menu handle
+        shopMenuHandle: 'new-main-menu', // Replace with actual "Shop" menu handle
+        policiesMenuHandle: 'footer-menu', // Replace with actual "Policies" menu handle
         country: context.storefront.i18n.country,
         language: context.storefront.i18n.language,
       },

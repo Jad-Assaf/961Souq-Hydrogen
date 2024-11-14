@@ -235,3 +235,28 @@ export const HEADER_QUERY = `#graphql
   ${MENU_FRAGMENT}
 `;
 
+export const FOOTER_QUERY = `#graphql
+  query Footer(
+    $shopMenuHandle: String!
+    $policiesMenuHandle: String!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(language: $language, country: $country) {
+    shopMenu: menu(handle: $shopMenuHandle) {
+      id
+      items {
+        id
+        title
+        url
+      }
+    }
+    policiesMenu: menu(handle: $policiesMenuHandle) {
+      id
+      items {
+        id
+        title
+        url
+      }
+    }
+  }
+`;
