@@ -1,6 +1,6 @@
 /* Footer Styles */
 .footer {
-    background-color: #f8f9fa;
+    background-color: #f8f9fa !important;
     /* Light gray background */
     padding: 2rem 1rem;
     color: #232323;

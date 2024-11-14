@@ -108,12 +108,12 @@ async function loadCriticalData({ context }) {
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
-  const footerData = storefront
+  const footerData = await storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
-        shopMenuHandle: 'new-main-menu', // Replace with your actual handle
-        policiesMenuHandle: 'footer-menu', // Replace with your actual handle
+        shopMenuHandle: 'new-main-menu', // Replace with actual handle
+        policiesMenuHandle: 'footer-menu', // Replace with actual handle
       },
     })
     .catch((error) => {
@@ -121,10 +121,11 @@ function loadDeferredData({ context }) {
       return null;
     });
 
+  console.log('Footer data:', footerData);
   return {
-    footer: footerData,
-    cart: cart.get(), // Retain cart information
-    isLoggedIn: customerAccount.isLoggedIn(), // Retain customer account status
+    footer: footerData || { shopMenu: { items: [] }, policiesMenu: { items: [] } },
+    cart: cart.get(),
+    isLoggedIn: customerAccount.isLoggedIn(),
   };
 }
 
@@ -149,6 +150,7 @@ export function Layout({ children }) {
     shop: data.footer?.shopMenu || { items: [] },
     policies: data.footer?.policiesMenu || { items: [] },
   };
+  console.log('Footer menu in Layout:', footerMenu);
 
   return (
     <html lang="en">

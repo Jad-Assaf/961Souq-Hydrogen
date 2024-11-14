@@ -4,8 +4,8 @@ import { Link } from "@remix-run/react";
 
 export function Footer({ footerMenu }) {
     // Divide footerMenu into "Shop" and "Policies" dynamically
-    const shopMenu = footerMenu.items?.find((item) => item.title === "Shop")?.items || [];
-    const policiesMenu = footerMenu.items?.find((item) => item.title === "Policies")?.items || [];
+    const shopMenu = footerMenu.shop.items || [];
+    const policiesMenu = footerMenu.policies.items || [];
 
     return (
         <footer className="footer">
