@@ -108,24 +108,23 @@ async function loadCriticalData({ context }) {
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
-  const footerData = storefront
+  // Fetch footer menu
+  const footer = storefront
     .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
       variables: {
-        shopMenuHandle: 'new-main-menu', // Replace with actual handle
-        policiesMenuHandle: 'footer-menu', // Replace with actual handle
+        shopMenuHandle: 'new-main-menu', // Replace with your actual footer menu handle
+        policiesMenuHandle: 'footer-menu', // Replace with your actual footer menu handle
       },
     })
     .catch((error) => {
-      console.error(error);
+      console.error('Footer menu fetch failed:', error);
       return null;
     });
 
-  console.log('Footer data:', footerData);
   return {
-    footer: footerData || { shopMenu: { items: [] }, policiesMenu: { items: [] } },
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
+    footer,
   };
 }
 
@@ -145,12 +144,6 @@ export function Layout({ children }) {
       NProgress.done();
     }
   }, [navigation.state]);
-
-  const footerMenu = {
-    shop: data.footer?.shopMenu || { items: [] },
-    policies: data.footer?.policiesMenu || { items: [] },
-  };
-  console.log('Footer menu in Layout:', footerMenu);
 
   return (
     <html lang="en">
@@ -172,7 +165,7 @@ export function Layout({ children }) {
         ) : (
           children
         )}
-        <Footer footerMenu={footerMenu} />
+        <Footer footerMenu={data.footer} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
