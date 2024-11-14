@@ -139,6 +139,27 @@
 li i svg{
     width: 20px;
     height: auto;
-    color: #2172af;
+    fill: #2172af;
 }
 
+.fa-map-marker-alt{
+    margin-top: 2px;
+}
+
+.copyright{
+    display: flex;
+    justify-content: space-around;
+    width: 100vw;
+    height: 80px;
+    background-color: #2172af;
+    color: #fff;
+}
+
+.copyright p{
+    font-size: 12px;
+}
+
+.copyright div{
+    display: flex;
+    justify-content: center;
+}
