@@ -8,6 +8,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import { Footer } from './Footer';
 
 /**
  * @param {PageLayoutProps}
@@ -18,6 +19,7 @@ export function PageLayout({
   header,
   isLoggedIn,
   publicStoreDomain,
+  footer, // Add footer as a prop
 }) {
   return (
     <Aside.Provider>
@@ -33,6 +35,7 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
+      <Footer footerMenu={footer} /> {/* Pass the footer data to Footer */}
     </Aside.Provider>
   );
 }

@@ -20,7 +20,6 @@ import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
 import NProgress from 'nprogress';  // Import NProgress
 import 'nprogress/nprogress.css';  // Import NProgress styles
-import { Footer } from './components/Footer';
 
 // Configure NProgress (Optional: Disable spinner)
 NProgress.configure({ showSpinner: true });
@@ -107,12 +106,13 @@ async function loadCriticalData({ context }) {
 async function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
+  // Fetch both the Shop menu and Policies menu
   const footer = await storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
-        shopMenuHandle: 'new-main-menu',
-        policiesMenuHandle: 'footer-menu',
+        shopMenuHandle: 'new-main-menu', // Handle for Shop menu
+        policiesMenuHandle: 'footer-menu', // Handle for Policies menu
       },
     })
     .catch((error) => {
@@ -120,23 +120,21 @@ async function loadDeferredData({ context }) {
       return null;
     });
 
-  console.log('Footer Data:', footer); // Log the fetched footer data
-
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    footer, // Return the fetched footer data
   };
 }
+
 /**
  * Layout component for the application.
  */
 export function Layout({ children }) {
   const nonce = useNonce();
-  const data = useRouteLoaderData('root');
+  const data = useRouteLoaderData('root'); // Assuming this includes footer data
   const navigation = useNavigation();  // Use useNavigation hook
 
-  // Manage NProgress on route transitions
   useEffect(() => {
     if (navigation.state === 'loading') {
       NProgress.start();
@@ -160,13 +158,19 @@ export function Layout({ children }) {
             shop={data.shop}
             consent={data.consent}
           >
-            <PageLayout {...data}>{children}</PageLayout>
-            <Footer footerMenu={data.footer} />
+            <PageLayout
+              {...data}
+              footerMenu={{
+                shopMenu: data.footer?.shopMenu || {}, // Ensure this is the correct structure
+                policiesMenu: data.footer?.policiesMenu || {}, // Ensure this is the correct structure
+              }}
+            >
+              {children}
+            </PageLayout>
           </Analytics.Provider>
         ) : (
           <>
             {children}
-            <Footer footerMenu={null} />
           </>
         )}
         <ScrollRestoration nonce={nonce} />
