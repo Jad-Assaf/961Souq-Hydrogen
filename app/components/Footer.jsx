@@ -1,13 +1,56 @@
-import React from "react";
-import { useLoaderData, Link } from "@remix-run/react";
-import '../styles/Footer.css'
+import React, { useEffect, useState } from "react";
+import { Link } from "@remix-run/react";
+import "../styles/Footer.css";
 
 export function Footer() {
-    const { footerMenu } = useLoaderData();
+    const [footerMenu, setFooterMenu] = useState(null);
+
+    useEffect(() => {
+        const fetchFooterMenu = async () => {
+            try {
+                const response = await fetch('/api/storefront/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-SDK-Version': '1.0.0',
+                    },
+                    body: JSON.stringify({
+                        query: `
+                          query getFooterMenu($footerHandle: String!) {
+                              footerMenu: menu(handle: $footerHandle) {
+                                  items {
+                                      id
+                                      title
+                                      url
+                                      items {
+                                          id
+                                          title
+                                          url
+                                      }
+                                  }
+                              }
+                          }
+                        `,
+                        variables: { footerHandle: "Footer-Menu1" },
+                    }),
+                });
+                const result = await response.json();
+                setFooterMenu(result.data.footerMenu);
+            } catch (error) {
+                console.error("Failed to fetch footer menu:", error);
+            }
+        };
+
+        fetchFooterMenu();
+    }, []);
+
+    if (!footerMenu) {
+        return <div>Loading...</div>;
+    }
 
     // Divide footerMenu into "Shop" and "Policies" dynamically
-    const shopMenu = footerMenu.items.filter((item) => item.title === "Shop")[0]?.items || [];
-    const policiesMenu = footerMenu.items.filter((item) => item.title === "Policies")[0]?.items || [];
+    const shopMenu = footerMenu.items.find((item) => item.title === "Shop")?.items || [];
+    const policiesMenu = footerMenu.items.find((item) => item.title === "Policies")?.items || [];
 
     return (
         <footer className="footer">
