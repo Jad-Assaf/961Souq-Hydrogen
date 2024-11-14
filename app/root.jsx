@@ -20,7 +20,6 @@ import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
 import NProgress from 'nprogress';  // Import NProgress
 import 'nprogress/nprogress.css';  // Import NProgress styles
-import { Footer } from './components/Footer';
 
 // Configure NProgress (Optional: Disable spinner)
 NProgress.configure({ showSpinner: true });
@@ -106,32 +105,22 @@ async function loadCriticalData({ context }) {
  * Load data for rendering content below the fold.
  */
 function loadDeferredData({ context }) {
-  const { storefront, cart } = context;
+  const { storefront, customerAccount, cart } = context;
 
-  const FOOTER_QUERY = `
-        query getFooterMenu($footerHandle: String!) {
-            footerMenu: menu(handle: $footerHandle) {
-                items {
-                    id
-                    title
-                    url
-                    items {
-                        id
-                        title
-                        url
-                    }
-                }
-            }
-        }
-    `;
-
-  const variables = { footerHandle: "footer" };
-
-  const { data } = storefront.query(FOOTER_QUERY, { variables });
+  const footer = storefront
+    .query(FOOTER_QUERY, {
+      cache: storefront.CacheLong(),
+      variables: { footerMenuHandle: 'footer' },
+    })
+    .catch((error) => {
+      console.error(error);
+      return null;
+    });
 
   return {
     cart: cart.get(),
-    footerMenu: data.footerMenu || { items: [] },
+    isLoggedIn: customerAccount.isLoggedIn(),
+    footer,
   };
 }
 
@@ -142,8 +131,6 @@ export function Layout({ children }) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();  // Use useNavigation hook
-  const { footerMenu } = useRouteLoaderData("root");
-
 
   // Manage NProgress on route transitions
   useEffect(() => {
@@ -174,7 +161,6 @@ export function Layout({ children }) {
         ) : (
           children
         )}
-        <Footer footerMenu={footerMenu} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
