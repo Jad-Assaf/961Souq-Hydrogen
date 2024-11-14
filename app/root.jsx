@@ -104,15 +104,13 @@ async function loadCriticalData({ context }) {
  * Load data for rendering content below the fold.
  */
 async function loadDeferredData({ context }) {
-  const { storefront, customerAccount, cart } = context;
-
-  // Fetch both the Shop menu and Policies menu
+  const { storefront } = context;
   const footer = await storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
-        shopMenuHandle: 'new-main-menu', // Handle for Shop menu
-        policiesMenuHandle: 'footer-menu', // Handle for Policies menu
+        shopMenuHandle: 'new-main-menu',
+        policiesMenuHandle: 'footer-menu',
       },
     })
     .catch((error) => {
@@ -120,9 +118,8 @@ async function loadDeferredData({ context }) {
       return null;
     });
 
+  console.log('Fetched Footer Data:', footer); // Debug log
   return {
-    cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
     footer, // Return the fetched footer data
   };
 }
