@@ -236,14 +236,30 @@ export const HEADER_QUERY = `#graphql
 `;
 
 export const FOOTER_QUERY = `#graphql
-  query Footer(
-    $country: CountryCode
-    $footerMenuHandle: String!
-    $language: LanguageCode
-  ) @inContext(language: $language, country: $country) {
-    menu(handle: $footerMenuHandle) {
-      ...Menu
+  query FooterQuery($shopMenuHandle: String!, $policiesMenuHandle: String!) {
+    shopMenu: menu(handle: $shopMenuHandle) {
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+        }
+      }
+    }
+    policiesMenu: menu(handle: $policiesMenuHandle) {
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+        }
+      }
     }
   }
-  ${MENU_FRAGMENT}
 `;
