@@ -505,7 +505,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Desktop Header Layout */
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .header-top {
     justify-content: space-between;
     /* Align logo to the left */
@@ -534,10 +534,10 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Mobile Header Layout */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .header-top {
     justify-content: center;
-    position: relative;
+    position: static;
     width: 95vw !important;
   }
 
@@ -714,7 +714,7 @@ button.reset:hover:not(:has(> *)) {
   gap: 1vw;
   margin: auto;
 
-  @media (min-width: 45em) {
+  @media (min-width: 1024px) {
     display: flex;
     gap: 0;
     flex-wrap: wrap;
@@ -1111,10 +1111,10 @@ li.cart-line .product-price {
 
   .header-search {
     position: absolute !important;
-    top: 70px !important;
+    top: 100px !important;
+    left: 0;
     width: 100vw !important;
     margin: auto !important;
-    left: -10px;
   }
 
   .main-search {
