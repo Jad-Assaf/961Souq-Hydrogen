@@ -107,19 +107,17 @@ async function loadCriticalData({ context }) {
 function loadDeferredData({ context }) {
   const { storefront, customerAccount, cart } = context;
 
-  console.log('Starting FOOTER_QUERY execution...');
+  console.log('Executing FOOTER_QUERY without country and language...');
 
   return storefront
     .query(FOOTER_QUERY, {
       variables: {
         shopMenuHandle: 'new-main-menu', // Replace with actual "Shop" menu handle
         policiesMenuHandle: 'footer-menu', // Replace with actual "Policies" menu handle
-        country: context.storefront.i18n.country,
-        language: context.storefront.i18n.language,
       },
     })
     .then((footerData) => {
-      console.log('FOOTER_QUERY Raw Response:', JSON.stringify(footerData, null, 2));
+      console.log('FOOTER_QUERY Response:', JSON.stringify(footerData, null, 2));
 
       return {
         footer: footerData,
@@ -128,8 +126,7 @@ function loadDeferredData({ context }) {
       };
     })
     .catch((error) => {
-      console.error('FOOTER_QUERY failed:', error);
-
+      console.error('FOOTER_QUERY Error:', error);
       return {
         footer: { shopMenu: { items: [] }, policiesMenu: { items: [] } },
         cart: cart.get(),
@@ -137,6 +134,7 @@ function loadDeferredData({ context }) {
       };
     });
 }
+
 
 /**
  * Layout component for the application.
@@ -175,7 +173,7 @@ export function Layout({ children }) {
         ) : (
           children
         )}
-        <Footer footerMenu={data.footer} />
+        <Footer footerMenu={footerMenu} />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
