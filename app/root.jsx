@@ -54,14 +54,18 @@ export function links() {
 /**
  * @param {LoaderFunctionArgs} args
  */
+/**
+ * Loader Function
+ */
 export async function loader(args) {
-  const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
+  const deferredData = await loadDeferredData(args);
+
   const { storefront, env } = args.context;
 
   return defer({
-    ...deferredData,
     ...criticalData,
+    ...deferredData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -78,48 +82,50 @@ export async function loader(args) {
 }
 
 /**
- * Load data necessary for rendering content above the fold.
+ * Load Critical Data
+ * Fetch data necessary for rendering above-the-fold content.
  */
-const processMenuItems = (items) => {
-  return items.map((item) => ({
-    ...item,
-    items: item.items ? processMenuItems(item.items) : [],
-  }));
-};
-
 async function loadCriticalData({ context }) {
   const { storefront } = context;
-  const header = await storefront.query(HEADER_QUERY, {
-    variables: { headerMenuHandle: 'new-main-menu' },
-  });
-
-  // Process nested menus
-  if (header?.menu?.items) {
-    header.menu.items = processMenuItems(header.menu.items);
-  }
-
-  return { header };
-}
-
-
-/**
- * Load data for rendering content below the fold.
- */
-function loadDeferredData({ context }) {
-  const { storefront, customerAccount, cart } = context;
-  const SHOP_MENU_HANDLE = "shop";
-  const POLICIES_MENU_HANDLE = "policies";
 
   const query = `
-    query getMenus($shopHandle: String!, $policiesHandle: String!) {
-      shopMenu: menu(handle: $shopHandle) {
+    query getHeaderMenu($headerHandle: String!) {
+      headerMenu: menu(handle: $headerHandle) {
         items {
           id
           title
           url
+          items {
+            id
+            title
+            url
+          }
         }
       }
-      policiesMenu: menu(handle: $policiesHandle) {
+    }
+  `;
+
+  const variables = {
+    headerHandle: "new-main-menu",
+  };
+
+  const { data } = await storefront.query(query, { variables });
+
+  // Process and return headerMenu
+  const headerMenu = data.headerMenu || { items: [] };
+  return { header: { menu: headerMenu } };
+}
+
+/**
+ * Load Deferred Data
+ * Fetch data necessary for rendering below-the-fold content.
+ */
+async function loadDeferredData({ context }) {
+  const { storefront, cart, customerAccount } = context;
+
+  const query = `
+    query getFooterMenu($footerHandle: String!) {
+      footerMenu: menu(handle: $footerHandle) {
         items {
           id
           title
@@ -130,20 +136,19 @@ function loadDeferredData({ context }) {
   `;
 
   const variables = {
-    shopHandle: 'new-main-menu',
-    policiesHandle: 'Footer-Menu1',
+    footerHandle: "Footer-Menu1",
   };
 
-  const { data } = await context.storefront.query(query, { variables });
+  const { data } = await storefront.query(query, { variables });
 
+  // Process and return footerMenu, cart, and isLoggedIn status
+  const footerMenu = data.footerMenu || { items: [] };
   return {
-    cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
-    shopMenu: data.shopMenu,
-    policiesMenu: data.policiesMenu,
+    footerMenu,
+    cart: await cart.get(),
+    isLoggedIn: await customerAccount.isLoggedIn(),
   };
 }
-
 /**
  * Layout component for the application.
  */
@@ -181,9 +186,9 @@ export function Layout({ children }) {
         ) : (
           children
         )}
+        <Footer />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
-        <Footer />
       </body>
     </html>
   );

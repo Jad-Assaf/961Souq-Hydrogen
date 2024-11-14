@@ -3,7 +3,11 @@ import { useLoaderData, Link } from "@remix-run/react";
 import '../styles/Footer.css'
 
 export function Footer() {
-    const { shopMenu, policiesMenu } = useLoaderData();
+    const { footerMenu } = useLoaderData();
+
+    // Divide footerMenu into "Shop" and "Policies" dynamically
+    const shopMenu = footerMenu.items.filter((item) => item.title === "Shop")[0]?.items || [];
+    const policiesMenu = footerMenu.items.filter((item) => item.title === "Policies")[0]?.items || [];
 
     return (
         <footer className="footer">
@@ -13,7 +17,7 @@ export function Footer() {
                     <div className="footer-column">
                         <h3>Shop</h3>
                         <ul>
-                            {shopMenu?.items.map((item) => (
+                            {shopMenu.map((item) => (
                                 <li key={item.id}>
                                     <Link to={new URL(item.url).pathname}>{item.title}</Link>
                                 </li>
@@ -25,7 +29,7 @@ export function Footer() {
                     <div className="footer-column">
                         <h3>Policies</h3>
                         <ul>
-                            {policiesMenu?.items.map((item) => (
+                            {policiesMenu.map((item) => (
                                 <li key={item.id}>
                                     <Link to={new URL(item.url).pathname}>{item.title}</Link>
                                 </li>
@@ -33,7 +37,7 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    {/* Customer Service */}
+                    {/* Customer Service Section */}
                     <div className="footer-column">
                         <h3>Customer Service</h3>
                         <ul className="contact-info">
@@ -54,7 +58,6 @@ export function Footer() {
                                 <a href="mailto:admin@961souq.com">admin@961souq.com</a>
                             </li>
                         </ul>
-                        {/* Social Media Links */}
                         <div className="social-links">
                             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
                                 <i className="fab fa-facebook-f"></i>
