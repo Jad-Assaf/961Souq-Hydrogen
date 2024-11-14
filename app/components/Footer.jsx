@@ -1,5 +1,4 @@
 import React from "react";
-import { useShopQuery, gql } from "@shopify/hydrogen";
 import "../styles/Footer.css";
 
 export function Footer() {
@@ -88,7 +87,7 @@ export function Footer() {
     );
 }
 
-const FOOTER_MENUS_QUERY = gql`
+const FOOTER_MENUS_QUERY = `#graphql
     query FooterMenus($shopHandle: String!, $policiesHandle: String!) {
         shopMenu: menu(handle: $shopHandle) {
             items {
