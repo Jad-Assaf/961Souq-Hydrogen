@@ -4,7 +4,6 @@
     /* Light gray background */
     padding: 2rem 1rem;
     color: #232323;
-    font-family: Arial, sans-serif;
 }
 
 .footer .container {
@@ -32,7 +31,7 @@
 .footer-column h3 {
     font-size: 1.2rem;
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     color: #000;
     /* Black for headings */
 }
@@ -51,17 +50,15 @@
 .footer-column ul li a {
     text-decoration: none;
     color: #232323;
-    /* Shopify-themed blue */
     transition: color 0.3s ease;
+    font-weight: 300;
 }
 
 .footer-column ul li a:hover {
-    color: #1a5b8a;
+    color: #2172af;
     text-decoration: underline;
-    /* Darker blue on hover */
 }
 
-/* Contact Information */
 .contact-info {
     font-size: 0.9rem;
     color: #232323;
