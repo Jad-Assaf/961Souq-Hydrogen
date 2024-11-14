@@ -127,7 +127,7 @@ function loadDeferredData({ context }) {
 
   const variables = { footerHandle: "footer" };
 
-  const { data } = await storefront.query(FOOTER_QUERY, { variables });
+  const { data } = storefront.query(FOOTER_QUERY, { variables });
 
   return {
     cart: cart.get(),
