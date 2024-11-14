@@ -6,6 +6,9 @@ export function Footer({ footerMenu }) {
     const shopMenu = footerMenu?.shopMenu?.items || [];
     const policiesMenu = footerMenu?.policiesMenu?.items || [];
 
+    console.log('Shop Menu:', shopMenu);
+    console.log('Policies Menu:', policiesMenu);
+
     return (
         <footer className="footer">
             <div className="container">
