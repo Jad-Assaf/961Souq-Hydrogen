@@ -34,13 +34,13 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     <div className="footer-column">
                         <h3>Customer Service</h3>
                         <ul className="contact-info">
-                            <li>
+                            {/* <li>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
                                     <path d="M168.3 499.2C116.1 435 0 279.4 0 192C0 85.96 85.96 0 192 0C298 0 384 85.96 384 192C384 279.4 267 435 215.7 499.2C203.4 514.5 180.6 514.5 168.3 499.2H168.3zM192 256C227.3 256 256 227.3 256 192C256 156.7 227.3 128 192 128C156.7 128 128 156.7 128 192C128 227.3 156.7 256 192 256z"></path>
                                 </svg>
                                 <a href="https://maps.app.goo.gl/wKNzrfSVrLm7srkB7">961souq - Zalka High
                                     Way Facing White Tower Hotel Ground Floor, Zalka, Lebanon.</a>
-                            </li>
+                            </li> */}
                             <li>
                                 <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="phone-alt" role="img" viewBox="0 0 512 512" class="svg-inline--fa fa-phone-alt fa-w-16 fa-7x"><path fill="currentColor" d="M497.39 361.8l-112-48a24 24 0 0 0-28 6.9l-49.6 60.6A370.66 370.66 0 0 1 130.6 204.11l60.6-49.6a23.94 23.94 0 0 0 6.9-28l-48-112A24.16 24.16 0 0 0 122.6.61l-104 24A24 24 0 0 0 0 48c0 256.5 207.9 464 464 464a24 24 0 0 0 23.4-18.6l24-104a24.29 24.29 0 0 0-14.01-27.6z" class=""></path></svg>
                                 <a href="tel:+9611888031">+961 1 888 031</a>
