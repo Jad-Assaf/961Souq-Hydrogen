@@ -238,37 +238,52 @@ export function HeaderMenu({ menu, viewport }) {
       });
     };
 
+    const handleLinkClick = () => {
+      menuItems.forEach((item) => {
+        const submenus = item.querySelectorAll('.submenu');
+        submenus.forEach((submenu) => {
+          submenu.style.display = 'none';
+          submenu.style.opacity = '0';
+          submenu.style.transform = 'translateY(-10px)';
+        });
+      });
+    };
 
     menuItems.forEach((item) => {
       item.addEventListener('mouseenter', handleMouseEnter);
       item.addEventListener('mouseleave', handleMouseLeave);
     });
 
-    return () => {
-      menuItems.forEach((item) => {
-        item.removeEventListener('mouseenter', handleMouseEnter);
-        item.removeEventListener('mouseleave', handleMouseLeave);
-      });
-    };
-  }, []);
+    const links = item.querySelectorAll('a');
+    links.forEach((link) => {
+      link.addEventListener('click', handleLinkClick);
+    });
 
-  const renderMenuItems = (items = [], level = 1) =>
-    items.map((item) => (
-      <div key={item.id} className={`menu-item-level-${level}`}>
-        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
-        {item.items?.length > 0 && (
-          <div className={`submenu submenu-level-${level}`}>
-            {renderMenuItems(item.items, level + 1)}
-          </div>
-        )}
-      </div>
-    ));
+  return () => {
+    menuItems.forEach((item) => {
+      item.removeEventListener('mouseenter', handleMouseEnter);
+      item.removeEventListener('mouseleave', handleMouseLeave);
+    });
+  };
+}, []);
 
-  return (
-    <nav className={`header-menu-${viewport}`} role="navigation">
-      {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
-    </nav>
-  );
+const renderMenuItems = (items = [], level = 1) =>
+  items.map((item) => (
+    <div key={item.id} className={`menu-item-level-${level}`}>
+      <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
+      {item.items?.length > 0 && (
+        <div className={`submenu submenu-level-${level}`}>
+          {renderMenuItems(item.items, level + 1)}
+        </div>
+      )}
+    </div>
+  ));
+
+return (
+  <nav className={`header-menu-${viewport}`} role="navigation">
+    {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
+  </nav>
+);
 }
 
 function HeaderMenuMobileToggle({ toggleMobileMenu }) {
