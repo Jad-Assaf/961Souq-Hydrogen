@@ -8,7 +8,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import { Footer } from './Footer';
+import Footer from './Footer';
 
 const shopMenuData = [
   { title: "Apple", link: "/apple" },
