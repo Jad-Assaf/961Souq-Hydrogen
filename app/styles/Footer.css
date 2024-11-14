@@ -121,17 +121,12 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .footer-sections {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
     .footer-column {
-        min-width: 100%;
+        min-width: 40% !important;
     }
 
     .social-links {
-        justify-content: center;
+        justify-content: start;
     }
 }
 
