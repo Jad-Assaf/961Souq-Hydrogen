@@ -855,6 +855,8 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
   width: 30px;
   height: 30px;
+  color: #2172af;
+  fill: #2172af;
 }
 
 .main-search {

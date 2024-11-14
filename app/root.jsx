@@ -103,24 +103,23 @@ async function loadCriticalData({ context }) {
 /**
  * Load data for rendering content below the fold.
  */
-async function loadDeferredData({ context }) {
-  const { storefront } = context;
-  const footer = await storefront
+function loadDeferredData({ context }) {
+  const { storefront, customerAccount, cart } = context;
+
+  const footer = storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: {
-        shopMenuHandle: 'new-main-menu',
-        policiesMenuHandle: 'footer-menu',
-      },
+      variables: { footerMenuHandle: 'footer' },
     })
     .catch((error) => {
-      console.error('Error fetching footer data:', error);
+      console.error(error);
       return null;
     });
 
-  console.log('Fetched Footer Data:', footer); // Debug log
   return {
-    footer, // Return the fetched footer data
+    cart: cart.get(),
+    isLoggedIn: customerAccount.isLoggedIn(),
+    footer,
   };
 }
 
@@ -129,9 +128,10 @@ async function loadDeferredData({ context }) {
  */
 export function Layout({ children }) {
   const nonce = useNonce();
-  const data = useRouteLoaderData('root'); // Assuming this includes footer data
+  const data = useRouteLoaderData('root');
   const navigation = useNavigation();  // Use useNavigation hook
 
+  // Manage NProgress on route transitions
   useEffect(() => {
     if (navigation.state === 'loading') {
       NProgress.start();
@@ -155,20 +155,10 @@ export function Layout({ children }) {
             shop={data.shop}
             consent={data.consent}
           >
-            <PageLayout
-              {...data}
-              footerMenu={{
-                shopMenu: data.footer?.shopMenu || {}, // Ensure this is the correct structure
-                policiesMenu: data.footer?.policiesMenu || {}, // Ensure this is the correct structure
-              }}
-            >
-              {children}
-            </PageLayout>
+            <PageLayout {...data}>{children}</PageLayout>
           </Analytics.Provider>
         ) : (
-          <>
-            {children}
-          </>
+          children
         )}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

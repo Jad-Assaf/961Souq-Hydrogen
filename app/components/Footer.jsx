@@ -1,49 +1,36 @@
 import React from "react";
-import "../styles/Footer.css";
-import { Link } from "@remix-run/react";
+import '../styles/Footer.css'
 
-export function Footer({ footerMenu }) {
-    const shopMenu = footerMenu?.shopMenu?.items || [];
-    const policiesMenu = footerMenu?.policiesMenu?.items || [];
-
-    console.log('Footer Menu Passed to Component:', footerMenu); // This should log the full footerMenu object
-    console.log('Shop Menu Items:', shopMenu); // Check if this logs the shop items
-    console.log('Policies Menu Items:', policiesMenu); // Check if this logs the policies items
-
+const Footer = ({ shopMenu, policiesMenu }) => {
     return (
         <footer className="footer">
             <div className="container">
                 <div className="footer-sections">
+                    {/* Shop Menu */}
                     <div className="footer-column">
                         <h3>Shop</h3>
                         <ul>
-                            {shopMenu.length > 0 ? (
-                                shopMenu.map((item) => (
-                                    <li key={item.id}>
-                                        <Link to={new URL(item.url).pathname}>{item.title}</Link>
-                                    </li>
-                                ))
-                            ) : (
-                                <li>No items found</li>
-                            )}
-                        </ul>
-                    </div>
-                    <div className="footer-column">
-                        <h3>Policies</h3>
-                        <ul>
-                            {policiesMenu.length > 0 ? (
-                                policiesMenu.map((item) => (
-                                    <li key={item.id}>
-                                        <Link to={new URL(item.url).pathname}>{item.title}</Link>
-                                    </li>
-                                ))
-                            ) : (
-                                <li>No items found</li>
-                            )}
+                            {shopMenu.map((item, index) => (
+                                <li key={index}>
+                                    <a href={item.link}>{item.title}</a>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
-                    {/* Customer Service Section */}
+                    {/* Policies Menu */}
+                    <div className="footer-column">
+                        <h3>Policies</h3>
+                        <ul>
+                            {policiesMenu.map((item, index) => (
+                                <li key={index}>
+                                    <a href={item.link}>{item.title}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Customer Service */}
                     <div className="footer-column">
                         <h3>Customer Service</h3>
                         <ul className="contact-info">
@@ -64,6 +51,7 @@ export function Footer({ footerMenu }) {
                                 <a href="mailto:admin@961souq.com">admin@961souq.com</a>
                             </li>
                         </ul>
+                        {/* Social Media Links */}
                         <div className="social-links">
                             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
                                 <i className="fab fa-facebook-f"></i>
@@ -86,4 +74,6 @@ export function Footer({ footerMenu }) {
             </div>
         </footer>
     );
-}
+};
+
+export default Footer;

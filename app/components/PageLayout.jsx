@@ -10,6 +10,32 @@ import {
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import { Footer } from './Footer';
 
+const shopMenuData = [
+  { title: "Apple", link: "/apple" },
+  { title: "Gaming", link: "/gaming" },
+  { title: "Laptops", link: "/laptops" },
+  { title: "Desktops", link: "/desktops" },
+  { title: "PC Parts", link: "/pc-parts" },
+  { title: "Networking", link: "/networking" },
+  { title: "Monitors", link: "/monitors" },
+  { title: "Mobiles", link: "/mobiles" },
+  { title: "Tablets", link: "/tablets" },
+  { title: "Audio", link: "/audio" },
+  { title: "Accessories", link: "/accessories" },
+  { title: "Fitness", link: "/fitness" },
+  { title: "Photography", link: "/photography" },
+  { title: "Home Appliances", link: "/home-appliances" },
+];
+
+const policiesMenuData = [
+  { title: "Exchange Policy", link: "/exchange-policy" },
+  { title: "Shipping Policy", link: "/shipping-policy" },
+  { title: "Privacy Policy", link: "/privacy-policy" },
+  { title: "Terms of Service", link: "/terms-of-service" },
+  { title: "Contact Us", link: "/contact-us" },
+];
+
+
 /**
  * @param {PageLayoutProps}
  */
@@ -35,7 +61,7 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
-      <Footer footerMenu={footer} /> {/* Pass the footer data to Footer */}
+      <Footer shopMenu={shopMenuData} policiesMenu={policiesMenuData} />
     </Aside.Provider>
   );
 }
