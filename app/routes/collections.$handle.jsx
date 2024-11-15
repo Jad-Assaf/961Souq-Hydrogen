@@ -293,7 +293,7 @@ export default function Collection() {
 
             {screenWidth >= 300 && (
               <button
-                className={`px-2 py-1 border rounded mr-2 ${numberInRow === 1 ? 'active' : ''}`}
+                className={`layout-buttons ${numberInRow === 1 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(1)}
               >
                 <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#2172af"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M8.625 2.5C8.625 3.12132 8.12132 3.625 7.5 3.625C6.87868 3.625 6.375 3.12132 6.375 2.5C6.375 1.87868 6.87868 1.375 7.5 1.375C8.12132 1.375 8.625 1.87868 8.625 2.5ZM8.625 7.5C8.625 8.12132 8.12132 8.625 7.5 8.625C6.87868 8.625 6.375 8.12132 6.375 7.5C6.375 6.87868 6.87868 6.375 7.5 6.375C8.12132 6.375 8.625 6.87868 8.625 7.5ZM7.5 13.625C8.12132 13.625 8.625 13.1213 8.625 12.5C8.625 11.8787 8.12132 11.375 7.5 11.375C6.87868 11.375 6.375 11.8787 6.375 12.5C6.375 13.1213 6.87868 13.625 7.5 13.625Z" fill="#2172af"></path> </g></svg>
@@ -301,7 +301,7 @@ export default function Collection() {
             )}
             {screenWidth >= 300 && (
               <button
-                className={`px-2 py-1 border rounded mr-2 ${numberInRow === 2 ? 'active' : ''}`}
+                className={`layout-buttons ${numberInRow === 2 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(2)}
               >
                 <svg fill="#2172af" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" stroke="#2172af"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M8.5,10a2,2,0,1,0,2,2A2,2,0,0,0,8.5,10Zm0,7a2,2,0,1,0,2,2A2,2,0,0,0,8.5,17Zm7-10a2,2,0,1,0-2-2A2,2,0,0,0,15.5,7Zm-7-4a2,2,0,1,0,2,2A2,2,0,0,0,8.5,3Zm7,14a2,2,0,1,0,2,2A2,2,0,0,0,15.5,17Zm0-7a2,2,0,1,0,2,2A2,2,0,0,0,15.5,10Z"></path></g></svg>
@@ -309,7 +309,7 @@ export default function Collection() {
             )}
             {screenWidth >= 550 && (
               <button
-                className={`px-2 py-1 border rounded mr-2 ${numberInRow === 3 ? 'active' : ''}`}
+                className={`layout-buttons ${numberInRow === 3 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(3)}
               >
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#2172af"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M7 5C7 6.10457 6.10457 7 5 7C3.89543 7 3 6.10457 3 5C3 3.89543 3.89543 3 5 3C6.10457 3 7 3.89543 7 5Z" fill="#2172af"></path> <path d="M14 5C14 6.10457 13.1046 7 12 7C10.8954 7 10 6.10457 10 5C10 3.89543 10.8954 3 12 3C13.1046 3 14 3.89543 14 5Z" fill="#2172af"></path> <path d="M19 7C20.1046 7 21 6.10457 21 5C21 3.89543 20.1046 3 19 3C17.8954 3 17 3.89543 17 5C17 6.10457 17.8954 7 19 7Z" fill="#2172af"></path> <path d="M7 12C7 13.1046 6.10457 14 5 14C3.89543 14 3 13.1046 3 12C3 10.8954 3.89543 10 5 10C6.10457 10 7 10.8954 7 12Z" fill="#2172af"></path> <path d="M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" fill="#2172af"></path> <path d="M21 12C21 13.1046 20.1046 14 19 14C17.8954 14 17 13.1046 17 12C17 10.8954 17.8954 10 19 10C20.1046 10 21 10.8954 21 12Z" fill="#2172af"></path> <path d="M5 21C6.10457 21 7 20.1046 7 19C7 17.8954 6.10457 17 5 17C3.89543 17 3 17.8954 3 19C3 20.1046 3.89543 21 5 21Z" fill="#2172af"></path> <path d="M14 19C14 20.1046 13.1046 21 12 21C10.8954 21 10 20.1046 10 19C10 17.8954 10.8954 17 12 17C13.1046 17 14 17.8954 14 19Z" fill="#2172af"></path> <path d="M19 21C20.1046 21 21 20.1046 21 19C21 17.8954 20.1046 17 19 17C17.8954 17 17 17.8954 17 19C17 20.1046 17.8954 21 19 21Z" fill="#2172af"></path> </g></svg>
@@ -317,7 +317,7 @@ export default function Collection() {
             )}
             {screenWidth >=1200 && (
               <button
-                className={`px-2 py-1 border rounded mr-2 ${numberInRow === 4 ? 'active' : ''}`}
+                className={`layout-buttons ${numberInRow === 4 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(4)}
               >
                 <img src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/4dots.svg?v=1731675116" />
@@ -328,7 +328,7 @@ export default function Collection() {
                 className={`px-2 py-1 border rounded ${numberInRow === 5 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(5)}
               >
-                <img src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/4dots.svg?v=1731675116" />
+                <img src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/5dots.svg?v=1731675116" />
               </button>
             )}
           </div>

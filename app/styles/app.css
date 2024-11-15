@@ -1394,6 +1394,17 @@ button#headlessui-menu-button-\:R3lab5\: {
   min-height: unset;
 }
 
+.layout-buttons{
+  border: 1px solid #e3e3e3;
+  padding: 5px 10px;
+  border-radius: 30px;
+}
+
+.layout-buttons img{
+  width: 40px;
+  margin: 4px 5px;
+}
+
 .product-item-collection {
   text-align: center;
   text-decoration: none;
