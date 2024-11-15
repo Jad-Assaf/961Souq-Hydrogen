@@ -268,6 +268,7 @@ export default function Collection() {
           <hr className='col-hr'></hr>
           {/* Layout controls */}
           <div className="layout-controls mb-4">
+            <span className="mr-2">Items per row:</span>
             <button
               className="px-2 py-1 border rounded mr-2"
               onClick={() => handleLayoutChange(3)}
@@ -289,13 +290,12 @@ export default function Collection() {
           </div>
 
           <PaginatedResourceSection
-            key={numberInRow} // Forces a remount when numberInRow changes
+            key={`products-grid-${numberInRow}`} // Forces re-render on change
             connection={{
               ...collection.products,
               nodes: sortedProducts,
             }}
-            resourcesClassName="products-grid"
-            style={{ gridTemplateColumns: `repeat(${numberInRow}, minmax(0, 1fr))` }} // Inline dynamic style
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`} // Dynamic class
           >
             {({ node: product, index }) => (
               <ProductItem
