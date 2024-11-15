@@ -9,7 +9,6 @@ import {
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
-import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
