@@ -1425,6 +1425,10 @@ button#headlessui-menu-button-\:R3lab5\: {
   padding: 2px;
 }
 
+.layout-buttons svg *{
+  fill: #4a4a4a;
+}
+
 button.layout-buttons.first-btn svg {
   width: 27px;
   height: 32px;
