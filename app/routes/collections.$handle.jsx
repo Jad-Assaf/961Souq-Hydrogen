@@ -277,7 +277,7 @@ export default function Collection() {
           </div>
         )}
 
-        <div className="flex-1">
+        <div className="flex-1 mt-[28px]">
           <DrawerFilter
             filters={collection.products.filters}
             appliedFilters={appliedFilters}
@@ -289,7 +289,7 @@ export default function Collection() {
 
           <hr className='col-hr'></hr>
           {/* Layout controls */}
-          <div className="layout-controls mb-4">
+          <div className="layout-controls">
 
             {screenWidth >= 300 && (
               <button
@@ -380,7 +380,7 @@ export function ProductItem({ product, index, numberInRow }) {
   // Calculate row and column delay
   const rowIndex = Math.floor(index / numberInRow);
   const columnIndex = index % numberInRow;
-  const delay = rowIndex * 0.3 + columnIndex * 0.1;
+  const delay = rowIndex * 0.1 + columnIndex * 0.05;
 
   useEffect(() => {
     if (isInView) {
@@ -406,7 +406,7 @@ export function ProductItem({ product, index, numberInRow }) {
           visible: {
             opacity: 1,
             x: 0,
-            transition: { delay, duration: 0.2 }
+            transition: { delay, duration: 0.1 }
           }
         }}
       >
@@ -415,7 +415,7 @@ export function ProductItem({ product, index, numberInRow }) {
             <motion.div
               initial={{ filter: 'blur(10px)', opacity: 0 }}
               animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.3 }}
               className='collection-product-image'
             >
               <Image
