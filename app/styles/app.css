@@ -1398,22 +1398,34 @@ button#headlessui-menu-button-\:R3lab5\: {
   min-height: unset;
 }
 
+.number-sort{
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .layout-controls{
   display: flex;
-  gap: 10px;
-  margin-left: 3%;
+  gap: 5px;
+  margin: 2% 3% 0;
 }
 
 .layout-buttons{
-  width: 45px;
+  width: 39px;
   display: flex;
   border: 1px solid grey;
   justify-content: center;
+  height: 30px;
+  align-items: center;
+}
+
+button.layout-buttons.first-btn svg{
+  height: 32px;
 }
 
 .layout-buttons img, .layout-buttons svg{
-  width: 40px;
-  margin: 0px -16px;
+  width: 35px;
+  margin: 0px -14.2px;
+  max-height: 28px;
 }
 
 .product-item-collection {

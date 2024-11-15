@@ -290,7 +290,7 @@ export default function Collection() {
           <hr className='col-hr'></hr>
           {/* Layout controls */}
           <div className="layout-controls">
-
+            <span className='number-sort'>View As:</span>
             {screenWidth >= 300 && (
               <button
                 className={`layout-buttons first-btn ${numberInRow === 1 ? 'active' : ''}`}
