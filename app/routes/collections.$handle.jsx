@@ -9,6 +9,7 @@ import {
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
@@ -431,11 +432,6 @@ export function ProductItem({ product, index, numberInRow }) {
           )}
           <div className='product-info-container'>
             <h4>{truncateText(product.title, 50)}</h4>
-            {window.innerWidth > 1500 && numberInRow === 1 && (
-              <p className="product-description">
-                {truncateText(product.description, 200)}
-              </p>
-            )}
             <div className="price-container">
               <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
                 <Money data={selectedVariant.price} />
