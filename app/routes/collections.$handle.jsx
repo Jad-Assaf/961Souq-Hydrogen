@@ -195,24 +195,24 @@ export default function Collection() {
   const navigate = useNavigate();
 
   useEffect(() => {
-  if (typeof window !== "undefined") {
-    const updateScreenWidth = () => {
-      const width = window.innerWidth;
-      setScreenWidth(width);
-      if (width >= 1500) setNumberInRow(5);
-      else if (width >= 1200) setNumberInRow(4);
-      else if (width >= 550) setNumberInRow(3);
-      else setNumberInRow(1);
-    };
+    if (typeof window !== "undefined") {
+      const updateScreenWidth = () => {
+        const width = window.innerWidth;
+        setScreenWidth(width);
+        if (width >= 1500) setNumberInRow(5);
+        else if (width >= 1200) setNumberInRow(4);
+        else if (width >= 550) setNumberInRow(3);
+        else setNumberInRow(1);
+      };
 
-    updateScreenWidth();
-    window.addEventListener("resize", updateScreenWidth);
+      updateScreenWidth();
+      window.addEventListener("resize", updateScreenWidth);
 
-    return () => {
-      window.removeEventListener("resize", updateScreenWidth);
-    };
-  }
-}, []);
+      return () => {
+        window.removeEventListener("resize", updateScreenWidth);
+      };
+    }
+  }, []);
 
   const handleLayoutChange = (number) => {
     setNumberInRow(number);
@@ -280,14 +280,7 @@ export default function Collection() {
         <div className="flex-1 mt-[28px]">
           <hr className='col-hr'></hr>
 
-          <DrawerFilter
-            filters={collection.products.filters}
-            appliedFilters={appliedFilters}
-            numberInRow={numberInRow}
-            onLayoutChange={handleLayoutChange}
-            productNumber={collection.products.nodes.length}
-            isDesktop={isDesktop}
-          >
+          <div className="view-container">
             <div className="layout-controls">
               <span className='number-sort'>View As:</span>
               {screenWidth >= 300 && (
@@ -341,7 +334,15 @@ export default function Collection() {
                 </button>
               )}
             </div>
-            </DrawerFilter>
+            <DrawerFilter
+              filters={collection.products.filters}
+              appliedFilters={appliedFilters}
+              numberInRow={numberInRow}
+              onLayoutChange={handleLayoutChange}
+              productNumber={collection.products.nodes.length}
+              isDesktop={isDesktop}
+            />
+          </div>
 
           <PaginatedResourceSection
             key={`products-grid-${numberInRow}`} // Forces re-render on change

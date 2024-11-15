@@ -1427,6 +1427,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 button.layout-buttons.first-btn svg *{
   fill: #4a4a4a;
+  stroke: transparent;
 }
 .layout-buttons svg *{
   stroke: #4a4a4a
