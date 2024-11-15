@@ -323,12 +323,12 @@ button {
     width: 100%;
   }
 
-  .product-form {
-    margin: -23px 0 0 165px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 250px;
+    .grid-cols-1 .product-form {
+    margin: -23px 0 0 165px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    max-width: 250px !important;
   }
 
 
@@ -1408,16 +1408,15 @@ button#headlessui-menu-button-\:R3lab5\: {
 .grid-cols-1 .product-info-container {
   width: 80%;
 }
-.grid-cols-1 .product-info-container .collection h4{
-  min-height: unset;
-  max-height: unset;
+
+@media (max-width: 1024px) {
+  .grid-cols-1 .product-info-container .collection h4 {
+    min-height: unset !important;
+    max-height: unset !important;
+  }
 }
 
-.grid-cols-1 .collection h4 {
-  min-height: unset;
-}
-
-.view-container{
+.view-container {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -1446,20 +1445,21 @@ button#headlessui-menu-button-\:R3lab5\: {
   padding: 2px;
 }
 
-button.layout-buttons.first-btn svg *{
+button.layout-buttons.first-btn svg * {
   fill: #4a4a4a;
   stroke: transparent;
 }
-.layout-buttons svg *{
+
+.layout-buttons svg * {
   stroke: #4a4a4a
 }
 
-button.layout-buttons.first-btn.active svg *{
+button.layout-buttons.first-btn.active svg * {
   fill: #fff;
   stroke: transparent;
 }
 
-.layout-buttons.active svg *{
+.layout-buttons.active svg * {
   stroke: #fff;
   box-shadow: inset rgb(0 0 0) 0px -25px 20px -20px;
 }
