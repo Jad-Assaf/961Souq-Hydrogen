@@ -1356,44 +1356,51 @@ button#headlessui-menu-button-\:R3lab5\: {
   grid-template-columns: repeat(5, 1fr);
 }
 
-/* Adjustments for Width Percentages */
+/* Product Item Sizing Based on Grid Columns */
 .grid-cols-1 .product-item-collection {
-  width: 100%;
+  min-width: 100%;
+  /* Takes full width for single column */
+  max-width: 100%;
 }
 
 .grid-cols-2 .product-item-collection {
-  width: 40%;
+  min-width: 40%;
+  /* 40% width for two columns */
+  max-width: 40%;
 }
 
 .grid-cols-3 .product-item-collection {
-  width: 30%;
+  min-width: 30%;
+  /* 30% width for three columns */
+  max-width: 30%;
 }
 
 .grid-cols-4 .product-item-collection {
-  width: 20%;
+  min-width: 20%;
+  /* 20% width for four columns */
+  max-width: 20%;
 }
 
 .grid-cols-5 .product-item-collection {
-  width: 15%;
+  min-width: 15%;
+  /* 15% width for five columns */
+  max-width: 15%;
 }
 
-/* Preserve Original Product Card Styles */
+/* Keep Product Card Height Consistent */
 .product-item img {
   height: auto;
   width: 100%;
 }
 
 .product-item-collection {
-  min-width: 200px;
-  /* Original min width */
-  max-width: 200px;
-  /* Original max width */
   min-height: 350px;
-  /* Keep consistent card height */
+  /* Consistent height for all product cards */
   text-align: center;
   text-decoration: none;
 }
 
+/* Collection Title Styling */
 .collection h4 {
   max-height: 80px;
   font-size: 13px;
@@ -1403,6 +1410,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   scroll-behavior: smooth;
 }
 
+/* Centering the Image Wrapper */
 .image-wrapper {
   display: flex;
   justify-content: center;
@@ -1414,9 +1422,17 @@ button#headlessui-menu-button-\:R3lab5\: {
   height: auto !important;
 }
 
+/* Responsive Adjustments */
 @media (max-width: 425px) {
+  .grid-cols-2 .product-item-collection {
+    min-width: 100%;
+    /* Switch to single column for mobile */
+    max-width: 100%;
+  }
+
   .product-item-collection {
     min-width: 170px;
+    /* Minimum width for smaller screens */
     max-width: 170px;
   }
 }
