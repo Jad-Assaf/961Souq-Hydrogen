@@ -1367,6 +1367,30 @@ button#headlessui-menu-button-\:R3lab5\: {
   height: auto;
 }
 
+.grid-cols-1 .product-item-collection{
+  min-height: unset;
+  text-align: left;
+}
+
+
+.collection-product-link{
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  align-items: start;
+}
+
+.collection-product-image{
+  filter: blur(0px);
+  opacity: 1;
+  width: 35%;
+  height: auto;
+}
+
+.product-info-container{
+  width: 80%;
+}
+
 .product-item-collection {
   min-height: 350px;
   /* Consistent height for all product cards */
