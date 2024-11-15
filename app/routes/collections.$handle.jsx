@@ -186,31 +186,33 @@ function loadDeferredData({ context }) {
 export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
   const [numberInRow, setNumberInRow] = useState(5);
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [screenWidth, setScreenWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1500
+  );
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const updateScreenWidth = () => {
-        setScreenWidth(window.innerWidth);
-        if (window.innerWidth > 1500) {
-          setNumberInRow(5);
-        } else if (window.innerWidth >= 1200 && window.innerWidth <= 1499) {
-          setNumberInRow(4);
-        } else if (window.innerWidth >= 550 && window.innerWidth <= 1199) {
-          setNumberInRow(3);
-        } else {
-          setNumberInRow(1);
-        }
-      };
-      updateScreenWidth();
-      window.addEventListener('resize', updateScreenWidth);
-      return () => window.removeEventListener('resize', updateScreenWidth);
-    }
-  }, []);
+  if (typeof window !== "undefined") {
+    const updateScreenWidth = () => {
+      const width = window.innerWidth;
+      setScreenWidth(width);
+      if (width >= 1500) setNumberInRow(5);
+      else if (width >= 1200) setNumberInRow(4);
+      else if (width >= 550) setNumberInRow(3);
+      else setNumberInRow(1);
+    };
+
+    updateScreenWidth();
+    window.addEventListener("resize", updateScreenWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateScreenWidth);
+    };
+  }
+}, []);
 
   const handleLayoutChange = (number) => {
     setNumberInRow(number);
