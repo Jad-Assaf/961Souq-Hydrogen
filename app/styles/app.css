@@ -198,6 +198,9 @@ button {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   padding: 10px;
   min-width: 175px;
+}
+
+.grid-cols-2.product-card, .grid-cols-3.product-card, .grid-cols-4.product-card, .grid-cols-5.product-card {
   min-height: 410px;
 }
 
@@ -229,7 +232,7 @@ button {
   font-size: 1rem;
   font-weight: 600;
   color: #ff5722;
-  min-height: 55px;
+  min-height: 40px;
 }
 
 .discountedPrice {
