@@ -292,7 +292,7 @@ export default function Collection() {
           <div className="layout-controls mb-4">
             <span className="mr-2">Items per row:</span>
 
-            {screenWidth >= 550 && (
+            {screenWidth >= 100 && screenWidth <= 549 || screenWidth >=550 && (
               <button
                 className={`px-2 py-1 border rounded mr-2 ${numberInRow === 1 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(1)}
@@ -300,7 +300,7 @@ export default function Collection() {
                 1
               </button>
             )}
-            {screenWidth >= 550 && (
+            {screenWidth >=100 && screenWidth <=549 || screenWidth >= 550 && (
               <button
                 className={`px-2 py-1 border rounded mr-2 ${numberInRow === 2 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(2)}
@@ -308,7 +308,7 @@ export default function Collection() {
                 2
               </button>
             )}
-            {screenWidth >= 1200 && (
+            {screenWidth >= 550 && (
               <button
                 className={`px-2 py-1 border rounded mr-2 ${numberInRow === 3 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(3)}
@@ -316,7 +316,7 @@ export default function Collection() {
                 3
               </button>
             )}
-            {screenWidth >= 1500 && (
+            {screenWidth >=1200 && (
               <button
                 className={`px-2 py-1 border rounded mr-2 ${numberInRow === 4 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(4)}
