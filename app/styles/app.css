@@ -203,6 +203,9 @@ button {
 .grid-cols-2 .product-card, .grid-cols-3 .product-card, .grid-cols-4 .product-card, .grid-cols-5 .product-card {
   min-height: 410px;
 }
+.grid-cols-2 .collection h4, .grid-cols-3 .collection h4, .grid-cols-4 .collection h4, .grid-cols-5 .collection h4 {
+  min-height: 80px;
+}
 
 .product-card:hover {
   transform: scale(1.02);
