@@ -397,16 +397,18 @@ export function ProductItem({ product, index, numberInRow }) {
               />
             </motion.div>
           )}
-          <h4>{truncateText(product.title, 50)}</h4>
-          <div className="price-container">
-            <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
-              <Money data={selectedVariant.price} />
-            </small>
-            {hasDiscount && selectedVariant.compareAtPrice && (
-              <small className="discountedPrice">
-                <Money data={selectedVariant.compareAtPrice} />
+          <div className='product-info-container'>
+            <h4>{truncateText(product.title, 50)}</h4>
+            <div className="price-container">
+              <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+                <Money data={selectedVariant.price} />
               </small>
-            )}
+              {hasDiscount && selectedVariant.compareAtPrice && (
+                <small className="discountedPrice">
+                  <Money data={selectedVariant.compareAtPrice} />
+                </small>
+              )}
+            </div>
           </div>
         </Link>
         <ProductForm
