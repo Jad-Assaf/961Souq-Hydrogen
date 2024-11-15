@@ -185,14 +185,38 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
-  const [numberInRow, setNumberInRow] = useState(4);
+  const [numberInRow, setNumberInRow] = useState(5);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const updateScreenWidth = () => {
+      setScreenWidth(window.innerWidth);
+
+      // Adjust default number of items per row based on screen size
+      if (window.innerWidth > 1500) {
+        setNumberInRow(5);
+      } else if (window.innerWidth >= 1200 && window.innerWidth <= 1499) {
+        setNumberInRow(4);
+      } else if (window.innerWidth >= 550 && window.innerWidth <= 1199) {
+        setNumberInRow(3);
+      } else {
+        setNumberInRow(1);
+      }
+    };
+
+    updateScreenWidth();
+    window.addEventListener("resize", updateScreenWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateScreenWidth);
+    };
+  }, []);
+
   const handleLayoutChange = (number) => {
-    console.log(`Setting numberInRow to: ${number}`);
     setNumberInRow(number);
   };
 
@@ -269,38 +293,40 @@ export default function Collection() {
           {/* Layout controls */}
           <div className="layout-controls mb-4">
             <span className="mr-2">Items per row:</span>
-            <button
-              className="px-2 py-1 border rounded mr-2"
-              onClick={() => handleLayoutChange(1)}
-            >
-              1
-            </button>
-            <button
-              className="px-2 py-1 border rounded mr-2"
-              onClick={() => handleLayoutChange(2)}
-            >
-              2
-            </button>
-            <button
-              className="px-2 py-1 border rounded mr-2"
-              onClick={() => handleLayoutChange(3)}
-            >
-              3
-            </button>
-            <button
-              className="px-2 py-1 border rounded mr-2"
-              onClick={() => handleLayoutChange(4)}
-            >
-              4
-            </button>
-            <button
-              className="px-2 py-1 border rounded"
-              onClick={() => handleLayoutChange(5)}
-            >
-              5
-            </button>
+            {screenWidth >= 550 && (
+              <button
+                className="px-2 py-1 border rounded mr-2"
+                onClick={() => handleLayoutChange(2)}
+              >
+                2
+              </button>
+            )}
+            {screenWidth >= 1200 && screenWidth <= 1499 && (
+              <button
+                className="px-2 py-1 border rounded mr-2"
+                onClick={() => handleLayoutChange(3)}
+              >
+                3
+              </button>
+            )}
+            {screenWidth >= 1500 && (
+              <button
+                className="px-2 py-1 border rounded mr-2"
+                onClick={() => handleLayoutChange(4)}
+              >
+                4
+              </button>
+            )}
+            {screenWidth > 1500 && (
+              <button
+                className="px-2 py-1 border rounded"
+                onClick={() => handleLayoutChange(5)}
+              >
+                5
+              </button>
+            )}
           </div>
-
+          
           <PaginatedResourceSection
             key={`products-grid-${numberInRow}`} // Forces re-render on change
             connection={{
