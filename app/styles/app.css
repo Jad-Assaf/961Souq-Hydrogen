@@ -1338,7 +1338,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 */
 .products-grid {
   display: grid;
-  grid-template-columns: 5;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
