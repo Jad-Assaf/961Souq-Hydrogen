@@ -785,6 +785,7 @@ button.reset:hover:not(:has(> *)) {
 .menu-item-level-2 {
   min-width: 15%;
 }
+
 .menu-item-level-2>a {
   font-weight: 600;
   margin-bottom: 7px;
@@ -823,22 +824,25 @@ button.reset:hover:not(:has(> *)) {
 }
 
 @media (max-width: 1500px) {
-  .menu-item-level-2{
+  .menu-item-level-2 {
     max-width: 20%;
   }
 }
+
 @media (max-width: 1400px) {
-  .header-menu-desktop>.menu-item-level-1{
+  .header-menu-desktop>.menu-item-level-1 {
     padding: 15px 1vw;
   }
 }
+
 @media (max-width: 1339px) {
-  .submenu-level-1{
+  .submenu-level-1 {
     top: 50%;
   }
 }
+
 @media (max-width: 1339px) {
-  .menu-item-level-2{
+  .menu-item-level-2 {
     max-width: 25%;
   }
 }
@@ -1335,7 +1339,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   row-gap: 30px;
 }
 
-.col-hr{
+.col-hr {
   border-color: #808080;
 }
 
@@ -1371,60 +1375,66 @@ button#headlessui-menu-button-\:R3lab5\: {
   height: auto;
 }
 
-.grid-cols-1 .product-item-collection{
+.grid-cols-1 .product-item-collection {
   min-height: unset;
   text-align: left;
 }
 
 
-.grid-cols-1 .collection-product-link{
+.grid-cols-1 .collection-product-link {
   display: flex;
   gap: 30px;
   justify-content: center;
   align-items: center;
 }
 
-.grid-cols-1 .collection-product-image{
+.grid-cols-1 .collection-product-image {
   filter: blur(0px);
   opacity: 1;
   width: 35%;
   height: auto;
 }
 
-.grid-cols-1 .product-info-container{
+.grid-cols-1 .product-info-container {
   width: 80%;
 }
-.grid-cols-1 .collection h4{
+
+.grid-cols-1 .collection h4 {
   min-height: unset;
 }
 
-.number-sort{
-  font-size: 12px;
+.number-sort {
+  font-size: 14px;
   font-weight: 700;
 }
 
-.layout-controls{
+.layout-controls {
   display: flex;
   gap: 5px;
   margin: 2% 3% 0;
+  align-items: center;
 }
 
-.layout-buttons{
-  width: 39px;
+.layout-buttons {
+  width: auto;
   display: flex;
   border: 1px solid grey;
   justify-content: center;
   height: 30px;
   align-items: center;
+  padding: 2px;
 }
 
-button.layout-buttons.first-btn svg{
+button.layout-buttons.first-btn svg {
+  width: 27px;
   height: 32px;
+  margin: 0;
 }
 
-.layout-buttons img, .layout-buttons svg{
+.layout-buttons img,
+.layout-buttons svg {
   width: 35px;
-  margin: 0px -14.2px;
+  margin: 0 -14.2px;
   max-height: 28px;
 }
 
