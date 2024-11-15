@@ -1439,6 +1439,11 @@ button.layout-buttons.first-btn svg *{
 .layout-buttons svg *{
   stroke: #4a4a4a
 }
+.layout-buttons.active {
+  background-color: #2172af;
+  color: white;
+  border-color: #2172af;
+}
 
 button.layout-buttons.first-btn svg {
   width: 27px;
