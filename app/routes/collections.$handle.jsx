@@ -410,9 +410,8 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
     product.priceRange.minVariantPrice.amount;
 
   return (
+    <div className="product-item-collection product-card" ref={ref}>
       <motion.div
-        className="product-item-collection product-card"
-        ref={ref}
         initial={{ opacity: 0, x: -30 }}
         animate={controls}
         variants={{
@@ -453,26 +452,26 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
                   {truncateText(product.description, 200)}
                 </p>
               )}
+
+            <div className="price-container">
+              <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+                <Money data={selectedVariant.price} />
+              </small>
+              {hasDiscount && selectedVariant.compareAtPrice && (
+                <small className="discountedPrice">
+                  <Money data={selectedVariant.compareAtPrice} />
+                </small>
+              )}
+            </div>
           </div>
         </Link>
-        <div className="">
-          <div className="price-container">
-            <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
-              <Money data={selectedVariant.price} />
-            </small>
-            {hasDiscount && selectedVariant.compareAtPrice && (
-              <small className="discountedPrice">
-                <Money data={selectedVariant.compareAtPrice} />
-              </small>
-            )}
-          </div>
-          <ProductForm
-            product={product}
-            selectedVariant={selectedVariant}
-            setSelectedVariant={setSelectedVariant}
-          />
-        </div>
+        <ProductForm
+          product={product}
+          selectedVariant={selectedVariant}
+          setSelectedVariant={setSelectedVariant}
+        />
       </motion.div>
+    </div>
   );
 })
 
