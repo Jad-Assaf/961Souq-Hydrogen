@@ -1410,7 +1410,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 @media (max-width: 1024px) {
-  .grid-cols-1 .product-info-container .collection h4 {
+  .grid-cols-1 .collection h4 {
     min-height: unset !important;
     max-height: unset !important;
   }
