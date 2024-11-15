@@ -193,27 +193,23 @@ export default function Collection() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const updateScreenWidth = () => {
-      setScreenWidth(window.innerWidth);
-
-      // Adjust default number of items per row based on screen size
-      if (window.innerWidth > 1500) {
-        setNumberInRow(5);
-      } else if (window.innerWidth >= 1200 && window.innerWidth <= 1499) {
-        setNumberInRow(4);
-      } else if (window.innerWidth >= 550 && window.innerWidth <= 1199) {
-        setNumberInRow(3);
-      } else {
-        setNumberInRow(1);
-      }
-    };
-
-    updateScreenWidth();
-    window.addEventListener("resize", updateScreenWidth);
-
-    return () => {
-      window.removeEventListener("resize", updateScreenWidth);
-    };
+    if (typeof window !== 'undefined') {
+      const updateScreenWidth = () => {
+        setScreenWidth(window.innerWidth);
+        if (window.innerWidth > 1500) {
+          setNumberInRow(5);
+        } else if (window.innerWidth >= 1200 && window.innerWidth <= 1499) {
+          setNumberInRow(4);
+        } else if (window.innerWidth >= 550 && window.innerWidth <= 1199) {
+          setNumberInRow(3);
+        } else {
+          setNumberInRow(1);
+        }
+      };
+      updateScreenWidth();
+      window.addEventListener('resize', updateScreenWidth);
+      return () => window.removeEventListener('resize', updateScreenWidth);
+    }
   }, []);
 
   const handleLayoutChange = (number) => {
@@ -326,7 +322,7 @@ export default function Collection() {
               </button>
             )}
           </div>
-          
+
           <PaginatedResourceSection
             key={`products-grid-${numberInRow}`} // Forces re-render on change
             connection={{
