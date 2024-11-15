@@ -265,19 +265,43 @@ export default function Collection() {
           />
 
           <hr className='col-hr'></hr>
+          {/* Layout controls */}
+          <div className="layout-controls mb-4">
+            <span className="mr-2">Items per row:</span>
+            <button
+              className="px-2 py-1 border rounded mr-2"
+              onClick={() => handleLayoutChange(3)}
+            >
+              3
+            </button>
+            <button
+              className="px-2 py-1 border rounded mr-2"
+              onClick={() => handleLayoutChange(4)}
+            >
+              4
+            </button>
+            <button
+              className="px-2 py-1 border rounded"
+              onClick={() => handleLayoutChange(5)}
+            >
+              5
+            </button>
+          </div>
 
           <PaginatedResourceSection
             connection={{
               ...collection.products,
               nodes: sortedProducts,
             }}
-            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            resourcesClassName="products-grid"
+            style={{ gridTemplateColumns: `repeat(${numberInRow}, minmax(0, 1fr))` }}
           >
             {({ node: product, index }) => (
               <ProductItem
                 key={product.id}
                 product={product}
-                loading={index < 50 ? 'eager' : undefined}
+                index={index}
+                numberInRow={numberInRow}
               />
             )}
           </PaginatedResourceSection>
@@ -307,13 +331,6 @@ export function ProductItem({ product, index, numberInRow }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 100px 0px' });
   const controls = useAnimation();
-
-  // Calculate delay for staggered animation based on row and column
-  useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [isInView, controls]);
 
   // Calculate row and column delay
   const rowIndex = Math.floor(index / numberInRow);
