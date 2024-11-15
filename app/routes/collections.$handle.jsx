@@ -9,7 +9,6 @@ import {
 } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
-import { AnimatedImage } from '~/components/AnimatedImage';
 import { truncateText } from '~/components/CollectionDisplay';
 import { DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
@@ -108,20 +107,16 @@ export async function loadCriticalData({ context, params, request }) {
     let sliderCollections = [];
 
     try {
-      // Fetch menu for slider collections
       const menuResult = await storefront.query(MENU_QUERY, {
         variables: { handle },
       });
       menu = menuResult.menu;
     } catch (error) {
       console.error("Error fetching menu:", error);
-      // Don't throw here, just log the error and continue with an empty menu
     }
 
-    // Only fetch slider collections if menu exists and has items
     if (menu && menu.items && menu.items.length > 0) {
       try {
-        // Fetch collections for the slider based on the menu items
         sliderCollections = await Promise.all(
           menu.items.map(async (item) => {
             try {
@@ -132,15 +127,13 @@ export async function loadCriticalData({ context, params, request }) {
               return collection;
             } catch (error) {
               console.error(`Error fetching collection for ${item.title}:`, error);
-              return null; // Return null for failed collection fetches
+              return null;
             }
           })
         );
-        // Filter out any null results
         sliderCollections = sliderCollections.filter(collection => collection !== null);
       } catch (error) {
         console.error("Error fetching slider collections:", error);
-        // If there's an error fetching slider collections, we'll just use an empty array
       }
     }
 
@@ -285,7 +278,7 @@ export default function Collection() {
           </div>
         )}
 
-        <div className="flex-1 mt-[28px]">
+        <div className="flex-1 mt-[116px]">
           <hr className='col-hr'></hr>
 
           <div className="view-container">
@@ -399,7 +392,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
   // Calculate row and column delay
   const rowIndex = Math.floor(index / numberInRow);
   const columnIndex = index % numberInRow;
-  const delay = Math.min(rowIndex * 0.1 + columnIndex * 0.05, 0.5); // Cap delay at 0.5s
+  const delay = Math.min(rowIndex * 0.1 + columnIndex * 0.05, 1); // Cap delay at 0.5s
 
   useEffect(() => {
     if (isInView) {
@@ -434,7 +427,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
             <motion.div
               initial={{ filter: 'blur(10px)', opacity: 0 }}
               animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.5 }}
               className='collection-product-image'
             >
               <Image

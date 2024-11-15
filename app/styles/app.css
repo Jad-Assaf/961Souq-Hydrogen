@@ -322,6 +322,16 @@ button {
     padding: 10px 0px;
     width: 100%;
   }
+
+  .product-form {
+    margin: -23px 0 0 165px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 250px;
+  }
+
+
 }
 
 .product-form {
@@ -1385,7 +1395,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   display: flex;
   gap: 30px;
   justify-content: center;
-  align-items: center;
+  align-items: start;
 }
 
 .grid-cols-1 .collection-product-image {
@@ -1397,6 +1407,10 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .product-info-container {
   width: 80%;
+}
+.grid-cols-1 .product-info-container .collection h4{
+  min-height: unset;
+  max-height: unset;
 }
 
 .grid-cols-1 .collection h4 {
