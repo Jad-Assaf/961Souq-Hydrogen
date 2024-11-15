@@ -278,6 +278,8 @@ export default function Collection() {
         )}
 
         <div className="flex-1 mt-[28px]">
+          <hr className='col-hr'></hr>
+
           <DrawerFilter
             filters={collection.products.filters}
             appliedFilters={appliedFilters}
@@ -286,8 +288,6 @@ export default function Collection() {
             productNumber={collection.products.nodes.length}
             isDesktop={isDesktop}
           />
-
-          <hr className='col-hr'></hr>
           {/* Layout controls */}
           <div className="layout-controls">
             <span className='number-sort'>View As:</span>
