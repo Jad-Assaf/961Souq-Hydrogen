@@ -8,6 +8,9 @@ import { useAside } from './Aside';
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
+    if (!text || typeof text !== "string") {
+        return ""; // Return an empty string if text is undefined or not a string
+    }
     const words = text.split(' ');
     return words.length > maxWords
         ? words.slice(0, maxWords).join(' ') + '...'
