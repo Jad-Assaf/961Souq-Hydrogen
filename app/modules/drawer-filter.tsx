@@ -372,6 +372,14 @@ export default function SortMenu({
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const location = useLocation();
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const productSortItems: { label: string; key: SortParam }[] = [
     { label: "Featured", key: "featured" },
@@ -398,7 +406,7 @@ export default function SortMenu({
   return (
     <Menu as="div" className="relative z-10">
       <MenuButton className="flex items-center gap-1.5 h-10 border px-4 py-2.5 rounded-full">
-        <span className="font-medium">Sort by: {activeItem.label}</span>
+        <span className="font-medium">{screenWidth > 550 ? `Sort by: ${activeItem.label}` : 'Sort'}</span>
         <CaretDown />
       </MenuButton>
       <MenuItems
