@@ -196,14 +196,22 @@ export default function Collection() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const updateScreenWidth = () => {
+      const debounce = (fn, delay) => {
+        let timeoutId;
+        return (...args) => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => fn(...args), delay);
+        };
+      };
+
+      const updateScreenWidth = debounce(() => {
         const width = window.innerWidth;
         setScreenWidth(width);
         if (width >= 1500) setNumberInRow(5);
         else if (width >= 1200) setNumberInRow(4);
         else if (width >= 550) setNumberInRow(3);
         else setNumberInRow(1);
-      };
+      }, 100);
 
       updateScreenWidth();
       window.addEventListener("resize", updateScreenWidth);
@@ -224,9 +232,9 @@ export default function Collection() {
   };
 
   const sortedProducts = React.useMemo(() => {
+    if (!collection || !collection.products || !collection.products.nodes) return [];
     const products = [...collection.products.nodes];
     return products.sort((a, b) => {
-      // Check if any variant is available for sale
       const aInStock = a.variants.nodes.some(variant => variant.availableForSale);
       const bInStock = b.variants.nodes.some(variant => variant.availableForSale);
 
@@ -234,7 +242,7 @@ export default function Collection() {
       if (!aInStock && bInStock) return 1;
       return 0;
     });
-  }, [collection.products.nodes]);
+  }, [collection?.products?.nodes]);
 
   return (
     <div className="collection">
@@ -382,7 +390,7 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-export function ProductItem({ product, index, numberInRow }) {
+const ProductItem = React.memo(({ product, index, numberInRow }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '0px 0px 100px 0px' });
@@ -391,7 +399,7 @@ export function ProductItem({ product, index, numberInRow }) {
   // Calculate row and column delay
   const rowIndex = Math.floor(index / numberInRow);
   const columnIndex = index % numberInRow;
-  const delay = rowIndex * 0.2 + columnIndex * 0.1;
+  const delay = Math.min(rowIndex * 0.1 + columnIndex * 0.05, 0.5); // Cap delay at 0.5s
 
   useEffect(() => {
     if (isInView) {
@@ -472,21 +480,7 @@ export function ProductItem({ product, index, numberInRow }) {
       </motion.div>
     </div>
   );
-}
-
-
-// Animation variants for staggered loading
-const staggerVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.8,
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.3 },
-  },
-};
+})
 
 /**
  * @param {{
