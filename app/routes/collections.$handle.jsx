@@ -271,6 +271,18 @@ export default function Collection() {
             <span className="mr-2">Items per row:</span>
             <button
               className="px-2 py-1 border rounded mr-2"
+              onClick={() => handleLayoutChange(1)}
+            >
+              1
+            </button>
+            <button
+              className="px-2 py-1 border rounded mr-2"
+              onClick={() => handleLayoutChange(2)}
+            >
+              2
+            </button>
+            <button
+              className="px-2 py-1 border rounded mr-2"
               onClick={() => handleLayoutChange(3)}
             >
               3
