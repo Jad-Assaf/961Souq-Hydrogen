@@ -432,6 +432,15 @@ export function ProductItem({ product, index, numberInRow }) {
           )}
           <div className='product-info-container'>
             <h4>{truncateText(product.title, 50)}</h4>
+            {typeof window !== "undefined" &&
+              window.innerWidth > 1500 &&
+              numberInRow === 1 &&
+              product.description && ( // Ensure description exists
+                <p className="product-description">
+                  {truncateText(product.description, 200)}
+                </p>
+              )}
+
             <div className="price-container">
               <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
                 <Money data={selectedVariant.price} />
@@ -569,6 +578,7 @@ const COLLECTION_BY_HANDLE_QUERY = `#graphql
     collection(handle: $handle) {
       id
       title
+      description
       handle
       image {
         url
