@@ -325,11 +325,11 @@ button {
 }
 
 .product-form {
-  margin-top: 15px;
+  margin: 15px auto 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 420px;
+  max-width: 400px;
 }
 
 .product-form form {

@@ -412,13 +412,6 @@ export function ProductItem({ product, index, numberInRow }) {
             </div>
           </div>
         </Link>
-        </motion.div>
-        <motion.div
-          initial={{ filter: 'blur(10px)', opacity: 0 }}
-          animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className='collection-product-form'
-        >
         <ProductForm
           product={product}
           selectedVariant={selectedVariant}
