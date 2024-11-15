@@ -391,7 +391,7 @@ export function ProductItem({ product, index, numberInRow }) {
   // Calculate row and column delay
   const rowIndex = Math.floor(index / numberInRow);
   const columnIndex = index % numberInRow;
-  const delay = rowIndex * 0.1 + columnIndex * 0.05;
+  const delay = rowIndex * 0.2 + columnIndex * 0.1;
 
   useEffect(() => {
     if (isInView) {
@@ -417,7 +417,7 @@ export function ProductItem({ product, index, numberInRow }) {
           visible: {
             opacity: 1,
             x: 0,
-            transition: { delay, duration: 0.1 }
+            transition: { delay, duration: 0.2 }
           }
         }}
       >
