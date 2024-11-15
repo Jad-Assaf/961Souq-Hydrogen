@@ -1373,21 +1373,21 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 
-.collection-product-link{
+.grid-cols-1 .collection-product-link{
   display: flex;
   gap: 30px;
   justify-content: center;
   align-items: start;
 }
 
-.collection-product-image{
+.grid-cols-1 .collection-product-image{
   filter: blur(0px);
   opacity: 1;
   width: 35%;
   height: auto;
 }
 
-.product-info-container{
+.grid-cols-1 .product-info-container{
   width: 80%;
 }
 
