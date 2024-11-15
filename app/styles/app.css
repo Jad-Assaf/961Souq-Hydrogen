@@ -1403,6 +1403,12 @@ button#headlessui-menu-button-\:R3lab5\: {
   min-height: unset;
 }
 
+.view-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
 .number-sort {
   font-size: 14px;
   font-weight: 700;
@@ -1410,9 +1416,10 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .layout-controls {
   display: flex;
-  gap: 5px;
-  margin: 2% 3% 0;
   align-items: center;
+  gap: 5px;
+  width: 50%;
+  margin: 2% 3% 0;
 }
 
 .layout-buttons {
