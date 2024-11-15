@@ -1335,6 +1335,10 @@ button#headlessui-menu-button-\:R3lab5\: {
   row-gap: 30px;
 }
 
+.col-hr{
+  border-color: #808080;
+}
+
 /* Dynamic Column Classes */
 .grid-cols-1 {
   grid-template-columns: repeat(1, 1fr);
@@ -1401,14 +1405,15 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 .layout-buttons{
-  /* border: 1px solid #e3e3e3; */
-  padding: 5px;
-  /* border-radius: 30px; */
+  width: 45px;
+  display: flex;
+  border: 1px solid grey;
+  justify-content: center;
 }
 
 .layout-buttons img, .layout-buttons svg{
-  width: 30px;
-  margin: 2px;
+  width: 40px;
+  margin: 0px -16px;
 }
 
 .product-item-collection {
