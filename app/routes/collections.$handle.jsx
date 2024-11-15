@@ -320,7 +320,7 @@ export default function Collection() {
                 className={`px-2 py-1 border rounded mr-2 ${numberInRow === 4 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(4)}
               >
-                <img src="../assets/4dots.svg" />
+                <img src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/4dots.svg?v=1731675116" />
               </button>
             )}
             {screenWidth >= 1500 && (
@@ -328,7 +328,7 @@ export default function Collection() {
                 className={`px-2 py-1 border rounded ${numberInRow === 5 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(5)}
               >
-                <img src="../assets/5dots.svg" />
+                <img src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/4dots.svg?v=1731675116" />
               </button>
             )}
           </div>
