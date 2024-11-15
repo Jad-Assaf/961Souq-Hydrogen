@@ -1357,34 +1357,8 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 /* Product Item Sizing Based on Grid Columns */
-.grid-cols-1 .product-item-collection {
+.product-item-collection {
   min-width: 100%;
-  /* Takes full width for single column */
-  max-width: 100%;
-}
-
-.grid-cols-2 .product-item-collection {
-  min-width: 40%;
-  /* 40% width for two columns */
-  max-width: 40%;
-}
-
-.grid-cols-3 .product-item-collection {
-  min-width: 30%;
-  /* 30% width for three columns */
-  max-width: 30%;
-}
-
-.grid-cols-4 .product-item-collection {
-  min-width: 20%;
-  /* 20% width for four columns */
-  max-width: 20%;
-}
-
-.grid-cols-5 .product-item-collection {
-  min-width: 15%;
-  /* 15% width for five columns */
-  max-width: 15%;
 }
 
 /* Keep Product Card Height Consistent */
@@ -1422,27 +1396,6 @@ button#headlessui-menu-button-\:R3lab5\: {
   height: auto !important;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 425px) {
-  .grid-cols-2 .product-item-collection {
-    min-width: 100%;
-    /* Switch to single column for mobile */
-    max-width: 100%;
-  }
-
-  .product-item-collection {
-    min-width: 170px;
-    /* Minimum width for smaller screens */
-    max-width: 170px;
-  }
-}
-
-@media (max-width: 360px) {
-  .product-item-collection {
-    min-width: 160px;
-    max-width: 160px;
-  }
-}
 
 .fltr-btn {
   padding: 10px;
