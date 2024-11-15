@@ -406,7 +406,7 @@ export function ProductItem({ product, index, numberInRow }) {
           visible: {
             opacity: 1,
             x: 0,
-            transition: { delay, duration: 0.5 }
+            transition: { delay, duration: 0.2 }
           }
         }}
       >
