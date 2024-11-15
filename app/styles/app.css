@@ -1396,13 +1396,13 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .layout-buttons{
   border: 1px solid #e3e3e3;
-  padding: 5px 10px;
+  padding: 5px;
   border-radius: 30px;
 }
 
-.layout-buttons img{
-  width: 40px;
-  margin: 4px 5px;
+.layout-buttons img, .layout-buttons svg{
+  width: 30px;
+  margin: 2px;
 }
 
 .product-item-collection {

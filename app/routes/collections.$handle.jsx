@@ -325,7 +325,7 @@ export default function Collection() {
             )}
             {screenWidth >= 1500 && (
               <button
-                className={`px-2 py-1 border rounded ${numberInRow === 5 ? 'active' : ''}`}
+                className={`layout-buttons ${numberInRow === 5 ? 'active' : ''}`}
                 onClick={() => handleLayoutChange(5)}
               >
                 <img src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/5dots.svg?v=1731675116" />
