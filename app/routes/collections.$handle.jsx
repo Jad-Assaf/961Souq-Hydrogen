@@ -270,7 +270,7 @@ export default function Collection() {
             <span className="mr-2">Items per row:</span>
             <button
               className="px-2 py-1 border rounded mr-2"
-              onClick={() => handleLayoutChange(3)}
+              onClick={() => { console.log('Clicked items per row'); handleLayoutChange(3)}}
             >
               3
             </button>
@@ -289,6 +289,7 @@ export default function Collection() {
           </div>
 
           <PaginatedResourceSection
+            key={numberInRow} // Forces a remount when numberInRow changes
             connection={{
               ...collection.products,
               nodes: sortedProducts,
@@ -305,6 +306,7 @@ export default function Collection() {
               />
             )}
           </PaginatedResourceSection>
+
         </div>
       </div>
 
