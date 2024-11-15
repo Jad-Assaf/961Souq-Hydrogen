@@ -290,7 +290,6 @@ export default function Collection() {
           <hr className='col-hr'></hr>
           {/* Layout controls */}
           <div className="layout-controls mb-4">
-            <span className="mr-2">Items per row:</span>
 
             {screenWidth >= 300 && (
               <button
@@ -433,6 +432,11 @@ export function ProductItem({ product, index, numberInRow }) {
           )}
           <div className='product-info-container'>
             <h4>{truncateText(product.title, 50)}</h4>
+            {window.innerWidth > 1500 && numberInRow === 1 && (
+              <p className="product-description">
+                {truncateText(product.description, 200)}
+              </p>
+            )}
             <div className="price-container">
               <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
                 <Money data={selectedVariant.price} />
