@@ -1371,7 +1371,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 /* Product Item Sizing Based on Grid Columns */
-.product-item-collection {
+.grid-cols-1 .product-item-collection {
   min-width: 100%;
 }
 
