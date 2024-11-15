@@ -411,12 +411,12 @@ export function ProductItem({ product, index, numberInRow }) {
               )}
             </div>
           </div>
+          <ProductForm
+            product={product}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
+          />
         </Link>
-        <ProductForm
-          product={product}
-          selectedVariant={selectedVariant}
-          setSelectedVariant={setSelectedVariant}
-        />
       </motion.div>
     </div>
   );

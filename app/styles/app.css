@@ -198,7 +198,7 @@ button {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   padding: 10px;
   min-width: 175px;
-  min-height: 400px;
+  min-height: 410px;
 }
 
 .product-card:hover {
@@ -1377,7 +1377,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   display: flex;
   gap: 30px;
   justify-content: center;
-  align-items: start;
+  align-items: center;
 }
 
 .grid-cols-1 .collection-product-image{
@@ -1390,10 +1390,11 @@ button#headlessui-menu-button-\:R3lab5\: {
 .grid-cols-1 .product-info-container{
   width: 80%;
 }
+.grid-cols-1 .collection h4{
+  min-height: unset;
+}
 
 .product-item-collection {
-  min-height: 350px;
-  /* Consistent height for all product cards */
   text-align: center;
   text-decoration: none;
 }
