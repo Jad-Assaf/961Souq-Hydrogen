@@ -256,28 +256,38 @@ export const FOOTER_QUERY = `#graphql
   }
 `;
 
+// Example of RELATED_PRODUCTS_QUERY
 export const RELATED_PRODUCTS_QUERY = `#graphql
-  query RelatedProductsByType($productType: String!) {
-  products(first: 10, query: "product_type:$productType") {
-    edges {
-      node {
-        id
-        title
-        productType
-        images(first: 1) {
-          nodes {
-            url
-            altText
+  query RelatedProducts($productType: String!) {
+    products(first: 10, query: "productType:${productType}") {
+      edges {
+        node {
+          id
+          title
+          handle
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
           }
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
+          variants(first: 1) {
+            nodes {
+              id
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+              }
+              availableForSale
+            }
           }
         }
       }
     }
   }
-}
 `;
