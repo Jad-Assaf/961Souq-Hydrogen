@@ -2,6 +2,7 @@ import {Link} from '@remix-run/react';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
 import {urlWithTrackingParams} from '~/lib/search';
 import { motion, useAnimation, useInView } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * @param {Omit<SearchResultsProps, 'error' | 'type'>}
