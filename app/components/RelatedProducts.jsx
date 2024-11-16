@@ -61,6 +61,9 @@ function RelatedProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
 
+    // Safely access the first image
+    const productImage = product.images.edges?.[0]?.node;
+
     // Check for available variants and set up selected variant
     const selectedVariant = product.variants.nodes.find(
         (variant) => variant.availableForSale
@@ -87,17 +90,21 @@ function RelatedProductItem({ product, index }) {
                 className="product-card"
             >
                 <Link to={`/products/${product.handle}`}>
-                    <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 40vw"
-                        srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=30 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                        alt={product.images.nodes[0].altText || 'Product Image'}
-                        width="180px"
-                        height="180px"
-                    />
+                    {productImage ? (
+                        <Image
+                            data={productImage}
+                            aspectRatio="1/1"
+                            sizes="(min-width: 45em) 20vw, 40vw"
+                            srcSet={`${productImage.url}?width=300&quality=30 300w,
+                                     ${productImage.url}?width=600&quality=30 600w,
+                                     ${productImage.url}?width=1200&quality=30 1200w`}
+                            alt={productImage.altText || 'Product Image'}
+                            width="180px"
+                            height="180px"
+                        />
+                    ) : (
+                        <div className="no-image-placeholder">No Image</div>
+                    )}
                     <h4 className="product-title">{truncateText(product.title, 50)}</h4>
                     <div className="product-price">
                         <Money data={selectedVariant.price} />
