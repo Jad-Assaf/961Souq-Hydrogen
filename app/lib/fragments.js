@@ -297,9 +297,13 @@ export const RELATED_PRODUCTS_QUERY = `#graphql
                 amount
                 currencyCode
               }
-              image {
-                url
-                altText
+              images(first: 1) {
+                edges {
+                  node {
+                    url
+                    altText
+                  }
+                }
               }
             }
           }
