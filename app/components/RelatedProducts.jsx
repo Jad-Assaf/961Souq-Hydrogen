@@ -62,15 +62,15 @@ function RelatedProductItem({ product, index }) {
     const isInView = useInView(ref, { once: true });
 
     // Check for available variants and set up selected variant
-    const selectedVariant =
-        product.variants.nodes.find(variant => variant.availableForSale) ||
-        product.variants.nodes[0];
+    const selectedVariant = product.variants.nodes.find(
+        (variant) => variant.availableForSale
+    ) || product.variants.nodes[0];
 
     // Determine if there's a discount by comparing the regular and discounted prices
     const hasDiscount =
         product.compareAtPriceRange &&
         product.compareAtPriceRange.minVariantPrice.amount >
-            product.priceRange.minVariantPrice.amount;
+        product.priceRange.minVariantPrice.amount;
 
     return (
         <motion.div
@@ -82,7 +82,7 @@ function RelatedProductItem({ product, index }) {
         >
             <motion.div
                 initial={{ filter: 'blur(10px)', opacity: 0 }}
-                animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                animate={{ filter: 'blur(0px)', opacity: 1 }}
                 transition={{ duration: 0.5 }}
                 className="product-card"
             >
@@ -94,7 +94,7 @@ function RelatedProductItem({ product, index }) {
                         srcSet={`${product.images.nodes[0].url}?width=300&quality=30 300w,
                                  ${product.images.nodes[0].url}?width=600&quality=30 600w,
                                  ${product.images.nodes[0].url}?width=1200&quality=30 1200w`}
-                        alt={product.images.nodes[0]?.altText || 'Product Image'}
+                        alt={product.images.nodes[0].altText || 'Product Image'}
                         width="180px"
                         height="180px"
                     />
@@ -112,7 +112,6 @@ function RelatedProductItem({ product, index }) {
         </motion.div>
     );
 }
-
 
 const LeftArrowIcon = () => (
     <svg

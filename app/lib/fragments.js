@@ -297,6 +297,10 @@ export const RELATED_PRODUCTS_QUERY = `#graphql
                 amount
                 currencyCode
               }
+              image {
+                url
+                altText
+              }
             }
           }
         }
@@ -304,4 +308,3 @@ export const RELATED_PRODUCTS_QUERY = `#graphql
     }
   }
 `;
-
