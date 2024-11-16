@@ -101,8 +101,19 @@ function SearchResultsProducts({term, products}) {
             const productUrl = `/products/${product.handle}`;
 
             return (
-              <div className="search-results-item" key={product.id}>
-                <Link prefetch="intent" to={productUrl}>
+              <div className="search-results-item product-card" key={product.id}>
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={controls}
+                  variants={{
+                    visible: {
+                      opacity: 1,
+                      x: 0,
+                      transition: { delay, duration: 0.2 }
+                    }
+                  }}
+                >
+                <Link prefetch="intent" to={productUrl} className='collection-product-link'>
                   {product.variants.nodes[0].image && (
                     <Image
                       data={product.variants.nodes[0].image}
@@ -117,6 +128,7 @@ function SearchResultsProducts({term, products}) {
                     </small>
                   </div>
                 </Link>
+                </motion.div>
               </div>
             );
           });
