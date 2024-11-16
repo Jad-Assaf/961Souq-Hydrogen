@@ -14,8 +14,7 @@ import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
-import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
-import RelatedProductsRow from '~/components/RelatedProducts';
+
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -36,7 +35,6 @@ async function loadCriticalData({ context, params, request }) {
     throw new Error('Expected product handle to be defined');
   }
 
-  // Fetch the product details
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: { handle, selectedOptions: getSelectedProductOptions(request) || [] },
   });
@@ -58,22 +56,14 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  console.log('Product Type:', product.productType);
-  const productType = product.productType || 'Laptops'; // Use fallback value if productType is missing
+  const productType = product.productType || 'General';
 
-  // Fetch related products based on product type
+  // Fetch related products
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: { productType },
   });
-  console.log('GraphQL Response for Related Products:', products);
 
-  const relatedProducts =
-    products?.edges?.map((edge) => edge.node) || [];
-  console.log('Mapped Related Products:', relatedProducts);
-
-  if (relatedProducts.length === 0) {
-    console.log('No related products found for this product type.');
-  }
+  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
   return { product, relatedProducts };
 }
@@ -107,13 +97,11 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts } = useLoaderData();
+  const { product, variants } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
   );
-
-  console.log('Related Products in Component:', relatedProducts);
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
@@ -129,6 +117,7 @@ export default function Product() {
       setSubtotal(price * quantity);
     }
   }, [quantity, selectedVariant]);
+
 
   const { title, descriptionHtml, images } = product;
 
@@ -291,14 +280,15 @@ export default function Product() {
             ],
           }}
         />
-      </div>
+      </div >
       <div className="related-products-row">
         <div className="related-products">
           <h2>Related Products</h2>
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
-    </div>
+
+    </div >
   );
 }
 

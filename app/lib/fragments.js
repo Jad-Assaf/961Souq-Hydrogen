@@ -257,27 +257,30 @@ export const FOOTER_QUERY = `#graphql
 `;
 
 export const RELATED_PRODUCTS_QUERY = `#graphql
-  query RelatedProductsByType($productType: String!) {
-  products(first: 10, query: $productType) {
-    edges {
-      node {
-        id
-        title
-        productType
-        images(first: 1) {
-          nodes {
-            url
-            altText
+  query RelatedProducts($productType: String!, $country: CountryCode, $language: LanguageCode) 
+  @inContext(country: $country, language: $language) {
+    products(first: 10, query: $productType) {
+      edges {
+        node {
+          id
+          title
+          handle
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
           }
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
           }
         }
       }
     }
   }
-}
 `;
