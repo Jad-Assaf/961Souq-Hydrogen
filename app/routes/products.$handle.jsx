@@ -15,7 +15,7 @@ import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
-import { RelatedProductsRow } from '~/components/RelatedProducts';
+import RelatedProductsRow from '~/components/RelatedProducts';
 
 
 export const meta = ({ data }) => {
