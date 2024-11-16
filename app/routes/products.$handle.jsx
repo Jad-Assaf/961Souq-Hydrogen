@@ -60,7 +60,7 @@ async function loadCriticalData({ context, params, request }) {
   }
 
   const { collection } = await storefront.query(RELATED_PRODUCTS_QUERY, {
-    variables: { collectionHandle: product.handle }, // Adjust logic to use a dynamic collection handle
+    variables: { collectionHandle: "apple" }, // Adjust logic to use a dynamic collection handle
   });
 
   console.log('Related Products Query Response:', collection);
