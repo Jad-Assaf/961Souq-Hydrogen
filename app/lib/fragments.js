@@ -310,47 +310,22 @@ export const RELATED_PRODUCTS_QUERY = `#graphql
 `;
 
 export const RECENTLY_VIEWED_PRODUCTS_QUERY = `#graphql
-  query RecentlyViewedProducts($handles: [String!], $country: CountryCode, $language: LanguageCode) 
-  @inContext(country: $country, language: $language) {
+  query RecentlyViewedProducts($handles: [String!]!) {
     products(first: 10, query: $handles) {
       edges {
         node {
           id
           title
           handle
-          images(first: 1) {
-            edges {
-              node {
-                url
-                altText
-              }
-            }
-          }
           priceRange {
             minVariantPrice {
               amount
               currencyCode
             }
           }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          variants(first: 5) {
-            nodes {
-              id
-              availableForSale
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              image {
+          images(first: 1) {
+            edges {
+              node {
                 url
                 altText
               }
