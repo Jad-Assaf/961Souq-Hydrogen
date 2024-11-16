@@ -362,6 +362,7 @@ const PRODUCT_FRAGMENT = `#graphql
     handle
     descriptionHtml
     description
+    productType
     images(first: 30) {
       edges {
         node {
