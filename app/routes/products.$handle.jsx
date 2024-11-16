@@ -97,21 +97,6 @@ function redirectToFirstVariant({ product, request }) {
   );
 }
 
-function redirectToFirstVariant({ product, request }) {
-  const url = new URL(request.url);
-  const firstVariant = product.variants.nodes[0];
-
-  return redirect(
-    getVariantUrl({
-      pathname: `/products/${product.handle}`,
-      handle: product.handle,
-      selectedOptions: firstVariant.selectedOptions,
-      searchParams: new URLSearchParams(url.search),
-    }),
-    { status: 302 }
-  );
-}
-
 export default function Product() {
   const { product, variants, relatedProducts } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
