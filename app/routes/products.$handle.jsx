@@ -60,17 +60,20 @@ async function loadCriticalData({ context, params, request }) {
   }
 
   console.log('Product Type:', product.productType);
+  const productType = product.productType || 'default-type'; // Replace 'default-type' with an actual fallback type.
 
-  // Fetch related products by product type
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: {
-      productType: product.productType || '', // Ensure productType is not undefined
+      productType: productType, // Use fallback value if productType is missing
     },
   });
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
-
   console.log('Mapped Related Products:', relatedProducts);
+
+  if (relatedProducts.length === 0) {
+    console.log('No related products found for this product type.');
+  }
 
   return { product, relatedProducts };
 }

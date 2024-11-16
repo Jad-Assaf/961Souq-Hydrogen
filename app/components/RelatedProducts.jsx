@@ -7,6 +7,10 @@ import { Link } from '@remix-run/react';
 import { AddToCartButton } from './AddToCartButton';
 
 function RelatedProductsRow({ products }) {
+    if (!products || products.length === 0) {
+        return <p>No related products available.</p>;
+    }
+
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -25,7 +29,7 @@ function RelatedProductsRow({ products }) {
         if (!isDragging) return;
         e.preventDefault();
         const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2; // Speed factor
+        const walk = (x - startX) * 2;
         rowRef.current.scrollLeft = scrollLeft - walk;
     };
 
