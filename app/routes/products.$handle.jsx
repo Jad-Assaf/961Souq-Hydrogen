@@ -434,7 +434,7 @@ const VARIANTS_QUERY = `#graphql
 
 const RELATED_PRODUCTS_QUERY = `#graphql
   query RelatedProducts($productType: String!) {
-    products(first: 10, query: "productType:${productType}") {
+    products(first: 10, query: "productType:${'$'}productType") {
       edges {
         node {
           id
