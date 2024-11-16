@@ -11,12 +11,13 @@ import { getVariantUrl } from '~/lib/variants';
 import { ProductPrice } from '~/components/ProductPrice';
 import { ProductImages } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
-import "../styles/ProductPage.css";
+import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
-import { RECENTLY_VIEWED_PRODUCTS_QUERY, RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
+import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
-import RecentlyViewed from '~/components/RecentlyViewed';
+import RecentlyViewedProducts from '~/components/RecentlyViewed';
+
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -30,26 +31,25 @@ export async function loader(args) {
 }
 
 async function loadCriticalData({ context, params, request }) {
-  const { storefront } = context;
   const { handle } = params;
+  const { storefront } = context;
 
   if (!handle) {
-    throw new Error("Expected product handle to be defined.");
+    throw new Error('Expected product handle to be defined');
   }
 
-  // Fetch product details
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: { handle, selectedOptions: getSelectedProductOptions(request) || [] },
   });
 
   if (!product?.id) {
-    throw new Response("Product not found", { status: 404 });
+    throw new Response('Product not found', { status: 404 });
   }
 
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
     firstVariant.selectedOptions.find(
-      (option) => option.name === "Title" && option.value === "Default Title"
+      (option) => option.name === 'Title' && option.value === 'Default Title'
     )
   );
 
@@ -59,47 +59,32 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  const productType = product.productType || "General";
+  const productType = product.productType || 'General';
 
   // Fetch related products
-  const { products: relatedProductEdges } = await storefront.query(RELATED_PRODUCTS_QUERY, {
+  const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: { productType },
   });
 
-  const relatedProducts = relatedProductEdges?.edges.map((edge) => edge.node) || [];
+  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
-  // Fetch recently viewed products
-  const url = new URL(request.url);
-  const recentlyViewedHandles = url.searchParams.get("recentlyViewed")?.split(",") || [];
+  // Handle recently viewed products via cookies
+  const cookieHeader = request.headers.get('Cookie') || '';
+  const cookies = new Map(cookieHeader.split(';').map((c) => c.trim().split('=')));
+  const recentlyViewed = cookies.get('recentlyViewed')
+    ? JSON.parse(decodeURIComponent(cookies.get('recentlyViewed')))
+    : [];
 
-  let recentlyViewedProducts = [];
-  if (recentlyViewedHandles.length) {
-    // Fetch products individually by handle
-    recentlyViewedProducts = await Promise.all(
-      recentlyViewedHandles.map(async (handle) => {
-        const { product } = await storefront.query(RECENTLY_VIEWED_PRODUCTS_QUERY, {
-          variables: { handle, selectedOptions: [] },
-        });
-        return product;
-      })
-    );
-  }
+  const updatedRecentlyViewed = [product.id, ...recentlyViewed.filter((id) => id !== product.id)].slice(0, 5);
+  const recentlyViewedCookie = `recentlyViewed=${encodeURIComponent(
+    JSON.stringify(updatedRecentlyViewed)
+  )}; Path=/; HttpOnly; Max-Age=2592000`; // 30 days
 
-  return { product, relatedProducts, recentlyViewedProducts };
-}
+  // Add the cookie header to the response
+  const headers = new Headers();
+  headers.append('Set-Cookie', recentlyViewedCookie);
 
-
-function loadDeferredData({ context, params }) {
-  const { storefront } = context;
-
-  const variants = storefront.query(VARIANTS_QUERY, {
-    variables: { handle: params.handle },
-  }).catch((error) => {
-    console.error(error);
-    return null;
-  });
-
-  return { variants };
+  return { product, relatedProducts, recentlyViewed: updatedRecentlyViewed, headers };
 }
 
 function redirectToFirstVariant({ product, request }) {
@@ -118,7 +103,7 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts, recentlyViewedProducts } = useLoaderData();
+  const { product, variants, relatedProducts } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -139,20 +124,6 @@ export default function Product() {
     }
   }, [quantity, selectedVariant]);
 
-  // Save recently viewed product handles
-  useEffect(() => {
-    const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
-    if (!recentlyViewed.includes(product.handle)) {
-      recentlyViewed.unshift(product.handle); // Add current handle
-      if (recentlyViewed.length > 10) recentlyViewed.pop(); // Limit to 10
-      localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
-    }
-
-    // Update query params in URL
-    const url = new URL(window.location);
-    url.searchParams.set('recentlyViewed', recentlyViewed.join(','));
-    window.history.replaceState(null, '', url.toString());
-  }, [product.handle]);
 
   const { title, descriptionHtml, images } = product;
 
@@ -162,7 +133,8 @@ export default function Product() {
   return (
     <div className="product">
       <div className="ProductPageTop">
-        <ProductImages images={images.edges} selectedVariantImage={selectedVariant?.image} />
+        <ProductImages images={images.edges}
+          selectedVariantImage={selectedVariant?.image} />
         <div className="product-main">
           <h1>{title}</h1>
           <div className="price-container">
@@ -197,12 +169,11 @@ export default function Product() {
           >
             <Await resolve={variants} errorElement="There was a problem loading product variants">
               {(data) => (
-                <>
-                  <ProductForm
-                    product={product}
-                    selectedVariant={selectedVariant}
-                    variants={data?.product?.variants.nodes || []}
-                    quantity={quantity} />
+                <><ProductForm
+                  product={product}
+                  selectedVariant={selectedVariant}
+                  variants={data?.product?.variants.nodes || []}
+                  quantity={quantity} />
                   <DirectCheckoutButton
                     selectedVariant={selectedVariant}
                     quantity={quantity} />
@@ -322,15 +293,13 @@ export default function Product() {
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
-      <div className="recently-viewed">
-        <div className="recently-viewed-section">
-          <h2>Recently Viewed Products</h2>
-          <RecentlyViewed products={recentlyViewedProducts || []} />
-        </div>
+      <div className="recently-viewed-products-row">
+        <RecentlyViewedProducts products={recentlyViewed || []} />
       </div>
     </div >
   );
 }
+
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
