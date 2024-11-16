@@ -280,5 +280,4 @@ export const RELATED_PRODUCTS_QUERY = `#graphql
     }
   }
 }
-
 `;

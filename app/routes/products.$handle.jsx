@@ -60,11 +60,12 @@ async function loadCriticalData({ context, params, request }) {
   }
 
   console.log('Product Type:', product.productType);
-  const productType = product.productType || 'default-type'; // Replace 'default-type' with an actual fallback type.
+  const productType = product.productType || 'Laptops'; // Use fallback value if productType is missing
 
+  // Fetch related products based on product type
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: {
-      productType: productType, // Use fallback value if productType is missing
+      productType: productType, // Use the productType to fetch related products
     },
   });
 
@@ -129,7 +130,6 @@ export default function Product() {
       setSubtotal(price * quantity);
     }
   }, [quantity, selectedVariant]);
-
 
   const { title, descriptionHtml, images } = product;
 
@@ -294,12 +294,10 @@ export default function Product() {
         />
       </div>
       <div className="related-products-row">
-        {relatedProducts?.length > 0 && (
-          <div className="related-products">
-            <h2>Related Products</h2>
-            <RelatedProductsRow products={relatedProducts} />
-          </div>
-        )}
+        <div className="related-products">
+          <h2>Related Products</h2>
+          <RelatedProductsRow products={relatedProducts} />
+        </div>
       </div>
     </div>
   );
