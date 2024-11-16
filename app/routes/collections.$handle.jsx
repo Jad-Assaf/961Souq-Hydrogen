@@ -386,7 +386,7 @@ export default function Collection() {
 const ProductItem = React.memo(({ product, index, numberInRow }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '0px 0px 100px 0px' });
+  const isInView = useInView(ref, { once: true, margin: '0px 0px 75px 0px' });
   const controls = useAnimation();
 
   // Calculate row and column delay

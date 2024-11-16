@@ -14,6 +14,8 @@ import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
+import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
+import RelatedProductsRow from '~/components/RelatedProducts';
 
 
 export const meta = ({ data }) => {
@@ -35,6 +37,7 @@ async function loadCriticalData({ context, params, request }) {
     throw new Error('Expected product handle to be defined');
   }
 
+  // Fetch the product details
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: { handle, selectedOptions: getSelectedProductOptions(request) || [] },
   });
@@ -56,7 +59,14 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  return { product };
+  // Fetch related products from the same collection
+  const { collection } = await storefront.query(RELATED_PRODUCTS_QUERY, {
+    variables: { collectionHandle: product.handle }, // Adjust logic to use a dynamic collection handle
+  });
+
+  const relatedProducts = collection?.products.edges.map((edge) => edge.node) || [];
+
+  return { product, relatedProducts };
 }
 
 function loadDeferredData({ context, params }) {
@@ -87,8 +97,23 @@ function redirectToFirstVariant({ product, request }) {
   );
 }
 
+function redirectToFirstVariant({ product, request }) {
+  const url = new URL(request.url);
+  const firstVariant = product.variants.nodes[0];
+
+  return redirect(
+    getVariantUrl({
+      pathname: `/products/${product.handle}`,
+      handle: product.handle,
+      selectedOptions: firstVariant.selectedOptions,
+      searchParams: new URLSearchParams(url.search),
+    }),
+    { status: 302 }
+  );
+}
+
 export default function Product() {
-  const { product, variants } = useLoaderData();
+  const { product, variants, relatedProducts } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -271,8 +296,16 @@ export default function Product() {
             ],
           }}
         />
-      </div >
-    </div >
+      </div>
+      <div className="related-products-row">
+        {relatedProducts?.length > 0 && (
+          <div className="related-products">
+            <h2>Related Products</h2>
+            <RelatedProductsRow products={relatedProducts} />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
