@@ -64,7 +64,7 @@ async function loadCriticalData({ context, params, request }) {
   // Fetch related products based on product type
   const { data, errors } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: {
-      productType: productType,
+      productType, // Pass productType directly
     },
   });
 
