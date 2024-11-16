@@ -16,6 +16,7 @@ import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
+import RecentlyViewed from '~/components/RecentlyViewed';
 
 
 export const meta = ({ data }) => {
@@ -26,7 +27,23 @@ export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
 
-  return defer({ ...deferredData, ...criticalData });
+  const url = new URL(args.request.url);
+  const recentlyViewedHandles = url.searchParams.get('recentlyViewed')?.split(',') || [];
+
+  // Fetch details for recently viewed products
+  const { storefront } = args.context;
+  const recentlyViewedProducts = recentlyViewedHandles.length
+    ? await Promise.all(
+      recentlyViewedHandles.map(async (handle) => {
+        const { product } = await storefront.query(PRODUCT_QUERY, {
+          variables: { handle, selectedOptions: [] },
+        });
+        return product;
+      })
+    )
+    : [];
+
+  return defer({ ...deferredData, ...criticalData, recentlyViewedProducts });
 }
 
 async function loadCriticalData({ context, params, request }) {
@@ -99,7 +116,7 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts } = useLoaderData();
+  const { product, variants, relatedProducts, recentlyViewedProducts } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -125,6 +142,23 @@ export default function Product() {
 
   const hasDiscount = selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
+
+  function addRecentlyViewed(handle) {
+    const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+    if (!recentlyViewed.includes(handle)) {
+      recentlyViewed.unshift(handle); // Add to the start of the array
+      if (recentlyViewed.length > 5) {
+        recentlyViewed.pop(); // Limit to 5 items
+      }
+      localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+    }
+  }
+
+  useEffect(() => {
+    if (product?.handle) {
+      addRecentlyViewed(product.handle);
+    }
+  }, [product.handle]);
 
   return (
     <div className="product">
@@ -289,7 +323,9 @@ export default function Product() {
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
-
+      <div className="recently-viewed">
+        <RecentlyViewed products={recentlyViewedProducts} />
+      </div>
     </div >
   );
 }

@@ -89,7 +89,7 @@ function RelatedProductItem({ product, index }) {
                     />
                     <div className="product-title">{product.title}</div>
                     <div className="product-price">
-                        From {product.priceRange.minVariantPrice.amount}{' '}
+                        {product.priceRange.minVariantPrice.amount}{' '}
                         {product.priceRange.minVariantPrice.currencyCode}
                     </div>
                 </Link>
