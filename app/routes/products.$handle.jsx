@@ -58,8 +58,10 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
+  console.log('Full Product Data:', product);
+  console.log('Product Type:', product.productType);
+
   const productType = product.productType || 'General';
-  console.log(productType)
 
   // Fetch related products
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
