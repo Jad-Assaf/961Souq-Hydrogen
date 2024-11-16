@@ -59,12 +59,15 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  // Fetch related products from the same collection
   const { collection } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: { collectionHandle: product.handle }, // Adjust logic to use a dynamic collection handle
   });
 
+  console.log('Related Products Query Response:', collection);
+
   const relatedProducts = collection?.products.edges.map((edge) => edge.node) || [];
+
+  console.log('Mapped Related Products:', relatedProducts);
 
   return { product, relatedProducts };
 }

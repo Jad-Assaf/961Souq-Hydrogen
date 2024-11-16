@@ -331,7 +331,6 @@ button {
 }
 
 .product-form {
-  margin: 15px auto 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
