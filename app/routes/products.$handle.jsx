@@ -16,8 +16,6 @@ import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
-import RecentlyViewedProducts from '~/components/RecentlyViewed';
-
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -68,23 +66,20 @@ async function loadCriticalData({ context, params, request }) {
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
-  // Handle recently viewed products via cookies
-  const cookieHeader = request.headers.get('Cookie') || '';
-  const cookies = new Map(cookieHeader.split(';').map((c) => c.trim().split('=')));
-  const recentlyViewed = cookies.get('recentlyViewed')
-    ? JSON.parse(decodeURIComponent(cookies.get('recentlyViewed')))
-    : [];
+  return { product, relatedProducts };
+}
 
-  const updatedRecentlyViewed = [product.id, ...recentlyViewed.filter((id) => id !== product.id)].slice(0, 5);
-  const recentlyViewedCookie = `recentlyViewed=${encodeURIComponent(
-    JSON.stringify(updatedRecentlyViewed)
-  )}; Path=/; HttpOnly; Max-Age=2592000`; // 30 days
+function loadDeferredData({ context, params }) {
+  const { storefront } = context;
 
-  // Add the cookie header to the response
-  const headers = new Headers();
-  headers.append('Set-Cookie', recentlyViewedCookie);
+  const variants = storefront.query(VARIANTS_QUERY, {
+    variables: { handle: params.handle },
+  }).catch((error) => {
+    console.error(error);
+    return null;
+  });
 
-  return { product, relatedProducts, recentlyViewed: updatedRecentlyViewed, headers };
+  return { variants };
 }
 
 function redirectToFirstVariant({ product, request }) {
@@ -103,7 +98,7 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts, recentlyViewed } = useLoaderData();
+  const { product, variants, relatedProducts } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -293,12 +288,7 @@ export default function Product() {
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
-      <div className="recently-viewed-products-row">
-        <RecentlyViewedProducts
-          storefront={storefront}
-          recentlyViewedIds={recentlyViewed}
-        />
-      </div>
+
     </div >
   );
 }
