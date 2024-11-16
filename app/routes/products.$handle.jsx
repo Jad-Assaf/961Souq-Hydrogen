@@ -58,10 +58,11 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  console.log('Full Product Data:', product);
-  console.log('Product Type:', product.productType);
+  console.log('Inside loadCriticalData - Product:', product);
+  console.log('Inside loadCriticalData - Product Type:', product.productType);
 
   const productType = product.productType || 'General';
+  console.log('Fallback Product Type:', productType);
 
   // Fetch related products
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
@@ -69,6 +70,9 @@ async function loadCriticalData({ context, params, request }) {
   });
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
+
+  console.log('Related Products Response:', products);
+  console.log('Mapped Related Products:', relatedProducts);
 
   return { product, relatedProducts };
 }
@@ -107,6 +111,9 @@ export default function Product() {
     product.selectedVariant,
     variants
   );
+
+  console.log('Product Type in Component:', product?.productType);
+  console.log('Related Products:', relatedProducts);
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
