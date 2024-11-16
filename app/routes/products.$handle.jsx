@@ -59,16 +59,21 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  // Fetch related products by product type
-  const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
-    variables: {
-      productType: product.productType, // Use product type for related products
-      country: 'US', // Replace with dynamic country if needed
-      language: 'EN', // Replace with dynamic language if needed
-    },
-  });
+  console.log('Product Type:', product.productType);
 
-  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
+  // Fetch related products by product type
+  let relatedProducts = [];
+  if (product.productType) {
+    const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
+      variables: {
+        productType: product.productType, // Use product type for related products
+      },
+    });
+
+    relatedProducts = products?.edges.map((edge) => edge.node) || [];
+  }
+
+  console.log('Mapped Related Products:', relatedProducts);
 
   return { product, relatedProducts };
 }
@@ -107,6 +112,8 @@ export default function Product() {
     product.selectedVariant,
     variants
   );
+
+  console.log('Related Products in Component:', relatedProducts);
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
