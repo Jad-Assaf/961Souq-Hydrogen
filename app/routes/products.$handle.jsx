@@ -59,15 +59,16 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  const { collection } = await storefront.query(RELATED_PRODUCTS_QUERY, {
-    variables: { collectionHandle: "apple" }, // Adjust logic to use a dynamic collection handle
+  // Fetch related products by product type
+  const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
+    variables: {
+      productType: product.productType, // Use product type for related products
+      country: 'US', // Replace with dynamic country if needed
+      language: 'EN', // Replace with dynamic language if needed
+    },
   });
 
-  console.log('Related Products Query Response:', collection);
-
-  const relatedProducts = collection?.products.edges.map((edge) => edge.node) || [];
-
-  console.log('Mapped Related Products:', relatedProducts);
+  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
   return { product, relatedProducts };
 }
