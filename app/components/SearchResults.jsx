@@ -89,6 +89,22 @@ function SearchResultsPages({term, pages}) {
  * @param {PartialSearchResult<'products'>}
  */
 function SearchResultsProducts({term, products}) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '0px 0px 75px 0px' });
+  const controls = useAnimation();
+
+  // Calculate row and column delay
+  const rowIndex = Math.floor(index / numberInRow);
+  const columnIndex = index % numberInRow;
+  const delay = Math.min(rowIndex * 0.1 + columnIndex * 0.05, 1); // Cap delay at 0.5s
+
+  useEffect(() => {
+    if (isInView) {
+      controls.start("visible");
+    }
+  }, [isInView, controls, index, numberInRow]);
+
   if (!products?.nodes.length) {
     return null;
   }
