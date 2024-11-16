@@ -59,7 +59,7 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  const productType = product.productType || 'default-type'; // Use fallback value if productType is missing
+  const productType = product.productType || 'Laptops'; // Use fallback value if productType is missing
 
   console.log('Product Type:', productType); // Log the product type
 
