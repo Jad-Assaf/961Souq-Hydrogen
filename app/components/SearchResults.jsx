@@ -1,8 +1,6 @@
 import {Link} from '@remix-run/react';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
 import {urlWithTrackingParams} from '~/lib/search';
-import { motion, useAnimation, useInView } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
 
 /**
  * @param {Omit<SearchResultsProps, 'error' | 'type'>}
@@ -90,12 +88,6 @@ function SearchResultsPages({term, pages}) {
  * @param {PartialSearchResult<'products'>}
  */
 function SearchResultsProducts({term, products}) {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '0px 0px 75px 0px' });
-  const controls = useAnimation();
-
-
   if (!products?.nodes.length) {
     return null;
   }
@@ -110,17 +102,6 @@ function SearchResultsProducts({term, products}) {
 
             return (
               <div className="search-results-item product-card" key={product.id}>
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={controls}
-                  variants={{
-                    visible: {
-                      opacity: 1,
-                      x: 0,
-                      transition: { delay, duration: 0.2 }
-                    }
-                  }}
-                >
                 <Link prefetch="intent" to={productUrl} className='collection-product-link'>
                   {product.variants.nodes[0].image && (
                     <Image
@@ -136,7 +117,6 @@ function SearchResultsProducts({term, products}) {
                     </small>
                   </div>
                 </Link>
-                </motion.div>
               </div>
             );
           });
