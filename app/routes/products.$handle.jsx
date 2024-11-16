@@ -14,6 +14,7 @@ import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
+import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 
 
@@ -58,24 +59,22 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
+  console.log('Product Type:', product.productType);
   const productType = product.productType || 'Laptops'; // Use fallback value if productType is missing
-  console.log('Product Type:', productType); // Log the product type
 
   // Fetch related products based on product type
-  const { data, errors } = await storefront.query(RELATED_PRODUCTS_QUERY, {
+  const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: {
-      productType, // Pass productType directly
+      productType: productType, // Use the productType to fetch related products
     },
   });
 
-  if (errors) {
-    console.error('GraphQL errors fetching related products:', errors);
+  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
+  console.log('Mapped Related Products:', relatedProducts);
+
+  if (relatedProducts.length === 0) {
+    console.log('No related products found for this product type.');
   }
-
-  console.log('Related Products Query Response:', data); // Log the full response
-
-  const relatedProducts = data?.products?.edges.map((edge) => edge.node) || [];
-  console.log('Related Products:', relatedProducts); // Log the related products
 
   return { product, relatedProducts };
 }
@@ -432,40 +431,6 @@ const VARIANTS_QUERY = `#graphql
   }
 `;
 
-const RELATED_PRODUCTS_QUERY = `#graphql
-  query RelatedProducts($productType: String!) {
-    products(first: 10, query: "productType:${'$'}productType") {
-      edges {
-        node {
-          id
-          title
-          handle
-          images(first: 1) {
-            edges {
-              node {
-                url
-                altText
-              }
-            }
-          }
-          variants(first: 1) {
-            nodes {
-              id
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-              }
-              availableForSale
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
