@@ -77,7 +77,7 @@ async function loadCriticalData({ context, params, request }) {
     // Fetch products individually by handle
     recentlyViewedProducts = await Promise.all(
       recentlyViewedHandles.map(async (handle) => {
-        const { product } = await storefront.query(PRODUCT_QUERY, {
+        const { product } = await storefront.query(RECENTLY_VIEWED_PRODUCTS_QUERY, {
           variables: { handle, selectedOptions: [] },
         });
         return product;
