@@ -1,54 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import { gql, useShopQuery } from '@shopify/hydrogen';
 
-const RECENTLY_VIEWED_PRODUCTS_QUERY = gql`
-  query getRecentlyViewedProducts($ids: [ID!]!) {
-    nodes(ids: $ids) {
-      ... on Product {
-        id
-        title
-        handle
-        images(first: 1) {
-          edges {
-            node {
-              src
-              altText
-            }
-          }
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-      }
-    }
-  }
-`;
-
-function RecentlyViewedProducts() {
-    const [recentlyViewedIds, setRecentlyViewedIds] = useState([]);
+function RecentlyViewedProducts({ storefront, recentlyViewedIds }) {
     const [products, setProducts] = useState([]);
 
     useEffect(() => {
-        const storedIds = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
-        setRecentlyViewedIds(storedIds);
-    }, []);
+        if (recentlyViewedIds.length > 0) {
+            const fetchProducts = async () => {
+                const query = `#graphql
+          query getRecentlyViewedProducts($ids: [ID!]!) {
+            nodes(ids: $ids) {
+              ... on Product {
+                id
+                title
+                handle
+                images(first: 1) {
+                  edges {
+                    node {
+                      src
+                      altText
+                    }
+                  }
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
+            }
+          }
+        `;
 
-    const { data } = useShopQuery({
-        query: RECENTLY_VIEWED_PRODUCTS_QUERY,
-        variables: { ids: recentlyViewedIds },
-        skip: recentlyViewedIds.length === 0,
-    });
+                const response = await storefront.query(query, {
+                    variables: { ids: recentlyViewedIds },
+                });
 
-    useEffect(() => {
-        if (data?.nodes) {
-            setProducts(data.nodes);
+                setProducts(response.nodes || []);
+            };
+
+            fetchProducts();
         }
-    }, [data]);
+    }, [recentlyViewedIds, storefront]);
 
-    if (products.length === 0) return null;
+    if (!products || products.length === 0) return null;
 
     return (
         <div className="recently-viewed-products">

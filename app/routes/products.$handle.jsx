@@ -103,7 +103,7 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts } = useLoaderData();
+  const { product, variants, relatedProducts, recentlyViewed } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -294,7 +294,10 @@ export default function Product() {
         </div>
       </div>
       <div className="recently-viewed-products-row">
-        <RecentlyViewedProducts products={recentlyViewed || []} />
+        <RecentlyViewedProducts
+          storefront={storefront}
+          recentlyViewedIds={recentlyViewed}
+        />
       </div>
     </div >
   );
