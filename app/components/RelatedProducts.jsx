@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { Image } from '@shopify/hydrogen';
 import { Money } from '@shopify/hydrogen';
 import { useInView } from 'react-intersection-observer';
-import AddToCartButton from './AddToCartButton'; // Ensure this is a valid component
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments'; // Ensure this path and query exist
 import { Link } from '@remix-run/react';
+import { AddToCartButton } from './AddToCartButton';
 
 function RelatedProductsRow({ products }) {
     const rowRef = useRef(null);
