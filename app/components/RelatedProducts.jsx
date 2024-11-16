@@ -25,17 +25,13 @@ export default function RelatedProductsRow({ products }) {
         if (!isDragging) return;
         e.preventDefault();
         const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2; // Speed adjustment
+        const walk = (x - startX) * 2;
         rowRef.current.scrollLeft = scrollLeft - walk;
     };
 
     const scrollRow = (distance) => {
         rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
     };
-
-    if (!products.length) {
-        return <p>No related products found.</p>;
-    }
 
     return (
         <div className="product-row-container">
@@ -63,12 +59,8 @@ export default function RelatedProductsRow({ products }) {
 
 function RelatedProductItem({ product, index }) {
     const ref = useRef(null);
-    const { open } = useAside();
 
-    // Determine selected variant and discount
-    const selectedVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
-    const hasVariants = product.variants.nodes.length > 1;
-
+    // Check for discounts
     const hasDiscount =
         product.compareAtPriceRange &&
         product.compareAtPriceRange.minVariantPrice.amount >
@@ -99,48 +91,14 @@ function RelatedProductItem({ product, index }) {
                     />
                     <h4 className="product-title">{product.title}</h4>
                     <div className="product-price">
-                        <Money data={selectedVariant.price} />
+                        <Money data={product.priceRange.minVariantPrice} />
                         {hasDiscount && (
                             <small className="discountedPrice">
-                                <Money data={selectedVariant.compareAtPrice} />
+                                <Money data={product.compareAtPriceRange.minVariantPrice} />
                             </small>
                         )}
                     </div>
                 </Link>
-
-                {/* Add to Cart Button */}
-                <AddToCartButton
-                    disabled={!selectedVariant || !selectedVariant.availableForSale}
-                    onClick={() => {
-                        if (hasVariants) {
-                            // Navigate to product page if multiple variants
-                            window.location.href = `/products/${product.handle}`;
-                        } else {
-                            open('cart');
-                        }
-                    }}
-                    lines={
-                        selectedVariant && !hasVariants
-                            ? [
-                                {
-                                    merchandiseId: selectedVariant.id,
-                                    quantity: 1,
-                                    product: {
-                                        ...product,
-                                        selectedVariant,
-                                        handle: product.handle,
-                                    },
-                                },
-                            ]
-                            : []
-                    }
-                >
-                    {!selectedVariant?.availableForSale
-                        ? 'Sold out'
-                        : hasVariants
-                            ? 'Select Options'
-                            : 'Add to cart'}
-                </AddToCartButton>
             </motion.div>
         </motion.div>
     );
