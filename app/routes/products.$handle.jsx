@@ -46,7 +46,6 @@ async function loadCriticalData({ context, params, request }) {
     throw new Response("Product not found", { status: 404 });
   }
 
-  // Handle default variant selection
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
     firstVariant.selectedOptions.find(
@@ -75,17 +74,20 @@ async function loadCriticalData({ context, params, request }) {
 
   let recentlyViewedProducts = [];
   if (recentlyViewedHandles.length) {
-    const { products: recentlyViewedProductEdges } = await storefront.query(
-      RECENTLY_VIEWED_PRODUCTS_QUERY,
-      {
-        variables: { handles: recentlyViewedHandles },
-      }
+    // Fetch products individually by handle
+    recentlyViewedProducts = await Promise.all(
+      recentlyViewedHandles.map(async (handle) => {
+        const { product } = await storefront.query(PRODUCT_QUERY, {
+          variables: { handle, selectedOptions: [] },
+        });
+        return product;
+      })
     );
-    recentlyViewedProducts = recentlyViewedProductEdges?.edges.map((edge) => edge.node) || [];
   }
 
   return { product, relatedProducts, recentlyViewedProducts };
 }
+
 
 function loadDeferredData({ context, params }) {
   const { storefront } = context;
@@ -326,16 +328,9 @@ export default function Product() {
           <RecentlyViewed products={recentlyViewedProducts || []} />
         </div>
       </div>
-      <div className="recently-viewed">
-        <div className="recently-viewed-section">
-          <h2>Recently Viewed Products</h2>
-          <RecentlyViewed products={recentlyViewedProducts || []} />
-        </div>
-      </div>
     </div >
   );
 }
-
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
