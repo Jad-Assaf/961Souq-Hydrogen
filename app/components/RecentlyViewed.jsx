@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 
