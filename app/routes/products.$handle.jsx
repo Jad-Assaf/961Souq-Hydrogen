@@ -11,13 +11,12 @@ import { getVariantUrl } from '~/lib/variants';
 import { ProductPrice } from '~/components/ProductPrice';
 import { ProductImages } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
-import "../styles/ProductPage.css"
+import "../styles/ProductPage.css";
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RECENTLY_VIEWED_PRODUCTS_QUERY, RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 import RecentlyViewed from '~/components/RecentlyViewed';
-
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -138,6 +137,20 @@ export default function Product() {
     }
   }, [quantity, selectedVariant]);
 
+  // Save recently viewed product handles
+  useEffect(() => {
+    const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+    if (!recentlyViewed.includes(product.handle)) {
+      recentlyViewed.unshift(product.handle); // Add current handle
+      if (recentlyViewed.length > 10) recentlyViewed.pop(); // Limit to 10
+      localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+    }
+
+    // Update query params in URL
+    const url = new URL(window.location);
+    url.searchParams.set('recentlyViewed', recentlyViewed.join(','));
+    window.history.replaceState(null, '', url.toString());
+  }, [product.handle]);
 
   const { title, descriptionHtml, images } = product;
 
@@ -147,8 +160,7 @@ export default function Product() {
   return (
     <div className="product">
       <div className="ProductPageTop">
-        <ProductImages images={images.edges}
-          selectedVariantImage={selectedVariant?.image} />
+        <ProductImages images={images.edges} selectedVariantImage={selectedVariant?.image} />
         <div className="product-main">
           <h1>{title}</h1>
           <div className="price-container">
@@ -183,11 +195,12 @@ export default function Product() {
           >
             <Await resolve={variants} errorElement="There was a problem loading product variants">
               {(data) => (
-                <><ProductForm
-                  product={product}
-                  selectedVariant={selectedVariant}
-                  variants={data?.product?.variants.nodes || []}
-                  quantity={quantity} />
+                <>
+                  <ProductForm
+                    product={product}
+                    selectedVariant={selectedVariant}
+                    variants={data?.product?.variants.nodes || []}
+                    quantity={quantity} />
                   <DirectCheckoutButton
                     selectedVariant={selectedVariant}
                     quantity={quantity} />
@@ -305,6 +318,12 @@ export default function Product() {
         <div className="related-products">
           <h2>Related Products</h2>
           <RelatedProductsRow products={relatedProducts || []} />
+        </div>
+      </div>
+      <div className="recently-viewed">
+        <div className="recently-viewed-section">
+          <h2>Recently Viewed Products</h2>
+          <RecentlyViewed products={recentlyViewedProducts || []} />
         </div>
       </div>
       <div className="recently-viewed">
