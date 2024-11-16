@@ -63,12 +63,12 @@ async function loadCriticalData({ context, params, request }) {
 
   // Fetch related products based on product type
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
-    variables: {
-      productType: `product_type:${productType}`,
-    },
+    variables: { productType },
   });
+  console.log('GraphQL Response for Related Products:', products);
 
-  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
+  const relatedProducts =
+    products?.edges?.map((edge) => edge.node) || [];
   console.log('Mapped Related Products:', relatedProducts);
 
   if (relatedProducts.length === 0) {
@@ -295,7 +295,7 @@ export default function Product() {
       <div className="related-products-row">
         <div className="related-products">
           <h2>Related Products</h2>
-          <RelatedProductsRow products={relatedProducts} />
+          <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
     </div>
