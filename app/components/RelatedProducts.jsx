@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { motion } from 'framer-motion';
-import { Image, Money } from '@shopify/hydrogen';
+import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
+import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
+import { AddToCartButton } from './AddToCartButton';
+import { useAside } from './Aside';
 
 export default function RelatedProductsRow({ products }) {
     const rowRef = useRef(null);
@@ -61,6 +63,11 @@ export default function RelatedProductsRow({ products }) {
 
 function RelatedProductItem({ product, index }) {
     const ref = useRef(null);
+    const { open } = useAside();
+
+    // Determine selected variant and discount
+    const selectedVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+    const hasVariants = product.variants.nodes.length > 1;
 
     const hasDiscount =
         product.compareAtPriceRange &&
@@ -92,14 +99,48 @@ function RelatedProductItem({ product, index }) {
                     />
                     <h4 className="product-title">{product.title}</h4>
                     <div className="product-price">
-                        <Money data={product.priceRange.minVariantPrice} />
+                        <Money data={selectedVariant.price} />
                         {hasDiscount && (
                             <small className="discountedPrice">
-                                <Money data={product.compareAtPriceRange.minVariantPrice} />
+                                <Money data={selectedVariant.compareAtPrice} />
                             </small>
                         )}
                     </div>
                 </Link>
+
+                {/* Add to Cart Button */}
+                <AddToCartButton
+                    disabled={!selectedVariant || !selectedVariant.availableForSale}
+                    onClick={() => {
+                        if (hasVariants) {
+                            // Navigate to product page if multiple variants
+                            window.location.href = `/products/${product.handle}`;
+                        } else {
+                            open('cart');
+                        }
+                    }}
+                    lines={
+                        selectedVariant && !hasVariants
+                            ? [
+                                {
+                                    merchandiseId: selectedVariant.id,
+                                    quantity: 1,
+                                    product: {
+                                        ...product,
+                                        selectedVariant,
+                                        handle: product.handle,
+                                    },
+                                },
+                            ]
+                            : []
+                    }
+                >
+                    {!selectedVariant?.availableForSale
+                        ? 'Sold out'
+                        : hasVariants
+                            ? 'Select Options'
+                            : 'Add to cart'}
+                </AddToCartButton>
             </motion.div>
         </motion.div>
     );
