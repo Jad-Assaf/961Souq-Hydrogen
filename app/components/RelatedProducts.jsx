@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { motion } from 'framer-motion';
 import { Image, Money } from '@shopify/hydrogen';
+import '../styles/CollectionSlider.css';
 
 export default function RelatedProductsRow({ products }) {
     const rowRef = useRef(null);
