@@ -14,7 +14,6 @@ import { ProductForm } from '~/components/ProductForm';
 import "../styles/ProductPage.css"
 import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
-import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 
 
@@ -433,6 +432,40 @@ const VARIANTS_QUERY = `#graphql
   }
 `;
 
+const RELATED_PRODUCTS_QUERY = `#graphql
+  query RelatedProducts($productType: String!) {
+    products(first: 10, query: "productType:${productType}") {
+      edges {
+        node {
+          id
+          title
+          handle
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+          variants(first: 1) {
+            nodes {
+              id
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+              }
+              availableForSale
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
