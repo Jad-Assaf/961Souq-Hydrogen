@@ -3,8 +3,6 @@ import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
-import { AddToCartButton } from './AddToCartButton';
-import { useAside } from './Aside';
 
 export default function RelatedProductsRow({ products }) {
     const rowRef = useRef(null);
@@ -33,6 +31,10 @@ export default function RelatedProductsRow({ products }) {
         rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
     };
 
+    if (!products.length) {
+        return <p>No related products found.</p>;
+    }
+
     return (
         <div className="product-row-container">
             <button className="home-prev-button" onClick={() => scrollRow(-600)}>
@@ -59,47 +61,42 @@ export default function RelatedProductsRow({ products }) {
 
 function RelatedProductItem({ product, index }) {
     const ref = useRef(null);
-
-    // Check for discounts
-    const hasDiscount =
-        product.compareAtPriceRange &&
-        product.compareAtPriceRange.minVariantPrice.amount >
-        product.priceRange.minVariantPrice.amount;
+    const isInView = useInView(ref, { once: true });
 
     return (
         <motion.div
             ref={ref}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: index * 0.01, duration: 0.5 }}
-            className="product-item"
+            className="category-container"
         >
-            <motion.div
-                initial={{ filter: 'blur(10px)', opacity: 0 }}
-                animate={{ filter: 'blur(0px)', opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="product-card"
-            >
-                <Link to={`/products/${product.handle}`}>
+            <Link to={`/products/${product.handle}`}>
+                <motion.div
+                    initial={{ filter: 'blur(10px)', opacity: 0 }}
+                    animate={{ filter: 'blur(0px)', opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="category-content"
+                >
                     <Image
-                        src={product.images.edges[0]?.node.url}
-                        alt={product.images.edges[0]?.node.altText || 'Product Image'}
+                        data={product.images.edges[0]?.node}
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
-                        width="180px"
-                        height="180px"
+                        srcSet={`${product.images.edges[0]?.node.url}?width=300&quality=30 300w,
+                                 ${product.images.edges[0]?.node.url}?width=600&quality=30 600w,
+                                 ${product.images.edges[0]?.node.url}?width=1200&quality=30 1200w`}
+                        alt={product.images.edges[0]?.node.altText || product.title}
+                        className="category-image"
+                        width="150px"
+                        height="150px"
                     />
-                    <h4 className="product-title">{product.title}</h4>
-                    <div className="product-price">
-                        <Money data={product.priceRange.minVariantPrice} />
-                        {hasDiscount && (
-                            <small className="discountedPrice">
-                                <Money data={product.compareAtPriceRange.minVariantPrice} />
-                            </small>
-                        )}
+                    <div className="category-title">{product.title}</div>
+                    <div className="category-price">
+                        From {product.priceRange.minVariantPrice.amount}{' '}
+                        {product.priceRange.minVariantPrice.currencyCode}
                     </div>
-                </Link>
-            </motion.div>
+                </motion.div>
+            </Link>
         </motion.div>
     );
 }
