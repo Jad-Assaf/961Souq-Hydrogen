@@ -3,15 +3,9 @@ import { Link } from '@remix-run/react';
 import { Image, Money } from '@shopify/hydrogen';
 
 export default function RecentlyViewed({ products }) {
-    const [recentlyViewed, setRecentlyViewed] = useState([]);
-
-    useEffect(() => {
-        // Load recently viewed products from localStorage
-        const handles = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
-        setRecentlyViewed(handles.slice(0, 5)); // Limit to 5 products
-    }, []);
-
-    if (!recentlyViewed.length) return null;
+    if (!products || products.length === 0) {
+        return <div>No recently viewed products yet.</div>;
+    }
 
     return (
         <div className="recently-viewed-section">
