@@ -8,6 +8,7 @@ import { AddToCartButton } from './AddToCartButton';
 
 function RelatedProductsRow({ products }) {
     if (!products || products.length === 0) {
+        console.log('No related products to render.');
         return <p>No related products available.</p>;
     }
 

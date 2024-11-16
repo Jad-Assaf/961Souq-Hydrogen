@@ -17,7 +17,6 @@ import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 
-
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
 };
@@ -65,7 +64,7 @@ async function loadCriticalData({ context, params, request }) {
   // Fetch related products based on product type
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: {
-      productType: productType, // Use the productType to fetch related products
+      productType: `product_type:${productType}`,
     },
   });
 
