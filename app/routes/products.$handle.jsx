@@ -59,22 +59,23 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  console.log('Product Type:', product.productType);
-  const productType = product.productType || 'Laptops'; // Use fallback value if productType is missing
+  const productType = product.productType || 'default-type'; // Use fallback value if productType is missing
+
+  console.log('Product Type:', productType); // Log the product type
 
   // Fetch related products based on product type
-  const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
+  const { data, error } = await storefront.query(RELATED_PRODUCTS_QUERY, {
     variables: {
       productType: productType, // Use the productType to fetch related products
     },
   });
 
-  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
-  console.log('Mapped Related Products:', relatedProducts);
-
-  if (relatedProducts.length === 0) {
-    console.log('No related products found for this product type.');
+  if (error) {
+    console.error('Error fetching related products:', error); // Log any errors
   }
+
+  const relatedProducts = data?.products?.edges.map((edge) => edge.node) || [];
+  console.log('Related Products:', relatedProducts); // Log the related products
 
   return { product, relatedProducts };
 }
