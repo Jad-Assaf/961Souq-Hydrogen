@@ -257,47 +257,28 @@ export const FOOTER_QUERY = `#graphql
 `;
 
 export const RELATED_PRODUCTS_QUERY = `#graphql
-  query RelatedProducts($productType: String!) {
+  query RelatedProductsByType($productType: String!) {
   products(first: 10, query: "product_type:$productType") {
     edges {
       node {
         id
         title
-        handle
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-        compareAtPriceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
+        productType
         images(first: 1) {
           nodes {
             url
             altText
           }
         }
-        variants(first: 1) {
-          nodes {
-            id
-            availableForSale
-            price {
-              amount
-              currencyCode
-            }
-            compareAtPrice {
-              amount
-              currencyCode
-            }
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
           }
         }
       }
     }
   }
 }
+
 `;

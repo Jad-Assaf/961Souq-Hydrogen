@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Image } from '@shopify/hydrogen';
 import { Money } from '@shopify/hydrogen';
 import { useInView } from 'react-intersection-observer';
-import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments'; // Ensure this path and query exist
 import { Link } from '@remix-run/react';
 import { AddToCartButton } from './AddToCartButton';
 
@@ -26,7 +25,7 @@ function RelatedProductsRow({ products }) {
         if (!isDragging) return;
         e.preventDefault();
         const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
+        const walk = (x - startX) * 2; // Speed factor
         rowRef.current.scrollLeft = scrollLeft - walk;
     };
 
@@ -59,7 +58,7 @@ function RelatedProductsRow({ products }) {
 }
 
 const RelatedProductItem = ({ product, index }) => {
-    const { ref, inView: isInView } = useInView({ triggerOnce: true });
+    const { ref, inView } = useInView({ triggerOnce: true });
     const selectedVariant =
         product.variants.nodes.find((variant) => variant.availableForSale) || product.variants.nodes[0];
 
@@ -72,13 +71,13 @@ const RelatedProductItem = ({ product, index }) => {
         <motion.div
             ref={ref}
             initial={{ opacity: 0, x: -20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: index * 0.01, duration: 0.5 }}
             className="product-item"
         >
             <motion.div
                 initial={{ filter: 'blur(10px)', opacity: 0 }}
-                animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                animate={inView ? { filter: 'blur(0px)', opacity: 1 } : {}}
                 transition={{ duration: 0.5 }}
                 className="product-card"
             >

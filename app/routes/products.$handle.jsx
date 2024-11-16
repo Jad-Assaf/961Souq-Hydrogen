@@ -62,16 +62,13 @@ async function loadCriticalData({ context, params, request }) {
   console.log('Product Type:', product.productType);
 
   // Fetch related products by product type
-  let relatedProducts = [];
-  if (product.productType) {
-    const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
-      variables: {
-        productType: product.productType, // Use product type for related products
-      },
-    });
+  const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
+    variables: {
+      productType: product.productType || '', // Ensure productType is not undefined
+    },
+  });
 
-    relatedProducts = products?.edges.map((edge) => edge.node) || [];
-  }
+  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
   console.log('Mapped Related Products:', relatedProducts);
 
