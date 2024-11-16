@@ -99,7 +99,7 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants } = useLoaderData();
+  const { product, variants, relatedProducts } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
