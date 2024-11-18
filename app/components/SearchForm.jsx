@@ -21,18 +21,32 @@ import {Form} from '@remix-run/react';
  *  </SearchForm>
  * @param {SearchFormProps}
  */
-export function SearchForm({ children, onSubmit, ...props }) {
+export function SearchForm({ children, ...props }) {
   const inputRef = useRef(null);
 
   useFocusOnCmdK(inputRef);
+
+  const handleInput = (event) => {
+    const inputValue = event.target.value;
+
+    // Check if the last character is a space
+    if (inputValue[inputValue.length - 1] === ' ') {
+      // Add wildcard in the backend value, but strip it out in the displayed value
+      const backendValue = inputValue.replace(/ /g, '* ') + '*';
+      event.target.setAttribute('data-backend-value', backendValue);  // Store backend value as an attribute
+
+      // Update only visible value without wildcards
+      event.target.value = inputValue;
+    }
+  };
 
   if (typeof children !== 'function') {
     return null;
   }
 
   return (
-    <Form method="get" {...props} onSubmit={onSubmit}>
-      {children({ inputRef })}
+    <Form method="get" {...props}>
+      {children({ inputRef, onInput: handleInput })}
     </Form>
   );
 }
