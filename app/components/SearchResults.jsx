@@ -129,9 +129,8 @@ function SearchResultsProducts({term, products}) {
                   {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
                 </PreviousLink>
               </div>
-              <div>
+              <div className="search-result-container">
                 {ItemsMarkup}
-                <br />
               </div>
               <div>
                 <NextLink>
