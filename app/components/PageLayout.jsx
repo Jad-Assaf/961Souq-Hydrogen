@@ -90,7 +90,7 @@ function SearchAside() {
       <div className="predictive-search">
         <br />
         <SearchFormPredictive>
-          {({fetchResults, goToSearch, inputRef}) => (
+          {({ fetchResults, goToSearch, inputRef }) => (
             <>
               <input
                 name="q"
@@ -102,7 +102,15 @@ function SearchAside() {
                 list={queriesDatalistId}
               />
               &nbsp;
-              <button onClick={goToSearch}>Search</button>
+              <button
+                onClick={() => {
+                  goToSearch(); // Corrected: Added parentheses to invoke goToSearch
+                  closeSearch();
+                  setSearchResultsVisible(false);
+                }}
+              >
+                Search
+              </button>
             </>
           )}
         </SearchFormPredictive>
