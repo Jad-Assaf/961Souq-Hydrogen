@@ -91,7 +91,13 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     onFocus={() => setSearchResultsVisible(true)}
                     className="search-bar"
                   />
-                  <button onClick={goToSearch} className="search-bar-submit">
+                  <button
+                    onClick={() => {
+                      goToSearch(); // Perform the search
+                      setSearchResultsVisible(false); // Close the search results
+                    }}
+                    className="search-bar-submit"
+                  >
                     <SearchIcon />
                   </button>
                 </div>
@@ -115,7 +121,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                               products={products}
                               closeSearch={() => {
                                 closeSearch();
-                                setSearchResultsVisible(false);
+                                setSearchResultsVisible(false); // Close results when closing search
                               }}
                               term={term}
                             />
@@ -123,7 +129,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                               <Link
                                 onClick={() => {
                                   closeSearch();
-                                  setSearchResultsVisible(false);
+                                  setSearchResultsVisible(false); // Close results when clicking "view all results"
                                 }}
                                 to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                                 className="view-all-results"
