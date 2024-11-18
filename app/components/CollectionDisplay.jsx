@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
@@ -110,10 +110,15 @@ function CategoryItem({ collection, index }) {
 
 function ProductRow({ products }) {
     const rowRef = useRef(null);
-    const [isInView, setIsInView] = useState(false); // Track visibility
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
+
+    // Implement lazy loading when the row comes into view
+    const { ref, inView } = useInView({
+        triggerOnce: true, // Trigger once when the row is in view
+        threshold: 0.1, // Trigger when 10% of the row is in view
+    });
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -136,48 +141,32 @@ function ProductRow({ products }) {
         rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
     };
 
-    // Use framer-motion's useInView hook to lazy load the row when it's in the viewport
-    const { ref, inView } = useInView({
-        triggerOnce: true, // This ensures the animation runs only once when the row comes into view
-        threshold: 0.1, // Adjust this to how much of the row needs to be visible before it's considered "in view"
-    });
-
-    useEffect(() => {
-        if (inView) {
-            setIsInView(true); // Set to true when the row comes into view
-        }
-    }, [inView]);
-
     return (
         <motion.div
-            className="product-row-container"
             ref={ref}
+            className="product-row-container"
             initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
+            animate={inView ? { opacity: 1 } : {}}
             transition={{ duration: 0.5 }}
         >
-            {isInView && (
-                <>
-                    <button className="home-prev-button" onClick={() => scrollRow(-600)}>
-                        <LeftArrowIcon />
-                    </button>
-                    <div
-                        className="collection-products-row"
-                        ref={rowRef}
-                        onMouseDown={handleMouseDown}
-                        onMouseLeave={handleMouseLeave}
-                        onMouseUp={handleMouseUp}
-                        onMouseMove={handleMouseMove}
-                    >
-                        {products.map((product, index) => (
-                            <ProductItem key={product.id} product={product} index={index} />
-                        ))}
-                    </div>
-                    <button className="home-next-button" onClick={() => scrollRow(600)}>
-                        <RightArrowIcon />
-                    </button>
-                </>
-            )}
+            <button className="home-prev-button" onClick={() => scrollRow(-600)}>
+                <LeftArrowIcon />
+            </button>
+            <div
+                className="collection-products-row"
+                ref={rowRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+            >
+                {products.map((product, index) => (
+                    <ProductItem key={product.id} product={product} index={index} />
+                ))}
+            </div>
+            <button className="home-next-button" onClick={() => scrollRow(600)}>
+                <RightArrowIcon />
+            </button>
         </motion.div>
     );
 }
@@ -216,13 +205,13 @@ function ProductItem({ product, index }) {
             transition={{ delay: index * 0.01, duration: 0.5 }}
             className="product-item"
         >
-                <motion.div
-                    initial={{ filter: 'blur(10px)', opacity: 0 }}
-                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
-                    transition={{ duration: 0.5 }}
-                    className="product-card"
-                >
-            <Link to={`/products/${product.handle}`}>
+            <motion.div
+                initial={{ filter: 'blur(10px)', opacity: 0 }}
+                animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                transition={{ duration: 0.5 }}
+                className="product-card"
+            >
+                <Link to={`/products/${product.handle}`}>
                     <Image
                         data={product.images.nodes[0]}
                         aspectRatio="1/1"
@@ -243,40 +232,40 @@ function ProductItem({ product, index }) {
                             </small>
                         )}
                     </div>
-            </Link>
+                </Link>
 
-            {/* Add to Cart Button */}
-            <AddToCartButton
-                disabled={!selectedVariant || !selectedVariant.availableForSale}
-                onClick={() => {
-                    if (hasVariants) {
-                        // Navigate to product page if multiple variants
-                        window.location.href = `/products/${product.handle}`;
-                    } else {
-                        open('cart');
+                {/* Add to Cart Button */}
+                <AddToCartButton
+                    disabled={!selectedVariant || !selectedVariant.availableForSale}
+                    onClick={() => {
+                        if (hasVariants) {
+                            // Navigate to product page if multiple variants
+                            window.location.href = `/products/${product.handle}`;
+                        } else {
+                            open('cart');
+                        }
+                    }}
+                    lines={
+                        selectedVariant && !hasVariants
+                            ? [
+                                {
+                                    merchandiseId: selectedVariant.id,
+                                    quantity: 1,
+                                    product: {
+                                        ...product,
+                                        selectedVariant,
+                                        handle: product.handle,
+                                    },
+                                },
+                            ]
+                            : []
                     }
-                }}
-                lines={
-                    selectedVariant && !hasVariants
-                    ? [
-                        {
-                            merchandiseId: selectedVariant.id,
-                            quantity: 1,
-                            product: {
-                                ...product,
-                                selectedVariant,
-                                handle: product.handle,
-                            },
-                        },
-                    ]
-                    : []
-                }
                 >
-                {!selectedVariant?.availableForSale
-                    ? 'Sold out'
-                    : hasVariants
-                    ? 'Select Options'
-                    : 'Add to cart'}
+                    {!selectedVariant?.availableForSale
+                        ? 'Sold out'
+                        : hasVariants
+                            ? 'Select Options'
+                            : 'Add to cart'}
                 </AddToCartButton>
             </motion.div>
         </motion.div>
