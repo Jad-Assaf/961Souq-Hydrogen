@@ -10,8 +10,8 @@
 
 .search-result-container .search-results-item {
     max-width: 175px;
-    min-height: 410px;
-    max-height: 410px;
+    min-height: 320px;
+    max-height: 320px;
 }
 
 .search-result-container .search-results-item a {
@@ -37,6 +37,7 @@
 .search-result-container .product-description {
     font-size: 14px;
     overflow-y: auto;
+    min-height: 80px;
     max-height: 80px;
 }
 
