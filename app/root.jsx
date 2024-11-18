@@ -19,8 +19,6 @@ import { PageLayout } from '~/components/PageLayout';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
 
-// Configure NProgress (Optional: Disable spinner)
-NProgress.configure({ showSpinner: true });
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
