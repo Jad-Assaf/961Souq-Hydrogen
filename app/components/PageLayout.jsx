@@ -1,5 +1,5 @@
 import {Await, Link} from '@remix-run/react';
-import {Suspense, useId} from 'react';
+import {Suspense, lazy, useId} from 'react';
 import {Aside} from '~/components/Aside';
 import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
@@ -8,7 +8,9 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import { Footer } from './Footer';
+
+const Footer = lazy(() => import('./Footer')); // Adjust the path if necessary
+
 
 const shopMenuData = [
   { title: "Apple", link: "/collections/apple" },
@@ -61,7 +63,9 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
-      <Footer shopMenu={shopMenuData} policiesMenu={policiesMenuData} />
+      <Suspense fallback={<div>Loading footer...</div>}>
+        <Footer {...footer} />
+      </Suspense>
     </Aside.Provider>
   );
 }
