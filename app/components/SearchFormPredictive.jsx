@@ -31,6 +31,7 @@ export function SearchFormPredictive({
   function goToSearch() {
     const term = inputRef?.current?.value;
     navigate(SEARCH_ENDPOINT + (term ? `?q=${term}` : ''));
+    resetInput();
     aside.close();
   }
 
