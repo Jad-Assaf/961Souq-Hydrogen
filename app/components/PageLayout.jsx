@@ -1,13 +1,13 @@
-import {Await, Link} from '@remix-run/react';
-import {Suspense, lazy, useId} from 'react';
-import {Aside} from '~/components/Aside';
-import {Header, HeaderMenu} from '~/components/Header';
-import {CartMain} from '~/components/CartMain';
+import { Await, Link } from '@remix-run/react';
+import { Suspense, lazy, useId } from 'react';
+import { Aside } from '~/components/Aside';
+import { Header, HeaderMenu } from '~/components/Header';
+import { CartMain } from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
-import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 
 const Footer = lazy(() => import('./Footer')); // Adjust the path if necessary
 
@@ -64,7 +64,7 @@ export function PageLayout({
       )}
       <main>{children}</main>
       <Suspense fallback={<div>Loading footer...</div>}>
-        <Footer {...footer} />
+        <Footer shopMenu={shopMenuData} policiesMenu={policiesMenuData} />
       </Suspense>
     </Aside.Provider>
   );
@@ -73,7 +73,7 @@ export function PageLayout({
 /**
  * @param {{cart: PageLayoutProps['cart']}}
  */
-function CartAside({cart}) {
+function CartAside({ cart }) {
   return (
     <Aside type="cart" heading="CART">
       <Suspense fallback={<p>Loading cart ...</p>}>
@@ -94,7 +94,7 @@ function SearchAside() {
       <div className="predictive-search">
         <br />
         <SearchFormPredictive>
-          {({fetchResults, goToSearch, inputRef}) => (
+          {({ fetchResults, goToSearch, inputRef }) => (
             <>
               <input
                 name="q"
@@ -112,8 +112,8 @@ function SearchAside() {
         </SearchFormPredictive>
 
         <SearchResultsPredictive>
-          {({items, total, term, state, closeSearch}) => {
-            const {articles, collections, pages, products, queries} = items;
+          {({ items, total, term, state, closeSearch }) => {
+            const { articles, collections, pages, products, queries } = items;
 
             if (state === 'loading' && term.current) {
               return <div>Loading...</div>;
@@ -175,7 +175,7 @@ function SearchAside() {
  *   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
  * }}
  */
-function MobileMenuAside({header, publicStoreDomain}) {
+function MobileMenuAside({ header, publicStoreDomain }) {
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
