@@ -9,8 +9,7 @@ import {
 } from '~/components/SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 
-const Footer = lazy(() => import('./Footer')); // Adjust the path if necessary
-
+const Footer = lazy(() => import('./Footer'));
 
 const shopMenuData = [
   { title: "Apple", link: "/collections/apple" },
@@ -63,7 +62,7 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
-      <Suspense fallback={<div>Loading footer...</div>}>
+      <Suspense>
         <Footer shopMenu={shopMenuData} policiesMenu={policiesMenuData} />
       </Suspense>
     </Aside.Provider>
