@@ -31,6 +31,13 @@
     margin: 30px 0 0 0;
 }
 
+.view-more a {
+    padding: 10px 30px;
+    border: 1px solid #2172af;
+    border-radius: 30px;
+    background-color: #f0f8ff87;
+}
+
 .search-result-container {
     display: flex;
     flex-wrap: wrap;
