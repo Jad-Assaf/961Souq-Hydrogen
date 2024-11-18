@@ -12,10 +12,13 @@
 }
 
 .search form input {
-    width: 250px;
+    width: 275px;
     border-radius: 30px;
     border: 1px solid #2172af;
     color: #232323;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: rgba(3, 102, 214, 0.3) 0px 0px 0px 3px;
 }
 
 .search-result-container {
