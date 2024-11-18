@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export const Footer = ({ shopMenu, policiesMenu }) => {
     const [stylesLoaded, setStylesLoaded] = useState(false);
@@ -14,7 +14,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
     if (!stylesLoaded) {
         return null; // or return a loading spinner if desired
     }
-    
+
     return (
         <footer className="footer">
             <div className="container">
