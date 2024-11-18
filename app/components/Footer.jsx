@@ -1,7 +1,7 @@
-import React from "react";
-import '../styles/Footer.css'
+import React, { useEffect, useState } from 'react';
+import '../styles/Footer.css';
 
-export const Footer = ({ shopMenu, policiesMenu }) => {
+const FooterContent = ({ shopMenu, policiesMenu }) => {
     return (
         <footer className="footer">
             <div className="container">
@@ -73,4 +73,27 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
             </div>
         </footer>
     );
+};
+
+export const Footer = ({ shopMenu, policiesMenu }) => {
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    setIsVisible(true);
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.1 } // Load when the footer is about 10% in view
+        );
+
+        const target = document.querySelector('.footer');
+        if (target) observer.observe(target);
+
+        return () => observer.disconnect();
+    }, []);
+
+    return isVisible ? <FooterContent shopMenu={shopMenu} policiesMenu={policiesMenu} /> : null;
 };
