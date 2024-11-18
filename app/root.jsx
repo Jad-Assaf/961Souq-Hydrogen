@@ -126,37 +126,35 @@ export function Layout({ children }) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
+  const [nprogress, setNProgress] = useState(null); // Store NProgress instance
 
   useEffect(() => {
-    let nprogress;
-
-    // Dynamically load NProgress once
+    // Load NProgress once and set it in the state
     const loadNProgress = async () => {
       const { default: NProgress } = await import('nprogress');
       await import('nprogress/nprogress.css');
-      nprogress = NProgress;
       NProgress.configure({ showSpinner: true });
+      setNProgress(NProgress); // Set NProgress once it's loaded
     };
 
     if (!nprogress) {
-      loadNProgress();
+      loadNProgress(); // Only load NProgress the first time
     }
 
-    // Start or stop NProgress based on route loading state
-    if (navigation.state === 'loading') {
-      if (!loading) {
-        nprogress?.start();
-        setLoading(true);
+    // Handle the route loading state
+    if (navigation.state === 'loading' && nprogress) {
+      nprogress.start(); // Start progress bar
+    } else if (nprogress) {
+      nprogress.done(); // Finish progress bar
+    }
+
+    return () => {
+      // Clean up NProgress when component unmounts or state changes
+      if (nprogress) {
+        nprogress.done();
       }
-    } else {
-      nprogress?.done();
-      setLoading(false);
-    }
-
-    // Clean up NProgress on component unmount or if route loading state changes unexpectedly
-    return () => nprogress?.done();
-  }, [navigation.state]);
+    };
+  }, [navigation.state, nprogress]); 
 
   return (
     <html lang="en">
