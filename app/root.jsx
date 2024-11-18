@@ -18,8 +18,6 @@ import tailwindCss from './styles/tailwind.css?url';
 import { PageLayout } from '~/components/PageLayout';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { useEffect } from 'react';
-import NProgress from 'nprogress';  // Import NProgress
-import 'nprogress/nprogress.css';  // Import NProgress styles
 
 // Configure NProgress (Optional: Disable spinner)
 NProgress.configure({ showSpinner: true });
@@ -129,14 +127,22 @@ function loadDeferredData({ context }) {
 export function Layout({ children }) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
-  const navigation = useNavigation();  // Use useNavigation hook
+  const navigation = useNavigation();
 
-  // Manage NProgress on route transitions
   useEffect(() => {
+    let nprogress;
+    const loadNProgress = async () => {
+      const { default: NProgress } = await import('nprogress');
+      await import('nprogress/nprogress.css');
+      nprogress = NProgress;
+      NProgress.configure({ showSpinner: true });
+    };
+
     if (navigation.state === 'loading') {
-      NProgress.start();
-    } else {
-      NProgress.done();
+      if (!nprogress) loadNProgress().then(() => nprogress.start());
+      else nprogress.start();
+    } else if (nprogress) {
+      nprogress.done();
     }
   }, [navigation.state]);
 
