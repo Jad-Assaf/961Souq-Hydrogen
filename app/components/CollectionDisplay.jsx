@@ -110,6 +110,7 @@ function CategoryItem({ collection, index }) {
 
 function ProductRow({ products }) {
     const rowRef = useRef(null);
+    const [isInView, setIsInView] = useState(false); // Track visibility
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
@@ -135,27 +136,49 @@ function ProductRow({ products }) {
         rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
     };
 
+    // Use framer-motion's useInView hook to lazy load the row when it's in the viewport
+    const { ref, inView } = useInView({
+        triggerOnce: true, // This ensures the animation runs only once when the row comes into view
+        threshold: 0.1, // Adjust this to how much of the row needs to be visible before it's considered "in view"
+    });
+
+    useEffect(() => {
+        if (inView) {
+            setIsInView(true); // Set to true when the row comes into view
+        }
+    }, [inView]);
+
     return (
-        <div className="product-row-container">
-            <button className="home-prev-button" onClick={() => scrollRow(-600)}>
-                <LeftArrowIcon />
-            </button>
-            <div
-                className="collection-products-row"
-                ref={rowRef}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
-            >
-                {products.map((product, index) => (
-                    <ProductItem key={product.id} product={product} index={index} />
-                ))}
-            </div>
-            <button className="home-next-button" onClick={() => scrollRow(600)}>
-                <RightArrowIcon />
-            </button>
-        </div>
+        <motion.div
+            className="product-row-container"
+            ref={ref}
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.5 }}
+        >
+            {isInView && (
+                <>
+                    <button className="home-prev-button" onClick={() => scrollRow(-600)}>
+                        <LeftArrowIcon />
+                    </button>
+                    <div
+                        className="collection-products-row"
+                        ref={rowRef}
+                        onMouseDown={handleMouseDown}
+                        onMouseLeave={handleMouseLeave}
+                        onMouseUp={handleMouseUp}
+                        onMouseMove={handleMouseMove}
+                    >
+                        {products.map((product, index) => (
+                            <ProductItem key={product.id} product={product} index={index} />
+                        ))}
+                    </div>
+                    <button className="home-next-button" onClick={() => scrollRow(600)}>
+                        <RightArrowIcon />
+                    </button>
+                </>
+            )}
+        </motion.div>
     );
 }
 
