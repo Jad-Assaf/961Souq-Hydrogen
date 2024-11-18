@@ -124,7 +124,7 @@ function SearchResultsProducts({term, products}) {
 
           return (
             <div>
-              <div>
+              <div className='view-more'>
                 <PreviousLink>
                   {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
                 </PreviousLink>
@@ -132,7 +132,7 @@ function SearchResultsProducts({term, products}) {
               <div className="search-result-container">
                 {ItemsMarkup}
               </div>
-              <div>
+              <div className='view-more'>
                 <NextLink>
                   {isLoading ? 'Loading...' : <span>Load more ↓</span>}
                 </NextLink>

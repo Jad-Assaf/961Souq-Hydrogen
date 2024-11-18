@@ -9,6 +9,9 @@
 
 .search form {
     margin-bottom: 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .search form input {
@@ -19,6 +22,13 @@
     text-align: center;
     background-color: #ffffff;
     box-shadow: rgba(3, 102, 214, 0.3) 0px 0px 0px 3px;
+}
+
+.view-more {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0 0 0;
 }
 
 .search-result-container {

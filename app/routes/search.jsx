@@ -217,7 +217,7 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 25 });
+  const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
   // Search articles, pages, and products for the `q` term
