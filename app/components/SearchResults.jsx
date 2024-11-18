@@ -113,8 +113,8 @@ function SearchResultsProducts({term, products}) {
                     />
                   )}
                   <div className='search-result-txt'>
-                    <p>{product.title}</p>
-                    <small>
+                    <p className='product-description'>{product.title}</p>
+                    <small className="price-container">
                       <Money data={product.variants.nodes[0].price} />
                     </small>
                   </div>

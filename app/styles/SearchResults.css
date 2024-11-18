@@ -9,7 +9,9 @@
 }
 
 .search-result-container div div .search-results-item{
-    max-width: 175px;;
+    max-width: 175px;
+    min-height: 410px;
+    max-height: 410px;
 }
 
 .search-result-container div div .search-results-item a{
