@@ -16,18 +16,18 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
-  const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+  try {
+    const url = new URL(request.url);
+    const isPredictive = url.searchParams.has('predictive');
+    const searchResult = await (isPredictive
+      ? predictiveSearch({ request, context })
+      : regularSearch({ request, context }));
 
-  searchPromise.catch((error) => {
+    return json(searchResult);
+  } catch (error) {
     console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
-
-  return json(await searchPromise);
+    return json({ term: '', result: null, error: error.message });
+  }
 }
 
 /**
@@ -216,18 +216,14 @@ export const SEARCH_QUERY = `#graphql
  */
 async function regularSearch({ request, context }) {
   const { storefront } = context;
-  const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 24 });
-  const term = String(url.searchParams.get('q') || '');
+  const { term } = getSearchParams(request);
 
-  // Search articles, pages, and products for the `q` term
+  const variables = getPaginationVariables(request, { pageBy: 24 });
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term },
   });
 
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
-  }
+  if (!items) throw new Error('No search data returned from Shopify API');
 
   const total = Object.values(items).reduce(
     (acc, { nodes }) => acc + nodes.length,
