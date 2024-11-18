@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
+import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
@@ -35,7 +35,8 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                 <div key={collection.id}>
                     <div className="collection-section">
                         <h3>{collection.title}</h3>
-                        <ProductRow products={collection.products.nodes} />
+                        {/* Wrap ProductRow in motion.div for lazy loading */}
+                        <LazyProductRow products={collection.products.nodes} />
                     </div>
 
                     {/* Inter-row images */}
@@ -108,65 +109,27 @@ function CategoryItem({ collection, index }) {
     );
 }
 
-function ProductRow({ products }) {
-    const rowRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
-
-    // Implement lazy loading when the row comes into view
-    const { ref, inView } = useInView({
-        triggerOnce: true, // Trigger once when the row is in view
+function LazyProductRow({ products }) {
+    const ref = useRef(null);
+    const { inView } = useInView({
+        triggerOnce: true,
         threshold: 0.1, // Trigger when 10% of the row is in view
     });
-
-    const handleMouseDown = (e) => {
-        setIsDragging(true);
-        setStartX(e.pageX - rowRef.current.offsetLeft);
-        setScrollLeft(rowRef.current.scrollLeft);
-    };
-
-    const handleMouseLeave = () => setIsDragging(false);
-    const handleMouseUp = () => setIsDragging(false);
-
-    const handleMouseMove = (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
-        rowRef.current.scrollLeft = scrollLeft - walk;
-    };
-
-    const scrollRow = (distance) => {
-        rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
-    };
 
     return (
         <motion.div
             ref={ref}
-            className="product-row-container"
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
             transition={{ duration: 0.5 }}
+            className="product-row-container"
         >
-            <button className="home-prev-button" onClick={() => scrollRow(-600)}>
-                <LeftArrowIcon />
-            </button>
-            <div
-                className="collection-products-row"
-                ref={rowRef}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
-            >
-                {products.map((product, index) => (
+            {/* Render product items lazily */}
+            <div className="collection-products-row">
+                {inView && products.map((product, index) => (
                     <ProductItem key={product.id} product={product} index={index} />
                 ))}
             </div>
-            <button className="home-next-button" onClick={() => scrollRow(600)}>
-                <RightArrowIcon />
-            </button>
         </motion.div>
     );
 }
