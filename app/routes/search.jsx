@@ -4,6 +4,7 @@ import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
+import { useRef } from 'react';
 
 /**
  * @type {MetaFunction}
