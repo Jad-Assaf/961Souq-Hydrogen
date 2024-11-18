@@ -1,12 +1,12 @@
-import { useRef, useEffect } from 'react';
-import { Form } from '@remix-run/react';
+import {useRef, useEffect} from 'react';
+import {Form} from '@remix-run/react';
 
 /**
  * Search form component that sends search requests to the `/search` route.
  * @example
  * ```tsx
  * <SearchForm>
- *  {({ inputRef }) => (
+ *  {({inputRef}) => (
  *    <>
  *      <input
  *        ref={inputRef}
@@ -21,24 +21,10 @@ import { Form } from '@remix-run/react';
  *  </SearchForm>
  * @param {SearchFormProps}
  */
-export function SearchForm({ children, ...props }) {
+export function SearchForm({children, ...props}) {
   const inputRef = useRef(null);
 
   useFocusOnCmdK(inputRef);
-
-  const handleInput = (event) => {
-    const inputValue = event.target.value;
-
-    // Check if the last character is a space, indicating a word end
-    if (inputValue.endsWith(' ')) {
-      // Add a wildcard `*` in a hidden input value for the backend, and remove it from displayed input
-      const backendValue = inputValue.trim().replace(/ +/g, '* ') + '*';
-      event.target.setAttribute('data-backend-value', backendValue); // Store the backend value as an attribute
-
-      // Keep the visible input without wildcards
-      event.target.value = inputValue.trim() + ' ';
-    }
-  };
 
   if (typeof children !== 'function') {
     return null;
@@ -46,17 +32,17 @@ export function SearchForm({ children, ...props }) {
 
   return (
     <Form method="get" {...props}>
-      {children({ inputRef, onInput: handleInput })}
+      {children({inputRef})}
     </Form>
   );
 }
 
 /**
- * Focuses the input when cmd+k is pressed.
+ * Focuses the input when cmd+k is pressed
  * @param {React.RefObject<HTMLInputElement>} inputRef
  */
 function useFocusOnCmdK(inputRef) {
-  // Focus the input when cmd+k is pressed
+  // focus the input when cmd+k is pressed
   useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === 'k' && event.metaKey) {
