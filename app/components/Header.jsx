@@ -76,7 +76,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             />
           </NavLink>
 
-          <SearchFormPredictive className="header-search">
+          <SearchFormPredictive className="header-search" closeSearch={() => {
+            closeSearch();
+            setSearchResultsVisible(false);
+          }}>
             {({ inputRef, fetchResults, goToSearch, fetcher }) => (
               <div ref={searchContainerRef} className="main-search">
                 <div className="search-container">
