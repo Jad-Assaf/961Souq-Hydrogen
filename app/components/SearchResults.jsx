@@ -95,6 +95,7 @@ function SearchResultsProducts({term, products}) {
   return (
     <div className="search-result">
       <h2>Products</h2>
+      <div className="search-result-container">
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const ItemsMarkup = nodes.map((product) => {
@@ -107,7 +108,7 @@ function SearchResultsProducts({term, products}) {
                     <Image
                       data={product.variants.nodes[0].image}
                       alt={product.title}
-                      width={50}
+                      width={150}
                     />
                   )}
                   <div className='search-result-txt'>
@@ -141,6 +142,7 @@ function SearchResultsProducts({term, products}) {
           );
         }}
       </Pagination>
+      </div>
       <br />
     </div>
   );
