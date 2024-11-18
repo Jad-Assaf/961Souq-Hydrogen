@@ -6,9 +6,12 @@
     justify-content: center;
     gap: 5%;
     margin: auto;
+    row-gap: 30px;
 }
 
 .search-result-container .search-results-item {
+    width: 40%;
+    min-width: unset;
     max-width: 175px;
     min-height: 320px;
     max-height: 320px;
