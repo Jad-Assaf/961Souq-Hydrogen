@@ -92,9 +92,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     className="search-bar"
                   />
                   <button type="button" onClick={() => {
-                    setSearchResultsVisible(false);
-                    closeSearch();
                     goToSearch();
+                    closeSearch();
                   }} className="search-bar-submit">
                     <SearchIcon />
                   </button>
