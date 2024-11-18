@@ -91,10 +91,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     onFocus={() => setSearchResultsVisible(true)}
                     className="search-bar"
                   />
-                  <button onClick={() => {
-                    goToSearch();
-                    closeSearch();
+                  <button type="button" onClick={() => {
                     setSearchResultsVisible(false);
+                    closeSearch();
+                    goToSearch();
                   }} className="search-bar-submit">
                     <SearchIcon />
                   </button>
