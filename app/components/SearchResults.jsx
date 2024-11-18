@@ -1,6 +1,7 @@
 import {Link} from '@remix-run/react';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
 import {urlWithTrackingParams} from '~/lib/search';
+import "../styles/SearchResults.css"
 
 /**
  * @param {Omit<SearchResultsProps, 'error' | 'type'>}
