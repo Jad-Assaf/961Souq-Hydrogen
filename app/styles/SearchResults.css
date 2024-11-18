@@ -44,7 +44,7 @@
     max-width: 1500px;
     width: 100%;
     justify-content: center;
-    gap: 5%;
+    gap: 30px;
     margin: auto;
     row-gap: 30px;
 }
