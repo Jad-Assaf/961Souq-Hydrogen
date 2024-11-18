@@ -45,7 +45,7 @@ export default function SearchPage() {
     if (searchInput) {
       const query = searchInput.value;
       const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-      
+
       // Redirect with modified query
       window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
@@ -54,7 +54,11 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results:</h1>
-      <SearchForm ref={formRef} onSubmit={handleFormSubmit}>
+      <SearchForm ref={formRef} onSubmit={(e) => {
+        handleFormSubmit(e);
+        closeSearch();
+        setSearchResultsVisible(false);
+      }}>
         {({ inputRef }) => (
           <>
             <input
@@ -65,7 +69,11 @@ export default function SearchPage() {
               type="search"
             />
             &nbsp;
-            <button type="submit"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#2172af" width="30px" height="30px"><path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#2172af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+            <button type="submit">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#2172af" width="30px" height="30px">
+                <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#2172af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
           </>
         )}
       </SearchForm>
@@ -78,13 +86,14 @@ export default function SearchPage() {
             <div>
               <SearchResults.Products products={products} term={term} />
               {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
+          <SearchResults.Articles articles={articles} term={term} /> */}
             </div>
           )}
         </SearchResults>
       )}
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
+
   );
 }
 
