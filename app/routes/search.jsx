@@ -217,7 +217,7 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 8 });
+  const variables = getPaginationVariables(request, { pageBy: 30 });
   const term = String(url.searchParams.get('q') || '');
 
   // Search articles, pages, and products for the `q` term
@@ -381,7 +381,7 @@ async function predictiveSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
-  const limit = Number(url.searchParams.get('limit') || 30);
+  const limit = Number(url.searchParams.get('limit') || 10);
   const type = 'predictive';
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
