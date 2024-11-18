@@ -20,10 +20,11 @@ export function SearchFormPredictive({
 
   /** Reset the input value and blur the input */
   function resetInput(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (inputRef?.current?.value) {
-      inputRef.current.blur();
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (inputRef?.current) {
+      inputRef.current.value = ''; // Clear the input field's value
+      inputRef.current.blur();     // Remove focus from the input field
     }
   }
 
@@ -31,7 +32,7 @@ export function SearchFormPredictive({
   function goToSearch() {
     const term = inputRef?.current?.value;
     navigate(SEARCH_ENDPOINT + (term ? `?q=${term}` : ''));
-    resetInput();
+    resetInput(); // This will now clear and blur the input
     aside.close();
   }
 
