@@ -76,11 +76,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             />
           </NavLink>
 
-          <SearchFormPredictive className="header-search" closeSearch={() => {
-            closeSearch();
-            setSearchResultsVisible(false);
-          }}>
-            {({ inputRef, fetchResults, goToSearch, fetcher }) => (
+          <SearchFormPredictive className="header-search">
+            {({ inputRef, fetchResults, goToSearch, fetcher, closeSearch }) => (
               <div ref={searchContainerRef} className="main-search">
                 <div className="search-container">
                   <input
@@ -94,10 +91,15 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     onFocus={() => setSearchResultsVisible(true)}
                     className="search-bar"
                   />
-                  <button type="button" onClick={() => {
-                    goToSearch();
-                    closeSearch();
-                  }} className="search-bar-submit">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      goToSearch();
+                      closeSearch(); // Close search results
+                      setSearchResultsVisible(false);
+                    }}
+                    className="search-bar-submit"
+                  >
                     <SearchIcon />
                   </button>
                 </div>
@@ -128,7 +130,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                             {term.current && total ? (
                               <Link
                                 onClick={() => {
-                                  closeSearch();
+                                  closeSearch(); // Close search results when viewing all results
                                   setSearchResultsVisible(false);
                                 }}
                                 to={`${SEARCH_ENDPOINT}?q=${term.current}`}
