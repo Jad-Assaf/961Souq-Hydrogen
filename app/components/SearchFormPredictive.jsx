@@ -20,11 +20,9 @@ export function SearchFormPredictive({
 
   /** Reset the input value and blur the input */
   function resetInput(event) {
-    event?.preventDefault();
-    event?.stopPropagation();
-    if (inputRef?.current) {
-      inputRef.current.value = ''; // Clear the input field's value
-      inputRef.current.blur();     // Remove focus from the input field
+    if (inputRef.current) {
+      inputRef.current.blur();
+      inputRef.current.value = '';
     }
   }
 
