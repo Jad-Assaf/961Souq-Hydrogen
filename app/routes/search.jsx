@@ -16,18 +16,31 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
-  try {
-    const url = new URL(request.url);
-    const isPredictive = url.searchParams.has('predictive');
-    const searchResult = await (isPredictive
-      ? predictiveSearch({ request, context })
-      : regularSearch({ request, context }));
+  const url = new URL(request.url);
+  const term = url.searchParams.get('q') || '';
+  const processedTerm = processSearchTerm(term);
 
-    return json(searchResult);
-  } catch (error) {
+  const isPredictive = url.searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context, term: processedTerm })
+    : regularSearch({ request, context, term: processedTerm });
+
+  searchPromise.catch((error) => {
     console.error(error);
-    return json({ term: '', result: null, error: error.message });
-  }
+    return { term: '', result: null, error: error.message };
+  });
+
+  return json(await searchPromise);
+}
+
+// Process the search term for more flexible matching
+function processSearchTerm(term) {
+  // Split the search term into individual words
+  const words = term.split(' ').filter(Boolean);
+
+  // Create a processed search term that allows partial matching
+  // Concatenate keywords with wildcards for broader matching
+  return words.map((word) => `${word}*`).join(' ');
 }
 
 /**
@@ -214,16 +227,18 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context }) {
+async function regularSearch({ request, context, term }) {
   const { storefront } = context;
-  const { term } = getSearchParams(request);
-
+  const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
+
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term },
   });
 
-  if (!items) throw new Error('No search data returned from Shopify API');
+  if (!items) {
+    throw new Error('No search data returned from Shopify API');
+  }
 
   const total = Object.values(items).reduce(
     (acc, { nodes }) => acc + nodes.length,
