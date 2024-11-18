@@ -51,14 +51,15 @@
 
 .search-result-container .search-results-item {
     width: 40%;
-    min-width: 200px;
-    /* max-width: 175px; */
+    min-width: 220px;
+    max-width: 220px;
     max-height: 320px;
 }
 
 @media (max-width: 400px) {
     .search-result-container .search-results-item {
         min-width: 40% !important;
+        max-width: 40% !important;
     }
 }
 
