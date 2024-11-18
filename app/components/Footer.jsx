@@ -1,7 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import '../styles/Footer.css';
+import React from "react";
 
-const FooterContent = ({ shopMenu, policiesMenu }) => {
+export const Footer = ({ shopMenu, policiesMenu }) => {
+    const [stylesLoaded, setStylesLoaded] = useState(false);
+
+    useEffect(() => {
+        const loadStyles = async () => {
+            await import('../styles/Footer.css');
+            setStylesLoaded(true);
+        };
+        loadStyles();
+    }, []);
+
+    if (!stylesLoaded) {
+        return null; // or return a loading spinner if desired
+    }
+    
     return (
         <footer className="footer">
             <div className="container">
@@ -73,27 +86,4 @@ const FooterContent = ({ shopMenu, policiesMenu }) => {
             </div>
         </footer>
     );
-};
-
-export const Footer = ({ shopMenu, policiesMenu }) => {
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting) {
-                    setIsVisible(true);
-                    observer.disconnect();
-                }
-            },
-            { threshold: 0.1 } // Load when the footer is about 10% in view
-        );
-
-        const target = document.querySelector('.footer');
-        if (target) observer.observe(target);
-
-        return () => observer.disconnect();
-    }, []);
-
-    return isVisible ? <FooterContent shopMenu={shopMenu} policiesMenu={policiesMenu} /> : null;
 };
