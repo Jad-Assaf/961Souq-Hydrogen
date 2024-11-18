@@ -1,4 +1,4 @@
-.search-result-container{
+.search-result-container div div{
     display: flex;
     flex-wrap: wrap;
     max-width: 1500px;
