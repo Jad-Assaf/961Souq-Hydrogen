@@ -126,9 +126,12 @@ export function Layout({ children }) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let nprogress;
+
+    // Dynamically load NProgress once
     const loadNProgress = async () => {
       const { default: NProgress } = await import('nprogress');
       await import('nprogress/nprogress.css');
@@ -136,12 +139,23 @@ export function Layout({ children }) {
       NProgress.configure({ showSpinner: true });
     };
 
-    if (navigation.state === 'loading') {
-      if (!nprogress) loadNProgress().then(() => nprogress.start());
-      else nprogress.start();
-    } else if (nprogress) {
-      nprogress.done();
+    if (!nprogress) {
+      loadNProgress();
     }
+
+    // Start or stop NProgress based on route loading state
+    if (navigation.state === 'loading') {
+      if (!loading) {
+        nprogress?.start();
+        setLoading(true);
+      }
+    } else {
+      nprogress?.done();
+      setLoading(false);
+    }
+
+    // Clean up NProgress on component unmount or if route loading state changes unexpectedly
+    return () => nprogress?.done();
   }, [navigation.state]);
 
   return (
@@ -205,7 +219,6 @@ export function ErrorBoundary() {
     </div>
   );
 }
-
 
 /** @typedef {LoaderReturnData} RootLoader */
 
