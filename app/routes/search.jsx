@@ -17,13 +17,10 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const term = url.searchParams.get('q') || '';
-  const processedTerm = processSearchTerm(term);
-
   const isPredictive = url.searchParams.has('predictive');
   const searchPromise = isPredictive
-    ? predictiveSearch({ request, context, term: processedTerm })
-    : regularSearch({ request, context, term: processedTerm });
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context });
 
   searchPromise.catch((error) => {
     console.error(error);
@@ -33,28 +30,30 @@ export async function loader({ request, context }) {
   return json(await searchPromise);
 }
 
-// Process the search term for more flexible matching
-function processSearchTerm(term) {
-  // Split the search term into individual words
-  const words = term.split(' ').filter(Boolean);
-
-  // Create a processed search term that allows partial matching
-  // Concatenate keywords with wildcards for broader matching
-  return words.map((word) => `${word}*`).join(' ');
-}
-
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  /** @type {LoaderReturnData} */
   const { type, term, result, error } = useLoaderData();
-  if (type === 'predictive') return null;
+  const formRef = useRef(null);
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+
+    const searchInput = formRef.current.querySelector('input[name="q"]');
+    if (searchInput) {
+      const query = searchInput.value;
+      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
+      
+      // Redirect with modified query
+      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+    }
+  };
 
   return (
     <div className="search">
       <h1>Search Results:</h1>
-      <SearchForm>
+      <SearchForm ref={formRef} onSubmit={handleFormSubmit}>
         {({ inputRef }) => (
           <>
             <input
@@ -227,11 +226,13 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, term }) {
+async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(url.searchParams.get('q') || '');
 
+  // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term },
   });

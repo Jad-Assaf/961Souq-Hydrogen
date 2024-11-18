@@ -21,7 +21,7 @@ import {Form} from '@remix-run/react';
  *  </SearchForm>
  * @param {SearchFormProps}
  */
-export function SearchForm({children, ...props}) {
+export function SearchForm({ children, onSubmit, ...props }) {
   const inputRef = useRef(null);
 
   useFocusOnCmdK(inputRef);
@@ -31,8 +31,8 @@ export function SearchForm({children, ...props}) {
   }
 
   return (
-    <Form method="get" {...props}>
-      {children({inputRef})}
+    <Form method="get" {...props} onSubmit={onSubmit}>
+      {children({ inputRef })}
     </Form>
   );
 }
