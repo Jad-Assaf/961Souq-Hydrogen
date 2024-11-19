@@ -46,10 +46,15 @@
     display: flex;
     justify-content: space-around;
     text-align: end;
-    width: 90%;
+    width: 80%;
+    margin: 25px auto;
 }
 
-.shipping-container *{
+.subtotal-container * {
+    flex: 1;
+}
+
+.shipping-container * {
     display: flex;
     flex-direction: column;
     row-gap: 10px;
