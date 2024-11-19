@@ -1,28 +1,28 @@
-import {json, redirect} from '@shopify/remix-oxygen';
-import {useLoaderData} from '@remix-run/react';
-import {Money, Image, flattenConnection} from '@shopify/hydrogen';
-import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
+import { json, redirect } from '@shopify/remix-oxygen';
+import { useLoaderData } from '@remix-run/react';
+import { Money, Image, flattenConnection } from '@shopify/hydrogen';
+import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery';
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({data}) => {
-  return [{title: `Order ${data?.order?.name}`}];
+export const meta = ({ data }) => {
+  return [{ title: `Order ${data?.order?.name}` }];
 };
 
 /**
  * @param {LoaderFunctionArgs}
  */
-export async function loader({params, context}) {
+export async function loader({ params, context }) {
   if (!params.id) {
     return redirect('/account/orders');
   }
 
   const orderId = atob(params.id);
-  const {data, errors} = await context.customerAccount.query(
+  const { data, errors } = await context.customerAccount.query(
     CUSTOMER_ORDER_QUERY,
     {
-      variables: {orderId},
+      variables: { orderId },
     },
   );
 
@@ -30,7 +30,7 @@ export async function loader({params, context}) {
     throw new Error('Order not found');
   }
 
-  const {order} = data;
+  const { order } = data;
 
   const lineItems = flattenConnection(order.lineItems);
   const discountApplications = flattenConnection(order.discountApplications);
@@ -107,37 +107,39 @@ export default function OrderRoute() {
           )}
 
           {/* Subtotal */}
-          <div className="order-subtotal">
-            <div>
-              <p>Subtotal</p>
+          <div className='subtotal-container'>
+            <div className="order-subtotal">
+              <div>
+                <p>Subtotal</p>
+              </div>
+              <div>
+                <p>Subtotal</p>
+              </div>
+              <div>
+                <Money data={order.subtotal} />
+              </div>
             </div>
-            <div>
-              <p>Subtotal</p>
-            </div>
-            <div>
-              <Money data={order.subtotal} />
-            </div>
-          </div>
 
-          {/* Tax */}
-          <div className="order-tax">
-            <div>Tax</div>
-            <div>
-              <p>Tax</p>
+            {/* Tax */}
+            <div className="order-tax">
+              <div>Tax</div>
+              <div>
+                <p>Tax</p>
+              </div>
+              <div>
+                <Money data={order.totalTax} />
+              </div>
             </div>
-            <div>
-              <Money data={order.totalTax} />
-            </div>
-          </div>
 
-          {/* Total */}
-          <div className="order-total">
-            <div>Total</div>
-            <div>
-              <p>Total</p>
-            </div>
-            <div>
-              <Money data={order.totalPrice} />
+            {/* Total */}
+            <div className="order-total">
+              <div>Total</div>
+              <div>
+                <p>Total</p>
+              </div>
+              <div>
+                <Money data={order.totalPrice} />
+              </div>
             </div>
           </div>
         </div>
@@ -179,7 +181,7 @@ export default function OrderRoute() {
 /**
  * @param {{lineItem: OrderLineItemFullFragment}}
  */
-function OrderLineRow({lineItem}) {
+function OrderLineRow({ lineItem }) {
   return (
     <div key={lineItem.id} className="line-item">
       {/* Product Details */}

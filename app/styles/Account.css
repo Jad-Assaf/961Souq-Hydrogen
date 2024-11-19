@@ -14,6 +14,32 @@
     border: 1px solid #2172af;
     border-radius: 30px;
     padding: 20px;
+    width: 75%;
+}
+
+.order-header{
+    display: flex;
+    justify-content: space-around;
+}
+
+.line-item{
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.line-item *{
+    flex: 1;
+}
+
+.line-item-product{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.line-item-title{
+    font-size: 12px;
 }
 
 .account .orders {
