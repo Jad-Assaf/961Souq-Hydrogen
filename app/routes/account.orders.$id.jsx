@@ -149,12 +149,14 @@ export default function OrderRoute() {
             <address>
               <p>{order.shippingAddress.name}</p>
               {order.shippingAddress.formatted ? (
-                <p>{order.shippingAddress.formatted}&nbsp;&nbsp;</p>
+                <p>
+                  {order.shippingAddress.formatted.join(', ')}
+                </p>
               ) : (
                 ' '
               )}
               {order.shippingAddress.formattedArea ? (
-                <p>{order.shippingAddress.formattedArea}&nbsp;&nbsp;</p>
+                <p>{order.shippingAddress.formattedArea}</p>
               ) : (
                 ' '
               )}
