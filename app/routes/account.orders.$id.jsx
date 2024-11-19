@@ -71,75 +71,76 @@ export default function OrderRoute() {
       <p>Placed on {new Date(order.processedAt).toDateString()}</p>
       <br />
       <div>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Product</th>
-              <th scope="col">Price</th>
-              <th scope="col">Quantity</th>
-              <th scope="col">Total</th>
-            </tr>
-          </thead>
-          <tbody>
+        <div className="order-summary">
+          {/* Header */}
+          <div className="order-header">
+            <div>Product</div>
+            <div>Price</div>
+            <div>Quantity</div>
+            <div>Total</div>
+          </div>
+
+          {/* Line Items */}
+          <div className="order-body">
             {lineItems.map((lineItem, lineItemIndex) => (
-              // eslint-disable-next-line react/no-array-index-key
               <OrderLineRow key={lineItemIndex} lineItem={lineItem} />
             ))}
-          </tbody>
-          <tfoot>
-            {((discountValue && discountValue.amount) ||
-              discountPercentage) && (
-              <tr>
-                <th scope="row" colSpan={3}>
-                  <p>Discounts</p>
-                </th>
-                <th scope="row">
-                  <p>Discounts</p>
-                </th>
-                <td>
-                  {discountPercentage ? (
-                    <span>-{discountPercentage}% OFF</span>
-                  ) : (
-                    discountValue && <Money data={discountValue} />
-                  )}
-                </td>
-              </tr>
-            )}
-            <tr>
-              <th scope="row" colSpan={3}>
-                <p>Subtotal</p>
-              </th>
-              <th scope="row">
-                <p>Subtotal</p>
-              </th>
-              <td>
-                <Money data={order.subtotal} />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row" colSpan={3}>
-                Tax
-              </th>
-              <th scope="row">
-                <p>Tax</p>
-              </th>
-              <td>
-                <Money data={order.totalTax} />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row" colSpan={3}>
-                Total
-              </th>
-              <th scope="row">
-                <p>Total</p>
-              </th>
-              <td>
-                <Money data={order.totalPrice} />
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+          </div>
+
+          {/* Discounts */}
+          {((discountValue && discountValue.amount) || discountPercentage) && (
+            <div className="order-discounts">
+              <div>
+                <p>Discounts</p>
+              </div>
+              <div>
+                <p>Discounts</p>
+              </div>
+              <div>
+                {discountPercentage ? (
+                  <span>-{discountPercentage}% OFF</span>
+                ) : (
+                  discountValue && <Money data={discountValue} />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Subtotal */}
+          <div className="order-subtotal">
+            <div>
+              <p>Subtotal</p>
+            </div>
+            <div>
+              <p>Subtotal</p>
+            </div>
+            <div>
+              <Money data={order.subtotal} />
+            </div>
+          </div>
+
+          {/* Tax */}
+          <div className="order-tax">
+            <div>Tax</div>
+            <div>
+              <p>Tax</p>
+            </div>
+            <div>
+              <Money data={order.totalTax} />
+            </div>
+          </div>
+
+          {/* Total */}
+          <div className="order-total">
+            <div>Total</div>
+            <div>
+              <p>Total</p>
+            </div>
+            <div>
+              <Money data={order.totalPrice} />
+            </div>
+          </div>
+        </div>
         <div>
           <h3>Shipping Address</h3>
           {order?.shippingAddress ? (

@@ -1,35 +1,48 @@
-.account{
+.account {
     max-width: 1300px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 50px auto;;
+    margin: 50px auto;
+    ;
     border: 1px solid #2172af;
     border-radius: 30px;
 }
 
-.account .orders{
+.account-order {
+    border: 1px solid #2172af;
+    border-radius: 30px;
+    padding: 20px;
+}
+
+.account .orders {
     width: 70%;
 }
 
-.account .orders, .account .account-profile, .account .account-addresses{
+.account .orders,
+.account .account-profile,
+.account .account-addresses {
     width: 50%;
 }
 
-.account input{
+.account input {
     border-color: #2172af !important;
     padding: 10px 25px;
     border-radius: 30px;
 }
 
-.address-btn-container{
+.address-btn-container {
     display: flex;
     gap: 20px;
 }
 
-.address-btn{
+.address-btn {
     padding: 5px 25px;
     border: 1px solid #2172af;
     border-radius: 30px;
+}
+
+.profile-update-btn {
+    margin: -6px 20px 20px;
 }
