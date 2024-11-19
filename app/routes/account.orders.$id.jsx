@@ -143,7 +143,7 @@ export default function OrderRoute() {
             </div>
           </div>
         </div>
-        <div>
+        <div className='shipping-container'>
           <h3>Shipping Address</h3>
           {order?.shippingAddress ? (
             <address>

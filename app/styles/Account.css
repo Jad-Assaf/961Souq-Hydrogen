@@ -17,29 +17,42 @@
     width: 75%;
 }
 
-.order-header{
+.order-header {
     display: flex;
     justify-content: space-around;
 }
 
-.line-item{
+.line-item {
     display: flex;
     justify-content: space-around;
     text-align: center;
 }
 
-.line-item *{
+.line-item * {
     flex: 1;
 }
 
-.line-item-product{
+.line-item-product {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.line-item-title{
+.line-item-title {
     font-size: 12px;
+}
+
+.subtotal-container {
+    display: flex;
+    justify-content: space-around;
+    text-align: end;
+    width: 90%;
+}
+
+.shipping-container *{
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
 }
 
 .account .orders {
