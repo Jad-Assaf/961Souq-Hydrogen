@@ -107,7 +107,7 @@ export default function OrderRoute() {
           )}
 
           {/* Subtotal */}
-          <div className='subtotal-container'>
+          {/* <div className='subtotal-container'>
             <div className="order-subtotal">
               <div>
                 <p>Subtotal</p>
@@ -120,7 +120,6 @@ export default function OrderRoute() {
               </div>
             </div>
 
-            {/* Tax */}
             <div className="order-tax">
               <div>Tax</div>
               <div>
@@ -131,7 +130,6 @@ export default function OrderRoute() {
               </div>
             </div>
 
-            {/* Total */}
             <div className="order-total">
               <div>Total</div>
               <div>
@@ -142,7 +140,7 @@ export default function OrderRoute() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className='shipping-container'>
           <h3>Shipping Address</h3>
           {order?.shippingAddress ? (
