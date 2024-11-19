@@ -16,6 +16,77 @@
     padding: 20px;
 }
 
+.order-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* Adjust columns as needed */
+    gap: 10px;
+}
+
+.order-header,
+.order-discounts,
+.order-subtotal,
+.order-tax,
+.order-total {
+    display: contents;
+    /* Allows the layout to mimic a table */
+}
+
+.order-body>div {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* Matches column count */
+}
+
+.order-body>div:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.order-header>div,
+.order-body>div>div {
+    font-weight: bold;
+}
+
+.line-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    /* Adjust column widths as needed */
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+}
+
+.line-item-product {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.line-item-image img {
+    border-radius: 4px;
+}
+
+.line-item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.line-item-title {
+    font-weight: bold;
+}
+
+.line-item-variant {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.line-item-price,
+.line-item-quantity,
+.line-item-discount {
+    text-align: center;
+}
+
 .account .orders {
     width: 70%;
 }

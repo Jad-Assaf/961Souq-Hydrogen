@@ -181,28 +181,35 @@ export default function OrderRoute() {
  */
 function OrderLineRow({lineItem}) {
   return (
-    <tr key={lineItem.id}>
-      <td>
-        <div>
-          {lineItem?.image && (
-            <div>
-              <Image data={lineItem.image} width={96} height={96} />
-            </div>
-          )}
-          <div>
-            <p>{lineItem.title}</p>
-            <small>{lineItem.variantTitle}</small>
+    <div key={lineItem.id} className="line-item">
+      {/* Product Details */}
+      <div className="line-item-product">
+        {lineItem?.image && (
+          <div className="line-item-image">
+            <Image data={lineItem.image} width={96} height={96} />
           </div>
+        )}
+        <div className="line-item-details">
+          <p className="line-item-title">{lineItem.title}</p>
+          <small className="line-item-variant">{lineItem.variantTitle}</small>
         </div>
-      </td>
-      <td>
+      </div>
+
+      {/* Price */}
+      <div className="line-item-price">
         <Money data={lineItem.price} />
-      </td>
-      <td>{lineItem.quantity}</td>
-      <td>
+      </div>
+
+      {/* Quantity */}
+      <div className="line-item-quantity">
+        {lineItem.quantity}
+      </div>
+
+      {/* Total Discount */}
+      <div className="line-item-discount">
         <Money data={lineItem.totalDiscount} />
-      </td>
-    </tr>
+      </div>
+    </div>
   );
 }
 
