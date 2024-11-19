@@ -19,6 +19,8 @@
 
 .account input{
     border-color: #2172af !important;
+    padding: 10px 25px;
+    border-radius: 30px;
 }
 
 .address-btn-container{
