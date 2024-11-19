@@ -1,9 +1,18 @@
 .account{
     max-width: 1300px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin: 50px auto;;
     border: 1px solid #2172af;
     border-radius: 30px;
+}
+
+.account .orders{
+    width: 70%;
+}
+
+.account .orders, .account .account-profile, .account .account-addresses{
+    width: 50%;
 }
