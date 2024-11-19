@@ -292,11 +292,12 @@ function NewAddressForm() {
       defaultAddress={null}
     >
       {({stateForMethod}) => (
-        <div>
+        <div className='address-btn-container'>
           <button
             disabled={stateForMethod('POST') !== 'idle'}
             formMethod="POST"
             type="submit"
+            className='address-btn'
           >
             {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
           </button>

@@ -55,7 +55,7 @@ function AccountMenu() {
   function isActiveStyle({isActive, isPending}) {
     return {
       fontWeight: isActive ? 'bold' : undefined,
-      color: isPending ? 'grey' : 'black',
+      color: isPending ? 'grey' : '#2172af',
     };
   }
 

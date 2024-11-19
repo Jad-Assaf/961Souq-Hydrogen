@@ -16,3 +16,18 @@
 .account .orders, .account .account-profile, .account .account-addresses{
     width: 50%;
 }
+
+.account input{
+    border-color: #2172af !important;
+}
+
+.address-btn-container{
+    display: flex;
+    gap: 20px;
+}
+
+.address-btn{
+    padding: 5px 25px;
+    border: 1px solid #2172af;
+    border-radius: 30px;
+}
