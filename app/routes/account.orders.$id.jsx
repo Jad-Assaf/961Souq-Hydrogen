@@ -139,8 +139,8 @@ export default function OrderRoute() {
                 <Money data={order.totalPrice} />
               </div>
             </div>
-          </div>
-        </div> */}
+          </div> */}
+        </div>
         <div className='shipping-container'>
           <h3>Shipping Address</h3>
           {order?.shippingAddress ? (
