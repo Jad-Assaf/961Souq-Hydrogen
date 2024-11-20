@@ -177,14 +177,26 @@ const MENU_FRAGMENT = `#graphql
       id
       title
       url
+      image {
+          src
+          altText
+        }
       items {
         id
         title
         url
+        image {
+          src
+          altText
+        }
         items {
           id
           title
           url
+          image {
+            src
+            altText
+          }
         }
       }
     }
