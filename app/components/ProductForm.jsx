@@ -124,13 +124,11 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
 
   if (!selectedVariant || !selectedVariant.availableForSale) return null;
 
-  const handleAnimation = (e, fetcher) => {
-    e.preventDefault(); // Prevent default form submission during animation
+  const handleAnimation = () => {
     setIsAnimating(true);
     setTimeout(() => {
       setIsAnimating(false);
-      fetcher.submit(); // Programmatically trigger form submission after animation
-    }, 300); // Complete animation before submitting
+    }, 300); // Complete animation before allowing submission
   };
 
   return (
@@ -143,24 +141,24 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
             merchandiseId: selectedVariant.id,
             quantity: quantity,
             selectedOptions: selectedVariant.selectedOptions,
-            selectedVariant: selectedVariant,
           },
         ],
       }}
     >
       {(fetcher) => {
+        // Automatically navigate to the checkout URL when available
         if (fetcher.data?.cart?.checkoutUrl) {
           window.location.href = fetcher.data.cart.checkoutUrl;
         }
 
         return (
           <motion.button
-            type="button" // Prevent form auto-submit
+            type="submit" // Allow CartForm to handle submission
             disabled={fetcher.state !== 'idle' || !selectedVariant?.availableForSale}
             className="buy-now-button"
-            onClick={(e) => handleAnimation(e, fetcher)}
-            animate={isAnimating ? { scale: 1.2 } : { scale: 1 }}
-            transition={{ duration: 0.2 }}
+            onClick={handleAnimation} // Trigger animation
+            animate={isAnimating ? { scale: 1.1 } : { scale: 1 }}
+            transition={{ duration: 0.3 }}
           >
             Buy Now
           </motion.button>
