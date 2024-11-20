@@ -5,6 +5,7 @@
     .product-images-container,
     .product-main{
         width: 100% !important;
+        margin: 10% 0 0;
     }
     .thumbnail{
         width: 75px !important;
