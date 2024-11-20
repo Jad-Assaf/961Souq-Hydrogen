@@ -381,3 +381,7 @@ strong{
     opacity: 0;
     transition: opacity 200ms ease;
 }
+
+.related-products-row{
+    width: 100%;
+}
