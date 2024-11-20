@@ -170,6 +170,10 @@ const MENU_FRAGMENT = `#graphql
     title
     type
     url
+    image {
+      src
+      altText
+    }
   }
   fragment ChildMenuItem on MenuItem {
     ...MenuItem
@@ -178,9 +182,9 @@ const MENU_FRAGMENT = `#graphql
       title
       url
       image {
-          src
-          altText
-        }
+        src
+        altText
+      }
       items {
         id
         title
@@ -214,7 +218,6 @@ const MENU_FRAGMENT = `#graphql
     }
   }
 `;
-
 
 export const HEADER_QUERY = `#graphql
   fragment Shop on Shop {
