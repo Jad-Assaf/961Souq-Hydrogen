@@ -119,14 +119,7 @@ function ProductOptions({ option }) {
 }
 
 export function DirectCheckoutButton({ selectedVariant, quantity }) {
-  const [isAnimating, setIsAnimating] = useState(false);
-
   if (!selectedVariant || !selectedVariant.availableForSale) return null;
-
-  const handleAnimation = () => {
-    setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 300); // Reset animation after 300ms
-  };
 
   return (
     <CartForm
@@ -153,16 +146,13 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
         }
 
         return (
-          <motion.button
+          <button
             type="submit"
             disabled={!selectedVariant || !selectedVariant.availableForSale}
             className="buy-now-button"
-            onClick={handleAnimation}
-            animate={isAnimating ? { scale: 1.2 } : { scale: 1 }}
-            transition={{ duration: 0.2 }}
           >
             Buy Now
-          </motion.button>
+          </button>
         );
       }}
     </CartForm>
