@@ -26,7 +26,11 @@ export function AddToCartButton({
     setTimeout(() => setIsAnimating(false), 300); // Reset animation after 300ms
   };
 
-  const isUnavailable = disabled || lines.some((line) => !line?.merchandise?.availableForSale);
+  // Check if any line is unavailable or if the `disabled` prop is true
+  const isUnavailable =
+    disabled ||
+    !lines?.length ||
+    lines.some((line) => !line?.merchandise?.availableForSale);
 
   return (
     <CartForm route="/cart" inputs={{ lines }} action={CartForm.ACTIONS.LinesAdd}>
@@ -52,7 +56,6 @@ export function AddToCartButton({
     </CartForm>
   );
 }
-
 
 /** @typedef {import('@remix-run/react').FetcherWithComponents} FetcherWithComponents */
 /** @typedef {import('@shopify/hydrogen').OptimisticCartLineInput} OptimisticCartLineInput */
