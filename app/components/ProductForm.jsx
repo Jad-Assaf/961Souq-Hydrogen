@@ -129,7 +129,7 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
     setIsAnimating(true);
     setTimeout(() => {
       setIsAnimating(false);
-      fetcher.submit(); // Programmatically trigger the form submission after animation
+      fetcher.submit(); // Programmatically trigger form submission after animation
     }, 300); // Complete animation before submitting
   };
 
@@ -155,14 +155,14 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
 
         return (
           <motion.button
-            type="button" // Prevent default submission
+            type="button" // Prevent form auto-submit
             disabled={fetcher.state !== 'idle' || !selectedVariant?.availableForSale}
-            className={`buy-now-button ${fetcher.state !== 'idle' ? 'loading' : ''}`}
+            className="buy-now-button"
             onClick={(e) => handleAnimation(e, fetcher)}
             animate={isAnimating ? { scale: 1.2 } : { scale: 1 }}
             transition={{ duration: 0.2 }}
           >
-            {fetcher.state === 'submitting' ? 'Processing...' : 'Buy Now'}
+            Buy Now
           </motion.button>
         );
       }}
