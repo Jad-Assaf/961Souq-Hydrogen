@@ -761,7 +761,6 @@ button.reset:hover:not(:has(> *)) {
 
 /* Submenu */
 .submenu-level-1 {
-  display: none;
   justify-content: flex-start;
   flex-wrap: wrap;
   row-gap: 30px;
@@ -775,7 +774,6 @@ button.reset:hover:not(:has(> *)) {
   border-radius: 0;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   transition: all 0.5s ease;
-  opacity: 0;
   transform: translateY(-10px);
   color: #000;
 }
