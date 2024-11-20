@@ -221,18 +221,14 @@ export function HeaderMenu({ menu, viewport }) {
     const handleMouseEnter = (event) => {
       const submenus = event.currentTarget.querySelectorAll('.submenu');
       submenus.forEach((submenu) => {
-        submenu.style.display = 'flex'; // Ensure the submenu is visible
-        submenu.style.opacity = '1'; // Fade in
-        submenu.style.transform = 'translateY(0)'; // Reset animation offset
+        submenu.classList.add('show');
       });
     };
 
     const handleMouseLeave = (event) => {
       const submenus = event.currentTarget.querySelectorAll('.submenu');
       submenus.forEach((submenu) => {
-        submenu.style.display = 'none'; // Hide submenu
-        submenu.style.opacity = '0'; // Fade out
-        submenu.style.transform = 'translateY(-10px)'; // Offset animation
+        submenu.classList.remove('show');
       });
     };
 
@@ -240,9 +236,7 @@ export function HeaderMenu({ menu, viewport }) {
       menuItems.forEach((item) => {
         const submenus = item.querySelectorAll('.submenu');
         submenus.forEach((submenu) => {
-          submenu.style.display = 'none';
-          submenu.style.opacity = '0';
-          submenu.style.transform = 'translateY(-10px)';
+          submenu.classList.remove('show');
         });
       });
     };
@@ -251,7 +245,7 @@ export function HeaderMenu({ menu, viewport }) {
       item.addEventListener('mouseenter', handleMouseEnter);
       item.addEventListener('mouseleave', handleMouseLeave);
 
-      const links = item.querySelectorAll('a'); // Ensure `links` is within `menuItems.forEach`
+      const links = item.querySelectorAll('a');
       links.forEach((link) => {
         link.addEventListener('click', handleLinkClick);
       });
@@ -262,7 +256,7 @@ export function HeaderMenu({ menu, viewport }) {
         item.removeEventListener('mouseenter', handleMouseEnter);
         item.removeEventListener('mouseleave', handleMouseLeave);
 
-        const links = item.querySelectorAll('a'); // Clean up properly
+        const links = item.querySelectorAll('a');
         links.forEach((link) => {
           link.removeEventListener('click', handleLinkClick);
         });
