@@ -171,7 +171,7 @@ const MENU_FRAGMENT = `#graphql
     type
     url
     image {
-      src
+      url
       altText
     }
   }
@@ -182,7 +182,7 @@ const MENU_FRAGMENT = `#graphql
       title
       url
       image {
-        src
+        url
         altText
       }
       items {
@@ -190,7 +190,7 @@ const MENU_FRAGMENT = `#graphql
         title
         url
         image {
-          src
+          url
           altText
         }
         items {
@@ -198,7 +198,7 @@ const MENU_FRAGMENT = `#graphql
           title
           url
           image {
-            src
+            url
             altText
           }
         }

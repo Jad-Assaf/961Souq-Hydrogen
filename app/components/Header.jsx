@@ -182,8 +182,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 <button onClick={() => openSubmenu(item.id)}>
                   {item.image && (
                     <img
-                      src={item.image.src}
-                      alt={item.image.alt || item.title}
+                      src={item.image?.url}
+                      alt={item.image?.alt || item.title}
                       className="menu-item-image"
                     />
                   )}
