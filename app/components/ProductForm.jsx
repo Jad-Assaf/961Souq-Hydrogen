@@ -1,6 +1,7 @@
 import { Link, useLocation } from '@remix-run/react';
 import { CartForm, VariantSelector } from '@shopify/hydrogen';
-import React from 'react';
+import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import { AddToCartButton } from '~/components/AddToCartButton';
 import { useAside } from '~/components/Aside';
 
@@ -119,7 +120,18 @@ function ProductOptions({ option }) {
 }
 
 export function DirectCheckoutButton({ selectedVariant, quantity }) {
+  const [isAnimating, setIsAnimating] = useState(false);
+
   if (!selectedVariant || !selectedVariant.availableForSale) return null;
+
+  const handleAnimation = (e, fetcher) => {
+    e.preventDefault(); // Prevent default form submission during animation
+    setIsAnimating(true);
+    setTimeout(() => {
+      setIsAnimating(false);
+      fetcher.submit(); // Programmatically trigger the form submission after animation
+    }, 300); // Complete animation before submitting
+  };
 
   return (
     <CartForm
@@ -137,22 +149,21 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
       }}
     >
       {(fetcher) => {
-        if (fetcher.state === 'submitting') {
-          return <p>Processing...</p>;
-        }
-
         if (fetcher.data?.cart?.checkoutUrl) {
           window.location.href = fetcher.data.cart.checkoutUrl;
         }
 
         return (
-          <button
-            type="submit"
-            disabled={!selectedVariant || !selectedVariant.availableForSale}
-            className="buy-now-button"
+          <motion.button
+            type="button" // Prevent default submission
+            disabled={fetcher.state !== 'idle' || !selectedVariant?.availableForSale}
+            className={`buy-now-button ${fetcher.state !== 'idle' ? 'loading' : ''}`}
+            onClick={(e) => handleAnimation(e, fetcher)}
+            animate={isAnimating ? { scale: 1.2 } : { scale: 1 }}
+            transition={{ duration: 0.2 }}
           >
-            Buy Now
-          </button>
+            {fetcher.state === 'submitting' ? 'Processing...' : 'Buy Now'}
+          </motion.button>
         );
       }}
     </CartForm>
