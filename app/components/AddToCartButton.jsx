@@ -26,6 +26,8 @@ export function AddToCartButton({
     setTimeout(() => setIsAnimating(false), 300); // Reset animation after 300ms
   };
 
+  const isUnavailable = disabled || lines.some((line) => !line?.merchandise?.availableForSale);
+
   return (
     <CartForm route="/cart" inputs={{ lines }} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher) => (
@@ -38,10 +40,10 @@ export function AddToCartButton({
           <motion.button
             type="submit"
             onClick={handleAnimation}
-            disabled={disabled ?? fetcher.state !== 'idle'}
-            className={`add-to-cart-button ${disabled ? 'disabled' : ''} ${fetcher.state !== 'idle' ? 'loading' : ''}`}
+            disabled={isUnavailable || fetcher.state !== 'idle'}
+            className={`add-to-cart-button ${isUnavailable ? 'disabled' : ''} ${fetcher.state !== 'idle' ? 'loading' : ''}`}
             animate={isAnimating ? { scale: 1.1 } : { scale: 1 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.2 }}
           >
             {children}
           </motion.button>
@@ -50,6 +52,7 @@ export function AddToCartButton({
     </CartForm>
   );
 }
+
 
 /** @typedef {import('@remix-run/react').FetcherWithComponents} FetcherWithComponents */
 /** @typedef {import('@shopify/hydrogen').OptimisticCartLineInput} OptimisticCartLineInput */

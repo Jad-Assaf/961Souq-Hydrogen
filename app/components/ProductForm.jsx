@@ -123,8 +123,6 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false); // Track whether redirect is needed
 
-  if (!selectedVariant || !selectedVariant.availableForSale) return null;
-
   const handleAnimation = () => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -139,6 +137,8 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
     };
   }, []);
 
+  const isUnavailable = !selectedVariant?.availableForSale;
+
   return (
     <CartForm
       route="/cart"
@@ -146,15 +146,14 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
       inputs={{
         lines: [
           {
-            merchandiseId: selectedVariant.id,
+            merchandiseId: selectedVariant?.id,
             quantity: quantity,
-            selectedOptions: selectedVariant.selectedOptions,
+            selectedOptions: selectedVariant?.selectedOptions,
           },
         ],
       }}
     >
       {(fetcher) => {
-        // Redirect only if `shouldRedirect` is true
         if (shouldRedirect && fetcher.data?.cart?.checkoutUrl) {
           window.location.href = fetcher.data.cart.checkoutUrl;
         }
@@ -162,10 +161,10 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
         return (
           <motion.button
             type="submit"
-            disabled={fetcher.state !== 'idle' || !selectedVariant?.availableForSale}
-            className="buy-now-button"
+            disabled={isUnavailable || fetcher.state !== 'idle'}
+            className={`buy-now-button ${isUnavailable ? 'disabled' : ''}`}
             onClick={handleAnimation}
-            animate={isAnimating ? { scale: 1.1 } : { scale: 1 }}
+            animate={isAnimating ? { scale: 1.05 } : { scale: 1 }}
             transition={{ duration: 0.3 }}
           >
             Buy Now
