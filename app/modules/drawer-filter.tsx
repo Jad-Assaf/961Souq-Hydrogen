@@ -32,27 +32,6 @@ import { Drawer, useDrawer } from "./drawer";
 import { IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid } from "./icon";
 import { Input } from "./input";
 
-const GET_NAVIGATION_MENU = `#graphql
-  query getNavigationMenu($handle: String!) {
-    shop {
-      navigation(handle: "new-main-menu") {
-        id
-        title
-        items {
-          id
-          title
-          url
-          collection {
-            id
-            title
-            handle
-          }
-        }
-      }
-    }
-  }
-`;
-
 type DrawerFilterProps = {
   productNumber?: number;
   filters: Filter[];
@@ -119,20 +98,8 @@ export function FiltersDrawer({
   appliedFilters = [],
   onRemoveFilter,
 }: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
-  const [categoryMenu, setCategoryMenu] = useState<any | null>(null);
   const [params] = useSearchParams();
   const location = useLocation();
-
-  const { data, error, loading } = useQuery(GET_NAVIGATION_MENU);
-
-  useEffect(() => {
-    if (data?.shop?.navigation) {
-      setCategoryMenu(data.shop.navigation);
-    }
-  }, [data]);
-
-  if (loading) return <p>Loading categories...</p>;
-  if (error) return <p>Error loading categories</p>;
 
   const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
     switch (filter.type) {
@@ -204,26 +171,6 @@ export function FiltersDrawer({
           <div className="flex flex-wrap gap-2">
             {/* <p>Apply Some Filters</p> */}
           </div>
-        </div>
-      )}
-      {categoryMenu && (
-        <div className="category-menu mb-4">
-          <h3 className="font-semibold text-lg mb-2">Categories:</h3>
-          <ul className="flex flex-wrap gap-2">
-            {categoryMenu.items.map((item: any) => (
-              <li key={item.id}>
-                {item.collection ? (
-                  <Link to={`/collections/${item.collection.handle}`} className="text-sm">
-                    {item.collection.title}
-                  </Link>
-                ) : (
-                  <a href={item.url} className="text-sm">
-                    {item.title}
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
         </div>
       )}
       {filters.map((filter: Filter) => (
@@ -491,8 +438,3 @@ export default function SortMenu({
     </Menu>
   );
 }
-
-function useQuery(GET_NAVIGATION_MENU: string): { data: any; error: any; loading: any; } {
-  throw new Error("Function not implemented.");
-}
-
