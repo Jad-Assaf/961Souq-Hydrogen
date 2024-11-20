@@ -335,7 +335,7 @@ export default function Collection() {
                 </button>
               )}
             </div>
-            <DrawerFilter
+          <DrawerFilter
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
               numberInRow={numberInRow}
@@ -544,7 +544,6 @@ function ProductOptions({ option }) {
               to={to}
               onClick={(e) => {
                 e.preventDefault(); // Add this line
-                // Handle variant selection here if needed
               }}
               style={{
                 border: isActive ? '1px solid black' : '1px solid transparent',
