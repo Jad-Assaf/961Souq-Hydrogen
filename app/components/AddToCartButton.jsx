@@ -40,8 +40,8 @@ export function AddToCartButton({
             onClick={handleAnimation}
             disabled={disabled ?? fetcher.state !== 'idle'}
             className={`add-to-cart-button ${disabled ? 'disabled' : ''} ${fetcher.state !== 'idle' ? 'loading' : ''}`}
-            animate={isAnimating ? { scale: 1.05 } : { scale: 1 }}
-            transition={{ duration: 0.5 }}
+            animate={isAnimating ? { scale: 1.1 } : { scale: 1 }}
+            transition={{ duration: 1 }}
           >
             {children}
           </motion.button>
