@@ -326,7 +326,7 @@
 
 .tabs {
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     border-bottom: 1px solid #ccc;
 }
 
