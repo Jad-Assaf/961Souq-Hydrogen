@@ -165,16 +165,26 @@ export const CART_QUERY_FRAGMENT = `#graphql
 const MENU_FRAGMENT = `#graphql
   fragment MenuItem on MenuItem {
     id
+    resourceId
+    tags
     title
+    type
     url
-    metafield(namespace: "custom", key: "custom_image") {
-      value
-      reference {
-        ... on MediaImage {
-          image {
-            url
-            altText
-          }
+  }
+  fragment ChildMenuItem on MenuItem {
+    ...MenuItem
+    items {
+      id
+      title
+      url
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
         }
       }
     }
@@ -182,7 +192,7 @@ const MENU_FRAGMENT = `#graphql
   fragment ParentMenuItem on MenuItem {
     ...MenuItem
     items {
-      ...MenuItem
+      ...ChildMenuItem
     }
   }
   fragment Menu on Menu {
@@ -192,6 +202,7 @@ const MENU_FRAGMENT = `#graphql
     }
   }
 `;
+
 
 export const HEADER_QUERY = `#graphql
   fragment Shop on Shop {
@@ -223,7 +234,6 @@ export const HEADER_QUERY = `#graphql
   }
   ${MENU_FRAGMENT}
 `;
-
 
 export const FOOTER_QUERY = `#graphql
   query Footer($shopMenuHandle: String!, $policiesMenuHandle: String!) {
@@ -326,3 +336,4 @@ export const RECENTLY_VIEWED_PRODUCTS_QUERY = `#graphql
     }
   }
 `;
+
