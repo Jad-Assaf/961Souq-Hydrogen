@@ -1,7 +1,7 @@
 import { Link, useLocation } from '@remix-run/react';
 import { CartForm, VariantSelector } from '@shopify/hydrogen';
 import { motion } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AddToCartButton } from '~/components/AddToCartButton';
 import { useAside } from '~/components/Aside';
 
@@ -121,6 +121,7 @@ function ProductOptions({ option }) {
 
 export function DirectCheckoutButton({ selectedVariant, quantity }) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false); // Track whether redirect is needed
 
   if (!selectedVariant || !selectedVariant.availableForSale) return null;
 
@@ -128,8 +129,15 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
     setIsAnimating(true);
     setTimeout(() => {
       setIsAnimating(false);
-    }, 300); // Complete animation before allowing submission
+      setShouldRedirect(true); // Allow redirection after animation
+    }, 300); // Complete animation before redirecting
   };
+
+  useEffect(() => {
+    return () => {
+      setShouldRedirect(false); // Reset redirection when leaving the component
+    };
+  }, []);
 
   return (
     <CartForm
@@ -146,17 +154,17 @@ export function DirectCheckoutButton({ selectedVariant, quantity }) {
       }}
     >
       {(fetcher) => {
-        // Automatically navigate to the checkout URL when available
-        if (fetcher.data?.cart?.checkoutUrl) {
+        // Redirect only if `shouldRedirect` is true
+        if (shouldRedirect && fetcher.data?.cart?.checkoutUrl) {
           window.location.href = fetcher.data.cart.checkoutUrl;
         }
 
         return (
           <motion.button
-            type="submit" // Allow CartForm to handle submission
+            type="submit"
             disabled={fetcher.state !== 'idle' || !selectedVariant?.availableForSale}
             className="buy-now-button"
-            onClick={handleAnimation} // Trigger animation
+            onClick={handleAnimation}
             animate={isAnimating ? { scale: 1.1 } : { scale: 1 }}
             transition={{ duration: 0.3 }}
           >
