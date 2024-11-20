@@ -175,11 +175,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
           <button className="mobile-menu-close" onClick={closeMobileMenu}>
             ✕
           </button>
-
+          <h3>Menu</h3>
           <div className={`mobile-menu-content ${activeSubmenu ? 'hidden' : ''}`}>
             {menu.items.map((item) => (
               <div key={item.id} className="mobile-menu-item">
                 <button onClick={() => openSubmenu(item.id)}>
+                  {item.image && (
+                    <img
+                      src={item.image.src}
+                      alt={item.image.alt || item.title}
+                      className="menu-item-image"
+                    />
+                  )}
                   {item.title} <span className="mobile-menu-arrow">›</span>
                 </button>
               </div>
@@ -200,6 +207,13 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                       to={new URL(subItem.url).pathname}
                       onClick={closeMobileMenu}
                     >
+                      {subItem.image && (
+                        <img
+                          src={subItem.image.src}
+                          alt={subItem.image.alt || subItem.title}
+                          className="submenu-item-image"
+                        />
+                      )}
                       {subItem.title}
                     </NavLink>
                   ))}
