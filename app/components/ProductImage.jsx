@@ -5,6 +5,7 @@ import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import { motion } from 'framer-motion';
 import 'yet-another-react-lightbox/styles.css';
 import '../styles/ProductImage.css';
+import { useSwipeable } from 'react-swipeable';
 
 const LeftArrowIcon = () => (
   <svg
@@ -44,7 +45,6 @@ export function ProductImages({ images, selectedVariantImage }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageKey, setImageKey] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-
   const [isVariantSelected, setIsVariantSelected] = useState(false);
 
   useEffect(() => {
@@ -63,10 +63,9 @@ export function ProductImages({ images, selectedVariantImage }) {
 
   const selectedImage = images[selectedImageIndex]?.node;
 
-  // Trigger a unique key change on each image change
   useEffect(() => {
-    setImageKey(prevKey => prevKey + 1);
-    setIsImageLoaded(false); // Reset loading status when image changes
+    setImageKey((prevKey) => prevKey + 1);
+    setIsImageLoaded(false);
   }, [selectedImageIndex]);
 
   const handlePrevImage = () => {
@@ -82,6 +81,13 @@ export function ProductImages({ images, selectedVariantImage }) {
     );
     setIsVariantSelected(false);
   };
+
+  // Swipe Handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: handleNextImage,
+    onSwipedRight: handlePrevImage,
+    trackMouse: true, // Allows swiping with a mouse for desktops
+  });
 
   return (
     <div className="product-images-container">
@@ -110,6 +116,7 @@ export function ProductImages({ images, selectedVariantImage }) {
         className="main-image"
         onClick={() => setIsLightboxOpen(true)}
         style={{ cursor: 'grab' }}
+        {...swipeHandlers} // Attach swipe handlers to the main image
       >
         {selectedImage && (
           <motion.div
