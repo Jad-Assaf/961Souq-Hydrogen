@@ -1,26 +1,34 @@
-@media (max-width: 1028px){
-    .ProductPageTop{
+@media (max-width: 1028px) {
+    .ProductPageTop {
         flex-direction: column;
     }
+
     .product-images-container,
-    .product-main{
+    .product-main {
         width: 100% !important;
-        margin: 10% 0 0;
     }
-    .thumbnail{
+
+    .product-images-container {
+        margin: 10% 0 0;
+
+    }
+
+    .thumbnail {
         width: 75px !important;
         height: 75px !important;
     }
-    .tab-button{
+
+    .tab-button {
         font-size: 14px !important;
         padding: 0 9px !important;
     }
-    .product-options-item{
+
+    .product-options-item {
         font-size: 14px;
     }
 }
 
-.ProductPageTop{
+.ProductPageTop {
     display: flex;
     justify-content: center;
     align-items: start;
@@ -28,16 +36,17 @@
     margin: auto;
 }
 
-.product-images-container, .product-main{
+.product-images-container,
+.product-main {
     width: 50%;
     margin-bottom: 30px;
 }
 
-.product-main{
+.product-main {
     width: 50%;
 }
 
-.product-price{
+.product-price {
     font-size: 18px;
     font-weight: 600;
 }
@@ -54,7 +63,7 @@
     justify-content: center;
 }
 
-.quantity-selector p{
+.quantity-selector p {
     font-size: 12px;
 }
 
@@ -228,7 +237,7 @@
     }
 }
 
-.product-form form{
+.product-form form {
     width: 85%;
 }
 
@@ -284,13 +293,13 @@
     width: 80%;
 }
 
-.OptionName{
+.OptionName {
     font-size: 14px;
     font-weight: 500;
     margin: 0 0 0.3rem 0;
 }
 
-.OptionValue{
+.OptionValue {
     font-weight: 300;
 }
 
@@ -343,25 +352,29 @@
     background-color: #f9f9f9;
 }
 
-.ProductPageBottom{
+.ProductPageBottom {
     width: 100%;
 }
 
-.ProductPageBottom *{
+.ProductPageBottom * {
     line-height: 2;
     list-style: inside;
 }
 
-.ProductPageBottom h3{
+.ProductPageBottom h3 {
     font-size: 18px;
     font-weight: 600;
 }
 
-.ProductPageBottom h2, .ProductPageBottom h3, .ProductPageBottom h4, .ProductPageBottom ul, .ProductPageBottom p{
+.ProductPageBottom h2,
+.ProductPageBottom h3,
+.ProductPageBottom h4,
+.ProductPageBottom ul,
+.ProductPageBottom p {
     margin-bottom: 20px;
 }
 
-strong{
+strong {
     font-weight: bold;
 }
 
@@ -383,6 +396,6 @@ strong{
     transition: opacity 200ms ease;
 }
 
-.related-products-row{
+.related-products-row {
     width: 100%;
 }
