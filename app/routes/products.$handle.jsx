@@ -176,17 +176,11 @@ export default function Product() {
               )}
             </Await>
           </Suspense>
+          <hr className='productPage-hr'></hr>
           <div className="product-details">
             <ul>
               <li>
-                <strong>Vendor:</strong> {' '}
-                {product.vendor ? (
-                  <a href={`/collections/vendors?q=${encodeURIComponent(product.vendor)}`}>
-                    {product.vendor}
-                  </a>
-                ) : (
-                  'N/A'
-                )}
+                <strong>Vendor:</strong> {product.vendor || 'N/A'}
               </li>
               <li>
                 <strong>SKU:</strong> {selectedVariant?.sku || 'N/A'}
@@ -200,6 +194,7 @@ export default function Product() {
               </li>
             </ul>
           </div>
+
         </div>
       </div>
       <div className="ProductPageBottom">
