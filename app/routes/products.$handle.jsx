@@ -76,7 +76,7 @@ async function loadCriticalData({ context, params, request }) {
   return { product, relatedProducts };
 }
 
-export async function loadProductMetafields({ context, params }) {
+ async function loadProductMetafields({ context, params }) {
   const { handle } = params;
   const { storefront } = context;
 
@@ -85,13 +85,21 @@ export async function loadProductMetafields({ context, params }) {
   }
 
   try {
+    console.log("Fetching metafields for handle:", handle);
     const { productByHandle } = await storefront.query(GET_PRODUCT_METAFIELDS, {
       variables: { handle },
     });
 
-    console.log("Metafields fetched:", productByHandle?.metafields);
+    if (!productByHandle) {
+      console.log("No product found for handle:", handle);
+      return { metafields: [] };
+    }
 
-    return { metafields: productByHandle?.metafields || [] };
+    // Extract metafields from edges
+    const metafields = productByHandle.metafields?.edges.map(edge => edge.node) || [];
+    console.log("Fetched metafields:", metafields);
+
+    return { metafields };
   } catch (error) {
     console.error("Error fetching metafields:", error);
     return { metafields: [] }; // Fallback to empty array
@@ -228,16 +236,25 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {/* Metafields Section */}
-          {hasMetafields ? (
+          {Array.isArray(metafields) && metafields.length > 0 ? (
             <div className="product-metafields">
               <h3>Additional Information</h3>
               <ul>
-                {metafields.map((metafield) => (
-                  <li key={metafield.key}>
-                    <strong>{metafield.key}:</strong> {metafield.value || "N/A"}
-                  </li>
-                ))}
+                {metafields.map((metafield) => {
+                  const labels = {
+                    shipping_time: "Shipping Time",
+                    condition: "Condition",
+                    warranty: "Warranty",
+                    vat: "VAT",
+                  };
+
+                  return (
+                    <li key={metafield.key}>
+                      <strong>{labels[metafield.key] || metafield.key}:</strong>{" "}
+                      {metafield.value || "N/A"}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : (
@@ -490,12 +507,18 @@ const VARIANTS_QUERY = `#graphql
 `;
 
 const GET_PRODUCT_METAFIELDS = `#graphql
-  query ProductMetafields($handle: String!) {
+  query Product($handle: String!) {
     productByHandle(handle: $handle) {
+      id
+      title
       metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
-        namespace
-        key
-        value
+        edges {
+          node {
+            namespace
+            key
+            value
+          }
+        }
       }
     }
   }
