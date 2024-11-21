@@ -110,14 +110,19 @@
 
 .social-links a:hover {
     background-color: #1a5b8a;
-    transform: scale(1.03);
-    /* Slight zoom on hover */
 }
 
-.social-links a svg{
+.social-links a:hover svg {
+    color: #2172af;
+    fill: #2172af;
+    transform: scale(1.2);
+}
+
+.social-links a svg {
     width: 15px;
     height: auto;
     fill: #fff;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 /* Responsive Design */
@@ -131,17 +136,17 @@
     }
 }
 
-li i svg{
+li i svg {
     width: 20px;
     height: auto;
     fill: #2172af;
 }
 
-.fa-map-marker-alt{
+.fa-map-marker-alt {
     margin-top: 2px;
 }
 
-.copyright{
+.copyright {
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -151,17 +156,17 @@ li i svg{
     color: #fff;
 }
 
-.copyright p{
+.copyright p {
     font-size: 12px;
 }
 
-.copyright div{
+.copyright div {
     display: flex;
     justify-content: space-around;
     width: 120px;
 }
 
-svg.icon.icon--full-color{
+svg.icon.icon--full-color {
     width: 50px;
     height: auto;
 }
