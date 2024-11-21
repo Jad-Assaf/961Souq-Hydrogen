@@ -166,10 +166,9 @@ export default function Product() {
               {(data) => (
                 <><ProductForm
                   product={product}
-                  variants={data?.product?.variants.nodes || []}
                   selectedVariant={selectedVariant}
-                  quantity={quantity}
-                />
+                  variants={data?.product?.variants.nodes || []}
+                  quantity={quantity} />
                   <DirectCheckoutButton
                     selectedVariant={selectedVariant}
                     quantity={quantity} />

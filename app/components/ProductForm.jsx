@@ -31,34 +31,18 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
   const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613963961&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
 
   return (
-    <><VariantSelector
+      <><VariantSelector
       handle={product.handle}
       options={product.options.filter((option) => option.values.length > 1)}
       variants={variants}
     >
-      {({ option }) => (
-        <ProductOptions
-          key={option.name}
-          option={{
-            ...option,
-            values: option.values.map((value) => ({
-              value, // Ensure value is a string or primitive
-              optionValue: value,
-              isAvailable: true, // Placeholder or dynamic logic
-              isActive: false,   // Placeholder or dynamic logic
-            })),
-          }}
-          product={product}
-        />
-      )}
-    </VariantSelector>
-
-      <div className="product-form">
+      {({ option }) => <ProductOptions key={option.name} option={option} />}
+    </VariantSelector><div className="product-form">
         <AddToCartButton
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => {
             open('cart');
-          }}
+          } }
           lines={selectedVariant
             ? [
               {
@@ -89,80 +73,48 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
 /**
  * @param {{option: VariantOption}}
  */
-function ProductOptions({ option, product }) {
-  if (!product || !product.options || !product.variants) {
-    return <div>Product data is unavailable.</div>;
-  }
-
-  const [selectedOptions, setSelectedOptions] = useState(() => {
-    const initialOptions = {};
-    product.options.forEach((opt) => {
-      initialOptions[opt.name] = product.variants.nodes[0]?.selectedOptions.find(
-        (o) => o.name === opt.name
-      )?.value || opt.values[0];
-    });
-    return initialOptions;
-  });
-
-  const handleOptionSelect = (optionName, value) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [optionName]: value,
-    }));
-  };
-
-  const isVariantAvailable = (selectedOptions, currentOption, value) => {
-    const selected = { ...selectedOptions, [currentOption]: value };
-
-    return product.variants.nodes.some((variant) => {
-      const matches = Object.entries(selected).every(
-        ([name, val]) =>
-          variant.selectedOptions.find(
-            (opt) => opt.name === name && opt.value === val
-          )
-      );
-      return matches && variant.availableForSale;
-    });
-  };
-
+function ProductOptions({ option }) {
   return (
-    <div className="product-options">
-      {product.options.map((opt) => (
-        <div key={opt.name} className="product-option">
-          <h5 className="OptionName">{opt.name}:</h5>
-          <div className="product-options-grid">
-            {opt.values.map((val) => {
-              const isDisabled = !isVariantAvailable(
-                selectedOptions,
-                opt.name,
-                val.value
-              );
+    <div className="product-options" key={option.name}>
+      <h5 className='OptionName'>{option.name}: <span className='OptionValue'>{option.value}</span></h5>
+      <div className="product-options-grid">
+        {option.values.map(({ value, isAvailable, isActive, to, variant }) => {
+          // Check if the option is 'Color' and if the variant has an image
+          const isColorOption = option.name.toLowerCase() === 'color';
+          const variantImage = isColorOption && variant?.image?.url;
 
-              return (
-                <button
-                  key={`${opt.name}-${val.value}`}
-                  disabled={isDisabled}
-                  onClick={() => handleOptionSelect(opt.name, val.value)}
-                  style={{
-                    border:
-                      selectedOptions[opt.name] === val.value
-                        ? '1px solid #2172af'
-                        : '1px solid transparent',
-                    opacity: isDisabled ? 0.3 : 1,
-                    backgroundColor:
-                      selectedOptions[opt.name] === val.value
-                        ? '#e6f2ff'
-                        : '#f0f0f0',
-                    pointerEvents: isDisabled ? 'none' : 'auto',
-                  }}
-                >
-                  {val.value}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+          return (
+            <Link
+              className="product-options-item"
+              key={option.name + value}
+              prefetch="intent"
+              preventScrollReset
+              replace
+              to={to}
+              style={{
+                border: isActive ? '1px solid #2172af' : '1px solid transparent',
+                opacity: isAvailable ? 1 : 0.3,
+                borderRadius: '20px',
+                transition: 'all 0.3s ease-in-out',
+                backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0',
+                boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                transform: isActive ? 'scale(0.98)' : 'scale(1)',
+              }}
+            >
+              {variantImage ? (
+                <img
+                  src={variantImage}
+                  alt={value}
+                  style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                />
+              ) : (
+                value
+              )}
+            </Link>
+          );
+        })}
+      </div>
+      <br />
     </div>
   );
 }
