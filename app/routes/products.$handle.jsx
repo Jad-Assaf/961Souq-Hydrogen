@@ -414,7 +414,7 @@ const PRODUCT_FRAGMENT = `#graphql
       description
       title
     }
-    metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
+    metafields(namespace: "custom", keys: ["condition"]) {
       namespace
       key
       value
