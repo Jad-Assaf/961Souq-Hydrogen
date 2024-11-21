@@ -33,21 +33,23 @@ async function loadCriticalData({ context, params, request }) {
   const { storefront } = context;
 
   if (!handle) {
-    throw new Error('Expected product handle to be defined');
+    throw new Error("Expected product handle to be defined");
   }
 
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: { handle, selectedOptions: getSelectedProductOptions(request) || [] },
   });
 
+  console.log(product); // Inspect the product object for metafields
+
   if (!product?.id) {
-    throw new Response('Product not found', { status: 404 });
+    throw new Response("Product not found", { status: 404 });
   }
 
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
     firstVariant.selectedOptions.find(
-      (option) => option.name === 'Title' && option.value === 'Default Title'
+      (option) => option.name === "Title" && option.value === "Default Title"
     )
   );
 
@@ -57,7 +59,7 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  const productType = product.productType || 'General';
+  const productType = product.productType || "General";
 
   // Fetch related products
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
@@ -195,6 +197,19 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
+          {product?.metafields?.length > 0 && (
+            <div className="product-metafields">
+              <h3>Additional Information</h3>
+              <ul>
+                {product.metafields.map((metafield) => (
+                  <li key={metafield.key}>
+                    <strong>{metafield.key}:</strong> {metafield.value || 'N/A'}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
         </div>
       </div>
       <div className="ProductPageBottom">
@@ -398,6 +413,11 @@ const PRODUCT_FRAGMENT = `#graphql
     seo {
       description
       title
+    }
+    metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
+      namespace
+      key
+      value
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
