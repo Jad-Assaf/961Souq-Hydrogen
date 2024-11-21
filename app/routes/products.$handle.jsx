@@ -179,9 +179,9 @@ export default function Product() {
           <div className="product-details">
             <ul>
               <li>
-                <strong>Vendor:</strong>{' '}
+                <strong>Vendor:</strong> {' '}
                 {product.vendor ? (
-                  <a href={`/collections/vendors/${encodeURIComponent(product.vendor)}`}>
+                  <a href={`/collections/vendors?q=${encodeURIComponent(product.vendor)}`}>
                     {product.vendor}
                   </a>
                 ) : (
@@ -196,14 +196,7 @@ export default function Product() {
                 {selectedVariant?.availableForSale ? 'In Stock' : 'Out of Stock'}
               </li>
               <li>
-                <strong>Product Type:</strong>{' '}
-                {product.productType ? (
-                  <a href={`/collections/types/${encodeURIComponent(product.productType)}`}>
-                    {product.productType}
-                  </a>
-                ) : (
-                  'N/A'
-                )}
+                <strong>Product Type:</strong> {product.productType || 'N/A'}
               </li>
             </ul>
           </div>
