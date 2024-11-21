@@ -73,8 +73,18 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
 /**
  * @param {{option: VariantOption}}
  */
-function ProductOptions({ option }) {
-  const [selectedOptions, setSelectedOptions] = useState({});
+function ProductOptions({ product }) {
+  const [selectedOptions, setSelectedOptions] = useState(() => {
+    // Initialize selected options from the product's first variant or default values
+    const initialOptions = {};
+    product.options.forEach((option) => {
+      initialOptions[option.name] = product.variants.nodes[0]?.selectedOptions.find(
+        (opt) => opt.name === option.name
+      )?.value || option.values[0];
+    });
+    return initialOptions;
+  });
+
   const handleOptionSelect = (optionName, value) => {
     setSelectedOptions((prev) => ({
       ...prev,
@@ -85,14 +95,20 @@ function ProductOptions({ option }) {
   const isVariantAvailable = (selectedOptions, currentOption, value) => {
     const selected = { ...selectedOptions, [currentOption]: value };
 
-    // Check against all variants
     return product.variants.nodes.some((variant) => {
       const matches = Object.entries(selected).every(
-        ([optionName, optionValue]) => variant.options[optionName] === optionValue
+        ([optionName, optionValue]) =>
+          variant.selectedOptions.find(
+            (opt) => opt.name === optionName && opt.value === optionValue
+          )
       );
       return matches && variant.availableForSale;
     });
   };
+
+  if (!product) {
+    return <div>Product data is unavailable.</div>;
+  }
 
   return (
     <div className="product-options">
@@ -101,7 +117,11 @@ function ProductOptions({ option }) {
           <h5 className="OptionName">{option.name}:</h5>
           <div className="product-options-grid">
             {option.values.map((value) => {
-              const isDisabled = !isVariantAvailable(selectedOptions, option.name, value);
+              const isDisabled = !isVariantAvailable(
+                selectedOptions,
+                option.name,
+                value
+              );
 
               return (
                 <button
@@ -110,9 +130,14 @@ function ProductOptions({ option }) {
                   onClick={() => handleOptionSelect(option.name, value)}
                   style={{
                     border:
-                      selectedOptions[option.name] === value ? '1px solid #2172af' : '1px solid transparent',
+                      selectedOptions[option.name] === value
+                        ? '1px solid #2172af'
+                        : '1px solid transparent',
                     opacity: isDisabled ? 0.3 : 1,
-                    backgroundColor: selectedOptions[option.name] === value ? '#e6f2ff' : '#f0f0f0',
+                    backgroundColor:
+                      selectedOptions[option.name] === value
+                        ? '#e6f2ff'
+                        : '#f0f0f0',
                     pointerEvents: isDisabled ? 'none' : 'auto',
                   }}
                 >
