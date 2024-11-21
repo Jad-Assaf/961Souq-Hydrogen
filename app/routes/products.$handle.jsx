@@ -65,9 +65,8 @@ async function loadCriticalData({ context, params, request }) {
   });
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
-  const metafields = product.metafields?.edges.map((edge) => edge.node) || [];
 
-  return { product, relatedProducts, metafields };
+  return { product, relatedProducts };
 }
 
 function loadDeferredData({ context, params }) {
@@ -99,7 +98,8 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts, metafields } = useLoaderData();
+  const { product, variants, relatedProducts } = useLoaderData();
+  const metafields = product.metafields?.edges || [];
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -108,8 +108,8 @@ export default function Product() {
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
 
-  const incrementQuantity = () => setQuantity((prev) => prev + 1);
-  const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const incrementQuantity = () => setQuantity(prev => prev + 1);
+  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const [activeTab, setActiveTab] = useState('description');
 
@@ -120,14 +120,11 @@ export default function Product() {
     }
   }, [quantity, selectedVariant]);
 
+
   const { title, descriptionHtml, images } = product;
 
-  const hasDiscount =
-    selectedVariant?.compareAtPrice &&
+  const hasDiscount = selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
-
-  const hasMetafields = Array.isArray(metafields) && metafields.length > 0;
-
 
   return (
     <div className="product">
@@ -199,17 +196,14 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {hasMetafields && (
-            <div className="product-metafields">
-              <h3>Additional Information</h3>
-              <ul>
-                {metafields.map((metafield) => (
-                  <li key={metafield.key}>
-                    <strong>{metafield.key}:</strong> {metafield.value || 'N/A'}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {metafields.length > 0 && (
+            <ul>
+              {metafields.map(({ node }) => (
+                <li key={node.key}>
+                  <strong>{node.key}:</strong> {node.value}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>
@@ -415,6 +409,15 @@ const PRODUCT_FRAGMENT = `#graphql
       description
       title
     }
+    metafields(first: 20, namespace: "custom") {
+      edges {
+        node {
+          namespace
+          key
+          value
+        }
+      }
+    }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
@@ -428,15 +431,6 @@ const PRODUCT_QUERY = `#graphql
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
       ...Product
-      metafields(first: 20, namespace: "custom") {
-        edges {
-          node {
-            namespace
-            key
-            value
-          }
-        }
-      }
     }
   }
   ${PRODUCT_FRAGMENT}
@@ -465,7 +459,6 @@ const VARIANTS_QUERY = `#graphql
     }
   }
 `;
-
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
