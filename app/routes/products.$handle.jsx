@@ -99,7 +99,6 @@ function redirectToFirstVariant({ product, request }) {
 
 export default function Product() {
   const { product, variants, relatedProducts } = useLoaderData();
-  const metafields = product.metafields?.edges || [];
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -108,10 +107,11 @@ export default function Product() {
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
 
-  const incrementQuantity = () => setQuantity(prev => prev + 1);
-  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const [activeTab, setActiveTab] = useState('description');
+  const [activeTab, setActiveTab] = useState("description");
 
   useEffect(() => {
     if (selectedVariant && selectedVariant.price) {
@@ -120,10 +120,10 @@ export default function Product() {
     }
   }, [quantity, selectedVariant]);
 
+  const { title, descriptionHtml, images, metafields } = product;
 
-  const { title, descriptionHtml, images } = product;
-
-  const hasDiscount = selectedVariant?.compareAtPrice &&
+  const hasDiscount =
+    selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
 
   return (
@@ -196,14 +196,19 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {metafields.length > 0 && (
-            <ul>
-              {metafields.map(({ node }) => (
-                <li key={node.key}>
-                  <strong>{node.key}:</strong> {node.value}
-                </li>
-              ))}
-            </ul>
+          {metafields?.edges.length > 0 ? (
+            <div className="product-metafields">
+              <h3>Additional Information</h3>
+              <ul>
+                {metafields.edges.map(({ node }) => (
+                  <li key={node.key}>
+                    <strong>{node.key}:</strong> {node.value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>No additional information available.</p>
           )}
         </div>
       </div>
@@ -405,11 +410,7 @@ const PRODUCT_FRAGMENT = `#graphql
         ...ProductVariant
       }
     }
-    seo {
-      description
-      title
-    }
-    metafields(first: 20, namespace: "custom") {
+    metafields(first: 20, namespace: "custom") { 
       edges {
         node {
           namespace
@@ -417,6 +418,10 @@ const PRODUCT_FRAGMENT = `#graphql
           value
         }
       }
+    }
+    seo {
+      description
+      title
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
