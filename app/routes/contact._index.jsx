@@ -1,5 +1,5 @@
-// app/routes/contact-us.jsx
 import React from 'react';
+import "../styles/Contact.css"
 
 export const meta = () => {
     return [{ title: 'Contact Us | Hydrogen Storefront' }];

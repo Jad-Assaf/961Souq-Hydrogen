@@ -32,7 +32,7 @@ const policiesMenuData = [
   { title: "Shipping Policy", link: "/policies/shipping-policy" },
   { title: "Privacy Policy", link: "/policies/privacy-policy" },
   { title: "Terms of Service", link: "/policies/terms-of-service" },
-  { title: "Contact Us", link: "/pages/contact-us" },
+  { title: "Contact Us", link: "/contact" },
 ];
 
 
