@@ -16,7 +16,6 @@ import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
-import { ProductMetafields } from '~/components/Metafields';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -108,11 +107,10 @@ export default function Product() {
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
 
-  const incrementQuantity = () => setQuantity((prev) => prev + 1);
-  const decrementQuantity = () =>
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const incrementQuantity = () => setQuantity(prev => prev + 1);
+  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
-  const [activeTab, setActiveTab] = useState("description");
+  const [activeTab, setActiveTab] = useState('description');
 
   useEffect(() => {
     if (selectedVariant && selectedVariant.price) {
@@ -121,10 +119,10 @@ export default function Product() {
     }
   }, [quantity, selectedVariant]);
 
-  const { title, descriptionHtml, images, metafields } = product;
 
-  const hasDiscount =
-    selectedVariant?.compareAtPrice &&
+  const { title, descriptionHtml, images } = product;
+
+  const hasDiscount = selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
 
   return (
@@ -197,7 +195,12 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          <ProductMetafields handle={product.handle} storefront={useLoaderData().storefront} />
+          <ProductMetafields
+            metafieldCondition={product.metafieldCondition}
+            metafieldWarranty={product.metafieldWarranty}
+            metafieldShipping={product.metafieldShipping}
+            metafieldVat={product.metafieldVat}
+          />
         </div>
       </div>
       <div className="ProductPageBottom">
@@ -398,18 +401,21 @@ const PRODUCT_FRAGMENT = `#graphql
         ...ProductVariant
       }
     }
-    metafields(first: 20, namespace: "custom") { 
-      edges {
-        node {
-          namespace
-          key
-          value
-        }
-      }
-    }
     seo {
       description
       title
+    }
+    metafieldCondition: metafield(namespace: "custom", key: "condition") {
+      value
+    }
+    metafieldWarranty: metafield(namespace: "custom", key: "warranty") {
+      value
+    }
+    metafieldShipping: metafield(namespace: "custom", key: "shipping") {
+      value
+    }
+    metafieldVat: metafield(namespace: "custom", key: "vat") {
+      value
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
