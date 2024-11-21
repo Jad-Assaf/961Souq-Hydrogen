@@ -200,36 +200,26 @@ export default function Product() {
             <div className="product-metafields">
               <h3>Additional Information</h3>
               <ul>
-                {product.metafields.map((metafield) => {
-                  switch (metafield.key) {
-                    case "shipping_time":
-                      return (
-                        <li key={metafield.key}>
-                          <strong>Shipping Time:</strong> {metafield.value}
-                        </li>
-                      );
-                    case "condition":
-                      return (
-                        <li key={metafield.key}>
-                          <strong>Condition:</strong> {metafield.value}
-                        </li>
-                      );
-                    case "warranty":
-                      return (
-                        <li key={metafield.key}>
-                          <strong>Warranty:</strong> {metafield.value}
-                        </li>
-                      );
-                    case "vat":
-                      return (
-                        <li key={metafield.key}>
-                          <strong>VAT:</strong> {metafield.value}
-                        </li>
-                      );
-                    default:
-                      return null;
-                  }
-                })}
+                {product.metafields
+                  .filter((metafield) =>
+                    ["shipping_time", "condition", "warranty", "vat"].includes(
+                      metafield.key
+                    )
+                  )
+                  .map((metafield) => {
+                    const label = {
+                      shipping_time: "Shipping Time",
+                      condition: "Condition",
+                      warranty: "Warranty",
+                      vat: "VAT",
+                    }[metafield.key];
+
+                    return (
+                      <li key={metafield.key}>
+                        <strong>{label}:</strong> {metafield.value}
+                      </li>
+                    );
+                  })}
               </ul>
             </div>
           )}
