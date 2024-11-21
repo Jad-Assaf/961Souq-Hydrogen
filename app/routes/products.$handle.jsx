@@ -196,20 +196,7 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {metafields?.edges.length > 0 ? (
-            <div className="product-metafields">
-              <h3>Additional Information</h3>
-              <ul>
-                {metafields.edges.map(({ node }) => (
-                  <li key={node.key}>
-                    <strong>{node.key}:</strong> {node.value}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <p>No additional information available.</p>
-          )}
+          <ProductMetafields handle={product.handle} storefront={useLoaderData().storefront} />
         </div>
       </div>
       <div className="ProductPageBottom">
