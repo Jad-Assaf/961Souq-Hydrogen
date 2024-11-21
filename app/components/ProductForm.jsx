@@ -39,8 +39,16 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
       {({ option }) => (
         <ProductOptions
           key={option.name}
-          option={option}
-          product={product} // Pass the product object
+          option={{
+            ...option,
+            values: option.values.map((value) => ({
+              value, // Ensure value is a string or primitive
+              optionValue: value,
+              isAvailable: true, // Placeholder or dynamic logic
+              isActive: false,   // Placeholder or dynamic logic
+            })),
+          }}
+          product={product}
         />
       )}
     </VariantSelector>
@@ -109,7 +117,9 @@ function ProductOptions({ option, product }) {
     return product.variants.nodes.some((variant) => {
       const matches = Object.entries(selected).every(
         ([name, val]) =>
-          variant.selectedOptions.find((opt) => opt.name === name && opt.value === val)
+          variant.selectedOptions.find(
+            (opt) => opt.name === name && opt.value === val
+          )
       );
       return matches && variant.availableForSale;
     });
@@ -117,34 +127,42 @@ function ProductOptions({ option, product }) {
 
   return (
     <div className="product-options">
-      <div key={option.name} className="product-option">
-        <h5 className="OptionName">{option.name}:</h5>
-        <div className="product-options-grid">
-          {option.values.map((value) => {
-            const isDisabled = !isVariantAvailable(selectedOptions, option.name, value);
+      {product.options.map((opt) => (
+        <div key={opt.name} className="product-option">
+          <h5 className="OptionName">{opt.name}:</h5>
+          <div className="product-options-grid">
+            {opt.values.map((val) => {
+              const isDisabled = !isVariantAvailable(
+                selectedOptions,
+                opt.name,
+                val.value
+              );
 
-            return (
-              <button
-                key={`${option.name}-${value}`}
-                disabled={isDisabled}
-                onClick={() => handleOptionSelect(option.name, value)}
-                style={{
-                  border: selectedOptions[option.name] === value
-                    ? '1px solid #2172af'
-                    : '1px solid transparent',
-                  opacity: isDisabled ? 0.3 : 1,
-                  backgroundColor: selectedOptions[option.name] === value
-                    ? '#e6f2ff'
-                    : '#f0f0f0',
-                  pointerEvents: isDisabled ? 'none' : 'auto',
-                }}
-              >
-                {value}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={`${opt.name}-${val.value}`}
+                  disabled={isDisabled}
+                  onClick={() => handleOptionSelect(opt.name, val.value)}
+                  style={{
+                    border:
+                      selectedOptions[opt.name] === val.value
+                        ? '1px solid #2172af'
+                        : '1px solid transparent',
+                    opacity: isDisabled ? 0.3 : 1,
+                    backgroundColor:
+                      selectedOptions[opt.name] === val.value
+                        ? '#e6f2ff'
+                        : '#f0f0f0',
+                    pointerEvents: isDisabled ? 'none' : 'auto',
+                  }}
+                >
+                  {val.value}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
