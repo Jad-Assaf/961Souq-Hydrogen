@@ -23,9 +23,12 @@ export const meta = ({ data }) => {
 
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
-  const criticalData = await loadCriticalData(args);
+  const [criticalData, metafieldData] = await Promise.all([
+    loadCriticalData(args), // Existing loader function for product details
+    loadProductMetafields(args), // New loader function for metafields
+  ]);  
 
-  return defer({ ...deferredData, ...criticalData });
+  return defer({ ...deferredData, ...criticalData, ...metafieldData });
 }
 
 async function loadCriticalData({ context, params, request }) {
@@ -69,6 +72,25 @@ async function loadCriticalData({ context, params, request }) {
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
   return { product, relatedProducts };
+}
+
+export async function loadProductMetafields({ context, params }) {
+  const { handle } = params;
+  const { storefront } = context;
+
+  if (!handle) {
+    throw new Error('Expected product handle to be defined');
+  }
+
+  const { productByHandle } = await storefront.query(GET_PRODUCT_METAFIELDS, {
+    variables: { handle },
+  });
+
+  if (!productByHandle) {
+    return { metafields: [] }; // Return empty array if metafields are not available
+  }
+
+  return { metafields: productByHandle.metafields || [] };
 }
 
 function loadDeferredData({ context, params }) {
@@ -197,19 +219,31 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {product?.metafields?.length > 0 && (
+          {/* Metafields Section */}
+          {metafields.length > 0 ? (
             <div className="product-metafields">
               <h3>Additional Information</h3>
               <ul>
-                {product.metafields.map((metafield) => (
-                  <li key={metafield.key}>
-                    <strong>{metafield.key}:</strong> {metafield.value || 'N/A'}
-                  </li>
-                ))}
+                {metafields.map((metafield) => {
+                  const labels = {
+                    shipping_time: "Shipping Time",
+                    condition: "Condition",
+                    warranty: "Warranty",
+                    vat: "VAT",
+                  };
+
+                  return (
+                    <li key={metafield.key}>
+                      <strong>{labels[metafield.key] || metafield.key}:</strong>{" "}
+                      {metafield.value || "N/A"}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
+          ) : (
+            <p>No additional information available.</p>
           )}
-
         </div>
       </div>
       <div className="ProductPageBottom">
@@ -456,6 +490,17 @@ const VARIANTS_QUERY = `#graphql
   }
 `;
 
+const GET_PRODUCT_METAFIELDS = `#graphql
+  query ProductMetafields($handle: String!) {
+    productByHandle(handle: $handle) {
+      metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
+        namespace
+        key
+        value
+      }
+    }
+  }
+`;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
