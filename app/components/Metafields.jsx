@@ -5,18 +5,26 @@ export function ProductMetafields({ metafieldCondition, metafieldWarranty, metaf
         <div className="product-metafields">
             <h3>Product Details</h3>
             <ul>
-                <li>
-                    <strong>Condition:</strong> {metafieldCondition?.value || 'Not available'}
-                </li>
-                <li>
-                    <strong>Warranty:</strong> {metafieldWarranty?.value || 'Not available'}
-                </li>
-                <li>
-                    <strong>Shipping:</strong> {metafieldShipping?.value || 'Not available'}
-                </li>
-                <li>
-                    <strong>VAT:</strong> {metafieldVat?.value || 'Not available'}
-                </li>
+                {metafieldCondition?.value && (
+                    <li>
+                         {metafieldCondition.value}
+                    </li>
+                )}
+                {metafieldWarranty?.value && (
+                    <li>
+                        Warranty: {metafieldWarranty.value}
+                    </li>
+                )}
+                {metafieldShipping?.value && (
+                    <li>
+                        Shipping: {metafieldShipping.value}
+                    </li>
+                )}
+                {metafieldVat?.value && (
+                    <li>
+                        VAT: {metafieldVat.value}
+                    </li>
+                )}
             </ul>
         </div>
     );
