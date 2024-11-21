@@ -1,0 +1,19 @@
+.policy {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    max-width: 750px;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+}
+
+.policy h3,
+.policy h5 {
+    margin: 25px 0 15px;
+    font-weight: 600;
+}
+
+.policy p {
+    line-height: 35px;
+}
