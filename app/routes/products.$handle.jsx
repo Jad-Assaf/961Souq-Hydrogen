@@ -177,10 +177,16 @@ export default function Product() {
             </Await>
           </Suspense>
           <div className="product-details">
-            <h3>Product Details</h3>
             <ul>
               <li>
-                <strong>Vendor:</strong> {product.vendor || 'N/A'}
+                <strong>Vendor:</strong>{' '}
+                {product.vendor ? (
+                  <a href={`/collections/vendors/${encodeURIComponent(product.vendor)}`}>
+                    {product.vendor}
+                  </a>
+                ) : (
+                  'N/A'
+                )}
               </li>
               <li>
                 <strong>SKU:</strong> {selectedVariant?.sku || 'N/A'}
@@ -190,7 +196,14 @@ export default function Product() {
                 {selectedVariant?.availableForSale ? 'In Stock' : 'Out of Stock'}
               </li>
               <li>
-                <strong>Product Type:</strong> {product.productType || 'N/A'}
+                <strong>Product Type:</strong>{' '}
+                {product.productType ? (
+                  <a href={`/collections/types/${encodeURIComponent(product.productType)}`}>
+                    {product.productType}
+                  </a>
+                ) : (
+                  'N/A'
+                )}
               </li>
             </ul>
           </div>

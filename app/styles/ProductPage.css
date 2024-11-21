@@ -399,3 +399,8 @@ strong {
 .related-products-row {
     width: 100%;
 }
+
+.product-details li{
+    font-size: 12px;
+    margin-bottom: 0.2rem;
+}
