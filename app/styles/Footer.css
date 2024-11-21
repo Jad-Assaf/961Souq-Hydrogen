@@ -3,6 +3,7 @@
     background-color: #fff !important;
     padding-top: 2rem;
     color: #232323;
+    border-top: 1px solid #2172af;
 }
 
 .footer .container {
@@ -11,7 +12,7 @@
     justify-content: space-between;
     gap: 1rem;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 20px auto;
     padding: 0 15px;
 }
 

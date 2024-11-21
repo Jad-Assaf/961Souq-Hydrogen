@@ -1,11 +1,15 @@
 .policy {
     display: flex;
     flex-direction: column;
-    width: 80%;
-    max-width: 750px;
+    width: 90%;
+    max-width: 900px;
     justify-content: center;
     align-items: center;
-    margin: auto;
+    margin: 50px auto;
+    border: 1px solid #2172af;
+    padding: 10px 50px 50px;
+    border-radius: 20px;
+    background-color: #f9f9f9;
 }
 
 .policy h3,
