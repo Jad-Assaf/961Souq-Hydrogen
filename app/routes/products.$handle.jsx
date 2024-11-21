@@ -23,14 +23,9 @@ export const meta = ({ data }) => {
 
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
-  const [criticalData, metafieldData] = await Promise.all([
-    loadCriticalData(args), // Existing loader function for product details
-    loadProductMetafields(args), // New loader function for metafields
-  ]);  
+  const criticalData = await loadCriticalData(args);
 
-  console.log("Metafield data:", metafieldData);
-
-  return defer({ ...deferredData, ...criticalData, metafields: metafieldData.metafields || [], });
+  return defer({ ...deferredData, ...criticalData });
 }
 
 async function loadCriticalData({ context, params, request }) {
@@ -38,23 +33,28 @@ async function loadCriticalData({ context, params, request }) {
   const { storefront } = context;
 
   if (!handle) {
-    throw new Error("Expected product handle to be defined");
+    throw new Error('Expected product handle to be defined');
   }
 
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: { handle, selectedOptions: getSelectedProductOptions(request) || [] },
   });
 
-  console.log(product); // Inspect the product object for metafields
-
   if (!product?.id) {
-    throw new Response("Product not found", { status: 404 });
+    throw new Response('Product not found', { status: 404 });
   }
+
+  // Filter metafields based on desired keys
+  const desiredKeys = ['shipping_time', 'condition', 'warranty', 'vat'];
+  const metafields =
+    product.metafields?.edges
+      .map((edge) => edge.node)
+      .filter((metafield) => desiredKeys.includes(metafield.key)) || [];
 
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
     firstVariant.selectedOptions.find(
-      (option) => option.name === "Title" && option.value === "Default Title"
+      (option) => option.name === 'Title' && option.value === 'Default Title'
     )
   );
 
@@ -64,7 +64,7 @@ async function loadCriticalData({ context, params, request }) {
     throw redirectToFirstVariant({ product, request });
   }
 
-  const productType = product.productType || "General";
+  const productType = product.productType || 'General';
 
   // Fetch related products
   const { products } = await storefront.query(RELATED_PRODUCTS_QUERY, {
@@ -73,50 +73,7 @@ async function loadCriticalData({ context, params, request }) {
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
-  return { product, relatedProducts };
-}
-
- async function loadProductMetafields({ context, params }) {
-  const { handle } = params;
-  const { storefront } = context;
-
-  if (!handle) {
-    throw new Error('Expected product handle to be defined');
-  }
-
-  try {
-    console.log("Fetching metafields for handle:", handle);
-    const { productByHandle } = await storefront.query(GET_PRODUCT_METAFIELDS, {
-      variables: { handle },
-    });
-
-    if (!productByHandle) {
-      console.log("No product found for handle:", handle);
-      return { metafields: [] };
-    }
-
-    // Extract metafields from edges
-    const metafields = productByHandle.metafields?.edges.map(edge => edge.node) || [];
-    console.log("Fetched metafields:", metafields);
-
-    return { metafields };
-  } catch (error) {
-    console.error("Error fetching metafields:", error);
-    return { metafields: [] }; // Fallback to empty array
-  }
-}
-
-function loadDeferredData({ context, params }) {
-  const { storefront } = context;
-
-  const variants = storefront.query(VARIANTS_QUERY, {
-    variables: { handle: params.handle },
-  }).catch((error) => {
-    console.error(error);
-    return null;
-  });
-
-  return { variants };
+  return { product, relatedProducts, metafields };
 }
 
 function redirectToFirstVariant({ product, request }) {
@@ -136,8 +93,6 @@ function redirectToFirstVariant({ product, request }) {
 
 export default function Product() {
   const { product, variants, relatedProducts, metafields } = useLoaderData();
-  console.log("Metafields in component:", metafields);
-
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -236,29 +191,17 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {Array.isArray(metafields) && metafields.length > 0 ? (
+          {hasMetafields && (
             <div className="product-metafields">
               <h3>Additional Information</h3>
               <ul>
-                {metafields.map((metafield) => {
-                  const labels = {
-                    shipping_time: "Shipping Time",
-                    condition: "Condition",
-                    warranty: "Warranty",
-                    vat: "VAT",
-                  };
-
-                  return (
-                    <li key={metafield.key}>
-                      <strong>{labels[metafield.key] || metafield.key}:</strong>{" "}
-                      {metafield.value || "N/A"}
-                    </li>
-                  );
-                })}
+                {metafields.map((metafield) => (
+                  <li key={metafield.key}>
+                    <strong>{metafield.key}:</strong> {metafield.value || 'N/A'}
+                  </li>
+                ))}
               </ul>
             </div>
-          ) : (
-            <p>No additional information available.</p>
           )}
         </div>
       </div>
@@ -477,6 +420,15 @@ const PRODUCT_QUERY = `#graphql
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
       ...Product
+      metafields(first: 50) {
+        edges {
+          node {
+            namespace
+            key
+            value
+          }
+        }
+      }
     }
   }
   ${PRODUCT_FRAGMENT}
@@ -506,23 +458,6 @@ const VARIANTS_QUERY = `#graphql
   }
 `;
 
-const GET_PRODUCT_METAFIELDS = `#graphql
-  query Product($handle: String!) {
-    productByHandle(handle: $handle) {
-      id
-       title
-       metafields(first: 50, keys:[]) {
-         edges {
-           node {
-             namespace
-             key
-             value
-           }
-         }
-       }
-     }
-   }
-`;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
