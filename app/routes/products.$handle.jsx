@@ -414,11 +414,6 @@ const PRODUCT_FRAGMENT = `#graphql
       description
       title
     }
-    metafields(namespace: "custom", keys: ["condition"]) {
-      namespace
-      key
-      value
-    }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
