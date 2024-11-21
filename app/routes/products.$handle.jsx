@@ -510,18 +510,18 @@ const GET_PRODUCT_METAFIELDS = `#graphql
   query Product($handle: String!) {
     productByHandle(handle: $handle) {
       id
-      title
-      metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
-        edges {
-          node {
-            namespace
-            key
-            value
-          }
-        }
-      }
-    }
-  }
+       title
+       metafields(first: 50, keys:[]) {
+         edges {
+           node {
+             namespace
+             key
+             value
+           }
+         }
+       }
+     }
+   }
 `;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
