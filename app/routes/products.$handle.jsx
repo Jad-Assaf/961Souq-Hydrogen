@@ -16,6 +16,7 @@ import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
+import { useQuery } from '@apollo/client';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -36,6 +37,7 @@ async function loadCriticalData({ context, params, request }) {
     throw new Error('Expected product handle to be defined');
   }
 
+  // Query the product
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: { handle, selectedOptions: getSelectedProductOptions(request) || [] },
   });
@@ -44,6 +46,17 @@ async function loadCriticalData({ context, params, request }) {
     throw new Response('Product not found', { status: 404 });
   }
 
+  // Process the metafields (ensure they're accessible and valid)
+  const metafields = product.metafields || [];
+  const metafieldData = metafields.reduce((acc, metafield) => {
+    acc[metafield.key] = metafield.value || null;
+    return acc;
+  }, {});
+
+  // Log metafield information for debugging purposes
+  console.log('Metafields:', metafieldData);
+
+  // Identify the default variant
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
     firstVariant.selectedOptions.find(
@@ -66,8 +79,10 @@ async function loadCriticalData({ context, params, request }) {
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
-  return { product, relatedProducts };
+  // Return product data including metafields
+  return { product: { ...product, metafieldData }, relatedProducts };
 }
+
 
 function loadDeferredData({ context, params }) {
   const { storefront } = context;
@@ -196,32 +211,28 @@ export default function Product() {
           </div>
           <hr className='productPage-hr'></hr>
           {/* Metafields Section */}
-          {product?.metafields?.length > 0 && (
+          {product?.metafieldData && Object.keys(product.metafieldData).length > 0 ? (
             <div className="product-metafields">
               <h3>Additional Information</h3>
               <ul>
-                {product.metafields
-                  .filter((metafield) =>
-                    ["shipping_time", "condition", "warranty", "vat"].includes(
-                      metafield.key
-                    )
-                  )
-                  .map((metafield) => {
-                    const label = {
-                      shipping_time: "Shipping Time",
-                      condition: "Condition",
-                      warranty: "Warranty",
-                      vat: "VAT",
-                    }[metafield.key];
+                {Object.entries(product.metafieldData).map(([key, value]) => {
+                  const labels = {
+                    shipping_time: "Shipping Time",
+                    condition: "Condition",
+                    warranty: "Warranty",
+                    vat: "VAT",
+                  };
 
-                    return (
-                      <li key={metafield.key}>
-                        <strong>{label}:</strong> {metafield.value}
-                      </li>
-                    );
-                  })}
+                  return (
+                    <li key={key}>
+                      <strong>{labels[key] || key}:</strong> {value || "N/A"}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
+          ) : (
+            <p>No additional information available.</p>
           )}
         </div>
       </div>
