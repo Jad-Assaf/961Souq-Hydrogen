@@ -28,7 +28,9 @@ export async function loader(args) {
     loadProductMetafields(args), // New loader function for metafields
   ]);  
 
-  return defer({ ...deferredData, ...criticalData, metafields: metafieldData.metafields });
+  console.log("Metafield data:", metafieldData);
+
+  return defer({ ...deferredData, ...criticalData, metafields: metafieldData.metafields || [], });
 }
 
 async function loadCriticalData({ context, params, request }) {
@@ -82,15 +84,18 @@ export async function loadProductMetafields({ context, params }) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const { productByHandle } = await storefront.query(GET_PRODUCT_METAFIELDS, {
-    variables: { handle },
-  });
+  try {
+    const { productByHandle } = await storefront.query(GET_PRODUCT_METAFIELDS, {
+      variables: { handle },
+    });
 
-  if (!productByHandle) {
-    return { metafields: [] }; // Return empty array if metafields are not available
+    console.log("Metafields fetched:", productByHandle?.metafields);
+
+    return { metafields: productByHandle?.metafields || [] };
+  } catch (error) {
+    console.error("Error fetching metafields:", error);
+    return { metafields: [] }; // Fallback to empty array
   }
-
-  return { metafields: productByHandle.metafields || [] };
 }
 
 function loadDeferredData({ context, params }) {
@@ -123,6 +128,8 @@ function redirectToFirstVariant({ product, request }) {
 
 export default function Product() {
   const { product, variants, relatedProducts, metafields } = useLoaderData();
+  console.log("Metafields in component:", metafields);
+
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
@@ -149,7 +156,7 @@ export default function Product() {
   const hasDiscount = selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
 
-  const hasMetafields = metafields && metafields.length > 0
+  const hasMetafields = Array.isArray(metafields) && metafields.length > 0;
 
   return (
     <div className="product">
@@ -222,26 +229,19 @@ export default function Product() {
           </div>
           <hr className='productPage-hr'></hr>
           {/* Metafields Section */}
-          {hasMetafields && (
+          {hasMetafields ? (
             <div className="product-metafields">
               <h3>Additional Information</h3>
               <ul>
-                {metafields.map((metafield) => {
-                  const labels = {
-                    shipping_time: "Shipping Time",
-                    condition: "Condition",
-                    warranty: "Warranty",
-                    vat: "VAT",
-                  };
-
-                  return (
-                    <li key={metafield.key}>
-                      <strong>{labels[metafield.key] || metafield.key}:</strong> {metafield.value || "N/A"}
-                    </li>
-                  );
-                })}
+                {metafields.map((metafield) => (
+                  <li key={metafield.key}>
+                    <strong>{metafield.key}:</strong> {metafield.value || "N/A"}
+                  </li>
+                ))}
               </ul>
             </div>
+          ) : (
+            <p>No additional information available.</p>
           )}
         </div>
       </div>
