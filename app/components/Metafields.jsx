@@ -3,7 +3,6 @@ import React from "react";
 export function ProductMetafields({ metafieldCondition, metafieldWarranty, metafieldShipping, metafieldVat }) {
     return (
         <div className="product-metafields">
-            <h3>Product Details</h3>
             <ul>
                 {metafieldCondition?.value && (
                     <li>
