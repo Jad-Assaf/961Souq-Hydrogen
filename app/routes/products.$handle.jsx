@@ -176,6 +176,24 @@ export default function Product() {
               )}
             </Await>
           </Suspense>
+          <div className="product-details">
+            <h3>Product Details</h3>
+            <ul>
+              <li>
+                <strong>Vendor:</strong> {product.vendor || 'N/A'}
+              </li>
+              <li>
+                <strong>SKU:</strong> {selectedVariant?.sku || 'N/A'}
+              </li>
+              <li>
+                <strong>Availability:</strong>{' '}
+                {selectedVariant?.availableForSale ? 'In Stock' : 'Out of Stock'}
+              </li>
+              <li>
+                <strong>Product Type:</strong> {product.productType || 'N/A'}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
       <div className="ProductPageBottom">
