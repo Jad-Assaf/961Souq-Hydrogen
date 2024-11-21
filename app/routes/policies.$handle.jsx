@@ -50,7 +50,7 @@ export default function Policy() {
       <br />
       <br />
       <div>
-        <Link to="/policies">← Back to Policies</Link>
+        <Link className='back-policy' to="/policies">← Back to Policies</Link>
       </div>
       <br />
       <h1>{policy.title}</h1>
