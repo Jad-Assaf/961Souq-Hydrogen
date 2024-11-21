@@ -74,47 +74,55 @@ export function ProductForm({ product, selectedVariant, variants, quantity = 1 }
  * @param {{option: VariantOption}}
  */
 function ProductOptions({ option }) {
-  return (
-    <div className="product-options" key={option.name}>
-      <h5 className='OptionName'>{option.name}: <span className='OptionValue'>{option.value}</span></h5>
-      <div className="product-options-grid">
-        {option.values.map(({ value, isAvailable, isActive, to, variant }) => {
-          // Check if the option is 'Color' and if the variant has an image
-          const isColorOption = option.name.toLowerCase() === 'color';
-          const variantImage = isColorOption && variant?.image?.url;
+  const [selectedOptions, setSelectedOptions] = useState({});
+  const handleOptionSelect = (optionName, value) => {
+    setSelectedOptions((prev) => ({
+      ...prev,
+      [optionName]: value,
+    }));
+  };
 
-          return (
-            <Link
-              className="product-options-item"
-              key={option.name + value}
-              prefetch="intent"
-              preventScrollReset
-              replace
-              to={to}
-              style={{
-                border: isActive ? '1px solid #2172af' : '1px solid transparent',
-                opacity: isAvailable ? 1 : 0.3,
-                borderRadius: '20px',
-                transition: 'all 0.3s ease-in-out',
-                backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0',
-                boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
-                transform: isActive ? 'scale(0.98)' : 'scale(1)',
-              }}
-            >
-              {variantImage ? (
-                <img
-                  src={variantImage}
-                  alt={value}
-                  style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                />
-              ) : (
-                value
-              )}
-            </Link>
-          );
-        })}
-      </div>
-      <br />
+  const isVariantAvailable = (selectedOptions, currentOption, value) => {
+    const selected = { ...selectedOptions, [currentOption]: value };
+
+    // Check against all variants
+    return product.variants.nodes.some((variant) => {
+      const matches = Object.entries(selected).every(
+        ([optionName, optionValue]) => variant.options[optionName] === optionValue
+      );
+      return matches && variant.availableForSale;
+    });
+  };
+
+  return (
+    <div className="product-options">
+      {product.options.map((option) => (
+        <div key={option.name} className="product-option">
+          <h5 className="OptionName">{option.name}:</h5>
+          <div className="product-options-grid">
+            {option.values.map((value) => {
+              const isDisabled = !isVariantAvailable(selectedOptions, option.name, value);
+
+              return (
+                <button
+                  key={`${option.name}-${value}`}
+                  disabled={isDisabled}
+                  onClick={() => handleOptionSelect(option.name, value)}
+                  style={{
+                    border:
+                      selectedOptions[option.name] === value ? '1px solid #2172af' : '1px solid transparent',
+                    opacity: isDisabled ? 0.3 : 1,
+                    backgroundColor: selectedOptions[option.name] === value ? '#e6f2ff' : '#f0f0f0',
+                    pointerEvents: isDisabled ? 'none' : 'auto',
+                  }}
+                >
+                  {value}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
