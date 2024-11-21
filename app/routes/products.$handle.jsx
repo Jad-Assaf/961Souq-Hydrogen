@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { defer, redirect } from '@shopify/remix-oxygen';
-import { Await, useLoaderData, useParams } from '@remix-run/react';
+import { Await, useLoaderData } from '@remix-run/react';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -16,7 +16,6 @@ import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
-import { gql, useQuery } from '@apollo/client';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -66,8 +65,9 @@ async function loadCriticalData({ context, params, request }) {
   });
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
+  const metafields = product.metafields?.edges.map((edge) => edge.node) || [];
 
-  return { product, relatedProducts };
+  return { product, relatedProducts, metafields };
 }
 
 function loadDeferredData({ context, params }) {
@@ -99,27 +99,17 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts } = useLoaderData();
+  const { product, variants, relatedProducts, metafields } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
   );
-  const { handle } = useParams();
-
-  const { loading, error, data } = useQuery(GET_PRODUCT, {
-    variables: { handle },
-  });
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-
-  const product = data.productByHandle;
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
 
-  const incrementQuantity = () => setQuantity(prev => prev + 1);
-  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const [activeTab, setActiveTab] = useState('description');
 
@@ -130,11 +120,14 @@ export default function Product() {
     }
   }, [quantity, selectedVariant]);
 
-
   const { title, descriptionHtml, images } = product;
 
-  const hasDiscount = selectedVariant?.compareAtPrice &&
+  const hasDiscount =
+    selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
+
+  const hasMetafields = Array.isArray(metafields) && metafields.length > 0;
+
 
   return (
     <div className="product">
@@ -206,13 +199,18 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          <ul>
-            {data.productByHandle.metafields.edges.map(({ node }) => (
-              <li key={node.key}>
-                <strong>{node.key}:</strong> {node.value}
-              </li>
-            ))}
-          </ul>
+          {hasMetafields && (
+            <div className="product-metafields">
+              <h3>Additional Information</h3>
+              <ul>
+                {metafields.map((metafield) => (
+                  <li key={metafield.key}>
+                    <strong>{metafield.key}:</strong> {metafield.value || 'N/A'}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
       <div className="ProductPageBottom">
@@ -430,6 +428,15 @@ const PRODUCT_QUERY = `#graphql
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
       ...Product
+      metafields(first: 20, namespace: "custom") {
+        edges {
+          node {
+            namespace
+            key
+            value
+          }
+        }
+      }
     }
   }
   ${PRODUCT_FRAGMENT}
@@ -455,24 +462,6 @@ const VARIANTS_QUERY = `#graphql
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
       ...ProductVariants
-    }
-  }
-`;
-
-export const GET_PRODUCT = gql`
-  query Product($handle: String!) {
-    productByHandle(handle: $handle) {
-      id
-      title
-      metafields(first: 20, namespace: "custom") {
-        edges {
-          node {
-            namespace
-            key
-            value
-          }
-        }
-      }
     }
   }
 `;
