@@ -195,36 +195,43 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {product?.metafields &&
-            (product.metafields['custom.shipping_time'] ||
-              product.metafields['custom.condition'] ||
-              product.metafields['custom.warranty'] ||
-              product.metafields['custom.vat']) && (
-              <div className="product-metafields">
-                <ul>
-                  {product.metafields['custom.shipping_time'] && (
-                    <li>
-                      <strong>Shipping Time:</strong> {product.metafields['custom.shipping_time']}
-                    </li>
-                  )}
-                  {product.metafields['custom.condition'] && (
-                    <li>
-                      <strong>Condition:</strong> {product.metafields['custom.condition']}
-                    </li>
-                  )}
-                  {product.metafields['custom.warranty'] && (
-                    <li>
-                      <strong>Warranty:</strong> {product.metafields['custom.warranty']}
-                    </li>
-                  )}
-                  {product.metafields['custom.vat'] && (
-                    <li>
-                      <strong>VAT:</strong> {product.metafields['custom.vat']}
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
+          {product?.metafields?.length > 0 && (
+            <div className="product-metafields">
+              <h3>Additional Information</h3>
+              <ul>
+                {product.metafields.map((metafield) => {
+                  switch (metafield.key) {
+                    case "shipping_time":
+                      return (
+                        <li key={metafield.key}>
+                          <strong>Shipping Time:</strong> {metafield.value}
+                        </li>
+                      );
+                    case "condition":
+                      return (
+                        <li key={metafield.key}>
+                          <strong>Condition:</strong> {metafield.value}
+                        </li>
+                      );
+                    case "warranty":
+                      return (
+                        <li key={metafield.key}>
+                          <strong>Warranty:</strong> {metafield.value}
+                        </li>
+                      );
+                    case "vat":
+                      return (
+                        <li key={metafield.key}>
+                          <strong>VAT:</strong> {metafield.value}
+                        </li>
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
       <div className="ProductPageBottom">
@@ -394,42 +401,47 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
 
 const PRODUCT_FRAGMENT = `#graphql
   fragment Product on Product {
-    id
-    title
-    vendor
-    handle
-    descriptionHtml
-    description
-    productType
-    images(first: 30) {
-      edges {
-        node {
-          __typename
-          id
-          url
-          altText
-          width
-          height
-        }
+  id
+  title
+  vendor
+  handle
+  descriptionHtml
+  description
+  productType
+  images(first: 30) {
+    edges {
+      node {
+        __typename
+        id
+        url
+        altText
+        width
+        height
       }
-    }
-    options {
-      name
-      values
-    }
-    selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
-      ...ProductVariant
-    }
-    variants(first: 1) {
-      nodes {
-        ...ProductVariant
-      }
-    }
-    seo {
-      description
-      title
     }
   }
+  options {
+    name
+    values
+  }
+  selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
+    ...ProductVariant
+  }
+  variants(first: 1) {
+    nodes {
+      ...ProductVariant
+    }
+  }
+  seo {
+    description
+    title
+  }
+  metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
+    namespace
+    key
+    value
+  }
+}
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
 
