@@ -12,6 +12,12 @@
     background-color: #f9f9f9;
 }
 
+.policy a {
+    border: 1px solid #2172af;
+    padding: 10px 15px;
+    border-radius: 30px;
+}
+
 .policy h3,
 .policy h5 {
     margin: 25px 0 15px;
