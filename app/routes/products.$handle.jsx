@@ -194,7 +194,37 @@ export default function Product() {
               </li>
             </ul>
           </div>
-
+          <hr className='productPage-hr'></hr>
+          {product?.metafields &&
+            (product.metafields['custom.shipping_time'] ||
+              product.metafields['custom.condition'] ||
+              product.metafields['custom.warranty'] ||
+              product.metafields['custom.vat']) && (
+              <div className="product-metafields">
+                <ul>
+                  {product.metafields['custom.shipping_time'] && (
+                    <li>
+                      <strong>Shipping Time:</strong> {product.metafields['custom.shipping_time']}
+                    </li>
+                  )}
+                  {product.metafields['custom.condition'] && (
+                    <li>
+                      <strong>Condition:</strong> {product.metafields['custom.condition']}
+                    </li>
+                  )}
+                  {product.metafields['custom.warranty'] && (
+                    <li>
+                      <strong>Warranty:</strong> {product.metafields['custom.warranty']}
+                    </li>
+                  )}
+                  {product.metafields['custom.vat'] && (
+                    <li>
+                      <strong>VAT:</strong> {product.metafields['custom.vat']}
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
         </div>
       </div>
       <div className="ProductPageBottom">
