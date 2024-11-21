@@ -195,6 +195,7 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
+          {/* Metafields Section */}
           {product?.metafields?.length > 0 && (
             <div className="product-metafields">
               <h3>Additional Information</h3>
@@ -401,47 +402,47 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
 
 const PRODUCT_FRAGMENT = `#graphql
   fragment Product on Product {
-  id
-  title
-  vendor
-  handle
-  descriptionHtml
-  description
-  productType
-  images(first: 30) {
-    edges {
-      node {
-        __typename
-        id
-        url
-        altText
-        width
-        height
+    id
+    title
+    vendor
+    handle
+    descriptionHtml
+    description
+    productType
+    images(first: 30) {
+      edges {
+        node {
+          __typename
+          id
+          url
+          altText
+          width
+          height
+        }
       }
     }
-  }
-  options {
-    name
-    values
-  }
-  selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
-    ...ProductVariant
-  }
-  variants(first: 1) {
-    nodes {
+    options {
+      name
+      values
+    }
+    selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
       ...ProductVariant
     }
+    variants(first: 1) {
+      nodes {
+        ...ProductVariant
+      }
+    }
+    seo {
+      description
+      title
+    }
+    metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
+      namespace
+      key
+      value
+    }
   }
-  seo {
-    description
-    title
-  }
-  metafields(namespace: "custom", keys: ["shipping_time", "condition", "warranty", "vat"]) {
-    namespace
-    key
-    value
-  }
-}
   ${PRODUCT_VARIANT_FRAGMENT}
 `;
 
