@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { defer, redirect } from '@shopify/remix-oxygen';
-import { Await, useLoaderData } from '@remix-run/react';
+import { Await, useLoaderData, useParams } from '@remix-run/react';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -16,6 +16,7 @@ import { DirectCheckoutButton } from '../components/ProductForm';
 import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
+import { gql, useQuery } from '@apollo/client';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -44,13 +45,6 @@ async function loadCriticalData({ context, params, request }) {
     throw new Response('Product not found', { status: 404 });
   }
 
-  // Filter metafields based on desired keys
-  const desiredKeys = ['shipping_time', 'condition', 'warranty', 'vat'];
-  const metafields =
-    product.metafields?.edges
-      .map((edge) => edge.node)
-      .filter((metafield) => desiredKeys.includes(metafield.key)) || [];
-
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
     firstVariant.selectedOptions.find(
@@ -73,7 +67,20 @@ async function loadCriticalData({ context, params, request }) {
 
   const relatedProducts = products?.edges.map((edge) => edge.node) || [];
 
-  return { product, relatedProducts, metafields };
+  return { product, relatedProducts };
+}
+
+function loadDeferredData({ context, params }) {
+  const { storefront } = context;
+
+  const variants = storefront.query(VARIANTS_QUERY, {
+    variables: { handle: params.handle },
+  }).catch((error) => {
+    console.error(error);
+    return null;
+  });
+
+  return { variants };
 }
 
 function redirectToFirstVariant({ product, request }) {
@@ -92,11 +99,21 @@ function redirectToFirstVariant({ product, request }) {
 }
 
 export default function Product() {
-  const { product, variants, relatedProducts, metafields } = useLoaderData();
+  const { product, variants, relatedProducts } = useLoaderData();
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants
   );
+  const { handle } = useParams();
+
+  const { loading, error, data } = useQuery(GET_PRODUCT, {
+    variables: { handle },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  const product = data.productByHandle;
 
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
@@ -118,8 +135,6 @@ export default function Product() {
 
   const hasDiscount = selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
-
-  const hasMetafields = Array.isArray(metafields) && metafields.length > 0;
 
   return (
     <div className="product">
@@ -191,18 +206,13 @@ export default function Product() {
             </ul>
           </div>
           <hr className='productPage-hr'></hr>
-          {hasMetafields && (
-            <div className="product-metafields">
-              <h3>Additional Information</h3>
-              <ul>
-                {metafields.map((metafield) => (
-                  <li key={metafield.key}>
-                    <strong>{metafield.key}:</strong> {metafield.value || 'N/A'}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <ul>
+            {data.productByHandle.metafields.edges.map(({ node }) => (
+              <li key={node.key}>
+                <strong>{node.key}:</strong> {node.value}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       <div className="ProductPageBottom">
@@ -420,15 +430,6 @@ const PRODUCT_QUERY = `#graphql
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
       ...Product
-      metafields(first: 50) {
-        edges {
-          node {
-            namespace
-            key
-            value
-          }
-        }
-      }
     }
   }
   ${PRODUCT_FRAGMENT}
@@ -454,6 +455,24 @@ const VARIANTS_QUERY = `#graphql
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
       ...ProductVariants
+    }
+  }
+`;
+
+export const GET_PRODUCT = gql`
+  query Product($handle: String!) {
+    productByHandle(handle: $handle) {
+      id
+      title
+      metafields(first: 20, namespace: "custom") {
+        edges {
+          node {
+            namespace
+            key
+            value
+          }
+        }
+      }
     }
   }
 `;
