@@ -34,15 +34,17 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
             <>
                 {/* Render "New Arrivals" row first */}
                 {collections.find((collection) => collection.handle === "new-arrivals") && (
-                    <div className="collection-section">
+                    <><div className="collection-section">
                         <h3>New Arrivals</h3>
                         <ProductRow
-                            products={
-                                collections.find((collection) => collection.handle === "new-arrivals")
-                                    .products.nodes
-                            }
-                        />
-                    </div>
+                            products={collections.find((collection) => collection.handle === "new-arrivals")
+                                .products.nodes} />
+                    </div><div className="collection-section">
+                            <h3>New Arrivals</h3>
+                            <ProductRow
+                                products={collections.find((collection) => collection.handle === "laptops")
+                                    .products.nodes} />
+                        </div></>
                 )}
 
                 {/* Render remaining rows */}

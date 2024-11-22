@@ -39,11 +39,7 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'apple', 'apple-macbook', 'apple-iphone', 'gaming-laptops', 'gaming-consoles', 'console-games',
-    'laptops', 'desktops', 'pc-parts', 'samsung-mobile-phones', 'monitors',
-    // 'car-accessories', 'fitness watches', 'garmin-smart-watch',
-    // 'apple-watch', 'samsung-watches', 'kitchen-appliances',
-    // 'cleaning-devices'
+    'new-arrivals', 'laptops', 'apple-macbook', 'apple-iphone', 'apple-accessories', 'gaming-laptops', 'gaming-consoles', 'console-games', 'desktops', 'pc-parts', 'monitors', 'earbuds', 'speakers', 'microphones', 'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 'action-cameras', 'cameras', 'surveillance-cameras', 'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
   // Fetch collections for product rows.
@@ -58,22 +54,22 @@ const brandsData = [
   { name: "MSI", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/msi-logo.jpg?v=1712761894", link: "/collections/msi-products" },
   { name: "Marshall", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/marshall-logo.jpg?v=1683620097", link: "/collections/marshall-collection" },
   { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-logo_08932e54-a973-4e07-b192-b8ea378744a4.jpg?v=1683619917", link: "/collections/jbl-collection" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dell.png?v=1648112715", link: "/collections/dell-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-logo.jpg?v=1712761787", link: "/collections/garmin-smart-watch" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/asus-logo.jpg?v=1712761801", link: "/collections/asus-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-Logo.jpg?v=1712761812", link: "/collections/samsung-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/sony-logo.jpg?v=1712761825", link: "/collections/sony" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/benq-logo.jpg?v=1712762620", link: "/collections/benq-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tp-link-logo.jpg?v=1712761852", link: "/collections/tp-link-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/nothing-logo.jpg?v=1712761865", link: "/collections/nothing-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/xiaomi-logo.jpg?v=1712761880", link: "/collections/xiaomi-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/microsoft-logo.jpg?v=1712762506", link: "/collections/microsoft-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/nintendo-logo.jpg?v=1712762532", link: "/collections/nintendo-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenovo-logo.jpg?v=1712762549", link: "/collections/lenovo-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lg-logo.jpg?v=1712762606", link: "/collections/lg-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/meta-logo.jpg?v=1712762516", link: "/collections/meta-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ubuquiti-logo.jpg?v=1712761841", link: "/collections/ubiquiti-products" },
-  { name: "JBL", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
+  { name: "Dell", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dell.png?v=1648112715", link: "/collections/dell-products" },
+  { name: "Garmin", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-logo.jpg?v=1712761787", link: "/collections/garmin-smart-watch" },
+  { name: "Asus", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/asus-logo.jpg?v=1712761801", link: "/collections/asus-products" },
+  { name: "Samsung", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-Logo.jpg?v=1712761812", link: "/collections/samsung-products" },
+  { name: "Sony", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/sony-logo.jpg?v=1712761825", link: "/collections/sony" },
+  { name: "Benq", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/benq-logo.jpg?v=1712762620", link: "/collections/benq-products" },
+  { name: "Tp-link", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tp-link-logo.jpg?v=1712761852", link: "/collections/tp-link-products" },
+  { name: "Nothing", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/nothing-logo.jpg?v=1712761865", link: "/collections/nothing-products" },
+  { name: "Xiaomi", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/xiaomi-logo.jpg?v=1712761880", link: "/collections/xiaomi-products" },
+  { name: "Microsoft", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/microsoft-logo.jpg?v=1712762506", link: "/collections/microsoft-products" },
+  { name: "Nintendo", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/nintendo-logo.jpg?v=1712762532", link: "/collections/nintendo-products" },
+  { name: "Lenovo", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenovo-logo.jpg?v=1712762549", link: "/collections/lenovo-products" },
+  { name: "LG", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lg-logo.jpg?v=1712762606", link: "/collections/lg-products" },
+  { name: "Meta", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/meta-logo.jpg?v=1712762516", link: "/collections/meta-products" },
+  { name: "Ubiquiti", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ubuquiti-logo.jpg?v=1712761841", link: "/collections/ubiquiti-products" },
+  { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
