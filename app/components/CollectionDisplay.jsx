@@ -38,31 +38,33 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                         <ProductRow products={collection.products.nodes} />
                     </div>
 
-                    {/* Inter-row images */}
-                    <div className="image-row">
-                        {images.slice(index * 2, index * 2 + 2).map((image, i) => (
-                            <motion.div
-                                key={`${collection.id}-${i}`}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.1 + 0.2 }}
-                                className="row-image"
-                                width="740px"
-                                height="300px"
-                            >
-                                <Image
-                                    data={image}
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    srcSet={`${image}?width=300&quality=30 300w,
-                                             ${image}?width=600&quality=30 600w,
-                                             ${image}?width=1200&quality=30 1200w`}
-                                    alt={`Collection ${index + 1} Image ${i + 1}`}
+                    {/* Render image row only after every 3rd collection */}
+                    {index % 3 === 2 && ( // Change the condition to check for every 3rd collection
+                        <div className="image-row">
+                            {images.slice((index / 3) * 2, (index / 3) * 2 + 2).map((image, i) => (
+                                <motion.div
+                                    key={`${collection.id}-${i}`}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.1 + 0.2 }}
+                                    className="row-image"
                                     width="740px"
                                     height="300px"
-                                />
-                            </motion.div>
-                        ))}
-                    </div>
+                                >
+                                    <Image
+                                        data={image}
+                                        sizes="(min-width: 45em) 20vw, 40vw"
+                                        srcSet={`${image}?width=300&quality=30 300w,
+                                     ${image}?width=600&quality=30 600w,
+                                     ${image}?width=1200&quality=30 1200w`}
+                                        alt={`Collection ${Math.floor(index / 3) + 1} Image ${i + 1}`}
+                                        width="740px"
+                                        height="300px"
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             ))}
         </div>
@@ -193,13 +195,13 @@ function ProductItem({ product, index }) {
             transition={{ delay: index * 0.01, duration: 0.5 }}
             className="product-item"
         >
-                <motion.div
-                    initial={{ filter: 'blur(10px)', opacity: 0 }}
-                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
-                    transition={{ duration: 0.5 }}
-                    className="product-card"
-                >
-            <Link to={`/products/${product.handle}`}>
+            <motion.div
+                initial={{ filter: 'blur(10px)', opacity: 0 }}
+                animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                transition={{ duration: 0.5 }}
+                className="product-card"
+            >
+                <Link to={`/products/${product.handle}`}>
                     <Image
                         data={product.images.nodes[0]}
                         aspectRatio="1/1"
@@ -220,40 +222,40 @@ function ProductItem({ product, index }) {
                             </small>
                         )}
                     </div>
-            </Link>
+                </Link>
 
-            {/* Add to Cart Button */}
-            <AddToCartButton
-                disabled={!selectedVariant || !selectedVariant.availableForSale}
-                onClick={() => {
-                    if (hasVariants) {
-                        // Navigate to product page if multiple variants
-                        window.location.href = `/products/${product.handle}`;
-                    } else {
-                        open('cart');
+                {/* Add to Cart Button */}
+                <AddToCartButton
+                    disabled={!selectedVariant || !selectedVariant.availableForSale}
+                    onClick={() => {
+                        if (hasVariants) {
+                            // Navigate to product page if multiple variants
+                            window.location.href = `/products/${product.handle}`;
+                        } else {
+                            open('cart');
+                        }
+                    }}
+                    lines={
+                        selectedVariant && !hasVariants
+                            ? [
+                                {
+                                    merchandiseId: selectedVariant.id,
+                                    quantity: 1,
+                                    product: {
+                                        ...product,
+                                        selectedVariant,
+                                        handle: product.handle,
+                                    },
+                                },
+                            ]
+                            : []
                     }
-                }}
-                lines={
-                    selectedVariant && !hasVariants
-                    ? [
-                        {
-                            merchandiseId: selectedVariant.id,
-                            quantity: 1,
-                            product: {
-                                ...product,
-                                selectedVariant,
-                                handle: product.handle,
-                            },
-                        },
-                    ]
-                    : []
-                }
                 >
-                {!selectedVariant?.availableForSale
-                    ? 'Sold out'
-                    : hasVariants
-                    ? 'Select Options'
-                    : 'Add to cart'}
+                    {!selectedVariant?.availableForSale
+                        ? 'Sold out'
+                        : hasVariants
+                            ? 'Select Options'
+                            : 'Add to cart'}
                 </AddToCartButton>
             </motion.div>
         </motion.div>
