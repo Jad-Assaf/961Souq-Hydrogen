@@ -427,7 +427,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
             <motion.div
               initial={{ filter: 'blur(10px)', opacity: 0 }}
               animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.3 }}
               className='collection-product-image'
             >
               <Image
