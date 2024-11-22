@@ -16,8 +16,9 @@ export default function ContactUs() {
             <div className="contact-info">
                 <h3>Contact Information:</h3>
                 <p><strong>Email:</strong> admin@961souq.com</p>
-                <p><strong>Phone:</strong> +961 03 963 961</p>
-                <p><strong>Address:</strong> 123 Main Street, Your City, Your Country</p>
+                <p><strong>Phone:</strong> <a href="tel:+9611888031">+961 1 888 031</a></p>
+                <p><strong>Whatsapp:</strong> <a href="https://wa.me/9613963961">+961 3 963 961</a></p>
+                <p><strong>Address:</strong> <a href="https://maps.app.goo.gl/wKNzrfSVrLm7srkB7" target="_blank" title="961 Souq Store Location">961souq - Zalka High Way Facing white Tower hotel Ground Floor, Zalka, Lebanon.</a></p>
             </div>
             <form className="contact-form">
                 <h3>Send Us a Message</h3>
