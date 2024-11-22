@@ -33,13 +33,22 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
             {/* Product rows using hardcoded handles */}
             {collections.map((collection, index) => (
                 <div key={collection.id}>
+                    {/* Check if the collection handle is "new-arrivals" and render the specific row */}
+                    {collection.handle === "new-arrivals" && (
+                        <div className="new-arrivals-row">
+                            <h3>New Arrivals</h3>
+                            <ProductRow products={collection.products.nodes} />
+                        </div>
+                    )}
+
+                    {/* Render regular collection section */}
                     <div className="collection-section">
                         <h3>{collection.title}</h3>
                         <ProductRow products={collection.products.nodes} />
                     </div>
 
                     {/* Render image row only after every 3rd collection */}
-                    {(index + 1) % 3 === 0 && ( // Adjust condition to include the first set correctly
+                    {(index + 1) % 3 === 0 && (
                         <div className="image-row">
                             {images.slice(Math.floor(index / 3) * 2, Math.floor(index / 3) * 2 + 2).map((image, i) => (
                                 <motion.div
