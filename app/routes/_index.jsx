@@ -43,9 +43,9 @@ async function loadCriticalData({ context }) {
     'apple-macbook', 'apple-iphone', 'apple-accessories', 
     'gaming-laptops', 'gaming-consoles', 'console-games', 
     'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'earbuds', 'speakers', 'surround-systems', 
     'desktops', 'pc-parts', 'business-monitors', 
-    'earbuds', 'speakers', 'fitness-bands', 
-    // 'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
     // 'action-cameras', 'cameras', 'surveillance-cameras', 
     // 'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
@@ -110,6 +110,7 @@ export default function Homepage() {
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-s24.jpg?v=1732281967',
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-watch-ultra.jpg?v=1732281967',
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-banner.jpg?v=1727943839',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-eaubuds.jpg?v=1732284726',
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-speakers.jpg?v=1711034859',
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-speakers.jpg?v=1711034859',
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-speakers.jpg?v=1711034859',
