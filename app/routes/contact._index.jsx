@@ -1,5 +1,6 @@
 import React from 'react';
 import "../styles/Contact.css";
+import { json } from '@shopify/remix-oxygen';
 import { createContentSecurityPolicy } from '@shopify/hydrogen';
 
 export const meta = () => {
@@ -9,17 +10,19 @@ export const meta = () => {
 // Set CSP and nonce
 export function loader() {
     const { header, nonce } = createContentSecurityPolicy({
+        defaultSrc: ["'self'", "https://cdn.shopify.com", "https://shopify.com"],
         frameSrc: ["https://www.google.com", "https://maps.google.com"],
+        scriptSrc: ["'self'", "https://maps.googleapis.com"],
     });
 
-    return new Response(null, {
-        headers: {
-            'Content-Security-Policy': header,
-        },
-        context: {
-            nonce,
-        },
-    });
+    return json(
+        { nonce }, // Pass nonce as data for the component
+        {
+            headers: {
+                'Content-Security-Policy': header,
+            },
+        }
+    );
 }
 
 export default function ContactUs({ nonce }) {
@@ -35,6 +38,7 @@ export default function ContactUs({ nonce }) {
                     allowFullScreen=""
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
+                    nonce={nonce} // Add nonce attribute to the iframe for CSP compliance
                 ></iframe>
             </div>
             <p>
