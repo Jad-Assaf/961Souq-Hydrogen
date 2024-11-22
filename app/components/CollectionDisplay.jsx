@@ -51,7 +51,7 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                 {collections.find((collection) => collection.handle === "laptops") && (
                     <div className="collection-section">
                         <div className="collection-header">
-                            <h3>New Arrivals</h3>
+                            <h3>Laptops</h3>
                             <Link to="/collections/laptops" className="view-all-link">
                                 View All
                             </Link>
