@@ -1,10 +1,9 @@
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
-import { Suspense, lazy } from 'react';
-const BannerSlideshow = lazy(() => import('../components/BannerSlideshow'));
-const CollectionDisplay = lazy(() => import('../components/CollectionDisplay'));
-const BrandSection = lazy(() => import('~/components/BrandsSection'));
-
+import { CollectionDisplay } from '../components/CollectionDisplay';
+import { BannerSlideshow } from '../components/BannerSlideshow';
+import BrandSection from '~/components/BrandsSection';
+import { Suspense } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -134,9 +133,7 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      <Suspense fallback={<div>Loading slideshow...</div>}>
-        <BannerSlideshow banners={banners} />
-      </Suspense>
+      <BannerSlideshow banners={banners} />
       <Suspense fallback={<div>Loading collections...</div>}>
         <CollectionDisplay collections={collections} sliderCollections={sliderCollections} images={images} />
       </Suspense>
