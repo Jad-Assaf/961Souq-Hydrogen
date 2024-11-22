@@ -55,6 +55,15 @@ export default {
         });
       }
 
+      // Add Content-Security-Policy header
+      const csp = `
+        default-src 'self' https://cdn.shopify.com https://shopify.com;
+        frame-src https://www.google.com https://maps.google.com;
+        script-src 'self' https://maps.googleapis.com;
+      `.trim();
+
+      response.headers.set('Content-Security-Policy', csp);
+
       return response;
     } catch (error) {
       // eslint-disable-next-line no-console
