@@ -33,12 +33,8 @@ async function loadCriticalData({ context }) {
     variables: { handle: menuHandle },
   });
 
-  if (!menu || !menu.items) {
-    throw new Response('Menu or menu items not found', { status: 404 });
-  }
-
-  // Extract handles from the menu items
-  const menuHandles = menu.items.map((item) =>
+  // Safely handle cases where menu or menu.items is undefined
+  const menuHandles = (menu?.items || []).map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
@@ -51,14 +47,14 @@ async function loadDeferredData({ context }, menuHandles) {
 
   // Hardcoded handles for product rows
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
