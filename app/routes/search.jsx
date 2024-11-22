@@ -1,12 +1,11 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useNavigate, useSearchParams } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useEffect, useRef, useState } from 'react';
-import LayoutControls from '~/components/LayoutControls';
-import { DrawerFilter } from '~/modules/drawer-filter';
+import { useLocation } from 'react-use';
 
 /**
  * @type {MetaFunction}
@@ -20,108 +19,110 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
+  const searchParams = url.searchParams;
+
+  const isPredictive = searchParams.has("predictive");
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
     : regularSearch({ request, context });
 
   const result = await searchPromise.catch((error) => {
     console.error(error);
-    return { term: '', result: null, error: error.message };
+    return { term: "", result: null, error: error.message };
   });
 
-  // Extract filters from result
-  const filters = result?.filters || [];
+  const filters = [];
+  const appliedFilters = [];
 
-  return json({ ...result, filters });
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith(FILTER_URL_PREFIX)) {
+      const filterKey = key.replace(FILTER_URL_PREFIX, "");
+      filters.push({ [filterKey]: JSON.parse(value) });
+      appliedFilters.push({
+        label: `${value}`,
+        filter: { [filterKey]: JSON.parse(value) },
+      });
+    }
+  }
+
+  return json({
+    ...result,
+    filters,
+    appliedFilters,
+  });
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { term, result, filters, appliedFilters: initialAppliedFilters } = useLoaderData();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const formRef = useRef(null);
-  const [numberInRow, setNumberInRow] = useState(5);
-  const [screenWidth, setScreenWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1500
-  );
-  const [appliedFilters, setAppliedFilters] = useState([]);
+  const [appliedFilters, setAppliedFilters] = useState(initialAppliedFilters);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     const updateScreenWidth = () => {
-      const width = window.innerWidth;
-      setScreenWidth(width);
-      if (width >= 1500) setNumberInRow(5);
-      else if (width >= 1200) setNumberInRow(4);
-      else if (width >= 550) setNumberInRow(3);
-      else setNumberInRow(1);
+      setScreenWidth(window.innerWidth);
     };
 
-    updateScreenWidth();
     window.addEventListener("resize", updateScreenWidth);
-
-    return () => {
-      window.removeEventListener("resize", updateScreenWidth);
-    };
+    return () => window.removeEventListener("resize", updateScreenWidth);
   }, []);
 
-  const handleLayoutChange = (number) => {
-    setNumberInRow(number);
-  };
-
   const handleFilterRemove = (filter) => {
+    const newUrl = getAppliedFilterLink(filter, searchParams, location);
+    navigate(newUrl);
     setAppliedFilters((prev) =>
-      prev.filter((appliedFilter) => appliedFilter.id !== filter.id)
+      prev.filter((appliedFilter) => appliedFilter.label !== filter.label)
     );
   };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
-
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
       const modifiedQuery = query.split(" ").map((word) => word + "*").join(" ");
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      navigate(`/search?q=${encodeURIComponent(modifiedQuery)}`);
     }
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <LayoutControls
-        numberInRow={numberInRow}
-        screenWidth={screenWidth}
-        handleLayoutChange={handleLayoutChange}
-      />
+      <form ref={formRef} onSubmit={handleFormSubmit}>
+        <input type="text" name="q" defaultValue={term} />
+        <button type="submit">Search</button>
+      </form>
       {!term || !result?.total ? (
-        <SearchResults.Empty />
+        <p>No results found.</p>
       ) : (
         <div className="flex flex-col lg:flex-row">
           {/* Filters */}
           {screenWidth >= 1024 && (
             <div className="w-[220px]">
-              <DrawerFilter
-                filters={result.filters || []} // Adjust based on available data
+              <FiltersDrawer
+                filters={filters || []}
                 appliedFilters={appliedFilters}
                 onRemoveFilter={handleFilterRemove}
               />
             </div>
           )}
+          {/* Results */}
           <div className="flex-1">
-            <SearchResults result={result} term={term}>
-              {({ products }) => (
-                <SearchResults.Products products={products} term={term} />
-              )}
-            </SearchResults>
+            <h2>Showing results for "{term}"</h2>
+            <SearchResults result={result} term={term} />
           </div>
         </div>
       )}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
+
 
 /**
  * Regular search query and fragments
