@@ -4,7 +4,7 @@ import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LayoutControls from '~/components/LayoutControls';
 import { DrawerFilter } from '~/modules/drawer-filter';
 
