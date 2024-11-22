@@ -1,27 +1,28 @@
 import React from 'react';
-import "../styles/Contact.css"
-import { json } from '@remix-run/server-runtime';
+import "../styles/Contact.css";
+import { createContentSecurityPolicy } from '@shopify/hydrogen';
 
 export const meta = () => {
     return [{ title: 'Contact Us | Hydrogen Storefront' }];
 };
 
+// Set CSP and nonce
 export function loader() {
-    return json(
-        null, // No data to return
-        {
-            headers: {
-                'Content-Security-Policy': `
-          default-src 'self' https://cdn.shopify.com https://shopify.com;
-          frame-src https://www.google.com https://maps.google.com;
-          script-src 'self' https://maps.googleapis.com;
-        `.trim(),
-            },
-        }
-    );
+    const { header, nonce } = createContentSecurityPolicy({
+        frameSrc: ["https://www.google.com", "https://maps.google.com"],
+    });
+
+    return new Response(null, {
+        headers: {
+            'Content-Security-Policy': header,
+        },
+        context: {
+            nonce,
+        },
+    });
 }
 
-export default function ContactUs() {
+export default function ContactUs({ nonce }) {
     return (
         <div className="contact-us-page">
             <h1>Contact Us</h1>
