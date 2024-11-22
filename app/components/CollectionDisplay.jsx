@@ -55,7 +55,7 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
 
                 {/* Render remaining rows */}
                 {collections
-                    .filter((collection) => collection.handle !== "new-arrivals")
+                    .filter((collection) => collection.handle !== "new-arrivals" && collection.handle !== "laptops")
                     .map((collection, index) => {
                         // Calculate if this is an image row
                         const isImageRow = index % 3 === 0; // Render image rows first and after every 3 product rows
