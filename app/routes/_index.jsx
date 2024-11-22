@@ -44,7 +44,8 @@ async function loadCriticalData({ context }) {
     'gaming-laptops', 'gaming-consoles', 'console-games', 
     'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
     'desktops', 'pc-parts', 'business-monitors', 
-    'earbuds', 'speakers', 'microphones', 
+    'earbuds', 
+    // 'speakers', 'microphones', 
     // 'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
     // 'action-cameras', 'cameras', 'surveillance-cameras', 
     // 'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
