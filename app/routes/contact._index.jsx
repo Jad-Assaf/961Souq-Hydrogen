@@ -1,20 +1,24 @@
 import React from 'react';
 import "../styles/Contact.css"
+import { json } from '@remix-run/server-runtime';
 
 export const meta = () => {
     return [{ title: 'Contact Us | Hydrogen Storefront' }];
 };
 
 export function loader() {
-    return new Response(null, {
-        headers: {
-            'Content-Security-Policy': `
-                default-src 'self' https://cdn.shopify.com https://shopify.com;
-                frame-src https://www.google.com https://maps.google.com;
-                script-src 'self' https://maps.googleapis.com;
-            `.trim(),
-        },
-    });
+    return json(
+        null, // No data to return
+        {
+            headers: {
+                'Content-Security-Policy': `
+          default-src 'self' https://cdn.shopify.com https://shopify.com;
+          frame-src https://www.google.com https://maps.google.com;
+          script-src 'self' https://maps.googleapis.com;
+        `.trim(),
+            },
+        }
+    );
 }
 
 export default function ContactUs() {
