@@ -1,15 +1,10 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData, useNavigate, useSearchParams } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-use';
-import { FILTER_URL_PREFIX } from '~/lib/const';
-import { DrawerFilter } from '~/modules/drawer-filter';
-import { FiltersDrawer } from '../modules/drawer-filter';
-import { getAppliedFilterLink } from '../lib/filter';
+import { useRef } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -23,106 +18,56 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const searchParams = url.searchParams;
-
-  const isPredictive = searchParams.has("predictive");
+  const isPredictive = url.searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
     : regularSearch({ request, context });
 
-  const result = await searchPromise.catch((error) => {
+  searchPromise.catch((error) => {
     console.error(error);
-    return { term: "", result: null, error: error.message };
+    return { term: '', result: null, error: error.message };
   });
 
-  const filters = [];
-  const appliedFilters = [];
-
-  for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith(FILTER_URL_PREFIX)) {
-      const filterKey = key.replace(FILTER_URL_PREFIX, "");
-      filters.push({ [filterKey]: JSON.parse(value) });
-      appliedFilters.push({
-        label: `${value}`,
-        filter: { [filterKey]: JSON.parse(value) },
-      });
-    }
-  }
-
-  return json({
-    ...result,
-    filters,
-    appliedFilters,
-  });
+  return json(await searchPromise);
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { term, result, filters, appliedFilters: initialAppliedFilters } = useLoaderData();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { type, term, result, error } = useLoaderData();
   const formRef = useRef(null);
-  const [appliedFilters, setAppliedFilters] = useState(initialAppliedFilters);
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const updateScreenWidth = () => {
-      setScreenWidth(window.innerWidth);
-    };
-
-    window.addEventListener("resize", updateScreenWidth);
-    return () => window.removeEventListener("resize", updateScreenWidth);
-  }, []);
-
-  const handleFilterRemove = (filter) => {
-    const newUrl = getAppliedFilterLink(filter, searchParams, location);
-    navigate(newUrl);
-    setAppliedFilters((prev) =>
-      prev.filter((appliedFilter) => appliedFilter.label !== filter.label)
-    );
-  };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
+
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      const modifiedQuery = query.split(" ").map((word) => word + "*").join(" ");
-      navigate(`/search?q=${encodeURIComponent(modifiedQuery)}`);
+      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
+      
+      // Redirect with modified query
+      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <form ref={formRef} onSubmit={handleFormSubmit}>
-        <input type="text" name="q" defaultValue={term} />
-        <button type="submit">Search</button>
-      </form>
       {!term || !result?.total ? (
-        <p>No results found.</p>
+        <SearchResults.Empty />
       ) : (
-        <div className="flex flex-col lg:flex-row">
-          {/* Filters */}
-          {screenWidth >= 1024 && (
-            <div className="w-[220px]">
-              <FiltersDrawer
-                filters={filters || []}
-                appliedFilters={appliedFilters}
-                onRemoveFilter={handleFilterRemove}
-              />
+        <SearchResults result={result} term={term}>
+          {({ articles, pages, products, term }) => (
+            <div>
+              <SearchResults.Products products={products} term={term} />
+              {/* <SearchResults.Pages pages={pages} term={term} />
+              <SearchResults.Articles articles={articles} term={term} /> */}
             </div>
           )}
-          {/* Results */}
-          <div className="flex-1">
-            <h2>Showing results for "{term}"</h2>
-            <SearchResults result={result} term={term} />
-          </div>
-        </div>
+        </SearchResults>
       )}
+      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
