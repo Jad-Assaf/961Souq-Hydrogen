@@ -6,6 +6,10 @@ import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-use';
+import { FILTER_URL_PREFIX } from '~/lib/const';
+import { DrawerFilter } from '~/modules/drawer-filter';
+import { FiltersDrawer } from '../modules/drawer-filter';
+import { getAppliedFilterLink } from '../lib/filter';
 
 /**
  * @type {MetaFunction}
@@ -122,7 +126,6 @@ export default function SearchPage() {
     </div>
   );
 }
-
 
 /**
  * Regular search query and fragments
