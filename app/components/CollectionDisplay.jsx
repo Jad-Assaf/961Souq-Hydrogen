@@ -70,16 +70,16 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                         );
                     }
 
-                    // Render regular collections with images interspersed
-                    const isImageRow = (index + 1) % 3 === 1 && index > 0; // Show image rows after 3 product rows, skipping "New Arrivals"
-                    const imageStartIndex = Math.floor(index / 3) * 2 + 2; // Adjust slicing to skip the first two images for "New Arrivals"
+                    // Calculate the correct image index
+                    const imageRowIndex = Math.floor((index - 1) / 3); // Adjust index to skip "New Arrivals"
+                    const isImageRow = (index - 1) % 3 === 2 && index > 0; // Show image rows after 3 product rows
 
                     return (
                         <React.Fragment key={collection.id}>
                             {/* Render image row before the current collection when the condition is met */}
-                            {isImageRow && images.length > imageStartIndex && (
+                            {isImageRow && images.length > imageRowIndex * 2 + 2 && (
                                 <div className="image-row">
-                                    {images.slice(imageStartIndex, imageStartIndex + 2).map((image, i) => (
+                                    {images.slice(imageRowIndex * 2 + 2, imageRowIndex * 2 + 4).map((image, i) => (
                                         <motion.div
                                             key={`${collection.id}-image-${i}`}
                                             initial={{ opacity: 0, scale: 0.9 }}
@@ -95,7 +95,7 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                                 srcSet={`${image}?width=300&quality=30 300w,
                                              ${image}?width=600&quality=30 600w,
                                              ${image}?width=1200&quality=30 1200w`}
-                                                alt={`Image Row ${Math.floor(index / 3) + 1} Image ${i + 1}`}
+                                                alt={`Image Row ${imageRowIndex + 1} Image ${i + 1}`}
                                                 width="740px"
                                                 height="300px"
                                             />
