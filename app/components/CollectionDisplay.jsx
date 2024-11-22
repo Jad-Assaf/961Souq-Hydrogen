@@ -32,19 +32,35 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
 
             {/* Product rows using hardcoded handles */}
             <>
-                {collections.map((collection, index) => {
-                    // Check if this is the "new-arrivals" collection and render it first
-                    if (collection.handle === "new-arrivals") {
+                {/* Render "New Arrivals" row first */}
+                {collections.find((collection) => collection.handle === "new-arrivals") && (
+                    <div className="collection-section">
+                        <h3>New Arrivals</h3>
+                        <ProductRow
+                            products={
+                                collections.find((collection) => collection.handle === "new-arrivals")
+                                    .products.nodes
+                            }
+                        />
+                    </div>
+                )}
+
+                {/* Render remaining rows */}
+                {collections
+                    .filter((collection) => collection.handle !== "new-arrivals")
+                    .map((collection, index) => {
+                        // Calculate if this is an image row
+                        const isImageRow = index % 3 === 0; // Render image rows first and after every 3 product rows
+                        const imageIndex = Math.floor(index / 3) * 2; // Determine which images to display for the current image row
+
                         return (
-                            <div key={collection.id} className="collection-section">
-                                <h3>New Arrivals</h3>
-                                <ProductRow products={collection.products.nodes} />
-                                {/* Render the first image row immediately after "New Arrivals" */}
-                                {images.length > 0 && (
+                            <React.Fragment key={collection.id}>
+                                {/* Render image row before product rows */}
+                                {isImageRow && images.length > imageIndex && (
                                     <div className="image-row">
-                                        {images.slice(0, 2).map((image, i) => (
+                                        {images.slice(imageIndex, imageIndex + 2).map((image, i) => (
                                             <motion.div
-                                                key={`new-arrivals-image-${i}`}
+                                                key={`${collection.id}-image-${i}`}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ delay: i * 0.1 + 0.2 }}
@@ -58,7 +74,7 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                                     srcSet={`${image}?width=300&quality=30 300w,
                                                  ${image}?width=600&quality=30 600w,
                                                  ${image}?width=1200&quality=30 1200w`}
-                                                    alt={`New Arrivals Image ${i + 1}`}
+                                                    alt={`Image Row ${Math.floor(index / 3) + 1} Image ${i + 1}`}
                                                     width="740px"
                                                     height="300px"
                                                 />
@@ -66,52 +82,15 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                         ))}
                                     </div>
                                 )}
-                            </div>
-                        );
-                    }
 
-                    // Calculate the correct image index
-                    const imageRowIndex = Math.floor((index - 1) / 3); // Adjust index to skip "New Arrivals"
-                    const isImageRow = (index - 1) % 3 === 2 && index > 0; // Show image rows after 3 product rows
-
-                    return (
-                        <React.Fragment key={collection.id}>
-                            {/* Render image row before the current collection when the condition is met */}
-                            {isImageRow && images.length > imageRowIndex * 2 + 2 && (
-                                <div className="image-row">
-                                    {images.slice(imageRowIndex * 2 + 2, imageRowIndex * 2 + 4).map((image, i) => (
-                                        <motion.div
-                                            key={`${collection.id}-image-${i}`}
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: i * 0.1 + 0.2 }}
-                                            className="row-image"
-                                            width="740px"
-                                            height="300px"
-                                        >
-                                            <Image
-                                                data={image}
-                                                sizes="(min-width: 45em) 20vw, 40vw"
-                                                srcSet={`${image}?width=300&quality=30 300w,
-                                             ${image}?width=600&quality=30 600w,
-                                             ${image}?width=1200&quality=30 1200w`}
-                                                alt={`Image Row ${imageRowIndex + 1} Image ${i + 1}`}
-                                                width="740px"
-                                                height="300px"
-                                            />
-                                        </motion.div>
-                                    ))}
+                                {/* Render product row */}
+                                <div className="collection-section">
+                                    <h3>{collection.title}</h3>
+                                    <ProductRow products={collection.products.nodes} />
                                 </div>
-                            )}
-
-                            {/* Render regular collection */}
-                            <div className="collection-section">
-                                <h3>{collection.title}</h3>
-                                <ProductRow products={collection.products.nodes} />
-                            </div>
-                        </React.Fragment>
-                    );
-                })}
+                            </React.Fragment>
+                        );
+                    })}
             </>
         </div>
     );
