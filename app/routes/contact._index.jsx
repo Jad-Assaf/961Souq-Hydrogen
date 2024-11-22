@@ -1,5 +1,5 @@
 import React from 'react';
-import "../styles/Contact.css";
+import "../styles/Contact.css"
 
 export const meta = () => {
     return [{ title: 'Contact Us | Hydrogen Storefront' }];
@@ -10,11 +10,16 @@ export default function ContactUs() {
         <div className="contact-us-page">
             <h1>Contact Us</h1>
             <div className="map-container">
-                <img
-                    src="https://maps.app.goo.gl/yHGwV7uzqzyyotKH6"
-                    alt="961SOUQ Location"
-                    style={{ width: "100%", height: "auto", border: 0 }}
-                />
+                <iframe
+                    width="600"
+                    height="450"
+                    style="border:0"
+                    loading="lazy"
+                    allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyARNlt89r96wfjnVl7CiB53VQkmbDBaQ8o
+    &q=Space+Needle,Seattle+WA">
+                </iframe>
             </div>
             <p>
                 We’d love to hear from you! Feel free to reach out to us for any
