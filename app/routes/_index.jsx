@@ -44,8 +44,7 @@ async function loadCriticalData({ context }) {
     'gaming-laptops', 'gaming-consoles', 'console-games', 
     'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
     'desktops', 'pc-parts', 'business-monitors', 
-    'earbuds', 'speakers',
-    //  'microphones', 
+    'earbuds', 'speakers', 'microphones', 
     // 'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
     // 'action-cameras', 'cameras', 'surveillance-cameras', 
     // 'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
@@ -147,7 +146,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
         url
         altText
       }
-      products(first: 20) {
+      products(first: 15) {
         nodes {
           id
           title
@@ -170,7 +169,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               altText
             }
           }
-          variants(first: 10) {
+          variants(first: 5) {
             nodes {
               id
               availableForSale
