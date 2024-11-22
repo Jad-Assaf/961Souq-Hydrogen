@@ -35,7 +35,12 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                 {/* Render "New Arrivals" and "Laptops" rows at the start */}
                 {collections.find((collection) => collection.handle === "new-arrivals") && (
                     <div className="collection-section">
-                        <h3>New Arrivals</h3>
+                        <div className="collection-header">
+                            <h3>New Arrivals</h3>
+                            <Link to="/collections/new-arrivals" className="view-all-link">
+                                View All
+                            </Link>
+                        </div>
                         <ProductRow
                             products={collections.find((collection) => collection.handle === "new-arrivals")
                                 .products.nodes}
@@ -45,7 +50,12 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
 
                 {collections.find((collection) => collection.handle === "laptops") && (
                     <div className="collection-section">
-                        <h3>Laptops</h3>
+                        <div className="collection-header">
+                            <h3>New Arrivals</h3>
+                            <Link to="/collections/laptops" className="view-all-link">
+                                View All
+                            </Link>
+                        </div>
                         <ProductRow
                             products={collections.find((collection) => collection.handle === "laptops")
                                 .products.nodes}
@@ -93,7 +103,12 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
 
                                 {/* Render product row */}
                                 <div className="collection-section">
-                                    <h3>{collection.title}</h3>
+                                    <div className="collection-header">
+                                        <h3>{collection.title}</h3>
+                                        <Link to={`/collections/${collection.handle}`} className="view-all-link">
+                                            View All
+                                        </Link>
+                                    </div>
                                     <ProductRow products={collection.products.nodes} />
                                 </div>
                             </React.Fragment>

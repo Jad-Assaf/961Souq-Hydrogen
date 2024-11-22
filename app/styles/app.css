@@ -182,6 +182,13 @@ button {
   cursor: grabbing;
 }
 
+.collection-header{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 /* Product Item Styling */
 .product-item {
   min-width: 200px;
