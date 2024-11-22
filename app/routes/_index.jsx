@@ -46,8 +46,8 @@ async function loadCriticalData({ context }) {
     'desktops', 'pc-parts', 'business-monitors', 
     'earbuds', 'speakers', 'microphones', 
     'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+    // 'action-cameras', 'cameras', 'surveillance-cameras', 
+    // 'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
   // Fetch collections for product rows.
