@@ -5,6 +5,18 @@ export const meta = () => {
     return [{ title: 'Contact Us | Hydrogen Storefront' }];
 };
 
+export function loader() {
+    return new Response(null, {
+        headers: {
+            'Content-Security-Policy': `
+                default-src 'self' https://cdn.shopify.com https://shopify.com;
+                frame-src https://www.google.com https://maps.google.com;
+                script-src 'self' https://maps.googleapis.com;
+            `.trim(),
+        },
+    });
+}
+
 export default function ContactUs() {
     return (
         <div className="contact-us-page">
@@ -26,8 +38,8 @@ export default function ContactUs() {
             </p>
             <div className="contact-info">
                 <h3>Contact Information:</h3>
-                <p><strong>Email:</strong> support@example.com</p>
-                <p><strong>Phone:</strong> +1 (234) 567-890</p>
+                <p><strong>Email:</strong> admin@961souq.com</p>
+                <p><strong>Phone:</strong> +961 03 963 961</p>
                 <p><strong>Address:</strong> 123 Main Street, Your City, Your Country</p>
             </div>
             <form className="contact-form">

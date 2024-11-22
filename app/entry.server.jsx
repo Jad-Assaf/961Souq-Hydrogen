@@ -17,19 +17,12 @@ export default async function handleRequest(
   remixContext,
   context,
 ) {
-  const {nonce, header: baseCspHeader, NonceProvider} = createContentSecurityPolicy({
+  const {nonce, header, NonceProvider} = createContentSecurityPolicy({
     shop: {
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
   });
-
-  // Add custom directives to the base CSP
-  const extendedCspHeader = `
-    ${baseCspHeader}
-    frame-src 'self' https://www.google.com https://maps.google.com;
-    script-src 'self' https://maps.googleapis.com;
-  `.trim();
 
   const body = await renderToReadableStream(
     <NonceProvider>
@@ -51,10 +44,13 @@ export default async function handleRequest(
   }
 
   responseHeaders.set('Content-Type', 'text/html');
-  responseHeaders.set('Content-Security-Policy', extendedCspHeader);
+  responseHeaders.set('Content-Security-Policy', header);
 
   return new Response(body, {
     headers: responseHeaders,
     status: responseStatusCode,
   });
 }
+
+/** @typedef {import('@shopify/remix-oxygen').EntryContext} EntryContext */
+/** @typedef {import('@shopify/remix-oxygen').AppLoadContext} AppLoadContext */
