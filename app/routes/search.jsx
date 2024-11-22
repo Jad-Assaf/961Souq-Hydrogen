@@ -5,6 +5,8 @@ import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef } from 'react';
+import LayoutControls from '~/components/LayoutControls';
+import { DrawerFilter } from '~/modules/drawer-filter';
 
 /**
  * @type {MetaFunction}
@@ -23,12 +25,15 @@ export async function loader({ request, context }) {
     ? predictiveSearch({ request, context })
     : regularSearch({ request, context });
 
-  searchPromise.catch((error) => {
+  const result = await searchPromise.catch((error) => {
     console.error(error);
     return { term: '', result: null, error: error.message };
   });
 
-  return json(await searchPromise);
+  // Extract filters from result
+  const filters = result?.filters || [];
+
+  return json({ ...result, filters });
 }
 
 /**
@@ -37,6 +42,39 @@ export async function loader({ request, context }) {
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
   const formRef = useRef(null);
+  const [numberInRow, setNumberInRow] = useState(5);
+  const [screenWidth, setScreenWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1500
+  );
+  const [appliedFilters, setAppliedFilters] = useState([]);
+
+  useEffect(() => {
+    const updateScreenWidth = () => {
+      const width = window.innerWidth;
+      setScreenWidth(width);
+      if (width >= 1500) setNumberInRow(5);
+      else if (width >= 1200) setNumberInRow(4);
+      else if (width >= 550) setNumberInRow(3);
+      else setNumberInRow(1);
+    };
+
+    updateScreenWidth();
+    window.addEventListener("resize", updateScreenWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateScreenWidth);
+    };
+  }, []);
+
+  const handleLayoutChange = (number) => {
+    setNumberInRow(number);
+  };
+
+  const handleFilterRemove = (filter) => {
+    setAppliedFilters((prev) =>
+      prev.filter((appliedFilter) => appliedFilter.id !== filter.id)
+    );
+  };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -44,9 +82,7 @@ export default function SearchPage() {
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-      
-      // Redirect with modified query
+      const modifiedQuery = query.split(" ").map((word) => word + "*").join(" ");
       window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
   };
@@ -54,18 +90,33 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
+      <LayoutControls
+        numberInRow={numberInRow}
+        screenWidth={screenWidth}
+        handleLayoutChange={handleLayoutChange}
+      />
       {!term || !result?.total ? (
         <SearchResults.Empty />
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
+        <div className="flex flex-col lg:flex-row">
+          {/* Filters */}
+          {screenWidth >= 1024 && (
+            <div className="w-[220px]">
+              <DrawerFilter
+                filters={result.filters || []} // Adjust based on available data
+                appliedFilters={appliedFilters}
+                onRemoveFilter={handleFilterRemove}
+              />
             </div>
           )}
-        </SearchResults>
+          <div className="flex-1">
+            <SearchResults result={result} term={term}>
+              {({ products }) => (
+                <SearchResults.Products products={products} term={term} />
+              )}
+            </SearchResults>
+          </div>
+        </div>
       )}
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
