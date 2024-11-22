@@ -53,7 +53,7 @@ export default function SearchPage() {
 
   return (
     <div className="search">
-      <h1>Search Results:</h1>
+      <h1>Search Results</h1>
       {!term || !result?.total ? (
         <SearchResults.Empty />
       ) : (
