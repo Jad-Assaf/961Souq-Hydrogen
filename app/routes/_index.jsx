@@ -43,9 +43,9 @@ async function loadCriticalData({ context }) {
     'apple-macbook', 'apple-iphone', 'apple-accessories', 
     'gaming-laptops', 'gaming-consoles', 'console-games', 
     'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
     'earbuds', 'speakers', 'surround-systems', 
     'desktops', 'pc-parts', 'business-monitors', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
     // 'action-cameras', 'cameras', 'surveillance-cameras', 
     // 'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
