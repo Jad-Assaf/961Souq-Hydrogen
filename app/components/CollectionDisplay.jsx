@@ -31,51 +31,88 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
             </div>
 
             {/* Product rows using hardcoded handles */}
-            {collections.map((collection, index) => (
-                <div key={collection.id}>
-                    {/* Check if the collection handle is "new-arrivals" and render the specific row */}
-                    {collection.handle === "new-arrivals" && (
-                        <div className="new-arrivals-row">
-                            <h3>New Arrivals</h3>
-                            <ProductRow products={collection.products.nodes} />
-                        </div>
-                    )}
+            <>
+                {collections.map((collection, index) => {
+                    // Check if this is the "new-arrivals" collection and render it first
+                    if (collection.handle === "new-arrivals") {
+                        return (
+                            <div key={collection.id} className="collection-section">
+                                <h3>New Arrivals</h3>
+                                <ProductRow products={collection.products.nodes} />
+                                {/* Render the first image row immediately after "New Arrivals" */}
+                                {images.length > 0 && (
+                                    <div className="image-row">
+                                        {images.slice(0, 2).map((image, i) => (
+                                            <motion.div
+                                                key={`new-arrivals-image-${i}`}
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: i * 0.1 + 0.2 }}
+                                                className="row-image"
+                                                width="740px"
+                                                height="300px"
+                                            >
+                                                <Image
+                                                    data={image}
+                                                    sizes="(min-width: 45em) 20vw, 40vw"
+                                                    srcSet={`${image}?width=300&quality=30 300w,
+                                                 ${image}?width=600&quality=30 600w,
+                                                 ${image}?width=1200&quality=30 1200w`}
+                                                    alt={`New Arrivals Image ${i + 1}`}
+                                                    width="740px"
+                                                    height="300px"
+                                                />
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
 
-                    {/* Render regular collection section */}
-                    <div className="collection-section">
-                        <h3>{collection.title}</h3>
-                        <ProductRow products={collection.products.nodes} />
-                    </div>
+                    // Render regular collections with images interspersed
+                    const isImageRow = (index + 1) % 3 === 1 && index > 0; // Show image rows after 3 product rows, skipping "New Arrivals"
+                    const imageStartIndex = Math.floor(index / 3) * 2 + 2; // Adjust slicing to skip the first two images for "New Arrivals"
 
-                    {/* Render image row only after every 3rd collection */}
-                    {(index + 1) % 3 === 0 && (
-                        <div className="image-row">
-                            {images.slice(Math.floor(index / 3) * 2, Math.floor(index / 3) * 2 + 2).map((image, i) => (
-                                <motion.div
-                                    key={`${collection.id}-${i}`}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: i * 0.1 + 0.2 }}
-                                    className="row-image"
-                                    width="740px"
-                                    height="300px"
-                                >
-                                    <Image
-                                        data={image}
-                                        sizes="(min-width: 45em) 20vw, 40vw"
-                                        srcSet={`${image}?width=300&quality=30 300w,
-                                     ${image}?width=600&quality=30 600w,
-                                     ${image}?width=1200&quality=30 1200w`}
-                                        alt={`Collection ${Math.floor(index / 3) + 1} Image ${i + 1}`}
-                                        width="740px"
-                                        height="300px"
-                                    />
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            ))}
+                    return (
+                        <React.Fragment key={collection.id}>
+                            {/* Render image row before the current collection when the condition is met */}
+                            {isImageRow && images.length > imageStartIndex && (
+                                <div className="image-row">
+                                    {images.slice(imageStartIndex, imageStartIndex + 2).map((image, i) => (
+                                        <motion.div
+                                            key={`${collection.id}-image-${i}`}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: i * 0.1 + 0.2 }}
+                                            className="row-image"
+                                            width="740px"
+                                            height="300px"
+                                        >
+                                            <Image
+                                                data={image}
+                                                sizes="(min-width: 45em) 20vw, 40vw"
+                                                srcSet={`${image}?width=300&quality=30 300w,
+                                             ${image}?width=600&quality=30 600w,
+                                             ${image}?width=1200&quality=30 1200w`}
+                                                alt={`Image Row ${Math.floor(index / 3) + 1} Image ${i + 1}`}
+                                                width="740px"
+                                                height="300px"
+                                            />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Render regular collection */}
+                            <div className="collection-section">
+                                <h3>{collection.title}</h3>
+                                <ProductRow products={collection.products.nodes} />
+                            </div>
+                        </React.Fragment>
+                    );
+                })}
+            </>
         </div>
     );
 }
