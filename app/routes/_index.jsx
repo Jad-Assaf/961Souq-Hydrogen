@@ -149,61 +149,80 @@ export default function Homepage() {
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
+  collectionByHandle(handle: $handle) {
+    id
+    title
+    handle
       image {
-        url
-        altText
-      }
-      products(first: 15) {
+      url
+      altText
+    }
+    products(first: 15) {
         nodes {
-          id
-          title
-          handle
+        id
+        title
+        handle
           priceRange {
             minVariantPrice {
-              amount
-              currencyCode
-            }
+            amount
+            currencyCode
           }
+        }
           compareAtPriceRange {
             minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+        images(first: 1) {
+            nodes {
+            url
+            altText
+          }
+        }
+        variants(first: 5) {
+            nodes {
+            id
+            availableForSale
+              price {
               amount
               currencyCode
             }
-          }
-          images(first: 1) {
-            nodes {
-              url
-              altText
+              compareAtPrice {
+              amount
+              currencyCode
+            }
+              selectedOptions {
+              name
+              value
             }
           }
         }
       }
     }
   }
+}
 `;
 
-const GET_MENU_QUERY = `#graphql
+export const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
-    menu(handle: $handle) {
+  menu(handle: $handle) {
       items {
+      id
+      title
+      url
+        items {
         id
         title
         url
-        items {
+          items {
           id
           title
           url
-          items {
-            id
-            title
-            url
-          }
         }
       }
     }
   }
+}
 `;
+
