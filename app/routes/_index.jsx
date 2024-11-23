@@ -202,24 +202,32 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-    
+
   ];
 
-  const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
+  const newArrivalsCollection =
+    collections && collections.find((collection) => collection.handle === "new-arrivals");
 
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
+      {/* Safely render the CategorySlider and defer other content */}
+      {sliderCollections && (
+        <Suspense fallback={<div>Loading slider collections...</div>}>
+          <CategorySlider sliderCollections={sliderCollections} />
+        </Suspense>
+      )}
+
       <div className="collections-container">
-        <>
-          {/* Render "New Arrivals" and "Laptops" rows at the start */}
-          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
-        </>
+        {newArrivalsCollection ? (
+          <TopProductSections collection={newArrivalsCollection} />
+        ) : (
+          <div>Loading new arrivals...</div>
+        )}
       </div>
-      {/* Defer these sections */}
+
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections} images={images} />
+        <DeferredCollectionDisplay collections={collections || []} images={images} />
       </Suspense>
 
       <Suspense fallback={<div>Loading brands...</div>}>
