@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
+import { TopProductSections } from './TopProductSections';
 
 const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load the CollectionRows component
 
@@ -19,27 +20,17 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
-export const CollectionDisplay = ({ collections, sliderCollections, images }) => {
+export const CollectionDisplay = ({ collections, images }) => {
+    const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
+    const laptopsCollection = collections.find((collection) => collection.handle === "laptops");
     return (
         <div className="collections-container">
 
             {/* Product rows using hardcoded handles */}
             <>
                 {/* Render "New Arrivals" and "Laptops" rows at the start */}
-                {collections.find((collection) => collection.handle === "new-arrivals") && (
-                    <div className="collection-section">
-                        <div className="collection-header">
-                            <h3>New Arrivals</h3>
-                            <Link to="/collections/new-arrivals" className="view-all-link">
-                                View All
-                            </Link>
-                        </div>
-                        <ProductRow
-                            products={collections.find((collection) => collection.handle === "new-arrivals").products.nodes}
-                        />
-                    </div>
-                )}
-
+                {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+                {laptopsCollection && <TopProductSections collection={laptopsCollection} />}
                 {/* Lazy load the rest of the collections */}
                 <Suspense fallback={<div>Loading collections...</div>}>
                     <CollectionRows collections={collections} images={images} />

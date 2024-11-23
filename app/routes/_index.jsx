@@ -4,6 +4,7 @@ import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
 import { CategorySlider } from '~/components/CollectionSlider';
+import { TopProductSections } from '~/components/TopProductSections';
 
 /**
  * @type {MetaFunction}
@@ -131,10 +132,20 @@ export default function Homepage() {
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-speakers.jpg?v=1711034859',
   ];
 
+  const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
+  const laptopsCollection = collections.find((collection) => collection.handle === "laptops");
+
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
+      <div className="collections-container">
+        <>
+          {/* Render "New Arrivals" and "Laptops" rows at the start */}
+          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+          {laptopsCollection && <TopProductSections collection={laptopsCollection} />}
+        </>
+      </div>
       <CollectionDisplay collections={collections} sliderCollections={sliderCollections} images={images} />
       <BrandSection brands={brandsData} />
     </div>
