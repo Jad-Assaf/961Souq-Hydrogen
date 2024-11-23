@@ -41,6 +41,7 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
+    'new-arrivals', 'laptops', 
     'apple-macbook', 'apple-iphone', 'apple-accessories', 
     'gaming-laptops', 'gaming-consoles', 'console-games', 
     'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
@@ -132,7 +133,6 @@ export default function Homepage() {
   ];
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
-  const laptopsCollection = collections.find((collection) => collection.handle === "laptops");
 
   return (
     <div className="home">
@@ -142,7 +142,6 @@ export default function Homepage() {
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
           {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
-          {laptopsCollection && <TopProductSections collection={laptopsCollection} />}
         </>
       </div>
       <CollectionDisplay collections={collections} sliderCollections={sliderCollections} images={images} />
