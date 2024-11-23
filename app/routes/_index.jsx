@@ -219,13 +219,21 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
-      <div className="collections-container">
-        <>
-          {/* Render "New Arrivals" and "Laptops" rows at the start */}
-          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
-        </>
-      </div>
+      <Suspense fallback={<DelayedFallback delay={2000}>
+        <div>Loading collections...</div>
+      </DelayedFallback>}>
+        <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
+      </Suspense>
+      <Suspense fallback={<DelayedFallback delay={2000}>
+        <div>Loading collections...</div>
+      </DelayedFallback>}>
+        <div className="collections-container">
+          <>
+            {/* Render "New Arrivals" and "Laptops" rows at the start */}
+            {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+          </>
+        </div>
+      </Suspense>
       {/* Defer these sections */}
       <Suspense fallback={<DelayedFallback delay={2000}>
         <div>Loading collections...</div>
