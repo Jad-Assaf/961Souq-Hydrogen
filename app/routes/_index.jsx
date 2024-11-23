@@ -3,6 +3,7 @@ import { useLoaderData } from '@remix-run/react';
 import DeferredCollectionDisplay from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
+import { Suspense } from 'react';
 
 /**
  * @type {MetaFunction}
