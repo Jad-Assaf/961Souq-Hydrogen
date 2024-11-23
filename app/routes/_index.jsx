@@ -1,9 +1,11 @@
 import { defer } from '@shopify/remix-oxygen';
-import { useLoaderData, Await } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
+import { Await } from '@remix-run/react';
 import { Suspense } from 'react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
+import Placeholder from '~/components/Placeholder'; // New placeholder component for sections
 
 /**
  * @type {MetaFunction}
@@ -129,20 +131,28 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <Suspense fallback={<div>Loading collections...</div>}>
-        <Await resolve={collections}>
-          {(resolvedCollections) => (
-            <CollectionDisplay
-              collections={resolvedCollections} // Pass resolved collections directly
-              sliderCollections={[]} // Pass sliderCollections if needed
-              images={images}
-            />
-          )}
-        </Await>
-      </Suspense>
-      <Suspense fallback={<div>Loading brands...</div>}>
-        <BrandSection brands={brands} />
-      </Suspense>
+
+      {/* Placeholder for collections */}
+      <div style={{ minHeight: '1000px' }}> {/* Set fixed height to avoid shifting */}
+        <Suspense fallback={<Placeholder title="Collections are loading..." />}>
+          <Await resolve={collections}>
+            {(resolvedCollections) => (
+              <CollectionDisplay
+                collections={resolvedCollections} // Pass resolved collections directly
+                sliderCollections={[]} // Pass sliderCollections if needed
+                images={images}
+              />
+            )}
+          </Await>
+        </Suspense>
+      </div>
+
+      {/* Placeholder for brands */}
+      <div style={{ minHeight: '300px' }}> {/* Set fixed height to avoid shifting */}
+        <Suspense fallback={<Placeholder title="Brands are loading..." />}>
+          <BrandSection brands={brands} />
+        </Suspense>
+      </div>
     </div>
   );
 }
