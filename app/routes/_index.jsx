@@ -41,25 +41,25 @@ async function loadCriticalData({ context }) {
 
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
-  // Hardcoded handles for product rows.
-  const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
-  ];
-
+  
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
-
+  
   return { collections, sliderCollections };
 }
+
+// Hardcoded handles for product rows.
+const hardcodedHandles = [
+  'new-arrivals', 'laptops',
+  'apple-macbook', 'apple-iphone', 'apple-accessories',
+  'gaming-laptops', 'gaming-consoles', 'console-games',
+  'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+  'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+  'earbuds', 'speakers', 'surround-systems',
+  'desktops', 'pc-parts', 'business-monitors',
+  'action-cameras', 'cameras', 'surveillance-cameras',
+  'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+];
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
