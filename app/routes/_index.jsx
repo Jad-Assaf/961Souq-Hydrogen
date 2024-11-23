@@ -4,10 +4,8 @@ import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
-
-const CollectionDisplay = lazy(() => import('../components/CollectionDisplay'));
-const BrandSection = lazy(() => import('~/components/BrandsSection'));
-
+import { CollectionDisplay } from '~/components/CollectionDisplay';
+import BrandSection from '~/components/BrandsSection';
 
 /**
  * @type {MetaFunction}
@@ -149,14 +147,23 @@ export default function Homepage() {
       </div>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <CollectionDisplay collections={collections} images={images} />
+        <DeferredCollectionDisplay collections={collections} images={images} />
       </Suspense>
 
       <Suspense fallback={<div>Loading brands...</div>}>
-        <BrandSection brands={brandsData} />
+        <DeferredBrandSection brands={brandsData} />
       </Suspense>
     </div>
   );
+}
+
+// Create deferred versions of components
+function DeferredCollectionDisplay({ collections, images }) {
+  return <CollectionDisplay collections={collections} images={images} />;
+}
+
+function DeferredBrandSection({ brands }) {
+  return <BrandSection brands={brands} />;
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
