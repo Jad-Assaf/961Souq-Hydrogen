@@ -5,6 +5,7 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
+import React, { Suspense } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -18,8 +19,10 @@ export const meta = () => {
  */
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData });
+  const collections = await fetchCollectionsByHandles(args.context, hardcodedHandles); // Fetch collections
+  return defer({ ...criticalData, collections });
 }
+
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
@@ -41,14 +44,14 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -137,18 +140,19 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
+      <CategorySlider sliderCollections={sliderCollections} />
       <div className="collections-container">
-        <>
-          {/* Render "New Arrivals" and "Laptops" rows at the start */}
-          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
-        </>
+        {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
       </div>
-      <CollectionDisplay collections={collections} sliderCollections={sliderCollections} images={images} />
-      <BrandSection brands={brandsData} />
+      {/* Defer loading of these components */}
+      <Suspense fallback={<div>Loading...</div>}>
+        <CollectionDisplay collections={collections} images={images} />
+        <BrandSection brands={brandsData} />
+      </Suspense>
     </div>
   );
 }
+
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
