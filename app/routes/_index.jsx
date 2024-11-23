@@ -1,9 +1,9 @@
-import { defer } from '@shopify/remix-oxygen'; 
-import { useLoaderData } from '@remix-run/react'; 
-import { CollectionDisplay } from '../components/CollectionDisplay'; 
-import { BannerSlideshow } from '../components/BannerSlideshow'; 
-import BrandSection from '~/components/BrandsSection'; 
-import { CategorySlider } from '~/components/CollectionSlider'; 
+import { defer } from '@shopify/remix-oxygen';
+import { useLoaderData } from '@remix-run/react';
+import { CollectionDisplay } from '../components/CollectionDisplay';
+import { BannerSlideshow } from '../components/BannerSlideshow';
+import BrandSection from '~/components/BrandsSection';
+import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 
 /**
@@ -18,10 +18,8 @@ export const meta = () => {
  */
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
-  const collections = await fetchCollectionsByHandles(args.context, hardcodedHandles); // Fetch collections
-  return defer({ ...criticalData, collections });
+  return defer({ ...criticalData });
 }
-
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
@@ -141,7 +139,10 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
       <div className="collections-container">
+        <>
+          {/* Render "New Arrivals" and "Laptops" rows at the start */}
           {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+        </>
       </div>
       <CollectionDisplay collections={collections} images={images} />
       <BrandSection brands={brandsData} />
