@@ -36,7 +36,7 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
                                 altText: `Banner ${index + 1}`,
                             }}
                             width="100vw"
-                            height={auto}
+                            height="auto"
                             aspectRatio="16/9"
                             sizes="(max-width: 768px) 100vw, 1920px"
                             className="banner-image"
