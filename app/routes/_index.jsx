@@ -17,7 +17,7 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader(args) {
+export async function loader({ context }) {
   const banners = [
     {
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
@@ -33,23 +33,36 @@ export async function loader(args) {
     },
   ];
 
-  const criticalData = await loadCriticalData(args);
+  try {
+    // Fetch critical data
+    const criticalData = await loadCriticalData(context);
 
-  // Simulate delay for deferred data
-  const deferredCollections = new Promise((resolve) =>
-    setTimeout(() => resolve(criticalData.collections), 2000)
-  );
+    // Create promises for deferred data
+    const deferredCollections = new Promise((resolve) =>
+      setTimeout(() => resolve(criticalData.collections), 2000)
+    );
+    const deferredBrands = new Promise((resolve) =>
+      setTimeout(() => resolve(brandsData), 3000)
+    );
 
-  const deferredBrands = new Promise((resolve) =>
-    setTimeout(() => resolve(brandsData), 3000)
-  );
-
-  return defer({ ...criticalData, banners, collections: deferredCollections, brands: deferredBrands });
+    // Return data using defer
+    return defer({
+      banners,
+      sliderCollections: criticalData.sliderCollections,
+      collections: deferredCollections,
+      brands: deferredBrands,
+    });
+  } catch (error) {
+    // Log the error and return a meaningful response
+    console.error('Loader error:', error);
+    throw new Response('Failed to load data', { status: 500 });
+  }
 }
 
-
-async function loadCriticalData({ context }) {
+async function loadCriticalData(context) {
   const menuHandle = 'new-main-menu';
+
+  // Query menu data
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -58,15 +71,13 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from the menu items.
+  // Fetch collections using menu handles
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
-
-  // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Hardcoded handles for product rows.
+  // Hardcoded handles for collections
   const hardcodedHandles = [
     'new-arrivals', 'laptops', 
     'apple-macbook', 'apple-iphone', 'apple-accessories', 
@@ -82,7 +93,7 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return { collections, sliderCollections };
+  return { sliderCollections, collections };
 }
 
 const brandsData = [
