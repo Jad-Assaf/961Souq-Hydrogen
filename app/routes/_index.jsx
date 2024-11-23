@@ -1,9 +1,8 @@
 import { defer } from '@shopify/remix-oxygen';
-import { Await, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import DeferredCollectionDisplay from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
-import { Suspense } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -15,10 +14,13 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader({ context }) {
-  const menuHandle = 'new-main-menu';
+export async function loader(args) {
+  const criticalData = await loadCriticalData(args);
+  return defer({ ...criticalData });
+}
 
-  // Fetch menu and critical collections eagerly
+async function loadCriticalData({ context }) {
+  const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -27,22 +29,31 @@ export async function loader({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Fetch critical collections (e.g., "New Arrivals" and "Laptops") eagerly
-  const criticalHandles = ['new-arrivals', 'laptops'];
-  const criticalCollections = await fetchCollectionsByHandles(context, criticalHandles);
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  // Defer less critical collections
-  const lessCriticalHandles = [
-    'apple-macbook', 'apple-iphone', 'gaming-laptops', 'gaming-consoles', 'mobile-accessories',
-    'garmin-smart-watch', 'earbuds', 'speakers', 'desktops', 'business-monitors',
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  // Hardcoded handles for product rows.
+  const hardcodedHandles = [
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
-  const deferredCollections = fetchCollectionsByHandles(context, lessCriticalHandles);
 
-  return defer({
-    menu,
-    criticalCollections,
-    lessCriticalCollections: deferredCollections, // Deferred for less critical data
-  });
+  // Fetch collections for product rows.
+  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+
+  return { collections, sliderCollections };
 }
 
 const brandsData = [
@@ -76,15 +87,13 @@ async function fetchCollectionsByHandles(context, handles) {
       GET_COLLECTION_BY_HANDLE_QUERY,
       { variables: { handle } }
     );
-    if (collectionByHandle) {
-      collections.push(collectionByHandle);
-    }
+    if (collectionByHandle) collections.push(collectionByHandle);
   }
-  return collections.length ? collections : []; // Always return an array
+  return collections;
 }
 
 export default function Homepage() {
-  const { criticalCollections, lessCriticalCollections } = useLoaderData();
+  const { collections, sliderCollections } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -124,27 +133,15 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-
-      {/* Render critical collections */}
-      <DeferredCollectionDisplay collections={criticalCollections} />
-
-      {/* Defer less critical collections */}
-      <Suspense fallback={<div>Loading more collections...</div>}>
-        <Await resolve={lessCriticalCollections}>
-          {(resolvedCollections) =>
-            resolvedCollections && resolvedCollections.length > 0 ? (
-              <DeferredCollectionDisplay collections={resolvedCollections} />
-            ) : (
-              <div>No additional collections to load.</div>
-            )
-          }
-        </Await>
-      </Suspense>
+      <DeferredCollectionDisplay
+        collections={collections}
+        sliderCollections={sliderCollections}
+        images={images}
+      />
       <BrandSection brands={brandsData} />
     </div>
   );
 }
-
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
