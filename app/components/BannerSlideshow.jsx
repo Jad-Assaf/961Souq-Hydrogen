@@ -36,7 +36,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
     };
 
     return (
-        <div className="banner-slideshow">
+        <div className="banner-slideshow" style={styles.bannerSlideshow}>
             {banners.map((banner, index) => (
                 <motion.div
                     key={index}
@@ -48,6 +48,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                     drag="x" // Enable horizontal dragging
                     dragConstraints={{ left: 0, right: 0 }} // Constrain drag to horizontal direction
                     onDragEnd={handleDragEnd} // Handle swipe gesture
+                    style={styles.bannerSlide}
                 >
                     {index === currentIndex && (
                         <a href={banner.link} target="_self" rel="noopener noreferrer">
@@ -61,6 +62,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                                 aspectRatio="16/9"
                                 sizes="(max-width: 768px) 100vw, 1920px"
                                 className="banner-image"
+                                style={styles.bannerImage}
                             />
                         </a>
                     )}
@@ -69,3 +71,29 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
         </div>
     );
 }
+
+const styles = {
+    bannerSlideshow: {
+        position: 'relative',
+        width: '100vw',
+        height: '300px',
+        overflow: 'hidden',
+    },
+    bannerSlide: {
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        opacity: '0',
+        transition: 'opacity 1s ease-in-out',
+    },
+    bannerImage: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block',
+    },
+};

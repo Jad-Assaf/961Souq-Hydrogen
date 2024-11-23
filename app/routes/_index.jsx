@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
-import { Await, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
@@ -17,7 +17,7 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader({ context }) {
+export async function loader(args) {
   const banners = [
     {
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
@@ -33,36 +33,12 @@ export async function loader({ context }) {
     },
   ];
 
-  try {
-    // Fetch critical data
-    const criticalData = await loadCriticalData(context);
-
-    // Create promises for deferred data
-    const deferredCollections = new Promise((resolve) =>
-      setTimeout(() => resolve(criticalData.collections), 2000)
-    );
-    const deferredBrands = new Promise((resolve) =>
-      setTimeout(() => resolve(brandsData), 3000)
-    );
-
-    // Return data using defer
-    return defer({
-      banners,
-      sliderCollections: criticalData.sliderCollections,
-      collections: deferredCollections,
-      brands: deferredBrands,
-    });
-  } catch (error) {
-    // Log the error and return a meaningful response
-    console.error('Loader error:', error);
-    throw new Response('Failed to load data', { status: 500 });
-  }
+  const criticalData = await loadCriticalData(args);
+  return defer({ ...criticalData, banners });
 }
 
-async function loadCriticalData(context) {
+async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
-
-  // Query menu data
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -71,13 +47,15 @@ async function loadCriticalData(context) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Fetch collections using menu handles
+  // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
+
+  // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Hardcoded handles for collections
+  // Hardcoded handles for product rows.
   const hardcodedHandles = [
     'new-arrivals', 'laptops', 
     'apple-macbook', 'apple-iphone', 'apple-accessories', 
@@ -93,7 +71,7 @@ async function loadCriticalData(context) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return { sliderCollections, collections };
+  return { collections, sliderCollections };
 }
 
 const brandsData = [
@@ -133,7 +111,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, brands } = useLoaderData();
+  const { banners, collections, sliderCollections } = useLoaderData();
 
   const images = [
     {
@@ -247,20 +225,13 @@ export default function Homepage() {
           {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
         </>
       </div>
-      {/* Deferred: Collections */}
+      {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <Await resolve={collections}>
-          {(resolvedCollections) => (
-            <DeferredCollectionDisplay collections={resolvedCollections} images={images} />
-          )}
-        </Await>
+        <DeferredCollectionDisplay collections={collections} images={images} />
       </Suspense>
 
-      {/* Deferred: Brands */}
       <Suspense fallback={<div>Loading brands...</div>}>
-        <Await resolve={brands}>
-          {(resolvedBrands) => <DeferredBrandSection brands={resolvedBrands} />}
-        </Await>
+        <DeferredBrandSection brands={brandsData} />
       </Suspense>
     </div>
   );
