@@ -1,9 +1,9 @@
 // CollectionRows.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import Image from 'your-image-component'; // Import your Image component
 import { ProductRow } from './CollectionDisplay';
 import { Link } from '@remix-run/react';
+import { Image } from '@shopify/hydrogen-react';
 
 const CollectionRows = ({ collections, images }) => {
     return (
