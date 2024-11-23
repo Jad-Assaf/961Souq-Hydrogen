@@ -1,11 +1,10 @@
-import { defer } from '@shopify/remix-oxygen';
-import { Await, useLoaderData } from '@remix-run/react';
-import { CollectionDisplay } from '../components/CollectionDisplay';
-import { BannerSlideshow } from '../components/BannerSlideshow';
-import BrandSection from '~/components/BrandsSection';
-import { CategorySlider } from '~/components/CollectionSlider';
+import { defer } from '@shopify/remix-oxygen'; 
+import { useLoaderData } from '@remix-run/react'; 
+import { CollectionDisplay } from '../components/CollectionDisplay'; 
+import { BannerSlideshow } from '../components/BannerSlideshow'; 
+import BrandSection from '~/components/BrandsSection'; 
+import { CategorySlider } from '~/components/CollectionSlider'; 
 import { TopProductSections } from '~/components/TopProductSections';
-import { Suspense } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -19,13 +18,10 @@ export const meta = () => {
  */
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
-
-  // Defer collections for CollectionDisplay and BrandSection
-  return defer({
-    ...criticalData,
-    collections: fetchCollectionsByHandles(args.context, hardcodedHandles), // Deferred collections
-  });
+  const collections = await fetchCollectionsByHandles(args.context, hardcodedHandles); // Fetch collections
+  return defer({ ...criticalData, collections });
 }
+
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
@@ -47,14 +43,14 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -101,8 +97,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const loaderData = useLoaderData();
-  const collectionsPromise = loaderData.collections; // Defer collections
+  const { collections, sliderCollections } = useLoaderData();
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -144,30 +139,15 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider sliderCollections={collections?.sliderCollections} />
+      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
       <div className="collections-container">
-        {newArrivalsCollection && (
-          <TopProductSections collection={newArrivalsCollection} />
-        )}
+          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
       </div>
-
-      {/* Deferred CollectionDisplay */}
-      <Suspense fallback={<div>Loading collections...</div>}>
-        <Await resolve={collectionsPromise}>
-          {(resolvedCollections) => (
-            <CollectionDisplay collections={resolvedCollections} images={images} />
-          )}
-        </Await>
-      </Suspense>
-
-      {/* Deferred BrandSection */}
-      <Suspense fallback={<div>Loading brands...</div>}>
-        <BrandSection brands={brandsData} />
-      </Suspense>
+      <CollectionDisplay collections={collections} images={images} />
+      <BrandSection brands={brandsData} />
     </div>
   );
 }
-
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
