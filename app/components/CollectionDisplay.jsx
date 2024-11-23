@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
+import { CategorySlider } from './CollectionSlider';
 
 const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load the CollectionRows component
 
@@ -23,14 +24,7 @@ export const CollectionDisplay = ({ collections, sliderCollections, images }) =>
     return (
         <div className="collections-container">
             {/* Slide container using 'new-main-menu' handles */}
-            <div className="slide-con">
-                <h3 className="cat-h3">Shop By Categories</h3>
-                <div className="category-slider">
-                    {sliderCollections.map((collection, index) => (
-                        <CategoryItem key={collection.id} collection={collection} index={index} />
-                    ))}
-                </div>
-            </div>
+            <CategorySlider sliderCollections={sliderCollections} />
 
             {/* Product rows using hardcoded handles */}
             <>
@@ -49,69 +43,14 @@ export const CollectionDisplay = ({ collections, sliderCollections, images }) =>
                     </div>
                 )}
 
-                {collections.find((collection) => collection.handle === "laptops") && (
-                    <div className="collection-section">
-                        <div className="collection-header">
-                            <h3>Laptops</h3>
-                            <Link to="/collections/laptops" className="view-all-link">
-                                View All
-                            </Link>
-                        </div>
-                        <ProductRow
-                            products={collections.find((collection) => collection.handle === "laptops")
-                                .products.nodes}
-                        />
-                    </div>
-                )}
-
                 {/* Lazy load the rest of the collections */}
                 <Suspense fallback={<div>Loading collections...</div>}>
-                    <CollectionRows collections={ collections} images={images} />
+                    <CollectionRows collections={collections} images={images} />
                 </Suspense>
             </>
         </div>
     );
 };
-
-
-function CategoryItem({ collection, index }) {
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true });
-
-    return (
-        <motion.div
-            ref={ref}
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: index * 0.01, duration: 0.5 }}
-            className="category-container"
-        >
-            <Link to={`/collections/${collection.handle}`}>
-                <motion.div
-                    initial={{ filter: 'blur(10px)', opacity: 0 }}
-                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
-                    transition={{ duration: 0.5 }}
-                    width="150px"
-                    height="150px"
-                >
-                    <Image
-                        data={collection.image}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 40vw"
-                        srcSet={`${collection.image?.url}?width=300&quality=30 300w,
-                                 ${collection.image?.url}?width=600&quality=30 600w,
-                                 ${collection.image?.url}?width=1200&quality=30 1200w`}
-                        alt={collection.image?.altText || collection.title}
-                        className="category-image"
-                        width="150px"
-                        height="150px"
-                    />
-                </motion.div>
-                <div className="category-title">{collection.title}</div>
-            </Link>
-        </motion.div>
-    );
-}
 
 export function ProductRow({ products }) {
     const rowRef = useRef(null);

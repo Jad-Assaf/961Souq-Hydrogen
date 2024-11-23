@@ -1,82 +1,57 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+// CategorySlider.jsx
+import { Link } from '@remix-run/react';
+import { Image } from '@shopify/hydrogen-react';
+import { motion, useInView } from 'framer-motion';
+import React, { useRef } from 'react';
 
-// Helper function to fetch collections (now local to this component)
-async function fetchCollections(context, handles) {
-    const collections = [];
-    for (const handle of handles) {
-        const { collectionByHandle } = await context.storefront.query(
-            FETCH_COLLECTION_QUERY,
-            { variables: { handle } }
-        );
-        if (collectionByHandle) collections.push(collectionByHandle);
-    }
-    return collections;
-}
-
-// GraphQL query to fetch collection by handle
-const FETCH_COLLECTION_QUERY = `#graphql
-  query FetchCollection($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-    }
-  }
-`;
-
-export default function CollectionSlider({ context }) {
-    const [collections, setCollections] = useState([]);
-
-    useEffect(() => {
-        if (!context || !context.storefront) {
-            console.error("Context or storefront missing in CollectionSlider!");
-            return; // Exit early if context is missing
-        }
-
-        async function loadCollections() {
-            try {
-                const handles = ['apple', 'gaming', 'laptops'];
-                const data = await fetchCollections(context, handles);
-                setCollections(data);
-            } catch (error) {
-                console.error("Error fetching collections:", error);
-            }
-        }
-
-        loadCollections();
-    }, [context]);
-
+export const CategorySlider = ({ sliderCollections }) => {
     return (
         <div className="slide-con">
             <h3 className="cat-h3">Shop By Categories</h3>
             <div className="category-slider">
-                {collections.length > 0 ? (
-                    collections.map((collection) => (
-                        <Link
-                            key={collection.id}
-                            to={`/collections/${collection.handle}`}
-                            className="category-container"
-                        >
-                            <img
-                                src={collection.image?.url}
-                                alt={collection.image?.altText || collection.title}
-                                className="category-image"
-                                loading="lazy"
-                                width="175"
-                                height="175"
-                            />
-                            <div className="category-title">{collection.title}</div>
-                        </Link>
-                    ))
-                ) : (
-                    <div>No collections found.</div>
-                )}
+                {sliderCollections.map((collection, index) => (
+                    <CategoryItem key={collection.id} collection={collection} index={index} />
+                ))}
             </div>
         </div>
+    );
+};
+
+function CategoryItem({ collection, index }) {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
+
+    return (
+        <motion.div
+            ref={ref}
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ delay: index * 0.01, duration: 0.5 }}
+            className="category-container"
+        >
+            <Link to={`/collections/${collection.handle}`}>
+                <motion.div
+                    initial={{ filter: 'blur(10px)', opacity: 0 }}
+                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                    transition={{ duration: 0.5 }}
+                    width="150px"
+                    height="150px"
+                >
+                    <Image
+                        data={collection.image}
+                        aspectRatio="1/1"
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        srcSet={`${collection.image?.url}?width=300&quality=30 300w,
+                                 ${collection.image?.url}?width=600&quality=30 600w,
+                                 ${collection.image?.url}?width=1200&quality=30 1200w`}
+                        alt={collection.image?.altText || collection.title}
+                        className="category-image"
+                        width="150px"
+                        height="150px"
+                    />
+                </motion.div>
+                <div className="category-title">{collection.title}</div>
+            </Link>
+        </motion.div>
     );
 }

@@ -3,6 +3,7 @@ import { useLoaderData } from '@remix-run/react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
+import { CategorySlider } from '~/components/CollectionSlider';
 
 /**
  * @type {MetaFunction}
@@ -133,6 +134,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
+      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
       <CollectionDisplay collections={collections} sliderCollections={sliderCollections} images={images} />
       <BrandSection brands={brandsData} />
     </div>
