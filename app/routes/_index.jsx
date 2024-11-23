@@ -76,9 +76,11 @@ async function fetchCollectionsByHandles(context, handles) {
       GET_COLLECTION_BY_HANDLE_QUERY,
       { variables: { handle } }
     );
-    if (collectionByHandle) collections.push(collectionByHandle);
+    if (collectionByHandle) {
+      collections.push(collectionByHandle);
+    }
   }
-  return collections;
+  return collections.length ? collections : []; // Always return an array
 }
 
 export default function Homepage() {
@@ -129,9 +131,13 @@ export default function Homepage() {
       {/* Defer less critical collections */}
       <Suspense fallback={<div>Loading more collections...</div>}>
         <Await resolve={lessCriticalCollections}>
-          {(resolvedCollections) => (
-            <DeferredCollectionDisplay collections={resolvedCollections} />
-          )}
+          {(resolvedCollections) =>
+            resolvedCollections && resolvedCollections.length > 0 ? (
+              <DeferredCollectionDisplay collections={resolvedCollections} />
+            ) : (
+              <div>No additional collections to load.</div>
+            )
+          }
         </Await>
       </Suspense>
       <BrandSection brands={brandsData} />

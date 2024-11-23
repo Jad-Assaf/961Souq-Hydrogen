@@ -122,17 +122,33 @@ function CollectionDisplayComponent({ collections, sliderCollections, images }) 
 // Lazy-load the CollectionDisplay component
 const CollectionDisplay = lazy(() => Promise.resolve({ default: CollectionDisplayComponent }));
 
-export default function DeferredCollectionDisplay({ collections, sliderCollections, images }) {
+export default function DeferredCollectionDisplay({ collections = [] }) {
+    if (!collections || collections.length === 0) {
+        return <div>No collections to display.</div>; // Placeholder for empty collections
+    }
+
     return (
-        <Suspense fallback={<div>Loading collections...</div>}>
-            <CollectionDisplay
-                collections={collections}
-                sliderCollections={sliderCollections}
-                images={images}
-            />
-        </Suspense>
+        <div className="collections-container">
+            {collections.map((collection) => (
+                <div key={collection.id} className="collection">
+                    <h3>{collection.title}</h3>
+                    {collection.products?.nodes?.length ? (
+                        <div className="products">
+                            {collection.products.nodes.map((product) => (
+                                <div key={product.id} className="product">
+                                    <h4>{product.title}</h4>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div>No products found.</div>
+                    )}
+                </div>
+            ))}
+        </div>
     );
 }
+
 
 function CategoryItem({ collection, index }) {
     const ref = useRef(null);
