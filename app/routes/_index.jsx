@@ -1,5 +1,5 @@
 import { defer } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { Await, useLoaderData } from '@remix-run/react';
 import DeferredCollectionDisplay from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
@@ -134,6 +134,7 @@ export default function Homepage() {
           )}
         </Await>
       </Suspense>
+      <BrandSection brands={brandsData} />
     </div>
   );
 }
