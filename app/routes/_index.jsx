@@ -105,15 +105,6 @@ async function fetchCollectionsByHandles(context, handles) {
 export default function Homepage() {
   const { menu, banners, collections, sliderCollections } = useLoaderData();
 
-  const banners = [
-    {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476', link: '/collections/google-pixel'},
-    {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601', link: '/collections/google-pixel'},
-    {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718', link: '/collections/google-pixel'},
-  ];
-
   const images = [
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
