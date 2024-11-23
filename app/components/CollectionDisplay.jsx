@@ -19,7 +19,7 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
-const CollectionDisplay = ({ collections, sliderCollections, images }) => {
+export const CollectionDisplay = ({ collections, sliderCollections, images }) => {
     return (
         <div className="collections-container">
             {/* Slide container using 'new-main-menu' handles */}
