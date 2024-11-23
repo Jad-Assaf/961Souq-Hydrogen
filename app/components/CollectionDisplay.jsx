@@ -5,7 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
-lazy
+
 const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load the CollectionRows component
 
 // Truncate text to fit within the given max word count
