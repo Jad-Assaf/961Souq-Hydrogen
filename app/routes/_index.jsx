@@ -1,12 +1,11 @@
 import React, { Suspense, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { Await, useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
-import { DelayedFallback } from '~/components/DelayedFallback';
 
 /**
  * @type {MetaFunction}
@@ -35,8 +34,19 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners });
+
+  // Simulate delay for deferred data
+  const deferredCollections = new Promise((resolve) =>
+    setTimeout(() => resolve(criticalData.collections), 2000)
+  );
+
+  const deferredBrands = new Promise((resolve) =>
+    setTimeout(() => resolve(brandsData), 3000)
+  );
+
+  return defer({ ...criticalData, banners, collections: deferredCollections, brands: deferredBrands });
 }
+
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
@@ -58,14 +68,14 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -112,7 +122,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections } = useLoaderData();
+  const { banners, collections, sliderCollections, brands } = useLoaderData();
 
   const images = [
     {
@@ -211,7 +221,7 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-
+    
   ];
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
@@ -219,32 +229,27 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <Suspense fallback={<DelayedFallback delay={2000}>
-        <div>Loading collections...</div>
-      </DelayedFallback>}>
-        <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
-      </Suspense>
-      <Suspense fallback={<DelayedFallback delay={2000}>
-        <div>Loading collections...</div>
-      </DelayedFallback>}>
-        <div className="collections-container">
-          <>
-            {/* Render "New Arrivals" and "Laptops" rows at the start */}
-            {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
-          </>
-        </div>
-      </Suspense>
-      {/* Defer these sections */}
-      <Suspense fallback={<DelayedFallback delay={2000}>
-        <div>Loading collections...</div>
-      </DelayedFallback>}>
-        <DeferredCollectionDisplay collections={collections} images={images} />
+      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
+      <div className="collections-container">
+        <>
+          {/* Render "New Arrivals" and "Laptops" rows at the start */}
+          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+        </>
+      </div>
+      {/* Deferred: Collections */}
+      <Suspense fallback={<div>Loading collections...</div>}>
+        <Await resolve={collections}>
+          {(resolvedCollections) => (
+            <DeferredCollectionDisplay collections={resolvedCollections} images={images} />
+          )}
+        </Await>
       </Suspense>
 
-      <Suspense fallback={<DelayedFallback delay={3000}>
-        <div>Loading collections...</div>
-      </DelayedFallback>}>
-        <DeferredBrandSection brands={brandsData} />
+      {/* Deferred: Brands */}
+      <Suspense fallback={<div>Loading brands...</div>}>
+        <Await resolve={brands}>
+          {(resolvedBrands) => <DeferredBrandSection brands={resolvedBrands} />}
+        </Await>
       </Suspense>
     </div>
   );
@@ -258,7 +263,6 @@ function DeferredCollectionDisplay({ collections, images }) {
 function DeferredBrandSection({ brands }) {
   return <BrandSection brands={brands} />;
 }
-
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
