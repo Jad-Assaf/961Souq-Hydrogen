@@ -17,13 +17,10 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader(args) {
-  const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData });
-}
-
-async function loadCriticalData({ context }) {
+export async function loader({ context }) {
   const menuHandle = 'new-main-menu';
+
+  // Load the critical data first (menu and banner)
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -32,31 +29,41 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
-
-  // Fetch collections for the slider using menu handles.
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
-  // Hardcoded handles for product rows.
-  const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+  // Load banner data (hardcoded or fetched from the server)
+  const banners = [
+    {
+      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
+      link: '/collections/google-pixel',
+    },
+    {
+      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
+      link: '/collections/garmin',
+    },
+    {
+      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
+      link: '/collections/remarkable',
+    },
   ];
 
-  // Fetch collections for product rows.
-  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+  // Defer the rest of the data (collections and sliderCollections)
+  const deferredData = defer({
+    collections: fetchCollectionsByHandles(context, [
+      'new-arrivals', 'laptops',
+      'apple-macbook', 'apple-iphone', 'apple-accessories',
+      'gaming-laptops', 'gaming-consoles', 'console-games',
+      'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+      'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+      'earbuds', 'speakers', 'surround-systems',
+      'desktops', 'pc-parts', 'business-monitors',
+      'action-cameras', 'cameras', 'surveillance-cameras',
+      'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+    ]),
+    sliderCollections: fetchCollectionsByHandles(context, menu.items.map(item =>
+      item.title.toLowerCase().replace(/\s+/g, '-')
+    )),
+  });
 
-  return { collections, sliderCollections };
+  return { menu, banners, ...deferredData };
 }
 
 const brandsData = [
@@ -96,7 +103,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections, sliderCollections } = useLoaderData();
+  const { menu, banners, collections, sliderCollections } = useLoaderData();
 
   const banners = [
     {
