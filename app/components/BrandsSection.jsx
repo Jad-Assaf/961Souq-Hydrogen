@@ -14,8 +14,8 @@ export const BrandSection = ({ brands }) => {
                                     altText: brand.name, // Use the brand name as alt text
                                     url: brand.image,    // URL of the brand image
                                 }}
-                                width="100%" // Set a reasonable width for brand logos
-                                height="200px" // Set a reasonable height for brand logos
+                                width="186px" // Set a reasonable width for brand logos
+                                height="auto" // Set a reasonable height for brand logos
                                 aspectRatio="1/1" // Force a square aspect ratio
                                 sizes="(min-width: 45em) 10vw, 20vw" // Responsive sizes
                             />
