@@ -1,21 +1,25 @@
-import React, { useRef, useState, lazy, Suspense } from 'react';
+import React, { Suspense, lazy, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
+lazy
+const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load the CollectionRows component
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
-    if (!text || typeof text !== 'string') {
-        return ''; // Return an empty string if text is undefined or not a string
+    if (!text || typeof text !== "string") {
+        return ""; // Return an empty string if text is undefined or not a string
     }
     const words = text.split(' ');
-    return words.length > maxWords ? words.slice(0, maxWords).join(' ') + '...' : text;
+    return words.length > maxWords
+        ? words.slice(0, maxWords).join(' ') + '...'
+        : text;
 }
 
-function CollectionDisplayComponent({ collections, sliderCollections, images }) {
+const CollectionDisplay = ({ collections, sliderCollections, images }) => {
     return (
         <div className="collections-container">
             {/* Slide container using 'new-main-menu' handles */}
@@ -31,7 +35,7 @@ function CollectionDisplayComponent({ collections, sliderCollections, images }) 
             {/* Product rows using hardcoded handles */}
             <>
                 {/* Render "New Arrivals" and "Laptops" rows at the start */}
-                {collections.find((collection) => collection.handle === 'new-arrivals') && (
+                {collections.find((collection) => collection.handle === "new-arrivals") && (
                     <div className="collection-section">
                         <div className="collection-header">
                             <h3>New Arrivals</h3>
@@ -40,14 +44,12 @@ function CollectionDisplayComponent({ collections, sliderCollections, images }) 
                             </Link>
                         </div>
                         <ProductRow
-                            products={
-                                collections.find((collection) => collection.handle === 'new-arrivals').products.nodes
-                            }
+                            products={collections.find((collection) => collection.handle === "new-arrivals").products.nodes}
                         />
                     </div>
                 )}
 
-                {collections.find((collection) => collection.handle === 'laptops') && (
+                {collections.find((collection) => collection.handle === "laptops") && (
                     <div className="collection-section">
                         <div className="collection-header">
                             <h3>Laptops</h3>
@@ -56,83 +58,21 @@ function CollectionDisplayComponent({ collections, sliderCollections, images }) 
                             </Link>
                         </div>
                         <ProductRow
-                            products={
-                                collections.find((collection) => collection.handle === 'laptops').products.nodes
-                            }
+                            products={collections.find((collection) => collection.handle === "laptops")
+                                .products.nodes}
                         />
                     </div>
                 )}
 
-                {/* Render remaining rows */}
-                {collections
-                    .filter((collection) => collection.handle !== 'new-arrivals' && collection.handle !== 'laptops')
-                    .map((collection, index) => {
-                        // Calculate if this is an image row
-                        const isImageRow = index % 3 === 0; // Render image rows first and after every 3 product rows
-                        const imageIndex = Math.floor(index / 3) * 2; // Determine which images to display for the current image row
-
-                        return (
-                            <React.Fragment key={collection.id}>
-                                {/* Render image row before product rows */}
-                                {isImageRow && images.length > imageIndex && (
-                                    <div className="image-row">
-                                        {images.slice(imageIndex, imageIndex + 2).map((image, i) => (
-                                            <motion.div
-                                                key={`${collection.id}-image-${i}`}
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ delay: i * 0.1 + 0.2 }}
-                                                className="row-image"
-                                                width="740px"
-                                                height="300px"
-                                            >
-                                                <Image
-                                                    data={image}
-                                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                                    srcSet={`${image}?width=300&quality=30 300w,
-                             ${image}?width=600&quality=30 600w,
-                             ${image}?width=1200&quality=30 1200w`}
-                                                    alt={`Image Row ${Math.floor(index / 3) + 1} Image ${i + 1}`}
-                                                    width="740px"
-                                                    height="300px"
-                                                />
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Render product row */}
-                                <div className="collection-section">
-                                    <div className="collection-header">
-                                        <h3>{collection.title}</h3>
-                                        <Link to={`/collections/${collection.handle}`} className="view-all-link">
-                                            View All
-                                        </Link>
-                                    </div>
-                                    <ProductRow products={collection.products.nodes} />
-                                </div>
-                            </React.Fragment>
-                        );
-                    })}
+                {/* Lazy load the rest of the collections */}
+                <Suspense fallback={<div>Loading collections...</div>}>
+                    <CollectionRows collections={ collections} images={images} />
+                </Suspense>
             </>
         </div>
     );
-}
+};
 
-// Lazy-load the CollectionDisplay component
-const CollectionDisplay = lazy(() => Promise.resolve({ default: CollectionDisplayComponent }));
-
-export default function DeferredCollectionDisplay({ collections, sliderCollections, images }) {
-    return (
-        <Suspense fallback={<div>Loading collections...</div>}>
-            <CollectionDisplay
-                collections={collections}
-                sliderCollections={sliderCollections}
-                images={images}
-            />
-        </Suspense>
-    );
-}
 
 function CategoryItem({ collection, index }) {
     const ref = useRef(null);
@@ -173,7 +113,7 @@ function CategoryItem({ collection, index }) {
     );
 }
 
-function ProductRow({ products }) {
+export function ProductRow({ products }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -258,13 +198,13 @@ function ProductItem({ product, index }) {
             transition={{ delay: index * 0.01, duration: 0.5 }}
             className="product-item"
         >
-                <motion.div
-                    initial={{ filter: 'blur(10px)', opacity: 0 }}
-                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
-                    transition={{ duration: 0.5 }}
-                    className="product-card"
-                >
-            <Link to={`/products/${product.handle}`}>
+            <motion.div
+                initial={{ filter: 'blur(10px)', opacity: 0 }}
+                animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                transition={{ duration: 0.5 }}
+                className="product-card"
+            >
+                <Link to={`/products/${product.handle}`}>
                     <Image
                         data={product.images.nodes[0]}
                         aspectRatio="1/1"
@@ -285,40 +225,40 @@ function ProductItem({ product, index }) {
                             </small>
                         )}
                     </div>
-            </Link>
+                </Link>
 
-            {/* Add to Cart Button */}
-            <AddToCartButton
-                disabled={!selectedVariant || !selectedVariant.availableForSale}
-                onClick={() => {
-                    if (hasVariants) {
-                        // Navigate to product page if multiple variants
-                        window.location.href = `/products/${product.handle}`;
-                    } else {
-                        open('cart');
+                {/* Add to Cart Button */}
+                <AddToCartButton
+                    disabled={!selectedVariant || !selectedVariant.availableForSale}
+                    onClick={() => {
+                        if (hasVariants) {
+                            // Navigate to product page if multiple variants
+                            window.location.href = `/products/${product.handle}`;
+                        } else {
+                            open('cart');
+                        }
+                    }}
+                    lines={
+                        selectedVariant && !hasVariants
+                            ? [
+                                {
+                                    merchandiseId: selectedVariant.id,
+                                    quantity: 1,
+                                    product: {
+                                        ...product,
+                                        selectedVariant,
+                                        handle: product.handle,
+                                    },
+                                },
+                            ]
+                            : []
                     }
-                }}
-                lines={
-                    selectedVariant && !hasVariants
-                    ? [
-                        {
-                            merchandiseId: selectedVariant.id,
-                            quantity: 1,
-                            product: {
-                                ...product,
-                                selectedVariant,
-                                handle: product.handle,
-                            },
-                        },
-                    ]
-                    : []
-                }
                 >
-                {!selectedVariant?.availableForSale
-                    ? 'Sold out'
-                    : hasVariants
-                    ? 'Select Options'
-                    : 'Add to cart'}
+                    {!selectedVariant?.availableForSale
+                        ? 'Sold out'
+                        : hasVariants
+                            ? 'Select Options'
+                            : 'Add to cart'}
                 </AddToCartButton>
             </motion.div>
         </motion.div>

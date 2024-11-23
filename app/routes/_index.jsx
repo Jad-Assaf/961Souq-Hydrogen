@@ -1,6 +1,6 @@
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
-import DeferredCollectionDisplay from '../components/CollectionDisplay';
+import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
 
@@ -39,14 +39,14 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -133,11 +133,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <DeferredCollectionDisplay
-        collections={collections}
-        sliderCollections={sliderCollections}
-        images={images}
-      />
+      <CollectionDisplay collections={collections} sliderCollections={sliderCollections} images={images} />
       <BrandSection brands={brandsData} />
     </div>
   );
