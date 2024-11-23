@@ -51,7 +51,7 @@ export async function loader({ context }) {
   return defer({
     menu,
     banners,
-    collections,
+    collections, // Deferred promise
     brands: brandsData,
   });
 }
@@ -67,7 +67,7 @@ async function fetchCollectionsByHandles(context, handles) {
       collections.push(collectionByHandle);
     }
   }
-  return collections;
+  return collections; // Return valid collections
 }
 
 const brandsData = [
@@ -132,7 +132,11 @@ export default function Homepage() {
       <Suspense fallback={<div>Loading collections...</div>}>
         <Await resolve={collections}>
           {(resolvedCollections) => (
-            <CollectionDisplay collections={resolvedCollections} sliderCollections={[]} images={images} />
+            <CollectionDisplay
+              collections={resolvedCollections} // Pass resolved collections directly
+              sliderCollections={[]} // Pass sliderCollections if needed
+              images={images}
+            />
           )}
         </Await>
       </Suspense>
