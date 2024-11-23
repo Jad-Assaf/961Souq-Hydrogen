@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, lazy, Suspense } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
@@ -8,16 +8,14 @@ import { useAside } from './Aside';
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
-    if (!text || typeof text !== "string") {
-        return ""; // Return an empty string if text is undefined or not a string
+    if (!text || typeof text !== 'string') {
+        return ''; // Return an empty string if text is undefined or not a string
     }
     const words = text.split(' ');
-    return words.length > maxWords
-        ? words.slice(0, maxWords).join(' ') + '...'
-        : text;
+    return words.length > maxWords ? words.slice(0, maxWords).join(' ') + '...' : text;
 }
 
-export function CollectionDisplay({ collections, sliderCollections, images }) {
+function CollectionDisplayComponent({ collections, sliderCollections, images }) {
     return (
         <div className="collections-container">
             {/* Slide container using 'new-main-menu' handles */}
@@ -33,7 +31,7 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
             {/* Product rows using hardcoded handles */}
             <>
                 {/* Render "New Arrivals" and "Laptops" rows at the start */}
-                {collections.find((collection) => collection.handle === "new-arrivals") && (
+                {collections.find((collection) => collection.handle === 'new-arrivals') && (
                     <div className="collection-section">
                         <div className="collection-header">
                             <h3>New Arrivals</h3>
@@ -42,13 +40,14 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                             </Link>
                         </div>
                         <ProductRow
-                            products={collections.find((collection) => collection.handle === "new-arrivals")
-                                .products.nodes}
+                            products={
+                                collections.find((collection) => collection.handle === 'new-arrivals').products.nodes
+                            }
                         />
                     </div>
                 )}
 
-                {collections.find((collection) => collection.handle === "laptops") && (
+                {collections.find((collection) => collection.handle === 'laptops') && (
                     <div className="collection-section">
                         <div className="collection-header">
                             <h3>Laptops</h3>
@@ -57,15 +56,16 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                             </Link>
                         </div>
                         <ProductRow
-                            products={collections.find((collection) => collection.handle === "laptops")
-                                .products.nodes}
+                            products={
+                                collections.find((collection) => collection.handle === 'laptops').products.nodes
+                            }
                         />
                     </div>
                 )}
 
                 {/* Render remaining rows */}
                 {collections
-                    .filter((collection) => collection.handle !== "new-arrivals" && collection.handle !== "laptops")
+                    .filter((collection) => collection.handle !== 'new-arrivals' && collection.handle !== 'laptops')
                     .map((collection, index) => {
                         // Calculate if this is an image row
                         const isImageRow = index % 3 === 0; // Render image rows first and after every 3 product rows
@@ -90,8 +90,8 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                                                     data={image}
                                                     sizes="(min-width: 45em) 20vw, 40vw"
                                                     srcSet={`${image}?width=300&quality=30 300w,
-                                                 ${image}?width=600&quality=30 600w,
-                                                 ${image}?width=1200&quality=30 1200w`}
+                             ${image}?width=600&quality=30 600w,
+                             ${image}?width=1200&quality=30 1200w`}
                                                     alt={`Image Row ${Math.floor(index / 3) + 1} Image ${i + 1}`}
                                                     width="740px"
                                                     height="300px"
@@ -116,6 +116,21 @@ export function CollectionDisplay({ collections, sliderCollections, images }) {
                     })}
             </>
         </div>
+    );
+}
+
+// Lazy-load the CollectionDisplay component
+const CollectionDisplay = lazy(() => Promise.resolve({ default: CollectionDisplayComponent }));
+
+export default function DeferredCollectionDisplay({ collections, sliderCollections, images }) {
+    return (
+        <Suspense fallback={<div>Loading collections...</div>}>
+            <CollectionDisplay
+                collections={collections}
+                sliderCollections={sliderCollections}
+                images={images}
+            />
+        </Suspense>
     );
 }
 

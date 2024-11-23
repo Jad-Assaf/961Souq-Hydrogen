@@ -1,11 +1,8 @@
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
-import { Await } from '@remix-run/react';
-import { Suspense } from 'react';
-import { CollectionDisplay } from '../components/CollectionDisplay';
+import DeferredCollectionDisplay from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import BrandSection from '~/components/BrandsSection';
-import Placeholder from '~/components/Placeholder'; // New placeholder component for sections
 
 /**
  * @type {MetaFunction}
@@ -17,10 +14,13 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader({ context }) {
-  const menuHandle = 'new-main-menu';
+export async function loader(args) {
+  const criticalData = await loadCriticalData(args);
+  return defer({ ...criticalData });
+}
 
-  // Fetch critical data: Menu and banners
+async function loadCriticalData({ context }) {
+  const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -29,13 +29,15 @@ export async function loader({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  const banners = [
-    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
-    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601' },
-    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718' },
-  ];
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  // Defer non-critical data: collections and brands
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  // Hardcoded handles for product rows.
   const hardcodedHandles = [
     'new-arrivals', 'laptops',
     'apple-macbook', 'apple-iphone', 'apple-accessories',
@@ -45,31 +47,13 @@ export async function loader({ context }) {
     'earbuds', 'speakers', 'surround-systems',
     'desktops', 'pc-parts', 'business-monitors',
     'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
-  const collections = fetchCollectionsByHandles(context, hardcodedHandles);
+  // Fetch collections for product rows.
+  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return defer({
-    menu,
-    banners,
-    collections, // Deferred promise
-    brands: brandsData,
-  });
-}
-
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) {
-      collections.push(collectionByHandle);
-    }
-  }
-  return collections; // Return valid collections
+  return { collections, sliderCollections };
 }
 
 const brandsData = [
@@ -96,8 +80,26 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
 
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
+
 export default function Homepage() {
-  const { menu, banners, collections, brands } = useLoaderData();
+  const { collections, sliderCollections } = useLoaderData();
+
+  const banners = [
+    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
+    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601' },
+    { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718' },
+  ];
 
   const images = [
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
@@ -131,108 +133,91 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-
-      {/* Placeholder for collections */}
-      <div style={{ minHeight: '1000px' }}> {/* Set fixed height to avoid shifting */}
-        <Suspense fallback={<Placeholder title="Collections are loading..." />}>
-          <Await resolve={collections}>
-            {(resolvedCollections) => (
-              <CollectionDisplay
-                collections={resolvedCollections} // Pass resolved collections directly
-                sliderCollections={[]} // Pass sliderCollections if needed
-                images={images}
-              />
-            )}
-          </Await>
-        </Suspense>
-      </div>
-
-      {/* Placeholder for brands */}
-      <div style={{ minHeight: '300px' }}> {/* Set fixed height to avoid shifting */}
-        <Suspense fallback={<Placeholder title="Brands are loading..." />}>
-          <BrandSection brands={brands} />
-        </Suspense>
-      </div>
+      <DeferredCollectionDisplay
+        collections={collections}
+        sliderCollections={sliderCollections}
+        images={images}
+      />
+      <BrandSection brands={brandsData} />
     </div>
   );
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
-  collectionByHandle(handle: $handle) {
-    id
-    title
-    handle
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
       image {
-      url
-      altText
-    }
-    products(first: 15) {
+        url
+        altText
+      }
+      products(first: 15) {
         nodes {
-        id
-        title
-        handle
+          id
+          title
+          handle
           priceRange {
             minVariantPrice {
-            amount
-            currencyCode
+              amount
+              currencyCode
+            }
           }
-        }
           compareAtPriceRange {
             minVariantPrice {
-            amount
-            currencyCode
+              amount
+              currencyCode
+            }
           }
-        }
-        images(first: 1) {
+          images(first: 1) {
             nodes {
-            url
-            altText
+              url
+              altText
+            }
           }
-        }
-        variants(first: 5) {
+          variants(first: 5) {
             nodes {
-            id
-            availableForSale
+              id
+              availableForSale
               price {
-              amount
-              currencyCode
-            }
+                amount
+                currencyCode
+              }
               compareAtPrice {
-              amount
-              currencyCode
-            }
+                amount
+                currencyCode
+              }
               selectedOptions {
-              name
-              value
+                name
+                value
+              }
             }
           }
         }
       }
     }
   }
-}
 `;
 
 export const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
-  menu(handle: $handle) {
+    menu(handle: $handle) {
       items {
-      id
-      title
-      url
-        items {
         id
         title
         url
-          items {
+        items {
           id
           title
           url
+          items {
+            id
+            title
+            url
+          }
         }
       }
     }
   }
-}
 `;
-
