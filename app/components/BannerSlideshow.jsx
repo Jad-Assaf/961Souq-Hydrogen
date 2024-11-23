@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Image } from "@shopify/hydrogen"; // Import Shopify Image component
+import { Image } from "@shopify/hydrogen";
 
 /**
  * BannerSlideshow component that cycles through banners without titles.
  */
-export function BannerSlideshow({ banners, interval = 3000 }) {
+export function BannerSlideshow({ banners, interval = 5000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
@@ -14,7 +14,7 @@ export function BannerSlideshow({ banners, interval = 3000 }) {
             );
         }, interval);
 
-        return () => clearInterval(timer); // Cleanup on unmount
+        return () => clearInterval(timer);
     }, [banners, interval]);
 
     return (
@@ -28,13 +28,13 @@ export function BannerSlideshow({ banners, interval = 3000 }) {
                         <Image
                             data={{
                                 url: banner.imageUrl,
-                                altText: `Banner ${index + 1}` // Add appropriate alt text for accessibility
+                                altText: `Banner ${index + 1}`
                             }}
-                            width="100vw" // Example width for full-width banners
-                            height="auto" // Example height for full-width banners
-                            aspectRatio="16/9" // Aspect ratio for widescreen banners
-                            sizes="(max-width: 768px) 100vw, 1920px" // Responsive sizes
-                            className="banner-image" // Add a class for custom styling if needed
+                            width="100vw"
+                            height="200px"
+                            aspectRatio="16/9"
+                            sizes="(max-width: 768px) 100vw, 1920px"
+                            className="banner-image"
                         />
                     )}
                 </div>
