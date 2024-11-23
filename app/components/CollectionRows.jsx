@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'your-image-component'; // Import your Image component
 import { ProductRow } from './CollectionDisplay';
+import { Link } from '@remix-run/react';
 
 const CollectionRows = ({ collections, images }) => {
     return (
