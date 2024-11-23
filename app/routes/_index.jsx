@@ -1,5 +1,5 @@
 import { defer } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, Await } from '@remix-run/react';
 import { Suspense } from 'react';
 import { CollectionDisplay } from '../components/CollectionDisplay';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -46,12 +46,12 @@ export async function loader({ context }) {
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
   ];
 
-  const deferredCollections = fetchCollectionsByHandles(context, hardcodedHandles);
+  const collections = fetchCollectionsByHandles(context, hardcodedHandles);
 
   return defer({
     menu,
     banners,
-    collections: deferredCollections,
+    collections,
     brands: brandsData,
   });
 }
@@ -67,7 +67,7 @@ async function fetchCollectionsByHandles(context, handles) {
       collections.push(collectionByHandle);
     }
   }
-  return collections.filter(Boolean); // Ensure no invalid entries
+  return collections;
 }
 
 const brandsData = [
@@ -130,7 +130,11 @@ export default function Homepage() {
     <div className="home">
       <BannerSlideshow banners={banners} />
       <Suspense fallback={<div>Loading collections...</div>}>
-        <CollectionDisplay collections={collections} sliderCollections={[]} images={images} />
+        <Await resolve={collections}>
+          {(resolvedCollections) => (
+            <CollectionDisplay collections={resolvedCollections} sliderCollections={[]} images={images} />
+          )}
+        </Await>
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
         <BrandSection brands={brands} />
