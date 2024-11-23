@@ -1,9 +1,9 @@
-import { defer } from '@shopify/remix-oxygen'; 
-import { Await, useLoaderData } from '@remix-run/react'; 
-import { CollectionDisplay } from '../components/CollectionDisplay'; 
-import { BannerSlideshow } from '../components/BannerSlideshow'; 
-import BrandSection from '~/components/BrandsSection'; 
-import { CategorySlider } from '~/components/CollectionSlider'; 
+import { defer } from '@shopify/remix-oxygen';
+import { Await, useLoaderData } from '@remix-run/react';
+import { CollectionDisplay } from '../components/CollectionDisplay';
+import { BannerSlideshow } from '../components/BannerSlideshow';
+import BrandSection from '~/components/BrandsSection';
+import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { Suspense } from 'react';
 
@@ -20,14 +20,12 @@ export const meta = () => {
 export async function loader(args) {
   const criticalData = await loadCriticalData(args);
 
-  // Defer collections for CollectionDisplay and other data
+  // Defer collections for CollectionDisplay and BrandSection
   return defer({
     ...criticalData,
     collections: fetchCollectionsByHandles(args.context, hardcodedHandles), // Deferred collections
   });
 }
-
-
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
@@ -49,14 +47,14 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -103,7 +101,8 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { collections, sliderCollections } = useLoaderData();
+  const loaderData = useLoaderData();
+  const collectionsPromise = loaderData.collections; // Defer collections
 
   const banners = [
     { imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476' },
@@ -154,7 +153,7 @@ export default function Homepage() {
 
       {/* Deferred CollectionDisplay */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <Await resolve={collections}>
+        <Await resolve={collectionsPromise}>
           {(resolvedCollections) => (
             <CollectionDisplay collections={resolvedCollections} images={images} />
           )}
