@@ -26,19 +26,19 @@ const CollectionRows = ({ collections, images }) => {
                                             animate={{ opacity: 1, scale: 1 }}
                                             transition={{ delay: i * 0.1 + 0.2 }}
                                             className="row-image"
-                                            width="740px"
-                                            height="300px"
                                         >
-                                            <Image
-                                                data={image}
-                                                sizes="(min-width: 45em) 20vw, 40vw"
-                                                srcSet={`${image}?width=300&quality=30 300w,
-                                                         ${image}?width=600&quality=30 600w,
-                                                         ${image}?width=1200&quality=30 1200w`}
-                                                alt={`Image Row ${Math.floor(index / 3) + 1} Image ${i + 1}`}
-                                                width="740px"
-                                                height="300px"
-                                            />
+                                            <a href={image.link} target="_self" rel="noopener noreferrer">
+                                                <Image
+                                                    data={{
+                                                        url: image.src, // Ensure the `src` field contains the image URL
+                                                        altText: `Image Row ${Math.floor(index / 3) + 1} Image ${i + 1}`,
+                                                    }}
+                                                    sizes="(min-width: 45em) 20vw, 40vw"
+                                                    width="740px"
+                                                    height="300px"
+                                                    className="image-row-item"
+                                                />
+                                            </a>
                                         </motion.div>
                                     ))}
                                 </div>
