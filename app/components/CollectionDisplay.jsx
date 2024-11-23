@@ -5,7 +5,6 @@ import { motion, useInView } from 'framer-motion';
 import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
-import { CategorySlider } from './CollectionSlider';
 
 const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load the CollectionRows component
 
@@ -23,8 +22,6 @@ export function truncateText(text, maxWords) {
 export const CollectionDisplay = ({ collections, sliderCollections, images }) => {
     return (
         <div className="collections-container">
-            {/* Slide container using 'new-main-menu' handles */}
-            <CategorySlider sliderCollections={sliderCollections} />
 
             {/* Product rows using hardcoded handles */}
             <>
