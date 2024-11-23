@@ -6,6 +6,7 @@ import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
+import { DelayedFallback } from '~/components/DelayedFallback';
 
 /**
  * @type {MetaFunction}
@@ -57,14 +58,14 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -210,7 +211,7 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-    
+
   ];
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
@@ -226,11 +227,15 @@ export default function Homepage() {
         </>
       </div>
       {/* Defer these sections */}
-      <Suspense fallback={<div>Loading collections...</div>}>
+      <Suspense fallback={<DelayedFallback delay={2000}>
+        <div>Loading collections...</div>
+      </DelayedFallback>}>
         <DeferredCollectionDisplay collections={collections} images={images} />
       </Suspense>
 
-      <Suspense fallback={<div>Loading brands...</div>}>
+      <Suspense fallback={<DelayedFallback delay={3000}>
+        <div>Loading collections...</div>
+      </DelayedFallback>}>
         <DeferredBrandSection brands={brandsData} />
       </Suspense>
     </div>
@@ -245,6 +250,7 @@ function DeferredCollectionDisplay({ collections, images }) {
 function DeferredBrandSection({ brands }) {
   return <BrandSection brands={brands} />;
 }
+
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
