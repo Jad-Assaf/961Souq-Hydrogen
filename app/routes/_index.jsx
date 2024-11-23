@@ -17,19 +17,7 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader({ context }) {
-  const menuHandle = 'new-main-menu';
-
-  // Load the critical data first (menu and banner)
-  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-    variables: { handle: menuHandle },
-  });
-
-  if (!menu) {
-    throw new Response('Menu not found', { status: 404 });
-  }
-
-  // Load banner data (hardcoded or fetched from the server)
+export async function loader(args) {
   const banners = [
     {
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
@@ -45,25 +33,45 @@ export async function loader({ context }) {
     },
   ];
 
-  // Defer the rest of the data (collections and sliderCollections)
-  const deferredData = defer({
-    collections: fetchCollectionsByHandles(context, [
-      'new-arrivals', 'laptops',
-      'apple-macbook', 'apple-iphone', 'apple-accessories',
-      'gaming-laptops', 'gaming-consoles', 'console-games',
-      'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-      'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-      'earbuds', 'speakers', 'surround-systems',
-      'desktops', 'pc-parts', 'business-monitors',
-      'action-cameras', 'cameras', 'surveillance-cameras',
-      'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
-    ]),
-    sliderCollections: fetchCollectionsByHandles(context, menu.items.map(item =>
-      item.title.toLowerCase().replace(/\s+/g, '-')
-    )),
+  const criticalData = await loadCriticalData(args);
+  return defer({ ...criticalData, banners });
+}
+
+async function loadCriticalData({ context }) {
+  const menuHandle = 'new-main-menu';
+  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+    variables: { handle: menuHandle },
   });
 
-  return { menu, banners, ...deferredData };
+  if (!menu) {
+    throw new Response('Menu not found', { status: 404 });
+  }
+
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
+
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  // Hardcoded handles for product rows.
+  const hardcodedHandles = [
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+  ];
+
+  // Fetch collections for product rows.
+  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+
+  return { collections, sliderCollections };
 }
 
 const brandsData = [
@@ -103,7 +111,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { menu, banners, collections, sliderCollections } = useLoaderData();
+  const { collections, sliderCollections } = useLoaderData();
 
   const images = [
     {
@@ -202,32 +210,24 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-
+    
   ];
 
-  const newArrivalsCollection =
-    collections && collections.find((collection) => collection.handle === "new-arrivals");
+  const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
 
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      {/* Safely render the CategorySlider and defer other content */}
-      {sliderCollections && (
-        <Suspense fallback={<div>Loading slider collections...</div>}>
-          <CategorySlider sliderCollections={sliderCollections} />
-        </Suspense>
-      )}
-
+      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
       <div className="collections-container">
-        {newArrivalsCollection ? (
-          <TopProductSections collection={newArrivalsCollection} />
-        ) : (
-          <div>Loading new arrivals...</div>
-        )}
+        <>
+          {/* Render "New Arrivals" and "Laptops" rows at the start */}
+          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+        </>
       </div>
-
+      {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections || []} images={images} />
+        <DeferredCollectionDisplay collections={collections} images={images} />
       </Suspense>
 
       <Suspense fallback={<div>Loading brands...</div>}>
