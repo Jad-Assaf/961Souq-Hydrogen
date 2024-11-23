@@ -19,15 +19,15 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
-export const CollectionDisplay = ({ collections, images }) => {
+export const CollectionDisplay = React.memo(({ collections, images }) => {
     return (
         <div className="collections-container">
-                <Suspense fallback={<div>Loading collections...</div>}>
-                    <CollectionRows collections={collections} images={images} />
-                </Suspense>
+            <Suspense fallback={<div>Loading collections...</div>}>
+                <CollectionRows collections={collections} images={images} />
+            </Suspense>
         </div>
     );
-};
+});
 
 export function ProductRow({ products }) {
     const rowRef = useRef(null);
