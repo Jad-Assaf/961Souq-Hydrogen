@@ -265,6 +265,14 @@ async function regularSearch({ request, context }) {
     },
   });
 
+  console.log(SEARCH_QUERY, {
+    variables: {
+      ...variables,
+      term,
+      filters: filters.length ? filters : undefined,
+    },
+  });
+
   if (!items) {
     throw new Error('No search data returned from Shopify API');
   }
