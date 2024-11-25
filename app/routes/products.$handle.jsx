@@ -17,6 +17,7 @@ import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 import { ProductMetafields } from '~/components/Metafields';
+import RecentlyViewedProducts from '~/components/RecentlyViewed';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -125,6 +126,18 @@ export default function Product() {
 
   const hasDiscount = selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
+
+  useEffect(() => {
+    const saved = localStorage.getItem('recentlyViewed');
+    const recentlyViewed = saved ? JSON.parse(saved) : [];
+
+    // Add the current product ID to the recently viewed list
+    if (!recentlyViewed.includes(product.id)) {
+      const updatedRecentlyViewed = [product.id, ...recentlyViewed].slice(0, 10); // Limit to 10 products
+      localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecentlyViewed));
+    }
+  }, [product.id]);
+
 
   return (
     <div className="product">
@@ -314,7 +327,19 @@ export default function Product() {
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
-
+      <div className="product">
+        {/* Existing product details */}
+        <div className="related-products-row">
+          <div className="related-products">
+            <h2>Related Products</h2>
+            <RelatedProductsRow products={relatedProducts || []} />
+          </div>
+        </div>
+        {/* Recently Viewed Products Section */}
+        <div className="recently-viewed-products">
+          <RecentlyViewedProducts />
+        </div>
+      </div>
     </div >
   );
 }

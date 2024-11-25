@@ -1,70 +1,82 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function RecentlyViewedProducts({ storefront, recentlyViewedIds }) {
-    const [products, setProducts] = useState([]);
+function RecentlyViewedProducts() {
+    const [recentlyViewed, setRecentlyViewed] = useState(() => {
+        // Get the initial state from localStorage
+        const saved = localStorage.getItem('recentlyViewed');
+        return saved ? JSON.parse(saved) : [];
+    });
 
+    const [productData, setProductData] = useState([]);
+
+    // Fetch product details for recently viewed products
     useEffect(() => {
-        if (recentlyViewedIds.length > 0) {
-            const fetchProducts = async () => {
-                const query = `#graphql
-          query getRecentlyViewedProducts($ids: [ID!]!) {
-            nodes(ids: $ids) {
-              ... on Product {
-                id
-                title
-                handle
-                images(first: 1) {
-                  edges {
-                    node {
-                      src
-                      altText
+        async function fetchProducts() {
+            if (recentlyViewed.length > 0) {
+                const promises = recentlyViewed.map(async (id) => {
+                    const response = await fetch(`/api/graphql`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: `
+                query GetProductDetails($id: ID!) {
+                  product(id: $id) {
+                    id
+                    title
+                    description
+                    images(first: 1) {
+                      edges {
+                        node {
+                          src
+                        }
+                      }
                     }
                   }
                 }
-                priceRange {
-                  minVariantPrice {
-                    amount
-                    currencyCode
-                  }
-                }
-              }
-            }
-          }
-        `;
+              `,
+                            variables: { id },
+                        }),
+                    });
 
-                const response = await storefront.query(query, {
-                    variables: { ids: recentlyViewedIds },
+                    const result = await response.json();
+                    return result.data.product;
                 });
 
-                setProducts(response.nodes || []);
-            };
-
-            fetchProducts();
+                const products = await Promise.all(promises);
+                setProductData(products);
+            }
         }
-    }, [recentlyViewedIds, storefront]);
 
-    if (!products || products.length === 0) return null;
+        fetchProducts();
+    }, [recentlyViewed]);
+
+    useEffect(() => {
+        // Save the state to localStorage whenever it changes
+        localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+    }, [recentlyViewed]);
 
     return (
-        <div className="recently-viewed-products">
+        <div>
             <h2>Recently Viewed Products</h2>
-            <div className="products-grid">
-                {products.map((product) => (
-                    <div key={product.id} className="product-card">
-                        <img
-                            src={product.images.edges[0]?.node.src}
-                            alt={product.images.edges[0]?.node.altText || product.title}
-                        />
-                        <h3>{product.title}</h3>
-                        <p>
-                            {new Intl.NumberFormat('en-US', {
-                                style: 'currency',
-                                currency: product.priceRange.minVariantPrice.currencyCode,
-                            }).format(product.priceRange.minVariantPrice.amount)}
-                        </p>
-                    </div>
-                ))}
-            </div>
+            {productData.length > 0 ? (
+                <div style={{ display: 'flex', gap: '16px' }}>
+                    {productData.map((product) => (
+                        <div key={product.id} style={{ border: '1px solid #ddd', padding: '8px' }}>
+                            <img
+                                src={product.images.edges[0]?.node.src}
+                                alt={product.title}
+                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                            />
+                            <h3>{product.title}</h3>
+                            <p>{product.description}</p>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p>No recently viewed products.</p>
+            )}
         </div>
     );
 }
