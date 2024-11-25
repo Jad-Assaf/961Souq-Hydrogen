@@ -364,6 +364,10 @@ export default function Collection() {
             )}
           </PaginatedResourceSection>
         </div>
+        <div className='recently-viewed-container'>
+          <h2>Recently Viewed Products</h2>
+          <RecentlyViewedProducts currentProductId={product.id} />
+        </div>
       </div>
 
       <Analytics.CollectionView
@@ -374,10 +378,6 @@ export default function Collection() {
           },
         }}
       />
-      <div className='recently-viewed-container'>
-        <h2>Recently Viewed Products</h2>
-        <RecentlyViewedProducts currentProductId={product.id} />
-      </div>
     </div>
   );
 }
