@@ -102,11 +102,11 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
-      {isDesktop && result && result.items?.filters && (
+      {isDesktop && result && result.items?.filters && result.items.filters.length > 0 && (
         <div className="filters-container">
           <FiltersDrawer
             filters={result.items.filters}
-            appliedFilters={result.appliedFilters}
+            appliedFilters={result.appliedFilters || []}
             onRemoveFilter={handleFilterRemove}
           />
         </div>
@@ -128,7 +128,11 @@ export default function SearchPage() {
           <SearchResults result={result} term={term}>
             {({ articles, pages, products, term }) => (
               <div>
-                <SearchResults.Products products={products} term={term} />
+                {products?.nodes?.length > 0 ? (
+                  <SearchResults.Products products={products} term={term} />
+                ) : (
+                  <p>No products found for "{term}".</p>
+                )}
               </div>
             )}
           </SearchResults>
