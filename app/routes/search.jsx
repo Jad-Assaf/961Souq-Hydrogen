@@ -1,5 +1,5 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useSearchParams } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
@@ -19,9 +19,10 @@ export const meta = () => {
 export async function loader({ request, context }) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
+  const sort = url.searchParams.get('sort') || 'relevance'; // Get sort parameter
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+    : regularSearch({ request, context, sort }); // Pass sort parameter to regularSearch
 
   searchPromise.catch((error) => {
     console.error(error);
@@ -37,6 +38,7 @@ export async function loader({ request, context }) {
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
   const formRef = useRef(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -45,15 +47,31 @@ export default function SearchPage() {
     if (searchInput) {
       const query = searchInput.value;
       const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-      
+
       // Redirect with modified query
       window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
   };
 
+  const handleSortChange = (event) => {
+    const newSort = event.target.value;
+    searchParams.set('sort', newSort);
+    setSearchParams(searchParams); // Update search params to trigger a new search
+  };
+
   return (
     <div className="search">
       <h1>Search Results</h1>
+      <div>
+        <label htmlFor="sort">Sort by: </label>
+        <select id="sort" onChange={handleSortChange} value={searchParams.get('sort') || 'relevance'}>
+          <option value="relevance">Relevance</option>
+          <option value="price-low-high">Price: Low to High</option>
+          <option value="price-high-low">Price: High to Low</option>
+          <option value="best-selling">Best Selling</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
       {!term || !result?.total ? (
         <SearchResults.Empty />
       ) : (
@@ -76,76 +94,7 @@ export default function SearchPage() {
  * Regular search query and fragments
  * (adjust as needed)
  */
-const SEARCH_PRODUCT_FRAGMENT = `#graphql
-  fragment SearchProduct on Product {
-    __typename
-    handle
-    id
-    publishedAt
-    title
-    trackingParameters
-    vendor
-    variants(first: 1) {
-      nodes {
-        id
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-        selectedOptions {
-          name
-          value
-        }
-        product {
-          handle
-          title
-        }
-      }
-    }
-  }
-`;
-
-const SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment SearchPage on Page {
-     __typename
-     handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment SearchArticle on Article {
-    __typename
-    handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const PAGE_INFO_FRAGMENT = `#graphql
-  fragment PageInfoFragment on PageInfo {
-    hasNextPage
-    hasPreviousPage
-    startCursor
-    endCursor
-  }
-`;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-export const SEARCH_QUERY = `#graphql
+const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
     $endCursor: String
@@ -153,6 +102,8 @@ export const SEARCH_QUERY = `#graphql
     $language: LanguageCode
     $last: Int
     $term: String!
+    $sortKey: ProductSortKeys // Add sortKey
+    $reverse: Boolean // Add reverse
     $startCursor: String
   ) @inContext(country: $country, language: $language) {
     articles: search(
@@ -183,7 +134,8 @@ export const SEARCH_QUERY = `#graphql
       first: $first,
       last: $last,
       query: $term,
-      sortKey: RELEVANCE,
+      sortKey: $sortKey, // Use sortKey from parameters
+      reverse: $reverse, // Use reverse from parameters
       types: [PRODUCT],
       unavailableProducts: HIDE,
     ) {
@@ -211,15 +163,40 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context }) {
+async function regularSearch({ request, context, sort }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
+  // Determine sortKey and reverse based on sort parameter
+  let sortKey;
+  let reverse = false;
+
+  switch (sort) {
+    case 'price-low-high':
+      sortKey = 'PRICE';
+      break;
+    case 'price-high-low':
+      sortKey = 'PRICE';
+      reverse = true;
+      break;
+    case 'best-selling':
+      sortKey = 'BEST_SELLING';
+      break;
+    case 'newest':
+      sortKey = 'CREATED';
+      reverse = true;
+      break;
+    case 'relevance':
+    default:
+      sortKey = 'RELEVANCE';
+      break;
+  }
+
   // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
+    variables: { ...variables, term, sortKey, reverse },
   });
 
   if (!items) {
