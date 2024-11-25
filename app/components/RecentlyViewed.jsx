@@ -1,12 +1,10 @@
+// RecentlyViewedProducts.jsx
+
 import React, { useEffect, useState } from 'react';
-import { Link, useFetcher } from '@remix-run/react';
-import { useShop } from '@shopify/hydrogen';
-import { json } from '@shopify/remix-oxygen';
+import { Link } from '@remix-run/react';
 
 export default function RecentlyViewedProducts({ currentProductId }) {
     const [products, setProducts] = useState([]);
-    const { storeDomain, storefrontApiVersion } = useShop();
-    const fetcher = useFetcher();
 
     useEffect(() => {
         // Update the viewed products list in localStorage
@@ -36,15 +34,55 @@ export default function RecentlyViewedProducts({ currentProductId }) {
 
         // Fetch product data if there are any viewed products
         if (productIds.length > 0) {
-            fetcher.load(`/products/${currentProductId}?index&ids=${productIds.join(',')}`);
+            fetchProducts(productIds).then((fetchedProducts) => {
+                setProducts(fetchedProducts);
+            });
         }
     }, [currentProductId]);
 
-    useEffect(() => {
-        if (fetcher.data && fetcher.data.products) {
-            setProducts(fetcher.data.products);
+    // Function to fetch products from the Shopify Storefront API
+    async function fetchProducts(productIds) {
+        const storefrontAccessToken = 'YOUR_STOREFRONT_ACCESS_TOKEN';
+        const shopDomain = 'YOUR_SHOPIFY_SHOP_DOMAIN';
+
+        const query = `
+      query getProductsByIds($ids: [ID!]!) {
+        nodes(ids: $ids) {
+          ... on Product {
+            id
+            title
+            handle
+            featuredImage {
+              url
+              altText
+            }
+            priceRange {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+          }
         }
-    }, [fetcher.data]);
+      }
+    `;
+
+        const response = await fetch(`https://${shopDomain}/api/2023-07/graphql.json`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Shopify-Storefront-Access-Token': storefrontAccessToken,
+            },
+            body: JSON.stringify({
+                query,
+                variables: { ids: productIds },
+            }),
+        });
+
+        const jsonResponse = await response.json();
+        const products = jsonResponse.data.nodes.filter((node) => node !== null);
+        return products;
+    }
 
     if (products.length === 0) {
         return null; // Don't render the component if there are no recently viewed products
@@ -81,46 +119,4 @@ function ProductCard({ product }) {
             </Link>
         </div>
     );
-}
-
-// API Route Handler
-export async function action({ request, context }) {
-    const { storefront } = context;
-    const url = new URL(request.url);
-    const idsParam = url.searchParams.get('ids');
-
-    if (!idsParam) {
-        return json({ products: [] });
-    }
-
-    const ids = idsParam.split(',');
-
-    const query = `
-    query getProductsByIds($ids: [ID!]!) {
-      nodes(ids: $ids) {
-        ... on Product {
-          id
-          title
-          handle
-          featuredImage {
-            url
-            altText
-          }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-        }
-      }
-    }
-  `;
-
-    const data = await storefront.query(query, { variables: { ids } });
-
-    // Extract products from the data
-    const products = data.nodes.filter((node) => node !== null);
-
-    return json({ products });
 }
