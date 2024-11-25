@@ -19,37 +19,9 @@ export const meta = () => {
 export async function loader({ request, context }) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
-  const sort = url.searchParams.get('sort') || 'relevance'; // Default to 'relevance'
-
-  // Initialize variables for sortKey and reverse
-  let sortKey;
-  let reverse = false;
-
-  // Map sort values to Shopify's sortKey and reverse
-  switch (sort) {
-    case 'price-low-high':
-      sortKey = 'PRICE';
-      break;
-    case 'price-high-low':
-      sortKey = 'PRICE';
-      reverse = true;
-      break;
-    case 'best-selling':
-      sortKey = 'BEST_SELLING';
-      break;
-    case 'newest':
-      sortKey = 'CREATED';
-      reverse = true;
-      break;
-    case 'featured':
-    default:
-      sortKey = 'RELEVANCE'; // Default sort
-      break;
-  }
-
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, sortKey, reverse });
+    : regularSearch({ request, context });
 
   searchPromise.catch((error) => {
     console.error(error);
@@ -62,40 +34,54 @@ export async function loader({ request, context }) {
 /**
  * Renders the /search route
  */
+const SORT_OPTIONS = {
+  RELEVANCE: { label: 'Relevance', sortKey: 'RELEVANCE', reverse: false },
+  TITLE_ASC: { label: 'Title (A-Z)', sortKey: 'TITLE', reverse: false },
+  TITLE_DESC: { label: 'Title (Z-A)', sortKey: 'TITLE', reverse: true },
+  CREATED_AT_ASC: { label: 'Date (Oldest)', sortKey: 'CREATED_AT', reverse: false },
+  CREATED_AT_DESC: { label: 'Date (Newest)', sortKey: 'CREATED_AT', reverse: true },
+};
+
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { term, result } = useLoaderData();
   const formRef = useRef(null);
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
+  const handleSortChange = (event) => {
+    const selectedSort = SORT_OPTIONS[event.target.value];
+    const searchParams = new URLSearchParams(window.location.search);
 
-    const searchInput = formRef.current.querySelector('input[name="q"]');
-    if (searchInput) {
-      const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-
-      // Redirect with modified query
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
-    }
+    searchParams.set('sortKey', selectedSort.sortKey);
+    searchParams.set('reverse', selectedSort.reverse);
+    window.location.search = searchParams.toString();
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
+
+      {/* Sorting Dropdown */}
+      <select onChange={handleSortChange} defaultValue="RELEVANCE">
+        {Object.keys(SORT_OPTIONS).map((key) => (
+          <option key={key} value={key}>
+            {SORT_OPTIONS[key].label}
+          </option>
+        ))}
+      </select>
+
       {!term || !result?.total ? (
-        <SearchResults.Empty />
+        <p>No results found.</p>
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
-            </div>
-          )}
-        </SearchResults>
+        <div>
+          <p>Found {result.total} results for "{term}"</p>
+          <ul>
+            {result.items.products?.nodes.map((product) => (
+              <li key={product.id}>
+                {product.title} - {product.vendor}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
@@ -156,7 +142,8 @@ const SEARCH_PAGE_FRAGMENT = `#graphql
 const SEARCH_ARTICLE_FRAGMENT = `#graphql
   fragment SearchArticle on Article {
     __typename
-    handle id
+    handle
+    id
     title
     trackingParameters
   }
@@ -181,8 +168,6 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
-    $sortKey: ProductSortKeys
-    $reverse: Boolean
   ) @inContext(country: $country, language: $language) {
     articles: search(
       query: $term,
@@ -241,11 +226,13 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, sortKey, reverse }) {
+async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
+  const sortKey = url.searchParams.get('sortKey') || 'RELEVANCE';
+  const reverse = url.searchParams.get('reverse') === 'true';
 
   // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
@@ -360,7 +347,7 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
     $country: CountryCode
- $language: LanguageCode
+    $language: LanguageCode
     $limit: Int!
     $limitScope: PredictiveSearchLimitScope!
     $term: String!
@@ -418,6 +405,7 @@ async function predictiveSearch({ request, context }) {
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
+        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term,
