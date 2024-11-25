@@ -40,11 +40,11 @@ export async function loader({ request, context }) {
     },
   });
 
-  if (!searchResults) {
+  if (!searchResults || !searchResults.products) {
     throw redirect('/search');
   }
 
-  return defer({ searchResults });
+  return defer({ searchResults: searchResults.products });
 }
 
 /**
@@ -65,8 +65,8 @@ export default function SearchPage() {
     navigate(newUrl);
   };
 
-  // Filter products based on applied filters
-  const filteredProducts = searchResults.nodes.filter(product => {
+  // Ensure searchResults.nodes is defined before filtering
+  const filteredProducts = (searchResults.nodes || []).filter(product => {
     return filters.every(filter => {
       // Example filter logic; adjust according to your filter structure
       return product.variants.some(variant => variant.availableForSale); // Example: check if any variant is available
@@ -77,8 +77,8 @@ export default function SearchPage() {
   const sortedProducts = React.useMemo(() => {
     return filteredProducts.sort((a, b) => {
       // Implement sorting logic based on your requirements
-      const aPrice = a.variants[0].price.amount;
-      const bPrice = b.variants[0].price.amount;
+      const aPrice = a.variants[0]?.price.amount || 0;
+      const bPrice = b.variants[0]?.price.amount || 0;
       return aPrice - bPrice; // Sort by price low to high
     });
   }, [filteredProducts]);
@@ -201,37 +201,7 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
   }
 `;
 
-const SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment SearchPage on Page {
-     __typename
-     handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment SearchArticle on Article {
-    __typename
-    handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const PAGE_INFO_FRAGMENT = `#graphql
-  fragment PageInfoFragment on PageInfo {
-    hasNextPage
-    hasPreviousPage
-    startCursor
-    endCursor
-  }
-`;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-export const SEARCH_QUERY = `#graphql
+const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
     $endCursor: String
@@ -245,29 +215,7 @@ export const SEARCH_QUERY = `#graphql
     $reverse: Boolean,
     $after: String,
   ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
-    products(first: $first, after: $after, query: $query, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
+    products(first: $first, after: $after, query: $term, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
       nodes {
         id
         title
@@ -292,9 +240,6 @@ export const SEARCH_QUERY = `#graphql
     }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
-  ${SEARCH_PAGE_FRAGMENT}
-  ${SEARCH_ARTICLE_FRAGMENT}
-  ${PAGE_INFO_FRAGMENT}
 `;
 
 /**
