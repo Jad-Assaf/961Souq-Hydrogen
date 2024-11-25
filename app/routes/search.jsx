@@ -212,7 +212,6 @@ const PAGE_INFO_FRAGMENT = `#graphql
 `;
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-// Modified SEARCH_QUERY to include filters
 export const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
@@ -223,36 +222,6 @@ export const SEARCH_QUERY = `#graphql
     $term: String!
     $startCursor: String
   ) @inContext(country: $country, language: $language) {
-    products: search(
-      after: $endCursor,
-      before: $startCursor,
-      first: $first,
-      last: $last,
-      query: $term,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
-    ) {
-      nodes {
-        ...on Product {
-          ...SearchProduct
-        }
-      }
-      pageInfo {
-        ...PageInfoFragment
-      }
-      filters {
-        id
-        label
-        type
-        values {
-          id
-          label
-          count
-          input
-        }
-      }
-    }
     articles: search(
       query: $term,
       types: [ARTICLE],
@@ -275,6 +244,25 @@ export const SEARCH_QUERY = `#graphql
         }
       }
     }
+    products: search(
+      after: $endCursor,
+      before: $startCursor,
+      first: $first,
+      last: $last,
+      query: $term,
+      sortKey: RELEVANCE,
+      types: [PRODUCT],
+      unavailableProducts: HIDE,
+    ) {
+      nodes {
+        ...on Product {
+          ...SearchProduct
+        }
+      }
+      pageInfo {
+        ...PageInfoFragment
+      }
+    }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
   ${SEARCH_PAGE_FRAGMENT}
@@ -282,7 +270,14 @@ export const SEARCH_QUERY = `#graphql
   ${PAGE_INFO_FRAGMENT}
 `;
 
-// Modified `regularSearch` function
+/**
+ * Regular search fetcher
+ * @param {Pick<
+ *   LoaderFunctionArgs,
+ *   'request' | 'context'
+ * >}
+ * @return {Promise<RegularSearchReturn>}
+ */
 async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
@@ -298,9 +293,9 @@ async function regularSearch({ request, context }) {
     throw new Error('No search data returned from Shopify API');
   }
 
-  const total = (products.nodes?.length || 0) +
-    (articles.nodes?.length || 0) +
-    (pages.nodes?.length || 0);
+  const total = (products.nodes?.length || 0) + 
+                (articles.nodes?.length || 0) + 
+                (pages.nodes?.length || 0);
 
   const error = errors
     ? errors.map(({ message }) => message).join(', ')
@@ -320,41 +315,6 @@ async function regularSearch({ request, context }) {
       },
     },
   };
-}
-
-/**
- * Regular search fetcher
- * @param {Pick<
- *   LoaderFunctionArgs,
- *   'request' | 'context'
- * >}
- * @return {Promise<RegularSearchReturn>}
- */
-async function regularSearch({ request, context }) {
-  const { storefront } = context;
-  const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 24 });
-  const term = String(url.searchParams.get('q') || '');
-
-  // Search articles, pages, and products for the `q` term
-  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
-  });
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, { nodes }) => acc + nodes.length,
-    0,
-  );
-
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
-
-  return { type: 'regular', term, error, result: { total, items } };
 }
 
 /**
