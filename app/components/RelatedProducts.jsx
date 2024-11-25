@@ -32,7 +32,6 @@ export default function RelatedProductsRow({ products }) {
 
     return (
         <div className="collection-section">
-            <h3>Related Products</h3>
             <div className="product-row-container">
                 <button className="home-prev-button" onClick={() => scrollRow(-600)}>
                     <LeftArrowIcon />

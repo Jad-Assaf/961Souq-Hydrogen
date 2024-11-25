@@ -315,7 +315,10 @@ export default function Product() {
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
-      <RecentlyViewedProducts currentProductId={product.id} />
+      <div className='recently-viewed-container'>
+        <h2>Recently Viewed Products</h2>
+        <RecentlyViewedProducts currentProductId={product.id} />
+      </div>
     </div >
   );
 }
