@@ -1,7 +1,7 @@
-// RecentlyViewedProducts.jsx
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
+import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
+import { motion, useInView } from 'framer-motion';
 
 export default function RecentlyViewedProducts({ currentProductId }) {
     const [products, setProducts] = useState([]);
@@ -18,7 +18,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
             viewedProducts.unshift(currentProductId);
 
             // Limit the array to the last 5 viewed products
-            viewedProducts = viewedProducts.slice(0, 5);
+            viewedProducts = viewedProducts.slice(0, 10);
 
             // Save back to localStorage
             localStorage.setItem('viewedProducts', JSON.stringify(viewedProducts));
@@ -96,34 +96,97 @@ export default function RecentlyViewedProducts({ currentProductId }) {
     }
 
     return (
-        <div className="recently-viewed-products">
-            <h2>Recently Viewed Products</h2>
-            <div className="product-grid">
-                {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                ))}
+        <div className="collection-section">
+            <h3>Recently Viewed Products</h3>
+            <div className="product-row-container">
+                <button className="home-prev-button" onClick={() => scrollRow(-600)}>
+                    <LeftArrowIcon />
+                </button>
+                <div
+                    className="collection-products-row"
+                    ref={rowRef}
+                    onMouseDown={handleMouseDown}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                >
+                    {products.map((product, index) => (
+                        <RecentlyViewedProductItem key={product.id} product={product} index={index} />
+                    ))}
+                </div>
+                <button className="home-next-button" onClick={() => scrollRow(600)}>
+                    <RightArrowIcon />
+                </button>
             </div>
         </div>
     );
 }
 
-// Simple ProductCard component included in the same file
-function ProductCard({ product }) {
+function RecentlyViewedProductItem({ product, index }) {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
+
     return (
-        <div className="product-card">
-            <Link to={`/products/${product.handle}`}>
-                {product.featuredImage && (
-                    <img
-                        src={product.featuredImage.url}
+        <motion.div
+            ref={ref}
+            initial={{ opacity: 0, x: -20 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ delay: index * 0.01, duration: 0.5 }}
+            className="product-item"
+        >
+            <motion.div
+                initial={{ filter: 'blur(10px)', opacity: 0 }}
+                animate={{ filter: 'blur(0px)', opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="product-card"
+            >
+                <Link to={`/products/${product.handle}`}>
+                    <Image
+                        data={product.featuredImage}
+                        aspectRatio="1/1"
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+                                 ${product.featuredImage.url}?width=600&quality=30 600w,
+                                 ${product.featuredImage.url}?width=1200&quality=30 1200w`}
                         alt={product.featuredImage.altText || product.title}
+                        width="150px"
+                        height="150px"
                     />
-                )}
-                <h3>{product.title}</h3>
-                <p>
-                    {product.priceRange.minVariantPrice.amount}{' '}
-                    {product.priceRange.minVariantPrice.currencyCode}
-                </p>
-            </Link>
-        </div>
+                    <div className="product-title">{product.title}</div>
+                    <div className="product-price">
+                        {product.priceRange.minVariantPrice.amount}{' '}
+                        {product.priceRange.minVariantPrice.currencyCode}
+                    </div>
+                </Link>
+            </motion.div>
+        </motion.div>
     );
 }
+
+const LeftArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+);
+
+const RightArrowIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);
