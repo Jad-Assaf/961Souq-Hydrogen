@@ -319,7 +319,6 @@ export default function Product() {
         <h2>Recently Viewed Products</h2>
         <RecentlyViewedProducts />
       </div>
-
     </div >
   );
 }

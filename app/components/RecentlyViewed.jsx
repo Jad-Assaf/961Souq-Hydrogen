@@ -1,103 +1,107 @@
-import React, { useState, useEffect } from 'react';
+// RecentlyViewed.jsx
+import React, { useEffect, useState } from 'react';
+import { Link } from '@remix-run/react';
+import { Money } from '@shopify/hydrogen';
 
-function RecentlyViewedProducts() {
-    const [recentlyViewed, setRecentlyViewed] = useState(() => {
-        const saved = localStorage.getItem('recentlyViewed');
-        return saved ? JSON.parse(saved) : [];
-    });
+const RECENTLY_VIEWED_QUERY = `#graphql
+  query RecentlyViewed($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on Product {
+        id
+        title
+        handle
+        images(first: 1) {
+          edges {
+            node {
+              url
+              altText
+            }
+          }
+        }
+        variants(first: 1) {
+          nodes {
+            price {
+              amount
+              currencyCode
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
+const RecentlyViewedProducts = () => {
+    const [recentlyViewed, setRecentlyViewed] = useState([]);
     const [productData, setProductData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchProducts() {
-            try {
-                if (recentlyViewed.length > 0) {
-                    setLoading(true);
-                    const unfetchedIds = recentlyViewed.filter(
-                        (id) => !productData.find((product) => product.id === id)
-                    );
+        const products = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+        setRecentlyViewed(products);
+    }, []);
 
-                    if (unfetchedIds.length === 0) {
-                        setLoading(false);
-                        return;
-                    }
-
-                    const promises = unfetchedIds.map(async (id) => {
-                        const response = await fetch(`/api/graphql`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                query: `
-                                query GetProductDetails($id: ID!) {
-                                  product(id: $id) {
-                                    id
-                                    title
-                                    description
-                                    images(first: 1) {
-                                      edges {
-                                        node {
-                                          src
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              `,
-                                variables: { id },
-                            }),
-                        });
-
-                        if (!response.ok) {
-                            console.error(`Failed to fetch product ${id}: ${response.statusText}`);
-                            return null;
-                        }
-
-                        const result = await response.json();
-                        return result.data.product;
+    useEffect(() => {
+        const fetchProducts = async () => {
+            if (recentlyViewed.length > 0) {
+                const productIds = recentlyViewed.map(product => product.id);
+                try {
+                    const response = await fetch('/api/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: RECENTLY_VIEWED_QUERY,
+                            variables: { ids: productIds },
+                        }),
                     });
 
-                    const products = await Promise.all(promises);
-                    setProductData((prev) => [...prev, ...products.filter((p) => p)]);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const { data } = await response.json();
+                    setProductData(data.nodes);
+                } catch (error) {
+                    console.error('Error fetching recently viewed products:', error);
+                } finally {
+                    setLoading(false);
                 }
-            } catch (error) {
-                console.error('Error fetching recently viewed products:', error);
-            } finally {
+            } else {
                 setLoading(false);
             }
-        }
+        };
 
         fetchProducts();
     }, [recentlyViewed]);
 
+    if (loading) {
+        return <p>Loading recently viewed products...</p>;
+    }
+
     return (
-        <div>
+        <div className="recently-viewed">
             <h2>Recently Viewed Products</h2>
-            {loading ? (
-                <p>Loading recently viewed products...</p>
-            ) : productData.length > 0 ? (
-                <div style={{ display: 'flex', gap: '16px' }}>
-                    {productData.map((product) =>
-                        product ? (
-                            <div key={product.id} style={{ border: '1px solid #ddd', padding: '8px' }}>
-                                <img
-                                    src={product.images?.edges[0]?.node?.src || ''}
-                                    alt={product.title || 'Product Image'}
-                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                                />
-                                <h3>{product.title || 'Untitled Product'}</h3>
-                                <p>{product.description || 'No description available.'}</p>
-                            </div>
-                        ) : null
-                    )}
-                </div>
-            ) : (
+            {productData.length === 0 ? (
                 <p>No recently viewed products.</p>
+            ) : (
+                <ul>
+                    {productData.map(product => (
+                        <li key={product.id}>
+                            <Link to={`/products/${product.handle}`}>
+                                <img src={product.images[0]?.edges[0]?.node.url} alt={product.title} />
+                                <h3>{product.title}</h3>
+                                <p>
+                                    <Money data={product.variants.nodes[0].price} />
+                                </p>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
             )}
         </div>
     );
-}
+};
 
 export default RecentlyViewedProducts;
