@@ -25,7 +25,12 @@ export async function loader({ request, context }) {
       : regularSearch({ request, context });
 
     const searchResult = await searchPromise;
-    console.log('Search Result:', searchResult);
+
+    if (!searchResult.result?.items?.products?.nodes) {
+      console.error('No products found in search result.');
+    }
+
+    console.log('Final Search Result:', searchResult);
     return json(searchResult);
   } catch (error) {
     console.error('Error in loader:', error);
@@ -76,15 +81,15 @@ export default function SearchPage() {
         <div>
           <p>Found {result.total} results for "{term}"</p>
           <ul>
-              {result?.items?.products?.nodes?.length ? (
-                result.items.products.nodes.map((product) => (
-                  <li key={product.id}>
-                    {product.title} - {product.vendor}
-                  </li>
-                ))
-              ) : (
-                <p>No products found.</p>
-              )}
+            {result?.items?.products?.nodes?.length ? (
+              result.items.products.nodes.map((product) => (
+                <li key={product.id}>
+                  {product.title} - {product.vendor}
+                </li>
+              ))
+            ) : (
+              <p>No products found for "{term}".</p>
+            )}
           </ul>
         </div>
       )}
@@ -241,30 +246,37 @@ async function regularSearch({ request, context }) {
   const reverse = url.searchParams.get('reverse') === 'true';
 
   console.log('Search Term:', term);
-  console.log('Variables:', { ...variables, term, sortKey, reverse });
+  console.log('Query Variables:', { ...variables, term, sortKey, reverse });
 
-  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+  const { data, errors } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term, sortKey, reverse },
   });
 
-  console.log('Returned Items:', items);
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
+  if (errors) {
+    console.error('GraphQL Errors:', errors);
+    throw new Error(errors.map((e) => e.message).join(', '));
   }
 
-  const total = Object.values(items).reduce(
-    (acc, { nodes }) => acc + nodes.length,
-    0,
-  );
+  console.log('GraphQL Response Data:', data);
 
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
+  if (!data || !data.products) {
+    console.error('No products data found in GraphQL response');
+    throw new Error('No products data returned from Shopify API');
+  }
 
-  console.log('Total Results:', total);
+  const total = data.products.nodes?.length || 0;
 
-  return { type: 'regular', term, error, result: { total, items } };
+  console.log('Total Products:', total);
+
+  return {
+    type: 'regular',
+    term,
+    error: null,
+    result: {
+      total,
+      items: { products: data.products },
+    },
+  };
 }
 
 /**
