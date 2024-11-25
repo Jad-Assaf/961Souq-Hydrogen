@@ -23,7 +23,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
             viewedProducts.unshift(currentProductId);
 
             // Limit the array to the last 10 viewed products
-            viewedProducts = viewedProducts.slice(0, 10);
+            viewedProducts = viewedProducts.slice(0, 20);
 
             // Save back to localStorage
             localStorage.setItem('viewedProducts', JSON.stringify(viewedProducts));
