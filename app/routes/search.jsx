@@ -5,7 +5,7 @@ import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef } from 'react';
-
+import { FILTER_URL_PREFIX } from '~/lib/const';
 /**
  * @type {MetaFunction}
  */
