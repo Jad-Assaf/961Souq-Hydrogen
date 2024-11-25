@@ -17,18 +17,20 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
-  const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+  try {
+    const url = new URL(request.url);
+    const isPredictive = url.searchParams.has('predictive');
+    const searchPromise = isPredictive
+      ? predictiveSearch({ request, context })
+      : regularSearch({ request, context });
 
-  searchPromise.catch((error) => {
-    console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
-
-  return json(await searchPromise);
+    const searchResult = await searchPromise;
+    console.log('Search Result:', searchResult);
+    return json(searchResult);
+  } catch (error) {
+    console.error('Error in loader:', error);
+    return json({ term: '', result: null, error: error.message });
+  }
 }
 
 /**
@@ -74,11 +76,15 @@ export default function SearchPage() {
         <div>
           <p>Found {result.total} results for "{term}"</p>
           <ul>
-            {result.items.products?.nodes.map((product) => (
-              <li key={product.id}>
-                {product.title} - {product.vendor}
-              </li>
-            ))}
+              {result?.items?.products?.nodes?.length ? (
+                result.items.products.nodes.map((product) => (
+                  <li key={product.id}>
+                    {product.title} - {product.vendor}
+                  </li>
+                ))
+              ) : (
+                <p>No products found.</p>
+              )}
           </ul>
         </div>
       )}
@@ -234,10 +240,14 @@ async function regularSearch({ request, context }) {
   const sortKey = url.searchParams.get('sortKey') || 'RELEVANCE';
   const reverse = url.searchParams.get('reverse') === 'true';
 
-  // Search articles, pages, and products for the `q` term
+  console.log('Search Term:', term);
+  console.log('Variables:', { ...variables, term, sortKey, reverse });
+
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term, sortKey, reverse },
   });
+
+  console.log('Returned Items:', items);
 
   if (!items) {
     throw new Error('No search data returned from Shopify API');
@@ -251,6 +261,8 @@ async function regularSearch({ request, context }) {
   const error = errors
     ? errors.map(({ message }) => message).join(', ')
     : undefined;
+
+  console.log('Total Results:', total);
 
   return { type: 'regular', term, error, result: { total, items } };
 }
