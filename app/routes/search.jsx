@@ -199,17 +199,17 @@ export const SEARCH_QUERY = `#graphql
       }
     }
     products: search(
-      after: $endCursor,
-      before: $startCursor,
+      query: $term,
       first: $first,
       last: $last,
-      query: $term,
+      after: $endCursor,
+      before: $startCursor,
       sortKey: RELEVANCE,
       types: [PRODUCT],
       unavailableProducts: HIDE,
-      filters: $filters, // Pass filters to products search
+      filters: $filters // Ensure this is correctly structured
     ) {
-      filters { // Fetch filters structure
+      filters {
         id
         label
         type
@@ -221,9 +221,7 @@ export const SEARCH_QUERY = `#graphql
         }
       }
       nodes {
-        ...on Product {
-          ...SearchProduct
-        }
+        ...SearchProduct
       }
       pageInfo {
         ...PageInfoFragment
