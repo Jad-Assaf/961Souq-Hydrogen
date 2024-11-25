@@ -164,6 +164,7 @@ const PAGE_INFO_FRAGMENT = `#graphql
 `;
 
 // Regular search query
+// Regular search query
 export const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
@@ -173,7 +174,7 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
-    $filters: [FilterInput]
+    $filters: [ProductFilter!] // Ensure filters are defined correctly
   ) @inContext(country: $country, language: $language) {
     articles: search(
       query: $term,
@@ -206,8 +207,19 @@ export const SEARCH_QUERY = `#graphql
       sortKey: RELEVANCE,
       types: [PRODUCT],
       unavailableProducts: HIDE,
-      filters: $filters,
+      filters: $filters, // Pass filters to products search
     ) {
+      filters { // Fetch filters structure
+        id
+        label
+        type
+        values {
+          id
+          label
+          count
+          input
+        }
+      }
       nodes {
         ...on Product {
           ...SearchProduct
@@ -237,14 +249,18 @@ async function regularSearch({ request, context }) {
   const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
-  const filters = getFiltersFromSearchParams(url.searchParams);
 
-  // Log filters to check their structure
-  console.log('Filters:', filters);
+  // Extract filters from search parameters, but do not pass them to products search
+  const filters = getFiltersFromSearchParams(url.searchParams);
 
   // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term, filters: filters.length ? filters : undefined },
+    variables: { 
+      ...variables, 
+      term, 
+      // Only pass filters to the collection query if applicable
+      filters: filters.length ? filters : undefined,
+    },
   });
 
   if (!items) {
