@@ -179,7 +179,6 @@ export const SEARCH_QUERY = `#graphql
       query: $term,
       types: [ARTICLE],
       first: $first,
-      filters: $filters,
     ) {
       nodes {
         ...on Article {
@@ -191,7 +190,6 @@ export const SEARCH_QUERY = `#graphql
       query: $term,
       types: [PAGE],
       first: $first,
-      filters: $filters,
     ) {
       nodes {
         ...on Page {
@@ -241,9 +239,12 @@ async function regularSearch({ request, context }) {
   const term = String(url.searchParams.get('q') || '');
   const filters = getFiltersFromSearchParams(url.searchParams);
 
+  // Log filters to check their structure
+  console.log('Filters:', filters);
+
   // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term, filters },
+    variables: { ...variables, term, filters: filters.length ? filters : undefined },
   });
 
   if (!items) {
@@ -261,7 +262,6 @@ async function regularSearch({ request, context }) {
 
   return { type: 'regular', term, error, result: { total, items } };
 }
-
 /**
  * Function to extract filters from search parameters
  * @param {URLSearchParams} searchParams
