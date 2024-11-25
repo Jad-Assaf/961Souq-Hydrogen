@@ -1,42 +1,55 @@
 import { json } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
-import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
-/**
- * @type {MetaFunction}
- */
 export const meta = () => {
   return [{ title: `Hydrogen | Search` }];
 };
 
-/**
- * @param {LoaderFunctionArgs}
- */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+  const term = url.searchParams.get('q') || '';
+  const sortKey = url.searchParams.get('sort') || 'RELEVANCE';
+  const variables = getPaginationVariables(request, { pageBy: 24 });
 
-  searchPromise.catch((error) => {
-    console.error(error);
-    return { term: '', result: null, error: error.message };
+  const { storefront } = context;
+  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term, sortKey },
   });
 
-  return json(await searchPromise);
+  if (!items) {
+    throw new Error('No search data returned from Shopify API');
+  }
+
+  const total = Object.values(items).reduce(
+    (acc, { nodes }) => acc + nodes.length,
+    0
+  );
+
+  const error = errors
+    ? errors.map(({ message }) => message).join(', ')
+    : undefined;
+
+  return json({ type: 'regular', term, error, result: { total, items }, sortKey });
 }
 
-/**
- * Renders the /search route
- */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { term, result, error, sortKey } = useLoaderData();
+  const [currentSortKey, setCurrentSortKey] = useState(sortKey);
   const formRef = useRef(null);
+
+  const handleSortChange = (event) => {
+    const newSortKey = event.target.value;
+    setCurrentSortKey(newSortKey);
+
+    // Redirect with updated sort key
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('sort', newSortKey);
+    window.location.search = searchParams.toString();
+  };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -45,7 +58,7 @@ export default function SearchPage() {
     if (searchInput) {
       const query = searchInput.value;
       const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-      
+
       // Redirect with modified query
       window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
@@ -54,15 +67,31 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
+      <form ref={formRef} onSubmit={handleFormSubmit}>
+        <input
+          type="text"
+          name="q"
+          defaultValue={term}
+          placeholder="Search..."
+        />
+        <button type="submit">Search</button>
+      </form>
+      <div>
+        <label htmlFor="sort">Sort by:</label>
+        <select id="sort" value={currentSortKey} onChange={handleSortChange}>
+          <option value="RELEVANCE">Relevance</option>
+          <option value="PRICE">Price: Low to High</option>
+          <option value="PRICE_DESC">Price: High to Low</option>
+          <option value="TITLE">Title: A-Z</option>
+        </select>
+      </div>
       {!term || !result?.total ? (
         <SearchResults.Empty />
       ) : (
         <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
+          {({ products, term }) => (
             <div>
               <SearchResults.Products products={products} term={term} />
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
             </div>
           )}
         </SearchResults>
