@@ -116,7 +116,7 @@ export default function Homepage() {
   const images = [
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
-      link: '/collections/apple-products', // Add link
+      link: '/collections/apple', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/APPLE-IPHONE-16-wh.jpg?v=1728307748',
@@ -124,67 +124,67 @@ export default function Homepage() {
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
-      link: '/collections/playstation', // Add link
+      link: '/collections/sony-playstation', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps-studios.jpg?v=1728486402',
-      link: '/collections/apple-products', // Add link
+      link: '/collections/console-games', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cmf-phone-1-banner-1.jpg?v=1727944715',
-      link: '/collections/apple-iphone', // Add link
+      link: '/collections/nothing-phones', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-s24.jpg?v=1732281967',
-      link: '/collections/playstation', // Add link
+      link: '/collections/samsung-mobile-phones', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-watch-ultra.jpg?v=1732281967',
-      link: '/collections/apple-products', // Add link
+      link: '/products/samsung-galaxy-watch-ultra', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-banner.jpg?v=1727943839',
-      link: '/collections/apple-iphone', // Add link
+      link: '/collections/garmin-smart-watch', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-eaubuds.jpg?v=1732284726',
-      link: '/collections/playstation', // Add link
+      link: '/collections/earbuds', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-speakers.jpg?v=1711034859',
-      link: '/collections/apple-products', // Add link
+      link: '/collections/gaming-speakers', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-desktops.jpg?v=1732287092',
-      link: '/collections/apple-iphone', // Add link
+      link: '/collections/gaming-desktops', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-monitors_6069e5a5-45c8-4ff2-8543-67de7c8ee0f4.jpg?v=1732287093',
-      link: '/collections/playstation', // Add link
+      link: '/collections/gaming-monitors', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenses.jpg?v=1732289718',
-      link: '/collections/apple-products', // Add link
+      link: '/collections/camera-lenses', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/action.jpg?v=1732289718',
-      link: '/collections/apple-iphone', // Add link
+      link: '/collections/action-cameras', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/govee-rgb.jpg?v=1732288379',
-      link: '/collections/playstation', // Add link
+      link: '/collections/lighting', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dyson-vacuums.jpg?v=1732288379',
-      link: '/collections/apple-products', // Add link
+      link: '/collections/vacuum-cleaners', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/streaming.jpg?v=1732289074',
-      link: '/collections/apple-iphone', // Add link
+      link: '/collections/streaming-devices', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/smart-home.jpg?v=1732289074',
-      link: '/collections/playstation', // Add link
+      link: '/collections/smart-devices', // Add link
     },
     {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',

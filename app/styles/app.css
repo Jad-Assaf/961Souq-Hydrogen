@@ -136,8 +136,8 @@ button {
   max-width: 1500px;
   margin: 50px auto 50px auto;
   box-shadow: inset 1px 1px 20px 3px #f4f4f4;
-  border-radius: 20px 5px;
-  padding: 20px;
+  border-radius: 20px;
+  padding: 20px 5px;
   background-color: transparent;
   backdrop-filter: blur(10px);
 }
