@@ -10,41 +10,6 @@ import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'
 import { Analytics } from '@shopify/hydrogen';
 import React, { useEffect, useState } from 'react';
 
-const SEARCH_QUERY = `#graphql
-  query Search(
-    $query: String!,
-    $filters: [ProductFilter!],
-    $sortKey: ProductSortKeys,
-    $reverse: Boolean,
-    $first: Int,
-    $after: String
-  ) {
-    products(first: $first, after: $after, query: $query, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
-      nodes {
-        id
-        title
-        handle
-        images {
-          url
-          altText
-        }
-        variants {
-          id
-          price {
-            amount
-            currencyCode
-          }
-          availableForSale
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-    }
-  }
-`;
-
 /**
  * @type {MetaFunction}
  */
