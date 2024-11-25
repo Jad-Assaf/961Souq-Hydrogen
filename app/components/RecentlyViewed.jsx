@@ -5,6 +5,11 @@ import { motion, useInView } from 'framer-motion';
 
 export default function RecentlyViewedProducts({ currentProductId }) {
     const [products, setProducts] = useState([]);
+    const rowRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+
 
     useEffect(() => {
         // Update the viewed products list in localStorage
@@ -17,7 +22,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
             // Add the current product ID to the beginning of the array
             viewedProducts.unshift(currentProductId);
 
-            // Limit the array to the last 5 viewed products
+            // Limit the array to the last 10 viewed products
             viewedProducts = viewedProducts.slice(0, 10);
 
             // Save back to localStorage
@@ -65,19 +70,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
           }
         }
       }
-    `; 
-
-        const response = await fetch(`https://961souqs.myshopify.com/api/2023-07/graphql.json`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Shopify-Storefront-Access-Token': 'e00803cf918c262c99957f078d8b6d44',
-            },
-            body: JSON.stringify({
-                query,
-                variables: { ids: productIds },
-            }),
-        });
+    `;
 
         const jsonResponse = await response.json();
 
@@ -90,6 +83,28 @@ export default function RecentlyViewedProducts({ currentProductId }) {
         const products = jsonResponse.data.nodes.filter((node) => node !== null);
         return products;
     }
+
+    // Scroll handling for the product row
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        setStartX(e.pageX - rowRef.current.offsetLeft);
+        setScrollLeft(rowRef.current.scrollLeft);
+    };
+
+    const handleMouseLeave = () => setIsDragging(false);
+    const handleMouseUp = () => setIsDragging(false);
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - rowRef.current.offsetLeft;
+        const walk = (x - startX) * 2; // Adjust scroll speed
+        rowRef.current.scrollLeft = scrollLeft - walk;
+    };
+
+    const scrollRow = (distance) => {
+        rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
+    };
 
     if (products.length === 0) {
         return null; // Don't render the component if there are no recently viewed products
