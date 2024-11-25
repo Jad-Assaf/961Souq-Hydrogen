@@ -1,4 +1,6 @@
 import { json } from '@remix-run/node';
+import { useLoaderData, Link } from '@remix-run/react';
+import { Money } from '@shopify/hydrogen';
 
 // Define your GraphQL query
 const RECENTLY_VIEWED_QUERY = `#graphql
