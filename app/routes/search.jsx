@@ -261,41 +261,6 @@ export const SEARCH_QUERY = `#graphql
 `;
 
 /**
- * Regular search fetcher
- * @param {Pick<
- *   LoaderFunctionArgs,
- *   'request' | 'context'
- * >}
- * @return {Promise<RegularSearchReturn>}
- */
-async function regularSearch({ request, context }) {
-  const { storefront } = context;
-  const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 24 });
-  const term = String(url.searchParams.get('q') || '');
-
-  // Search articles, pages, and products for the `q` term
-  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
-  });
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, { nodes }) => acc + nodes.length,
-    0,
-  );
-
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
-
-  return { type: 'regular', term, error, result: { total, items } };
-}
-
-/**
  * Predictive search query and fragments
  * (adjust as needed)
  */
