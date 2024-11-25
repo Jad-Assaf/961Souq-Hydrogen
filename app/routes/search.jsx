@@ -12,12 +12,13 @@ export const meta = () => {
 export async function loader({ request, context }) {
   const url = new URL(request.url);
   const term = url.searchParams.get('q') || '';
-  const sortKey = url.searchParams.get('sort') || 'RELEVANCE';
+  const sortKey = url.searchParams.get('sort') || 'CREATED';
+  const reverse = sortKey === 'PRICE_DESC';
   const variables = getPaginationVariables(request, { pageBy: 24 });
 
   const { storefront } = context;
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term, sortKey },
+    variables: { ...variables, term, sortKey, reverse },
   });
 
   if (!items) {
@@ -183,6 +184,8 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
+    $sortKey: ProductSortKeys = RELEVANCE
+    $reverse: Boolean = false
   ) @inContext(country: $country, language: $language) {
     articles: search(
       query: $term,
@@ -212,7 +215,8 @@ export const SEARCH_QUERY = `#graphql
       first: $first,
       last: $last,
       query: $term,
-      sortKey: RELEVANCE,
+      sortKey: $sortKey,
+      reverse: $reverse,
       types: [PRODUCT],
       unavailableProducts: HIDE,
     ) {
