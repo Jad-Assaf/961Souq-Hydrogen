@@ -17,82 +17,57 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
-  try {
-    const url = new URL(request.url);
-    const isPredictive = url.searchParams.has('predictive');
-    const searchPromise = isPredictive
-      ? predictiveSearch({ request, context })
-      : regularSearch({ request, context });
+  const url = new URL(request.url);
+  const isPredictive = url.searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context });
 
-    const searchResult = await searchPromise;
+  searchPromise.catch((error) => {
+    console.error(error);
+    return { term: '', result: null, error: error.message };
+  });
 
-    if (!searchResult.result?.items?.products?.nodes) {
-      console.error('No products found in search result.');
-    }
-
-    console.log('Final Search Result:', searchResult);
-    return json(searchResult);
-  } catch (error) {
-    console.error('Error in loader:', error);
-    return json({ term: '', result: null, error: error.message });
-  }
+  return json(await searchPromise);
 }
 
 /**
  * Renders the /search route
  */
-const SORT_OPTIONS = {
-  'price-low-high': { label: 'Price: Low to High', sortKey: 'PRICE', reverse: false },
-  'price-high-low': { label: 'Price: High to Low', sortKey: 'PRICE', reverse: true },
-  'best-selling': { label: 'Best Selling', sortKey: 'BEST_SELLING', reverse: false },
-  'newest': { label: 'Newest', sortKey: 'CREATED', reverse: true },
-  'featured': { label: 'Featured', sortKey: 'CREATED', reverse: false },
-};
-
 export default function SearchPage() {
-  const { term, result } = useLoaderData();
+  const { type, term, result, error } = useLoaderData();
   const formRef = useRef(null);
 
-  const handleSortChange = (event) => {
-    const selectedSort = SORT_OPTIONS[event.target.value];
-    const searchParams = new URLSearchParams(window.location.search);
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
 
-    searchParams.set('sortKey', selectedSort.sortKey);
-    searchParams.set('reverse', selectedSort.reverse);
-    window.location.search = searchParams.toString();
+    const searchInput = formRef.current.querySelector('input[name="q"]');
+    if (searchInput) {
+      const query = searchInput.value;
+      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
+      
+      // Redirect with modified query
+      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+    }
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-
-      {/* Sorting Dropdown */}
-      <select onChange={handleSortChange} defaultValue="featured">
-        {Object.keys(SORT_OPTIONS).map((key) => (
-          <option key={key} value={key}>
-            {SORT_OPTIONS[key].label}
-          </option>
-        ))}
-      </select>
-
       {!term || !result?.total ? (
-        <p>No results found.</p>
+        <SearchResults.Empty />
       ) : (
-        <div>
-          <p>Found {result.total} results for "{term}"</p>
-          <ul>
-            {result?.items?.products?.nodes?.length ? (
-              result.items.products.nodes.map((product) => (
-                <li key={product.id}>
-                  {product.title} - {product.vendor}
-                </li>
-              ))
-            ) : (
-              <p>No products found.</p>
-            )}
-          </ul>
-        </div>
+        <SearchResults result={result} term={term}>
+          {({ articles, pages, products, term }) => (
+            <div>
+              <SearchResults.Products products={products} term={term} />
+              {/* <SearchResults.Pages pages={pages} term={term} />
+              <SearchResults.Articles articles={articles} term={term} /> */}
+            </div>
+          )}
+        </SearchResults>
       )}
+      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
@@ -208,8 +183,7 @@ export const SEARCH_QUERY = `#graphql
       first: $first,
       last: $last,
       query: $term,
-      sortKey: $sortKey,
-      reverse: $reverse,
+      sortKey: RELEVANCE,
       types: [PRODUCT],
       unavailableProducts: HIDE,
     ) {
@@ -241,39 +215,27 @@ async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
-
   const term = String(url.searchParams.get('q') || '');
-  const sortKey = url.searchParams.get('sortKey') || 'CREATED';
-  const reverse = url.searchParams.get('reverse') === 'true';
 
-  console.log('Search Term:', term);
-  console.log('Sort Key:', sortKey, 'Reverse:', reverse);
-
-  const { data, errors } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term, sortKey, reverse },
+  // Search articles, pages, and products for the `q` term
+  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term },
   });
 
-  if (errors) {
-    console.error('GraphQL Errors:', errors);
-    throw new Error(errors.map((e) => e.message).join(', '));
+  if (!items) {
+    throw new Error('No search data returned from Shopify API');
   }
 
-  if (!data || !data.products) {
-    console.error('No products data found in GraphQL response');
-    throw new Error('No products data returned from Shopify API');
-  }
+  const total = Object.values(items).reduce(
+    (acc, { nodes }) => acc + nodes.length,
+    0,
+  );
 
-  const total = data.products.nodes?.length || 0;
+  const error = errors
+    ? errors.map(({ message }) => message).join(', ')
+    : undefined;
 
-  return {
-    type: 'regular',
-    term,
-    error: null,
-    result: {
-      total,
-      items: { products: data.products },
-    },
-  };
+  return { type: 'regular', term, error, result: { total, items } };
 }
 
 /**
