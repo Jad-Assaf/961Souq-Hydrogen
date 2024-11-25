@@ -42,7 +42,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
 
     // Function to fetch products from the Shopify Storefront API
     async function fetchProducts(productIds) {
-        const storefrontAccessToken = 'e00803cf918c262c99957f078d8b6d44';
+        const storefrontAccessToken = import.meta.env.PUBLIC_STOREFRONT_API_TOKEN;
         const shopDomain = import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN;
 
         const query = `
@@ -67,7 +67,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
       }
     `;
 
-        const response = await fetch(`https://961souqs.myshopify.com//api/2023-07/graphql.json`, {
+        const response = await fetch(`https://${shopDomain}/api/2023-07/graphql.json`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
