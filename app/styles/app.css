@@ -349,6 +349,10 @@ button {
   transform: translateY(-2px);
 }
 
+.recently-viewed-container {
+  width: 100%;
+}
+
 .recently-viewed-container .product-item{
   display: flex;
   justify-content: center;
