@@ -182,6 +182,7 @@ button {
   width: 300px;
   text-align: center;
   text-decoration: none;
+  margin-left: 5px;
 }
 
 /* Product Card Styling */
@@ -1393,7 +1394,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 /* Keep Product Card Height Consistent */
-.product-item-collection img {
+.product-item-collection img, .product-item img {
   width: 100%;
   height: auto;
 }
