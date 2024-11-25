@@ -12,8 +12,33 @@ export const meta = () => {
 export async function loader({ request, context }) {
   const url = new URL(request.url);
   const term = url.searchParams.get('q') || '';
-  const sortKey = url.searchParams.get('sort') || 'CREATED';
-  const reverse = sortKey === 'PRICE_DESC';
+  const sort = url.searchParams.get('sort') || 'relevance'; // Default sort
+
+  let sortKey;
+  let reverse = false;
+
+  // Map `sort` to Shopify's `sortKey` and `reverse` values
+  switch (sort) {
+    case 'price-low-high':
+      sortKey = 'PRICE';
+      break;
+    case 'price-high-low':
+      sortKey = 'PRICE';
+      reverse = true;
+      break;
+    case 'newest':
+      sortKey = 'CREATED';
+      reverse = true;
+      break;
+    case 'best-selling':
+      sortKey = 'BEST_SELLING';
+      break;
+    case 'relevance':
+    default:
+      sortKey = 'RELEVANCE';
+      break;
+  }
+
   const variables = getPaginationVariables(request, { pageBy: 24 });
 
   const { storefront } = context;
@@ -21,8 +46,9 @@ export async function loader({ request, context }) {
     variables: { ...variables, term, sortKey, reverse },
   });
 
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
+  if (errors) {
+    console.error('GraphQL Errors:', errors);
+    return { term, result: null, error: errors.map(e => e.message).join(', ') };
   }
 
   const total = Object.values(items).reduce(
@@ -30,45 +56,24 @@ export async function loader({ request, context }) {
     0
   );
 
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
-
-  return json({ type: 'regular', term, error, result: { total, items }, sortKey });
+  return { type: 'regular', term, error: null, result: { total, items }, sortKey };
 }
 
 export default function SearchPage() {
-  const { term, result, error, sortKey } = useLoaderData();
-  const [currentSortKey, setCurrentSortKey] = useState(sortKey);
-  const formRef = useRef(null);
+  const { type, term, result, sortKey, error } = useLoaderData();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const handleSortChange = (event) => {
-    const newSortKey = event.target.value;
-    setCurrentSortKey(newSortKey);
-
-    // Redirect with updated sort key
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set('sort', newSortKey);
-    window.location.search = searchParams.toString();
-  };
-
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-
-    const searchInput = formRef.current.querySelector('input[name="q"]');
-    if (searchInput) {
-      const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-
-      // Redirect with modified query
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
-    }
+    const newSort = event.target.value;
+    searchParams.set('sort', newSort);
+    setSearchParams(searchParams); // Triggers page reload with updated `sort`
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <form ref={formRef} onSubmit={handleFormSubmit}>
+
+      <form>
         <input
           type="text"
           name="q"
@@ -77,27 +82,31 @@ export default function SearchPage() {
         />
         <button type="submit">Search</button>
       </form>
+
       <div>
         <label htmlFor="sort">Sort by:</label>
-        <select id="sort" value={currentSortKey} onChange={handleSortChange}>
-          <option value="RELEVANCE">Relevance</option>
-          <option value="PRICE">Price: Low to High</option>
-          <option value="PRICE_DESC">Price: High to Low</option>
-          <option value="TITLE">Title: A-Z</option>
+        <select id="sort" value={searchParams.get('sort') || 'relevance'} onChange={handleSortChange}>
+          <option value="relevance">Relevance</option>
+          <option value="price-low-high">Price: Low to High</option>
+          <option value="price-high-low">Price: High to Low</option>
+          <option value="newest">Newest</option>
+          <option value="best-selling">Best Selling</option>
         </select>
       </div>
+
       {!term || !result?.total ? (
-        <SearchResults.Empty />
+        <p>No results found.</p>
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
+        <div>
+          {/* Display products */}
+          {result.items.products?.nodes.map((product) => (
+            <div key={product.id}>
+              <h2>{product.title}</h2>
+              <p>{product.vendor}</p>
             </div>
-          )}
-        </SearchResults>
+          ))}
+        </div>
       )}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
@@ -187,43 +196,18 @@ export const SEARCH_QUERY = `#graphql
     $sortKey: ProductSortKeys = RELEVANCE
     $reverse: Boolean = false
   ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
     products: search(
-      after: $endCursor,
-      before: $startCursor,
-      first: $first,
-      last: $last,
       query: $term,
+      types: [PRODUCT],
       sortKey: $sortKey,
       reverse: $reverse,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
+      first: $first,
+      after: $endCursor,
+      before: $startCursor,
+      last: $last
     ) {
       nodes {
-        ...on Product {
-          ...SearchProduct
-        }
+        ...SearchProduct
       }
       pageInfo {
         ...PageInfoFragment
@@ -231,8 +215,6 @@ export const SEARCH_QUERY = `#graphql
     }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
-  ${SEARCH_PAGE_FRAGMENT}
-  ${SEARCH_ARTICLE_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
 `;
 
