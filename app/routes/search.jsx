@@ -1,12 +1,13 @@
-import { json, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, useSearchParams } from '@remix-run/react';
+import { json } from '@shopify/remix-oxygen';
+import { useLoaderData, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
-import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
-import { FiltersDrawer, DrawerFilter } from '~/modules/drawer-filter';
-import { FILTER_URL_PREFIX } from '~/lib/const';
+import { useMediaQuery } from 'react-responsive';
+import { FiltersDrawer } from '../modules/drawer-filter';
+import { DrawerFilter } from '../modules/drawer-filter';
+import { getAppliedFilterLink } from '../lib/filter';
+import React, { useEffect, useRef, useState } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -38,55 +39,101 @@ export async function loader({ request, context }) {
  */
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
+  const [numberInRow, setNumberInRow] = useState(5);
+  const [screenWidth, setScreenWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1500
+  );
+  const isDesktop = useMediaQuery({ minWidth: 1024 });
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const formRef = useRef(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [filters, setFilters] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const debounce = (fn, delay) => {
+        let timeoutId;
+        return (...args) => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => fn(...args), delay);
+        };
+      };
+
+      const updateScreenWidth = debounce(() => {
+        const width = window.innerWidth;
+        setScreenWidth(width);
+        if (width >= 1500) setNumberInRow(5);
+        else if (width >= 1200) setNumberInRow(4);
+        else if (width >= 550) setNumberInRow(3);
+        else setNumberInRow(1);
+      }, 100);
+
+      updateScreenWidth();
+      window.addEventListener("resize", updateScreenWidth);
+
+      return () => {
+        window.removeEventListener("resize", updateScreenWidth);
+      };
+    }
+  }, []);
+
+  const handleLayoutChange = (number) => {
+    setNumberInRow(number);
+  };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
+
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
       const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
+
+      // Redirect with modified query
       window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    const newSearchParams = new URLSearchParams(searchParams);
-    newFilters.forEach(filter => {
-      newSearchParams.set(`${FILTER_URL_PREFIX}${filter.key}`, JSON.stringify(filter.value));
-    });
-    setSearchParams(newSearchParams);
+  const handleFilterRemove = (filter) => {
+    const newUrl = getAppliedFilterLink(filter, searchParams, location);
+    navigate(newUrl);
   };
-
-  console.log('Search Results:', { term, result, error }); // Debugging log
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <SearchForm onSubmit={handleFormSubmit} ref={formRef} />
-      <FiltersDrawer>
-        <DrawerFilter
-          filters={filters}
-          onChange={handleFilterChange}
-        />
-      </FiltersDrawer>
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
-      ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              {/* Uncomment if you want to show articles and pages */}
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
-            </div>
-          )}
-        </SearchResults>
+      {isDesktop && result && result.items?.filters && (
+        <div className="filters-container">
+          <FiltersDrawer
+            filters={result.items.filters}
+            appliedFilters={result.appliedFilters}
+            onRemoveFilter={handleFilterRemove}
+          />
+        </div>
       )}
+      <div className="search-content">
+        <div className="view-container">
+          <DrawerFilter
+            filters={result.items?.filters || []}
+            appliedFilters={result.appliedFilters || []}
+            numberInRow={numberInRow}
+            onLayoutChange={handleLayoutChange}
+            productNumber={result.items?.products?.length || 0}
+            isDesktop={isDesktop}
+          />
+        </div>
+        {!term || !result?.total ? (
+          <SearchResults.Empty />
+        ) : (
+          <SearchResults result={result} term={term}>
+            {({ articles, pages, products, term }) => (
+              <div>
+                <SearchResults.Products products={products} term={term} />
+              </div>
+            )}
+          </SearchResults>
+        )}
+      </div>
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
@@ -94,6 +141,7 @@ export default function SearchPage() {
 
 /**
  * Regular search query and fragments
+ * (adjust as needed)
  */
 const SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment SearchProduct on Product {
@@ -163,8 +211,8 @@ const PAGE_INFO_FRAGMENT = `#graphql
   }
 `;
 
-// Regular search query
-// Regular search query
+// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
+// Modified SEARCH_QUERY to include filters
 export const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
@@ -174,8 +222,37 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
-    $filters: [ProductFilter!] // Ensure filters are defined correctly
   ) @inContext(country: $country, language: $language) {
+    products: search(
+      after: $endCursor,
+      before: $startCursor,
+      first: $first,
+      last: $last,
+      query: $term,
+      sortKey: RELEVANCE,
+      types: [PRODUCT],
+      unavailableProducts: HIDE,
+    ) {
+      nodes {
+        ...on Product {
+          ...SearchProduct
+        }
+      }
+      pageInfo {
+        ...PageInfoFragment
+      }
+      filters {
+        id
+        label
+        type
+        values {
+          id
+          label
+          count
+          input
+        }
+      }
+    }
     articles: search(
       query: $term,
       types: [ARTICLE],
@@ -198,41 +275,52 @@ export const SEARCH_QUERY = `#graphql
         }
       }
     }
-    products: search(
-      query: $term,
-      first: $first,
-      last: $last,
-      after: $endCursor,
-      before: $startCursor,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
-      filters: $filters // Ensure this is correctly structured
-    ) {
-      filters {
-        id
-        label
-        type
-        values {
-          id
-          label
-          count
-          input
-        }
-      }
-      nodes {
-        ...SearchProduct
-      }
-      pageInfo {
-        ...PageInfoFragment
-      }
-    }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
   ${SEARCH_PAGE_FRAGMENT}
   ${SEARCH_ARTICLE_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
 `;
+
+// Modified `regularSearch` function
+async function regularSearch({ request, context }) {
+  const { storefront } = context;
+  const url = new URL(request.url);
+  const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(url.searchParams.get('q') || '');
+
+  // Search articles, pages, and products for the `q` term
+  const { errors, products, articles, pages } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term },
+  });
+
+  if (!products) {
+    throw new Error('No search data returned from Shopify API');
+  }
+
+  const total = (products.nodes?.length || 0) +
+    (articles.nodes?.length || 0) +
+    (pages.nodes?.length || 0);
+
+  const error = errors
+    ? errors.map(({ message }) => message).join(', ')
+    : undefined;
+
+  return {
+    type: 'regular',
+    term,
+    error,
+    result: {
+      total,
+      items: {
+        products: products.nodes || [],
+        articles: articles.nodes || [],
+        pages: pages.nodes || [],
+        filters: products.filters || [],
+      },
+    },
+  };
+}
 
 /**
  * Regular search fetcher
@@ -248,27 +336,9 @@ async function regularSearch({ request, context }) {
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
-  // Extract filters from search parameters
-  const filters = getFiltersFromSearchParams(url.searchParams).map(filter => ({
-    // Adjust the structure to match ProductFilter
-    [filter.key]: filter.value,
-  }));
-
   // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { 
-      ...variables, 
-      term, 
-      filters: filters.length ? filters : undefined, // Pass only if filters are present
-    },
-  });
-
-  console.log(SEARCH_QUERY, {
-    variables: {
-      ...variables,
-      term,
-      filters: filters.length ? filters : undefined,
-    },
+    variables: { ...variables, term },
   });
 
   if (!items) {
@@ -287,16 +357,6 @@ async function regularSearch({ request, context }) {
   return { type: 'regular', term, error, result: { total, items } };
 }
 
-// Function to extract filters from search parameters
-function getFiltersFromSearchParams(searchParams) {
-  const filters = [];
-  for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith(FILTER_URL_PREFIX)) {
-      filters.push({ key: key.replace(FILTER_URL_PREFIX, ''), value: JSON.parse(value) });
-    }
-  }
-  return filters;
-}
 /**
  * Predictive search query and fragments
  * (adjust as needed)
@@ -447,6 +507,7 @@ async function predictiveSearch({ request, context }) {
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
+        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term,
