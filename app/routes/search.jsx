@@ -1,10 +1,14 @@
+// app/routes/search.jsx
 import { json } from '@shopify/remix-oxygen';
+import { useLoaderData } from '@remix-run/react';
 
-export async function loader({ request, context }) {
-  console.log("Loader function called"); // Log to server console
-  const url = new URL(request.url);
-  console.log("Request URL:", request.url); // Log the request URL
-
-  // Example of returning a response
+export async function loader() {
+  console.log("Loader function called"); // This should log
   return json({ message: "Loader is working!" });
+}
+
+export default function SearchPage() {
+  console.log("SearchPage component rendered"); // This should log
+  const data = useLoaderData();
+  return <div>{data.message}</div>;
 }
