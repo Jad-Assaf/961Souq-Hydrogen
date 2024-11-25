@@ -72,6 +72,18 @@ export default function RecentlyViewedProducts({ currentProductId }) {
       }
     `;
 
+        const response = await fetch(`https://961souqs.myshopify.com/api/2023-07/graphql.json`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Shopify-Storefront-Access-Token': 'e00803cf918c262c99957f078d8b6d44',
+            },
+            body: JSON.stringify({
+                query,
+                variables: { ids: productIds },
+            }),
+        });
+
         const jsonResponse = await response.json();
 
         // Handle any errors returned by the API
@@ -109,6 +121,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
     if (products.length === 0) {
         return null; // Don't render the component if there are no recently viewed products
     }
+
 
     return (
         <div className="collection-section">
