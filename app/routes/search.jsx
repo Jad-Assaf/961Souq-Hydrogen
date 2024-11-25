@@ -2,7 +2,7 @@
 import { json } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 
-export async function loader() {
+export function loader() {
   console.log("Loader function called"); // This should log
   return json({ message: "Loader is working!" });
 }
