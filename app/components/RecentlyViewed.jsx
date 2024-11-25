@@ -42,8 +42,8 @@ export default function RecentlyViewedProducts({ currentProductId }) {
 
     // Function to fetch products from the Shopify Storefront API
     async function fetchProducts(productIds) {
-        const storefrontAccessToken = import.meta.env.PUBLIC_STOREFRONT_API_TOKEN;
-        const shopDomain = import.meta.env.PUBLIC_SHOPIFY_STORE_DOMAIN;
+        const storefrontAccessToken = import.meta.env.VITE_PUBLIC_STOREFRONT_API_TOKEN;
+        const shopDomain = import.meta.env.VITE_PUBLIC_SHOPIFY_STORE_DOMAIN;
 
         const query = `
       query getProductsByIds($ids: [ID!]!) {
@@ -65,7 +65,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
           }
         }
       }
-    `;
+    `; 
 
         const response = await fetch(`https://${shopDomain}/api/2023-07/graphql.json`, {
             method: 'POST',
