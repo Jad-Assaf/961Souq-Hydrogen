@@ -237,6 +237,8 @@ async function regularSearch({ request, context, sort }) {
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
+  console.log("Search term:", term); // Debugging log
+
   // Determine sortKey and reverse based on sort parameter
   let sortKey;
   let reverse = false;
@@ -266,6 +268,8 @@ async function regularSearch({ request, context, sort }) {
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term, sortKey, reverse },
   });
+
+  console.log("GraphQL Response:", items); // Debugging log
 
   if (!items) {
     throw new Error('No search data returned from Shopify API');
