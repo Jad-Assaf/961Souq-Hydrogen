@@ -17,6 +17,7 @@ import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 import { ProductMetafields } from '~/components/Metafields';
+import RecentlyViewedProducts from '~/components/RecentlyViewed';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -313,6 +314,10 @@ export default function Product() {
           <h2>Related Products</h2>
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
+      </div>
+      <div className="recently-viewed-section">
+        <h2>Recently Viewed Products</h2>
+        <RecentlyViewedProducts />
       </div>
 
     </div >
