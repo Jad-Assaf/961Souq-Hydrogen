@@ -42,11 +42,11 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 const SORT_OPTIONS = {
-  RELEVANCE: { label: 'Relevance', sortKey: 'RELEVANCE', reverse: false },
-  TITLE_ASC: { label: 'Title (A-Z)', sortKey: 'TITLE', reverse: false },
-  TITLE_DESC: { label: 'Title (Z-A)', sortKey: 'TITLE', reverse: true },
-  CREATED_AT_ASC: { label: 'Date (Oldest)', sortKey: 'CREATED_AT', reverse: false },
-  CREATED_AT_DESC: { label: 'Date (Newest)', sortKey: 'CREATED_AT', reverse: true },
+  'price-low-high': { label: 'Price: Low to High', sortKey: 'PRICE', reverse: false },
+  'price-high-low': { label: 'Price: High to Low', sortKey: 'PRICE', reverse: true },
+  'best-selling': { label: 'Best Selling', sortKey: 'BEST_SELLING', reverse: false },
+  'newest': { label: 'Newest', sortKey: 'CREATED', reverse: true },
+  'featured': { label: 'Featured', sortKey: 'CREATED', reverse: false },
 };
 
 export default function SearchPage() {
@@ -67,7 +67,7 @@ export default function SearchPage() {
       <h1>Search Results</h1>
 
       {/* Sorting Dropdown */}
-      <select onChange={handleSortChange} defaultValue="RELEVANCE">
+      <select onChange={handleSortChange} defaultValue="featured">
         {Object.keys(SORT_OPTIONS).map((key) => (
           <option key={key} value={key}>
             {SORT_OPTIONS[key].label}
@@ -88,7 +88,7 @@ export default function SearchPage() {
                 </li>
               ))
             ) : (
-              <p>No products found for "{term}".</p>
+              <p>No products found.</p>
             )}
           </ul>
         </div>
@@ -241,12 +241,13 @@ async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
+
   const term = String(url.searchParams.get('q') || '');
-  const sortKey = url.searchParams.get('sortKey') || 'RELEVANCE';
+  const sortKey = url.searchParams.get('sortKey') || 'CREATED';
   const reverse = url.searchParams.get('reverse') === 'true';
 
   console.log('Search Term:', term);
-  console.log('Query Variables:', { ...variables, term, sortKey, reverse });
+  console.log('Sort Key:', sortKey, 'Reverse:', reverse);
 
   const { data, errors } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term, sortKey, reverse },
@@ -257,16 +258,12 @@ async function regularSearch({ request, context }) {
     throw new Error(errors.map((e) => e.message).join(', '));
   }
 
-  console.log('GraphQL Response Data:', data);
-
   if (!data || !data.products) {
     console.error('No products data found in GraphQL response');
     throw new Error('No products data returned from Shopify API');
   }
 
   const total = data.products.nodes?.length || 0;
-
-  console.log('Total Products:', total);
 
   return {
     type: 'regular',
