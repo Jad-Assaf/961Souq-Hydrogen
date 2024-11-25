@@ -17,22 +17,16 @@ import { CSSTransition } from 'react-transition-group';
 import { RELATED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 import { ProductMetafields } from '~/components/Metafields';
-import RecentlyViewedProducts from '~/components/RecentlyViewed';
 
 export const meta = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
 };
 
 export async function loader(args) {
-  try {
-    const deferredData = loadDeferredData(args);
-    const criticalData = await loadCriticalData(args);
+  const deferredData = loadDeferredData(args);
+  const criticalData = await loadCriticalData(args);
 
-    return defer({ ...deferredData, ...criticalData });
-  } catch (error) {
-    console.error('Error in loader:', error); // Add detailed logging
-    throw new Response('Something went wrong', { status: 500 });
-  }
+  return defer({ ...deferredData, ...criticalData });
 }
 
 async function loadCriticalData({ context, params, request }) {
@@ -48,11 +42,7 @@ async function loadCriticalData({ context, params, request }) {
   });
 
   if (!product?.id) {
-    console.error('Product not found for handle:', handle);
     throw new Response('Product not found', { status: 404 });
-  }
-  if (!Array.isArray(relatedProducts)) {
-    console.error('Related products not properly fetched:', relatedProducts);
   }
 
   const firstVariant = product.variants.nodes[0];
@@ -129,24 +119,13 @@ export default function Product() {
       setSubtotal(price * quantity);
     }
   }, [quantity, selectedVariant]);
-  
-  useEffect(() => {
-    if (product?.id) {
-      const saved = localStorage.getItem('recentlyViewed');
-      const recentlyViewed = saved ? JSON.parse(saved) : [];
-      
-      if (!recentlyViewed.includes(product.id)) {
-        const updatedRecentlyViewed = [product.id, ...recentlyViewed].slice(0, 10); // Limit to 10
-        localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecentlyViewed));
-      }
-    }
-  }, [product?.id]);
+
 
   const { title, descriptionHtml, images } = product;
 
   const hasDiscount = selectedVariant?.compareAtPrice &&
     selectedVariant.price.amount !== selectedVariant.compareAtPrice.amount;
-  
+
   return (
     <div className="product">
       <div className="ProductPageTop">
@@ -335,12 +314,7 @@ export default function Product() {
           <RelatedProductsRow products={relatedProducts || []} />
         </div>
       </div>
-      {/* Recently Viewed Products Section */}
-      <div className="recently-viewed-products">
-        <Suspense fallback={<div>Loading recently viewed products...</div>}>
-          <RecentlyViewedProducts />
-        </Suspense>
-      </div>
+
     </div >
   );
 }
