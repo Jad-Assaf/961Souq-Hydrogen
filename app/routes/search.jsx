@@ -1,14 +1,13 @@
 import { json } from '@shopify/remix-oxygen';
 import { useLoaderData, useSearchParams } from '@remix-run/react';
-import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
+import { getPaginationVariables } from '@shopify/hydrogen';
 import { SearchResults } from '~/components/SearchResults';
-import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
 
 export const meta = () => {
   return [{ title: `Hydrogen | Search` }];
 };
 
+// Loader function
 export async function loader({ request, context }) {
   const url = new URL(request.url);
   const term = url.searchParams.get('q') || '';
@@ -39,16 +38,31 @@ export async function loader({ request, context }) {
       break;
   }
 
+  // Call the `regularSearch` function
+  const result = await regularSearch({
+    request,
+    context,
+    term,
+    sortKey,
+    reverse,
+  });
+
+  return json({ type: 'regular', term, result, sortKey });
+}
+
+// `regularSearch` function
+async function regularSearch({ request, context, term, sortKey, reverse }) {
+  const { storefront } = context;
   const variables = getPaginationVariables(request, { pageBy: 24 });
 
-  const { storefront } = context;
+  // Perform the query
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term, sortKey, reverse },
   });
 
   if (errors) {
     console.error('GraphQL Errors:', errors);
-    return json({ term, result: null, error: errors.map(e => e.message).join(', ') });
+    throw new Error(errors.map((e) => e.message).join(', '));
   }
 
   const total = Object.values(items).reduce(
@@ -56,11 +70,11 @@ export async function loader({ request, context }) {
     0
   );
 
-  return json({ type: 'regular', term, error: null, result: { total, items }, sortKey });
+  return { total, items };
 }
 
 export default function SearchPage() {
-  const { type, term, result, sortKey, error } = useLoaderData();
+  const { term, result, sortKey } = useLoaderData();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handleSortChange = (event) => {
@@ -98,6 +112,7 @@ export default function SearchPage() {
         <p>No results found.</p>
       ) : (
         <div>
+          {/* Display products */}
           {result.items.products?.nodes.map((product) => (
             <div key={product.id}>
               <h2>{product.title}</h2>
@@ -110,6 +125,7 @@ export default function SearchPage() {
   );
 }
 
+// GraphQL query for regular search
 export const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
@@ -169,41 +185,6 @@ const PAGE_INFO_FRAGMENT = `#graphql
     endCursor
   }
 `;
-
-/**
- * Regular search fetcher
- * @param {Pick<
- *   LoaderFunctionArgs,
- *   'request' | 'context'
- * >}
- * @return {Promise<RegularSearchReturn>}
- */
-async function regularSearch({ request, context }) {
-  const { storefront } = context;
-  const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 24 });
-  const term = String(url.searchParams.get('q') || '');
-
-  // Search articles, pages, and products for the `q` term
-  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
-  });
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, { nodes }) => acc + nodes.length,
-    0,
-  );
-
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
-
-  return { type: 'regular', term, error, result: { total, items } };
-}
 
 /**
  * Predictive search query and fragments
