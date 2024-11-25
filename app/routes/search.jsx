@@ -284,37 +284,55 @@ async function regularSearch({ request, context }) {
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
-  // Search articles, pages, and products for the `q` term
-  const { errors, products, articles, pages } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
-  });
+  try {
+    // Fetch data from Shopify
+    const { errors, products, articles, pages } = await storefront.query(SEARCH_QUERY, {
+      variables: { ...variables, term },
+    });
 
-  if (!products) {
-    throw new Error('No search data returned from Shopify API');
-  }
+    // Fallback for missing or undefined properties
+    const productNodes = products?.nodes || [];
+    const articleNodes = articles?.nodes || [];
+    const pageNodes = pages?.nodes || [];
+    const filters = products?.filters || [];
 
-  const total = (products.nodes?.length || 0) + 
-                (articles.nodes?.length || 0) + 
-                (pages.nodes?.length || 0);
+    const total = productNodes.length + articleNodes.length + pageNodes.length;
 
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
+    const error = errors
+      ? errors.map(({ message }) => message).join(', ')
+      : undefined;
 
-  return {
-    type: 'regular',
-    term,
-    error,
-    result: {
-      total,
-      items: {
-        products: products.nodes || [],
-        articles: articles.nodes || [],
-        pages: pages.nodes || [],
-        filters: products.filters || [],
+    return {
+      type: 'regular',
+      term,
+      error,
+      result: {
+        total,
+        items: {
+          products: productNodes,
+          articles: articleNodes,
+          pages: pageNodes,
+          filters,
+        },
       },
-    },
-  };
+    };
+  } catch (error) {
+    console.error('Error fetching search data:', error);
+    return {
+      type: 'regular',
+      term,
+      error: error.message,
+      result: {
+        total: 0,
+        items: {
+          products: [],
+          articles: [],
+          pages: [],
+          filters: [],
+        },
+      },
+    };
+  }
 }
 
 /**
