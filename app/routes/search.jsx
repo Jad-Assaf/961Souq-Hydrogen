@@ -289,29 +289,24 @@ async function regularSearch({ request, context }) {
   const term = String(url.searchParams.get('q') || '');
 
   try {
-    // Fetch data from Shopify
     const { errors, products, articles, pages } = await storefront.query(SEARCH_QUERY, {
       variables: { ...variables, term },
     });
 
-    // Fallback for missing or undefined properties
     const productNodes = products?.nodes || [];
     const articleNodes = articles?.nodes || [];
     const pageNodes = pages?.nodes || [];
     const filters = products?.filters || [];
 
-    const total = productNodes.length + articleNodes.length + pageNodes.length;
-
-    const error = errors
-      ? errors.map(({ message }) => message).join(', ')
-      : undefined;
+    console.log('Products:', productNodes); // Debugging
+    console.log('Filters:', filters); // Debugging
 
     return {
       type: 'regular',
       term,
-      error,
+      error: errors?.map(({ message }) => message).join(', '),
       result: {
-        total,
+        total: productNodes.length + articleNodes.length + pageNodes.length,
         items: {
           products: productNodes,
           articles: articleNodes,
@@ -321,7 +316,7 @@ async function regularSearch({ request, context }) {
       },
     };
   } catch (error) {
-    console.error('Error fetching search data:', error);
+    console.error('Search Error:', error);
     return {
       type: 'regular',
       term,
