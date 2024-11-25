@@ -94,6 +94,74 @@ export default function SearchPage() {
  * Regular search query and fragments
  * (adjust as needed)
  */
+const SEARCH_PRODUCT_FRAGMENT = `#graphql
+  fragment SearchProduct on Product {
+    __typename
+    handle
+    id
+    publishedAt
+    title
+    trackingParameters
+    vendor
+    variants(first: 1) {
+      nodes {
+        id
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+        selectedOptions {
+          name
+          value
+        }
+        product {
+          handle
+          title
+        }
+      }
+    }
+  }
+`;
+
+const SEARCH_PAGE_FRAGMENT = `#graphql
+  fragment SearchPage on Page {
+     __typename
+     handle
+    id
+    title
+    trackingParameters
+  }
+`;
+
+const SEARCH_ARTICLE_FRAGMENT = `#graphql
+  fragment SearchArticle on Article {
+    __typename
+    handle
+    id
+    title
+    trackingParameters
+  }
+`;
+
+const PAGE_INFO_FRAGMENT = `#graphql
+  fragment PageInfoFragment on PageInfo {
+    hasNextPage
+    hasPreviousPage
+    startCursor
+    endCursor
+  }
+`;
+
 const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
@@ -214,11 +282,11 @@ async function regularSearch({ request, context, sort }) {
 
   return { type: 'regular', term, error, result: { total, items } };
 }
-
 /**
- * Predictive search query and fragments
+ * Regular search query and fragments
  * (adjust as needed)
  */
+
 const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
   fragment PredictiveArticle on Article {
     __typename
