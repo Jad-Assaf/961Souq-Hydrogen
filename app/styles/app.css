@@ -353,7 +353,7 @@ button {
   width: 100%;
 }
 
-.recently-viewed-container .product-item{
+.recently-viewed-container .product-item {
   display: flex;
   justify-content: center;
 }
@@ -677,8 +677,13 @@ button.reset:hover:not(:has(> *)) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
   border-bottom: 1px solid #e0e0e0;
+}
+
+.mobile-menu-item button {
+  width: 100%;
+  text-align: start;
+  padding: 10px 0;
 }
 
 /* Menu Item Arrow */
@@ -1403,7 +1408,8 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 /* Keep Product Card Height Consistent */
-.product-item-collection img, .product-item img {
+.product-item-collection img,
+.product-item img {
   width: 100%;
   height: auto;
 }
