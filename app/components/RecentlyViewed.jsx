@@ -43,7 +43,7 @@ export default function RecentlyViewedProducts({ currentProductId }) {
     // Function to fetch products from the Shopify Storefront API
     async function fetchProducts(productIds) {
         const storefrontAccessToken = import.meta.env.VITE_PUBLIC_STOREFRONT_API_TOKEN;
-        const shopDomain = import.meta.env.VITE_PUBLIC_SHOPIFY_STORE_DOMAIN;
+        const shopDomain = 'https://961souqs.myshopify.com';
 
         const query = `
       query getProductsByIds($ids: [ID!]!) {
