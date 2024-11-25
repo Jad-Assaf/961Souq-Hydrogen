@@ -250,16 +250,18 @@ async function regularSearch({ request, context }) {
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
-  // Extract filters from search parameters, but do not pass them to products search
-  const filters = getFiltersFromSearchParams(url.searchParams);
+  // Extract filters from search parameters
+  const filters = getFiltersFromSearchParams(url.searchParams).map(filter => ({
+    // Adjust the structure to match ProductFilter
+    [filter.key]: filter.value,
+  }));
 
   // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { 
       ...variables, 
       term, 
-      // Only pass filters to the collection query if applicable
-      filters: filters.length ? filters : undefined,
+      filters: filters.length ? filters : undefined, // Pass only if filters are present
     },
   });
 
@@ -278,11 +280,8 @@ async function regularSearch({ request, context }) {
 
   return { type: 'regular', term, error, result: { total, items } };
 }
-/**
- * Function to extract filters from search parameters
- * @param {URLSearchParams} searchParams
- * @return {Array} filters
- */
+
+// Function to extract filters from search parameters
 function getFiltersFromSearchParams(searchParams) {
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
@@ -292,7 +291,6 @@ function getFiltersFromSearchParams(searchParams) {
   }
   return filters;
 }
-
 /**
  * Predictive search query and fragments
  * (adjust as needed)
