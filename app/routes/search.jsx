@@ -44,6 +44,7 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
+  console.log("SearchPage component rendered"); // Debugging log
   const { type, term, result, error } = useLoaderData();
   const formRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
