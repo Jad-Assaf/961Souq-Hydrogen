@@ -48,7 +48,7 @@ export async function loader({ request, context }) {
 
   if (errors) {
     console.error('GraphQL Errors:', errors);
-    return { term, result: null, error: errors.map(e => e.message).join(', ') };
+    return json({ term, result: null, error: errors.map(e => e.message).join(', ') });
   }
 
   const total = Object.values(items).reduce(
@@ -56,7 +56,7 @@ export async function loader({ request, context }) {
     0
   );
 
-  return { type: 'regular', term, error: null, result: { total, items }, sortKey };
+  return json({ type: 'regular', term, error: null, result: { total, items }, sortKey });
 }
 
 export default function SearchPage() {
@@ -98,7 +98,6 @@ export default function SearchPage() {
         <p>No results found.</p>
       ) : (
         <div>
-          {/* Display products */}
           {result.items.products?.nodes.map((product) => (
             <div key={product.id}>
               <h2>{product.title}</h2>
@@ -111,79 +110,6 @@ export default function SearchPage() {
   );
 }
 
-/**
- * Regular search query and fragments
- * (adjust as needed)
- */
-const SEARCH_PRODUCT_FRAGMENT = `#graphql
-  fragment SearchProduct on Product {
-    __typename
-    handle
-    id
-    publishedAt
-    title
-    trackingParameters
-    vendor
-    variants(first: 1) {
-      nodes {
-        id
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-        selectedOptions {
-          name
-          value
-        }
-        product {
-          handle
-          title
-        }
-      }
-    }
-  }
-`;
-
-const SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment SearchPage on Page {
-     __typename
-     handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment SearchArticle on Article {
-    __typename
-    handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const PAGE_INFO_FRAGMENT = `#graphql
-  fragment PageInfoFragment on PageInfo {
-    hasNextPage
-    hasPreviousPage
-    startCursor
-    endCursor
-  }
-`;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
 export const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
@@ -216,6 +142,32 @@ export const SEARCH_QUERY = `#graphql
   }
   ${SEARCH_PRODUCT_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
+`;
+
+const SEARCH_PRODUCT_FRAGMENT = `#graphql
+  fragment SearchProduct on Product {
+    handle
+    id
+    title
+    vendor
+    variants(first: 1) {
+      nodes {
+        price {
+          amount
+          currencyCode
+        }
+      }
+    }
+  }
+`;
+
+const PAGE_INFO_FRAGMENT = `#graphql
+  fragment PageInfoFragment on PageInfo {
+    hasNextPage
+    hasPreviousPage
+    startCursor
+    endCursor
+  }
 `;
 
 /**
