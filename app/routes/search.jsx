@@ -170,8 +170,8 @@ const SEARCH_QUERY = `#graphql
     $language: LanguageCode
     $last: Int
     $term: String!
-    $sortKey: ProductSortKeys // Add sortKey
-    $reverse: Boolean // Add reverse
+    $sortKey: ProductSortKeys
+    $reverse: Boolean
     $startCursor: String
   ) @inContext(country: $country, language: $language) {
     articles: search(
@@ -202,8 +202,8 @@ const SEARCH_QUERY = `#graphql
       first: $first,
       last: $last,
       query: $term,
-      sortKey: $sortKey, // Use sortKey from parameters
-      reverse: $reverse, // Use reverse from parameters
+      sortKey: $sortKey,
+      reverse: $reverse,
       types: [PRODUCT],
       unavailableProducts: HIDE,
     ) {
