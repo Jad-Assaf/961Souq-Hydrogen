@@ -167,7 +167,8 @@ export const SEARCH_QUERY = `#graphql
     $language: LanguageCode
     $last: Int
     $term: String!
-    $startCursor: String
+    $filters: [ProductFilter!]
+    $sortKey: ProductSortKeys
   ) @inContext(country: $country, language: $language) {
     articles: search(
       query: $term,
@@ -197,7 +198,8 @@ export const SEARCH_QUERY = `#graphql
       first: $first,
       last: $last,
       query: $term,
-      sortKey: RELEVANCE,
+      filters: $filters,
+      sortKey: $sortKey,
       types: [PRODUCT],
       unavailableProducts: HIDE,
     ) {
@@ -216,7 +218,6 @@ export const SEARCH_QUERY = `#graphql
   ${SEARCH_ARTICLE_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
 `;
-
 /**
  * Regular search fetcher
  * @param {Pick<
