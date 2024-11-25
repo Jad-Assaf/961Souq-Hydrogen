@@ -2,77 +2,96 @@ import React, { useState, useEffect } from 'react';
 
 function RecentlyViewedProducts() {
     const [recentlyViewed, setRecentlyViewed] = useState(() => {
-        // Get the initial state from localStorage
         const saved = localStorage.getItem('recentlyViewed');
         return saved ? JSON.parse(saved) : [];
     });
 
     const [productData, setProductData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // Fetch product details for recently viewed products
     useEffect(() => {
         async function fetchProducts() {
-            if (recentlyViewed.length > 0) {
-                const promises = recentlyViewed.map(async (id) => {
-                    const response = await fetch(`/api/graphql`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            query: `
-                query GetProductDetails($id: ID!) {
-                  product(id: $id) {
-                    id
-                    title
-                    description
-                    images(first: 1) {
-                      edges {
-                        node {
-                          src
-                        }
-                      }
+            try {
+                if (recentlyViewed.length > 0) {
+                    setLoading(true);
+                    const unfetchedIds = recentlyViewed.filter(
+                        (id) => !productData.find((product) => product.id === id)
+                    );
+
+                    if (unfetchedIds.length === 0) {
+                        setLoading(false);
+                        return;
                     }
-                  }
-                }
-              `,
-                            variables: { id },
-                        }),
+
+                    const promises = unfetchedIds.map(async (id) => {
+                        const response = await fetch(`/api/graphql`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                query: `
+                                query GetProductDetails($id: ID!) {
+                                  product(id: $id) {
+                                    id
+                                    title
+                                    description
+                                    images(first: 1) {
+                                      edges {
+                                        node {
+                                          src
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              `,
+                                variables: { id },
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            console.error(`Failed to fetch product ${id}: ${response.statusText}`);
+                            return null;
+                        }
+
+                        const result = await response.json();
+                        return result.data.product;
                     });
 
-                    const result = await response.json();
-                    return result.data.product;
-                });
-
-                const products = await Promise.all(promises);
-                setProductData(products);
+                    const products = await Promise.all(promises);
+                    setProductData((prev) => [...prev, ...products.filter((p) => p)]);
+                }
+            } catch (error) {
+                console.error('Error fetching recently viewed products:', error);
+            } finally {
+                setLoading(false);
             }
         }
 
         fetchProducts();
     }, [recentlyViewed]);
 
-    useEffect(() => {
-        // Save the state to localStorage whenever it changes
-        localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
-    }, [recentlyViewed]);
-
     return (
         <div>
             <h2>Recently Viewed Products</h2>
-            {productData.length > 0 ? (
+            {loading ? (
+                <p>Loading recently viewed products...</p>
+            ) : productData.length > 0 ? (
                 <div style={{ display: 'flex', gap: '16px' }}>
-                    {productData.map((product) => (
-                        <div key={product.id} style={{ border: '1px solid #ddd', padding: '8px' }}>
-                            <img
-                                src={product.images.edges[0]?.node.src}
-                                alt={product.title}
-                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                            <h3>{product.title}</h3>
-                            <p>{product.description}</p>
-                        </div>
-                    ))}
+                    {productData.map((product) =>
+                        product ? (
+                            <div key={product.id} style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                <img
+                                    src={product.images?.edges[0]?.node?.src || ''}
+                                    alt={product.title || 'Product Image'}
+                                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                />
+                                <h3>{product.title || 'Untitled Product'}</h3>
+                                <p>{product.description || 'No description available.'}</p>
+                            </div>
+                        ) : null
+                    )}
                 </div>
             ) : (
                 <p>No recently viewed products.</p>
