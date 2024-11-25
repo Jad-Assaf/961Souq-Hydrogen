@@ -17,19 +17,27 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
+  console.log("Loader function called");
   const url = new URL(request.url);
+  console.log("Request URL:", request.url);
+
   const isPredictive = url.searchParams.has('predictive');
+  console.log("Is Predictive Search:", isPredictive);
+
   const sort = url.searchParams.get('sort') || 'relevance'; // Get sort parameter
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
     : regularSearch({ request, context, sort }); // Pass sort parameter to regularSearch
 
   searchPromise.catch((error) => {
-    console.error(error);
+    console.error("Search Promise Error:", error);
     return { term: '', result: null, error: error.message };
   });
 
-  return json(await searchPromise);
+  const result = await searchPromise;
+  console.log("Search Promise Result:", result);
+
+  return json(result);
 }
 
 /**
