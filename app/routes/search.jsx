@@ -1,13 +1,12 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
+import { useLoaderData, useNavigate, useSearchParams } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
-import { useMediaQuery } from 'react-responsive';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { DrawerFilter } from '../modules/drawer-filter';
-import { getAppliedFilterLink } from '../lib/filter';
-import React, { useEffect, useRef, useState } from 'react';
+import { getEmptyPredictiveSearchResult } from '~/lib/search';
+import { useRef, useState } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -21,17 +20,65 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+  const searchParams = url.searchParams;
+  const term = searchParams.get('q') || '';
+  const paginationVariables = getPaginationVariables(request, { pageBy: 24 });
 
-  searchPromise.catch((error) => {
-    console.error(error);
-    return { term: '', result: null, error: error.message };
+  const filters = [];
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith('filter_')) {
+      const filterKey = key.replace('filter_', '');
+      filters.push({ [filterKey]: JSON.parse(value) });
+    }
+  }
+
+  const regularSearchPromise = regularSearch({
+    request,
+    context,
+    filters,
+    term,
+    paginationVariables,
   });
 
-  return json(await searchPromise);
+  try {
+    const result = await regularSearchPromise;
+    return json({ term, ...result });
+  } catch (error) {
+    console.error(error);
+    return json({ term, error: error.message, result: null });
+  }
+}
+
+async function regularSearch({ request, context, filters, term, paginationVariables }) {
+  const { storefront } = context;
+
+  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...paginationVariables, term, filters },
+  });
+
+  if (!items) {
+    throw new Error('No search data returned from Shopify API');
+  }
+
+  const total = Object.values(items).reduce(
+    (acc, { nodes }) => acc + (nodes ? nodes.length : 0),
+    0,
+  );
+
+  const error = errors ? errors.map(({ message }) => message).join(', ') : undefined;
+
+  return {
+    type: 'regular',
+    term,
+    error,
+    result: {
+      total,
+      items: {
+        ...items,
+        filters: items.products?.filters || [],
+      },
+    },
+  };
 }
 
 /**
@@ -39,108 +86,45 @@ export async function loader({ request, context }) {
  */
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
-  const [numberInRow, setNumberInRow] = useState(5);
-  const [screenWidth, setScreenWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1500
-  );
-  const isDesktop = useMediaQuery({ minWidth: 1024 });
+  const [appliedFilters, setAppliedFilters] = React.useState([]);
   const [searchParams] = useSearchParams();
-  const location = useLocation();
   const navigate = useNavigate();
-  const formRef = useRef(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const debounce = (fn, delay) => {
-        let timeoutId;
-        return (...args) => {
-          clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => fn(...args), delay);
-        };
-      };
-
-      const updateScreenWidth = debounce(() => {
-        const width = window.innerWidth;
-        setScreenWidth(width);
-        if (width >= 1500) setNumberInRow(5);
-        else if (width >= 1200) setNumberInRow(4);
-        else if (width >= 550) setNumberInRow(3);
-        else setNumberInRow(1);
-      }, 100);
-
-      updateScreenWidth();
-      window.addEventListener("resize", updateScreenWidth);
-
-      return () => {
-        window.removeEventListener("resize", updateScreenWidth);
-      };
-    }
-  }, []);
-
-  const handleLayoutChange = (number) => {
-    setNumberInRow(number);
-  };
-
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-
-    const searchInput = formRef.current.querySelector('input[name="q"]');
-    if (searchInput) {
-      const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-
-      // Redirect with modified query
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
-    }
-  };
 
   const handleFilterRemove = (filter) => {
-    const newUrl = getAppliedFilterLink(filter, searchParams, location);
-    navigate(newUrl);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete(`filter_${filter.id}`);
+    navigate(`/search?${newParams.toString()}`);
+  };
+
+  const handleFilterApply = (filter, value) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set(`filter_${filter.id}`, JSON.stringify(value));
+    navigate(`/search?${newParams.toString()}`);
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-      {isDesktop && result && result.items?.filters && result.items.filters.length > 0 && (
-        <div className="filters-container">
-          <FiltersDrawer
-            filters={result.items.filters}
-            appliedFilters={result.appliedFilters || []}
-            onRemoveFilter={handleFilterRemove}
-          />
-        </div>
+      {result?.items?.filters?.length > 0 && (
+        <FiltersDrawer
+          filters={result.items.filters}
+          appliedFilters={appliedFilters}
+          onRemoveFilter={handleFilterRemove}
+          onApplyFilter={handleFilterApply}
+        />
       )}
-      <div className="search-content">
-        <div className="view-container">
-          <DrawerFilter
-            filters={result.items?.filters || []}
-            appliedFilters={result.appliedFilters || []}
-            numberInRow={numberInRow}
-            onLayoutChange={handleLayoutChange}
-            productNumber={result.items?.products?.length || 0}
-            isDesktop={isDesktop}
-          />
-        </div>
-        {!term || !result?.total ? (
-          <SearchResults.Empty />
-        ) : (
-          <SearchResults result={result} term={term}>
-            {({ articles, pages, products, term }) => (
-              <div>
-                {products?.nodes?.length > 0 ? (
-                    <SearchResults.Products
-                      products={result?.items?.products || []}
-                      term={term}
-                    />
-                ) : (
-                  <p>No products found for "{term}".</p>
-                )}
-              </div>
-            )}
-          </SearchResults>
-        )}
-      </div>
+      {!term || !result?.total ? (
+        <SearchResults.Empty />
+      ) : (
+        <SearchResults result={result} term={term}>
+          {({ articles, pages, products }) => (
+            <div>
+              <SearchResults.Products products={products} term={term} />
+              {/* Optionally display articles and pages */}
+            </div>
+          )}
+        </SearchResults>
+      )}
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
@@ -227,43 +211,42 @@ export const SEARCH_QUERY = `#graphql
     $language: LanguageCode
     $last: Int
     $term: String!
+    $filters: [ProductFilter!]
     $startCursor: String
   ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
+    articles: search(query: $term, types: [ARTICLE], first: $first) {
       nodes {
-        ...on Article {
-          ...SearchArticle
-        }
+        ...SearchArticle
       }
     }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
+    pages: search(query: $term, types: [PAGE], first: $first) {
       nodes {
-        ...on Page {
-          ...SearchPage
-        }
+        ...SearchPage
       }
     }
     products: search(
-      after: $endCursor,
-      before: $startCursor,
-      first: $first,
-      last: $last,
-      query: $term,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
+      after: $endCursor
+      before: $startCursor
+      first: $first
+      last: $last
+      query: $term
+      filters: $filters
+      types: [PRODUCT]
+      sortKey: RELEVANCE
+      unavailableProducts: HIDE
     ) {
       nodes {
-        ...on Product {
-          ...SearchProduct
+        ...SearchProduct
+      }
+      filters {
+        id
+        label
+        type
+        values {
+          id
+          label
+          count
+          input
         }
       }
       pageInfo {
@@ -288,37 +271,28 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
-  const term = String(url.searchParams.get('q') || '');
   const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(url.searchParams.get('q') || '');
 
-  try {
-    const response = await storefront.query(SEARCH_QUERY, {
-      variables: { ...variables, term },
-    });
+  // Search articles, pages, and products for the `q` term
+  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term },
+  });
 
-    console.log('Raw API Response:', response); // Log the full response
-
-    const products = response.products || {};
-    const productNodes = products.nodes || [];
-
-    console.log('Products:', productNodes); // Log the product data
-
-    return {
-      type: 'regular',
-      term,
-      error: response.errors ? response.errors.map(e => e.message).join(', ') : undefined,
-      result: {
-        total: productNodes.length,
-        items: {
-          products: productNodes,
-          filters: products.filters || [],
-        },
-      },
-    };
-  } catch (error) {
-    console.error('Error in regularSearch:', error);
-    throw error;
+  if (!items) {
+    throw new Error('No search data returned from Shopify API');
   }
+
+  const total = Object.values(items).reduce(
+    (acc, { nodes }) => acc + nodes.length,
+    0,
+  );
+
+  const error = errors
+    ? errors.map(({ message }) => message).join(', ')
+    : undefined;
+
+  return { type: 'regular', term, error, result: { total, items } };
 }
 
 /**
