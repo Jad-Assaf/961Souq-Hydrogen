@@ -4,10 +4,9 @@ import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { FiltersDrawer, DrawerFilter } from '~/modules/drawer-filter';
 import { FILTER_URL_PREFIX } from '~/lib/const';
-
 
 /**
  * @type {MetaFunction}
@@ -33,6 +32,7 @@ export async function loader({ request, context }) {
 
   return json(await searchPromise);
 }
+
 /**
  * Renders the /search route
  */
@@ -61,6 +61,8 @@ export default function SearchPage() {
     setSearchParams(newSearchParams);
   };
 
+  console.log('Search Results:', { term, result, error }); // Debugging log
+
   return (
     <div className="search">
       <h1>Search Results</h1>
@@ -78,6 +80,7 @@ export default function SearchPage() {
           {({ articles, pages, products, term }) => (
             <div>
               <SearchResults.Products products={products} term={term} />
+              {/* Uncomment if you want to show articles and pages */}
               {/* <SearchResults.Pages pages={pages} term={term} />
               <SearchResults.Articles articles={articles} term={term} /> */}
             </div>
@@ -163,7 +166,7 @@ const PAGE_INFO_FRAGMENT = `#graphql
 // Regular search query
 export const SEARCH_QUERY = `#graphql
   query RegularSearch(
-  $country: CountryCode
+    $country: CountryCode
     $endCursor: String
     $first: Int
     $language: LanguageCode
@@ -171,56 +174,56 @@ export const SEARCH_QUERY = `#graphql
     $term: String!
     $startCursor: String
     $filters: [FilterInput]
-) @inContext(country: $country, language: $language) {
-  articles: search(
-    query: $term,
-    types: [ARTICLE],
-    first: $first,
-    filters: $filters,
-  ) {
+  ) @inContext(country: $country, language: $language) {
+    articles: search(
+      query: $term,
+      types: [ARTICLE],
+      first: $first,
+      filters: $filters,
+    ) {
       nodes {
         ...on Article {
           ...SearchArticle
+        }
       }
     }
-  }
-  pages: search(
-    query: $term,
-    types: [PAGE],
-    first: $first,
-    filters: $filters,
-  ) {
+    pages: search(
+      query: $term,
+      types: [PAGE],
+      first: $first,
+      filters: $filters,
+    ) {
       nodes {
         ...on Page {
           ...SearchPage
+        }
       }
     }
-  }
-  products: search(
-    after: $endCursor,
-    before: $startCursor,
-    first: $first,
-    last: $last,
-    query: $term,
-    sortKey: RELEVANCE,
-    types: [PRODUCT],
-    unavailableProducts: HIDE,
-    filters: $filters,
-  ) {
+    products: search(
+      after: $endCursor,
+      before: $startCursor,
+      first: $first,
+      last: $last,
+      query: $term,
+      sortKey: RELEVANCE,
+      types: [PRODUCT],
+      unavailableProducts: HIDE,
+      filters: $filters,
+    ) {
       nodes {
         ...on Product {
           ...SearchProduct
+        }
       }
-    }
       pageInfo {
         ...PageInfoFragment
+      }
     }
   }
-}
-  ${ SEARCH_PRODUCT_FRAGMENT }
-  ${ SEARCH_PAGE_FRAGMENT }
-  ${ SEARCH_ARTICLE_FRAGMENT }
-  ${ PAGE_INFO_FRAGMENT }
+  ${SEARCH_PRODUCT_FRAGMENT}
+  ${SEARCH_PAGE_FRAGMENT}
+  ${SEARCH_ARTICLE_FRAGMENT}
+  ${PAGE_INFO_FRAGMENT}
 `;
 
 /**
@@ -424,7 +427,6 @@ async function predictiveSearch({ request, context }) {
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
-        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term,
