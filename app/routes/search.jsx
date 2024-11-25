@@ -6,7 +6,7 @@ import { SearchResults } from '~/components/SearchResults';
 import { FiltersDrawer } from '../modules/drawer-filter';
 import { DrawerFilter } from '../modules/drawer-filter';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 /**
  * @type {MetaFunction}
