@@ -275,6 +275,10 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
+    $filters: [ProductFilter!],
+    $sortKey: ProductSortKeys,
+    $reverse: Boolean,
+    $after: String,
   ) @inContext(country: $country, language: $language) {
     articles: search(
       query: $term,
@@ -298,23 +302,27 @@ export const SEARCH_QUERY = `#graphql
         }
       }
     }
-    products: search(
-      after: $endCursor,
-      before: $startCursor,
-      first: $first,
-      last: $last,
-      query: $term,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
-    ) {
+    products(first: $first, after: $after, query: $query, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
       nodes {
-        ...on Product {
-          ...SearchProduct
+        id
+        title
+        handle
+        images {
+          url
+          altText
+        }
+        variants {
+          id
+          price {
+            amount
+            currencyCode
+          }
+          availableForSale
         }
       }
       pageInfo {
-        ...PageInfoFragment
+        hasNextPage
+        endCursor
       }
     }
   }
