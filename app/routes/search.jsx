@@ -1,14 +1,10 @@
-import { defer, redirect, json } from '@shopify/remix-oxygen';
-import { useLoaderData, Link, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
-import {
-  getPaginationVariables,
-  Image,
-  Money,
-} from '@shopify/hydrogen';
-import { FiltersDrawer } from '../modules/drawer-filter'; // Assuming you have this component
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'; // Your existing component
-import { Analytics } from '@shopify/hydrogen';
-import React, { useEffect, useState } from 'react';
+import { json } from '@shopify/remix-oxygen';
+import { useLoaderData } from '@remix-run/react';
+import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
+import { SearchForm } from '~/components/SearchForm';
+import { SearchResults } from '~/components/SearchResults';
+import { getEmptyPredictiveSearchResult } from '~/lib/search';
+import { useRef } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -18,144 +14,76 @@ export const meta = () => {
 };
 
 /**
- * @param {LoaderFunctionArgs} args
+ * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const query = url.searchParams.get('q') || '';
-  const paginationVariables = getPaginationVariables(request, { pageBy: 50 });
+  const isPredictive = url.searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context });
 
-  // Extract filters and sorting parameters from the URL
-  const sort = url.searchParams.get('sort') || 'newest';
-  const filters = []; // Initialize with empty filters
-
-  // Fetch search results
-  const searchResults = await context.storefront.query(SEARCH_QUERY, {
-    variables: {
-      query,
-      filters,
-      sortKey: getSortKey(sort),
-      reverse: isReverseSort(sort),
-      ...paginationVariables,
-    },
+  searchPromise.catch((error) => {
+    console.error(error);
+    return { term: '', result: null, error: error.message };
   });
 
-  if (!searchResults || !searchResults.products) {
-    throw redirect('/search');
-  }
-
-  return defer({ searchResults: searchResults.products });
+  return json(await searchPromise);
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { searchResults } = useLoaderData();
-  const [filters, setFilters] = useState([]);
-  const [numberInRow, setNumberInRow] = useState(5);
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { type, term, result, error } = useLoaderData();
+  const formRef = useRef(null);
 
-  // Handle filter changes
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    const newUrl = getAppliedFilterLink(newFilters, searchParams, location);
-    navigate(newUrl);
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    const searchInput = formRef.current.querySelector('input[name="q"]');
+    const query = searchInput.value;
+    const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
+    window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
   };
 
-  // Ensure searchResults.nodes is defined before filtering
-  const filteredProducts = (searchResults.nodes || []).filter(product => {
-    return filters.every(filter => {
-      // Example filter logic; adjust according to your filter structure
-      return product.variants.some(variant => variant.availableForSale); // Example: check if any variant is available
-    });
-  });
+  // Example filter and sort UI
+  const handleFilterChange = (filter) => {
+    // Update the URL with the new filter
+  };
 
-  // Sort products
-  const sortedProducts = React.useMemo(() => {
-    return filteredProducts.sort((a, b) => {
-      // Implement sorting logic based on your requirements
-      const aPrice = a.variants[0]?.price.amount || 0;
-      const bPrice = b.variants[0]?.price.amount || 0;
-      return aPrice - bPrice; // Sort by price low to high
-    });
-  }, [filteredProducts]);
+  const handleSortChange = (sort) => {
+    // Update the URL with the new sort option
+  };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-
-      <FiltersDrawer
-        filters={[]} // Pass your filter options here
-        appliedFilters={filters}
-        onRemoveFilter={handleFilterChange}
-      />
-
-      <div className="flex-1 mt-[116px]">
-        <PaginatedResourceSection
-          connection={{
-            nodes: sortedProducts,
-            // Add pagination info here if necessary
-          }}
-          resourcesClassName="products-grid"
-        >
-          {({ node: product }) => (
-            <div key={product.id}>
-              <Link to={`/products/${product.handle}`}>
-                <Image src={product.images[0]?.url} alt={product.images[0]?.altText} />
-                <h4>{product.title}</h4>
-                <p>
-                  <Money money={product.variants[0].price} />
-                </p>
-              </Link>
-            </div>
-          )}
-        </PaginatedResourceSection>
+      {/* Filters and Sorting UI */}
+      <div className="filters">
+        <select onChange={(e) => handleSortChange(e.target.value)}>
+          <option value="RELEVANCE">Sort by Relevance</option>
+          <option value="price-low-high">Price: Low to High</option>
+          <option value="price-high-low">Price: High to Low</option>
+        </select>
+        {/* Add more filter options here */}
       </div>
 
-      <Analytics.SearchView data={{ searchTerm: searchParams.get('q'), searchResults }} />
+      {!term || !result?.total ? (
+        <SearchResults.Empty />
+      ) : (
+        <SearchResults result={result} term={term}>
+          {({ articles, pages, products, term }) => (
+            <div>
+              <SearchResults.Products products={products} term={term} />
+              {/* <SearchResults.Pages pages={pages} term={term} />
+              <SearchResults.Articles articles={articles} term={term} /> */}
+            </div>
+          )}
+        </SearchResults>
+      )}
+      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
-}
-
-/**
- * Function to get the applied filter link
- * @param {Array} filters
- * @param {URLSearchParams} searchParams
- * @param {Location} location
- * @returns {string} New URL with applied filters
- */
-function getAppliedFilterLink(filters, searchParams, location) {
-  const newParams = new URLSearchParams(searchParams);
-  // Update the filters in the URL
-  // Add logic to handle filter parameters
-  return `${location.pathname}?${newParams.toString()}`;
-}
-
-/**
- * Function to determine sort key
- * @param {string} sort
- * @returns {string} Sort key for GraphQL query
- */
-function getSortKey(sort) {
-  switch (sort) {
-    case 'price':
-      return 'PRICE';
-    case 'newest':
-    default:
-      return 'CREATED_AT';
-  }
-}
-
-/**
- * Function to determine if sort should be reversed
- * @param {string} sort
- * @returns {boolean} True if sort should be reversed
- */
-function isReverseSort(sort) {
-  return sort === 'price-desc';
 }
 
 /**
@@ -201,7 +129,37 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
   }
 `;
 
-const SEARCH_QUERY = `#graphql
+const SEARCH_PAGE_FRAGMENT = `#graphql
+  fragment SearchPage on Page {
+     __typename
+     handle
+    id
+    title
+    trackingParameters
+  }
+`;
+
+const SEARCH_ARTICLE_FRAGMENT = `#graphql
+  fragment SearchArticle on Article {
+    __typename
+    handle
+    id
+    title
+    trackingParameters
+  }
+`;
+
+const PAGE_INFO_FRAGMENT = `#graphql
+  fragment PageInfoFragment on PageInfo {
+    hasNextPage
+    hasPreviousPage
+    startCursor
+    endCursor
+  }
+`;
+
+// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
+export const SEARCH_QUERY = `#graphql
   query RegularSearch(
     $country: CountryCode
     $endCursor: String
@@ -210,36 +168,53 @@ const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
-    $filters: [ProductFilter!],
-    $sortKey: ProductSortKeys,
-    $reverse: Boolean,
-    $after: String,
   ) @inContext(country: $country, language: $language) {
-    products(first: $first, after: $after, query: $term, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
+    articles: search(
+      query: $term,
+      types: [ARTICLE],
+      first: $first,
+    ) {
       nodes {
-        id
-        title
-        handle
-        images {
-          url
-          altText
+        ...on Article {
+          ...SearchArticle
         }
-        variants {
-          id
-          price {
-            amount
-            currencyCode
-          }
-          availableForSale
+      }
+    }
+    pages: search(
+      query: $term,
+      types: [PAGE],
+      first: $first,
+    ) {
+      nodes {
+        ...on Page {
+          ...SearchPage
+        }
+      }
+    }
+    products: search(
+      after: $endCursor,
+      before: $startCursor,
+      first: $first,
+      last: $last,
+      query: $term,
+      sortKey: RELEVANCE,
+      types: [PRODUCT],
+      unavailableProducts: HIDE,
+    ) {
+      nodes {
+        ...on Product {
+          ...SearchProduct
         }
       }
       pageInfo {
-        hasNextPage
-        endCursor
+        ...PageInfoFragment
       }
     }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
+  ${SEARCH_PAGE_FRAGMENT}
+  ${SEARCH_ARTICLE_FRAGMENT}
+  ${PAGE_INFO_FRAGMENT}
 `;
 
 /**
@@ -256,11 +231,25 @@ async function regularSearch({ request, context }) {
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
+  // Extract filters from URL
+  const filters = [];
+  for (const [key, value] of url.searchParams.entries()) {
+    if (key.startsWith(FILTER_URL_PREFIX)) {
+      const filterKey = key.replace(FILTER_URL_PREFIX, '');
+      filters.push({ [filterKey]: JSON.parse(value) });
+    }
+  }
+
+  // Extract sort parameter
+  const sort = url.searchParams.get('sort') || 'RELEVANCE';
+  const sortKey = sort === 'price-low-high' ? 'PRICE' : sort === 'price-high-low' ? 'PRICE' : 'RELEVANCE';
+
   // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
+    variables: { ...variables, term, filters, sortKey },
   });
 
+  // Handle errors and total count
   if (!items) {
     throw new Error('No search data returned from Shopify API');
   }
