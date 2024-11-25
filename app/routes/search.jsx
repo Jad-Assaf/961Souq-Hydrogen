@@ -129,7 +129,10 @@ export default function SearchPage() {
             {({ articles, pages, products, term }) => (
               <div>
                 {products?.nodes?.length > 0 ? (
-                  <SearchResults.Products products={products} term={term} />
+                    <SearchResults.Products
+                      products={result?.items?.products || []}
+                      term={term}
+                    />
                 ) : (
                   <p>No products found for "{term}".</p>
                 )}
@@ -285,52 +288,36 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
+  const variables = getPaginationVariables(request, { pageBy: 24 });
 
   try {
-    const { errors, products, articles, pages } = await storefront.query(SEARCH_QUERY, {
+    const response = await storefront.query(SEARCH_QUERY, {
       variables: { ...variables, term },
     });
 
-    const productNodes = products?.nodes || [];
-    const articleNodes = articles?.nodes || [];
-    const pageNodes = pages?.nodes || [];
-    const filters = products?.filters || [];
+    console.log('Raw API Response:', response); // Log the full response
 
-    console.log('Products:', productNodes); // Debugging
-    console.log('Filters:', filters); // Debugging
+    const products = response.products || {};
+    const productNodes = products.nodes || [];
+
+    console.log('Products:', productNodes); // Log the product data
 
     return {
       type: 'regular',
       term,
-      error: errors?.map(({ message }) => message).join(', '),
+      error: response.errors ? response.errors.map(e => e.message).join(', ') : undefined,
       result: {
-        total: productNodes.length + articleNodes.length + pageNodes.length,
+        total: productNodes.length,
         items: {
           products: productNodes,
-          articles: articleNodes,
-          pages: pageNodes,
-          filters,
+          filters: products.filters || [],
         },
       },
     };
   } catch (error) {
-    console.error('Search Error:', error);
-    return {
-      type: 'regular',
-      term,
-      error: error.message,
-      result: {
-        total: 0,
-        items: {
-          products: [],
-          articles: [],
-          pages: [],
-          filters: [],
-        },
-      },
-    };
+    console.error('Error in regularSearch:', error);
+    throw error;
   }
 }
 
