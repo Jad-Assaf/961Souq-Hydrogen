@@ -1,10 +1,15 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useNavigate } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef } from 'react';
+
+/**
+ * Constants
+ */
+const FILTER_URL_PREFIX = 'filter_'; // Define your filter prefix
 
 /**
  * @type {MetaFunction}
@@ -14,29 +19,53 @@ export const meta = () => {
 };
 
 /**
- * @param {LoaderFunctionArgs}
+ * Loader function
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
 
-  searchPromise.catch((error) => {
+  // Extract filters
+  const filters = [];
+  for (const [key, value] of url.searchParams.entries()) {
+    if (key.startsWith(FILTER_URL_PREFIX)) {
+      const filterKey = key.replace(FILTER_URL_PREFIX, '');
+      filters.push({ [filterKey]: JSON.parse(value) });
+    }
+  }
+
+  try {
+    const searchPromise = isPredictive
+      ? predictiveSearch({ request, context })
+      : regularSearch({ request, context, filters }); // Pass filters here
+
+    const searchResult = await searchPromise;
+    return json(searchResult);
+  } catch (error) {
     console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
-
-  return json(await searchPromise);
+    return json({ term: '', result: null, error: error.message });
+  }
 }
 
 /**
- * Renders the /search route
+ * Generate URL for applying or removing filters
+ */
+function getAppliedFilterLink(filter, currentUrl) {
+  const url = new URL(currentUrl);
+  url.searchParams.delete(`${FILTER_URL_PREFIX}${filter.key}`);
+  if (filter.value) {
+    url.searchParams.append(`${FILTER_URL_PREFIX}${filter.key}`, JSON.stringify(filter.value));
+  }
+  return url.toString();
+}
+
+/**
+ * Search Page Component
  */
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
   const formRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -47,8 +76,13 @@ export default function SearchPage() {
       const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
       
       // Redirect with modified query
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      navigate(`/search?q=${encodeURIComponent(modifiedQuery)}`);
     }
+  };
+
+  const handleRemoveFilter = (filter) => {
+    const newUrl = getAppliedFilterLink(filter, new URL(window.location.href));
+    navigate(newUrl); // Use client-side navigation
   };
 
   return (
@@ -57,19 +91,54 @@ export default function SearchPage() {
       {!term || !result?.total ? (
         <SearchResults.Empty />
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
-            </div>
-          )}
-        </SearchResults>
+        <>
+          <SearchResults result={result} term={term}>
+            {({ articles, pages, products, term }) => (
+              <div>
+                <SearchResults.Products products={products} term={term} />
+              </div>
+            )}
+          </SearchResults>
+          <SearchResults.Filters
+            filters={result?.filters || []} // Ensure a default value for filters
+            appliedFilters={result?.appliedFilters || []}
+            onRemoveFilter={handleRemoveFilter}
+          />
+        </>
       )}
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
+}
+
+/**
+ * Regular search fetcher
+ */
+async function regularSearch({ request, context, filters }) {
+  const { storefront } = context;
+  const url = new URL(request.url);
+  const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(url.searchParams.get('q') || '');
+
+  // Add filters to GraphQL variables
+  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term, filters },
+  });
+
+  if (!items) {
+    throw new Error('No search data returned from Shopify API');
+  }
+
+  const total = Object.values(items).reduce(
+    (acc, { nodes }) => acc + nodes.length,
+    0,
+  );
+
+  const error = errors
+    ? errors.map(({ message }) => message).join(', ')
+    : undefined;
+
+  return { type: 'regular', term, error, result: { total, items } };
 }
 
 /**
@@ -154,6 +223,7 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
+    $filters: [ProductFilter!]
   ) @inContext(country: $country, language: $language) {
     articles: search(
       query: $term,
@@ -183,6 +253,7 @@ export const SEARCH_QUERY = `#graphql
       first: $first,
       last: $last,
       query: $term,
+      filters: $filters,
       sortKey: RELEVANCE,
       types: [PRODUCT],
       unavailableProducts: HIDE,
@@ -211,32 +282,6 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context }) {
-  const { storefront } = context;
-  const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 24 });
-  const term = String(url.searchParams.get('q') || '');
-
-  // Search articles, pages, and products for the `q` term
-  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
-  });
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, { nodes }) => acc + nodes.length,
-    0,
-  );
-
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
-
-  return { type: 'regular', term, error, result: { total, items } };
-}
 
 /**
  * Predictive search query and fragments
