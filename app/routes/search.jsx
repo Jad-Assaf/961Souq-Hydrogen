@@ -1,10 +1,49 @@
-import { json } from '@shopify/remix-oxygen';
-import { useLoaderData, useNavigate } from '@remix-run/react';
-import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
-import { SearchForm } from '~/components/SearchForm';
-import { SearchResults } from '~/components/SearchResults';
-import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef } from 'react';
+import { defer, redirect, json } from '@shopify/remix-oxygen';
+import { useLoaderData, Link, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
+import {
+  getPaginationVariables,
+  Image,
+  Money,
+} from '@shopify/hydrogen';
+import { FiltersDrawer } from '../modules/drawer-filter'; // Assuming you have this component
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'; // Your existing component
+import { Analytics } from '@shopify/hydrogen';
+import React, { useEffect, useState } from 'react';
+
+const SEARCH_QUERY = `#graphql
+  query Search(
+    $query: String!,
+    $filters: [ProductFilter!],
+    $sortKey: ProductSortKeys,
+    $reverse: Boolean,
+    $first: Int,
+    $after: String
+  ) {
+    products(first: $first, after: $after, query: $query, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
+      nodes {
+        id
+        title
+        handle
+        images {
+          url
+          altText
+        }
+        variants {
+          id
+          price {
+            amount
+            currencyCode
+          }
+          availableForSale
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
 
 /**
  * @type {MetaFunction}
@@ -14,113 +53,150 @@ export const meta = () => {
 };
 
 /**
- * @param {LoaderFunctionArgs}
+ * @param {LoaderFunctionArgs} args
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const term = url.searchParams.get('q') || '';
+  const query = url.searchParams.get('q') || '';
+  const paginationVariables = getPaginationVariables(request, { pageBy: 50 });
 
-  // Extract applied filters from URL
-  const filters = [];
-  url.searchParams.forEach((value, key) => {
-    if (key.startsWith('filter.p.') || key.startsWith('filter.v.')) {
-      const filterType = key.split('.')[1]; // 'p' or 'v'
-      const filterKey = key.split('.')[2]; // e.g., 'vendor' or 'product_type'
-      filters.push({ [filterKey]: value });
-    }
+  // Extract filters and sorting parameters from the URL
+  const sort = url.searchParams.get('sort') || 'newest';
+  const filters = []; // Initialize with empty filters
+
+  // Fetch search results
+  const searchResults = await context.storefront.query(SEARCH_QUERY, {
+    variables: {
+      query,
+      filters,
+      sortKey: getSortKey(sort),
+      reverse: isReverseSort(sort),
+      ...paginationVariables,
+    },
   });
 
-  // Fetch available filters and search results
-  try {
-    const result = await context.storefront.query(FILTER_QUERY, {
-      variables: { term },
-    });
-
-    return json({ ...result, appliedFilters: filters });
-  } catch (error) {
-    console.error(error);
-    return json({ term, error: error.message });
+  if (!searchResults) {
+    throw redirect('/search');
   }
+
+  return defer({ searchResults });
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { products, appliedFilters, filters } = useLoaderData();
+  const { searchResults } = useLoaderData();
+  const [filters, setFilters] = useState([]);
+  const [numberInRow, setNumberInRow] = useState(5);
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const handleFilterChange = (filterKey, value) => {
-    const url = new URL(window.location.href);
-
-    if (value) {
-      url.searchParams.set(`filter.p.${filterKey}`, value);
-    } else {
-      url.searchParams.delete(`filter.p.${filterKey}`);
-    }
-
-    navigate(url.toString());
+  // Handle filter changes
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    const newUrl = getAppliedFilterLink(newFilters, searchParams, location);
+    navigate(newUrl);
   };
 
+  // Filter products based on applied filters
+  const filteredProducts = searchResults.nodes.filter(product => {
+    return filters.every(filter => {
+      // Example filter logic; adjust according to your filter structure
+      return product.variants.some(variant => variant.availableForSale); // Example: check if any variant is available
+    });
+  });
+
+  // Sort products
+  const sortedProducts = React.useMemo(() => {
+    return filteredProducts.sort((a, b) => {
+      // Implement sorting logic based on your requirements
+      const aPrice = a.variants[0].price.amount;
+      const bPrice = b.variants[0].price.amount;
+      return aPrice - bPrice; // Sort by price low to high
+    });
+  }, [filteredProducts]);
+
   return (
-    <div>
+    <div className="search">
       <h1>Search Results</h1>
-      <div>
-        {/* Render Filters Dynamically */}
-        {filters.map((filter) => (
-          <div key={filter.id}>
-            <label>{filter.label}</label>
-            <select
-              onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-              value={appliedFilters.find((f) => f[filter.id])?.[filter.id] || ''}
-            >
-              <option value="">All</option>
-              {filter.values.map((value) => (
-                <option key={value.id} value={value.label}>
-                  {value.label} ({value.count})
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+
+      <FiltersDrawer
+        filters={[]} // Pass your filter options here
+        appliedFilters={filters}
+        onRemoveFilter={handleFilterChange}
+      />
+
+      <div className="flex-1 mt-[116px]">
+        <PaginatedResourceSection
+          connection={{
+            nodes: sortedProducts,
+            // Add pagination info here if necessary
+          }}
+          resourcesClassName="products-grid"
+        >
+          {({ node: product }) => (
+            <div key={product.id}>
+              <Link to={`/products/${product.handle}`}>
+                <Image src={product.images[0]?.url} alt={product.images[0]?.altText} />
+                <h4>{product.title}</h4>
+                <p>
+                  <Money money={product.variants[0].price} />
+                </p>
+              </Link>
+            </div>
+          )}
+        </PaginatedResourceSection>
       </div>
 
-      <div>
-        {/* Render Products */}
-        {products.nodes.map((product) => (
-          <div key={product.id}>{product.title}</div>
-        ))}
-      </div>
+      <Analytics.SearchView data={{ searchTerm: searchParams.get('q'), searchResults }} />
     </div>
   );
+}
+
+/**
+ * Function to get the applied filter link
+ * @param {Array} filters
+ * @param {URLSearchParams} searchParams
+ * @param {Location} location
+ * @returns {string} New URL with applied filters
+ */
+function getAppliedFilterLink(filters, searchParams, location) {
+  const newParams = new URLSearchParams(searchParams);
+  // Update the filters in the URL
+  // Add logic to handle filter parameters
+  return `${location.pathname}?${newParams.toString()}`;
+}
+
+/**
+ * Function to determine sort key
+ * @param {string} sort
+ * @returns {string} Sort key for GraphQL query
+ */
+function getSortKey(sort) {
+  switch (sort) {
+    case 'price':
+      return 'PRICE';
+    case 'newest':
+    default:
+      return 'CREATED_AT';
+  }
+}
+
+/**
+ * Function to determine if sort should be reversed
+ * @param {string} sort
+ * @returns {boolean} True if sort should be reversed
+ */
+function isReverseSort(sort) {
+  return sort === 'price-desc';
 }
 
 /**
  * Regular search query and fragments
  * (adjust as needed)
  */
-
-const FILTER_QUERY = `#graphql
-query FILTER_QUERY($term: String!) {
-    products: search(query: $term, types: [PRODUCT]) {
-      filters {
-        id
-        label
-        type
-        values {
-          id
-          label
-          count
-        }
-      }
-      nodes {
-        id
-        title
-      }
-    }
-  }
-`;
-
 const SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment SearchProduct on Product {
     __typename
@@ -199,7 +275,6 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
-    $filters: [ProductFilter!]
   ) @inContext(country: $country, language: $language) {
     articles: search(
       query: $term,
@@ -229,7 +304,6 @@ export const SEARCH_QUERY = `#graphql
       first: $first,
       last: $last,
       query: $term,
-      filters: $filters,
       sortKey: RELEVANCE,
       types: [PRODUCT],
       unavailableProducts: HIDE,
@@ -258,19 +332,15 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, term, filters }) {
+async function regularSearch({ request, context }) {
   const { storefront } = context;
+  const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(url.searchParams.get('q') || '');
 
-  // Construct filter objects for the GraphQL query
-  const productFilters = filters.map((filter) => {
-    const key = Object.keys(filter)[0];
-    const value = filter[key];
-    return { [key]: value };
-  });
-
+  // Search articles, pages, and products for the `q` term
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term, filters: productFilters },
+    variables: { ...variables, term },
   });
 
   if (!items) {
