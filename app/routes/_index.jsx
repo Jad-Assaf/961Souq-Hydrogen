@@ -220,7 +220,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} /> {/* Pass the menu data to CategorySlider */}
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
