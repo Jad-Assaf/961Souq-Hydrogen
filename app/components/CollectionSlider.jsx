@@ -1,4 +1,3 @@
-// CollectionSlider.jsx (CategorySlider.jsx)
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
@@ -6,7 +5,7 @@ import React, { useRef, useState } from 'react';
 
 export const CategorySlider = ({ menu, sliderCollections }) => {
     if (!menu || !menu.items) {
-        return null; // or some fallback UI
+        return null; // Fallback UI
     }
 
     const [expandedCategories, setExpandedCategories] = useState([]);
@@ -63,17 +62,11 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
                 ref={ref}
                 initial={{ opacity: 0, x: -30 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ delay: index * 0.01, duration: 0.5 }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
                 className="category-container"
             >
                 {hasSubItems ? (
-                    <div
-                        onClick={handleClick}
-                        className="category-link"
-                        role={hasSubItems ? 'button' : undefined}
-                        aria-haspopup={hasSubItems ? 'true' : 'false'}
-                        aria-expanded={isExpanded ? 'true' : 'false'}
-                    >
+                    <div onClick={handleClick} className="category-link">
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
                     </div>
                 ) : (

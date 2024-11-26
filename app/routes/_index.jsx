@@ -13,6 +13,38 @@ import { BrandSection } from '~/components/BrandsSection';
 export const meta = () => {
   return [{ title: 'Hydrogen | Home' }];
 };
+const GET_COLLECTIONS_WITH_SUBCOLLECTIONS_QUERY = `#graphql
+  query GetCollectionsWithSubcollections($handles: [String!]!) {
+    collectionsByHandles(handles: $handles) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+      products(first: 10) {
+        nodes {
+          id
+          title
+          handle
+          images(first: 1) {
+            nodes {
+              url
+              altText
+            }
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 /**
  * @param {LoaderFunctionArgs} args
@@ -47,22 +79,15 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Recursive function to extract all handles from menu items and subitems
-  const extractHandles = (items) => {
-    let handles = [];
-    items.forEach((item) => {
-      const handle = extractHandleFromUrl(item.url);
-      if (handle) handles.push(handle);
-      if (item.items && item.items.length > 0) {
-        handles = handles.concat(extractHandles(item.items));
-      }
-    });
-    return handles;
-  };
+  // Extract handles from menu items
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  const menuHandles = extractHandles(menu.items);
+  // Fetch collections and subcollections for the slider
+  const sliderCollections = await fetchCollectionsWithSubcollections(context, menuHandles);
 
-  // Fetch collections for product rows (if still needed)
+  // Fetch product collections using hardcoded handles
   const hardcodedHandles = [
     'new-arrivals', 'laptops',
     'apple-macbook', 'apple-iphone', 'apple-accessories',
@@ -72,33 +97,34 @@ async function loadCriticalData({ context }) {
     'earbuds', 'speakers', 'surround-systems',
     'desktops', 'pc-parts', 'business-monitors',
     'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
   ];
 
-  const productRowCollections = await fetchCollectionsByHandles(context, hardcodedHandles);
+  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Extract slider collections from menu items' resources
-  const sliderCollections = [];
+  return { collections, sliderCollections, menu };
+}
 
-  const traverseMenuItems = (items) => {
-    items.forEach(item => {
-      if (item.resource && item.resource.__typename === 'Collection') {
-        sliderCollections.push(item.resource);
-      }
-      if (item.items && item.items.length > 0) {
-        traverseMenuItems(item.items);
-      }
-    });
-  };
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
 
-  traverseMenuItems(menu.items);
+async function fetchCollectionsWithSubcollections(context, handles) {
+  if (!handles || handles.length === 0) return [];
 
-  // Return all necessary data
-  return {
-    collections: productRowCollections,
-    sliderCollections,
-    menu
-  };
+  const { collectionsByHandles } = await context.storefront.query(
+    GET_COLLECTIONS_WITH_SUBCOLLECTIONS_QUERY,
+    { variables: { handles } }
+  );
+  return collectionsByHandles || [];
 }
 
 const brandsData = [
@@ -124,24 +150,6 @@ const brandsData = [
   { name: "Ubiquiti", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ubuquiti-logo.jpg?v=1712761841", link: "/collections/ubiquiti-products" },
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
-
-async function fetchCollectionsByHandles(context, handles) {
-  // Prepare an array of promises for all handle queries
-  const collectionPromises = handles.map(handle =>
-    context.storefront.query(GET_COLLECTION_BY_HANDLE_QUERY, { variables: { handle } })
-      .then(response => response.collectionByHandle)
-      .catch(error => {
-        console.error(`Error fetching collection for handle "${handle}":`, error);
-        return null;
-      })
-  );
-
-  // Await all promises concurrently
-  const collectionsData = await Promise.all(collectionPromises);
-
-  // Filter out any null responses
-  return collectionsData.filter(collection => collection !== null);
-}
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menu } = useLoaderData();
@@ -336,57 +344,21 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
-// index.jsx
-
-const GET_MENU_QUERY = `#graphql
+export const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
     menu(handle: $handle) {
       items {
         id
         title
         url
-        resource {
-          ... on Collection {
-            id
-            title
-            handle
-            image {
-              url
-              altText
-            }
-          }
-          # You can add other resource types if needed
-        }
         items {
           id
           title
           url
-          resource {
-            ... on Collection {
-              id
-              title
-              handle
-              image {
-                url
-                altText
-              }
-            }
-          }
           items {
             id
             title
             url
-            resource {
-              ... on Collection {
-                id
-                title
-                handle
-                image {
-                  url
-                  altText
-                }
-              }
-            }
           }
         }
       }
