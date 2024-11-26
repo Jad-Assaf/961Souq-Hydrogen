@@ -1461,10 +1461,6 @@ button#headlessui-menu-button-\:R3lab5\: {
   min-height: unset;
 }
 
-.cols-1-add-to-cart{
-  display: none;
-}
-
 .view-container {
   display: flex;
   justify-content: space-between;
