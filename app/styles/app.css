@@ -1478,6 +1478,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .mobile-container {
   display: flex;
+  gap: 10px;
 }
 
 .view-container {
