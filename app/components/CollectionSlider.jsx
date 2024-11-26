@@ -1,3 +1,4 @@
+// CollectionSlider.jsx (CategorySlider.jsx)
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
@@ -5,7 +6,7 @@ import React, { useRef, useState } from 'react';
 
 export const CategorySlider = ({ menu, sliderCollections }) => {
     if (!menu || !menu.items) {
-        return null; // or fallback UI
+        return null; // or some fallback UI
     }
 
     const [expandedCategories, setExpandedCategories] = useState([]);

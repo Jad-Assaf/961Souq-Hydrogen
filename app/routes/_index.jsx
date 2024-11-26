@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -47,22 +47,22 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Recursive function to extract all collection handles (including subcollections)
-  function extractHandlesFromMenu(menuItems) {
-    const handles = [];
-    for (const item of menuItems) {
+  // Recursive function to extract all handles from menu items and subitems
+  const extractHandles = (items) => {
+    let handles = [];
+    items.forEach((item) => {
       const handle = extractHandleFromUrl(item.url);
-      if (handle) handles.push(handle); // Add handle
+      if (handle) handles.push(handle);
       if (item.items && item.items.length > 0) {
-        handles.push(...extractHandlesFromMenu(item.items)); // Process subcollections
+        handles = handles.concat(extractHandles(item.items));
       }
-    }
+    });
     return handles;
-  }
+  };
 
-  const menuHandles = extractHandlesFromMenu(menu.items);
+  const menuHandles = extractHandles(menu.items);
 
-  // Fetch collections for the slider using menu handles.
+  // Fetch collections based on all extracted handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
@@ -79,10 +79,14 @@ async function loadCriticalData({ context }) {
   ];
 
   // Fetch collections for product rows.
-  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+  const productRowCollections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
-  return { collections, sliderCollections, menu };
+  // Return all necessary data
+  return {
+    collections: productRowCollections,
+    sliderCollections,
+    menu
+  };
 }
 
 const brandsData = [
@@ -110,15 +114,21 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
+  // Prepare an array of promises for all handle queries
+  const collectionPromises = handles.map(handle =>
+    context.storefront.query(GET_COLLECTION_BY_HANDLE_QUERY, { variables: { handle } })
+      .then(response => response.collectionByHandle)
+      .catch(error => {
+        console.error(`Error fetching collection for handle "${handle}":`, error);
+        return null;
+      })
+  );
+
+  // Await all promises concurrently
+  const collectionsData = await Promise.all(collectionPromises);
+
+  // Filter out any null responses
+  return collectionsData.filter(collection => collection !== null);
 }
 
 export default function Homepage() {
@@ -266,6 +276,49 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       image {
         url
         altText
+      }
+      products(first: 15) {
+        nodes {
+          id
+          title
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          compareAtPriceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            nodes {
+              url
+              altText
+            }
+          }
+          variants(first: 5) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
+            }
+          }
+        }
       }
     }
   }
