@@ -331,9 +331,6 @@ button {
     padding: 10px 0px;
     width: 100%;
   }
-  .mobile-add-to-cart{
-    display: block;
-  }
 }
 
 .product-form {
@@ -364,6 +361,10 @@ button {
 
 .mobile-add-to-cart{
   display: none;
+}
+
+.grid-cols-1 .mobile-add-to-cart {
+  display: block;
 }
 
 /*
