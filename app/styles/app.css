@@ -1453,6 +1453,14 @@ button#headlessui-menu-button-\:R3lab5\: {
   display: none;
 }
 
+.add-to-cart-button{
+  display: none;
+}
+
+.grid-cols-2 .add-to-cart-button, .grid-cols-3 .add-to-cart-button, .grid-cols-4 .add-to-cart-button, .grid-cols-5 .add-to-cart-button{
+  display: block;
+}
+
 .grid-cols-1 .product-info-container .add-to-cart-button{
   display: block;
 }
