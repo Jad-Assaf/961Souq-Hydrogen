@@ -471,6 +471,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
               product={product}
               selectedVariant={selectedVariant}
               setSelectedVariant={setSelectedVariant}
+              className="cols-1-add-to-cart"
             />
           </div>
         </div>
