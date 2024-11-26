@@ -367,8 +367,8 @@ button {
   justify-content: center;
 }
 
-.mobile-add-to-cart {
-  display: none;
+.grid-cols-2 .mobile-add-to-cart, .grid-cols-3 .mobile-add-to-cart, .grid-cols-4 .mobile-add-to-cart .grid-cols-5 .mobile-add-to-cart {
+  display: none !important;
 }
 
 .grid-cols-1 .mobile-add-to-cart {
