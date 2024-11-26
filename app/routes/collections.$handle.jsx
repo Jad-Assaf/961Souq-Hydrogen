@@ -422,7 +422,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           }
         }}
       >
-        <div style={{ display: 'flex' }}>
+        <div className='mobile-container'>
           <Link key={product.id} prefetch="intent" to={variantUrl} className='collection-product-link'>
             {product.featuredImage && isInView && (
               <motion.div

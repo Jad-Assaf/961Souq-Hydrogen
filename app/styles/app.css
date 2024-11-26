@@ -1461,6 +1461,10 @@ button#headlessui-menu-button-\:R3lab5\: {
   min-height: unset;
 }
 
+.grid-cols-1 .mobile-container{
+  display: flex;
+}
+
 .view-container {
   display: flex;
   justify-content: space-between;
