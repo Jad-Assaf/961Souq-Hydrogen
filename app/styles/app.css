@@ -365,6 +365,7 @@ button {
 
 .grid-cols-1 .mobile-add-to-cart {
   display: block;
+  z-index: 999999;
 }
 
 /*
