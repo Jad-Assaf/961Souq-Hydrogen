@@ -47,48 +47,34 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  function extractHandles(menuItems) {
-    const handles = [];
-    menuItems.forEach((item) => {
-      if (item.resource?.handle) {
-        handles.push(item.resource.handle);
-      }
-      // Recursively process subitems
-      if (item.items && item.items.length > 0) {
-        handles.push(...extractHandles(item.items));
-      }
-    });
-    return handles;
-  }
+  // Extract handles for top-level collections
+  const menuHandles = menu.items
+    .filter(item => item.resource?.handle)
+    .map(item => item.resource.handle);
 
-  // Existing code to fetch collections
-  // Extract handles from the menu items.
-  const subcollectionHandles = extractHandles(menu.items);
-  const subcollections = await fetchCollectionsByHandles(context, subcollectionHandles);
-
-
-  // Fetch collections for the slider using menu handles.
+  // Fetch slider collections (main collections) using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Hardcoded handles for product rows.
+  // Hardcoded handles for product rows
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
-  // Fetch collections for product rows.
+  // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
   return { collections, sliderCollections, menu };
 }
+
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
@@ -234,10 +220,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider
-        menu={menu}
-        sliderCollections={sliderCollections.concat(subcollections)}
-      />
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
