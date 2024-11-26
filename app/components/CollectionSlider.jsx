@@ -1,14 +1,19 @@
-// app/components/CategorySlider.jsx
-
+// CategorySlider.jsx
 import { Link } from '@remix-run/react';
+import { Image } from '@shopify/hydrogen-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
 
-export const CategorySlider = ({ menuItems }) => {
+export const CategorySlider = ({ menuItems, sliderCollections }) => {
     const [expandedCategoryId, setExpandedCategoryId] = useState(null);
 
-    const handleCategoryClick = (categoryId) => {
-        setExpandedCategoryId((prev) => (prev === categoryId ? null : categoryId));
+    const collectionMap = new Map(
+        sliderCollections.map((collection) => [collection.handle, collection])
+    );
+
+    const getCollectionHandleFromUrl = (url) => {
+        const match = url.match(/\/collections\/([^\/?#]+)/);
+        return match ? match[1] : null;
     };
 
     return (
@@ -20,7 +25,11 @@ export const CategorySlider = ({ menuItems }) => {
                         key={item.id}
                         item={item}
                         isExpanded={expandedCategoryId === item.id}
-                        onClick={() => handleCategoryClick(item.id)}
+                        onClick={() =>
+                            setExpandedCategoryId((prev) => (prev === item.id ? null : item.id))
+                        }
+                        getCollectionHandleFromUrl={getCollectionHandleFromUrl}
+                        collectionMap={collectionMap}
                     />
                 ))}
             </div>
@@ -28,9 +37,16 @@ export const CategorySlider = ({ menuItems }) => {
     );
 };
 
-function CategoryItem({ item, isExpanded, onClick }) {
+function CategoryItem({
+    item,
+    isExpanded,
+    onClick,
+    getCollectionHandleFromUrl,
+    collectionMap,
+}) {
     const hasSubitems = item.items && item.items.length > 0;
-    const collection = item.collection;
+    const handle = getCollectionHandleFromUrl(item.url);
+    const collection = handle ? collectionMap.get(handle) : null;
 
     return (
         <div className="category-container">
@@ -52,8 +68,8 @@ function CategoryItem({ item, isExpanded, onClick }) {
                     className="category-image-wrapper"
                 >
                     {collection?.image ? (
-                        <img
-                            src={collection.image.url}
+                        <Image
+                            data={collection.image}
                             alt={collection.image.altText || collection.title}
                             className="category-image"
                         />
@@ -72,12 +88,8 @@ function CategoryItem({ item, isExpanded, onClick }) {
                         className="subcategory-list"
                     >
                         {item.items.map((subItem) => (
-                            <Link
-                                key={subItem.id}
-                                to={subItem.url}
-                                className="subcategory-item"
-                            >
-                                <div className="subcategory-title">{subItem.title}</div>
+                            <Link key={subItem.id} to={subItem.url} className="subcategory-item">
+                                {subItem.title}
                             </Link>
                         ))}
                     </motion.div>
