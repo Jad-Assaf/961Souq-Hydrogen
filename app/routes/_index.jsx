@@ -305,21 +305,54 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
-export const GET_MENU_QUERY = `#graphql
+const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
     menu(handle: $handle) {
       items {
         id
         title
         url
+        resource {
+          ... on Collection {
+            id
+            title
+            handle
+            image {
+              url
+              altText
+            }
+          }
+        }
         items {
           id
           title
           url
+          resource {
+            ... on Collection {
+              id
+              title
+              handle
+              image {
+                url
+                altText
+              }
+            }
+          }
           items {
             id
             title
             url
+            resource {
+              ... on Collection {
+                id
+                title
+                handle
+                image {
+                  url
+                  altText
+                }
+              }
+            }
           }
         }
       }
