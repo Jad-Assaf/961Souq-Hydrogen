@@ -34,7 +34,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners });
+  return defer({ ...criticalData, banners, menu: criticalData.menu });
 }
 
 async function loadCriticalData({ context }) {
@@ -47,50 +47,32 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Function to extract collection handle from URL
-  function getCollectionHandleFromUrl(url) {
-    const match = url.match(/\/collections\/([^\/?#]+)/);
-    return match ? match[1] : null;
-  }
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  // Function to recursively extract handles from menu items
-  function extractHandlesFromMenuItems(items) {
-    let handles = [];
-    items.forEach((item) => {
-      const handle = getCollectionHandleFromUrl(item.url);
-      if (handle) {
-        handles.push(handle);
-      }
-      if (item.items && item.items.length > 0) {
-        handles = handles.concat(extractHandlesFromMenuItems(item.items));
-      }
-    });
-    return handles;
-  }
-
-  // Extract handles from the menu items and their subitems
-  const menuHandles = Array.from(new Set(extractHandlesFromMenuItems(menu.items)));
-
-  // Fetch collections for the slider using menu handles
+  // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return { collections, sliderCollections, menuItems: menu.items };
+  return { collections, sliderCollections };
 }
 
 const brandsData = [
@@ -118,46 +100,19 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  if (handles.length === 0) return [];
-
-  // Build the query with aliases
-  const query = buildCollectionsQuery(handles);
-
-  const data = await context.storefront.query(query);
-
-  // Extract collections from the response
-  const collections = handles
-    .map((handle) => data[`collection_${sanitizeHandle(handle)}`])
-    .filter(Boolean);
-
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
   return collections;
 }
 
-function buildCollectionsQuery(handles) {
-  const collectionQueries = handles.map((handle) => `
-    collection_${sanitizeHandle(handle)}: collectionByHandle(handle: "${handle}") {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-      # Include other fields as needed
-    }
-  `);
-
-  return `query GetCollectionsByHandles {
-    ${collectionQueries.join('\n')}
-  }`;
-}
-
-function sanitizeHandle(handle) {
-  return handle.replace(/[^a-zA-Z0-9_]/g, '_');
-}
-
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menuItems } = useLoaderData();
+  const { banners, collections, sliderCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -264,7 +219,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menuItems={menuItems} sliderCollections={sliderCollections} />
+      <CategorySlider menu={menu} /> {/* Pass the menu data to CategorySlider */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
