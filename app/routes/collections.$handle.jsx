@@ -465,13 +465,13 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
                 )}
               </div>
             </div>
-            <ProductForm
-              product={product}
-              selectedVariant={selectedVariant}
-              setSelectedVariant={setSelectedVariant}
-              className="mobile-add-to-cart"
-            />
           </Link>
+          <ProductForm
+            product={product}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
+            className="mobile-add-to-cart"
+          />
         </div>
         <ProductForm
           product={product}
