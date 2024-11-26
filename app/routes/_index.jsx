@@ -23,23 +23,14 @@ const GET_COLLECTIONS_WITH_SUBCOLLECTIONS_QUERY = `#graphql
         url
         altText
       }
-      products(first: 10) {
-        nodes {
-          id
-          title
-          handle
-          images(first: 1) {
-            nodes {
-              url
-              altText
-            }
-          }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
+      # Subcollections: mimic hierarchy by including menu items
+      items {
+        id
+        title
+        handle
+        image {
+          url
+          altText
         }
       }
     }
