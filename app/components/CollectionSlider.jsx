@@ -4,6 +4,9 @@ import { motion, useInView } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 
 export const CategorySlider = ({ menu }) => {
+    if (!menu || !menu.items) {
+        return null; // or some fallback UI
+    }
     const [expandedCategories, setExpandedCategories] = useState([]);
 
     const handleCategoryClick = (id) => {

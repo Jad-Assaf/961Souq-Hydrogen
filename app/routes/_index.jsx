@@ -34,7 +34,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners, menu: criticalData.menu });
+  return defer({ ...criticalData, banners });
 }
 
 async function loadCriticalData({ context }) {
@@ -72,7 +72,8 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return { collections, sliderCollections };
+  // Return menu along with other data
+  return { collections, sliderCollections, menu };
 }
 
 const brandsData = [
