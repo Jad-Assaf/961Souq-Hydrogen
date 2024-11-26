@@ -47,11 +47,25 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  function extractHandles(menuItems) {
+    const handles = [];
+    menuItems.forEach((item) => {
+      if (item.resource?.handle) {
+        handles.push(item.resource.handle);
+      }
+      // Recursively process subitems
+      if (item.items && item.items.length > 0) {
+        handles.push(...extractHandles(item.items));
+      }
+    });
+    return handles;
+  }
+
   // Existing code to fetch collections
   // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+  const subcollectionHandles = extractHandles(menu.items);
+  const subcollections = await fetchCollectionsByHandles(context, subcollectionHandles);
+
 
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
@@ -220,7 +234,10 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
+      <CategorySlider
+        menu={menu}
+        sliderCollections={sliderCollections.concat(subcollections)}
+      />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
