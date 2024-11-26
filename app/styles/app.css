@@ -1446,6 +1446,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 @media (max-width: 1024px) {
   .grid-cols-1 .collection-product-image {
     width: 60% !important;
+    margin-bottom: 15px;
   }
 
   .grid-cols-1 .product-info-container h4 {
