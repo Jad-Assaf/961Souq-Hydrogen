@@ -443,7 +443,9 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
                 />
               </motion.div>
             )}
-            <div className='product-info-container'>
+          </Link>
+          <div>
+            <Link key={product.id} prefetch="intent" to={variantUrl} className='product-info-container'>
               <h4>{truncateText(product.title, 50)}</h4>
               {typeof window !== "undefined" &&
                 window.innerWidth > 1500 &&
@@ -464,14 +466,14 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
                   </small>
                 )}
               </div>
-            </div>
-          </Link>
-          <ProductForm
-            product={product}
-            selectedVariant={selectedVariant}
-            setSelectedVariant={setSelectedVariant}
-            className="mobile-add-to-cart"
-          />
+            </Link>
+            <ProductForm
+              product={product}
+              selectedVariant={selectedVariant}
+              setSelectedVariant={setSelectedVariant}
+              className="mobile-add-to-cart"
+            />
+          </div>
         </div>
         <ProductForm
           product={product}
