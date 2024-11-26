@@ -47,11 +47,31 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Existing code to extract handles and fetch collections
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+  // Function to extract collection handle from URL
+  function getCollectionHandleFromUrl(url) {
+    const match = url.match(/\/collections\/([^\/?#]+)/);
+    return match ? match[1] : null;
+  }
 
+  // Function to recursively extract handles from menu items
+  function extractHandlesFromMenuItems(items) {
+    let handles = [];
+    items.forEach((item) => {
+      const handle = getCollectionHandleFromUrl(item.url);
+      if (handle) {
+        handles.push(handle);
+      }
+      if (item.items && item.items.length > 0) {
+        handles = handles.concat(extractHandlesFromMenuItems(item.items));
+      }
+    });
+    return handles;
+  }
+
+  // Extract handles from the menu items and their subitems
+  const menuHandles = extractHandlesFromMenuItems(menu.items);
+
+  // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
@@ -70,7 +90,6 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menuItems along with existing data
   return { collections, sliderCollections, menuItems: menu.items };
 }
 

@@ -96,7 +96,7 @@ function CategoryItem({
                             const subCollection = subHandle ? collectionMap.get(subHandle) : null;
 
                             return (
-                                <Link key={subItem.id} to={subItem.url} className="category-container">
+                                <Link key={subItem.id} to={`/collections/${subHandle}`} className="category-container">
                                     <motion.div
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.3 }}
