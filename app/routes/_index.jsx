@@ -47,8 +47,13 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
+
   // Fetch collections for the slider using menu handles.
-  const menuHandles = extractHandlesFromMenu(menu.items);
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
@@ -98,34 +103,13 @@ const brandsData = [
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
   for (const handle of handles) {
-    try {
-      const { collectionByHandle } = await context.storefront.query(
-        GET_COLLECTION_BY_HANDLE_QUERY,
-        { variables: { handle } }
-      );
-      if (collectionByHandle) {
-        collections.push(collectionByHandle);
-      } else {
-        console.warn(`Collection not found for handle: ${handle}`);
-      }
-    } catch (error) {
-      console.error(`Error fetching collection for handle: ${handle}`, error);
-    }
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
   }
   return collections;
-}
-
-// Recursive function to extract handles from nested menu items
-function extractHandlesFromMenu(menuItems) {
-  const handles = [];
-  for (const item of menuItems) {
-    const handle = extractHandleFromUrl(item.url);
-    if (handle) handles.push(handle);
-    if (item.items && item.items.length > 0) {
-      handles.push(...extractHandlesFromMenu(item.items));
-    }
-  }
-  return handles;
 }
 
 export default function Homepage() {
