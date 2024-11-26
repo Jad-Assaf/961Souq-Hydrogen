@@ -1472,7 +1472,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 .grid-cols-3 .product-info-container .add-to-cart-button,
 .grid-cols-4 .product-info-container .add-to-cart-button,
 .grid-cols-5 .product-info-container .add-to-cart-button {
-  display: block;
+  display: none;
 }
 
 .grid-cols-1 .product-info-container .add-to-cart-button {
