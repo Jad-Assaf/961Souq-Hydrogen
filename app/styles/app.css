@@ -1424,7 +1424,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   display: flex;
   gap: 30px;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .grid-cols-1 .collection-product-image {
@@ -1438,6 +1438,10 @@ button#headlessui-menu-button-\:R3lab5\: {
   .grid-cols-1 .collection-product-image {
     width: 60% !important;
   }
+
+  .grid-cols-1 .collection h4 {
+    font-size: 14px;
+  }
 }
 
 .grid-cols-1 .product-info-container {
@@ -1446,6 +1450,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .collection h4 {
   min-height: unset;
+  font-size: 18px;
 }
 
 .view-container {
