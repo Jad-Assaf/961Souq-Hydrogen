@@ -422,7 +422,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           }
         }}
       >
-        <div>
+        <div className='collection-product-link-container'>
           <Link key={product.id} prefetch="intent" to={variantUrl} className='collection-product-link'>
             {product.featuredImage && isInView && (
               <motion.div
@@ -444,7 +444,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
               </motion.div>
             )}
           </Link>
-          <div>
+          <div className='collection-product-info-container'>
             <Link key={product.id} prefetch="intent" to={variantUrl} className='product-info-container'>
               <h4>{truncateText(product.title, 50)}</h4>
               {typeof window !== "undefined" &&

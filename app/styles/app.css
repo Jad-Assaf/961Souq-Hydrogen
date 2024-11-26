@@ -211,6 +211,14 @@ button {
   min-height: 80px !important;
 }
 
+.collection-product-link-container {
+  display: flex;
+  width: 100%;
+  justify-content: start;
+}
+
+
+
 .product-card:hover {
   transform: scale(1.02);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -359,7 +367,7 @@ button {
   justify-content: center;
 }
 
-.mobile-add-to-cart{
+.mobile-add-to-cart {
   display: none;
 }
 
@@ -1430,16 +1438,16 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 
 .grid-cols-1 .collection-product-link {
-  display: flex;
+  /* display: flex;
   gap: 30px;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
 }
 
 .grid-cols-1 .collection-product-image {
   filter: blur(0px);
   opacity: 1;
-  width: 35%;
+  /* width: 35%; */
   height: auto;
 }
 
@@ -1571,6 +1579,13 @@ button.layout-buttons.first-btn svg {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.collection-product-info-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-left: 5%;
 }
 
 .price-filter-inputs {
