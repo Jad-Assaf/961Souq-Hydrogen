@@ -47,15 +47,15 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from all menu items recursively
-  const allHandles = extractHandlesFromMenuItems(menu.items);
-  const uniqueHandles = [...new Set(allHandles)];
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  // Fetch collections for all handles
-  const allCollections = await fetchCollectionsByHandles(context, uniqueHandles);
-
-  // Use allCollections as sliderCollections
-  const sliderCollections = allCollections;
+  // Fetch collections for the slider using menu handles.
+  const menuHandles = extractHandlesFromMenu(menu.items);
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -75,29 +75,6 @@ async function loadCriticalData({ context }) {
 
   // Return menu along with other data
   return { collections, sliderCollections, menu };
-}
-
-function extractHandlesFromMenuItems(menuItems) {
-  const handles = [];
-  for (const item of menuItems) {
-    const handle = extractHandleFromUrl(item.url);
-    if (handle) {
-      handles.push(handle);
-    }
-    if (item.items && item.items.length > 0) {
-      handles.push(...extractHandlesFromMenuItems(item.items));
-    }
-  }
-  return handles;
-}
-
-function extractHandleFromUrl(url) {
-  if (!url) return null;
-  const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-  if (match && match[1]) {
-    return match[1];
-  }
-  return null;
 }
 
 const brandsData = [
@@ -131,9 +108,24 @@ async function fetchCollectionsByHandles(context, handles) {
       GET_COLLECTION_BY_HANDLE_QUERY,
       { variables: { handle } }
     );
-    if (collectionByHandle) collections.push(collectionByHandle);
+    if (collectionByHandle) {
+      collections.push(collectionByHandle);
+    }
   }
   return collections;
+}
+
+// Recursive function to extract handles from nested menu items
+function extractHandlesFromMenu(menuItems) {
+  const handles = [];
+  for (const item of menuItems) {
+    const handle = extractHandleFromUrl(item.url);
+    if (handle) handles.push(handle);
+    if (item.items && item.items.length > 0) {
+      handles.push(...extractHandlesFromMenu(item.items));
+    }
+  }
+  return handles;
 }
 
 export default function Homepage() {
