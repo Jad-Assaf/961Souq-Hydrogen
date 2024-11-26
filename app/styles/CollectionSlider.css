@@ -22,13 +22,6 @@
     font-weight: 500;
 }
 
-.mob-con {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 30px;
-}
-
 .category-slider {
     display: flex;
     flex-wrap: nowrap;
@@ -40,10 +33,6 @@
     -webkit-overflow-scrolling: touch;
     max-width: 1500px;
     margin-left: 20px;
-}
-
-.category-slider::-webkit-scrollbar {
-    display: none;
 }
 
 .category-container {
