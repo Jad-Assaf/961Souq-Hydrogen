@@ -57,6 +57,9 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
         }
     };
 
+    // Extract the relative path from item.url
+    const relativeUrl = new URL(item.url).pathname;
+
     return (
         <div className={`category-item ${isExpanded ? 'expanded' : ''}`}>
             <motion.div
@@ -71,7 +74,7 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
                     </div>
                 ) : (
-                    <Link to={item.url} className="category-link">
+                    <Link to={relativeUrl} className="category-link">
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
                     </Link>
                 )}

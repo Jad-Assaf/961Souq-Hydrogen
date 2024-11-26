@@ -47,14 +47,18 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Existing code to fetch collections
-  // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+  // Extract all collection handles from the menu items recursively
+  const allHandles = extractHandlesFromMenuItems(menu.items);
+  const uniqueHandles = [...new Set(allHandles)];
 
-  // Fetch collections for the slider using menu handles.
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+  // Fetch all collections based on the extracted handles
+  const allCollections = await fetchCollectionsByHandles(context, uniqueHandles);
+
+  // Create a mapping from handle to collection
+  const collectionMap = {};
+  allCollections.forEach((collection) => {
+    collectionMap[collection.handle] = collection;
+  });
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -72,8 +76,29 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
-  return { collections, sliderCollections, menu };
+  return { collections, sliderCollections: allCollections, menu };
+}
+
+function extractHandlesFromMenuItems(menuItems) {
+  const handles = [];
+  for (const item of menuItems) {
+    const handle = extractHandleFromUrl(item.url);
+    if (handle) {
+      handles.push(handle);
+    }
+    if (item.items && item.items.length > 0) {
+      handles.push(...extractHandlesFromMenuItems(item.items));
+    }
+  }
+  return handles;
+}
+
+function extractHandleFromUrl(url) {
+  const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
 }
 
 const brandsData = [
