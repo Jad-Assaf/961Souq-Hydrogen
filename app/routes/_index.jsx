@@ -47,12 +47,6 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Existing code to fetch collections
-  // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
-
   // Fetch collections for the slider using menu handles.
   const menuHandles = extractHandlesFromMenu(menu.items);
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
