@@ -1437,12 +1437,16 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 @media (max-width: 1024px) {
   .grid-cols-1 .collection-product-image {
-    width: 60% !important;
+    width: 90% !important;
+    margin: 0 !important;
   }
 }
 
 .grid-cols-1 .product-info-container {
-  width: 75%;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .product-info-container .add-to-cart-button{
