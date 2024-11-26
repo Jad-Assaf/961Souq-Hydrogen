@@ -422,6 +422,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           }
         }}
       >
+        <div>
         <Link key={product.id} prefetch="intent" to={variantUrl} className='collection-product-link'>
           {product.featuredImage && isInView && (
             <motion.div
@@ -465,6 +466,13 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
             </div>
           </div>
         </Link>
+          <ProductForm
+            product={product}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
+            className="mobile-add-to-cart"
+          />
+        </div>
         <ProductForm
           product={product}
           selectedVariant={selectedVariant}
