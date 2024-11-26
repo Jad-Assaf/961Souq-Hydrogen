@@ -76,14 +76,14 @@ async function loadCriticalData({ context }) {
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -118,16 +118,35 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
+  if (handles.length === 0) return [];
+
+  // Build a query string that matches any of the handles
+  const handleQueries = handles.map((handle) => `handle:'${handle}'`);
+  const queryStr = handleQueries.join(' OR ');
+
+  const { collections } = await context.storefront.query(GET_COLLECTIONS_BY_HANDLES_QUERY, {
+    variables: { query: queryStr },
+  });
+
+  return collections.nodes;
 }
+
+const GET_COLLECTIONS_BY_HANDLES_QUERY = `#graphql
+  query GetCollectionsByHandles($query: String!) {
+    collections(first: 50, query: $query) {
+      nodes {
+        id
+        title
+        handle
+        image {
+          url
+          altText
+        }
+        # Include other fields as needed
+      }
+    }
+  }
+`;
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menuItems } = useLoaderData();
