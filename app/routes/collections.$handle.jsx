@@ -444,8 +444,8 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
               </motion.div>
             )}
           </Link>
-          <div>
-            <Link key={product.id} prefetch="intent" to={variantUrl} className='product-info-container'>
+          <div className='product-info-container'>
+            <Link key={product.id} prefetch="intent" to={variantUrl} className=''>
               <h4>{truncateText(product.title, 50)}</h4>
               {typeof window !== "undefined" &&
                 window.innerWidth > 1500 &&
@@ -471,7 +471,6 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
               product={product}
               selectedVariant={selectedVariant}
               setSelectedVariant={setSelectedVariant}
-              className="cols-1-add-to-cart"
             />
           </div>
         </div>

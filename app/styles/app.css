@@ -1445,6 +1445,14 @@ button#headlessui-menu-button-\:R3lab5\: {
   width: 75%;
 }
 
+.product-info-container .add-to-cart-button{
+  display: none;
+}
+
+.grid-cols-1 .product-info-container .add-to-cart-button{
+  display: block;
+}
+
 .grid-cols-1 .collection h4 {
   min-height: unset;
 }
