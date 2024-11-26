@@ -101,6 +101,10 @@ function CategoryContent({ item, isInView, collectionMap }) {
     const handle = extractHandleFromUrl(item.url);
     const collection = handle ? collectionMap[handle] : null;
 
+    if (!collection) {
+        console.warn(`Collection not found for handle: ${handle}`);
+    }
+
     return (
         <>
             <motion.div
@@ -120,7 +124,7 @@ function CategoryContent({ item, isInView, collectionMap }) {
                         height="150px"
                     />
                 ) : (
-                    <div className="category-placeholder-image"></div>
+                    <div className="category-placeholder-image">No Image</div>
                 )}
             </motion.div>
             <div className="category-title">{title}</div>

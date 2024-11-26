@@ -98,12 +98,18 @@ const brandsData = [
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
   for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) {
-      collections.push(collectionByHandle);
+    try {
+      const { collectionByHandle } = await context.storefront.query(
+        GET_COLLECTION_BY_HANDLE_QUERY,
+        { variables: { handle } }
+      );
+      if (collectionByHandle) {
+        collections.push(collectionByHandle);
+      } else {
+        console.warn(`Collection not found for handle: ${handle}`);
+      }
+    } catch (error) {
+      console.error(`Error fetching collection for handle: ${handle}`, error);
     }
   }
   return collections;
