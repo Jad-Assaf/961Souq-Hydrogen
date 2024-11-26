@@ -422,49 +422,58 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           }
         }}
       >
-        <Link key={product.id} prefetch="intent" to={variantUrl} className='collection-product-link'>
-          {product.featuredImage && isInView && (
-            <motion.div
-              initial={{ filter: 'blur(10px)', opacity: 0 }}
-              animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className='collection-product-image'
-            >
-              <Image
-                srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
+        <div className='mobile-container'>
+          <Link key={product.id} prefetch="intent" to={variantUrl} className='collection-product-link'>
+            {product.featuredImage && isInView && (
+              <motion.div
+                initial={{ filter: 'blur(10px)', opacity: 0 }}
+                animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className='collection-product-image'
+              >
+                <Image
+                  srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
                          ${product.featuredImage.url}?width=600&quality=30 600w,
                          ${product.featuredImage.url}?width=1200&quality=30 1200w`}
-                alt={product.featuredImage.altText || product.title}
-                loading="lazy"
-                width="180px"
-                height="180px"
-                onLoad={() => setIsImageLoaded(true)}
-              />
-            </motion.div>
-          )}
+                  alt={product.featuredImage.altText || product.title}
+                  loading="lazy"
+                  width="180px"
+                  height="180px"
+                  onLoad={() => setIsImageLoaded(true)}
+                />
+              </motion.div>
+            )}
+          </Link>
           <div className='product-info-container'>
-            <h4>{truncateText(product.title, 50)}</h4>
-            {typeof window !== "undefined" &&
-              window.innerWidth > 1500 &&
-              numberInRow === 1 &&
-              product.description && ( // Ensure description exists
-                <p className="product-description">
-                  {truncateText(product.description, 200)}
-                </p>
-              )}
+            <Link key={product.id} prefetch="intent" to={variantUrl} className=''>
+              <h4>{truncateText(product.title, 50)}</h4>
+              {typeof window !== "undefined" &&
+                window.innerWidth > 1500 &&
+                numberInRow === 1 &&
+                product.description && ( // Ensure description exists
+                  <p className="product-description">
+                    {truncateText(product.description, 200)}
+                  </p>
+                )}
 
-            <div className="price-container">
-              <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
-                <Money data={selectedVariant.price} />
-              </small>
-              {hasDiscount && selectedVariant.compareAtPrice && (
-                <small className="discountedPrice">
-                  <Money data={selectedVariant.compareAtPrice} />
+              <div className="price-container">
+                <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+                  <Money data={selectedVariant.price} />
                 </small>
-              )}
-            </div>
+                {hasDiscount && selectedVariant.compareAtPrice && (
+                  <small className="discountedPrice">
+                    <Money data={selectedVariant.compareAtPrice} />
+                  </small>
+                )}
+              </div>
+            </Link>
+            <ProductForm
+              product={product}
+              selectedVariant={selectedVariant}
+              setSelectedVariant={setSelectedVariant}
+            />
           </div>
-        </Link>
+        </div>
         <ProductForm
           product={product}
           selectedVariant={selectedVariant}
