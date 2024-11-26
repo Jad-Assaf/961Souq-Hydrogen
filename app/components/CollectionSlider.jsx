@@ -67,7 +67,13 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
                 className="category-container"
             >
                 {hasSubItems ? (
-                    <div onClick={handleClick} className="category-link">
+                    <div
+                        onClick={handleClick}
+                        className="category-link"
+                        role={hasSubItems ? 'button' : undefined}
+                        aria-haspopup={hasSubItems ? 'true' : 'false'}
+                        aria-expanded={isExpanded ? 'true' : 'false'}
+                    >
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
                     </div>
                 ) : (

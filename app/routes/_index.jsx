@@ -62,24 +62,36 @@ async function loadCriticalData({ context }) {
 
   const menuHandles = extractHandles(menu.items);
 
-  // Fetch collections based on all extracted handles
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
-  // Hardcoded handles for product rows.
+  // Fetch collections for product rows (if still needed)
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
-  // Fetch collections for product rows.
   const productRowCollections = await fetchCollectionsByHandles(context, hardcodedHandles);
+
+  // Extract slider collections from menu items' resources
+  const sliderCollections = [];
+
+  const traverseMenuItems = (items) => {
+    items.forEach(item => {
+      if (item.resource && item.resource.__typename === 'Collection') {
+        sliderCollections.push(item.resource);
+      }
+      if (item.items && item.items.length > 0) {
+        traverseMenuItems(item.items);
+      }
+    });
+  };
+
+  traverseMenuItems(menu.items);
 
   // Return all necessary data
   return {
@@ -324,21 +336,57 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
-export const GET_MENU_QUERY = `#graphql
+// index.jsx
+
+const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
     menu(handle: $handle) {
       items {
         id
         title
         url
+        resource {
+          ... on Collection {
+            id
+            title
+            handle
+            image {
+              url
+              altText
+            }
+          }
+          # You can add other resource types if needed
+        }
         items {
           id
           title
           url
+          resource {
+            ... on Collection {
+              id
+              title
+              handle
+              image {
+                url
+                altText
+              }
+            }
+          }
           items {
             id
             title
             url
+            resource {
+              ... on Collection {
+                id
+                title
+                handle
+                image {
+                  url
+                  altText
+                }
+              }
+            }
           }
         }
       }
