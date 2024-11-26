@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -20,15 +20,18 @@ export const meta = () => {
 export async function loader(args) {
   const banners = [
     {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
+      imageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
       link: '/collections/google-pixel',
     },
     {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
+      imageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
       link: '/collections/garmin',
     },
     {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
+      imageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
       link: '/collections/remarkable',
     },
   ];
@@ -48,9 +51,7 @@ async function loadCriticalData({ context }) {
   }
 
   // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+  const menuHandles = extractHandlesFromMenu(menu.items);
 
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
@@ -71,18 +72,41 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Inside loadCriticalData function
+  // Function to extract handle from URL
+  function getCollectionHandleFromUrl(url) {
+    const match = url.match(/\/collections\/([^\/?#]+)/);
+    return match ? match[1] : null;
+  }
 
+  // Function to extract handles from menu items
+  function extractHandlesFromMenu(items) {
+    let handles = [];
+    items.forEach((item) => {
+      const handle = getCollectionHandleFromUrl(item.url);
+      if (handle) {
+        handles.push(handle);
+      }
+      if (item.items && item.items.length > 0) {
+        handles = handles.concat(extractHandlesFromMenu(item.items));
+      }
+    });
+    return handles;
+  }
+
+  // Attach collections to menu items
   function attachCollectionsToMenuItems(menuItems, collections) {
     const collectionMap = new Map();
     collections.forEach((collection) => {
-      collectionMap.set(collection.title.toLowerCase(), collection);
+      collectionMap.set(collection.handle, collection);
     });
 
     menuItems.forEach((item) => {
-      const collection = collectionMap.get(item.title.toLowerCase());
-      if (collection) {
-        item.collection = collection;
+      const handle = getCollectionHandleFromUrl(item.url);
+      if (handle) {
+        const collection = collectionMap.get(handle);
+        if (collection) {
+          item.collection = collection;
+        }
       }
 
       // Recursively attach collections to subitems
@@ -135,7 +159,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections } = useLoaderData();
+  const { banners, collections, sliderCollections, menuItems } = useLoaderData();
 
   const images = [
     {
@@ -237,7 +261,9 @@ export default function Homepage() {
     
   ];
 
-  const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
+  const newArrivalsCollection = collections.find(
+    (collection) => collection.handle === 'new-arrivals'
+  );
 
   return (
     <div className="home">
@@ -245,8 +271,10 @@ export default function Homepage() {
       <CategorySlider menuItems={menuItems} />
       <div className="collections-container">
         <>
-          {/* Render "New Arrivals" and "Laptops" rows at the start */}
-          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+          {/* Render "New Arrivals" row at the start */}
+          {newArrivalsCollection && (
+            <TopProductSections collection={newArrivalsCollection} />
+          )}
         </>
       </div>
       {/* Defer these sections */}
