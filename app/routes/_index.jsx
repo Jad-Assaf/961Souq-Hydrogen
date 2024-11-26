@@ -69,7 +69,7 @@ async function loadCriticalData({ context }) {
   }
 
   // Extract handles from the menu items and their subitems
-  const menuHandles = extractHandlesFromMenuItems(menu.items);
+  const menuHandles = Array.from(new Set(extractHandlesFromMenuItems(menu.items)));
 
   // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
@@ -120,33 +120,41 @@ const brandsData = [
 async function fetchCollectionsByHandles(context, handles) {
   if (handles.length === 0) return [];
 
-  // Build a query string that matches any of the handles
-  const handleQueries = handles.map((handle) => `handle:'${handle}'`);
-  const queryStr = handleQueries.join(' OR ');
+  // Build the query with aliases
+  const query = buildCollectionsQuery(handles);
 
-  const { collections } = await context.storefront.query(GET_COLLECTIONS_BY_HANDLES_QUERY, {
-    variables: { query: queryStr },
-  });
+  const data = await context.storefront.query(query);
 
-  return collections.nodes;
+  // Extract collections from the response
+  const collections = handles
+    .map((handle) => data[`collection_${sanitizeHandle(handle)}`])
+    .filter(Boolean);
+
+  return collections;
 }
 
-const GET_COLLECTIONS_BY_HANDLES_QUERY = `#graphql
-  query GetCollectionsByHandles($query: String!) {
-    collections(first: 50, query: $query) {
-      nodes {
-        id
-        title
-        handle
-        image {
-          url
-          altText
-        }
-        # Include other fields as needed
+function buildCollectionsQuery(handles) {
+  const collectionQueries = handles.map((handle) => `
+    collection_${sanitizeHandle(handle)}: collectionByHandle(handle: "${handle}") {
+      id
+      title
+      handle
+      image {
+        url
+        altText
       }
+      # Include other fields as needed
     }
-  }
-`;
+  `);
+
+  return `query GetCollectionsByHandles {
+    ${collectionQueries.join('\n')}
+  }`;
+}
+
+function sanitizeHandle(handle) {
+  return handle.replace(/[^a-zA-Z0-9_]/g, '_');
+}
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menuItems } = useLoaderData();
