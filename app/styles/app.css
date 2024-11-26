@@ -1422,9 +1422,9 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .collection-product-link {
   display: flex;
-  gap: 30px;
+  gap: 15px;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .grid-cols-1 .collection-product-image {
@@ -1442,7 +1442,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 }
 
 .grid-cols-1 .product-info-container {
-  width: 80%;
+  width: 75%;
 }
 
 .grid-cols-1 .collection h4 {
