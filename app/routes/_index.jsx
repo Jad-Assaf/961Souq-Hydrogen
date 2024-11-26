@@ -71,7 +71,31 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return { collections, sliderCollections };
+  // Inside loadCriticalData function
+
+  function attachCollectionsToMenuItems(menuItems, collections) {
+    const collectionMap = new Map();
+    collections.forEach((collection) => {
+      collectionMap.set(collection.title.toLowerCase(), collection);
+    });
+
+    menuItems.forEach((item) => {
+      const collection = collectionMap.get(item.title.toLowerCase());
+      if (collection) {
+        item.collection = collection;
+      }
+
+      // Recursively attach collections to subitems
+      if (item.items && item.items.length > 0) {
+        attachCollectionsToMenuItems(item.items, collections);
+      }
+    });
+  }
+
+  // After fetching sliderCollections
+  attachCollectionsToMenuItems(menu.items, sliderCollections);
+
+  return { collections, sliderCollections, menuItems: menu.items };
 }
 
 const brandsData = [
@@ -218,7 +242,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
+      <CategorySlider menuItems={menuItems} />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
