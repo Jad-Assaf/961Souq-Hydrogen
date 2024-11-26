@@ -57,6 +57,11 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
         }
     };
 
+    // Extract the relative path from item.url
+    const relativeUrl = item.url.startsWith('http')
+        ? new URL(item.url).pathname
+        : item.url;
+
     return (
         <div className={`category-item ${isExpanded ? 'expanded' : ''}`}>
             <motion.div
@@ -71,7 +76,7 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
                     </div>
                 ) : (
-                    <Link to={item.url} className="category-link">
+                    <Link to={relativeUrl} className="category-link">
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
                     </Link>
                 )}
@@ -130,6 +135,7 @@ function CategoryContent({ item, isInView, collectionMap }) {
 
 // Helper function to extract handle from URL
 function extractHandleFromUrl(url) {
+    if (!url) return null;
     const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
     if (match && match[1]) {
         return match[1];
