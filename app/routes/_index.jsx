@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -52,9 +52,9 @@ async function loadCriticalData({ context }) {
     const handles = [];
     for (const item of menuItems) {
       const handle = extractHandleFromUrl(item.url);
-      if (handle) handles.push(handle); // Extract handle for main item
+      if (handle) handles.push(handle); // Add handle
       if (item.items && item.items.length > 0) {
-        handles.push(...extractHandlesFromMenu(item.items)); // Process subcollections recursively
+        handles.push(...extractHandlesFromMenu(item.items)); // Process subcollections
       }
     }
     return handles;
@@ -266,49 +266,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
       image {
         url
         altText
-      }
-      products(first: 15) {
-        nodes {
-          id
-          title
-          handle
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          images(first: 1) {
-            nodes {
-              url
-              altText
-            }
-          }
-          variants(first: 5) {
-            nodes {
-              id
-              availableForSale
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              selectedOptions {
-                name
-                value
-              }
-            }
-          }
-        }
       }
     }
   }
