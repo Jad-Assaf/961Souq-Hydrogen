@@ -13,29 +13,6 @@ import { BrandSection } from '~/components/BrandsSection';
 export const meta = () => {
   return [{ title: 'Hydrogen | Home' }];
 };
-const GET_COLLECTIONS_WITH_SUBCOLLECTIONS_QUERY = `#graphql
-  query GetCollectionsWithSubcollections($handles: [String!]!) {
-    collectionsByHandles(handles: $handles) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-      # Subcollections: mimic hierarchy by including menu items
-      items {
-        id
-        title
-        handle
-        image {
-          url
-          altText
-        }
-      }
-    }
-  }
-`;
 
 /**
  * @param {LoaderFunctionArgs} args
@@ -70,52 +47,33 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from menu items
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections and subcollections for the slider
-  const sliderCollections = await fetchCollectionsWithSubcollections(context, menuHandles);
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Fetch product collections using hardcoded handles
+  // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
+  // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
+  // Return menu along with other data
   return { collections, sliderCollections, menu };
-}
-
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
-}
-
-async function fetchCollectionsWithSubcollections(context, handles) {
-  if (!handles || handles.length === 0) return [];
-
-  const { collectionsByHandles } = await context.storefront.query(
-    GET_COLLECTIONS_WITH_SUBCOLLECTIONS_QUERY,
-    { variables: { handles } }
-  );
-  return collectionsByHandles || [];
 }
 
 const brandsData = [
@@ -141,6 +99,18 @@ const brandsData = [
   { name: "Ubiquiti", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ubuquiti-logo.jpg?v=1712761841", link: "/collections/ubiquiti-products" },
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
+
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menu } = useLoaderData();
