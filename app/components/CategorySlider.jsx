@@ -1,30 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-export default function CategorySlider({ collections, fetchSubCollections }) {
+export default function CategorySlider({ mainCollections, fetchSubCollections }) {
     const [subCollections, setSubCollections] = useState([]);
     const [selectedCollection, setSelectedCollection] = useState(null);
 
-    async function handleFetchSubCollections(handle) {
-        try {
-            const subCollectionsData = await fetchSubCollections(handle);
-            setSubCollections(subCollectionsData);
-            setSelectedCollection(
-                collections.find((collection) => collection.handle === handle)
-            );
-        } catch (error) {
-            console.error('Error fetching sub-collections:', error);
-        }
+    async function handleCollectionClick(handle) {
+        const subCollectionsData = await fetchSubCollections(handle);
+        setSelectedCollection(handle);
+        setSubCollections(subCollectionsData);
     }
 
     return (
         <div className="category-slider">
             <h2>Categories</h2>
             <div className="slider-container">
-                {collections.map((collection) => (
+                {mainCollections.map((collection) => (
                     <div
                         key={collection.id}
                         className="slider-item"
-                        onClick={() => handleFetchSubCollections([collection.handle])}
+                        onClick={() => handleCollectionClick(collection.handle)}
                     >
                         <img
                             src={collection.image?.src}
@@ -37,15 +31,12 @@ export default function CategorySlider({ collections, fetchSubCollections }) {
 
             {subCollections.length > 0 && (
                 <div className="sub-collections">
-                    <h3>Sub-Collections of {selectedCollection.title}</h3>
+                    <h3>Sub-Collections of {selectedCollection}</h3>
                     <div className="slider-container">
-                        {subCollections.map((subCollection) => (
-                            <div key={subCollection.id} className="slider-item">
-                                <img
-                                    src={subCollection.image?.src}
-                                    alt={subCollection.image?.altText || subCollection.title}
-                                />
-                                <p>{subCollection.title}</p>
+                        {subCollections.map((sub) => (
+                            <div key={sub.id} className="slider-item">
+                                <img src={sub.image?.src} alt={sub.image?.altText || sub.title} />
+                                <p>{sub.title}</p>
                             </div>
                         ))}
                     </div>
