@@ -5,6 +5,7 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
+import CategorySlider from '~/components/CategorySlider';
 
 /**
  * @type {MetaFunction}
