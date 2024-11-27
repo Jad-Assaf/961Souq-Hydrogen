@@ -34,8 +34,8 @@ export async function loader(args) {
   ];
 
   const [criticalData, categorySliderData] = await Promise.all([
-    loadCriticalData(args), // Existing logic remains untouched
-    loadCategorySliderData(args), // Added logic for CategorySlider
+    loadCriticalData(args), // Fetch main collections data
+    loadCategorySliderData(args), // Fetch data for CategorySlider
   ]);
 
   return defer({ ...criticalData, banners, categorySliderData });
@@ -72,7 +72,7 @@ async function loadCriticalData({ context }) {
 }
 
 async function loadCategorySliderData({ context }) {
-  const categoryMenuHandle = 'categories-menu'; // Unique handle for category menu
+  const categoryMenuHandle = 'categories-menu';
   const { menu } = await context.storefront.query(CATEGORY_SLIDER_MENU_QUERY, {
     variables: { handle: categoryMenuHandle },
   });
@@ -87,6 +87,28 @@ async function loadCategorySliderData({ context }) {
   return { categoryCollections, categoryMenu: menu };
 }
 
+/**
+ * Fetch collections based on handles
+ * @param {LoaderFunctionArgs} context
+ * @param {Array} handles
+ */
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
+
+/**
+ * Fetch category collections for CategorySlider
+ * @param {LoaderFunctionArgs} context
+ * @param {Array} handles
+ */
 async function fetchCategoryCollections(context, handles) {
   const collections = [];
   for (const handle of handles) {
@@ -101,7 +123,29 @@ async function fetchCategoryCollections(context, handles) {
   return collections;
 }
 
-// CategorySlider-specific GraphQL queries
+// GraphQL Queries
+const GET_MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+          items {
+            id
+            title
+            url
+          }
+        }
+      }
+    }
+  }
+`;
+
 const CATEGORY_SLIDER_MENU_QUERY = `#graphql
   query GetCategorySliderMenu($handle: String!) {
     menu(handle: $handle) {
@@ -123,6 +167,63 @@ const CATEGORY_SLIDER_COLLECTION_QUERY = `#graphql
       image {
         url
         altText
+      }
+    }
+  }
+`;
+
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+      products(first: 15) {
+        nodes {
+          id
+          title
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          compareAtPriceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            nodes {
+              url
+              altText
+            }
+          }
+          variants(first: 5) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -152,17 +253,6 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
 
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
-}
 
 export default function Homepage() {
   const { banners, collections, menu, categorySliderData } = useLoaderData();
@@ -301,82 +391,3 @@ function DeferredCollectionDisplay({ collections, images }) {
 function DeferredBrandSection({ brands }) {
   return <BrandSection brands={brands} />;
 }
-
-const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
-  query GetCollectionByHandle($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-      products(first: 15) {
-        nodes {
-          id
-          title
-          handle
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          images(first: 1) {
-            nodes {
-              url
-              altText
-            }
-          }
-          variants(first: 5) {
-            nodes {
-              id
-              availableForSale
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              selectedOptions {
-                name
-                value
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const GET_MENU_QUERY = `#graphql
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
-  }
-`;
