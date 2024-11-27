@@ -1,6 +1,4 @@
-// src/routes/index.jsx
-
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -39,41 +37,6 @@ export async function loader(args) {
   return defer({ ...criticalData, banners });
 }
 
-/**
- * Recursively extracts collection handles from menu items and their sub-items.
- * @param {Array} items - The menu items.
- * @returns {Array} - An array of collection handles.
- */
-function extractHandlesFromMenu(items) {
-  let handles = [];
-
-  items.forEach((item) => {
-    const handle = extractHandleFromUrl(item.url);
-    if (handle) {
-      handles.push(handle);
-    }
-
-    if (item.items && item.items.length > 0) {
-      handles = handles.concat(extractHandlesFromMenu(item.items));
-    }
-  });
-
-  return handles;
-}
-
-/**
- * Extracts the collection handle from a given URL.
- * @param {string} url - The URL from which to extract the handle.
- * @returns {string|null} - The extracted handle or null if not found.
- */
-function extractHandleFromUrl(url) {
-  const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-  if (match && match[1]) {
-    return match[1];
-  }
-  return null;
-}
-
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
@@ -84,116 +47,33 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Recursively extract handles from the menu items, including subcategories
-  const menuHandles = extractHandlesFromMenu(menu.items);
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  // Fetch collections for the slider using menu handles
+  // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Hardcoded handles for product rows
+  // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
-  // Fetch collections for product rows
+  // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Combine all collections for comprehensive mapping
-  const allCollections = [...sliderCollections, ...collections];
-
-  // Return menu along with all collections
-  return { collections: allCollections, sliderCollections, menu };
-}
-
-/**
- * Fetches collections by their handles.
- * @param {Object} context - The context object containing the storefront.
- * @param {Array} handles - An array of collection handles to fetch.
- * @returns {Array} - An array of fetched collection objects.
- */
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
-    query GetCollectionByHandle($handle: String!) {
-      collectionByHandle(handle: $handle) {
-        id
-        title
-        handle
-        image {
-          url
-          altText
-        }
-        products(first: 15) {
-          nodes {
-            id
-            title
-            handle
-            priceRange {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-            compareAtPriceRange {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-            images(first: 1) {
-              nodes {
-                url
-                altText
-              }
-            }
-            variants(first: 5) {
-              nodes {
-                id
-                availableForSale
-                price {
-                  amount
-                  currencyCode
-                }
-                compareAtPrice {
-                  amount
-                  currencyCode
-                }
-                selectedOptions {
-                  name
-                  value
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  // Use Promise.all to fetch all collections concurrently
-  const fetchPromises = handles.map(handle =>
-    context.storefront.query(GET_COLLECTION_BY_HANDLE_QUERY, { variables: { handle } })
-  );
-
-  const results = await Promise.all(fetchPromises);
-
-  results.forEach((result, index) => {
-    if (result.collectionByHandle) {
-      collections.push(result.collectionByHandle);
-    } else {
-      console.warn(`Collection with handle "${handles[index]}" not found.`);
-    }
-  });
-
-  return collections;
+  // Return menu along with other data
+  return { collections, sliderCollections, menu };
 }
 
 const brandsData = [
@@ -220,27 +100,17 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
 
-const GET_MENU_QUERY = `#graphql
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
   }
-`;
+  return collections;
+}
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menu } = useLoaderData();
@@ -342,7 +212,7 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-
+    
   ];
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
@@ -378,3 +248,81 @@ function DeferredBrandSection({ brands }) {
   return <BrandSection brands={brands} />;
 }
 
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+      products(first: 15) {
+        nodes {
+          id
+          title
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          compareAtPriceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            nodes {
+              url
+              altText
+            }
+          }
+          variants(first: 5) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const GET_MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+          items {
+            id
+            title
+            url
+          }
+        }
+      }
+    }
+  }
+`;
