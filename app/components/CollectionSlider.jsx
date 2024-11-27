@@ -45,62 +45,55 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
 };
 
 function CategoryItem({ item, index, expandedCategories, onCategoryClick, collectionMap }) {
-    const isExpanded = expandedCategories.includes(item.title);
+    const isExpanded = expandedCategories.includes(item.id);
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
 
-    const handleCategoryClick = () => {
-        onCategoryClick(item.title);
+    const handleClick = (e) => {
+        if (hasSubItems) {
+            e.preventDefault();
+            onCategoryClick(item.id);
+        }
     };
 
     return (
-        <div key={item.id} className="category-item">
-            <div onClick={handleCategoryClick} className="category-title">
-                {item.title}
-            </div>
-
-            {/* Render image for main category */}
-            {collectionMap[item.title] && collectionMap[item.title].image ? (
-                <Image
-                    data={collectionMap[item.title].image}
-                    aspectRatio="1/1"
-                    sizes="(min-width: 45em) 20vw, 40vw"
-                    alt={collectionMap[item.title].image?.altText || item.title}
-                    className="category-image"
-                    width="150px"
-                    height="150px"
-                />
-            ) : (
-                <div className="category-placeholder-image"></div>
-            )}
-
-            {/* Render sub-items if expanded */}
+        <div className={`category-item ${isExpanded ? 'expanded' : ''}`}>
+            <motion.div
+                ref={ref}
+                initial={{ opacity: 0, x: -30 }}
+                animate={isInView ? { opacity: 1, x: 0 } : {}}
+                transition={{ delay: index * 0.01, duration: 0.5 }}
+                className="category-container"
+            >
+                {hasSubItems ? (
+                    <div onClick={handleClick} className="category-link">
+                        <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
+                    </div>
+                ) : (
+                    <Link to={item.url} className="category-link">
+                        <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
+                    </Link>
+                )}
+            </motion.div>
             {isExpanded && hasSubItems && (
                 <div className="subcategory-list">
-                    {item.items.map((subItem) => (
-                        <div key={subItem.id} className="subcategory-item">
-                            <div className="subcategory-title">{subItem.title}</div>
-
-                            {/* Render image for sub-item */}
-                            {collectionMap[subItem.title] && collectionMap[subItem.title].image ? (
-                                <Image
-                                    data={collectionMap[subItem.title].image}
-                                    aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    alt={collectionMap[subItem.title].image?.altText || subItem.title}
-                                    className="subcategory-image"
-                                    width="100px" // Adjust size as needed
-                                    height="100px" // Adjust size as needed
-                                />
-                            ) : (
-                                <div className="subcategory-placeholder-image"></div>
-                            )}
-                        </div>
+                    {item.items.map((subItem, subIndex) => (
+                        <CategoryItem
+                            key={subItem.id}
+                            item={subItem}
+                            index={subIndex}
+                            expandedCategories={expandedCategories}
+                            onCategoryClick={onCategoryClick}
+                            collectionMap={collectionMap}
+                        />
                     ))}
                 </div>
             )}
         </div>
     );
 }
+
 function CategoryContent({ item, isInView, collectionMap }) {
     const title = item.title;
 

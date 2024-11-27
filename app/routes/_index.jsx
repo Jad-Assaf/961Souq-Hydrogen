@@ -47,16 +47,14 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from the menu items, including sub-items
-  const menuHandles = [];
-  menu.items.forEach(item => {
-    menuHandles.push(item.title.toLowerCase().replace(/\s+/g, '-')); // Main collection handle
-    if (item.items) {
-      item.items.forEach(subItem => {
-        menuHandles.push(subItem.title.toLowerCase().replace(/\s+/g, '-')); // Sub-collection handle
-      });
-    }
-  });
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
+
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -72,10 +70,10 @@ async function loadCriticalData({ context }) {
   ];
 
   // Fetch collections for product rows.
-  const collections = await fetchCollectionsByHandles(context, [...menuHandles, ...hardcodedHandles]);
+  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, menu };
+  return { collections, sliderCollections, menu };
 }
 
 const brandsData = [
