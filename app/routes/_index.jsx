@@ -39,7 +39,7 @@ export async function loader(args) {
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
-  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+  const { menu } = await context.storefront.query(GET_COLLECTIONS_QUERY, {
     variables: { handle: menuHandle },
   });
 
