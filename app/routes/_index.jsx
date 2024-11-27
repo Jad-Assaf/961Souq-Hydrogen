@@ -33,8 +33,12 @@ export async function loader(args) {
     },
   ];
 
-  const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners });
+  const [criticalData, categorySliderData] = await Promise.all([
+    loadCriticalData(args), // Existing logic remains untouched
+    loadCategorySliderData(args), // Added logic for CategorySlider
+  ]);
+
+  return defer({ ...criticalData, banners, categorySliderData });
 }
 
 async function loadCriticalData({ context }) {
@@ -66,6 +70,63 @@ async function loadCriticalData({ context }) {
   // Return menu along with other data
   return { collections, menu };
 }
+
+async function loadCategorySliderData({ context }) {
+  const categoryMenuHandle = 'categories-menu'; // Unique handle for category menu
+  const { menu } = await context.storefront.query(CATEGORY_SLIDER_MENU_QUERY, {
+    variables: { handle: categoryMenuHandle },
+  });
+
+  if (!menu) {
+    throw new Response('Category menu not found', { status: 404 });
+  }
+
+  const categoryHandles = menu.items.map((item) => item.title);
+  const categoryCollections = await fetchCategoryCollections(context, categoryHandles);
+
+  return { categoryCollections, categoryMenu: menu };
+}
+
+async function fetchCategoryCollections(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      CATEGORY_SLIDER_COLLECTION_QUERY,
+      { variables: { handle } },
+    );
+    if (collectionByHandle) {
+      collections.push(collectionByHandle);
+    }
+  }
+  return collections;
+}
+
+// CategorySlider-specific GraphQL queries
+const CATEGORY_SLIDER_MENU_QUERY = `#graphql
+  query GetCategorySliderMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        title
+        url
+        id
+      }
+    }
+  }
+`;
+
+const CATEGORY_SLIDER_COLLECTION_QUERY = `#graphql
+  query GetCategorySliderCollection($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+    }
+  }
+`;
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
@@ -104,7 +165,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, menu } = useLoaderData();
+  const { banners, collections, menu, categorySliderData } = useLoaderData();
 
   const images = [
     {
@@ -212,7 +273,7 @@ export default function Homepage() {
     <div className="home">
       <BannerSlideshow banners={banners} />
       <Suspense fallback={<div>Loading category slider...</div>}>
-        <CategorySlider />
+        <CategorySlider categorySliderData={categorySliderData} />
       </Suspense>
       <div className="collections-container">
         <>
