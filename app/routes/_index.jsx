@@ -147,7 +147,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, menu } = useLoaderData();
+  const { banners, collections, categoryCollections } = useLoaderData();
 
   const images = [
     {
