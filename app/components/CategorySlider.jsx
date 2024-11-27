@@ -1,7 +1,7 @@
 // src/components/CategorySlider.jsx
 
+import { Link } from '@remix-run/react';
 import React from 'react';
-import { Link } from '@shopify/hydrogen';
 
 export default function CategorySlider({ collections }) {
     return (
