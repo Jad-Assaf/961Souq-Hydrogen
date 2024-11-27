@@ -108,7 +108,7 @@ function CategoryContent({ item, isInView, collectionMap }) {
                 transition={{ duration: 0.5 }}
                 className="category-image-container"
             >
-                {collection && collection.image ? (
+                {collection?.image?.src ? (
                     <img
                         src={collection.image.src}
                         alt={collection.image.altText || title}
@@ -117,7 +117,9 @@ function CategoryContent({ item, isInView, collectionMap }) {
                         height="150px"
                     />
                 ) : (
-                    <div className="category-placeholder-image"></div>
+                    <div className="category-placeholder-image">
+                        <span>No Image Available</span>
+                    </div>
                 )}
             </motion.div>
             <div className="category-title">{title}</div>
@@ -127,9 +129,6 @@ function CategoryContent({ item, isInView, collectionMap }) {
 
 // Helper function to extract handle from URL
 function extractHandleFromUrl(url) {
-    const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-    if (match && match[1]) {
-        return match[1];
-    }
-    return null;
+  const match = url?.match(/\/collections\/([a-zA-Z0-9\-_]+)/); // Add a fallback for `undefined` URLs
+  return match && match[1] ? match[1] : null;
 }

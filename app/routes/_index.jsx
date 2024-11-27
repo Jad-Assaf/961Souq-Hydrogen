@@ -47,15 +47,10 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles for categories from the menu
-  const categoryHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+  // Fetch all collections, including sub-collections, recursively
+  const categorySliderCollections = await fetchCategorySliderCollectionsRecursive(context, menu.items);
 
-  // Fetch collections for the CategorySlider
-  const categorySliderCollections = await fetchCategorySliderCollections(context, categoryHandles);
-
-  // Hardcoded handles for product rows.
+  // Hardcoded handles for other product rows
   const hardcodedHandles = [
     'new-arrivals', 'laptops', 
     'apple-macbook', 'apple-iphone', 'apple-accessories', 
@@ -68,10 +63,8 @@ async function loadCriticalData({ context }) {
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
-  // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
   return { collections, categorySliderCollections, menu };
 }
 
@@ -118,18 +111,38 @@ const GET_CATEGORY_COLLECTIONS_QUERY = `#graphql
 `;
 
 async function fetchCategorySliderCollections(context, handles) {
-  const { collections } = await context.storefront.query(GET_CATEGORY_COLLECTIONS_QUERY, {
-    variables: { handles },
-  });
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(GET_COLLECTION_BY_HANDLE_QUERY, {
+      variables: { handle },
+    });
+    if (collectionByHandle) {
+      collections.push({
+        id: collectionByHandle.id,
+        title: collectionByHandle.title,
+        handle: collectionByHandle.handle,
+        image: collectionByHandle.image,
+      });
+    }
+  }
+  return collections;
+}
 
-  if (!collections || !collections.edges) return [];
+async function fetchCategorySliderCollectionsRecursive(context, menuItems) {
+  const handles = menuItems.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
+  const collections = await fetchCategorySliderCollections(context, handles);
 
-  return collections.edges.map(({ node }) => ({
-    id: node.id,
-    title: node.title,
-    handle: node.handle,
-    image: node.image,
-  }));
+  // Fetch sub-collections recursively
+  for (const item of menuItems) {
+    if (item.items && item.items.length > 0) {
+      const subCollections = await fetchCategorySliderCollectionsRecursive(context, item.items);
+      collections.push(...subCollections);
+    }
+  }
+
+  return collections;
 }
 
 async function fetchCollectionsByHandles(context, handles) {
