@@ -61,10 +61,9 @@ async function loadCriticalData({ context }) {
 
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
-  const categorySliderCollections = await fetchCollectionsFromMenu(context, menu.items);
 
   // Return menu along with other data
-  return { collections, menu, categorySliderCollections };
+  return { collections, menu };
 }
 
 const brandsData = [
@@ -103,40 +102,8 @@ async function fetchCollectionsByHandles(context, handles) {
   return collections;
 }
 
-async function fetchCollectionsFromMenu(context, menuItems) {
-  const collections = [];
-
-  for (const menuItem of menuItems) {
-    // Extract the collection handle from the menu item URL
-    const collectionHandle = getCollectionHandleFromUrl(menuItem.url);
-    if (collectionHandle) {
-      // Fetch the collection by handle
-      const collection = await fetchCollectionByHandle(context, collectionHandle);
-
-      // Recursively fetch subcollections from sub-menu items
-      const subCollections = await fetchCollectionsFromMenu(context, menuItem.items);
-      collection.subCollections = subCollections;
-
-      collections.push(collection);
-    }
-  }
-
-  return collections;
-}
-
-// index.jsx
-
-function getCollectionHandleFromUrl(url) {
-  // Match URLs like '/collections/collection-handle'
-  const match = url.match(/\/collections\/([^\/\?]+)/);
-  if (match && match[1]) {
-    return match[1];
-  }
-  return null;
-}
-
 export default function Homepage() {
-  const { banners, collections, menu, categorySliderCollections } = useLoaderData();
+  const { banners, collections, menu } = useLoaderData();
 
   const images = [
     {
@@ -243,7 +210,6 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider collections={categorySliderCollections} />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
