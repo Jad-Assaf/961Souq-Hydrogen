@@ -47,14 +47,13 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Existing code to fetch collections
-  // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
+  // Extract handles for categories from the menu
+  const categoryHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for the slider using menu handles.
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+  // Fetch collections for the CategorySlider
+  const categorySliderCollections = await fetchCategorySliderCollections(context, categoryHandles);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -73,7 +72,7 @@ async function loadCriticalData({ context }) {
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, sliderCollections, menu };
+  return { collections, categorySliderCollections, menu };
 }
 
 const brandsData = [
@@ -99,6 +98,39 @@ const brandsData = [
   { name: "Ubiquiti", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ubuquiti-logo.jpg?v=1712761841", link: "/collections/ubiquiti-products" },
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
+
+const GET_CATEGORY_COLLECTIONS_QUERY = `#graphql
+  query GetCollections($handles: [String!]) {
+    collections(first: 30, query: $handles) {
+      edges {
+        node {
+          id
+          title
+          handle
+          image {
+            src
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
+async function fetchCategorySliderCollections(context, handles) {
+  const { collections } = await context.storefront.query(GET_CATEGORY_COLLECTIONS_QUERY, {
+    variables: { handles },
+  });
+
+  if (!collections || !collections.edges) return [];
+
+  return collections.edges.map(({ node }) => ({
+    id: node.id,
+    title: node.title,
+    handle: node.handle,
+    image: node.image,
+  }));
+}
 
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
@@ -220,7 +252,10 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
+      <CategorySlider
+        menu={menu}
+        sliderCollections={categorySliderCollections}
+      />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
