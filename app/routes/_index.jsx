@@ -5,7 +5,6 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
-import CategorySlider from '~/components/CategorySlider';
 
 /**
  * @type {MetaFunction}
@@ -34,11 +33,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  const categorySliderHandles = ['apple', 'laptops', 'gaming']; // Replace with your actual handles
-  const categorySliderCollections = await fetchCollectionsByHandles(args.context, categorySliderHandles);
-
-  return defer({ ...criticalData, banners, categorySliderCollections });
-
+  return defer({ ...criticalData, banners });
 }
 
 async function loadCriticalData({ context }) {
@@ -66,9 +61,10 @@ async function loadCriticalData({ context }) {
 
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+  const categorySliderCollections = await fetchCollectionsFromMenu(context, menu.items);
 
   // Return menu along with other data
-  return { collections, menu };
+  return { collections, menu, categorySliderCollections };
 }
 
 const brandsData = [
@@ -105,6 +101,38 @@ async function fetchCollectionsByHandles(context, handles) {
     if (collectionByHandle) collections.push(collectionByHandle);
   }
   return collections;
+}
+
+async function fetchCollectionsFromMenu(context, menuItems) {
+  const collections = [];
+
+  for (const menuItem of menuItems) {
+    // Extract the collection handle from the menu item URL
+    const collectionHandle = getCollectionHandleFromUrl(menuItem.url);
+    if (collectionHandle) {
+      // Fetch the collection by handle
+      const collection = await fetchCollectionByHandle(context, collectionHandle);
+
+      // Recursively fetch subcollections from sub-menu items
+      const subCollections = await fetchCollectionsFromMenu(context, menuItem.items);
+      collection.subCollections = subCollections;
+
+      collections.push(collection);
+    }
+  }
+
+  return collections;
+}
+
+// index.jsx
+
+function getCollectionHandleFromUrl(url) {
+  // Match URLs like '/collections/collection-handle'
+  const match = url.match(/\/collections\/([^\/\?]+)/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
 }
 
 export default function Homepage() {
