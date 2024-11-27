@@ -97,6 +97,7 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
 function CategoryContent({ item, isInView, collectionMap }) {
     const title = item.title;
 
+    // Extract the handle from the item's URL
     const handle = extractHandleFromUrl(item.url);
     const collection = handle ? collectionMap[handle] : null;
 
@@ -109,9 +110,11 @@ function CategoryContent({ item, isInView, collectionMap }) {
                 className="category-image-container"
             >
                 {collection && collection.image ? (
-                    <img
-                        src={collection.image.src}
-                        alt={collection.image.altText || title}
+                    <Image
+                        data={collection.image}
+                        aspectRatio="1/1"
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        alt={collection.image?.altText || title}
                         className="category-image"
                         width="150px"
                         height="150px"

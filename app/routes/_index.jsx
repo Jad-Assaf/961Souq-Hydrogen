@@ -39,7 +39,7 @@ export async function loader(args) {
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
-  const { menu } = await context.storefront.query(GET_COLLECTIONS_QUERY, {
+  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
 
@@ -47,6 +47,8 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
@@ -98,38 +100,16 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
 
-const GET_COLLECTIONS_QUERY = `#graphql
-  query GetCollections($handles: [String!]) {
-    collections(first: 30, query: $handles) {
-      edges {
-        node {
-          id
-          title
-          handle
-          image {
-            src
-            altText
-          }
-        }
-      }
-    }
-  }
-`;
-
 async function fetchCollectionsByHandles(context, handles) {
-  const { collections } = await context.storefront.query(GET_COLLECTIONS_QUERY, {
-    variables: { handles },
-  });
-
-  if (!collections || !collections.edges) return [];
-
-  // Transform the edges into a flat array of collections
-  return collections.edges.map(({ node }) => ({
-    id: node.id,
-    title: node.title,
-    handle: node.handle,
-    image: node.image,
-  }));
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
 }
 
 export default function Homepage() {
