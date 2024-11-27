@@ -92,19 +92,61 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
+  const { collections } = await context.storefront.query(GET_COLLECTIONS_QUERY, {
+    variables: { handles },
+  });
+
+  return collections.edges.map((edge) => edge.node);
 }
 
+// Function to fetch sub-collections for CategorySlider
+async function fetchCategorySliderSubCollections(context, handles) {
+  const { collectionss } = await context.storefront.query(GET_CATEGORY_SLIDER_COLLECTIONS_QUERY, {
+    variables: { handles },
+  });
+
+  return collectionss.edges.map((edge) => edge.node);
+}
+
+const GET_COLLECTIONS_QUERY = `#graphql
+  query GetCollections($handles: [String!]) {
+    collections(first: 10, query: $handles) {
+      edges {
+        node {
+          id
+          title
+          handle
+          image {
+            src
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
+const GET_CATEGORY_SLIDER_COLLECTIONS_QUERY = `#graphql
+  query GetCategorySliderCollections($handles: [String!]) {
+    collections(first: 10, query: $handles) {
+      edges {
+        node {
+          id
+          title
+          handle
+          image {
+            src
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
+
 export default function Homepage() {
-  const { banners, collections, menu } = useLoaderData();
+  const { banners, collections, menu, collectionss } = useLoaderData();
 
   const images = [
     {
@@ -203,7 +245,7 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-    
+
   ];
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
@@ -212,7 +254,10 @@ export default function Homepage() {
     <div className="home">
       <BannerSlideshow banners={banners} />
       <Suspense fallback={<div>Loading category slider...</div>}>
-        <CategorySlider collections={collections} /> {/* Pass collections as props */}
+        <CategorySlider
+          collections={collectionss}
+          fetchSubCollections={fetchCategorySliderSubCollections} // Pass the fetch function
+        />
       </Suspense>
       <div className="collections-container">
         <>

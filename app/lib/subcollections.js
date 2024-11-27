@@ -6,30 +6,42 @@ export async function loader({ context, request }) {
         throw new Response('Missing collection handle', { status: 400 });
     }
 
-    const GET_SUB_COLLECTIONS_QUERY = `#graphql
-    query GetSubCollections($handle: String!) {
-      collectionByHandle(handle: $handle) {
-        id
-        title
-        handle
-        image {
-          url
-          altText
+    const GET_COLLECTIONS_QUERY = `#graphql
+    query GetCollections($handles: [String!]) {
+      collections(first: 10, query: $handles) {
+        edges {
+          node {
+            id
+            title
+            handle
+            image {
+              src
+              altText
+            }
+          }
         }
       }
     }
   `;
 
-    const { collectionByHandle } = await context.storefront.query(
-        GET_SUB_COLLECTIONS_QUERY,
-        { variables: { handle } }
+    const { collections } = await context.storefront.query(
+        GET_COLLECTIONS_QUERY,
+        { variables: { handles: [handle] } }
     );
 
-    if (!collectionByHandle) {
-        throw new Response('Collection not found', { status: 404 });
+    if (!collections || collections.edges.length === 0) {
+        throw new Response('No sub-collections found', { status: 404 });
     }
 
-    return new Response(JSON.stringify(collectionByHandle), {
-        headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+        JSON.stringify(
+            collections.edges.map((edge) => ({
+                id: edge.node.id,
+                title: edge.node.title,
+                handle: edge.node.handle,
+                image: edge.node.image,
+            }))
+        ),
+        { headers: { 'Content-Type': 'application/json' } }
+    );
 }
