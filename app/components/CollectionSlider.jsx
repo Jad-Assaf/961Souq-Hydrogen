@@ -97,6 +97,7 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
 function CategoryContent({ item, isInView, collectionMap }) {
     const title = item.title;
 
+    // Extract the handle from the item's URL
     const handle = extractHandleFromUrl(item.url);
     const collection = handle ? collectionMap[handle] : null;
 
@@ -108,18 +109,18 @@ function CategoryContent({ item, isInView, collectionMap }) {
                 transition={{ duration: 0.5 }}
                 className="category-image-container"
             >
-                {collection?.image?.src ? (
-                    <img
-                        src={collection.image.src}
-                        alt={collection.image.altText || title}
+                {collection && collection.image ? (
+                    <Image
+                        data={collection.image}
+                        aspectRatio="1/1"
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        alt={collection.image?.altText || title}
                         className="category-image"
                         width="150px"
                         height="150px"
                     />
                 ) : (
-                    <div className="category-placeholder-image">
-                        <span>No Image Available</span>
-                    </div>
+                    <div className="category-placeholder-image"></div>
                 )}
             </motion.div>
             <div className="category-title">{title}</div>
@@ -129,6 +130,9 @@ function CategoryContent({ item, isInView, collectionMap }) {
 
 // Helper function to extract handle from URL
 function extractHandleFromUrl(url) {
-  const match = url?.match(/\/collections\/([a-zA-Z0-9\-_]+)/); // Add a fallback for `undefined` URLs
-  return match && match[1] ? match[1] : null;
+    const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
+    if (match && match[1]) {
+        return match[1];
+    }
+    return null;
 }

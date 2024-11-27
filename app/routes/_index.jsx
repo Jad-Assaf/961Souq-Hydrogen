@@ -1,11 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
+import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
-import CategorySlider from '~/components/CategorySlider';
 
 /**
  * @type {MetaFunction}
@@ -47,24 +47,31 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
+
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
-  return { collections, menu };
+  return { collections, sliderCollections };
 }
 
 const brandsData = [
@@ -92,61 +99,19 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  const { collections: mainCollections } = await context.storefront.query(GET_COLLECTIONS_QUERY, {
-    variables: { handles },
-  });
-
-  return mainCollections.edges.map((edge) => edge.node);
-}
-
-// Function to fetch sub-collections for CategorySlider
-async function fetchCategorySliderSubCollections(context, handles) {
-  const { collections: subCollections } = await context.storefront.query(GET_CATEGORY_SLIDER_COLLECTIONS_QUERY, {
-    variables: { handles },
-  });
-
-  return subCollections.edges.map((edge) => edge.node);
-}
-
-const GET_COLLECTIONS_QUERY = `#graphql
-  query GetCollections($handles: [String!]) {
-    collections(first: 10, query: $handles) {
-      edges {
-        node {
-          id
-          title
-          handle
-          image {
-            src
-            altText
-          }
-        }
-      }
-    }
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
   }
-`;
-
-const GET_CATEGORY_SLIDER_COLLECTIONS_QUERY = `#graphql
-  query GetCategorySliderCollections($handles: [String!]) {
-    collections(first: 10, query: $handles) {
-      edges {
-        node {
-          id
-          title
-          handle
-          image {
-            src
-            altText
-          }
-        }
-      }
-    }
-  }
-`;
-
+  return collections;
+}
 
 export default function Homepage() {
-  const { banners, collections, menu } = useLoaderData();
+  const { banners, collections, sliderCollections } = useLoaderData();
 
   const images = [
     {
@@ -245,7 +210,7 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-
+    
   ];
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
@@ -253,12 +218,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <Suspense fallback={<div>Loading category slider...</div>}>
-        <CategorySlider
-          mainCollections={collections}
-          fetchSubCollections={fetchCategorySliderSubCollections}
-        />
-      </Suspense>
+      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
