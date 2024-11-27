@@ -5,7 +5,6 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
-import CategorySlider from '~/components/CategorySlider';
 
 /**
  * @type {MetaFunction}
@@ -33,12 +32,8 @@ export async function loader(args) {
     },
   ];
 
-  const [criticalData, categorySliderData] = await Promise.all([
-    loadCriticalData(args), // Fetch main collections data
-    loadCategorySliderData(args), // Fetch data for CategorySlider
-  ]);
-
-  return defer({ ...criticalData, banners, categorySliderData });
+  const criticalData = await loadCriticalData(args);
+  return defer({ ...criticalData, banners });
 }
 
 async function loadCriticalData({ context }) {
@@ -71,164 +66,6 @@ async function loadCriticalData({ context }) {
   return { collections, menu };
 }
 
-async function loadCategorySliderData({ context }) {
-  const categoryMenuHandle = 'categories-menu';
-  const { menu } = await context.storefront.query(CATEGORY_SLIDER_MENU_QUERY, {
-    variables: { handle: categoryMenuHandle },
-  });
-
-  if (!menu) {
-    throw new Response('Category menu not found', { status: 404 });
-  }
-
-  const categoryHandles = menu.items.map((item) => item.title);
-  const categoryCollections = await fetchCategoryCollections(context, categoryHandles);
-
-  return { categoryCollections, categoryMenu: menu };
-}
-
-/**
- * Fetch collections based on handles
- * @param {LoaderFunctionArgs} context
- * @param {Array} handles
- */
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
-}
-
-/**
- * Fetch category collections for CategorySlider
- * @param {LoaderFunctionArgs} context
- * @param {Array} handles
- */
-async function fetchCategoryCollections(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      CATEGORY_SLIDER_COLLECTION_QUERY,
-      { variables: { handle } },
-    );
-    if (collectionByHandle) {
-      collections.push(collectionByHandle);
-    }
-  }
-  return collections;
-}
-
-// GraphQL Queries
-const GET_MENU_QUERY = `#graphql
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
-  }
-`;
-
-const CATEGORY_SLIDER_MENU_QUERY = `#graphql
-  query GetCategorySliderMenu($handle: String!) {
-    menu(handle: $handle) {
-      items {
-        title
-        url
-        id
-      }
-    }
-  }
-`;
-
-const CATEGORY_SLIDER_COLLECTION_QUERY = `#graphql
-  query GetCategorySliderCollection($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-    }
-  }
-`;
-
-const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
-  query GetCollectionByHandle($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-      products(first: 15) {
-        nodes {
-          id
-          title
-          handle
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          images(first: 1) {
-            nodes {
-              url
-              altText
-            }
-          }
-          variants(first: 5) {
-            nodes {
-              id
-              availableForSale
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              selectedOptions {
-                name
-                value
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
   { name: "HP", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/hp.png?v=1648112715", link: "/collections/hp-products" },
@@ -253,9 +90,20 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
 
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
 
 export default function Homepage() {
-  const { banners, collections, menu, categorySliderData } = useLoaderData();
+  const { banners, collections, menu } = useLoaderData();
 
   const images = [
     {
@@ -363,7 +211,7 @@ export default function Homepage() {
     <div className="home">
       <BannerSlideshow banners={banners} />
       <Suspense fallback={<div>Loading category slider...</div>}>
-        <CategorySlider categorySliderData={categorySliderData} />
+        <CategorySlider collections={collections} /> {/* Pass collections as props */}
       </Suspense>
       <div className="collections-container">
         <>
@@ -391,3 +239,82 @@ function DeferredCollectionDisplay({ collections, images }) {
 function DeferredBrandSection({ brands }) {
   return <BrandSection brands={brands} />;
 }
+
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+      products(first: 15) {
+        nodes {
+          id
+          title
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          compareAtPriceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            nodes {
+              url
+              altText
+            }
+          }
+          variants(first: 5) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const GET_MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+          items {
+            id
+            title
+            url
+          }
+        }
+      }
+    }
+  }
+`;
