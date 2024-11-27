@@ -5,6 +5,7 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
+import CategorySlider from '~/components/CategorySlider';
 
 /**
  * @type {MetaFunction}
@@ -210,6 +211,9 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
+      <Suspense fallback={<div>Loading category slider...</div>}>
+        <CategorySlider />
+      </Suspense>
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
