@@ -1,53 +1,49 @@
 import React, { useState } from 'react';
 import { Image } from '@shopify/hydrogen-react';
 
-export const CategorySlider = ({ menu }) => {
-    const [activeCollection, setActiveCollection] = useState(null);
+export const CategorySlider = ({ categoryCollections }) => {
+    const [activeParent, setActiveParent] = useState(null);
 
-    // Handles the click on a parent collection
-    const handleCollectionClick = (collection) => {
-        if (activeCollection?.id === collection.id) {
-            setActiveCollection(null); // Collapse if already active
-        } else {
-            setActiveCollection(collection); // Set as active to show sub-collections
-        }
+    const handleParentClick = (parentId) => {
+        setActiveParent((prev) => (prev === parentId ? null : parentId));
     };
 
     return (
         <div className="category-slider">
             <h3 className="slider-title">Shop By Categories</h3>
             <div className="slider-container">
-                {menu?.items?.map((collection) => (
-                    <div key={collection.id} className="collection-card">
+                {categoryCollections.map((parent) => (
+                    <div key={parent.id} className="parent-collection">
                         <button
-                            className="collection-header"
-                            onClick={() => handleCollectionClick(collection)}
+                            className="parent-button"
+                            onClick={() => handleParentClick(parent.id)}
                         >
-                            {collection.image && (
+                            {parent.image && (
                                 <Image
-                                    src={collection.image.src}
-                                    alt={collection.image.altText || collection.title}
-                                    className="collection-image"
+                                    src={parent.image.src}
+                                    alt={parent.image.altText || parent.title}
+                                    className="parent-image"
                                 />
                             )}
-                            <h4 className="collection-title">{collection.title}</h4>
+                            <h4 className="parent-title">{parent.title}</h4>
                         </button>
-                        {/* Render sub-collections if this collection is active */}
-                        {activeCollection?.id === collection.id && (
+                        {activeParent === parent.id && parent.items?.length > 0 && (
                             <div className="sub-collections">
-                                {collection.items?.map((subCollection) => (
-                                    <div key={subCollection.id} className="sub-collection-card">
-                                        <a href={subCollection.url} className="sub-collection-link">
-                                            {subCollection.image && (
-                                                <Image
-                                                    src={subCollection.image.src}
-                                                    alt={subCollection.image.altText || subCollection.title}
-                                                    className="sub-collection-image"
-                                                />
-                                            )}
-                                            <p className="sub-collection-title">{subCollection.title}</p>
-                                        </a>
-                                    </div>
+                                {parent.items.map((child) => (
+                                    <a
+                                        key={child.id}
+                                        href={child.url}
+                                        className="sub-collection"
+                                    >
+                                        {child.image && (
+                                            <Image
+                                                src={child.image.src}
+                                                alt={child.image.altText || child.title}
+                                                className="sub-collection-image"
+                                            />
+                                        )}
+                                        <p className="sub-collection-title">{child.title}</p>
+                                    </a>
                                 ))}
                             </div>
                         )}

@@ -17,6 +17,42 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
+const GET_CATEGORY_COLLECTIONS_QUERY = `#graphql
+  query GetCollections($handles: [String!]) {
+    collections(first: 10, query: $handles) {
+      edges {
+        node {
+          id
+          title
+          handle
+          image {
+            src
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
+async function fetchCategoryCollections(context, handles) {
+  const { collections } = await context.storefront.query(GET_CATEGORY_COLLECTIONS_QUERY, {
+    variables: { handles },
+  });
+
+  if (!collections?.edges) {
+    return [];
+  }
+
+  return collections.edges.map(({ node }) => ({
+    id: node.id,
+    title: node.title,
+    handle: node.handle,
+    image: node.image,
+  }));
+}
+
+// Inside the loader function:
 export async function loader(args) {
   const banners = [
     {
@@ -34,7 +70,14 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners });
+
+  // Fetch collections for CategorySlider
+  const menuHandles = criticalData.menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
+  const categoryCollections = await fetchCategoryCollections(args.context, menuHandles);
+
+  return defer({ ...criticalData, banners, categoryCollections });
 }
 
 async function loadCriticalData({ context }) {
@@ -211,7 +254,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} />
+      <CategorySlider categoryCollections={categoryCollections} />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
