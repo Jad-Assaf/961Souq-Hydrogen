@@ -101,11 +101,11 @@ async function fetchCollectionsByHandles(context, handles) {
 
 // Function to fetch sub-collections for CategorySlider
 async function fetchCategorySliderSubCollections(context, handles) {
-  const { collectionss } = await context.storefront.query(GET_CATEGORY_SLIDER_COLLECTIONS_QUERY, {
+  const { collections } = await context.storefront.query(GET_CATEGORY_SLIDER_COLLECTIONS_QUERY, {
     variables: { handles },
   });
 
-  return collectionss.edges.map((edge) => edge.node);
+  return collections.edges.map((edge) => edge.node);
 }
 
 const GET_COLLECTIONS_QUERY = `#graphql
@@ -146,7 +146,7 @@ const GET_CATEGORY_SLIDER_COLLECTIONS_QUERY = `#graphql
 
 
 export default function Homepage() {
-  const { banners, collections, menu, collectionss } = useLoaderData();
+  const { banners, collections, menu } = useLoaderData();
 
   const images = [
     {
@@ -255,7 +255,7 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <Suspense fallback={<div>Loading category slider...</div>}>
         <CategorySlider
-          collections={collectionss}
+          collections={collections}
           fetchSubCollections={fetchCategorySliderSubCollections} // Pass the fetch function
         />
       </Suspense>
