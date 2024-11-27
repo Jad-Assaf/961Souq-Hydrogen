@@ -1,19 +1,61 @@
 import React, { useState } from 'react';
-
-export default function CategorySlider({ categorySliderData }) {
-    const { categoryCollections } = categorySliderData;
+import { useLoaderData } from '@remix-run/react';
+import '../styles/CollectionSlider.css'
+/**
+ * Component to display categories in a slider, with sub-collections loading on click.
+ */
+export default function CategorySlider() {
+    const { collections } = useLoaderData();
     const [subCollections, setSubCollections] = useState(null);
     const [selectedCollection, setSelectedCollection] = useState(null);
 
-    async function fetchSubCollections(collectionHandle) {
-        try {
-            const response = await fetch(`/api/subcollections?handle=${collectionHandle}`);
-            const data = await response.json();
+    const GET_SUB_COLLECTIONS_QUERY = `#graphql
+      query GetSubCollections($handle: String!) {
+        collectionByHandle(handle: $handle) {
+          id
+          title
+          handle
+          image {
+            url
+            altText
+          }
+          products(first: 10) {
+            nodes {
+              id
+              title
+              handle
+              images(first: 1) {
+                nodes {
+                  url
+                  altText
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
 
-            setSubCollections(data.subCollections);
-            setSelectedCollection(data.collection);
-        } catch (error) {
-            console.error('Error fetching sub-collections:', error);
+    async function fetchSubCollections(context, collectionHandle) {
+        const { collectionByHandle } = await context.storefront.query(
+            GET_SUB_COLLECTIONS_QUERY,
+            { variables: { handle: collectionHandle } },
+        );
+
+        if (collectionByHandle) {
+            // Extract both the collection image and the associated products
+            const subCollectionsData = collectionByHandle.products.nodes.map((product) => ({
+                id: product.id,
+                title: product.title,
+                handle: product.handle,
+                image: product.images[0]?.url,
+                altText: product.images[0]?.altText || product.title,
+            }));
+            setSubCollections(subCollectionsData);
+            setSelectedCollection({
+                title: collectionByHandle.title,
+                image: collectionByHandle.image,
+            });
         }
     }
 
@@ -21,11 +63,11 @@ export default function CategorySlider({ categorySliderData }) {
         <div className="category-slider">
             <h2>Categories</h2>
             <div className="slider-container">
-                {categoryCollections.map((collection) => (
+                {collections.map((collection) => (
                     <div
                         key={collection.id}
                         className="slider-item"
-                        onClick={() => fetchSubCollections(collection.handle)}
+                        onClick={() => fetchSubCollections(context, collection.handle)}
                     >
                         <img
                             src={collection.image?.url}
@@ -39,12 +81,19 @@ export default function CategorySlider({ categorySliderData }) {
             {subCollections && (
                 <div className="sub-collections">
                     <h3>Sub-Collections of {selectedCollection.title}</h3>
+                    {selectedCollection.image && (
+                        <img
+                            className="selected-collection-image"
+                            src={selectedCollection.image.url}
+                            alt={selectedCollection.image.altText || selectedCollection.title}
+                        />
+                    )}
                     <div className="slider-container">
                         {subCollections.map((subCollection) => (
                             <div key={subCollection.id} className="slider-item">
                                 <img
-                                    src={subCollection.image?.url}
-                                    alt={subCollection.image?.altText || subCollection.title}
+                                    src={subCollection.image}
+                                    alt={subCollection.altText || subCollection.title}
                                 />
                                 <p>{subCollection.title}</p>
                             </div>
