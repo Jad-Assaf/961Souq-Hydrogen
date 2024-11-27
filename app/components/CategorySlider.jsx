@@ -1,9 +1,9 @@
 // src/components/CategorySlider.jsx
 
 import React from 'react';
-import { Link, useShop, Image } from '@shopify/hydrogen';
+import { Link } from '@shopify/hydrogen';
 
-export default async function CategorySlider({ handles = [] }) {
+export default async function CategorySlider({ handles = [] }, { storefront }) {
     // Define the GraphQL query using #graphql without importing gql
     const query = `#graphql
     query GetCollections($handles: [String!]) {
@@ -23,19 +23,17 @@ export default async function CategorySlider({ handles = [] }) {
     }
   `;
 
-    // Use the storefront client provided by Hydrogen
-    const { storefront } = useShop();
-
-    // Fetch data using storefront.query without specifying the access token
+    // Fetch data using the storefront.query function
     const { data, errors } = await storefront.query(query, {
         variables: { handles },
     });
 
-    if (errors) {
+    if (errors && errors.length > 0) {
         return <div>Error loading collections: {errors[0].message}</div>;
     }
 
-    const collections = data?.collections?.edges?.map((edge) => edge.node) || [];
+    const collections =
+        data?.collections?.edges?.map((edge) => edge.node) || [];
 
     return (
         <div>
