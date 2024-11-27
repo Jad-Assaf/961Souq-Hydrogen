@@ -1,8 +1,7 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
-import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
@@ -47,25 +46,24 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Fetch all collections, including sub-collections, recursively
-  const categorySliderCollections = await fetchCategorySliderCollectionsRecursive(context, menu.items);
-
-  // Hardcoded handles for other product rows
+  // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
   ];
 
+  // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return { collections, categorySliderCollections, menu };
+  // Return menu along with other data
+  return { collections, menu };
 }
 
 const brandsData = [
@@ -92,59 +90,6 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/philips-logo.jpg?v=1712762630", link: "/collections/philips-products" },
 ];
 
-const GET_CATEGORY_COLLECTIONS_QUERY = `#graphql
-  query GetCollections($handles: [String!]) {
-    collections(first: 30, query: $handles) {
-      edges {
-        node {
-          id
-          title
-          handle
-          image {
-            src
-            altText
-          }
-        }
-      }
-    }
-  }
-`;
-
-async function fetchCategorySliderCollections(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(GET_COLLECTION_BY_HANDLE_QUERY, {
-      variables: { handle },
-    });
-    if (collectionByHandle) {
-      collections.push({
-        id: collectionByHandle.id,
-        title: collectionByHandle.title,
-        handle: collectionByHandle.handle,
-        image: collectionByHandle.image,
-      });
-    }
-  }
-  return collections;
-}
-
-async function fetchCategorySliderCollectionsRecursive(context, menuItems) {
-  const handles = menuItems.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
-  const collections = await fetchCategorySliderCollections(context, handles);
-
-  // Fetch sub-collections recursively
-  for (const item of menuItems) {
-    if (item.items && item.items.length > 0) {
-      const subCollections = await fetchCategorySliderCollectionsRecursive(context, item.items);
-      collections.push(...subCollections);
-    }
-  }
-
-  return collections;
-}
-
 async function fetchCollectionsByHandles(context, handles) {
   const collections = [];
   for (const handle of handles) {
@@ -158,7 +103,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, categorySliderCollections, menu } = useLoaderData();
+  const { banners, collections, menu } = useLoaderData();
 
   const images = [
     {
@@ -265,10 +210,6 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider
-        menu={menu}
-        sliderCollections={categorySliderCollections}
-      />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
@@ -277,7 +218,7 @@ export default function Homepage() {
       </div>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections} images={images} />
+        <DeferredCollectionDisplay collections={collections} />
       </Suspense>
 
       <Suspense fallback={<div>Loading brands...</div>}>
@@ -288,8 +229,8 @@ export default function Homepage() {
 }
 
 // Create deferred versions of components
-function DeferredCollectionDisplay({ collections, images }) {
-  return <CollectionDisplay collections={collections} images={images} />;
+function DeferredCollectionDisplay({ collections }) {
+  return <CollectionDisplay collections={collections} />;
 }
 
 function DeferredBrandSection({ brands }) {
