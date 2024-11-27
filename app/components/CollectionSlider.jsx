@@ -1,4 +1,5 @@
-// CollectionSlider.jsx (CategorySlider.jsx)
+// src/components/CollectionSlider.jsx (also known as CategorySlider.jsx)
+
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
