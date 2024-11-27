@@ -47,6 +47,7 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  // Existing code to fetch collections
   // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
@@ -71,7 +72,8 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  return { collections, sliderCollections };
+  // Return menu along with other data
+  return { collections, sliderCollections, menu };
 }
 
 const brandsData = [
@@ -111,7 +113,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections } = useLoaderData();
+  const { banners, collections, sliderCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -218,7 +220,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
