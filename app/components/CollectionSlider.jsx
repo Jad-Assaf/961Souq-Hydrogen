@@ -2,7 +2,7 @@
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 
 export const CategorySlider = ({ menu, sliderCollections }) => {
     if (!menu || !menu.items) {
@@ -12,10 +12,13 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
     const [expandedCategories, setExpandedCategories] = useState([]);
 
     // Create a mapping from collection handle to collection object
-    const collectionMap = {};
-    sliderCollections.forEach((collection) => {
-        collectionMap[collection.handle] = collection;
-    });
+    const collectionMap = useMemo(() => {
+        const map = {};
+        sliderCollections.forEach((collection) => {
+            map[collection.handle] = collection;
+        });
+        return map;
+    }, [sliderCollections]);
 
     const handleCategoryClick = (id) => {
         setExpandedCategories((prevExpanded) =>
@@ -63,13 +66,13 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
                 ref={ref}
                 initial={{ opacity: 0, x: -30 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ delay: index * 0.01, duration: 0.5 }}
+                transition={{ delay: index * 0.05, duration: 0.5 }}
                 className="category-container"
             >
                 {hasSubItems ? (
-                    <div onClick={handleClick} className="category-link">
+                    <button onClick={handleClick} className="category-link" aria-expanded={isExpanded}>
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
-                    </div>
+                    </button>
                 ) : (
                     <Link to={item.url} className="category-link">
                         <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
