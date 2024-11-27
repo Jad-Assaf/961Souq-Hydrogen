@@ -218,7 +218,7 @@ export default function Homepage() {
       </div>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections} />
+        <DeferredCollectionDisplay collections={collections} images={images} />
       </Suspense>
 
       <Suspense fallback={<div>Loading brands...</div>}>
@@ -229,8 +229,8 @@ export default function Homepage() {
 }
 
 // Create deferred versions of components
-function DeferredCollectionDisplay({ collections }) {
-  return <CollectionDisplay collections={collections} />;
+function DeferredCollectionDisplay({ collections, images }) {
+  return <CollectionDisplay collections={collections} images={images} />;
 }
 
 function DeferredBrandSection({ brands }) {
