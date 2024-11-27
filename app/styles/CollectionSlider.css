@@ -85,3 +85,45 @@
         width: 200px;
     }
 }
+
+
+
+.category-slider {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.slider-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+}
+
+.slider-item {
+    flex: 0 0 auto;
+    text-align: center;
+    max-width: 150px;
+    cursor: pointer;
+}
+
+.slider-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.slider-item p {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.sub-collections {
+    margin-top: 20px;
+}
+
+.selected-collection-image {
+    display: block;
+    margin: 20px auto;
+    max-width: 200px;
+}
