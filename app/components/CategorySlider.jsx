@@ -1,55 +1,70 @@
-import React, { useState } from 'react';
-import { Image } from '@shopify/hydrogen-react';
+// src/components/CategorySlider.jsx
 
-export const CategorySlider = ({ categoryCollections }) => {
-    const [activeParent, setActiveParent] = useState(null);
+import React from 'react';
+import { Link, useShop, Image } from '@shopify/hydrogen';
 
-    const handleParentClick = (parentId) => {
-        setActiveParent((prev) => (prev === parentId ? null : parentId));
-    };
+export default async function CategorySlider({ handles = [] }) {
+    // Define the GraphQL query using #graphql without importing gql
+    const query = `#graphql
+    query GetCollections($handles: [String!]) {
+      collections(first: 10, query: $handles) {
+        edges {
+          node {
+            id
+            title
+            handle
+            image {
+              url
+              altText
+            }
+          }
+        }
+      }
+    }
+  `;
+
+    // Use the storefront client provided by Hydrogen
+    const { storefront } = useShop();
+
+    // Fetch data using storefront.query without specifying the access token
+    const { data, errors } = await storefront.query(query, {
+        variables: { handles },
+    });
+
+    if (errors) {
+        return <div>Error loading collections: {errors[0].message}</div>;
+    }
+
+    const collections = data?.collections?.edges?.map((edge) => edge.node) || [];
 
     return (
-        <div className="category-slider">
-            <h3 className="slider-title">Shop By Categories</h3>
-            <div className="slider-container">
-                {categoryCollections.map((parent) => (
-                    <div key={parent.id} className="parent-collection">
-                        <button
-                            className="parent-button"
-                            onClick={() => handleParentClick(parent.id)}
-                        >
-                            {parent.image && (
-                                <Image
-                                    src={parent.image.src}
-                                    alt={parent.image.altText || parent.title}
-                                    className="parent-image"
-                                />
-                            )}
-                            <h4 className="parent-title">{parent.title}</h4>
-                        </button>
-                        {activeParent === parent.id && parent.items?.length > 0 && (
-                            <div className="sub-collections">
-                                {parent.items.map((child) => (
-                                    <a
-                                        key={child.id}
-                                        href={child.url}
-                                        className="sub-collection"
-                                    >
-                                        {child.image && (
-                                            <Image
-                                                src={child.image.src}
-                                                alt={child.image.altText || child.title}
-                                                className="sub-collection-image"
-                                            />
-                                        )}
-                                        <p className="sub-collection-title">{child.title}</p>
-                                    </a>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+        <div>
+            {collections.map((collection) => (
+                <CollectionCard key={collection.id} collection={collection} />
+            ))}
         </div>
     );
-};
+}
+
+// Define the CollectionCard component within the same file
+function CollectionCard({ collection }) {
+    const { handle, title, image } = collection;
+
+    return (
+        <div>
+            <Link to={`/collections/${handle}`}>
+                {image ? (
+                    <img
+                        src={image.url}
+                        alt={image.altText || title}
+                        width="300"
+                        height="300"
+                    />
+                ) : (
+                    <div>No image available</div>
+                )}
+                <h2>{title}</h2>
+            </Link>
+        </div>
+    );
+}

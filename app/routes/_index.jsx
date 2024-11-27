@@ -5,7 +5,7 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
-import { CategorySlider } from '~/components/CategorySlider';
+import CategorySlider from '~/components/CategorySlider';
 
 /**
  * @type {MetaFunction}
@@ -17,42 +17,6 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs} args
  */
-const GET_CATEGORY_COLLECTIONS_QUERY = `#graphql
-  query GetCollections($handles: [String!]) {
-    collections(first: 10, query: $handles) {
-      edges {
-        node {
-          id
-          title
-          handle
-          image {
-            src
-            altText
-          }
-        }
-      }
-    }
-  }
-`;
-
-async function fetchCategoryCollections(context, handles) {
-  const { collections } = await context.storefront.query(GET_CATEGORY_COLLECTIONS_QUERY, {
-    variables: { handles },
-  });
-
-  if (!collections?.edges) {
-    return [];
-  }
-
-  return collections.edges.map(({ node }) => ({
-    id: node.id,
-    title: node.title,
-    handle: node.handle,
-    image: node.image,
-  }));
-}
-
-// Inside the loader function:
 export async function loader(args) {
   const banners = [
     {
@@ -70,14 +34,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-
-  // Fetch collections for CategorySlider
-  const menuHandles = criticalData.menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
-  const categoryCollections = await fetchCategoryCollections(args.context, menuHandles);
-
-  return defer({ ...criticalData, banners, categoryCollections });
+  return defer({ ...criticalData, banners });
 }
 
 async function loadCriticalData({ context }) {
@@ -91,6 +48,7 @@ async function loadCriticalData({ context }) {
   }
 
   // Hardcoded handles for product rows.
+  
   const hardcodedHandles = [
     'new-arrivals', 'laptops',
     'apple-macbook', 'apple-iphone', 'apple-accessories',
@@ -147,7 +105,18 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, categoryCollections } = useLoaderData();
+  const { banners, collections, menu } = useLoaderData();
+  const collectionHandles = [
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
+  ];
 
   const images = [
     {
@@ -254,7 +223,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider categoryCollections={categoryCollections} />
+      <CategorySlider handles={collectionHandles} />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
