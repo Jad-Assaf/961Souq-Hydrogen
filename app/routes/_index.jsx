@@ -6,6 +6,7 @@ import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
+import { ExpandableMenu } from '~/components/ExpandableMenu';
 
 /**
  * @type {MetaFunction}
@@ -253,22 +254,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <div className="new-menu-container">
-        {newMenuItems.map((item) => (
-          <div key={item.id}>
-            <button onClick={() => setExpandedNewMenuId((prev) => (prev === item.id ? null : item.id))}>
-              {item.title}
-            </button>
-            {expandedNewMenuId === item.id && (
-              <div className="new-submenu">
-                {item.items.map((subItem) => (
-                  <div key={subItem.id}>{subItem.title}</div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      <ExpandableMenu menuItems={newMenuItems} /> {/* Use the new component */}
       {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
       <div className="collections-container">
         <>
