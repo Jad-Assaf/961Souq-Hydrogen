@@ -47,24 +47,14 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  // Existing code to fetch collections
   // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for the slider using the new collections query.
-  const collectionsResponse = await context.storefront.query(GET_COLLECTIONS_QUERY, {
-    variables: { handles: menuHandles },
-  });
-
-  const sliderCollections = collectionsResponse.collections.edges.map(edge => edge.node);
-
-  // Fetch images for sub-collections
-  const subCollectionsResponse = await context.storefront.query(GET_SUB_COLLECTIONS_QUERY, {
-    variables: { handles: menuHandles },
-  });
-
-  const subCollections = subCollectionsResponse.collections.edges.map(edge => edge.node);
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -83,7 +73,7 @@ async function loadCriticalData({ context }) {
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, sliderCollections, subCollections, menu };
+  return { collections, sliderCollections, menu };
 }
 
 const brandsData = [
@@ -123,7 +113,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menu, subCollections } = useLoaderData();
+  const { banners, collections, sliderCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -230,7 +220,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} subCollections={subCollections} />
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
@@ -330,24 +320,6 @@ export const GET_MENU_QUERY = `#graphql
             id
             title
             url
-          }
-        }
-      }
-    }
-  }
-`;
-
-const GET_SUB_COLLECTIONS_QUERY = `#graphql
-  query GetSubCollections($handles: [String!]) {
-    collections(first: 10, query: $handles) {
-      edges {
-        node {
-          id
-          title
-          handle
-          image {
-            src
-            altText
           }
         }
       }
