@@ -33,8 +33,8 @@ export const ExpandableMenu = ({ menuItems }) => {
     );
 };
 
-const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) => {
-    const isExpanded = expandedCategory === item.id;
+const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }) => {
+    const isExpanded = expandedCategories.includes(item.id);
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
@@ -46,10 +46,17 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) 
         }
     };
 
+    const handleTransitionEnd = (e) => {
+        if (e.target.classList.contains('subcategory-list')) {
+            const otherItems = document.querySelectorAll('.category-item:not(.expanded)');
+            otherItems.forEach((item) => item.classList.toggle('hidden', !isExpanded));
+        }
+    };
+
     return (
         <div
-            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''
-                }`}
+            className={`category-item ${isExpanded ? 'expanded' : ''}`}
+            onTransitionEnd={handleTransitionEnd}
         >
             <motion.div
                 ref={ref}
@@ -68,17 +75,15 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) 
                     </Link>
                 )}
             </motion.div>
-            {hasSubItems && (
-                <div
-                    className={`subcategory-list ${isExpanded ? 'expanded' : ''}`}
-                >
+            {isExpanded && hasSubItems && (
+                <div className="subcategory-list">
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
-                            expandedCategory={null} // Sub-items are independent
-                            onCategoryClick={() => { }} // No toggle for sub-items
+                            expandedCategories={expandedCategories}
+                            onCategoryClick={onCategoryClick}
                         />
                     ))}
                 </div>
