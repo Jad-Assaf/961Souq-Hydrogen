@@ -6,6 +6,7 @@ import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
+import MenuCollectionComponent from '~/components/MenuCollectionComponent';
 
 /**
  * @type {MetaFunction}
@@ -220,7 +221,8 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
+      <MenuCollectionComponent />
+      {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
