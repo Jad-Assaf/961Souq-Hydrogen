@@ -47,14 +47,17 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Existing code to fetch collections
   // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for the slider using menu handles.
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+  // Fetch collections for the slider using the new collections query.
+  const collectionsResponse = await context.storefront.query(GET_COLLECTIONS_QUERY, {
+    variables: { handles: menuHandles },
+  });
+
+  const sliderCollections = collectionsResponse.collections.edges.map(edge => edge.node);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -320,6 +323,24 @@ export const GET_MENU_QUERY = `#graphql
             id
             title
             url
+          }
+        }
+      }
+    }
+  }
+`;
+
+const GET_COLLECTIONS_QUERY = `#graphql
+  query GetCollections($handles: [String!]) {
+    collections(first: 10, query: $handles) {
+      edges {
+        node {
+          id
+          title
+          handle
+          image {
+            src
+            altText
           }
         }
       }
