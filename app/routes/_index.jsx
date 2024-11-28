@@ -34,9 +34,9 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  const menuItems = await fetchMenuItems(args.context);
+  const newMenuItems = await fetchNewMenuItems(args.context);
 
-  return defer({ ...criticalData, banners, menuItems });
+  return defer({ ...criticalData, banners, newMenuItems });
 }
 
 async function loadCriticalData({ context }) {
@@ -78,9 +78,9 @@ async function loadCriticalData({ context }) {
   return { collections, sliderCollections, menu };
 }
 
-async function fetchMenuItems(context) {
+async function fetchNewMenuItems(context) {
   const menuQuery = `
-    query GetMenu($handle: String!) {
+    query FetchNewMenu($handle: String!) {
       menu(handle: $handle) {
         items {
           id
@@ -105,6 +105,7 @@ async function fetchMenuItems(context) {
   const { menu } = await context.storefront.query(menuQuery, { variables: { handle: menuHandle } });
   return menu.items || [];
 }
+
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
@@ -143,8 +144,9 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menu, menuItems } = useLoaderData();
-  const [expandedMenuId, setExpandedMenuId] = useState(null);
+  const { banners, collections, sliderCollections, menu, newMenuItems } = useLoaderData();
+  const [expandedNewMenuId, setExpandedNewMenuId] = useState(null);
+
 
   const images = [
     {
@@ -251,23 +253,18 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <div className="menu-container">
-        {menuItems.map((item) => (
+      <div className="new-menu-container">
+        {newMenuItems.map((item) => (
           <div key={item.id}>
-            <button onClick={() => handleExpandMenu(item.id)}>{item.title}</button>
-            {expandedMenuId === item.id && (
-              <div className="submenu">
+            <button onClick={() => handleExpandNewMenu(item.id)}>{item.title}</button>
+            {expandedNewMenuId === item.id && (
+              <div className="new-submenu">
                 {item.items.map((subItem) => (
                   <div key={subItem.id}>{subItem.title}</div>
                 ))}
               </div>
             )}
           </div>
-        ))}
-      </div>
-      <div className="collections-container">
-        {collections.map((collection) => (
-          <div key={collection.id}>{collection.title}</div>
         ))}
       </div>
       {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
