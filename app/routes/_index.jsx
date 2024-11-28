@@ -55,6 +55,18 @@ async function loadCriticalData({ context }) {
 
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+  
+  const subCollections = [];
+  for (const collection of sliderCollections) {
+    if (collection.items) { // Check if there are sub-items
+      for (const subItem of collection.items) {
+        const subCollection = await fetchCollectionByHandle(context, subItem.handle);
+        if (subCollection) {
+          subCollections.push(subCollection);
+        }
+      }
+    }
+  }
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -73,7 +85,7 @@ async function loadCriticalData({ context }) {
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, sliderCollections, menu };
+  return { collections, sliderCollections, menu, subCollections };
 }
 
 const brandsData = [
@@ -113,7 +125,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menu } = useLoaderData();
+  const { banners, collections, sliderCollections, menu, subCollections } = useLoaderData();
 
   const images = [
     {
@@ -220,7 +232,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} subCollections={subCollections} />
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
