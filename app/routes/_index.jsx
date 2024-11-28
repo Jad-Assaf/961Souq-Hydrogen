@@ -102,11 +102,55 @@ async function fetchNewMenuItems(context) {
     }
   `;
 
+  const collectionQuery = `
+    query GetCollectionByHandle($handle: String!) {
+      collectionByHandle(handle: $handle) {
+        id
+        title
+        handle
+        image {
+          url
+          altText
+        }
+      }
+    }
+  `;
+
   const menuHandle = 'new-main-menu';
   const { menu } = await context.storefront.query(menuQuery, { variables: { handle: menuHandle } });
-  return menu.items || [];
+
+  if (!menu || !menu.items) {
+    return [];
+  }
+
+  // Extract handles from menu items and fetch collection data
+  async function fetchCollectionForMenuItem(item) {
+    const handle = extractHandleFromUrl(item.url);
+    let collection = null;
+
+    if (handle) {
+      const { collectionByHandle } = await context.storefront.query(collectionQuery, { variables: { handle } });
+      if (collectionByHandle) {
+        collection = collectionByHandle;
+      }
+    }
+
+    return {
+      ...item,
+      image: collection?.image || null,
+      items: await Promise.all(item.items.map(fetchCollectionForMenuItem)),
+    };
+  }
+
+  const enrichedMenuItems = await Promise.all(menu.items.map(fetchCollectionForMenuItem));
+  return enrichedMenuItems;
 }
 
+// Helper function to extract handle from URL
+function extractHandleFromUrl(url) {
+  const match = url?.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
+  return match?.[1] || null;
+}
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },

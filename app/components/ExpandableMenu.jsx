@@ -11,7 +11,7 @@ export const ExpandableMenu = ({ menuItems }) => {
     return (
         <div className="expandable-menu-container">
             {menuItems.map((item) => {
-                const collectionImageUrl = item.image?.url; // Assuming `item.image` is part of the fetched collection data
+                const collectionImageUrl = item.image?.url; // Retrieved from enriched menu items
                 const collectionAltText = item.image?.altText || item.title;
 
                 return (
