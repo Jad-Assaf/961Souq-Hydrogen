@@ -92,7 +92,7 @@
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-width 1s ease, max-height 0.5s ease, opacity 2s ease;
+    transition: max-width 0.3s ease, max-height 0.3s ease, opacity 1s ease;
 }
 
 .subcategory-list.expanded {
@@ -127,17 +127,18 @@
 
 @media screen and (max-width: 1024px) {
     .subcategory-list {
-        align-items: center;
+        align-items: start;
         width: 80vw;
         border: 1px solid #ababab;
         border-radius: 5px;
         box-shadow: inset 0px 0px 20px 0px #ededed;
-        margin: 20px auto;
-        padding: 20px 0;
+        margin: 0;
+        padding: 0;
     }
 
     .subcategory-list.expanded {
         max-height: 1000px; /* Adjust for mobile */
+        padding: 20px 0 0 0;
     }
 }
 
