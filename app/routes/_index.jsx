@@ -38,42 +38,53 @@ export async function loader(args) {
 }
 
 async function loadCriticalData({ context }) {
-  const menuHandle = 'new-main-menu';
-  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-    variables: { handle: menuHandle },
-  });
+    const menuHandle = 'new-main-menu';
+    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+        variables: { handle: menuHandle },
+    });
 
-  if (!menu) {
-    throw new Response('Menu not found', { status: 404 });
-  }
+    if (!menu) {
+        throw new Response('Menu not found', { status: 404 });
+    }
 
-  // Existing code to fetch collections
-  // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+    // Extract handles from top-level and subcategories
+    const menuHandles = extractHandlesFromMenu(menu.items);
 
-  // Fetch collections for the slider using menu handles.
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+    // Fetch collections for both top-level and subcategories
+    const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Hardcoded handles for product rows.
-  const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
-  ];
+    // Fetch collections for product rows using hardcoded handles
+    const hardcodedHandles = [
+        'new-arrivals', 'laptops', 
+        'apple-macbook', 'apple-iphone', 'apple-accessories', 
+        'gaming-laptops', 'gaming-consoles', 'console-games', 
+        'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+        'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+        'earbuds', 'speakers', 'surround-systems', 
+        'desktops', 'pc-parts', 'business-monitors', 
+        'action-cameras', 'cameras', 'surveillance-cameras', 
+        'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+    ];
 
-  // Fetch collections for product rows.
-  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+    const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
-  return { collections, sliderCollections, menu };
+    return { collections, sliderCollections, menu };
+}
+
+// Helper function to recursively extract handles from menu items and sub-items
+function extractHandlesFromMenu(items) {
+    const handles = [];
+    for (const item of items) {
+        // Extract the handle from the URL
+        const handle = extractHandleFromUrl(item.url);
+        if (handle) handles.push(handle);
+
+        // Recursively handle subcategories
+        if (item.items && item.items.length > 0) {
+            handles.push(...extractHandlesFromMenu(item.items));
+        }
+    }
+    return handles;
 }
 
 const brandsData = [
