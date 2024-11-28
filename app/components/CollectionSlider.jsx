@@ -128,11 +128,11 @@ function CategoryContent({ item, isInView, collectionMap }) {
     );
 }
 
-// Helper function to extract handle from URL
-function extractHandleFromUrl(url) {
-    const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-    if (match && match[1]) {
-        return match[1];
-    }
-    return null;
-}
+// // Helper function to extract handle from URL
+// function extractHandleFromUrl(url) {
+//     const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
+//     if (match && match[1]) {
+//         return match[1];
+//     }
+//     return null;
+// }

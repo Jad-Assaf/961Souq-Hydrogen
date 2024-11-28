@@ -38,20 +38,21 @@ export async function loader(args) {
 }
 
 async function loadCriticalData({ context }) {
-    const menuHandle = 'new-main-menu';
-    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-        variables: { handle: menuHandle },
+  const menuHandle = 'new-main-menu';
+  let menu = null;
+  try {
+    const result = await context.storefront.query(GET_MENU_QUERY, {
+      variables: { handle: menuHandle },
     });
+    menu = result.menu;
+    if (!menu) throw new Error('Menu not found');
+  } catch (error) {
+    console.error('Error fetching menu:', error);
+    throw new Response('Menu not found', { status: 404 });
+  }
 
-    if (!menu) {
-        throw new Response('Menu not found', { status: 404 });
-    }
-
-    // Extract handles from top-level and subcategories
-    const menuHandles = extractHandlesFromMenu(menu.items);
-
-    // Fetch collections for both top-level and subcategories
-    const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+  const menuHandles = menu.items ? extractHandlesFromMenu(menu.items) : [];
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
     // Fetch collections for product rows using hardcoded handles
     const hardcodedHandles = [
@@ -73,18 +74,16 @@ async function loadCriticalData({ context }) {
 
 // Helper function to recursively extract handles from menu items and sub-items
 function extractHandlesFromMenu(items) {
-    const handles = [];
-    for (const item of items) {
-        // Extract the handle from the URL
-        const handle = extractHandleFromUrl(item.url);
-        if (handle) handles.push(handle);
+  const handles = [];
+  for (const item of items || []) {
+    const handle = extractHandleFromUrl(item.url || '');
+    if (handle) handles.push(handle);
 
-        // Recursively handle subcategories
-        if (item.items && item.items.length > 0) {
-            handles.push(...extractHandlesFromMenu(item.items));
-        }
+    if (item.items && item.items.length > 0) {
+      handles.push(...extractHandlesFromMenu(item.items));
     }
-    return handles;
+  }
+  return handles;
 }
 
 const brandsData = [
