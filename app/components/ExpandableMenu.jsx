@@ -13,33 +13,21 @@ export const ExpandableMenu = ({ menuItems }) => {
     const [collapsingCategory, setCollapsingCategory] = useState(null);
 
     const handleCategoryClick = (id) => {
-        if (expandedCategory === id) {
-            // Start collapsing
-            setCollapsingCategory(id);
-            const collapsingElement = document.querySelector(`.category-item[data-id="${id}"]`);
+    if (expandedCategory === id) {
+        // Start collapsing
+        setCollapsingCategory(id);
+        setTimeout(() => {
+            // After the collapse animation completes, clear the states
+            setCollapsingCategory(null);
+            setExpandedCategory(null);
+        }, 1000); // Match the animation duration
+    } else {
+        // Expand new category
+        setExpandedCategory(id);
+        setCollapsingCategory(null); // Clear collapsing state immediately
+    }
+};
 
-            if (collapsingElement) {
-                collapsingElement.addEventListener(
-                    "transitionend",
-                    () => {
-                        setCollapsingCategory(null);
-                        setExpandedCategory(null);
-                        collapsingElement.classList.add("delayed");
-                    },
-                    { once: true }
-                );
-            }
-        } else {
-            // Expand new category
-            setExpandedCategory(id);
-
-            // Remove delayed class when expanding
-            const expandingElement = document.querySelector(`.category-item[data-id="${id}"]`);
-            if (expandingElement) {
-                expandingElement.classList.remove("delayed");
-            }
-        }
-    };
 
     return (
         <div className="slide-con">
@@ -74,12 +62,18 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
         }
     };
 
+    const handleTransitionEnd = () => {
+        if (isCollapsing) {
+            setCollapsingCategory(null); // Clear the collapsing state after transition ends
+        }
+    };
+
     return (
         <div
             className={`category-item ${isExpanded ? 'expanded' : ''} 
-                    ${isCollapsing ? 'collapsing' : ''} 
-                    ${!isExpanded && expandedCategory && !isCollapsing ? 'hidden' : ''}`}
-            data-id={item.id} /* Add this to identify each category item */
+                        ${isCollapsing ? 'collapsing' : ''} 
+                        ${!isExpanded && expandedCategory && !isCollapsing ? 'hidden' : ''}`}
+            onTransitionEnd={handleTransitionEnd} // Listen for transition end
         >
             <motion.div
                 ref={ref}

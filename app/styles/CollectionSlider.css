@@ -208,22 +208,20 @@
 
 .hidden {
     opacity: 0;
+    /* Fully transparent */
     pointer-events: none;
-    /* Prevent interaction with hidden items */
-    transition: opacity 1.5s linear;
-    /* Smooth transition for opacity */
+    /* Disable interaction */
+    visibility: hidden;
+    /* Completely hides the element */
+    transition: opacity 1s ease;
+    /* Smooth opacity transition */
 }
 
 .category-item {
     opacity: 1;
+    /* Fully visible by default */
     visibility: visible;
     /* Ensure visibility by default */
-    transition: opacity 1.5s linear, visibility 1.5s linear;
+    transition: opacity 1s ease, visibility 1s ease;
     /* Smooth transitions */
-}
-
-/* Add this animation class to delay hiding the visibility */
-.hidden.delayed {
-    visibility: hidden;
-    /* Hidden after transition */
 }
