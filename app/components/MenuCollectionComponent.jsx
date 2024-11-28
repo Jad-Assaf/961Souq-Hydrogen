@@ -1,17 +1,15 @@
-import { useFetcher } from '@remix-run/react';
 import React, { useState, useEffect } from 'react';
 
 /**
  * Fetch and display menu items and their related collection data.
+ * Uses context.storefront.query for data fetching.
  */
-const MenuCollectionComponent = () => {
-    const fetcher = useFetcher();
+const MenuCollectionComponent = ({ context }) => {
     const [menuItems, setMenuItems] = useState([]);
     const [collections, setCollections] = useState({});
     const [expandedMenuId, setExpandedMenuId] = useState(null);
     const [subMenuItems, setSubMenuItems] = useState([]);
 
-    // Fetch the menu data initially
     useEffect(() => {
         fetchMenu();
     }, []);
@@ -40,20 +38,17 @@ const MenuCollectionComponent = () => {
       }
     `;
 
-        const result = await fetcher.load(`/api/graphql`, {
-            method: 'POST',
-            body: JSON.stringify({
-                query: menuQuery,
-                variables: { handle: menuHandle },
-            }),
-        });
+        try {
+            const result = await context.storefront.query(menuQuery, { variables: { handle: menuHandle } });
+            const menuData = result?.menu?.items || [];
+            setMenuItems(menuData);
 
-        const menuData = result?.data?.menu?.items || [];
-        setMenuItems(menuData);
-
-        // Fetch collections for top-level menu items
-        const topLevelHandles = extractHandlesFromMenu(menuData);
-        await fetchCollections(topLevelHandles);
+            // Fetch collections for top-level menu items
+            const topLevelHandles = extractHandlesFromMenu(menuData);
+            await fetchCollections(topLevelHandles);
+        } catch (error) {
+            console.error('Error fetching menu:', error);
+        }
     };
 
     const extractHandlesFromMenu = (items) => {
@@ -77,16 +72,14 @@ const MenuCollectionComponent = () => {
 
         const fetchedCollections = {};
         for (const handle of handles) {
-            const result = await fetcher.load(`/api/graphql`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    query: collectionQuery,
-                    variables: { handle },
-                }),
-            });
-            const collection = result?.data?.collectionByHandle;
-            if (collection) {
-                fetchedCollections[handle] = collection;
+            try {
+                const result = await context.storefront.query(collectionQuery, { variables: { handle } });
+                const collection = result?.collectionByHandle;
+                if (collection) {
+                    fetchedCollections[handle] = collection;
+                }
+            } catch (error) {
+                console.error(`Error fetching collection for handle ${handle}:`, error);
             }
         }
         setCollections(fetchedCollections);
@@ -106,7 +99,7 @@ const MenuCollectionComponent = () => {
 
         setExpandedMenuId(menuId);
 
-        // Fetch sub-menu items if needed
+        // Fetch sub-menu items
         const subMenuQuery = `
       query GetMenu($handle: String!) {
         menu(handle: $handle) {
@@ -129,16 +122,13 @@ const MenuCollectionComponent = () => {
       }
     `;
 
-        const result = await fetcher.load(`/api/graphql`, {
-            method: 'POST',
-            body: JSON.stringify({
-                query: subMenuQuery,
-                variables: { handle },
-            }),
-        });
-
-        const subMenuData = result?.data?.menu?.items || [];
-        setSubMenuItems(subMenuData);
+        try {
+            const result = await context.storefront.query(subMenuQuery, { variables: { handle } });
+            const subMenuData = result?.menu?.items || [];
+            setSubMenuItems(subMenuData);
+        } catch (error) {
+            console.error(`Error fetching submenu for handle ${handle}:`, error);
+        }
     };
 
     return (

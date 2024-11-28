@@ -113,7 +113,7 @@ async function fetchCollectionsByHandles(context, handles) {
   return collections;
 }
 
-export default function Homepage() {
+export default function Homepage({ context }) {
   const { banners, collections, sliderCollections, menu } = useLoaderData();
 
   const images = [
@@ -221,7 +221,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <MenuCollectionComponent />
+      <MenuCollectionComponent context={context} />
       {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
       <div className="collections-container">
         <>
