@@ -140,3 +140,11 @@
         max-height: 1000px; /* Adjust for mobile */
     }
 }
+
+.hidden {
+    display: none;
+}
+
+.expanded {
+    display: flex;
+}
