@@ -83,20 +83,42 @@
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
-    justify-content: flex-start;
-    gap: 20px;
-    /* Space between subcategories */
+    justify-content: center;
+    /* gap: 20px; */
     margin: 20px auto;
-    max-width: 1500px;
+    width: 350px;
     padding: 10px;
+}
+
+.subcategory-list .category-item {
+    width: 100px;
+}
+
+.subcategory-list .category-container {
+    margin: 0;
+    padding-bottom: 5px;
+}
+
+.subcategory-list .category-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.subcategory-list .category-item .category-image {
+    width: 75px;
+}
+
+.subcategory-list .category-title {
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    margin-top: 5px;
 }
 
 @media screen and (max-width: 1024px) {
     .subcategory-list {
-        flex-direction: column;
-        /* Stack subcategories vertically on smaller screens */
         align-items: center;
-        width: 95vw;
+        width: 80vw;
         border: 1px solid #ababab;
         border-radius: 5px;
         box-shadow: inset 0px 0px 20px 0px #ededed;
