@@ -181,8 +181,8 @@
         }
 
         33% {
-            max-width: 0px;
-            max-height: 500px;
+            max-width: 350px;
+            max-height: 0;
             opacity: 0.7;
         }
 
@@ -208,18 +208,18 @@
 
 .hidden {
     opacity: 0;
-    /* Make hidden items fully transparent */
-    transition: opacity 0.3s ease;
-    /* Add smooth transition for opacity */
     pointer-events: none;
     /* Prevent interaction with hidden items */
-    display: none;
-        /* Hides all categories except the expanded one */
+    transition: opacity 0.3s ease;
+    /* Smooth transition for opacity */
+    visibility: hidden;
+    /* Ensure the element is not interactive */
 }
 
 .category-item {
     opacity: 1;
-    /* Default opacity for visible items */
-    transition: opacity 0.3s ease;
-    /* Add smooth transition for opacity */
+    visibility: visible;
+    /* Ensure visibility by default */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    /* Smooth transitions */
 }
