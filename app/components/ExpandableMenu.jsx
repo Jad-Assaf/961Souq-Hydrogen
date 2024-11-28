@@ -14,11 +14,16 @@ export const ExpandableMenu = ({ menuItems }) => {
     const handleCategoryClick = (id) => {
         setExpandedCategories((prevExpanded) => {
             const isCurrentlyExpanded = prevExpanded.includes(id);
-            if (!isCurrentlyExpanded) {
-                document.getElementById(id)?.classList.add('expanded');
-            } else {
-                document.getElementById(id)?.classList.remove('expanded');
+            const subcategoryList = document.getElementById(`subcategory-${id}`);
+
+            if (subcategoryList) {
+                if (!isCurrentlyExpanded) {
+                    subcategoryList.classList.add('expanded');
+                } else {
+                    subcategoryList.classList.remove('expanded');
+                }
             }
+
             return isCurrentlyExpanded
                 ? prevExpanded.filter((categoryId) => categoryId !== id)
                 : [...prevExpanded, id];
@@ -76,7 +81,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }
                 )}
             </motion.div>
             {isExpanded && hasSubItems && (
-                <div className="subcategory-list" id={item.id}>
+                <div className="subcategory-list" id={`subcategory-${item.id}`}>
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
