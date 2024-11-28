@@ -1,9 +1,10 @@
+// CollectionSlider.jsx (CategorySlider.jsx)
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 
-export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
+export const CategorySlider = ({ menu, sliderCollections }) => {
     if (!menu || !menu.items) {
         return null; // or some fallback UI
     }
@@ -14,11 +15,6 @@ export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
     const collectionMap = {};
     sliderCollections.forEach((collection) => {
         collectionMap[collection.handle] = collection;
-    });
-
-    // Create a mapping for subCollections as well
-    subCollections.forEach((subCollection) => {
-        collectionMap[subCollection.handle] = subCollection;
     });
 
     const handleCategoryClick = (id) => {
