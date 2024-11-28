@@ -156,14 +156,14 @@
 
         66% {
             max-width: 350px;
-            max-height: 500px;
+            max-height: 750px;
             /* Adjust as per content height */
             opacity: 0.7;
         }
 
         100% {
             max-width: 350px;
-            max-height: 500px;
+            max-height: 750px;
             opacity: 1;
         }
     }
@@ -176,7 +176,7 @@
     @keyframes collapseSequence {
         0% {
             max-width: 350px;
-            max-height: 500px;
+            max-height: 750px;
             opacity: 1;
         }
 
@@ -200,28 +200,15 @@
     }
 }
 
+.hidden {
+    display: none;
+    /* Hides all categories except the expanded one */
+}
+
 .category-item.expanded {
     display: flex;
     flex-direction: column;
     /* Ensures the expanded category remains visible */
-}
-
-.hidden {
-    opacity: 0;
-    /* Fully transparent */
-    pointer-events: none;
-    /* Disable interaction */
-    visibility: hidden;
-    /* Completely hides the element */
-    transition: opacity 1s ease;
-    /* Smooth opacity transition */
-}
-
-.category-item {
-    opacity: 1;
-    /* Fully visible by default */
-    visibility: visible;
-    /* Ensure visibility by default */
-    transition: opacity 1s ease, visibility 1s ease;
-    /* Smooth transitions */
+    align-items: center;
+    justify-content: center;
 }
