@@ -12,22 +12,22 @@ export const ExpandableMenu = ({ menuItems }) => {
     const [expandedCategories, setExpandedCategories] = useState([]);
 
     const handleCategoryClick = (id) => {
-            setExpandedCategories((prevExpanded) => {
-                const isCurrentlyExpanded = prevExpanded.includes(id);
-                const subcategoryList = document.getElementById(`subcategory-${id}`);
+        // Add/remove the `expanded` class to/from the corresponding `.subcategory-list`
+        const subcategoryList = document.getElementById(`subcategory-${id}`);
+        if (subcategoryList) {
+            if (expandedCategories.includes(id)) {
+                subcategoryList.classList.remove('expanded');
+            } else {
+                subcategoryList.classList.add('expanded');
+            }
+        }
 
-                if (subcategoryList) {
-                    if (!isCurrentlyExpanded) {
-                        subcategoryList.classList.add('expanded');
-                    } else {
-                        subcategoryList.classList.remove('expanded');
-                    }
-                }
-
-                return isCurrentlyExpanded
-                    ? prevExpanded.filter((categoryId) => categoryId !== id)
-                    : [...prevExpanded, id];
-            });
+        // Update the expandedCategories state
+        setExpandedCategories((prevExpanded) =>
+            prevExpanded.includes(id)
+                ? prevExpanded.filter((categoryId) => categoryId !== id)
+                : [...prevExpanded, id]
+        );
     };
 
     return (
@@ -81,7 +81,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }
                 )}
             </motion.div>
             {isExpanded && hasSubItems && (
-                <div className="subcategory-list">
+                <div className="subcategory-list" id={`subcategory-${item.id}`}>
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
