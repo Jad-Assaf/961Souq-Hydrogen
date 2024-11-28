@@ -91,11 +91,6 @@ async function fetchNewMenuItems(context) {
             id
             title
             url
-            items {
-              id
-              title
-              url
-            }
           }
         }
       }
