@@ -87,14 +87,26 @@ async function fetchNewMenuItems(context) {
           id
           title
           url
+          image { 
+            url 
+            altText 
+          } 
           items {
             id
             title
             url
+            image { 
+              url 
+              altText 
+            } 
             items {
               id
               title
               url
+              image { 
+                url 
+                altText 
+              }
             }
           }
         }
@@ -106,7 +118,6 @@ async function fetchNewMenuItems(context) {
   const { menu } = await context.storefront.query(menuQuery, { variables: { handle: menuHandle } });
   return menu.items || [];
 }
-
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
@@ -146,7 +157,6 @@ async function fetchCollectionsByHandles(context, handles) {
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menu, newMenuItems } = useLoaderData();
-  const [expandedNewMenuId, setExpandedNewMenuId] = useState(null);
 
 
   const images = [
