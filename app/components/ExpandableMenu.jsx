@@ -20,7 +20,7 @@ export const ExpandableMenu = ({ menuItems }) => {
                 // After the collapse animation completes, clear the states
                 setCollapsingCategory(null);
                 setExpandedCategory(null);
-            }, 1500); // Match the animation duration
+            }, 1000); // Match the animation duration
         } else {
             // Expand new category
             setExpandedCategory(id);

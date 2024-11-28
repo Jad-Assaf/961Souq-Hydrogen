@@ -94,70 +94,6 @@
     overflow: hidden;
 }
 
-/* Animation for expanded state */
-.subcategory-list.expanded {
-    animation: expandSequence 1.5s forwards;
-    /* Adjust duration as needed */
-}
-
-@keyframes expandSequence {
-    0% {
-        max-width: 0;
-        max-height: 0;
-        opacity: 0;
-    }
-
-    33% {
-        max-width: 350px;
-        max-height: 0;
-        opacity: 0;
-    }
-
-    66% {
-        max-width: 350px;
-        max-height: 500px;
-        /* Adjust as per content height */
-        opacity: 0;
-    }
-
-    100% {
-        max-width: 350px;
-        max-height: 500px;
-        opacity: 1;
-    }
-}
-
-/* Animation for collapsing */
-.subcategory-list.collapsing {
-    animation: collapseSequence 1.5s forwards;
-}
-
-@keyframes collapseSequence {
-    0% {
-        max-width: 350px;
-        max-height: 500px;
-        opacity: 1;
-    }
-
-    33% {
-        max-width: 0px;
-        max-height: 500px;
-        opacity: 1;
-    }
-
-    66% {
-        max-width: 0px;
-        max-height: 0;
-        opacity: 1;
-    }
-
-    100% {
-        max-width: 0;
-        max-height: 0;
-        opacity: 0;
-    }
-}
-
 /* Subcategory Items */
 .subcategory-list .category-item {
     width: 100px;
@@ -197,6 +133,70 @@
         max-height: 1000px;
         /* Adjust for mobile */
         padding: 20px 0 0 0;
+    }
+
+    /* Animation for expanded state */
+    .subcategory-list.expanded {
+        animation: expandSequence 1s forwards;
+        /* Adjust duration as needed */
+    }
+
+    @keyframes expandSequence {
+        0% {
+            max-width: 0;
+            max-height: 0;
+            opacity: 0;
+        }
+
+        33% {
+            max-width: 350px;
+            max-height: 0;
+            opacity: 0.2;
+        }
+
+        66% {
+            max-width: 350px;
+            max-height: 500px;
+            /* Adjust as per content height */
+            opacity: 0.7;
+        }
+
+        100% {
+            max-width: 350px;
+            max-height: 500px;
+            opacity: 1;
+        }
+    }
+
+    /* Animation for collapsing */
+    .subcategory-list.collapsing {
+        animation: collapseSequence 1s forwards;
+    }
+
+    @keyframes collapseSequence {
+        0% {
+            max-width: 350px;
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        33% {
+            max-width: 0px;
+            max-height: 500px;
+            opacity: 0.7;
+        }
+
+        66% {
+            max-width: 0px;
+            max-height: 0;
+            opacity: 0.5;
+        }
+
+        100% {
+            max-width: 0;
+            max-height: 0;
+            opacity: 0;
+        }
     }
 }
 
