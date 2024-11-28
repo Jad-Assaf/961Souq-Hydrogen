@@ -212,8 +212,6 @@
     /* Prevent interaction with hidden items */
     transition: opacity 1.5s linear;
     /* Smooth transition for opacity */
-    visibility: hidden;
-    /* Ensure the element is not interactive */
 }
 
 .category-item {
@@ -222,4 +220,10 @@
     /* Ensure visibility by default */
     transition: opacity 1.5s linear, visibility 1.5s linear;
     /* Smooth transitions */
+}
+
+/* Add this animation class to delay hiding the visibility */
+.hidden.delayed {
+    visibility: hidden;
+    /* Hidden after transition */
 }

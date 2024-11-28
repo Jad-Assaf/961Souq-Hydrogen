@@ -16,14 +16,28 @@ export const ExpandableMenu = ({ menuItems }) => {
         if (expandedCategory === id) {
             // Start collapsing
             setCollapsingCategory(id);
-            setTimeout(() => {
-                // After the collapse animation completes, clear the states
-                setCollapsingCategory(null);
-                setExpandedCategory(null);
-            }, 1000); // Match the animation duration
+            const collapsingElement = document.querySelector(`.category-item[data-id="${id}"]`);
+
+            if (collapsingElement) {
+                collapsingElement.addEventListener(
+                    "transitionend",
+                    () => {
+                        setCollapsingCategory(null);
+                        setExpandedCategory(null);
+                        collapsingElement.classList.add("delayed");
+                    },
+                    { once: true }
+                );
+            }
         } else {
             // Expand new category
             setExpandedCategory(id);
+
+            // Remove delayed class when expanding
+            const expandingElement = document.querySelector(`.category-item[data-id="${id}"]`);
+            if (expandingElement) {
+                expandingElement.classList.remove("delayed");
+            }
         }
     };
 
@@ -62,8 +76,10 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
 
     return (
         <div
-            className={`category-item ${isExpanded ? 'expanded' : ''} ${isCollapsing ? 'collapsing' : ''
-                } ${!isExpanded && expandedCategory && !isCollapsing ? 'hidden' : ''}`}
+            className={`category-item ${isExpanded ? 'expanded' : ''} 
+                    ${isCollapsing ? 'collapsing' : ''} 
+                    ${!isExpanded && expandedCategory && !isCollapsing ? 'hidden' : ''}`}
+            data-id={item.id} /* Add this to identify each category item */
         >
             <motion.div
                 ref={ref}
@@ -84,17 +100,16 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
             </motion.div>
             {hasSubItems && (
                 <div
-                    className={`subcategory-list ${isExpanded ? 'expanded' : ''} ${isCollapsing ? 'collapsing' : ''
-                        }`}
+                    className={`subcategory-list ${isExpanded ? 'expanded' : ''} ${isCollapsing ? 'collapsing' : ''}`}
                 >
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
-                            expandedCategory={null} // Sub-items are independent
-                            collapsingCategory={null} // Sub-items don't collapse independently
-                            onCategoryClick={() => { }} // No toggle for sub-items
+                            expandedCategory={null}
+                            collapsingCategory={null}
+                            onCategoryClick={() => { }}
                         />
                     ))}
                 </div>
