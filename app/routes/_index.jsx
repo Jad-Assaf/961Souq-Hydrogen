@@ -116,34 +116,43 @@ async function fetchNewMenuItems(context) {
     }
   `;
 
-  const menuHandle = 'new-main-menu';
-  const { menu } = await context.storefront.query(menuQuery, { variables: { handle: menuHandle } });
+  try {
+    const menuHandle = 'new-main-menu';
+    const { menu } = await context.storefront.query(menuQuery, { variables: { handle: menuHandle } });
 
-  if (!menu || !menu.items) {
-    return [];
-  }
+    if (!menu || !menu.items) {
+      return []; // Return empty array if menu is not found
+    }
 
-  // Extract handles from menu items and fetch collection data
-  async function fetchCollectionForMenuItem(item) {
-    const handle = extractHandleFromUrl(item.url);
-    let collection = null;
+    async function fetchCollectionForMenuItem(item) {
+      try {
+        const handle = extractHandleFromUrl(item.url);
+        let collection = null;
 
-    if (handle) {
-      const { collectionByHandle } = await context.storefront.query(collectionQuery, { variables: { handle } });
-      if (collectionByHandle) {
-        collection = collectionByHandle;
+        if (handle) {
+          const { collectionByHandle } = await context.storefront.query(collectionQuery, { variables: { handle } });
+          collection = collectionByHandle || null;
+        }
+
+        // Recurse into sub-items
+        const subItems = item.items ? await Promise.all(item.items.map(fetchCollectionForMenuItem)) : [];
+
+        return {
+          ...item,
+          image: collection?.image || null,
+          items: subItems,
+        };
+      } catch (error) {
+        // Fallback for individual item errors
+        return { ...item, image: null, items: [] };
       }
     }
 
-    return {
-      ...item,
-      image: collection?.image || null,
-      items: await Promise.all(item.items.map(fetchCollectionForMenuItem)),
-    };
+    return await Promise.all(menu.items.map(fetchCollectionForMenuItem));
+  } catch (error) {
+    // Return an empty array in case of critical failure
+    return [];
   }
-
-  const enrichedMenuItems = await Promise.all(menu.items.map(fetchCollectionForMenuItem));
-  return enrichedMenuItems;
 }
 
 // Helper function to extract handle from URL
@@ -297,7 +306,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <ExpandableMenu menuItems={newMenuItems} /> {/* Use the new component */}
+      <ExpandableMenu menuItems={newMenuItems || []} />
       {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
       <div className="collections-container">
         <>

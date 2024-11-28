@@ -11,28 +11,35 @@ export const ExpandableMenu = ({ menuItems }) => {
     return (
         <div className="expandable-menu-container">
             {menuItems.map((item) => {
-                const collectionImageUrl = item.image?.url; // Retrieved from enriched menu items
+                const collectionImageUrl = item.image?.url; // Use the enriched image data
                 const collectionAltText = item.image?.altText || item.title;
 
                 return (
                     <div key={item.id} className="menu-item">
-                        <button onClick={() => handleMenuToggle(item.id)}>{item.title}</button>
-                        {collectionImageUrl && (
-                            <div className="menu-item-image">
+                        <button onClick={() => handleMenuToggle(item.id)}>
+                            {item.title}
+                            {collectionImageUrl && (
                                 <Image
                                     src={collectionImageUrl}
                                     alt={collectionAltText}
+                                    className="menu-item-image"
                                     aspectRatio="1/1"
-                                    sizes="(min-width: 45em) 20vw, 40vw"
-                                    className="menu-image"
                                 />
-                            </div>
-                        )}
-                        {expandedMenuId === item.id && (
-                            <div className="expandable-submenu">
+                            )}
+                        </button>
+                        {expandedMenuId === item.id && item.items && (
+                            <div className="submenu">
                                 {item.items.map((subItem) => (
                                     <div key={subItem.id} className="submenu-item">
-                                        <span>{subItem.title}</span>
+                                        {subItem.title}
+                                        {subItem.image?.url && (
+                                            <Image
+                                                src={subItem.image.url}
+                                                alt={subItem.image.altText || subItem.title}
+                                                className="submenu-item-image"
+                                                aspectRatio="1/1"
+                                            />
+                                        )}
                                     </div>
                                 ))}
                             </div>
