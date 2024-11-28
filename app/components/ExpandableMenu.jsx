@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
-import "../styles/CollectionSlider.css"
+import "../styles/CollectionSlider.css";
 
 export const ExpandableMenu = ({ menuItems }) => {
     if (!menuItems || menuItems.length === 0) {
@@ -12,17 +12,6 @@ export const ExpandableMenu = ({ menuItems }) => {
     const [expandedCategories, setExpandedCategories] = useState([]);
 
     const handleCategoryClick = (id) => {
-        // Add/remove the `expanded` class to/from the corresponding `.subcategory-list`
-        const subcategoryList = document.getElementById(`subcategory-${id}`);
-        if (subcategoryList) {
-            if (expandedCategories.includes(id)) {
-                subcategoryList.classList.remove('expanded');
-            } else {
-                subcategoryList.classList.add('expanded');
-            }
-        }
-
-        // Update the expandedCategories state
         setExpandedCategories((prevExpanded) =>
             prevExpanded.includes(id)
                 ? prevExpanded.filter((categoryId) => categoryId !== id)
@@ -80,8 +69,13 @@ const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }
                     </Link>
                 )}
             </motion.div>
-            {isExpanded && hasSubItems && (
-                <div className="subcategory-list" id={`subcategory-${item.id}`}>
+            {hasSubItems && (
+                <motion.div
+                    className={`subcategory-list ${isExpanded ? 'expanded' : ''}`}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={isExpanded ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
@@ -91,7 +85,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }
                             onCategoryClick={onCategoryClick}
                         />
                     ))}
-                </div>
+                </motion.div>
             )}
         </div>
     );
