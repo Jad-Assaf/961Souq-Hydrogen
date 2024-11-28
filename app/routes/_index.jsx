@@ -256,7 +256,9 @@ export default function Homepage() {
       <div className="new-menu-container">
         {newMenuItems.map((item) => (
           <div key={item.id}>
-            <button onClick={() => handleExpandNewMenu(item.id)}>{item.title}</button>
+            <button onClick={() => setExpandedNewMenuId((prev) => (prev === item.id ? null : item.id))}>
+              {item.title}
+            </button>
             {expandedNewMenuId === item.id && (
               <div className="new-submenu">
                 {item.items.map((subItem) => (
