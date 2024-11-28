@@ -92,7 +92,7 @@
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-width 0.5s ease, max-height 1s ease, opacity 1.5s ease;
+    transition: max-width 1s ease, max-height 0.5s ease, opacity 2s ease;
 }
 
 .subcategory-list.expanded {
@@ -146,7 +146,8 @@
     /* Hides all categories except the expanded one */
 }
 
-.expanded {
+.category-item.expanded {
     display: flex;
+    flex-direction: column;
     /* Ensures the expanded category remains visible */
 }
