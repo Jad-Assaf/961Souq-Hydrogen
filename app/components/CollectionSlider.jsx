@@ -1,10 +1,9 @@
-// CollectionSlider.jsx (CategorySlider.jsx)
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 
-export const CategorySlider = ({ menu, sliderCollections }) => {
+export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
     if (!menu || !menu.items) {
         return null; // or some fallback UI
     }
@@ -37,6 +36,7 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
                         expandedCategories={expandedCategories}
                         onCategoryClick={handleCategoryClick}
                         collectionMap={collectionMap}
+                        subCollections={subCollections} // Pass subCollections as a prop
                     />
                 ))}
             </div>
@@ -44,7 +44,7 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
     );
 };
 
-function CategoryItem({ item, index, expandedCategories, onCategoryClick, collectionMap }) {
+function CategoryItem({ item, index, expandedCategories, onCategoryClick, collectionMap, subCollections }) {
     const isExpanded = expandedCategories.includes(item.id);
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
@@ -78,16 +78,22 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
             </motion.div>
             {isExpanded && hasSubItems && (
                 <div className="subcategory-list">
-                    {item.items.map((subItem, subIndex) => (
-                        <CategoryItem
-                            key={subItem.id}
-                            item={subItem}
-                            index={subIndex}
-                            expandedCategories={expandedCategories}
-                            onCategoryClick={onCategoryClick}
-                            collectionMap={collectionMap}
-                        />
-                    ))}
+                    {item.items.map((subItem, subIndex) => {
+                        const subCollection = subCollections.find(collection => collection.handle === subItem.handle);
+
+                        return (
+                            <CategoryItem
+                                key={subItem.id}
+                                item={subItem}
+                                index={subIndex}
+                                expandedCategories={expandedCategories}
+                                onCategoryClick={onCategoryClick}
+                                collectionMap={collectionMap}
+                                subCollections={subCollections} // Pass subCollections as a prop
+                                image={subCollection ? subCollection.image : null} // Pass the image if available
+                            />
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -117,7 +123,7 @@ function CategoryContent({ item, isInView, collectionMap }) {
                         alt={collection.image?.altText || title}
                         className="category-image"
                         width="150px"
-                        height="150px"
+                        height ="150px"
                     />
                 ) : (
                     <div className="category-placeholder-image"></div>

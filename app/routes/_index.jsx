@@ -59,6 +59,13 @@ async function loadCriticalData({ context }) {
 
   const sliderCollections = collectionsResponse.collections.edges.map(edge => edge.node);
 
+  // Fetch images for sub-collections
+  const subCollectionsResponse = await context.storefront.query(GET_SUB_COLLECTIONS_QUERY, {
+    variables: { handles: menuHandles },
+  });
+
+  const subCollections = subCollectionsResponse.collections.edges.map(edge => edge.node);
+
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
     'new-arrivals', 'laptops', 
@@ -76,7 +83,7 @@ async function loadCriticalData({ context }) {
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, sliderCollections, menu };
+  return { collections, sliderCollections, subCollections, menu };
 }
 
 const brandsData = [
@@ -330,8 +337,8 @@ export const GET_MENU_QUERY = `#graphql
   }
 `;
 
-const GET_COLLECTIONS_QUERY = `#graphql
-  query GetCollections($handles: [String!]) {
+const GET_SUB_COLLECTIONS_QUERY = `#graphql
+  query GetSubCollections($handles: [String!]) {
     collections(first: 10, query: $handles) {
       edges {
         node {
