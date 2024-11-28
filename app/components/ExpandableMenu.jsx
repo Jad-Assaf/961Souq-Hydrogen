@@ -33,8 +33,8 @@ export const ExpandableMenu = ({ menuItems }) => {
     );
 };
 
-const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }) => {
-    const isExpanded = expandedCategories.includes(item.id);
+const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) => {
+    const isExpanded = expandedCategory === item.id;
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
@@ -46,16 +46,20 @@ const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }
         }
     };
 
-    const handleTransitionEnd = (e) => {
-        if (e.target.classList.contains('subcategory-list')) {
-            const otherItems = document.querySelectorAll('.category-item:not(.expanded)');
-            otherItems.forEach((item) => item.classList.toggle('hidden', !isExpanded));
-        }
+    const handleTransitionEnd = () => {
+        const otherItems = document.querySelectorAll('.category-item:not(.expanded)');
+        otherItems.forEach((item) => {
+            if (isExpanded) {
+                item.classList.add('hidden');
+            } else {
+                item.classList.remove('hidden');
+            }
+        });
     };
 
     return (
         <div
-            className={`category-item ${isExpanded ? 'expanded' : ''}`}
+            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''}`}
             onTransitionEnd={handleTransitionEnd}
         >
             <motion.div
@@ -75,15 +79,17 @@ const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }
                     </Link>
                 )}
             </motion.div>
-            {isExpanded && hasSubItems && (
-                <div className="subcategory-list">
+            {hasSubItems && (
+                <div
+                    className={`subcategory-list ${isExpanded ? 'expanded' : ''}`}
+                >
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
-                            expandedCategories={expandedCategories}
-                            onCategoryClick={onCategoryClick}
+                            expandedCategory={null} // Sub-items are independent
+                            onCategoryClick={() => { }} // No toggle for sub-items
                         />
                     ))}
                 </div>
