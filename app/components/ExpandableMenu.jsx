@@ -10,18 +10,19 @@ export const ExpandableMenu = ({ menuItems }) => {
     }
 
     const [expandedCategory, setExpandedCategory] = useState(null);
-    const [collapsingCategory, setCollapsingCategory] = useState(null); // Track the collapsing category
+    const [collapsingCategory, setCollapsingCategory] = useState(null);
 
     const handleCategoryClick = (id) => {
         if (expandedCategory === id) {
-            // Collapse the currently expanded category
+            // Start collapsing
             setCollapsingCategory(id);
             setTimeout(() => {
-                setCollapsingCategory(null); // Clear collapsing state after animation
-                setExpandedCategory(null); // Collapse the category
-            }, 1500); // Match collapse animation duration
+                // After the collapse animation completes, clear the states
+                setCollapsingCategory(null);
+                setExpandedCategory(null);
+            }, 1500); // Match the animation duration
         } else {
-            // Expand the new category
+            // Expand new category
             setExpandedCategory(id);
         }
     };
@@ -61,7 +62,8 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
 
     return (
         <div
-            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''}`}
+            className={`category-item ${isExpanded ? 'expanded' : ''} ${isCollapsing ? 'collapsing' : ''
+                } ${!isExpanded && expandedCategory && !isCollapsing ? 'hidden' : ''}`}
         >
             <motion.div
                 ref={ref}
@@ -82,7 +84,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
             </motion.div>
             {hasSubItems && (
                 <div
-                    className={`subcategory-list ${isExpanded ? 'expanded' : isCollapsing ? 'collapsing' : ''
+                    className={`subcategory-list ${isExpanded ? 'expanded' : ''} ${isCollapsing ? 'collapsing' : ''
                         }`}
                 >
                     {item.items.map((subItem, subIndex) => (
