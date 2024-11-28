@@ -210,7 +210,7 @@
     opacity: 0;
     pointer-events: none;
     /* Prevent interaction with hidden items */
-    transition: opacity 0.3s ease;
+    transition: opacity 1.5s linear;
     /* Smooth transition for opacity */
     visibility: hidden;
     /* Ensure the element is not interactive */
@@ -220,6 +220,6 @@
     opacity: 1;
     visibility: visible;
     /* Ensure visibility by default */
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity 1.5s linear, visibility 1.5s linear;
     /* Smooth transitions */
 }
