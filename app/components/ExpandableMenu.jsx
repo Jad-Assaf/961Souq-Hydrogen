@@ -9,10 +9,10 @@ export const ExpandableMenu = ({ menuItems }) => {
         return null;
     }
 
-    const [activeCategory, setActiveCategory] = useState(null); // State to track the active (clicked) category
+    const [expandedCategory, setExpandedCategory] = useState(null);
 
     const handleCategoryClick = (id) => {
-        setActiveCategory((prevActive) => (prevActive === id ? null : id)); // Toggle active category
+        setExpandedCategory((prevExpanded) => (prevExpanded === id ? null : id)); // Toggle expanded category
     };
 
     return (
@@ -24,7 +24,8 @@ export const ExpandableMenu = ({ menuItems }) => {
                         key={item.id}
                         item={item}
                         index={index}
-                        isActive={activeCategory === item.id} // Pass active state
+                        isExpanded={expandedCategory === item.id}
+                        isOtherExpanded={expandedCategory !== null && expandedCategory !== item.id}
                         onCategoryClick={handleCategoryClick}
                     />
                 ))}
@@ -33,7 +34,7 @@ export const ExpandableMenu = ({ menuItems }) => {
     );
 };
 
-const ExpandableMenuItem = ({ item, index, isActive, onCategoryClick }) => {
+const ExpandableMenuItem = ({ item, index, isExpanded, isOtherExpanded, onCategoryClick }) => {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
@@ -46,7 +47,9 @@ const ExpandableMenuItem = ({ item, index, isActive, onCategoryClick }) => {
     };
 
     return (
-        <div className={`category-item ${isActive ? 'expanded' : ''} ${!isActive && hasSubItems ? 'hidden' : ''}`}>
+        <div
+            className={`category-item ${isExpanded ? 'expanded' : ''} ${isOtherExpanded ? 'hidden' : ''}`}
+        >
             <motion.div
                 ref={ref}
                 initial={{ opacity: 0, x: -30 }}
@@ -64,15 +67,16 @@ const ExpandableMenuItem = ({ item, index, isActive, onCategoryClick }) => {
                     </Link>
                 )}
             </motion.div>
-            {isActive && hasSubItems && (
+            {isExpanded && hasSubItems && (
                 <div className="subcategory-list">
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
-                            isActive={false} // Sub-items are not part of the active state logic
-                            onCategoryClick={() => { }} // Sub-items don't toggle
+                            isExpanded={false}
+                            isOtherExpanded={false}
+                            onCategoryClick={() => { }} // No toggle for sub-items
                         />
                     ))}
                 </div>

@@ -143,8 +143,10 @@
 
 .hidden {
     display: none;
+    /* Hides all categories except the expanded one */
 }
 
 .expanded {
     display: flex;
+    /* Ensures the expanded category remains visible */
 }
