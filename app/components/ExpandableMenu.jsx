@@ -46,21 +46,10 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) 
         }
     };
 
-    const handleTransitionEnd = () => {
-        const otherItems = document.querySelectorAll('.category-item:not(.expanded)');
-        otherItems.forEach((item) => {
-            if (isExpanded) {
-                item.classList.add('hidden');
-            } else {
-                item.classList.remove('hidden');
-            }
-        });
-    };
-
     return (
         <div
-            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''}`}
-            onTransitionEnd={handleTransitionEnd}
+            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''
+                }`}
         >
             <motion.div
                 ref={ref}
