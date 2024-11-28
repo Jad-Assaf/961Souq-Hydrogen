@@ -10,9 +10,20 @@ export const ExpandableMenu = ({ menuItems }) => {
     }
 
     const [expandedCategory, setExpandedCategory] = useState(null);
+    const [collapsingCategory, setCollapsingCategory] = useState(null); // Track the collapsing category
 
     const handleCategoryClick = (id) => {
-        setExpandedCategory((prevExpanded) => (prevExpanded === id ? null : id)); // Toggle expanded category
+        if (expandedCategory === id) {
+            // Collapse the currently expanded category
+            setCollapsingCategory(id);
+            setTimeout(() => {
+                setCollapsingCategory(null); // Clear collapsing state after animation
+                setExpandedCategory(null); // Collapse the category
+            }, 1500); // Match collapse animation duration
+        } else {
+            // Expand the new category
+            setExpandedCategory(id);
+        }
     };
 
     return (
@@ -25,6 +36,7 @@ export const ExpandableMenu = ({ menuItems }) => {
                         item={item}
                         index={index}
                         expandedCategory={expandedCategory}
+                        collapsingCategory={collapsingCategory}
                         onCategoryClick={handleCategoryClick}
                     />
                 ))}
@@ -33,8 +45,9 @@ export const ExpandableMenu = ({ menuItems }) => {
     );
 };
 
-const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) => {
+const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory, onCategoryClick }) => {
     const isExpanded = expandedCategory === item.id;
+    const isCollapsing = collapsingCategory === item.id; // Check if this category is collapsing
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
@@ -48,8 +61,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) 
 
     return (
         <div
-            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''
-                }`}
+            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''}`}
         >
             <motion.div
                 ref={ref}
@@ -70,7 +82,8 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) 
             </motion.div>
             {hasSubItems && (
                 <div
-                    className={`subcategory-list ${isExpanded ? 'expanded' : ''}`}
+                    className={`subcategory-list ${isExpanded ? 'expanded' : isCollapsing ? 'collapsing' : ''
+                        }`}
                 >
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
@@ -78,6 +91,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) 
                             item={subItem}
                             index={subIndex}
                             expandedCategory={null} // Sub-items are independent
+                            collapsingCategory={null} // Sub-items don't collapse independently
                             onCategoryClick={() => { }} // No toggle for sub-items
                         />
                     ))}

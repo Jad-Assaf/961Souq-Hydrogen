@@ -128,7 +128,7 @@
 }
 
 /* Animation for collapsing */
-.subcategory-list:not(.expanded) {
+.subcategory-list.collapsing {
     animation: collapseSequence 1.5s forwards;
 }
 
