@@ -87,14 +87,18 @@
     justify-content: center;
     margin: 20px auto;
     width: 350px;
+    padding: 10px;
+    max-width: 0;
+    max-height: 0;
+    opacity: 0;
     overflow: hidden;
-    animation: collapseSubcategory 0.5s ease forwards;
-    /* Default collapse animation */
+    transition: max-width 0.5s ease, max-height 0.3s ease, opacity 0.6s ease-in-out;
 }
 
 .subcategory-list.expanded {
-    animation: expandSubcategory 0.5s ease forwards;
-    /* Expand animation when expanded */
+    max-width: 350px;
+    max-height: 500px; /* Adjust as per content height */
+    opacity: 1;
 }
 
 /* Subcategory Items */
@@ -121,7 +125,6 @@
     font-size: 12px !important;
 }
 
-/* Mobile Adjustments */
 @media screen and (max-width: 1024px) {
     .subcategory-list {
         align-items: start;
@@ -131,14 +134,11 @@
         box-shadow: inset 0px 0px 20px 0px #ededed;
         margin: 0;
         padding: 0;
-        animation: collapseSubcategory 0.5s ease forwards;
     }
 
     .subcategory-list.expanded {
-        max-height: 1000px;
-        /* Adjust for mobile */
+        max-height: 1000px; /* Adjust for mobile */
         padding: 20px 0 0 0;
-        animation: expandSubcategory 0.5s ease forwards;
     }
 }
 
@@ -151,52 +151,4 @@
     display: flex;
     flex-direction: column;
     /* Ensures the expanded category remains visible */
-}
-
-@keyframes expandSubcategory {
-    0% {
-        max-width: 0;
-        max-height: 0;
-        opacity: 0;
-        padding: 0;
-    }
-
-    50% {
-        max-width: 200px;
-        max-height: 300px;
-        opacity: 0.5;
-        padding: 0;
-    }
-
-    100% {
-        max-width: 350px;
-        max-height: 500px;
-        /* Adjust as per content height */
-        opacity: 1;
-        padding: 10px;
-    }
-}
-
-@keyframes collapseSubcategory {
-    0% {
-        max-width: 350px;
-        max-height: 500px;
-        /* Adjust as per content height */
-        opacity: 1;
-        padding: 10px;
-    }
-
-    50% {
-        max-width: 200px;
-        max-height: 300px;
-        opacity: 0.5;
-        padding: 0;
-    }
-
-    100% {
-        max-width: 0;
-        max-height: 0;
-        opacity: 0;
-        padding: 0;
-    }
 }
