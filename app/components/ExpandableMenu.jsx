@@ -24,8 +24,7 @@ export const ExpandableMenu = ({ menuItems }) => {
                         key={item.id}
                         item={item}
                         index={index}
-                        isExpanded={expandedCategory === item.id}
-                        isOtherExpanded={expandedCategory !== null && expandedCategory !== item.id}
+                        expandedCategory={expandedCategory}
                         onCategoryClick={handleCategoryClick}
                     />
                 ))}
@@ -34,7 +33,8 @@ export const ExpandableMenu = ({ menuItems }) => {
     );
 };
 
-const ExpandableMenuItem = ({ item, index, isExpanded, isOtherExpanded, onCategoryClick }) => {
+const ExpandableMenuItem = ({ item, index, expandedCategory, onCategoryClick }) => {
+    const isExpanded = expandedCategory === item.id;
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
@@ -48,7 +48,8 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isOtherExpanded, onCatego
 
     return (
         <div
-            className={`category-item ${isExpanded ? 'expanded' : ''} ${isOtherExpanded ? 'hidden' : ''}`}
+            className={`category-item ${isExpanded ? 'expanded' : ''} ${!isExpanded && expandedCategory ? 'hidden' : ''
+                }`}
         >
             <motion.div
                 ref={ref}
@@ -67,15 +68,16 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isOtherExpanded, onCatego
                     </Link>
                 )}
             </motion.div>
-            {isExpanded && hasSubItems && (
-                <div className="subcategory-list">
+            {hasSubItems && (
+                <div
+                    className={`subcategory-list ${isExpanded ? 'expanded' : ''}`}
+                >
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
-                            isExpanded={false}
-                            isOtherExpanded={false}
+                            expandedCategory={null} // Sub-items are independent
                             onCategoryClick={() => { }} // No toggle for sub-items
                         />
                     ))}
