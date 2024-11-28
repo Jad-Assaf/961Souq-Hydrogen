@@ -95,7 +95,7 @@
 }
 
 .subcategory-list.expanded {
-    max-height: 500px; /* Adjust as per content height */
+    max-height: 5000px; /* Adjust as per content height */
     opacity: 1;
 }
 
