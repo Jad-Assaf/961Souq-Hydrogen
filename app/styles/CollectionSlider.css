@@ -200,13 +200,26 @@
     }
 }
 
-.hidden {
-    display: none;
-    /* Hides all categories except the expanded one */
-}
-
 .category-item.expanded {
     display: flex;
     flex-direction: column;
     /* Ensures the expanded category remains visible */
+}
+
+.hidden {
+    opacity: 0;
+    /* Make hidden items fully transparent */
+    transition: opacity 0.3s ease;
+    /* Add smooth transition for opacity */
+    pointer-events: none;
+    /* Prevent interaction with hidden items */
+    display: none;
+        /* Hides all categories except the expanded one */
+}
+
+.category-item {
+    opacity: 1;
+    /* Default opacity for visible items */
+    transition: opacity 0.3s ease;
+    /* Add smooth transition for opacity */
 }
