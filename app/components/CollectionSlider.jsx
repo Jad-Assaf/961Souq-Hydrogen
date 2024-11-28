@@ -1,21 +1,14 @@
-// CollectionSlider.jsx (CategorySlider.jsx)
+import React, { useState, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
-import { motion, useInView } from 'framer-motion';
-import React, { useRef, useState } from 'react';
 
-export const CategorySlider = ({ menu, sliderCollections }) => {
-    if (!menu || !menu.items) {
-        return null; // or some fallback UI
+export const ExpandableMenu = ({ menuItems }) => {
+    if (!menuItems || menuItems.length === 0) {
+        return null;
     }
 
     const [expandedCategories, setExpandedCategories] = useState([]);
-
-    // Create a mapping from collection handle to collection object
-    const collectionMap = {};
-    sliderCollections.forEach((collection) => {
-        collectionMap[collection.handle] = collection;
-    });
 
     const handleCategoryClick = (id) => {
         setExpandedCategories((prevExpanded) =>
@@ -29,14 +22,13 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
         <div className="slide-con">
             <h3 className="cat-h3">Shop By Categories</h3>
             <div className="category-slider">
-                {menu.items.map((item, index) => (
-                    <CategoryItem
+                {menuItems.map((item, index) => (
+                    <ExpandableMenuItem
                         key={item.id}
                         item={item}
                         index={index}
                         expandedCategories={expandedCategories}
                         onCategoryClick={handleCategoryClick}
-                        collectionMap={collectionMap}
                     />
                 ))}
             </div>
@@ -44,7 +36,7 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
     );
 };
 
-function CategoryItem({ item, index, expandedCategories, onCategoryClick, collectionMap }) {
+const ExpandableMenuItem = ({ item, index, expandedCategories, onCategoryClick }) => {
     const isExpanded = expandedCategories.includes(item.id);
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
@@ -68,38 +60,33 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
             >
                 {hasSubItems ? (
                     <div onClick={handleClick} className="category-link">
-                        <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
+                        <ExpandableMenuContent item={item} isInView={isInView} />
                     </div>
                 ) : (
                     <Link to={item.url} className="category-link">
-                        <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
+                        <ExpandableMenuContent item={item} isInView={isInView} />
                     </Link>
                 )}
             </motion.div>
             {isExpanded && hasSubItems && (
                 <div className="subcategory-list">
                     {item.items.map((subItem, subIndex) => (
-                        <CategoryItem
+                        <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
                             expandedCategories={expandedCategories}
                             onCategoryClick={onCategoryClick}
-                            collectionMap={collectionMap}
                         />
                     ))}
                 </div>
             )}
         </div>
     );
-}
+};
 
-function CategoryContent({ item, isInView, collectionMap }) {
+const ExpandableMenuContent = ({ item, isInView }) => {
     const title = item.title;
-
-    // Extract the handle from the item's URL
-    const handle = extractHandleFromUrl(item.url);
-    const collection = handle ? collectionMap[handle] : null;
 
     return (
         <>
@@ -109,12 +96,12 @@ function CategoryContent({ item, isInView, collectionMap }) {
                 transition={{ duration: 0.5 }}
                 className="category-image-container"
             >
-                {collection && collection.image ? (
+                {item.image ? (
                     <Image
-                        data={collection.image}
+                        data={item.image}
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
-                        alt={collection.image?.altText || title}
+                        alt={item.image?.altText || title}
                         className="category-image"
                         width="150px"
                         height="150px"
@@ -126,13 +113,4 @@ function CategoryContent({ item, isInView, collectionMap }) {
             <div className="category-title">{title}</div>
         </>
     );
-}
-
-// Helper function to extract handle from URL
-function extractHandleFromUrl(url) {
-    const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-    if (match && match[1]) {
-        return match[1];
-    }
-    return null;
-}
+};
