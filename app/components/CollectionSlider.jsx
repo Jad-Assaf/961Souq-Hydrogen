@@ -4,7 +4,7 @@ import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 
-export const CategorySlider = ({ menu, sliderCollections }) => {
+export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
     if (!menu || !menu.items) {
         return null; // or some fallback UI
     }
@@ -13,7 +13,8 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
 
     // Create a mapping from collection handle to collection object
     const collectionMap = {};
-    sliderCollections.forEach((collection) => {
+    // Merge sliderCollections and subCollections into collectionMap
+    [...sliderCollections, ...subCollections].forEach((collection) => {
         collectionMap[collection.handle] = collection;
     });
 
@@ -36,7 +37,7 @@ export const CategorySlider = ({ menu, sliderCollections }) => {
                         index={index}
                         expandedCategories={expandedCategories}
                         onCategoryClick={handleCategoryClick}
-                        collectionMap={collectionMap}
+                        collectionMap={collectionMap} // Pass the updated collectionMap
                     />
                 ))}
             </div>
