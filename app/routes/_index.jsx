@@ -34,7 +34,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners });
+  return defer({ ...criticalData, banners, menu: criticalData.menu });
 }
 
 async function loadCriticalData({ context }) {
@@ -55,9 +55,6 @@ async function loadCriticalData({ context }) {
 
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-  
-  // Fetch sub-collection data
-  const subCollections = await fetchSubCollections(context, menu);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
@@ -75,33 +72,7 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
-  return { collections, sliderCollections, subCollections, menu };
-}
-
-function extractSubCollectionHandles(menuItems) {
-  const handles = [];
-  menuItems.forEach((item) => {
-    // Extract the handle from the item's URL
-    const handle = extractHandleFromUrl(item.url);
-    if (handle) handles.push(handle);
-
-    // Recursively handle sub-items
-    if (item.items && item.items.length > 0) {
-      handles.push(...extractSubCollectionHandles(item.items));
-    }
-  });
-  return handles;
-}
-
-async function fetchSubCollections(context, menu) {
-  // Extract all sub-collection handles from the menu items
-  const subCollectionHandles = extractSubCollectionHandles(menu.items);
-
-  // Use the same logic as fetchCollectionsByHandles to get the sub-collections
-  const subCollections = await fetchCollectionsByHandles(context, subCollectionHandles);
-
-  return subCollections;
+  return { collections, sliderCollections };
 }
 
 const brandsData = [
@@ -141,7 +112,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, subCollections, menu } = useLoaderData();
+  const { banners, collections, sliderCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -248,11 +219,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider
-        menu={menu}
-        sliderCollections={sliderCollections}
-        subCollections={subCollections} // Pass subCollections
-      />
+      <CategorySlider sliderCollections={sliderCollections} /> {/* Use the new CategorySlider component */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
