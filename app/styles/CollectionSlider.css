@@ -79,7 +79,6 @@
     }
 }
 
-/* Subcategory List - Default Hidden State */
 .subcategory-list {
     display: flex;
     flex-wrap: wrap;
@@ -94,7 +93,6 @@
     overflow: hidden;
 }
 
-/* Subcategory Items */
 .subcategory-list .category-item {
     width: 100px;
 }
@@ -131,14 +129,11 @@
 
     .subcategory-list.expanded {
         max-height: 1000px;
-        /* Adjust for mobile */
         padding: 20px 0 0 0;
     }
 
-    /* Animation for expanded state */
     .subcategory-list.expanded {
         animation: expandSequence 1s forwards;
-        /* Adjust duration as needed */
     }
 
     @keyframes expandSequence {
@@ -157,7 +152,6 @@
         66% {
             max-width: 350px;
             max-height: 500px;
-            /* Adjust as per content height */
             opacity: 0.7;
         }
 
@@ -168,7 +162,6 @@
         }
     }
 
-    /* Animation for collapsing */
     .subcategory-list.collapsing {
         animation: collapseSequence 1s forwards;
     }
@@ -203,7 +196,6 @@
 .hidden {
     display: none;
     opacity: 0;
-    /* Hides all categories except the expanded one */
 }
 
 .category-item {
@@ -214,7 +206,6 @@
 .category-item.expanded {
     display: flex;
     flex-direction: column;
-    /* Ensures the expanded category remains visible */
     align-items: center;
     justify-content: center;
 }

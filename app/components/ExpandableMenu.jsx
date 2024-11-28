@@ -14,17 +14,14 @@ export const ExpandableMenu = ({ menuItems }) => {
 
     const handleCategoryClick = (id) => {
     if (expandedCategory === id) {
-        // Start collapsing
         setCollapsingCategory(id);
         setTimeout(() => {
-            // After the collapse animation completes, clear the states
             setCollapsingCategory(null);
             setExpandedCategory(null);
-        }, 1000); // Match the animation duration
+        }, 1000); 
     } else {
-        // Expand new category
         setExpandedCategory(id);
-        setCollapsingCategory(null); // Clear collapsing state immediately
+        setCollapsingCategory(null); 
     }
 };
 
@@ -50,7 +47,7 @@ export const ExpandableMenu = ({ menuItems }) => {
 
 const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory, onCategoryClick }) => {
     const isExpanded = expandedCategory === item.id;
-    const isCollapsing = collapsingCategory === item.id; // Check if this category is collapsing
+    const isCollapsing = collapsingCategory === item.id;
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
@@ -64,7 +61,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
 
     const handleTransitionEnd = () => {
         if (isCollapsing) {
-            setCollapsingCategory(null); // Clear the collapsing state after transition ends
+            setCollapsingCategory(null);
         }
     };
 
@@ -73,7 +70,7 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
             className={`category-item ${isExpanded ? 'expanded' : ''} 
                         ${isCollapsing ? 'collapsing' : ''} 
                         ${!isExpanded && expandedCategory && !isCollapsing ? 'hidden' : ''}`}
-            onTransitionEnd={handleTransitionEnd} // Listen for transition end
+            onTransitionEnd={handleTransitionEnd} 
         >
             <motion.div
                 ref={ref}
