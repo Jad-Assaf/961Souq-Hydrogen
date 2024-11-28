@@ -5,6 +5,7 @@ import React, { useRef, useState } from 'react';
 
 export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
     if (!menu || !menu.items) {
+        console.error("Menu or menu items are missing.");
         return null; // or some fallback UI
     }
 
@@ -72,7 +73,7 @@ function CategoryItem({ item, index, expandedCategories, onCategoryClick, collec
                     </div>
                 ) : (
                     <Link to={item.url} className="category-link">
-                        <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
+                        < CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
                     </Link>
                 )}
             </motion.div>
@@ -123,7 +124,7 @@ function CategoryContent({ item, isInView, collectionMap }) {
                         alt={collection.image?.altText || title}
                         className="category-image"
                         width="150px"
-                        height ="150px"
+                        height="150px"
                     />
                 ) : (
                     <div className="category-placeholder-image"></div>
