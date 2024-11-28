@@ -92,7 +92,7 @@
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-width 0.3s ease, max-height 0.3s ease, opacity 1s ease;
+    transition: max-width 1s ease, max-height 1s ease, opacity 0.5s ease;
 }
 
 .subcategory-list.expanded {
