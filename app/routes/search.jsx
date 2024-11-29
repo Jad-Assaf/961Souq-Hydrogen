@@ -1,10 +1,13 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useLocation } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { getFilterLink, getSortLink } from "~/utils/filterUtils";
+import { Filter } from "~/components/Filter";
+
 
 /**
  * @type {MetaFunction}
