@@ -1,9 +1,11 @@
 import { json } from '@shopify/remix-oxygen';
 import { useLoaderData, useLocation, useNavigate, useSearchParams } from '@remix-run/react';
-import { Analytics } from '@shopify/hydrogen';
-import { FiltersDrawer } from '~/modules/drawer-filter'; // Import FiltersDrawer
+import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
+import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
-import { useEffect, useState } from 'react';
+import { getEmptyPredictiveSearchResult } from '~/lib/search';
+import { useRef, useState } from 'react';
+import { FiltersDrawer } from '~/modules/drawer-filter'; // Import FiltersDrawer
 
 /**
  * @type {MetaFunction}
@@ -17,59 +19,30 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const term = url.searchParams.get('q') || '';
-  const filters = [];
+  const isPredictive = url.searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context });
 
-  // Parse filters from the URL
-  for (const [key, value] of url.searchParams.entries()) {
-    if (key.startsWith('filter_')) {
-      try {
-        filters.push({ [key.replace('filter_', '')]: JSON.parse(value) });
-      } catch (err) {
-        console.warn(`Invalid filter value for key "${key}":`, err);
-      }
-    }
-  }
+  searchPromise.catch((error) => {
+    console.error(error);
+    return { term: '', result: null, error: error.message };
+  });
 
-  try {
-    const { errors, data } = await context.storefront.query(SEARCH_QUERY, {
-      variables: { term, filters },
-    });
-
-    if (errors) {
-      console.error('GraphQL Errors:', errors);
-      throw new Error('Error fetching search results');
-    }
-
-    if (!data.products || data.products.nodes.length === 0) {
-      return json({ term, result: null, error: 'No products found' });
-    }
-
-    return json({
-      term,
-      result: {
-        products: data.products.nodes,
-        filters: data.products.filters,
-      },
-    });
-  } catch (error) {
-    console.error('Loader Error:', error);
-    return json({ term, result: null, error: error.message });
-  }
+  return json(await searchPromise);
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { term, result, error } = useLoaderData();
+  const { type, term, result, error } = useLoaderData();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Handle layout responsiveness
+  // Layout state
   const [numberInRow, setNumberInRow] = useState(3);
-  const handleLayoutChange = (number) => setNumberInRow(number);
 
   // Handle filter removal
   const handleFilterRemove = (filter) => {
@@ -78,30 +51,28 @@ export default function SearchPage() {
     navigate(`${location.pathname}?${newParams.toString()}`);
   };
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
-    <div className="search-page">
+    <div className="search">
       <h1>Search Results for "{term}"</h1>
 
       <div className="flex flex-col lg:flex-row">
-        {/* Filters Drawer */}
+        {/* Filters UI */}
         <div className="w-[220px]">
           <FiltersDrawer
-            filters={result?.filters || []} // Filters returned from loader
-            appliedFilters={[]} // You can adjust logic to parse applied filters if necessary
+            filters={result?.filters || []} // Filters data
+            appliedFilters={[]} // Empty array for now, logic for applied filters can be added later
             onRemoveFilter={handleFilterRemove}
           />
         </div>
 
         {/* Search Results */}
         <div className="flex-1">
-          {!term || !result?.products?.length ? (
+          {error ? (
+            <div>Error: {error}</div>
+          ) : !term || !result?.total ? (
             <SearchResults.Empty />
           ) : (
-            <SearchResults result={result.products} term={term}>
+            <SearchResults result={result} term={term}>
               {({ products }) => (
                 <div className={`products-grid grid-cols-${numberInRow}`}>
                   {products.map((product) => (
@@ -119,6 +90,7 @@ export default function SearchPage() {
     </div>
   );
 }
+
 /**
  * Regular search query and fragments
  * (adjust as needed)
@@ -192,43 +164,55 @@ const PAGE_INFO_FRAGMENT = `#graphql
 `;
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-const SEARCH_QUERY = `#graphql
-  query SearchWithFilters(
-    $term: String!,
-    $filters: [ProductFilter!],
-    $first: Int = 20
-  ) {
-    products(
-      first: $first,
+export const SEARCH_QUERY = `#graphql
+  query RegularSearch(
+    $country: CountryCode
+    $endCursor: String
+    $first: Int
+    $language: LanguageCode
+    $last: Int
+    $term: String!
+    $startCursor: String
+  ) @inContext(country: $country, language: $language) {
+    articles: search(
       query: $term,
-      filters: $filters
+      types: [ARTICLE],
+      first: $first,
     ) {
       nodes {
-        id
-        title
-        vendor
-        productType
-        featuredImage {
-          url
-          altText
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
+        ...on Article {
+          ...SearchArticle
         }
       }
-      filters {
-        id
-        label
-        type
-        values {
-          id
-          label
-          count
-          input
+    }
+    pages: search(
+      query: $term,
+      types: [PAGE],
+      first: $first,
+    ) {
+      nodes {
+        ...on Page {
+          ...SearchPage
         }
+      }
+    }
+    products: search(
+      after: $endCursor,
+      before: $startCursor,
+      first: $first,
+      last: $last,
+      query: $term,
+      sortKey: RELEVANCE,
+      types: [PRODUCT],
+      unavailableProducts: HIDE,
+    ) {
+      nodes {
+        ...on Product {
+          ...SearchProduct
+        }
+      }
+      pageInfo {
+        ...PageInfoFragment
       }
     }
   }
