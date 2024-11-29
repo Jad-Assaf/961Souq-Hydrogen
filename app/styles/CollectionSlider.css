@@ -39,7 +39,7 @@
     align-items: center;
     padding-bottom: 20px;
     position: relative;
-    /* Necessary for subcategory positioning */
+    /* Needed for dropdown positioning */
 }
 
 .category-image {
@@ -69,8 +69,14 @@
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    position: relative;
-    /* Positioned relative to the parent container */
+    position: absolute;
+    /* Position it relative to the parent container */
+    top: 100%;
+    /* Dropdown below the parent container */
+    left: 50%;
+    /* Default: Center horizontally */
+    transform: translateX(-50%);
+    /* Center it by default */
     transition: max-height 0.5s ease, opacity 0.5s ease;
     z-index: 10;
     background-color: #fff;
@@ -82,21 +88,27 @@
 .subcategory-list.expanded {
     max-height: 500px;
     opacity: 1;
-    margin-top: 10px;
-    /* Space between the category and dropdown */
 }
 
-/* Prevent subcategory list from going offscreen */
+/* Prevent dropdown from going offscreen on the left */
 .category-container:first-child .subcategory-list.expanded {
     left: 0;
-    /* Align to the left for the first item */
+    /* Align to the left */
+    transform: none;
+    /* Remove default centering */
 }
 
+/* Prevent dropdown from going offscreen on the right */
 .category-container:last-child .subcategory-list.expanded {
     right: 0;
-    /* Align to the right for the last item */
+    /* Align to the right */
+    left: auto;
+    /* Override left alignment */
+    transform: none;
+    /* Remove default centering */
 }
 
+/* Subcategory Items */
 .subcategory-list .category-item {
     width: 100px;
 }
@@ -176,9 +188,8 @@
     }
 
     .subcategory-list {
-        width: 100%;
-        /* Allow full width on smaller screens */
-        max-width: 100%;
+        width: 350px;
+        /* Maintain fixed width */
         max-height: 0;
     }
 
