@@ -19,36 +19,43 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const term = url.searchParams.get('q') || '';
+  const term = url.searchParams.get('q') || ''; // Extract search term
   const searchParams = new URLSearchParams(url.searchParams);
-  
-  // Extract filters from URL
+
+  // Parse filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
-      const filterKey = key.replace('filter_', '');
-      filters.push({ [filterKey]: JSON.parse(value) });
+      const filterKey = key.replace('filter_', ''); // Remove prefix
+      filters.push({ [filterKey]: JSON.parse(value) }); // Parse as JSON
     }
   }
 
   const variables = getPaginationVariables(request, { pageBy: 24 });
 
-  // Fetch search results and filters
-  const { errors, ...data } = await context.storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term, filters },
-  });
+  try {
+    // Perform GraphQL query
+    const { errors, data } = await context.storefront.query(SEARCH_QUERY, {
+      variables: { ...variables, term, filters },
+    });
 
-  if (errors) {
-    throw new Error('Error fetching search results');
+    if (errors || !data.products) {
+      console.error(errors || 'No products found.');
+      return json({ term, result: null, error: 'No results found' });
+    }
+
+    // Return products and filters
+    return json({
+      term,
+      result: {
+        products: data.products,
+        filters: data.products.filters, // Pass filter options to UI
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return json({ term, result: null, error: error.message });
   }
-
-  return json({
-    term,
-    result: {
-      products: data.products,
-      filters: data.products.filters,
-    },
-  });
 }
 
 /**
@@ -78,15 +85,15 @@ export default function SearchPage() {
         {/* Filters Drawer */}
         <div className="w-[220px]">
           <FiltersDrawer
-            filters={result.filters}
-            appliedFilters={result.appliedFilters || []}
+            filters={result?.filters || []} // Filters returned from loader
+            appliedFilters={result?.appliedFilters || []}
             onRemoveFilter={handleFilterRemove}
           />
         </div>
 
         {/* Search Results */}
         <div className="flex-1">
-          {!term || !result.products.nodes.length ? (
+          {!term || !result?.products?.nodes?.length ? (
             <SearchResults.Empty />
           ) : (
             <SearchResults result={result.products} term={term}>
