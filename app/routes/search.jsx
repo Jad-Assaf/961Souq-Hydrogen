@@ -38,18 +38,24 @@ export async function loader({ request, context }) {
 export default function SearchPage() {
   const { term, result } = useLoaderData();
 
-  // States to manage selected filters
+  // Check if result contains valid data
+  if (!result || !result.items || !result.items.products) {
+    console.error("Invalid result data:", result);
+    return <div>No results found.</div>;
+  }
+
+  // States for managing filters
   const [filters, setFilters] = useState({
     productTypes: [],
     vendors: [],
   });
 
-  // Extract unique options dynamically from the fetched products
-  const products = result?.items?.products || [];
+  // Extract products and unique filterable attributes
+  const products = result.items.products || [];
   const uniqueProductTypes = [...new Set(products.map((p) => p.productType))];
   const uniqueVendors = [...new Set(products.map((p) => p.vendor))];
 
-  // Update filters when options are selected
+  // Handle filter changes
   const handleFilterChange = (filterKey, values) => {
     setFilters((prev) => ({
       ...prev,
@@ -57,7 +63,7 @@ export default function SearchPage() {
     }));
   };
 
-  // Apply filters to the products
+  // Apply filters
   const filteredProducts = products.filter((product) => {
     const matchesProductType =
       !filters.productTypes.length ||
@@ -73,16 +79,14 @@ export default function SearchPage() {
     <div className="search">
       <h1>Search Results</h1>
 
+      {/* Filters Section */}
       <div className="filters">
-        {/* Filter for Product Types */}
         <Filter
           label="Product Types"
           options={uniqueProductTypes}
           selectedOptions={filters.productTypes}
           onChange={(values) => handleFilterChange("productTypes", values)}
         />
-
-        {/* Filter for Vendors */}
         <Filter
           label="Vendors"
           options={uniqueVendors}
@@ -91,10 +95,8 @@ export default function SearchPage() {
         />
       </div>
 
-      {/* Display Search Results */}
-      {!term || !filteredProducts.length ? (
-        <SearchResults.Empty />
-      ) : (
+      {/* Search Results Section */}
+      {filteredProducts.length > 0 ? (
         <SearchResults result={{ ...result, products: filteredProducts }} term={term}>
           {({ products }) => (
             <div>
@@ -102,8 +104,11 @@ export default function SearchPage() {
             </div>
           )}
         </SearchResults>
+      ) : (
+        <div>No results match your filters.</div>
       )}
 
+      {/* Analytics */}
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
