@@ -74,7 +74,7 @@
     /* Ensure it's positioned below */
     margin-top: 10px;
     /* Space between category and dropdown */
-    transition: max-height 0.5s ease, opacity 0.5s ease;
+    transition: max-height 0.2s ease, opacity 0.2s ease;
     z-index: 10;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -141,11 +141,11 @@
 }
 
 .subcategory-list.expanded {
-    animation: expandSequence 0.5s forwards;
+    animation: expandSequence 0.2s forwards;
 }
 
 .subcategory-list.collapsing {
-    animation: collapseSequence 0.5s forwards;
+    animation: collapseSequence 0.2s forwards;
 }
 
 @media screen and (max-width: 1024px) {

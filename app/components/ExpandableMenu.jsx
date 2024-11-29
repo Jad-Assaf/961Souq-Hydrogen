@@ -94,7 +94,7 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
             <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ delay: index * 0.01, duration: 0.5 }}
+                transition={{ delay: index * 0.01, duration: 0.2 }}
                 className="category-container"
             >
                 {hasSubItems ? (
@@ -138,7 +138,7 @@ const ExpandableMenuContent = ({ item, isInView }) => {
             <motion.div
                 initial={{ filter: "blur(10px)", opacity: 0 }}
                 animate={isInView ? { filter: "blur(0px)", opacity: 1 } : {}}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.2 }}
                 className="category-image-container"
             >
                 {item.image ? (
