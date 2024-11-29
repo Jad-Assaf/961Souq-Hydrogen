@@ -19,17 +19,22 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
+  const term = String(url.searchParams.get('q') || 'default-term');
+  console.log("Loader search term:", term);
+
   const isPredictive = url.searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
     : regularSearch({ request, context });
 
-  searchPromise.catch((error) => {
-    console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
-
-  return json(await searchPromise);
+  try {
+    const searchResult = await searchPromise;
+    console.log("Search result:", searchResult);
+    return json(searchResult);
+  } catch (error) {
+    console.error("Search error:", error);
+    return json({ term: '', result: null, error: error.message });
+  }
 }
 
 /**
