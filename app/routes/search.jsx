@@ -23,25 +23,47 @@ export async function loader({ request, context }) {
   const term = url.searchParams.get("q") || "";
   const filters = getFiltersFromUrl(url.searchParams);
 
-  const searchPromise = regularSearch({ request, context, term, filters });
+  const searchPromise = fetchProductsAndFilters({ term, filters, context });
 
   try {
-    return json(await searchPromise);
+    const { products, filters } = await searchPromise;
+    return json({ term, result: { products, filters } });
   } catch (error) {
     console.error(error);
     return json({ term, result: null, error: error.message });
   }
 }
 
-function getFiltersFromUrl(searchParams) {
-  const filters = {};
-  for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith("filter.")) {
-      const filterKey = key.replace("filter.", "");
-      filters[filterKey] = JSON.parse(value);
+async function fetchProductsAndFilters({ term, filters, context }) {
+  const { storefront } = context;
+  const query = `
+    query ($term: String!, $filters: [ProductFilterInput!]!) {
+      products(first: 20, query: $term, filters: $filters) {
+        nodes {
+          id
+          title
+          vendor
+          productType
+        }
+        filters {
+          id
+          label
+          type
+          values {
+            id
+            label
+            count
+          }
+        }
+      }
     }
-  }
-  return filters;
+  `;
+
+  const { data } = await storefront.query(query, { variables: { term, filters } });
+  return {
+    products: data.products.nodes,
+    filters: data.products.filters,
+  };
 }
 
 /**
@@ -50,65 +72,33 @@ function getFiltersFromUrl(searchParams) {
 export default function SearchPage() {
   const { term, result } = useLoaderData();
   const location = useLocation();
+  const [params] = useSearchParams();
 
   const products = result?.items?.products || [];
-  const [filters, setFilters] = useState({
-    productTypes: [],
-    vendors: [],
-  });
+  const filters = result?.filters || [];
+  const appliedFilters = getAppliedFilters(params);
 
-  // Extract unique filter options
-  const uniqueProductTypes = [...new Set(products.map((p) => p.productType))];
-  const uniqueVendors = [...new Set(products.map((p) => p.vendor))];
-
-  // Handle filter changes
-  const handleFilterChange = (filterKey, values) => {
-    const filterObject = { [filterKey]: values };
-    const filterLink = getFilterLink(filterObject, new URLSearchParams(location.search), location);
-    window.history.pushState(null, "", filterLink);
-    setFilters((prev) => ({ ...prev, [filterKey]: values }));
+  const handleRemoveFilter = (filter) => {
+    const link = getAppliedFilterLink(filter, params, location);
+    navigate(link);
   };
-
-  // Apply filters
-  const filteredProducts = products.filter((product) => {
-    const matchesProductType =
-      !filters.productTypes.length || filters.productTypes.includes(product.productType);
-    const matchesVendor =
-      !filters.vendors.length || filters.vendors.includes(product.vendor);
-    return matchesProductType && matchesVendor;
-  });
 
   return (
     <div className="search">
       <h1>Search Results</h1>
 
-      {/* Filters */}
       <div className="filters">
-        <Filter
-          label="Product Types"
-          options={uniqueProductTypes}
-          selectedOptions={filters.productTypes}
-          onChange={(values) => handleFilterChange("productTypes", values)}
-        />
-        <Filter
-          label="Vendors"
-          options={uniqueVendors}
-          selectedOptions={filters.vendors}
-          onChange={(values) => handleFilterChange("vendors", values)}
-        />
+        {filters.map((filter) => (
+          <Filter
+            key={filter.id}
+            label={filter.label}
+            options={filter.values}
+            appliedFilters={appliedFilters}
+          />
+        ))}
       </div>
 
-      {/* Search Results */}
-      {filteredProducts.length ? (
-        <SearchResults result={{ ...result, products: filteredProducts }} term={term}>
-          {({ products }) => <SearchResults.Products products={products} term={term} />}
-        </SearchResults>
-      ) : (
-        <div>No products found for your search.</div>
-      )}
-
-      {/* Analytics */}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
+      <SearchResults result={result} term={term} />
     </div>
   );
 }
