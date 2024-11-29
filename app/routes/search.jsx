@@ -1,11 +1,10 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData, useLocation, useNavigate, useSearchParams } from '@remix-run/react';
+import { useLoaderData, useSearchParams, useNavigate } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef, useState } from 'react';
-import { FiltersDrawer } from '~/modules/drawer-filter'; // Import FiltersDrawer
 
 /**
  * @type {MetaFunction}
@@ -37,56 +36,102 @@ export async function loader({ request, context }) {
  */
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
-  const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const formRef = useRef(null);
+  const [sortOption, setSortOption] = useState(searchParams.get('sort') || 'relevance');
 
-  // Layout state
-  const [numberInRow, setNumberInRow] = useState(3);
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    const searchInput = formRef.current.querySelector('input[name="q"]');
+    if (searchInput) {
+      const query = searchInput.value;
+      window.location.href = `/search?q=${encodeURIComponent(query)}`;
+    }
+  };
 
-  // Handle filter removal
-  const handleFilterRemove = (filter) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.delete(`filter_${filter.id}`);
-    navigate(`${location.pathname}?${newParams.toString()}`);
+  const handleFilterChange = (filterKey, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(filterKey, value);
+    } else {
+      params.delete(filterKey);
+    }
+    navigate(`/search?${params.toString()}`);
+  };
+
+  const handleSortChange = (event) => {
+    const newSortOption = event.target.value;
+    setSortOption(newSortOption);
+    const params = new URLSearchParams(searchParams);
+    params.set('sort', newSortOption);
+    navigate(`/search?${params.toString()}`);
   };
 
   return (
-    <div className="search">
-      <h1>Search Results for "{term}"</h1>
+    <div className="search-page-container">
+      <h1 className="text-xl font-bold mb-4">Search Results</h1>
 
-      <div className="flex flex-col lg:flex-row">
-        {/* Filters UI */}
-        <div className="w-[220px]">
-          <FiltersDrawer
-            filters={result?.filters || []} // Filters data
-            appliedFilters={[]} // Empty array for now, logic for applied filters can be added later
-            onRemoveFilter={handleFilterRemove}
-          />
+      {/* Search Form */}
+      <div className="search-form-container">
+        <SearchForm
+          ref={formRef}
+          onSubmit={handleFormSubmit}
+          placeholder="Search for products, articles, or pages..."
+        />
+      </div>
+
+      {/* Filter and Sort */}
+      <div className="filter-sort-container flex justify-between items-center mt-6">
+        {/* Filters */}
+        <div className="filters">
+          <label>
+            Category:
+            <select
+              onChange={(e) => handleFilterChange('category', e.target.value)}
+              defaultValue={searchParams.get('category') || ''}
+            >
+              <option value="">All</option>
+              <option value="electronics">Electronics</option>
+              <option value="apparel">Apparel</option>
+              <option value="home-goods">Home Goods</option>
+            </select>
+          </label>
         </div>
 
-        {/* Search Results */}
-        <div className="flex-1">
-          {error ? (
-            <div>Error: {error}</div>
-          ) : !term || !result?.total ? (
-            <SearchResults.Empty />
-          ) : (
-            <SearchResults result={result} term={term}>
-              {({ products }) => (
-                <div className={`products-grid grid-cols-${numberInRow}`}>
-                  {products.map((product) => (
-                    <SearchResults.Products key={product.id} product={product} />
-                  ))}
-                </div>
-              )}
-            </SearchResults>
-          )}
+        {/* Sort Options */}
+        <div className="sort">
+          <label>
+            Sort by:
+            <select value={sortOption} onChange={handleSortChange}>
+              <option value="relevance">Relevance</option>
+              <option value="price-low-high">Price: Low to High</option>
+              <option value="price-high-low">Price: High to Low</option>
+              <option value="newest">Newest</option>
+            </select>
+          </label>
         </div>
       </div>
 
+      {/* Search Results */}
+      <div className="search-results-container mt-8">
+        {!term || !result?.total ? (
+          <SearchResults.Empty message="No results found for your search." />
+        ) : (
+          <SearchResults result={result} term={term}>
+            {({ products }) => (
+              <div className="products-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <SearchResults.Products products={products} term={term} />
+              </div>
+            )}
+          </SearchResults>
+        )}
+      </div>
+
       {/* Analytics */}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
+      <Analytics.SearchView
+        data={{ searchTerm: term, searchResults: result }}
+      />
     </div>
   );
 }
