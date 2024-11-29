@@ -64,14 +64,22 @@
     flex-direction: row;
     justify-content: center;
     gap: 10px;
-    margin: 10px auto 0;
-    width: 350px;
-    max-width: 0;
+    margin: 0 auto;
+    /* Center horizontally */
+    width: 0;
+    /* Start from 0 width */
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    position: relative;
-    transition: max-height 0.5s ease, opacity 0.5s ease;
+    position: absolute;
+    /* Position relative to parent */
+    top: 50%;
+    /* Center vertically in parent */
+    left: 50%;
+    /* Center horizontally in parent */
+    transform: translate(-50%, -50%);
+    /* Adjust position to be centered */
+    transition: max-height 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
     z-index: 10;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -81,9 +89,12 @@
 
 .subcategory-list.expanded {
     max-height: 500px;
-    max-width: 350px;
-    /* Adjust based on content height */
+    width: 350px;
     opacity: 1;
+    top: 100%;
+    /* Position it below the category container */
+    transform: translateX(-50%);
+    /* Maintain horizontal center */
 }
 
 /* Subcategory Items */
