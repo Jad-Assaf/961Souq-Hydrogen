@@ -57,21 +57,20 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
         const containerRect = container.getBoundingClientRect();
         const screenWidth = window.innerWidth;
 
-        // Reset styles
-        dropdown.style.marginLeft = "0";
-        dropdown.style.marginRight = "0";
+        dropdown.style.left = "0"; // Reset any previous alignment
+        dropdown.style.transform = "translateX(0)";
 
-        if (containerRect.left < 350) {
-            // Align to the left if near the left screen edge
-            dropdown.style.marginLeft = "0";
-        } else if (containerRect.right + 350 > screenWidth) {
-            // Align to the right if near the right screen edge
-            dropdown.style.marginLeft = "auto";
-            dropdown.style.marginRight = "0";
+        if (containerRect.left < 0) {
+            // If the dropdown is going off the left edge, align to the left of the screen
+            dropdown.style.left = `${-containerRect.left}px`;
+        } else if (containerRect.right > screenWidth) {
+            // If the dropdown is going off the right edge, align to the right of the screen
+            const overflow = containerRect.right - screenWidth;
+            dropdown.style.left = `-${overflow}px`;
         } else {
-            // Default: Center the dropdown
-            dropdown.style.marginLeft = "auto";
-            dropdown.style.marginRight = "auto";
+            // Default: center below the container
+            dropdown.style.left = "50%";
+            dropdown.style.transform = "translateX(-50%)";
         }
     };
 
