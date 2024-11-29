@@ -1,19 +1,15 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation, useSearchParams } from "@remix-run/react";
-import { Checkbox } from "~/components/checkbox";
-import { getFilterLink, getAppliedFilterLink } from "~/lib/filter";
+import React from 'react';
+import { useNavigate, useLocation, useSearchParams } from '@remix-run/react';
+import { Checkbox } from '~/components/checkbox';
+import { getFilterLink, getAppliedFilterLink } from '~/lib/filter';
 
-export function Filter({ label, options, appliedFilters }) {
+export function Filter({ label, options, appliedFilters, onRemoveFilter }) {
     const navigate = useNavigate();
     const [params] = useSearchParams();
     const location = useLocation();
 
-    const isChecked = useCallback(
-        (option) => appliedFilters.some(
-            (filter) => JSON.stringify(filter.filter) === JSON.stringify(option)
-        ),
-        [appliedFilters]
-    );
+    const isChecked = (option) =>
+        appliedFilters.some((filter) => JSON.stringify(filter.filter) === JSON.stringify(option));
 
     const handleCheckedChange = (option, checked) => {
         if (checked) {
