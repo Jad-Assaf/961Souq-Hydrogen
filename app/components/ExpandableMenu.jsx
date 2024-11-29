@@ -64,7 +64,12 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
             dropdown.style.left = "100%";
         } else if ([2, 5, 8].includes(index)) {
             // 3rd, 6th, 9th: Align to the left
+        } else if ([2, 5, 8].includes(index)) {
             dropdown.style.left = "-100%";
+        } else if ([9].includes(index)) {
+            dropdown.style.left = "50%";
+        } else if ([10].includes(index)) {
+            dropdown.style.left = "-50%";
         } else {
             // Others: Default alignment
             dropdown.style.left = "0";
@@ -138,7 +143,7 @@ const ExpandableMenuContent = ({ item, isInView }) => {
             <motion.div
                 initial={{ filter: "blur(10px)", opacity: 0 }}
                 animate={isInView ? { filter: "blur(0px)", opacity: 1 } : {}}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.3 }}
                 className="category-image-container"
             >
                 {item.image ? (
