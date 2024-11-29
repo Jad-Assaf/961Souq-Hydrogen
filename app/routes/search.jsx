@@ -1,12 +1,11 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData, useSearchParams, useNavigate, useLocation } from '@remix-run/react';
+import { useLoaderData, useLocation, useNavigate, useSearchParams } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
-import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import React, { useRef } from 'react';
-import { Filter } from '~/components/Filter';
-import { getFilterLink, getAppliedFilterLink } from '~/lib/filter';
+import { FiltersDrawer } from '~/modules/drawer-filter'; // Import FiltersDrawer
+import { getAppliedFilterLink } from '~/lib/filter';
+import { useEffect, useState } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -20,159 +19,93 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const term = String(url.searchParams.get('q') || '');
-  const filters = getFiltersFromUrl(url.searchParams);
-
-  console.log("Search term:", term);
-  console.log("Filters:", filters);
-
-  const searchPromise = fetchProductsAndFilters({ term, filters, context });
-
-  try {
-    const { products, filters } = await searchPromise;
-    return json({ term, result: { products, filters } });
-  } catch (error) {
-    console.error("Loader Error:", error);
-    return json({ term, result: null, error: error.message });
-  }
-}
-
-async function fetchProductsAndFilters({ term, filters, context }) {
-  const { storefront } = context;
-  const query = `
-    query ($term: String!, $filters: [ProductFilterInput!]) {
-      products(first: 20, query: $term, filters: $filters) {
-        nodes {
-          id
-          title
-          vendor
-          productType
-        }
-        filters {
-          id
-          label
-          type
-          values {
-            id
-            label
-            count
-          }
-        }
-      }
-    }
-  `;
-
-  try {
-    const { data, errors } = await storefront.query(query, { variables: { term, filters } });
-
-    if (errors) {
-      console.error("GraphQL Errors:", errors);
-      throw new Error("Error in GraphQL query execution.");
-    }
-
-    if (!data || !data.products) {
-      throw new Error("No products found in the API response.");
-    }
-
-    return {
-      products: data.products.nodes || [],
-      filters: data.products.filters || [],
-    };
-  } catch (error) {
-    console.error("Error fetching products and filters:", error);
-    throw error;
-  }
-}
-
-function getFiltersFromUrl(searchParams) {
+  const term = url.searchParams.get('q') || '';
+  const searchParams = new URLSearchParams(url.searchParams);
+  
+  // Extract filters from URL
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith('filter.')) {
-      try {
-        filters.push({ [key.replace('filter.', '')]: JSON.parse(value) });
-      } catch (error) {
-        console.warn(`Invalid filter value for ${key}:`, value);
-      }
+    if (key.startsWith('filter_')) {
+      const filterKey = key.replace('filter_', '');
+      filters.push({ [filterKey]: JSON.parse(value) });
     }
   }
-  return filters;
+
+  const variables = getPaginationVariables(request, { pageBy: 24 });
+
+  // Fetch search results and filters
+  const { errors, ...data } = await context.storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term, filters },
+  });
+
+  if (errors) {
+    throw new Error('Error fetching search results');
+  }
+
+  return json({
+    term,
+    result: {
+      products: data.products,
+      filters: data.products.filters,
+    },
+  });
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { term, result } = useLoaderData();
   const location = useLocation();
-  const [params] = useSearchParams();
   const navigate = useNavigate();
-  const formRef = useRef(null);
+  const [searchParams] = useSearchParams();
 
-  const products = result?.products || [];
-  const filters = result?.filters || [];
-  const appliedFilters = getAppliedFilters(params);
+  // Handle layout responsiveness
+  const [numberInRow, setNumberInRow] = useState(3);
+  const handleLayoutChange = (number) => setNumberInRow(number);
 
-  const handleRemoveFilter = (filter) => {
-    const link = getAppliedFilterLink(filter, params, location);
-    navigate(link);
-  };
-
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-
-    const searchInput = formRef.current.querySelector('input[name="q"]');
-    if (searchInput) {
-      const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-
-      // Redirect with modified query
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
-    }
+  // Handle filter removal
+  const handleFilterRemove = (filter) => {
+    const newUrl = getAppliedFilterLink(filter, searchParams, location);
+    navigate(newUrl);
   };
 
   return (
-    <div className="search">
-      <h1>Search Results</h1>
+    <div className="search-page">
+      <h1>Search Results for "{term}"</h1>
 
-      {/* Filter Section */}
-      <div className="filters">
-        {filters.map((filter) => (
-          <Filter
-            key={filter.id}
-            label={filter.label}
-            options={filter.values}
-            appliedFilters={appliedFilters}
-            onRemoveFilter={handleRemoveFilter}
+      <div className="flex flex-col lg:flex-row">
+        {/* Filters Drawer */}
+        <div className="w-[220px]">
+          <FiltersDrawer
+            filters={result.filters}
+            appliedFilters={result.appliedFilters || []}
+            onRemoveFilter={handleFilterRemove}
           />
-        ))}
+        </div>
+
+        {/* Search Results */}
+        <div className="flex-1">
+          {!term || !result.products.nodes.length ? (
+            <SearchResults.Empty />
+          ) : (
+            <SearchResults result={result.products} term={term}>
+              {({ products }) => (
+                <div className={`products-grid grid-cols-${numberInRow}`}>
+                  {products.map((product) => (
+                    <SearchResults.Products key={product.id} product={product} />
+                  ))}
+                </div>
+              )}
+            </SearchResults>
+          )}
+        </div>
       </div>
 
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
-      ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
-            </div>
-          )}
-        </SearchResults>
-      )}
+      {/* Analytics */}
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
-}
-
-function getAppliedFilters(params) {
-  const filters = [];
-  for (const [key, value] of params.entries()) {
-    if (key.startsWith('filter.')) {
-      filters.push({ [key.replace('filter.', '')]: JSON.parse(value) });
-    }
-  }
-  return filters;
 }
 
 /**
@@ -248,55 +181,49 @@ const PAGE_INFO_FRAGMENT = `#graphql
 `;
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-export const SEARCH_QUERY = `#graphql
-  query RegularSearch(
-    $country: CountryCode
-    $endCursor: String
-    $first: Int
-    $language: LanguageCode
+const SEARCH_QUERY = `#graphql
+  query SearchWithFilters(
+    $term: String!,
+    $filters: [ProductFilter!],
+    $first: Int,
+    $endCursor: String,
+    $startCursor: String,
     $last: Int
-    $term: String!
-    $startCursor: String
-  ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
-    products: search(
-      after: $endCursor,
-      before: $startCursor,
+  ) {
+    products(
       first: $first,
       last: $last,
+      after: $endCursor,
+      before: $startCursor,
       query: $term,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
+      filters: $filters
     ) {
       nodes {
-        ...on Product {
-          ...SearchProduct
+        id
+        title
+        vendor
+        productType
+        featuredImage {
+          url
+          altText
+        }
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
         }
       }
-      pageInfo {
-        ...PageInfoFragment
+      filters {
+        id
+        label
+        type
+        values {
+          id
+          label
+          count
+          input
+        }
       }
     }
   }
