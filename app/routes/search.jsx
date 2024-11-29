@@ -4,8 +4,7 @@ import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
-import { Filter } from '~/components/Filter';
+import { useRef } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -19,17 +18,28 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+  const term = url.searchParams.get("q") || "";
+  const filters = getFiltersFromUrl(url.searchParams);
 
-  searchPromise.catch((error) => {
+  const searchPromise = regularSearch({ request, context, term, filters });
+
+  try {
+    return json(await searchPromise);
+  } catch (error) {
     console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
+    return json({ term, result: null, error: error.message });
+  }
+}
 
-  return json(await searchPromise);
+function getFiltersFromUrl(searchParams) {
+  const filters = {};
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith("filter.")) {
+      const filterKey = key.replace("filter.", "");
+      filters[filterKey] = JSON.parse(value);
+    }
+  }
+  return filters;
 }
 
 /**
@@ -37,41 +47,32 @@ export async function loader({ request, context }) {
  */
 export default function SearchPage() {
   const { term, result } = useLoaderData();
+  const location = useLocation();
 
-  // Ensure result contains valid products
   const products = result?.items?.products || [];
-  if (!products.length) {
-    console.error("No products found for the search term:", term);
-    return <div>No products found for your search.</div>;
-  }
-
-  // State for filters
   const [filters, setFilters] = useState({
     productTypes: [],
     vendors: [],
   });
 
-  // Extract unique options for filters
+  // Extract unique filter options
   const uniqueProductTypes = [...new Set(products.map((p) => p.productType))];
   const uniqueVendors = [...new Set(products.map((p) => p.vendor))];
 
   // Handle filter changes
   const handleFilterChange = (filterKey, values) => {
-    setFilters((prev) => ({
-      ...prev,
-      [filterKey]: values,
-    }));
+    const filterObject = { [filterKey]: values };
+    const filterLink = getFilterLink(filterObject, new URLSearchParams(location.search), location);
+    window.history.pushState(null, "", filterLink);
+    setFilters((prev) => ({ ...prev, [filterKey]: values }));
   };
 
-  // Apply filters to products
+  // Apply filters
   const filteredProducts = products.filter((product) => {
     const matchesProductType =
-      !filters.productTypes.length ||
-      filters.productTypes.includes(product.productType);
-
+      !filters.productTypes.length || filters.productTypes.includes(product.productType);
     const matchesVendor =
       !filters.vendors.length || filters.vendors.includes(product.vendor);
-
     return matchesProductType && matchesVendor;
   });
 
@@ -85,27 +86,23 @@ export default function SearchPage() {
           label="Product Types"
           options={uniqueProductTypes}
           selectedOptions={filters.productTypes}
-          onChange={(values) => handleFilterChange('productTypes', values)}
+          onChange={(values) => handleFilterChange("productTypes", values)}
         />
         <Filter
           label="Vendors"
           options={uniqueVendors}
           selectedOptions={filters.vendors}
-          onChange={(values) => handleFilterChange('vendors', values)}
+          onChange={(values) => handleFilterChange("vendors", values)}
         />
       </div>
 
       {/* Search Results */}
       {filteredProducts.length ? (
         <SearchResults result={{ ...result, products: filteredProducts }} term={term}>
-          {({ products }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-            </div>
-          )}
+          {({ products }) => <SearchResults.Products products={products} term={term} />}
         </SearchResults>
       ) : (
-        <div>No results match your filters.</div>
+        <div>No products found for your search.</div>
       )}
 
       {/* Analytics */}
@@ -197,6 +194,28 @@ export const SEARCH_QUERY = `#graphql
     $term: String!
     $startCursor: String
   ) @inContext(country: $country, language: $language) {
+    articles: search(
+      query: $term,
+      types: [ARTICLE],
+      first: $first,
+    ) {
+      nodes {
+        ...on Article {
+          ...SearchArticle
+        }
+      }
+    }
+    pages: search(
+      query: $term,
+      types: [PAGE],
+      first: $first,
+    ) {
+      nodes {
+        ...on Page {
+          ...SearchPage
+        }
+      }
+    }
     products: search(
       after: $endCursor,
       before: $startCursor,
@@ -208,26 +227,12 @@ export const SEARCH_QUERY = `#graphql
       unavailableProducts: HIDE,
     ) {
       nodes {
-        id
-        title
-        handle
-        productType
-        vendor
-        tags
-        variants(first: 1) {
-          nodes {
-            price {
-              amount
-              currencyCode
-            }
-          }
+        ...on Product {
+          ...SearchProduct
         }
       }
       pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
+        ...PageInfoFragment
       }
     }
   }
@@ -245,34 +250,28 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context }) {
+async function regularSearch({ request, context, term, filters }) {
   const { storefront } = context;
-  const url = new URL(request.url);
   const variables = getPaginationVariables(request, { pageBy: 24 });
-  const term = String(url.searchParams.get('q') || '');
 
-  console.log("Search term:", term); // Debugging search term
-
-  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
+  const { data, errors } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term, filters },
   });
 
-  console.log("Query result:", items); // Debugging query result
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
+  if (errors) {
+    console.error(errors);
+    throw new Error("Error fetching search results");
   }
 
-  const total = Object.values(items).reduce(
-    (acc, { nodes }) => acc + nodes.length,
-    0,
-  );
-
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
-
-  return { type: 'regular', term, error, result: { total, items } };
+  return {
+    type: "regular",
+    term,
+    error: null,
+    result: {
+      total: data.products.nodes.length,
+      items: { products: data.products.nodes },
+    },
+  };
 }
 
 /**
