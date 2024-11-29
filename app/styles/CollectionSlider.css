@@ -39,7 +39,7 @@
     align-items: center;
     padding-bottom: 20px;
     position: relative;
-    /* Key for positioning subcategory-list */
+    /* Added for subcategory positioning */
 }
 
 .category-image {
@@ -58,79 +58,58 @@
     text-transform: uppercase !important;
 }
 
-/* Subcategory List Styles */
 .subcategory-list {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
     justify-content: center;
     gap: 10px;
-    /* Space between items */
     margin: 10px auto 0;
-    /* Ensure it appears directly below parent */
-    width: 100%;
+    width: 300px;
     max-width: 300px;
-    /* Subcategory max-width */
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    position: absolute;
-    /* Positioned relative to the parent container */
-    top: 100%;
-    /* Positioned below the category-container */
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     transition: max-height 0.5s ease, opacity 0.5s ease;
     z-index: 10;
-    /* Ensure visibility */
     background-color: #fff;
-    /* Optional for better visibility */
     border: 1px solid #ddd;
-    /* Optional for clarity */
     border-radius: 5px;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    /* Optional for clarity */
+    box-shadow: 0 2px 10px #0000001a;
 }
 
 .subcategory-list.expanded {
     max-height: 500px;
-    /* Adjust height based on content */
+    /* Adjust based on content height */
     opacity: 1;
 }
 
 /* Subcategory Items */
 .subcategory-list .category-item {
-    width: 90px;
-    /* Ensure consistent item width */
-    margin: 5px 0;
-    /* Add spacing */
+    width: 100px;
 }
 
 .subcategory-list .category-container {
     margin: 0;
-    flex: none;
-    /* Prevent flex adjustments */
 }
 
 .subcategory-list .category-link {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
 }
 
 .subcategory-list .category-item .category-image {
-    width: 70px;
-    /* Smaller size for subcategories */
+    width: 80px;
 }
 
 .subcategory-list .category-title {
     font-weight: 500 !important;
     font-size: 12px !important;
-    color: #666;
 }
 
-/* Animation Keyframes for Expand and Collapse */
+/* Keyframes for Expand and Collapse */
 @keyframes expandSequence {
     0% {
         max-height: 0;
@@ -164,17 +143,53 @@
     animation: collapseSequence 0.5s forwards;
 }
 
-/* Media Query for Mobile */
 @media screen and (max-width: 1024px) {
+    .category-slider {
+        flex-wrap: wrap;
+        border: 1px solid #ababab;
+        border-radius: 5px;
+        width: 95vw;
+        box-shadow: inset 0px 0px 20px 0px #ededed;
+        padding-bottom: 20px;
+        margin: auto;
+        justify-content: center;
+    }
+
+    .category-container {
+        flex: 1 0 10vw !important;
+        margin: 30px 0px 0px 5px;
+    }
+
+    .category-image {
+        border: none;
+        width: 200px;
+    }
+
     .subcategory-list {
         width: 100%;
-        left: 0;
-        transform: none;
+        max-width: 100%;
         max-height: 0;
     }
 
     .subcategory-list.expanded {
         max-height: 1000px;
-        padding: 10px 0;
+        padding: 20px 0;
     }
+}
+
+.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.category-item {
+    opacity: 1;
+    transition: opacity 0.5s linear;
+}
+
+.category-item.expanded {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
