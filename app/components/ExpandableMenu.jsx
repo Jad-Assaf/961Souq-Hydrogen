@@ -65,6 +65,10 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
         } else if ([2, 5, 8].includes(index)) {
             // 3rd, 6th, 9th: Align to the left
             dropdown.style.left = "-100%";
+        } else if ([9].includes(index)) {
+            dropdown.style.left = "50%";
+        } else if ([10].includes(index)) {
+            dropdown.style.left = "-50%";
         } else {
             // Others: Default alignment
             dropdown.style.left = "0";
