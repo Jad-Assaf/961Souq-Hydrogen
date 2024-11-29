@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
@@ -43,9 +43,43 @@ export const ExpandableMenu = ({ menuItems }) => {
 };
 
 const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryClick }) => {
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true });
+    const containerRef = useRef(null);
+    const dropdownRef = useRef(null);
+    const isInView = useInView(containerRef, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
+
+    // Function to handle dynamic alignment of the dropdown
+    const handleSubcategoryPosition = () => {
+        if (!dropdownRef.current || !containerRef.current) return;
+
+        const dropdown = dropdownRef.current;
+        const container = containerRef.current;
+        const containerRect = container.getBoundingClientRect();
+        const screenWidth = window.innerWidth;
+
+        // Reset styles
+        dropdown.style.marginLeft = "0";
+        dropdown.style.marginRight = "0";
+
+        if (containerRect.left < 350) {
+            // Align to the left if near the left screen edge
+            dropdown.style.marginLeft = "0";
+        } else if (containerRect.right + 350 > screenWidth) {
+            // Align to the right if near the right screen edge
+            dropdown.style.marginLeft = "auto";
+            dropdown.style.marginRight = "0";
+        } else {
+            // Default: Center the dropdown
+            dropdown.style.marginLeft = "auto";
+            dropdown.style.marginRight = "auto";
+        }
+    };
+
+    useEffect(() => {
+        if (isExpanded) {
+            handleSubcategoryPosition();
+        }
+    }, [isExpanded]);
 
     const handleClick = (e) => {
         if (hasSubItems) {
@@ -56,12 +90,12 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
 
     return (
         <div
+            ref={containerRef}
             className={`category-item 
                 ${isExpanded ? 'expanded' : ''} 
                 ${isCollapsing ? 'collapsing' : ''}`}
         >
             <motion.div
-                ref={ref}
                 initial={{ opacity: 0, x: -30 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ delay: index * 0.01, duration: 0.5 }}
@@ -79,6 +113,7 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
             </motion.div>
             {hasSubItems && (
                 <div
+                    ref={dropdownRef}
                     className={`subcategory-list 
                         ${isExpanded ? 'expanded' : ''} 
                         ${isCollapsing ? 'collapsing' : ''}`}

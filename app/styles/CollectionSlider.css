@@ -69,14 +69,10 @@
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    position: absolute;
-    /* Position it relative to the parent container */
-    top: 100%;
-    /* Dropdown below the parent container */
-    left: 50%;
-    /* Default: Center horizontally */
-    transform: translateX(-50%);
-    /* Center it by default */
+    position: relative;
+    /* Ensure it's positioned below */
+    margin-top: 10px;
+    /* Space between category and dropdown */
     transition: max-height 0.5s ease, opacity 0.5s ease;
     z-index: 10;
     background-color: #fff;
@@ -88,24 +84,6 @@
 .subcategory-list.expanded {
     max-height: 500px;
     opacity: 1;
-}
-
-/* Prevent dropdown from going offscreen on the left */
-.category-container:first-child .subcategory-list.expanded {
-    left: 0;
-    /* Align to the left */
-    transform: none;
-    /* Remove default centering */
-}
-
-/* Prevent dropdown from going offscreen on the right */
-.category-container:last-child .subcategory-list.expanded {
-    right: 0;
-    /* Align to the right */
-    left: auto;
-    /* Override left alignment */
-    transform: none;
-    /* Remove default centering */
 }
 
 /* Subcategory Items */
