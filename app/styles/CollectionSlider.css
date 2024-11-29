@@ -39,7 +39,6 @@
     align-items: center;
     padding-bottom: 20px;
     position: relative;
-    /* Added for subcategory positioning */
 }
 
 .category-image {
@@ -65,21 +64,15 @@
     justify-content: center;
     gap: 10px;
     margin: 0 auto;
-    /* Center horizontally */
     width: 0;
-    /* Start from 0 width */
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    position: absolute;
-    /* Position relative to parent */
-    top: 50%;
-    /* Center vertically in parent */
-    left: 50%;
-    /* Center horizontally in parent */
-    transform: translate(-50%, -50%);
-    /* Adjust position to be centered */
-    transition: max-height 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+    position: relative;
+    /* Ensure it's relative to the parent container */
+    transform-origin: center top;
+    /* Animation origin is the top center */
+    transition: max-height 0.5s ease, opacity 0.5s ease, width 0.5s ease;
     z-index: 10;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -89,12 +82,22 @@
 
 .subcategory-list.expanded {
     max-height: 500px;
-    width: 350px;
+    width: 100%;
+    max-width: 350px;
     opacity: 1;
-    top: 100%;
-    /* Position it below the category container */
-    transform: translateX(-50%);
-    /* Maintain horizontal center */
+    margin: 0 auto;
+    /* Center by default */
+}
+
+/* Dynamic alignment based on container position */
+.category-container:first-child .subcategory-list.expanded {
+    margin-left: 0;
+    /* Align to the left for the first item */
+}
+
+.category-container:last-child .subcategory-list.expanded {
+    margin-right: 0;
+    /* Align to the right for the last item */
 }
 
 /* Subcategory Items */
