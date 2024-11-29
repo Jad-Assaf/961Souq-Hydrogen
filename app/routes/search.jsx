@@ -20,20 +20,21 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
   const term = String(url.searchParams.get('q') || '');
   const filters = getFiltersFromUrl(url.searchParams);
 
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : fetchProductsAndFilters({ term, filters, context });
+  console.log("Search term:", term);
+  console.log("Filters:", filters);
 
-  searchPromise.catch((error) => {
-    console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
+  const searchPromise = fetchProductsAndFilters({ term, filters, context });
 
-  return json(await searchPromise);
+  try {
+    const { products, filters } = await searchPromise;
+    return json({ term, result: { products, filters } });
+  } catch (error) {
+    console.error("Loader Error:", error);
+    return json({ term, result: null, error: error.message });
+  }
 }
 
 async function fetchProductsAndFilters({ term, filters, context }) {
@@ -61,28 +62,37 @@ async function fetchProductsAndFilters({ term, filters, context }) {
     }
   `;
 
-  const { data, errors } = await storefront.query(query, { variables: { term, filters } });
+  try {
+    const { data, errors } = await storefront.query(query, { variables: { term, filters } });
 
-  if (errors) {
-    console.error(errors);
-    throw new Error("Error fetching data from Shopify API");
-  }
+    if (errors) {
+      console.error("GraphQL Errors:", errors);
+      throw new Error("Error in GraphQL query execution.");
+    }
 
-  return {
-    type: 'regular',
-    term,
-    result: {
+    if (!data || !data.products) {
+      throw new Error("No products found in the API response.");
+    }
+
+    return {
       products: data.products.nodes || [],
       filters: data.products.filters || [],
-    },
-  };
+    };
+  } catch (error) {
+    console.error("Error fetching products and filters:", error);
+    throw error;
+  }
 }
 
 function getFiltersFromUrl(searchParams) {
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter.')) {
-      filters.push({ [key.replace('filter.', '')]: JSON.parse(value) });
+      try {
+        filters.push({ [key.replace('filter.', '')]: JSON.parse(value) });
+      } catch (error) {
+        console.warn(`Invalid filter value for ${key}:`, value);
+      }
     }
   }
   return filters;
