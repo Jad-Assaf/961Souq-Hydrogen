@@ -38,14 +38,20 @@ export async function loader({ request, context }) {
 export default function SearchPage() {
   const { term, result } = useLoaderData();
 
-  // State to manage selected filters
+  // Ensure result contains valid products
+  const products = result?.items?.products || [];
+  if (!products.length) {
+    console.error("No products found for the search term:", term);
+    return <div>No products found for your search.</div>;
+  }
+
+  // State for filters
   const [filters, setFilters] = useState({
     productTypes: [],
     vendors: [],
   });
 
-  // Extract unique filter options
-  const products = result?.items?.products || [];
+  // Extract unique options for filters
   const uniqueProductTypes = [...new Set(products.map((p) => p.productType))];
   const uniqueVendors = [...new Set(products.map((p) => p.vendor))];
 
@@ -57,7 +63,7 @@ export default function SearchPage() {
     }));
   };
 
-  // Filter products based on selected options
+  // Apply filters to products
   const filteredProducts = products.filter((product) => {
     const matchesProductType =
       !filters.productTypes.length ||
@@ -73,7 +79,7 @@ export default function SearchPage() {
     <div className="search">
       <h1>Search Results</h1>
 
-      {/* Filter Section */}
+      {/* Filters */}
       <div className="filters">
         <Filter
           label="Product Types"
@@ -89,10 +95,8 @@ export default function SearchPage() {
         />
       </div>
 
-      {/* Display Search Results */}
-      {!term || !filteredProducts.length ? (
-        <SearchResults.Empty />
-      ) : (
+      {/* Search Results */}
+      {filteredProducts.length ? (
         <SearchResults result={{ ...result, products: filteredProducts }} term={term}>
           {({ products }) => (
             <div>
@@ -100,6 +104,8 @@ export default function SearchPage() {
             </div>
           )}
         </SearchResults>
+      ) : (
+        <div>No results match your filters.</div>
       )}
 
       {/* Analytics */}
@@ -245,10 +251,13 @@ async function regularSearch({ request, context }) {
   const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(url.searchParams.get('q') || '');
 
-  // Search articles, pages, and products for the `q` term
+  console.log("Search term:", term); // Debugging search term
+
   const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
     variables: { ...variables, term },
   });
+
+  console.log("Query result:", items); // Debugging query result
 
   if (!items) {
     throw new Error('No search data returned from Shopify API');
