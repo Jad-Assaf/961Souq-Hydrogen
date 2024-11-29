@@ -1,11 +1,9 @@
 import { json } from '@shopify/remix-oxygen';
 import { useLoaderData, useLocation, useNavigate, useSearchParams } from '@remix-run/react';
-import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
-import { SearchForm } from '~/components/SearchForm';
-import { SearchResults } from '~/components/SearchResults';
+import { Analytics } from '@shopify/hydrogen';
 import { FiltersDrawer } from '~/modules/drawer-filter'; // Import FiltersDrawer
-import { getAppliedFilterLink } from '~/lib/filter';
-import { useState } from 'react';
+import { SearchResults } from '~/components/SearchResults';
+import { useEffect, useState } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -22,7 +20,7 @@ export async function loader({ request, context }) {
   const term = url.searchParams.get('q') || '';
   const filters = [];
 
-  // Parse filters
+  // Parse filters from the URL
   for (const [key, value] of url.searchParams.entries()) {
     if (key.startsWith('filter_')) {
       try {
@@ -43,7 +41,7 @@ export async function loader({ request, context }) {
       throw new Error('Error fetching search results');
     }
 
-    if (!data.products || !data.products.nodes.length) {
+    if (!data.products || data.products.nodes.length === 0) {
       return json({ term, result: null, error: 'No products found' });
     }
 
@@ -75,8 +73,9 @@ export default function SearchPage() {
 
   // Handle filter removal
   const handleFilterRemove = (filter) => {
-    const newUrl = getAppliedFilterLink(filter, searchParams, location);
-    navigate(newUrl);
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.delete(`filter_${filter.id}`);
+    navigate(`${location.pathname}?${newParams.toString()}`);
   };
 
   if (error) {
@@ -92,7 +91,7 @@ export default function SearchPage() {
         <div className="w-[220px]">
           <FiltersDrawer
             filters={result?.filters || []} // Filters returned from loader
-            appliedFilters={[]} // Use appropriate applied filters logic if needed
+            appliedFilters={[]} // You can adjust logic to parse applied filters if necessary
             onRemoveFilter={handleFilterRemove}
           />
         </div>
@@ -126,17 +125,38 @@ export default function SearchPage() {
  */
 const SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment SearchProduct on Product {
+    __typename
+    handle
     id
+    publishedAt
     title
+    trackingParameters
     vendor
-    featuredImage {
-      url
-      altText
-    }
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
+    variants(first: 1) {
+      nodes {
+        id
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+        selectedOptions {
+          name
+          value
+        }
+        product {
+          handle
+          title
+        }
       }
     }
   }
@@ -213,6 +233,9 @@ const SEARCH_QUERY = `#graphql
     }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
+  ${SEARCH_PAGE_FRAGMENT}
+  ${SEARCH_ARTICLE_FRAGMENT}
+  ${PAGE_INFO_FRAGMENT}
 `;
 
 /**
