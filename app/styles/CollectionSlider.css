@@ -175,6 +175,10 @@
         max-height: 1000px;
         padding: 20px 0;
     }
+
+    .category-slider>.category-item {
+        width: 33%;
+    }
 }
 
 .hidden {
@@ -192,4 +196,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 350px;
+}
+
+.category-slider>.category-item {
+    width: 15%;
 }
