@@ -5,6 +5,7 @@ import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef, useState } from 'react';
+import '../styles/SearchPage.css'
 
 /**
  * @type {MetaFunction}
