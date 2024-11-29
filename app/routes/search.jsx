@@ -5,9 +5,8 @@ import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import React, { useRef, useState } from 'react';
-import { getFilterLink, getSortLink } from "~/utils/filterUtils";
 import { Filter } from "~/components/Filter";
-
+import { getFilterLink, getSortLink } from '~/lib/filter';
 
 /**
  * @type {MetaFunction}
