@@ -5,26 +5,11 @@ import { Image } from '@shopify/hydrogen-react';
 import "../styles/CollectionSlider.css";
 
 export const ExpandableMenu = ({ menuItems }) => {
-    if (!menuItems || menuItems.length === 0) {
-        return null;
-    }
-
     const [expandedCategory, setExpandedCategory] = useState(null);
-    const [collapsingCategory, setCollapsingCategory] = useState(null);
 
     const handleCategoryClick = (id) => {
-    if (expandedCategory === id) {
-        setCollapsingCategory(id);
-        setTimeout(() => {
-            setCollapsingCategory(null);
-            setExpandedCategory(null);
-        }, 1000); 
-    } else {
-        setExpandedCategory(id);
-        setCollapsingCategory(null); 
-    }
-};
-
+        setExpandedCategory((prev) => (prev === id ? null : id)); // Toggle expanded category
+    };
 
     return (
         <div className="slide-con">
@@ -35,8 +20,7 @@ export const ExpandableMenu = ({ menuItems }) => {
                         key={item.id}
                         item={item}
                         index={index}
-                        expandedCategory={expandedCategory}
-                        collapsingCategory={collapsingCategory}
+                        isExpanded={expandedCategory === item.id}
                         onCategoryClick={handleCategoryClick}
                     />
                 ))}
@@ -45,9 +29,7 @@ export const ExpandableMenu = ({ menuItems }) => {
     );
 };
 
-const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory, onCategoryClick }) => {
-    const isExpanded = expandedCategory === item.id;
-    const isCollapsing = collapsingCategory === item.id;
+const ExpandableMenuItem = ({ item, index, isExpanded, onCategoryClick }) => {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
@@ -59,19 +41,8 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
         }
     };
 
-    const handleTransitionEnd = () => {
-        if (isCollapsing) {
-            setCollapsingCategory(null);
-        }
-    };
-
     return (
-        <div
-            className={`category-item ${isExpanded ? 'expanded' : ''} 
-                        ${isCollapsing ? 'collapsing' : ''} 
-                        ${!isExpanded && expandedCategory && !isCollapsing ? 'hidden' : ''}`}
-            onTransitionEnd={handleTransitionEnd} 
-        >
+        <div className={`category-item ${isExpanded ? 'expanded' : ''}`}>
             <motion.div
                 ref={ref}
                 initial={{ opacity: 0, x: -30 }}
@@ -89,18 +60,15 @@ const ExpandableMenuItem = ({ item, index, expandedCategory, collapsingCategory,
                     </Link>
                 )}
             </motion.div>
-            {hasSubItems && (
-                <div
-                    className={`subcategory-list ${isExpanded ? 'expanded' : ''} ${isCollapsing ? 'collapsing' : ''}`}
-                >
+            {hasSubItems && isExpanded && (
+                <div className="subcategory-list">
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
-                            expandedCategory={null}
-                            collapsingCategory={null}
-                            onCategoryClick={() => { }}
+                            isExpanded={false} // Sub-items are not expandable
+                            onCategoryClick={() => { }} // No toggle for sub-items
                         />
                     ))}
                 </div>
