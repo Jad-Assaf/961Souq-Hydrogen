@@ -39,6 +39,7 @@
     align-items: center;
     padding-bottom: 20px;
     position: relative;
+    /* Necessary for subcategory positioning */
 }
 
 .category-image {
@@ -63,16 +64,14 @@
     flex-direction: row;
     justify-content: center;
     gap: 10px;
-    margin: 0 auto;
-    width: 0;
+    width: 350px;
+    /* Fixed width */
     max-height: 0;
     opacity: 0;
     overflow: hidden;
     position: relative;
-    /* Ensure it's relative to the parent container */
-    transform-origin: center top;
-    /* Animation origin is the top center */
-    transition: max-height 0.5s ease, opacity 0.5s ease, width 0.5s ease;
+    /* Positioned relative to the parent container */
+    transition: max-height 0.5s ease, opacity 0.5s ease;
     z-index: 10;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -82,25 +81,22 @@
 
 .subcategory-list.expanded {
     max-height: 500px;
-    width: 100%;
-    max-width: 350px;
     opacity: 1;
-    margin: 0 auto;
-    /* Center by default */
+    margin-top: 10px;
+    /* Space between the category and dropdown */
 }
 
-/* Dynamic alignment based on container position */
+/* Prevent subcategory list from going offscreen */
 .category-container:first-child .subcategory-list.expanded {
-    margin-left: 0;
+    left: 0;
     /* Align to the left for the first item */
 }
 
 .category-container:last-child .subcategory-list.expanded {
-    margin-right: 0;
+    right: 0;
     /* Align to the right for the last item */
 }
 
-/* Subcategory Items */
 .subcategory-list .category-item {
     width: 100px;
 }
@@ -128,13 +124,11 @@
 @keyframes expandSequence {
     0% {
         max-height: 0;
-        max-width: 0;
         opacity: 0;
     }
 
     100% {
         max-height: 500px;
-        max-width: 350px;
         opacity: 1;
     }
 }
@@ -142,13 +136,11 @@
 @keyframes collapseSequence {
     0% {
         max-height: 500px;
-        max-width: 350px;
         opacity: 1;
     }
 
     100% {
         max-height: 0;
-        max-width: 0;
         opacity: 0;
     }
 }
@@ -185,6 +177,7 @@
 
     .subcategory-list {
         width: 100%;
+        /* Allow full width on smaller screens */
         max-width: 100%;
         max-height: 0;
     }
