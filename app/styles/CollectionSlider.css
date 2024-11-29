@@ -38,6 +38,8 @@
     justify-content: center;
     align-items: center;
     padding-bottom: 20px;
+    position: relative;
+    /* Key for positioning subcategory-list */
 }
 
 .category-image {
@@ -56,60 +58,79 @@
     text-transform: uppercase !important;
 }
 
-@media screen and (max-width: 1024px) {
-    .category-slider {
-        flex-wrap: wrap;
-        border: 1px solid #ababab;
-        border-radius: 5px;
-        width: 95vw;
-        box-shadow: inset 0px 0px 20px 0px #ededed;
-        padding-bottom: 20px;
-        margin: auto;
-        justify-content: center;
-    }
-
-    .category-container {
-        flex: 1 0 10vw !important;
-        margin: 30px 0px 0px 5px;
-    }
-
-    .category-image {
-        border: none;
-        width: 200px;
-    }
-}
-
-/* Subcategory List - Default Hidden State */
+/* Subcategory List Styles */
 .subcategory-list {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
     justify-content: center;
-    margin: 20px auto;
+    gap: 10px;
+    /* Space between items */
+    margin: 10px auto 0;
+    /* Ensure it appears directly below parent */
     width: 100%;
-    /* Full width to match parent */
-    padding: 0;
+    max-width: 300px;
+    /* Subcategory max-width */
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: opacity 0.5s ease, max-height 0.5s ease;
+    position: absolute;
+    /* Positioned relative to the parent container */
+    top: 100%;
+    /* Positioned below the category-container */
+    left: 50%;
+    transform: translateX(-50%);
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+    z-index: 10;
+    /* Ensure visibility */
+    background-color: #fff;
+    /* Optional for better visibility */
+    border: 1px solid #ddd;
+    /* Optional for clarity */
+    border-radius: 5px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    /* Optional for clarity */
 }
 
-/* Expanded Subcategory */
 .subcategory-list.expanded {
-    opacity: 1;
     max-height: 500px;
-    /* Adjust based on content height */
-    transition: opacity 0.5s ease, max-height 0.5s ease;
-    animation: expandSequence 0.5s forwards;
+    /* Adjust height based on content */
+    opacity: 1;
 }
 
-/* Collapsing State */
-.subcategory-list.collapsing {
-    animation: collapseSequence 0.5s forwards;
+/* Subcategory Items */
+.subcategory-list .category-item {
+    width: 90px;
+    /* Ensure consistent item width */
+    margin: 5px 0;
+    /* Add spacing */
 }
 
-/* Keyframe Animations */
+.subcategory-list .category-container {
+    margin: 0;
+    flex: none;
+    /* Prevent flex adjustments */
+}
+
+.subcategory-list .category-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.subcategory-list .category-item .category-image {
+    width: 70px;
+    /* Smaller size for subcategories */
+}
+
+.subcategory-list .category-title {
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    color: #666;
+}
+
+/* Animation Keyframes for Expand and Collapse */
 @keyframes expandSequence {
     0% {
         max-height: 0;
@@ -118,7 +139,7 @@
 
     100% {
         max-height: 500px;
-        /* Adjust as needed */
+        /* Match expanded height */
         opacity: 1;
     }
 }
@@ -126,7 +147,6 @@
 @keyframes collapseSequence {
     0% {
         max-height: 500px;
-        /* Adjust as needed */
         opacity: 1;
     }
 
@@ -136,38 +156,25 @@
     }
 }
 
-/* Subcategory Items */
-.subcategory-list .category-item {
-    width: 100px;
-    margin-bottom: 10px;
-    /* Space between rows */
+.subcategory-list.expanded {
+    animation: expandSequence 0.5s forwards;
 }
 
-.subcategory-list .category-container {
-    margin: 0;
+.subcategory-list.collapsing {
+    animation: collapseSequence 0.5s forwards;
 }
 
-.subcategory-list .category-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.subcategory-list .category-item .category-image {
-    width: 80px;
-    /* Smaller size for subcategory images */
-}
-
-.subcategory-list .category-title {
-    font-weight: 500;
-    font-size: 12px;
-    color: #666;
-}
-
-/* Media Queries */
+/* Media Query for Mobile */
 @media screen and (max-width: 1024px) {
+    .subcategory-list {
+        width: 100%;
+        left: 0;
+        transform: none;
+        max-height: 0;
+    }
+
     .subcategory-list.expanded {
         max-height: 1000px;
-        /* Adjust for mobile */
+        padding: 10px 0;
     }
 }
