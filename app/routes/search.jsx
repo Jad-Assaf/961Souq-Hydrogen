@@ -5,7 +5,7 @@ import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { FiltersDrawer } from '~/modules/drawer-filter'; // Import FiltersDrawer
 import { getAppliedFilterLink } from '~/lib/filter';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -19,41 +19,43 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const term = url.searchParams.get('q') || ''; // Extract search term
-  const searchParams = new URLSearchParams(url.searchParams);
-
-  // Parse filters from URL
+  const term = url.searchParams.get('q') || '';
   const filters = [];
-  for (const [key, value] of searchParams.entries()) {
+
+  // Parse filters
+  for (const [key, value] of url.searchParams.entries()) {
     if (key.startsWith('filter_')) {
-      const filterKey = key.replace('filter_', ''); // Remove prefix
-      filters.push({ [filterKey]: JSON.parse(value) }); // Parse as JSON
+      try {
+        filters.push({ [key.replace('filter_', '')]: JSON.parse(value) });
+      } catch (err) {
+        console.warn(`Invalid filter value for key "${key}":`, err);
+      }
     }
   }
 
-  const variables = getPaginationVariables(request, { pageBy: 24 });
-
   try {
-    // Perform GraphQL query
     const { errors, data } = await context.storefront.query(SEARCH_QUERY, {
-      variables: { ...variables, term, filters },
+      variables: { term, filters },
     });
 
-    if (errors || !data.products) {
-      console.error(errors || 'No products found.');
-      return json({ term, result: null, error: 'No results found' });
+    if (errors) {
+      console.error('GraphQL Errors:', errors);
+      throw new Error('Error fetching search results');
     }
 
-    // Return products and filters
+    if (!data.products || !data.products.nodes.length) {
+      return json({ term, result: null, error: 'No products found' });
+    }
+
     return json({
       term,
       result: {
-        products: data.products,
-        filters: data.products.filters, // Pass filter options to UI
+        products: data.products.nodes,
+        filters: data.products.filters,
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error('Loader Error:', error);
     return json({ term, result: null, error: error.message });
   }
 }
@@ -62,7 +64,7 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { term, result } = useLoaderData();
+  const { term, result, error } = useLoaderData();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -77,6 +79,10 @@ export default function SearchPage() {
     navigate(newUrl);
   };
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div className="search-page">
       <h1>Search Results for "{term}"</h1>
@@ -86,14 +92,14 @@ export default function SearchPage() {
         <div className="w-[220px]">
           <FiltersDrawer
             filters={result?.filters || []} // Filters returned from loader
-            appliedFilters={result?.appliedFilters || []}
+            appliedFilters={[]} // Use appropriate applied filters logic if needed
             onRemoveFilter={handleFilterRemove}
           />
         </div>
 
         {/* Search Results */}
         <div className="flex-1">
-          {!term || !result?.products?.nodes?.length ? (
+          {!term || !result?.products?.length ? (
             <SearchResults.Empty />
           ) : (
             <SearchResults result={result.products} term={term}>
@@ -114,45 +120,23 @@ export default function SearchPage() {
     </div>
   );
 }
-
 /**
  * Regular search query and fragments
  * (adjust as needed)
  */
 const SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment SearchProduct on Product {
-    __typename
-    handle
     id
-    publishedAt
     title
-    trackingParameters
     vendor
-    variants(first: 1) {
-      nodes {
-        id
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-        selectedOptions {
-          name
-          value
-        }
-        product {
-          handle
-          title
-        }
+    featuredImage {
+      url
+      altText
+    }
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
       }
     }
   }
@@ -192,16 +176,10 @@ const SEARCH_QUERY = `#graphql
   query SearchWithFilters(
     $term: String!,
     $filters: [ProductFilter!],
-    $first: Int,
-    $endCursor: String,
-    $startCursor: String,
-    $last: Int
+    $first: Int = 20
   ) {
     products(
       first: $first,
-      last: $last,
-      after: $endCursor,
-      before: $startCursor,
       query: $term,
       filters: $filters
     ) {
@@ -235,9 +213,6 @@ const SEARCH_QUERY = `#graphql
     }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
-  ${SEARCH_PAGE_FRAGMENT}
-  ${SEARCH_ARTICLE_FRAGMENT}
-  ${PAGE_INFO_FRAGMENT}
 `;
 
 /**
