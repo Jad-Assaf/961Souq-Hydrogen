@@ -60,15 +60,17 @@ const ExpandableMenuItem = ({ item, index, isExpanded, onCategoryClick }) => {
                     </Link>
                 )}
             </motion.div>
-            {hasSubItems && isExpanded && (
-                <div className="subcategory-list">
+            {hasSubItems && (
+                <div
+                    className={`subcategory-list ${isExpanded ? 'expanded' : ''}`}
+                >
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
                             key={subItem.id}
                             item={subItem}
                             index={subIndex}
-                            isExpanded={false} // Sub-items are not expandable
-                            onCategoryClick={() => { }} // No toggle for sub-items
+                            isExpanded={false}
+                            onCategoryClick={() => { }}
                         />
                     ))}
                 </div>

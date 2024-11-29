@@ -1,10 +1,10 @@
-/* Main Container */
 .slide-con {
     width: 100vw;
     max-width: 1500px;
     display: flex;
     flex-direction: column;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 20px;
 }
 
@@ -17,27 +17,27 @@
 
 .category-slider {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    flex-direction: row !important;
     justify-content: flex-start;
-    gap: 20px;
-    /* Space between categories */
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    max-width: 1500px;
     margin-left: 20px;
 }
 
-.category-item {
-    display: flex;
-    flex-direction: column;
-    width: calc(20% - 20px);
-    /* Adjust width based on row */
-    margin-bottom: 20px;
-}
-
 .category-container {
+    flex: 0 0 5vw;
+    margin: 30px 20px 0px 20px;
+    scroll-snap-align: start;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding-bottom: 20px;
 }
 
 .category-image {
@@ -50,56 +50,124 @@
 
 .category-title {
     margin-top: 10px;
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 600 !important;
+    font-size: 14px !important;
     color: #404040;
-    text-transform: uppercase;
+    text-transform: uppercase !important;
 }
 
-/* Subcategory List */
+@media screen and (max-width: 1024px) {
+    .category-slider {
+        flex-wrap: wrap;
+        border: 1px solid #ababab;
+        border-radius: 5px;
+        width: 95vw;
+        box-shadow: inset 0px 0px 20px 0px #ededed;
+        padding-bottom: 20px;
+        margin: auto;
+        justify-content: center;
+    }
+
+    .category-container {
+        flex: 1 0 10vw !important;
+        margin: 30px 0px 0px 5px;
+    }
+
+    .category-image {
+        border: none;
+        width: 200px;
+    }
+}
+
+/* Subcategory List - Default Hidden State */
 .subcategory-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-    padding: 10px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    flex-direction: row;
+    justify-content: center;
+    margin: 20px auto;
+    width: 100%;
+    /* Full width to match parent */
+    padding: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity 0.5s ease, max-height 0.5s ease;
 }
 
+/* Expanded Subcategory */
+.subcategory-list.expanded {
+    opacity: 1;
+    max-height: 500px;
+    /* Adjust based on content height */
+    transition: opacity 0.5s ease, max-height 0.5s ease;
+    animation: expandSequence 0.5s forwards;
+}
+
+/* Collapsing State */
+.subcategory-list.collapsing {
+    animation: collapseSequence 0.5s forwards;
+}
+
+/* Keyframe Animations */
+@keyframes expandSequence {
+    0% {
+        max-height: 0;
+        opacity: 0;
+    }
+
+    100% {
+        max-height: 500px;
+        /* Adjust as needed */
+        opacity: 1;
+    }
+}
+
+@keyframes collapseSequence {
+    0% {
+        max-height: 500px;
+        /* Adjust as needed */
+        opacity: 1;
+    }
+
+    100% {
+        max-height: 0;
+        opacity: 0;
+    }
+}
+
+/* Subcategory Items */
 .subcategory-list .category-item {
-    width: 120px;
-    /* Smaller width for subcategories */
+    width: 100px;
+    margin-bottom: 10px;
+    /* Space between rows */
 }
 
 .subcategory-list .category-container {
     margin: 0;
 }
 
-.subcategory-list .category-image {
+.subcategory-list .category-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.subcategory-list .category-item .category-image {
     width: 80px;
-    /* Smaller image for subcategories */
+    /* Smaller size for subcategory images */
 }
 
 .subcategory-list .category-title {
-    font-size: 12px;
     font-weight: 500;
+    font-size: 12px;
     color: #666;
 }
 
-/* Responsive Adjustments */
+/* Media Queries */
 @media screen and (max-width: 1024px) {
-    .category-slider {
-        justify-content: center;
-    }
-
-    .category-item {
-        width: calc(50% - 20px);
-        /* Two items per row */
-    }
-
-    .subcategory-list .category-item {
-        width: 100px;
+    .subcategory-list.expanded {
+        max-height: 1000px;
+        /* Adjust for mobile */
     }
 }
