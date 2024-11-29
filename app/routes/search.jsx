@@ -4,7 +4,8 @@ import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Filter } from '~/components/Filter';
 
 /**
  * @type {MetaFunction}
@@ -35,38 +36,74 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
-  const formRef = useRef(null);
+  const { term, result } = useLoaderData();
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
+  // States to manage selected filters
+  const [filters, setFilters] = useState({
+    productTypes: [],
+    vendors: [],
+  });
 
-    const searchInput = formRef.current.querySelector('input[name="q"]');
-    if (searchInput) {
-      const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-      
-      // Redirect with modified query
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
-    }
+  // Extract unique options dynamically from the fetched products
+  const products = result?.items?.products || [];
+  const uniqueProductTypes = [...new Set(products.map((p) => p.productType))];
+  const uniqueVendors = [...new Set(products.map((p) => p.vendor))];
+
+  // Update filters when options are selected
+  const handleFilterChange = (filterKey, values) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterKey]: values,
+    }));
   };
+
+  // Apply filters to the products
+  const filteredProducts = products.filter((product) => {
+    const matchesProductType =
+      !filters.productTypes.length ||
+      filters.productTypes.includes(product.productType);
+
+    const matchesVendor =
+      !filters.vendors.length || filters.vendors.includes(product.vendor);
+
+    return matchesProductType && matchesVendor;
+  });
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-      {!term || !result?.total ? (
+
+      <div className="filters">
+        {/* Filter for Product Types */}
+        <Filter
+          label="Product Types"
+          options={uniqueProductTypes}
+          selectedOptions={filters.productTypes}
+          onChange={(values) => handleFilterChange("productTypes", values)}
+        />
+
+        {/* Filter for Vendors */}
+        <Filter
+          label="Vendors"
+          options={uniqueVendors}
+          selectedOptions={filters.vendors}
+          onChange={(values) => handleFilterChange("vendors", values)}
+        />
+      </div>
+
+      {/* Display Search Results */}
+      {!term || !filteredProducts.length ? (
         <SearchResults.Empty />
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
+        <SearchResults result={{ ...result, products: filteredProducts }} term={term}>
+          {({ products }) => (
             <div>
               <SearchResults.Products products={products} term={term} />
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
             </div>
           )}
         </SearchResults>
       )}
+
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
@@ -189,11 +226,27 @@ export const SEARCH_QUERY = `#graphql
     ) {
       nodes {
         ...on Product {
-          ...SearchProduct
+          id
+          title
+          handle
+          productType
+          vendor
+          tags
+          variants(first: 1) {
+            nodes {
+              price {
+                amount
+                currencyCode
+              }
+            }
+          }
         }
       }
       pageInfo {
-        ...PageInfoFragment
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
     }
   }
