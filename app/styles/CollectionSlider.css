@@ -181,7 +181,7 @@
     }
 
     .category-slider>.category-item {
-        width: 33%;
+        width: 33% !important;
     }
 }
 
