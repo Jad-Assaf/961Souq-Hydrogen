@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Link } from '@remix-run/react';
-import { Image } from '@shopify/hydrogen-react';
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useInView } from "framer-motion";
+import { Link } from "@remix-run/react";
+import { Image } from "@shopify/hydrogen-react";
 import "../styles/CollectionSlider.css";
 
 export const ExpandableMenu = ({ menuItems }) => {
@@ -48,35 +48,32 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
     const isInView = useInView(containerRef, { once: true });
     const hasSubItems = item.items && item.items.length > 0;
 
-    // Function to handle dynamic alignment of the dropdown
-    const handleSubcategoryPosition = () => {
-        if (!dropdownRef.current || !containerRef.current) return;
+    // Function to dynamically adjust styles for specific items on mobile
+    const handleMobileDropdownPosition = () => {
+        if (!dropdownRef.current || window.innerWidth > 768) return; // Only on mobile
 
         const dropdown = dropdownRef.current;
-        const container = containerRef.current;
-        const containerRect = container.getBoundingClientRect();
-        const screenWidth = window.innerWidth;
 
-        dropdown.style.left = "0"; // Reset any previous alignment
-        dropdown.style.transform = "translateX(0)";
+        // Reset styles
+        dropdown.style.left = "auto";
+        dropdown.style.transform = "none";
 
-        if (containerRect.left < 0) {
-            // If the dropdown is going off the left edge, align to the left of the screen
-            dropdown.style.left = `${-containerRect.left}px`;
-        } else if (containerRect.right > screenWidth) {
-            // If the dropdown is going off the right edge, align to the right of the screen
-            const overflow = containerRect.right - screenWidth;
-            dropdown.style.left = `-${overflow}px`;
+        // Adjust based on index
+        if ([0, 3, 6, 9].includes(index)) {
+            // First, 4th, 7th, 10th: Align to the right
+            dropdown.style.left = "100%";
+        } else if ([2, 5, 8].includes(index)) {
+            // 3rd, 6th, 9th: Align to the left
+            dropdown.style.left = "-100%";
         } else {
-            // Default: center below the container
-            dropdown.style.left = "50%";
-            dropdown.style.transform = "translateX(-50%)";
+            // Others: Default alignment
+            dropdown.style.left = "0";
         }
     };
 
     useEffect(() => {
         if (isExpanded) {
-            handleSubcategoryPosition();
+            handleMobileDropdownPosition();
         }
     }, [isExpanded]);
 
@@ -91,8 +88,8 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
         <div
             ref={containerRef}
             className={`category-item 
-                ${isExpanded ? 'expanded' : ''} 
-                ${isCollapsing ? 'collapsing' : ''}`}
+                ${isExpanded ? "expanded" : ""} 
+                ${isCollapsing ? "collapsing" : ""}`}
         >
             <motion.div
                 initial={{ opacity: 0, x: -30 }}
@@ -114,8 +111,8 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
                 <div
                     ref={dropdownRef}
                     className={`subcategory-list 
-                        ${isExpanded ? 'expanded' : ''} 
-                        ${isCollapsing ? 'collapsing' : ''}`}
+                        ${isExpanded ? "expanded" : ""} 
+                        ${isCollapsing ? "collapsing" : ""}`}
                 >
                     {item.items.map((subItem, subIndex) => (
                         <ExpandableMenuItem
@@ -139,8 +136,8 @@ const ExpandableMenuContent = ({ item, isInView }) => {
     return (
         <>
             <motion.div
-                initial={{ filter: 'blur(10px)', opacity: 0 }}
-                animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                initial={{ filter: "blur(10px)", opacity: 0 }}
+                animate={isInView ? { filter: "blur(0px)", opacity: 1 } : {}}
                 transition={{ duration: 0.5 }}
                 className="category-image-container"
             >
