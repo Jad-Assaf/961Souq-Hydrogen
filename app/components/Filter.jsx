@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export function Filter({ label, options, selectedOptions, onChange }) {
     const handleOptionChange = (option) => {

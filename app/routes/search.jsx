@@ -19,22 +19,17 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const url = new URL(request.url);
-  const term = String(url.searchParams.get('q') || 'default-term');
-  console.log("Loader search term:", term);
-
   const isPredictive = url.searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
     : regularSearch({ request, context });
 
-  try {
-    const searchResult = await searchPromise;
-    console.log("Search result:", searchResult);
-    return json(searchResult);
-  } catch (error) {
-    console.error("Search error:", error);
-    return json({ term: '', result: null, error: error.message });
-  }
+  searchPromise.catch((error) => {
+    console.error(error);
+    return { term: '', result: null, error: error.message };
+  });
+
+  return json(await searchPromise);
 }
 
 /**
@@ -43,20 +38,14 @@ export async function loader({ request, context }) {
 export default function SearchPage() {
   const { term, result } = useLoaderData();
 
-  // Check if result contains valid data
-  if (!result || !result.items || !result.items.products) {
-    console.error("Invalid result data:", result);
-    return <div>No results found.</div>;
-  }
-
-  // States for managing filters
+  // State to manage selected filters
   const [filters, setFilters] = useState({
     productTypes: [],
     vendors: [],
   });
 
-  // Extract products and unique filterable attributes
-  const products = result.items.products || [];
+  // Extract unique filter options
+  const products = result?.items?.products || [];
   const uniqueProductTypes = [...new Set(products.map((p) => p.productType))];
   const uniqueVendors = [...new Set(products.map((p) => p.vendor))];
 
@@ -68,7 +57,7 @@ export default function SearchPage() {
     }));
   };
 
-  // Apply filters
+  // Filter products based on selected options
   const filteredProducts = products.filter((product) => {
     const matchesProductType =
       !filters.productTypes.length ||
@@ -84,24 +73,26 @@ export default function SearchPage() {
     <div className="search">
       <h1>Search Results</h1>
 
-      {/* Filters Section */}
+      {/* Filter Section */}
       <div className="filters">
         <Filter
           label="Product Types"
           options={uniqueProductTypes}
           selectedOptions={filters.productTypes}
-          onChange={(values) => handleFilterChange("productTypes", values)}
+          onChange={(values) => handleFilterChange('productTypes', values)}
         />
         <Filter
           label="Vendors"
           options={uniqueVendors}
           selectedOptions={filters.vendors}
-          onChange={(values) => handleFilterChange("vendors", values)}
+          onChange={(values) => handleFilterChange('vendors', values)}
         />
       </div>
 
-      {/* Search Results Section */}
-      {filteredProducts.length > 0 ? (
+      {/* Display Search Results */}
+      {!term || !filteredProducts.length ? (
+        <SearchResults.Empty />
+      ) : (
         <SearchResults result={{ ...result, products: filteredProducts }} term={term}>
           {({ products }) => (
             <div>
@@ -109,8 +100,6 @@ export default function SearchPage() {
             </div>
           )}
         </SearchResults>
-      ) : (
-        <div>No results match your filters.</div>
       )}
 
       {/* Analytics */}
@@ -202,28 +191,6 @@ export const SEARCH_QUERY = `#graphql
     $term: String!
     $startCursor: String
   ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
     products: search(
       after: $endCursor,
       before: $startCursor,
@@ -235,19 +202,17 @@ export const SEARCH_QUERY = `#graphql
       unavailableProducts: HIDE,
     ) {
       nodes {
-        ...on Product {
-          id
-          title
-          handle
-          productType
-          vendor
-          tags
-          variants(first: 1) {
-            nodes {
-              price {
-                amount
-                currencyCode
-              }
+        id
+        title
+        handle
+        productType
+        vendor
+        tags
+        variants(first: 1) {
+          nodes {
+            price {
+              amount
+              currencyCode
             }
           }
         }
