@@ -4,7 +4,7 @@ import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrog
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -31,40 +31,40 @@ export async function loader({ request, context }) {
   }
 
   const term = searchParams.get('q') || '';
-  const after = searchParams.get('after') || null; // Cursor for pagination
-  const first = 10; // Number of items per page
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`.trim();
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  console.log('Filter Query:', filterQuery); // Debugging
 
-  const predictiveResults = await predictiveSearch({
-    request,
-    context,
-    term: filterQuery,
-    first,
-    after,
+  const isPredictive = searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context, filterQuery });
+
+  searchPromise.catch((error) => {
+    console.error('Search Error:', error);
+    return { term: '', result: null, error: error.message };
   });
 
-  return json({
-    term,
-    result: predictiveResults,
-  });
+  const result = await searchPromise;
+  console.log('Search Result:', result); // Debugging
+  return json(result);
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { term, result } = useLoaderData();
+  const { type, term, result, error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
-  const [predictiveResults, setPredictiveResults] = useState([]);
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      const modifiedQuery = query.split(' ').map((word) => word + '*').join(' ');
+      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
   };
 
@@ -78,41 +78,10 @@ export default function SearchPage() {
     navigate(`/search?${params.toString()}`);
   };
 
-  const handlePredictiveSearch = async (term) => {
-    if (!term) {
-      setPredictiveResults([]);
-      return;
-    }
-
-    try {
-      const response = await fetch(`/predictive-search?q=${encodeURIComponent(term)}`);
-      const data = await response.json();
-      setPredictiveResults(data.result.items.products || []);
-    } catch (error) {
-      console.error('Error fetching predictive results:', error);
-    }
-  };
-
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <SearchForm
-        ref={formRef}
-        onSubmit={handleFormSubmit}
-        onInput={(e) => handlePredictiveSearch(e.target.value)}
-      />
-
-      {/* Predictive Results */}
-      {predictiveResults.length > 0 && (
-        <div className="predictive-results">
-          <h2>Suggestions</h2>
-          {predictiveResults.map((product) => (
-            <div key={product.id}>
-              <Link to={`/products/${product.handle}`}>{product.title}</Link>
-            </div>
-          ))}
-        </div>
-      )}
+      <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
       {/* Filters */}
       <div className="filters">
@@ -134,12 +103,11 @@ export default function SearchPage() {
         </label>
       </div>
 
-      {/* Regular Results */}
       {result?.products?.edges?.length > 0 ? (
         <div className="search-results">
           {result.products.edges.map(({ node: product }) => (
             <div className="product-card" key={product.id}>
-              <Link to={`/products/${product.handle}`} className="product-link">
+              <a href={`/products/${product.handle}`} className="product-link">
                 {product.variants.nodes[0]?.image && (
                   <Image
                     data={product.variants.nodes[0].image}
@@ -153,33 +121,9 @@ export default function SearchPage() {
                     <Money data={product.variants.nodes[0].price} />
                   </p>
                 </div>
-              </Link>
+              </a>
             </div>
           ))}
-          <div className="pagination">
-            {result.products.pageInfo.hasPreviousPage && (
-              <button
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams);
-                  params.set('after', result.products.pageInfo.startCursor);
-                  navigate(`/search?${params.toString()}`);
-                }}
-              >
-                Previous
-              </button>
-            )}
-            {result.products.pageInfo.hasNextPage && (
-              <button
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams);
-                  params.set('after', result.products.pageInfo.endCursor);
-                  navigate(`/search?${params.toString()}`);
-                }}
-              >
-                Next
-              </button>
-            )}
-          </div>
         </div>
       ) : (
         <p>No results found</p>
@@ -484,52 +428,41 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
-    $term: String!,
-    $first: Int,
-    $after: String
-  ) {
-    products: search(
+    $country: CountryCode
+    $language: LanguageCode
+    $limit: Int!
+    $limitScope: PredictiveSearchLimitScope!
+    $term: String!
+    $types: [PredictiveSearchType!]
+  ) @inContext(country: $country, language: $language) {
+    predictiveSearch(
+      limit: $limit,
+      limitScope: $limitScope,
       query: $term,
-      types: [PRODUCT],
-      first: $first,
-      after: $after,
-      sortKey: RELEVANCE
+      types: $types,
     ) {
-      edges {
-        node {
-          id
-          title
-          handle
-          vendor
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          variants(first: 1) {
-            nodes {
-              id
-              image {
-                url
-                altText
-              }
-              price {
-                amount
-                currencyCode
-              }
-            }
-          }
-        }
+      articles {
+        ...PredictiveArticle
       }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        endCursor
-        startCursor
+      collections {
+        ...PredictiveCollection
+      }
+      pages {
+        ...PredictivePage
+      }
+      products {
+        ...PredictiveProduct
+      }
+      queries {
+        ...PredictiveQuery
       }
     }
   }
+  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
+  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
+  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
+  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
+  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
 
 /**
@@ -549,11 +482,12 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Predictively search articles, collections, pages, products, and queries
+  // Predictively search articles, collections, pages, products, and queries (suggestions)
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
+        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term,
@@ -578,7 +512,6 @@ async function predictiveSearch({ request, context }) {
 
   return { type, term, result: { items, total } };
 }
-
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @typedef {import('@shopify/remix-oxygen').ActionFunctionArgs} ActionFunctionArgs */
