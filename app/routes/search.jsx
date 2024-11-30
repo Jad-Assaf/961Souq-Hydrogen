@@ -21,8 +21,12 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  // Extract filters
+  const term = searchParams.get('q') || '';
+  const after = searchParams.get('after') || null; // Cursor for pagination
+  const first = 10; // Number of items per page
   const filterQueryParts = [];
+
+  // Build filter query dynamically
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '');
@@ -30,23 +34,24 @@ export async function loader({ request, context }) {
     }
   }
 
-  const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
-  console.log('Filter Query:', filterQuery); // Debugging
 
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery });
+  try {
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+      variables: { filterQuery, first, after },
+    });
 
-  searchPromise.catch((error) => {
-    console.error('Search Error:', error);
-    return { term: '', result: null, error: error.message };
-  });
-
-  const result = await searchPromise;
-  console.log('Search Result:', result); // Debugging
-  return json(result);
+    return json({
+      result: {
+        products,
+        total: products.edges.length,
+      },
+      term,
+    });
+  } catch (error) {
+    console.error('Error fetching filtered products:', error);
+    throw new Response('Failed to fetch products', { status: 500 });
+  }
 }
 
 /**
@@ -164,8 +169,8 @@ export default function SearchPage() {
 }
 
 const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts($filterQuery: String!) {
-    products(first: 10, query: $filterQuery) {
+  query FilteredProducts($filterQuery: String!, $first: Int, $after: String) {
+    products(first: $first, after: $after, query: $filterQuery) {
       edges {
         node {
           id
@@ -192,6 +197,12 @@ const FILTERED_PRODUCTS_QUERY = `
             }
           }
         }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
     }
   }
