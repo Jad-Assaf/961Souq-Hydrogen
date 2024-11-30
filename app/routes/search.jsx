@@ -106,7 +106,7 @@ export default function SearchPage() {
         <div className="search-results">
           {result.products.edges.map(({ node: product }) => (
             <div className="product-card" key={product.id}>
-              <Link to={`/products/${product.handle}`} className="product-link">
+              <a href={`/products/${product.handle}`} className="product-link">
                 {product.variants.nodes[0]?.image && (
                   <Image
                     data={product.variants.nodes[0].image}
@@ -120,15 +120,13 @@ export default function SearchPage() {
                     <Money data={product.variants.nodes[0].price} />
                   </p>
                 </div>
-              </Link>
+              </a>
             </div>
           ))}
         </div>
       ) : (
         <p>No results found</p>
       )}
-
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
@@ -162,12 +160,6 @@ const FILTERED_PRODUCTS_QUERY = `
             }
           }
         }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        endCursor
-        startCursor
       }
     }
   }
@@ -317,8 +309,7 @@ async function regularSearch({ request, context, filterQuery }) {
 
   try {
     const variables = {
-      term: filterQuery,
-      first: 10, // Adjust as needed
+      filterQuery,
     };
 
     console.log('Query Variables:', variables); // Debugging
