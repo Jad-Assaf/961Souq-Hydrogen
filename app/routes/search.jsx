@@ -54,28 +54,16 @@ export async function loader({ request, context }) {
  */
 export default function SearchPage() {
   const { products, term } = useLoaderData();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const formRef = useRef(null);
-  const [filterQuery, setFilterQuery] = useState("");
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      const modifiedQuery = query.split(' ').map((word) => word + '*').join(' ');
+      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
     }
-  };
-
-  const handleFilterChange = (filterKey, value) => {
-    const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set(`filter_${filterKey}`, value);
-    } else {
-      params.delete(`filter_${filterKey}`);
-    }
-    navigate(`/search?${params.toString()}`);
   };
 
   return (
@@ -83,29 +71,17 @@ export default function SearchPage() {
       <h1>Search Results</h1>
       <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
-      {/* Example Filter UI */}
-      <div>
-        <button onClick={() => handleFilterChange('vendor', 'apple')}>
-          Filter by Apple
-        </button>
-        <button onClick={() => handleFilterChange('price', '>20')}>
-          Price Greater than $20
-        </button>
-      </div>
-
-      {/* Results */}
-      {!products.length ? (
-        <p>No products found</p>
+      {/* Render SearchResults Component */}
+      {!term || products.length === 0 ? (
+        <SearchResults.Empty />
       ) : (
-        <div>
-          {products.map((product) => (
-            <div key={product.id}>
-              <h2>{product.title}</h2>
-              <p>Vendor: {product.vendor}</p>
-              <p>Price: ${product.priceRange.minVariantPrice.amount}</p>
+        <SearchResults result={{ products }} term={term}>
+          {({ products }) => (
+            <div>
+              <SearchResults.Products products={products} term={term} />
             </div>
-          ))}
-        </div>
+          )}
+        </SearchResults>
       )}
     </div>
   );
@@ -124,6 +100,14 @@ const FILTERED_PRODUCTS_QUERY = `
             minVariantPrice {
               amount
               currencyCode
+            }
+          }
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
             }
           }
         }
