@@ -67,22 +67,74 @@ export default function SearchPage() {
 
       <FilterUI /> {/* Add Filters Here */}
 
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
+      {!term || !products.edges.length ? (
+        <p>No results found</p>
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ products }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-            </div>
-          )}
-        </SearchResults>
+        <div className="search-result">
+          <Pagination connection={products}>
+            {({ nodes, isLoading, NextLink, PreviousLink }) => {
+              const ItemsMarkup = nodes.map((product) => {
+                const productUrl = `/products/${product.handle}`;
+
+                return (
+                  <div className="search-results-item product-card" key={product.id}>
+                    <Link
+                      prefetch="intent"
+                      to={productUrl}
+                      className="collection-product-link"
+                    >
+                      {product.variants.nodes[0]?.image && (
+                        <Image
+                          data={product.variants.nodes[0].image}
+                          alt={product.title}
+                          width={150}
+                        />
+                      )}
+                      <div className="search-result-txt">
+                        <p className="product-description">{product.title}</p>
+                        <small className="price-container">
+                          <Money data={product.variants.nodes[0].price} />
+                        </small>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              });
+
+              return (
+                <div>
+                  <div className="view-more">
+                    <PreviousLink
+                      to={(params) => {
+                        const newParams = new URLSearchParams(params);
+                        newParams.set('after', products.pageInfo.startCursor || '');
+                        return `/search?${newParams.toString()}`;
+                      }}
+                    >
+                      {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                    </PreviousLink>
+                  </div>
+                  <div className="search-result-container">{ItemsMarkup}</div>
+                  <div className="view-more">
+                    <NextLink
+                      to={(params) => {
+                        const newParams = new URLSearchParams(params);
+                        newParams.set('after', products.pageInfo.endCursor || '');
+                        return `/search?${newParams.toString()}`;
+                      }}
+                    >
+                      {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                    </NextLink>
+                  </div>
+                </div>
+              );
+            }}
+          </Pagination>
+        </div>
       )}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
-
 function FilterUI() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
