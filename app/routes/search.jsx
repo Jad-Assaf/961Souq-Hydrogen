@@ -1,10 +1,11 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useSearchParams, useNavigate, Link } from '@remix-run/react';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Image, Money, Pagination } from '@shopify/hydrogen';
 
 /**
  * @type {MetaFunction}
@@ -17,60 +18,191 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
+  const { storefront } = context;
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+  const searchParams = url.searchParams;
 
-  searchPromise.catch((error) => {
-    console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
+  const term = searchParams.get('q') || '';
+  const after = searchParams.get('after') || null; // Cursor for pagination
+  const first = 50; // Number of items per page
+  const filterQueryParts = [];
 
-  return json(await searchPromise);
+  // Build filter query dynamically
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith('filter_')) {
+      const filterKey = key.replace('filter_', '');
+      filterQueryParts.push(`${filterKey}:${value}`);
+    }
+  }
+
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`.trim();
+
+  try {
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+      variables: { filterQuery, first, after },
+    });
+
+    return json({
+      products,
+      term,
+      after, // Pass the current cursor
+    });
+  } catch (error) {
+    console.error('Error fetching filtered products:', error);
+    throw new Response('Failed to fetch products', { status: 500 });
+  }
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { products, term } = useLoaderData();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const formRef = useRef(null);
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
-
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map(word => word + '*').join(' ');
-      
-      // Redirect with modified query
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      const params = new URLSearchParams(searchParams);
+      params.set('q', query); // Update the query parameter
+      navigate(`/search?${params.toString()}`);
     }
+  };
+
+  const handleFilterChange = (filterKey, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(`filter_${filterKey}`, value);
+    } else {
+      params.delete(`filter_${filterKey}`);
+    }
+    navigate(`/search?${params.toString()}`);
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
+
+      {/* Example Filter UI */}
+      <div>
+        <button onClick={() => handleFilterChange('vendor', 'apple')}>
+          Filter by Apple
+        </button>
+        <button onClick={() => handleFilterChange('price', '>20')}>
+          Price Greater than $20
+        </button>
+      </div>
+
+      {/* Results */}
+      {!products.edges.length ? (
+        <p>No results found</p>
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              {/* <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} /> */}
-            </div>
-          )}
-        </SearchResults>
+        <div className="search-result">
+          <Pagination connection={products}>
+            {({ nodes, isLoading, NextLink, PreviousLink }) => {
+              const ItemsMarkup = nodes.map((product) => {
+                const productUrl = `/products/${product.handle}`;
+
+                return (
+                  <div className="search-results-item product-card" key={product.id}>
+                    <Link prefetch="intent" to={productUrl} className="collection-product-link">
+                      {product.variants.nodes[0]?.image && (
+                        <Image
+                          data={product.variants.nodes[0].image}
+                          alt={product.title}
+                          width={150}
+                        />
+                      )}
+                      <div className="search-result-txt">
+                        <p className="product-description">{product.title}</p>
+                        <small className="price-container">
+                          <Money data={product.variants.nodes[0].price} />
+                        </small>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              });
+
+              return (
+                <div>
+                  <div className="view-more">
+                    <PreviousLink
+                      to={(params) => {
+                        const newParams = new URLSearchParams(params);
+                        newParams.set('after', products.pageInfo.startCursor || '');
+                        return `/search?${newParams.toString()}`;
+                      }}
+                    >
+                      {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                    </PreviousLink>
+                  </div>
+                  <div className="search-result-container">{ItemsMarkup}</div>
+                  <div className="view-more">
+                    <NextLink
+                      to={(params) => {
+                        const newParams = new URLSearchParams(params);
+                        newParams.set('after', products.pageInfo.endCursor || '');
+                        return `/search?${newParams.toString()}`;
+                      }}
+                    >
+                      {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                    </NextLink>
+                  </div>
+                </div>
+              );
+            }}
+          </Pagination>
+        </div>
       )}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
+
+// Shopify GraphQL Query
+const FILTERED_PRODUCTS_QUERY = `#graphql
+  query FilteredProducts($filterQuery: String!, $first: Int, $after: String) {
+    products(first: $first, after: $after, query: $filterQuery) {
+      edges {
+        node {
+          id
+          title
+          vendor
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          variants(first: 1) {
+            nodes {
+              id
+              price {
+                amount
+                currencyCode
+              }
+              image {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
+      }
+    }
+  }
+`;
 
 /**
  * Regular search query and fragments
