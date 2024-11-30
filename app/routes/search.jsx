@@ -151,7 +151,7 @@ export default function SearchPage() {
 // Shopify GraphQL Query
 const FILTERED_PRODUCTS_QUERY = `
   query FilteredProducts($filterQuery: String!, $first: Int, $after: String) {
-    products(first: $first, after: $after, query: $filterQuery) {
+    products(first: 50, after: $after, query: $filterQuery) {
       edges {
         node {
           id
