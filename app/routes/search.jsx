@@ -22,7 +22,6 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  const variables = getPaginationVariables(request, { pageBy: 24 });
   const term = String(searchParams.get('q') || '');
   const sortKey = searchParams.get('sort') || 'RELEVANCE';
   const filters = [];
@@ -34,6 +33,8 @@ export async function loader({ request, context }) {
       filters.push({ [filterKey]: JSON.parse(value) });
     }
   }
+
+  const variables = getPaginationVariables(request, { pageBy: 24 });
 
   const { products } = await storefront.query(SEARCH_QUERY, {
     variables: {
@@ -190,7 +191,6 @@ export const SEARCH_QUERY = `#graphql
     $language: LanguageCode
     $last: Int
     $term: String!
-    $startCursor: String
     $filters: [ProductFilter!]
     $sortKey: ProductSearchSortKeys
     $reverse: Boolean
@@ -225,7 +225,6 @@ export const SEARCH_QUERY = `#graphql
   ${SEARCH_PRODUCT_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
 `;
-
 
 /**
  * Regular search fetcher
