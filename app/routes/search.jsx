@@ -23,7 +23,9 @@ export async function loader({ request, context }) {
   const searchParams = url.searchParams;
 
   const term = searchParams.get('q') || '';
+  const after = searchParams.get('after') || null; // Cursor for pagination
   const filterQueryParts = [];
+  const first = 10; // Number of items per page
 
   // Build filter query dynamically
   for (const [key, value] of searchParams.entries()) {
@@ -37,14 +39,11 @@ export async function loader({ request, context }) {
 
   try {
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-      variables: { filterQuery },
+      variables: { filterQuery, first, after },
     });
 
     return json({
-      result: {
-        products,
-        total: products.edges.length,
-      },
+      products,
       term,
     });
   } catch (error) {
@@ -57,7 +56,7 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { result, term } = useLoaderData();
+  const { products, term } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
@@ -100,11 +99,11 @@ export default function SearchPage() {
       </div>
 
       {/* Results */}
-      {!term || !result?.total ? (
+      {!products.edges.length ? (
         <p>No results found</p>
       ) : (
         <div className="search-result">
-          <Pagination connection={result.products}>
+          <Pagination connection={products}>
             {({ nodes, isLoading, NextLink, PreviousLink }) => {
               const ItemsMarkup = nodes.map((product) => {
                 const productUrl = `/products/${product.handle}`;
@@ -155,8 +154,8 @@ export default function SearchPage() {
 
 // Shopify GraphQL Query
 const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts($filterQuery: String!) {
-    products(first: 10, query: $filterQuery) {
+  query FilteredProducts($filterQuery: String!, $first: Int, $after: String) {
+    products(first: $first, after: $after, query: $filterQuery) {
       edges {
         node {
           id
@@ -183,6 +182,12 @@ const FILTERED_PRODUCTS_QUERY = `
             }
           }
         }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
       }
     }
   }
