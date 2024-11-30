@@ -128,13 +128,25 @@ export default function SearchPage() {
               return (
                 <div>
                   <div className="view-more">
-                    <PreviousLink>
+                    <PreviousLink
+                      to={(params) => {
+                        const newParams = new URLSearchParams(params);
+                        newParams.set('after', products.pageInfo.startCursor || '');
+                        return `/search?${newParams.toString()}`;
+                      }}
+                    >
                       {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
                     </PreviousLink>
                   </div>
                   <div className="search-result-container">{ItemsMarkup}</div>
                   <div className="view-more">
-                    <NextLink>
+                    <NextLink
+                      to={(params) => {
+                        const newParams = new URLSearchParams(params);
+                        newParams.set('after', products.pageInfo.endCursor || '');
+                        return `/search?${newParams.toString()}`;
+                      }}
+                    >
                       {isLoading ? 'Loading...' : <span>Load more ↓</span>}
                     </NextLink>
                   </div>
@@ -151,7 +163,7 @@ export default function SearchPage() {
 // Shopify GraphQL Query
 const FILTERED_PRODUCTS_QUERY = `
   query FilteredProducts($filterQuery: String!, $first: Int, $after: String) {
-    products(first: 50, after: $after, query: $filterQuery) {
+    products(first: $first, after: $after, query: $filterQuery) {
       edges {
         node {
           id
