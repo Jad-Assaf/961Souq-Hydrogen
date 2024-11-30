@@ -1,11 +1,10 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData, useSearchParams, useNavigate } from '@remix-run/react';
-import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
+import { useLoaderData, useSearchParams, useNavigate, Link } from '@remix-run/react';
+import { getPaginationVariables, Analytics, Money } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef } from 'react';
-
 /**
  * @type {MetaFunction}
  */
