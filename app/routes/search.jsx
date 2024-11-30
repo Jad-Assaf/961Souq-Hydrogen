@@ -46,9 +46,7 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const { result, term } = useLoaderData();
   const formRef = useRef(null);
 
   const handleFormSubmit = (event) => {
@@ -56,19 +54,8 @@ export default function SearchPage() {
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map((word) => word + '*').join(' ');
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      window.location.href = `/search?q=${encodeURIComponent(query)}`;
     }
-  };
-
-  const handleFilterChange = (filterKey, value) => {
-    const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set(`filter_${filterKey}`, value);
-    } else {
-      params.delete(`filter_${filterKey}`);
-    }
-    navigate(`/search?${params.toString()}`);
   };
 
   return (
@@ -76,41 +63,39 @@ export default function SearchPage() {
       <h1>Search Results</h1>
       <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
-      {/* Filters */}
-      <div className="filters">
-        <label>
-          Vendor:
-          <select onChange={(e) => handleFilterChange('vendor', e.target.value)}>
-            <option value="">All</option>
-            <option value="apple">Apple</option>
-            <option value="samsung">Samsung</option>
-          </select>
-        </label>
-        <label>
-          Price:
-          <select onChange={(e) => handleFilterChange('price', e.target.value)}>
-            <option value="">All</option>
-            <option value=">100">Over $100</option>
-            <option value="<100">Under $100</option>
-          </select>
-        </label>
-      </div>
-
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
+      {!term || !result?.products?.edges?.length ? (
+        <p>No results found</p>
       ) : (
-        <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
+        <div className="search-result">
+          {result.products.edges.map(({ node: product }) => (
+            <div className="search-results-item product-card" key={product.id}>
+              <Link
+                prefetch="intent"
+                to={`/products/${product.handle}`}
+                className="collection-product-link"
+              >
+                {product.variants.nodes[0]?.image && (
+                  <Image
+                    data={product.variants.nodes[0].image}
+                    alt={product.title}
+                    width={150}
+                  />
+                )}
+                <div className="search-result-txt">
+                  <p className="product-description">{product.title}</p>
+                  <small className="price-container">
+                    <Money data={product.variants.nodes[0].price} />
+                  </small>
+                </div>
+              </Link>
             </div>
-          )}
-        </SearchResults>
+          ))}
+        </div>
       )}
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
+
 
 const FILTERED_PRODUCTS_QUERY = `
   query FilteredProducts($filterQuery: String!) {
