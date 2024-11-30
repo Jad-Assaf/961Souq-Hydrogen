@@ -25,7 +25,7 @@ export async function loader({ request, context }) {
   const term = searchParams.get('q') || '';
   const after = searchParams.get('after') || null; // Cursor for pagination
   const filterQueryParts = [];
-  const first = 10; // Number of items per page
+  const first = 50; // Number of items per page
 
   // Build filter query dynamically
   for (const [key, value] of searchParams.entries()) {
@@ -83,10 +83,6 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <form ref={formRef} onSubmit={handleFormSubmit}>
-        <input name="q" placeholder="Search..." />
-        <button type="submit">Search</button>
-      </form>
 
       {/* Example Filter UI */}
       <div>
