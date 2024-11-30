@@ -47,7 +47,7 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { products, term } = useLoaderData();
   const formRef = useRef(null);
 
   const handleFormSubmit = (event) => {
