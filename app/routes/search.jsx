@@ -20,34 +20,39 @@ export const meta = () => {
 export async function loader({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 24 });
-  const term = String(url.searchParams.get('q') || '');
+  const searchParams = url.searchParams;
 
-  const { errors, products } = await storefront.query(SEARCH_QUERY, {
-    variables: { ...variables, term },
+  const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(searchParams.get('q') || '');
+  const sortKey = searchParams.get('sort') || 'RELEVANCE';
+  const filters = [];
+
+  // Extract filters from searchParams
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith('filter_')) {
+      const filterKey = key.replace('filter_', '');
+      filters.push({ [filterKey]: JSON.parse(value) });
+    }
+  }
+
+  const { products } = await storefront.query(SEARCH_QUERY, {
+    variables: {
+      ...variables,
+      term,
+      filters,
+      sortKey,
+    },
   });
 
   if (!products) {
     throw new Error('No search data returned from Shopify API');
   }
 
-  const filters = products?.filters || [];
-
-  const total = products.nodes.length;
-
-  const error = errors
-    ? errors.map(({ message }) => message).join(', ')
-    : undefined;
-
   return json({
-    type: 'regular',
+    filters: products.filters || [],
+    result: products.nodes,
     term,
-    error,
-    result: {
-      total,
-      items: products.nodes,
-      filters,
-    },
+    total: products.nodes.length,
   });
 }
 
@@ -55,19 +60,16 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
-  const { filters = [] } = result || {};
+  const { filters, result, term, total } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const formRef = useRef(null);
-  const [sortOption, setSortOption] = useState(searchParams.get('sort') || 'relevance');
 
   const handleFilterChange = (filterId, value) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
-      params.set(filterId, value);
+      params.set(`filter_${filterId}`, JSON.stringify(value));
     } else {
-      params.delete(filterId);
+      params.delete(`filter_${filterId}`);
     }
     navigate(`/search?${params.toString()}`);
   };
@@ -76,14 +78,14 @@ export default function SearchPage() {
     <div className="search-page-container">
       <h1 className="text-xl font-bold mb-4">Search Results</h1>
 
-      {/* Dynamic Filters */}
+      {/* Filters Section */}
       <div className="filters-container">
         {filters.map((filter) => (
           <div key={filter.id} className="filter">
             <label>{filter.label}</label>
             <select
               onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-              defaultValue={searchParams.get(filter.id) || ''}
+              defaultValue={searchParams.get(`filter_${filter.id}`) || ''}
             >
               <option value="">All</option>
               {filter.values.map((value) => (
@@ -96,8 +98,13 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {/* Rest of your UI */}
-      <SearchResults result={result} />
+      {/* Search Results Section */}
+      <SearchResults result={result} term={term} />
+
+      {/* Analytics */}
+      <Analytics.SearchView
+        data={{ searchTerm: term, searchResults: result }}
+      />
     </div>
   );
 }
@@ -184,43 +191,20 @@ export const SEARCH_QUERY = `#graphql
     $last: Int
     $term: String!
     $startCursor: String
+    $filters: [ProductFilter!]
+    $sortKey: ProductSearchSortKeys
+    $reverse: Boolean
   ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
     products: search(
-      after: $endCursor,
-      before: $startCursor,
-      first: $first,
-      last: $last,
       query: $term,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
+      filters: $filters,
+      sortKey: $sortKey,
+      reverse: $reverse,
+      first: $first,
+      after: $endCursor
     ) {
       nodes {
-        ...on Product {
-          ...SearchProduct
-        }
+        ...SearchProduct
       }
       filters {
         id
@@ -239,10 +223,9 @@ export const SEARCH_QUERY = `#graphql
     }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
-  ${SEARCH_PAGE_FRAGMENT}
-  ${SEARCH_ARTICLE_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
 `;
+
 
 /**
  * Regular search fetcher
