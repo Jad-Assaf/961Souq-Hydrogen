@@ -102,6 +102,7 @@ export default function SearchPage() {
         ))}
       </div>
 
+
       {/* Products */}
       <div>
         {products.length === 0 ? (
@@ -434,27 +435,37 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
     $limitScope: PredictiveSearchLimitScope!
     $term: String!
     $types: [PredictiveSearchType!]
+    $filters: [ProductFilter!]
   ) @inContext(country: $country, language: $language) {
     predictiveSearch(
       limit: $limit,
       limitScope: $limitScope,
       query: $term,
       types: $types,
+      filters: $filters
     ) {
-      articles {
-        ...PredictiveArticle
-      }
-      collections {
-        ...PredictiveCollection
-      }
-      pages {
-        ...PredictivePage
-      }
       products {
-        ...PredictiveProduct
+        id
+        title
+        vendor
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+        images(first: 1) {
+          edges {
+            node {
+              url
+              altText
+            }
+          }
+        }
       }
       queries {
-        ...PredictiveQuery
+        text
+        styledText
       }
     }
   }
@@ -478,39 +489,41 @@ async function predictiveSearch({ request, context }) {
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
   const limit = Number(url.searchParams.get('limit') || 10);
-  const type = 'predictive';
+  const filters = [];
 
-  if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
+  // Collect filters from query parameters
+  for (const [key, value] of url.searchParams.entries()) {
+    if (key.startsWith('filter_')) {
+      const filterKey = key.replace('filter_', '');
+      try {
+        filters.push({ [filterKey]: JSON.parse(value) });
+      } catch (e) {
+        console.warn(`Invalid filter for key: ${filterKey}, value: ${value}`);
+      }
+    }
+  }
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
-  const { predictiveSearch: items, errors } = await storefront.query(
-    PREDICTIVE_SEARCH_QUERY,
-    {
+  if (!term) return { type: 'predictive', term, result: getEmptyPredictiveSearchResult() };
+
+  try {
+    const { predictiveSearch } = await storefront.query(PREDICTIVE_SEARCH_QUERY, {
       variables: {
-        // customize search options as needed
+        term,
         limit,
         limitScope: 'EACH',
-        term,
+        filters: filters.length > 0 ? filters : undefined,
       },
-    },
-  );
+    });
 
-  if (errors) {
-    throw new Error(
-      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
-    );
+    return {
+      type: 'predictive',
+      term,
+      result: predictiveSearch,
+    };
+  } catch (error) {
+    console.error('Error in predictive search:', error);
+    throw new Response('Failed to fetch predictive search results', { status: 500 });
   }
-
-  if (!items) {
-    throw new Error('No predictive search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, item) => acc + item.length,
-    0,
-  );
-
-  return { type, term, result: { items, total } };
 }
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
