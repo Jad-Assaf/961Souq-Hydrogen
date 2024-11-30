@@ -40,9 +40,11 @@ export async function loader({ request, context }) {
     });
 
     return json({
-      products: {
-        ...products,
-        nodes: products.edges.map((edge) => edge.node),
+      result: {
+        products: {
+          nodes: products.edges.map((edge) => edge.node),
+        },
+        total: products.edges.length,
       },
       term,
     });
@@ -56,7 +58,9 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { products, term } = useLoaderData();
+  const { result, term } = useLoaderData();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const formRef = useRef(null);
 
   const handleFormSubmit = (event) => {
@@ -64,9 +68,18 @@ export default function SearchPage() {
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map((word) => word + '*').join(' ');
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
+  };
+
+  const handleFilterChange = (filterKey, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(`filter_${filterKey}`, value);
+    } else {
+      params.delete(`filter_${filterKey}`);
+    }
+    navigate(`/search?${params.toString()}`);
   };
 
   return (
@@ -74,17 +87,29 @@ export default function SearchPage() {
       <h1>Search Results</h1>
       <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
-      {!term || !products?.nodes.length ? (
+      {/* Example Filter UI */}
+      <div>
+        <button onClick={() => handleFilterChange('vendor', 'apple')}>
+          Filter by Apple
+        </button>
+        <button onClick={() => handleFilterChange('price', '>20')}>
+          Price Greater than $20
+        </button>
+      </div>
+
+      {/* Results */}
+      {!term || !result?.total ? (
         <SearchResults.Empty />
       ) : (
-        <SearchResults result={{ products }} term={term}>
-          {({ products }) => (
+        <SearchResults result={result} term={term}>
+          {({ products, term }) => (
             <div>
               <SearchResults.Products products={products} term={term} />
             </div>
           )}
         </SearchResults>
       )}
+      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
 }
@@ -102,14 +127,6 @@ const FILTERED_PRODUCTS_QUERY = `
             minVariantPrice {
               amount
               currencyCode
-            }
-          }
-          images(first: 1) {
-            edges {
-              node {
-                url
-                altText
-              }
             }
           }
         }
