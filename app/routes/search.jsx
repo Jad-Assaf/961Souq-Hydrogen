@@ -24,8 +24,8 @@ export async function loader({ request, context }) {
 
   const term = searchParams.get('q') || '';
   const after = searchParams.get('after') || null; // Cursor for pagination
-  const filterQueryParts = [];
   const first = 50; // Number of items per page
+  const filterQueryParts = [];
 
   // Build filter query dynamically
   for (const [key, value] of searchParams.entries()) {
@@ -35,7 +35,7 @@ export async function loader({ request, context }) {
     }
   }
 
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`.trim();
 
   try {
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
@@ -45,6 +45,7 @@ export async function loader({ request, context }) {
     return json({
       products,
       term,
+      after, // Pass the current cursor
     });
   } catch (error) {
     console.error('Error fetching filtered products:', error);
@@ -66,7 +67,9 @@ export default function SearchPage() {
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams(searchParams);
+      params.set('q', query); // Update the query parameter
+      navigate(`/search?${params.toString()}`);
     }
   };
 
