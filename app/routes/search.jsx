@@ -101,73 +101,56 @@ export default function SearchPage() {
 
       {/* Results */}
       {!term || !result?.total ? (
-        <SearchResultsEmpty />
+        <p>No results found</p>
       ) : (
-        <SearchResultsProducts term={term} products={result.products} />
+        <div className="search-result">
+          <Pagination connection={result.products}>
+            {({ nodes, isLoading, NextLink, PreviousLink }) => {
+              const ItemsMarkup = nodes.map((product) => {
+                const productUrl = `/products/${product.handle}`;
+
+                return (
+                  <div className="search-results-item product-card" key={product.id}>
+                    <Link prefetch="intent" to={productUrl} className="collection-product-link">
+                      {product.variants.nodes[0]?.image && (
+                        <Image
+                          data={product.variants.nodes[0].image}
+                          alt={product.title}
+                          width={150}
+                        />
+                      )}
+                      <div className="search-result-txt">
+                        <p className="product-description">{product.title}</p>
+                        <small className="price-container">
+                          <Money data={product.variants.nodes[0].price} />
+                        </small>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              });
+
+              return (
+                <div>
+                  <div className="view-more">
+                    <PreviousLink>
+                      {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                    </PreviousLink>
+                  </div>
+                  <div className="search-result-container">{ItemsMarkup}</div>
+                  <div className="view-more">
+                    <NextLink>
+                      {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                    </NextLink>
+                  </div>
+                </div>
+              );
+            }}
+          </Pagination>
+        </div>
       )}
     </div>
   );
-}
-
-/**
- * Search Results Products Component
- */
-function SearchResultsProducts({ term, products }) {
-  if (!products?.edges.length) {
-    return null;
-  }
-
-  return (
-    <div className="search-result">
-      <Pagination connection={products}>
-        {({ nodes, isLoading, NextLink, PreviousLink }) => {
-          const ItemsMarkup = nodes.map((product) => {
-            const productUrl = `/products/${product.handle}`;
-
-            return (
-              <div className="search-results-item product-card" key={product.id}>
-                <Link prefetch="intent" to={productUrl} className="collection-product-link">
-                  {product.variants.nodes[0].image && (
-                    <Image
-                      data={product.variants.nodes[0].image}
-                      alt={product.title}
-                      width={150}
-                    />
-                  )}
-                  <div className="search-result-txt">
-                    <p className="product-description">{product.title}</p>
-                    <small className="price-container">
-                      <Money data={product.variants.nodes[0].price} />
-                    </small>
-                  </div>
-                </Link>
-              </div>
-            );
-          });
-
-          return (
-            <div>
-              <div className="view-more">
-                <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-                </PreviousLink>
-              </div>
-              <div className="search-result-container">{ItemsMarkup}</div>
-              <div className="view-more">
-                <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-                </NextLink>
-              </div>
-            </div>
-          );
-        }}
-      </Pagination>
-    </div>
-  );
-}
-
-function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
 }
 
 // Shopify GraphQL Query
