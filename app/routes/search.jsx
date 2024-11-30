@@ -17,6 +17,7 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
+  const { storefront } = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
@@ -29,17 +30,23 @@ export async function loader({ request, context }) {
     }
   }
 
+  const term = searchParams.get('q') || '';
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  console.log('Filter Query:', filterQuery); // Debugging
+
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQueryParts });
+    : regularSearch({ request, context, filterQuery });
 
   searchPromise.catch((error) => {
-    console.error(error);
+    console.error('Search Error:', error);
     return { term: '', result: null, error: error.message };
   });
 
-  return json(await searchPromise);
+  const result = await searchPromise;
+  console.log('Search Result:', result); // Debugging
+  return json(result);
 }
 
 /**
@@ -96,7 +103,7 @@ export default function SearchPage() {
         </label>
       </div>
 
-      {!term || !result?.total ? (
+      {!term || !result?.products?.edges?.length ? (
         <p>No results found</p>
       ) : (
         <div className="search-results">
@@ -305,28 +312,36 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filterQueryParts }) {
+async function regularSearch({ request, context, filterQuery }) {
   const { storefront } = context;
-  const url = new URL(request.url);
-  const term = url.searchParams.get('q') || '';
-
-  // Build filter query dynamically
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
   try {
-    const variables = getPaginationVariables(request, { pageBy: 24, term: filterQuery });
-    const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+    const variables = {
+      term: filterQuery,
+      first: 10, // Adjust as needed
+    };
+
+    console.log('Query Variables:', variables); // Debugging
+
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
-    if (!items) {
-      throw new Error('No search data returned from Shopify API');
+    if (!products?.edges?.length) {
+      console.error('No products found in response:', products); // Debugging
+      return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
     }
 
-    return { term, result: { ...items } };
+    return {
+      term: filterQuery,
+      result: {
+        products,
+        total: products.edges.length,
+      },
+    };
   } catch (error) {
     console.error('Error during regular search:', error);
-    return { term, result: null, error: error.message };
+    return { term: filterQuery, result: null, error: error.message };
   }
 }
 
