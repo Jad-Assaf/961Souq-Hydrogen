@@ -103,9 +103,7 @@ export default function SearchPage() {
         </label>
       </div>
 
-      {!term || !result?.products?.edges?.length ? (
-        <p>No results found</p>
-      ) : (
+      {result?.products?.edges?.length > 0 ? (
         <div className="search-results">
           {result.products.edges.map(({ node: product }) => (
             <div className="product-card" key={product.id}>
@@ -127,7 +125,10 @@ export default function SearchPage() {
             </div>
           ))}
         </div>
+      ) : (
+        <p>No results found</p>
       )}
+
       <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
     </div>
   );
