@@ -18,18 +18,37 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
+  const { storefront } = context;
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context });
+  const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(url.searchParams.get('q') || '');
 
-  searchPromise.catch((error) => {
-    console.error(error);
-    return { term: '', result: null, error: error.message };
+  const { errors, products } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term },
   });
 
-  return json(await searchPromise);
+  if (!products) {
+    throw new Error('No search data returned from Shopify API');
+  }
+
+  const filters = products.filters || [];
+
+  const total = products.nodes.length;
+
+  const error = errors
+    ? errors.map(({ message }) => message).join(', ')
+    : undefined;
+
+  return json({
+    type: 'regular',
+    term,
+    error,
+    result: {
+      total,
+      items: products.nodes,
+      filters,
+    },
+  });
 }
 
 /**
@@ -37,35 +56,19 @@ export async function loader({ request, context }) {
  */
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
+  const { filters } = result || {};
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
   const [sortOption, setSortOption] = useState(searchParams.get('sort') || 'relevance');
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-    const searchInput = formRef.current.querySelector('input[name="q"]');
-    if (searchInput) {
-      const query = searchInput.value;
-      window.location.href = `/search?q=${encodeURIComponent(query)}`;
-    }
-  };
-
-  const handleFilterChange = (filterKey, value) => {
+  const handleFilterChange = (filterId, value) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
-      params.set(filterKey, value);
+      params.set(filterId, value);
     } else {
-      params.delete(filterKey);
+      params.delete(filterId);
     }
-    navigate(`/search?${params.toString()}`);
-  };
-
-  const handleSortChange = (event) => {
-    const newSortOption = event.target.value;
-    setSortOption(newSortOption);
-    const params = new URLSearchParams(searchParams);
-    params.set('sort', newSortOption);
     navigate(`/search?${params.toString()}`);
   };
 
@@ -73,66 +76,28 @@ export default function SearchPage() {
     <div className="search-page-container">
       <h1 className="text-xl font-bold mb-4">Search Results</h1>
 
-      {/* Search Form */}
-      <div className="search-form-container">
-        <SearchForm
-          ref={formRef}
-          onSubmit={handleFormSubmit}
-          placeholder="Search for products, articles, or pages..."
-        />
-      </div>
-
-      {/* Filter and Sort */}
-      <div className="filter-sort-container flex justify-between items-center mt-6">
-        {/* Filters */}
-        <div className="filters">
-          <label>
-            Category:
+      {/* Dynamic Filters */}
+      <div className="filters-container">
+        {filters.map((filter) => (
+          <div key={filter.id} className="filter">
+            <label>{filter.label}</label>
             <select
-              onChange={(e) => handleFilterChange('category', e.target.value)}
-              defaultValue={searchParams.get('category') || ''}
+              onChange={(e) => handleFilterChange(filter.id, e.target.value)}
+              defaultValue={searchParams.get(filter.id) || ''}
             >
               <option value="">All</option>
-              <option value="electronics">Electronics</option>
-              <option value="apparel">Apparel</option>
-              <option value="home-goods">Home Goods</option>
+              {filter.values.map((value) => (
+                <option key={value.id} value={value.input}>
+                  {value.label} ({value.count})
+                </option>
+              ))}
             </select>
-          </label>
-        </div>
-
-        {/* Sort Options */}
-        <div className="sort">
-          <label>
-            Sort by:
-            <select value={sortOption} onChange={handleSortChange}>
-              <option value="relevance">Relevance</option>
-              <option value="price-low-high">Price: Low to High</option>
-              <option value="price-high-low">Price: High to Low</option>
-              <option value="newest">Newest</option>
-            </select>
-          </label>
-        </div>
+          </div>
+        ))}
       </div>
 
-      {/* Search Results */}
-      <div className="search-results-container mt-8">
-        {!term || !result?.total ? (
-          <SearchResults.Empty message="No results found for your search." />
-        ) : (
-          <SearchResults result={result} term={term}>
-            {({ products }) => (
-              <div className="products-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <SearchResults.Products products={products} term={term} />
-              </div>
-            )}
-          </SearchResults>
-        )}
-      </div>
-
-      {/* Analytics */}
-      <Analytics.SearchView
-        data={{ searchTerm: term, searchResults: result }}
-      />
+      {/* Rest of your UI */}
+      <SearchResults result={result} />
     </div>
   );
 }
@@ -255,6 +220,17 @@ export const SEARCH_QUERY = `#graphql
       nodes {
         ...on Product {
           ...SearchProduct
+        }
+      }
+      filters {
+        id
+        label
+        type
+        values {
+          id
+          label
+          count
+          input
         }
       }
       pageInfo {
