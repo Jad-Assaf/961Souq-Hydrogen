@@ -165,9 +165,9 @@ export default function SearchPage() {
   );
 }
 
-const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts($filterQuery: String!) {
-    products(first: *, query: $filterQuery) {
+const FILTERED_PRODUCTS_QUERY = `#graphql
+  query FilteredProducts($filterQuery: String!, $cursor: String) {
+    products(first: 250, query: $filterQuery, after: $cursor) {
       edges {
         node {
           id
@@ -194,6 +194,10 @@ const FILTERED_PRODUCTS_QUERY = `
             }
           }
         }
+        cursor
+      }
+      pageInfo {
+         hasNextPage
       }
     }
   }
