@@ -65,14 +65,12 @@ export default function SearchPage() {
       <h1>Search Results</h1>
       <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
-      <FilterUI /> {/* Add Filters Here */}
-
-      {!term || !products.edges.length ? (
+      {!term || !products?.edges?.length ? (
         <p>No results found</p>
       ) : (
         <div className="search-result">
           <Pagination connection={products}>
-            {({ nodes, isLoading, NextLink, PreviousLink }) => {
+            {({ nodes = [], isLoading, NextLink, PreviousLink }) => {
               const ItemsMarkup = nodes.map((product) => {
                 const productUrl = `/products/${product.handle}`;
 
@@ -107,7 +105,7 @@ export default function SearchPage() {
                     <PreviousLink
                       to={(params) => {
                         const newParams = new URLSearchParams(params);
-                        newParams.set('after', products.pageInfo.startCursor || '');
+                        newParams.set('after', products.pageInfo?.startCursor || '');
                         return `/search?${newParams.toString()}`;
                       }}
                     >
@@ -119,7 +117,7 @@ export default function SearchPage() {
                     <NextLink
                       to={(params) => {
                         const newParams = new URLSearchParams(params);
-                        newParams.set('after', products.pageInfo.endCursor || '');
+                        newParams.set('after', products.pageInfo?.endCursor || '');
                         return `/search?${newParams.toString()}`;
                       }}
                     >
@@ -135,6 +133,7 @@ export default function SearchPage() {
     </div>
   );
 }
+
 function FilterUI() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -328,6 +327,11 @@ async function regularSearch({ request, context, filters }) {
     };
 
     const { products } = await storefront.query(SEARCH_QUERY, { variables });
+
+    // Ensure `products.edges` and `products.pageInfo` exist
+    if (!products || !products.edges || !products.pageInfo) {
+      throw new Error('Invalid products data structure');
+    }
 
     return {
       term,
