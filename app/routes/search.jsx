@@ -31,7 +31,7 @@ export async function loader({ request, context }) {
     throw new Error('No search data returned from Shopify API');
   }
 
-  const filters = products.filters || [];
+  const filters = products?.filters || [];
 
   const total = products.nodes.length;
 
@@ -56,7 +56,7 @@ export async function loader({ request, context }) {
  */
 export default function SearchPage() {
   const { type, term, result, error } = useLoaderData();
-  const { filters } = result || {};
+  const { filters = [] } = result || {};
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
