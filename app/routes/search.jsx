@@ -1,6 +1,6 @@
 import { json } from '@shopify/remix-oxygen';
 import { useLoaderData, useSearchParams, useNavigate, Link } from '@remix-run/react';
-import { getPaginationVariables, Analytics, Money, Image, Pagination } from '@shopify/hydrogen';
+import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
@@ -21,10 +21,7 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  const term = searchParams.get('q') || '';
-  const after = searchParams.get('after') || null; // Cursor for pagination
-  const first = 10; // Items per page
-
+  // Extract filters
   const filterQueryParts = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
@@ -33,21 +30,23 @@ export async function loader({ request, context }) {
     }
   }
 
+  const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  console.log('Filter Query:', filterQuery); // Debugging
 
-  try {
-    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-      variables: { filterQuery, first, after },
-    });
+  const isPredictive = searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context, filterQuery });
 
-    return json({
-      products,
-      pageInfo: products.pageInfo,
-    });
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    throw new Response('Failed to fetch products', { status: 500 });
-  }
+  searchPromise.catch((error) => {
+    console.error('Search Error:', error);
+    return { term: '', result: null, error: error.message };
+  });
+
+  const result = await searchPromise;
+  console.log('Search Result:', result); // Debugging
+  return json(result);
 }
 
 /**
@@ -105,48 +104,26 @@ export default function SearchPage() {
       </div>
 
       {result?.products?.edges?.length > 0 ? (
-        <div className="search-result">
-          <div>
-            <Pagination connection={result.products}>
-              {({ nodes, isLoading, NextLink, PreviousLink }) => {
-                const ItemsMarkup = nodes.map((product) => (
-                  <div className="product-card" key={product.id}>
-                    <Link to={`/products/${product.handle}`}>
-                      {product.variants.nodes[0]?.image && (
-                        <Image
-                          data={product.variants.nodes[0].image}
-                          alt={product.title}
-                          width={150}
-                        />
-                      )}
-                      <div>
-                        <p>{product.title}</p>
-                        <Money data={product.variants.nodes[0].price} />
-                      </div>
-                    </Link>
-                  </div>
-                ));
-
-                return (
-                  <div>
-                    <div>{ItemsMarkup}</div>
-                    {result.pageInfo.hasNextPage && (
-                      <NextLink
-                        to={(params) => {
-                          params.set('after', result.pageInfo.endCursor);
-                          return `/search?${params.toString()}`;
-                        }}
-                      >
-                        {isLoading ? 'Loading...' : 'Load more ↓'}
-                      </NextLink>
-                    )}
-                  </div>
-                );
-              }}
-            </Pagination>
-
-          </div>
-          <br />
+        <div className="search-results">
+          {result.products.edges.map(({ node: product }) => (
+            <div className="product-card" key={product.id}>
+              <a href={`/products/${product.handle}`} className="product-link">
+                {product.variants.nodes[0]?.image && (
+                  <Image
+                    data={product.variants.nodes[0].image}
+                    alt={product.title}
+                    width={150}
+                  />
+                )}
+                <div className="product-details">
+                  <h2 className="product-title">{product.title}</h2>
+                  <p className="product-price">
+                    <Money data={product.variants.nodes[0].price} />
+                  </p>
+                </div>
+              </a>
+            </div>
+          ))}
         </div>
       ) : (
         <p>No results found</p>
@@ -155,9 +132,9 @@ export default function SearchPage() {
   );
 }
 
-const FILTERED_PRODUCTS_QUERY = `#graphql
-  query FilteredProducts($filterQuery: String!, $first: Int, $after: String) {
-    products(first: $first, after: $after, query: $filterQuery) {
+const FILTERED_PRODUCTS_QUERY = `
+  query FilteredProducts($filterQuery: String!) {
+    products(first: 10, query: $filterQuery) {
       edges {
         node {
           id
@@ -184,12 +161,6 @@ const FILTERED_PRODUCTS_QUERY = `#graphql
             }
           }
         }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
       }
     }
   }
