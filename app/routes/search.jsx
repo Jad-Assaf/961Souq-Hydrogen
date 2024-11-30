@@ -65,7 +65,7 @@ export default function SearchPage() {
       <h1>Search Results</h1>
       <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
-      {!term || !products?.edges?.length ? (
+      {!term || !products.edges.length ? (
         <p>No results found</p>
       ) : (
         <div className="search-result">
