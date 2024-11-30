@@ -165,9 +165,9 @@ export default function SearchPage() {
   );
 }
 
-const FILTERED_PRODUCTS_QUERY = `#graphql
-  query FilteredProducts($filterQuery: String!, $cursor: String) {
-    products(first: 250, query: $filterQuery, after: $cursor) {
+const FILTERED_PRODUCTS_QUERY = `
+  query FilteredProducts($filterQuery: String!) {
+    products(first: 10, query: $filterQuery) {
       edges {
         node {
           id
@@ -194,10 +194,6 @@ const FILTERED_PRODUCTS_QUERY = `#graphql
             }
           }
         }
-        cursor
-      }
-      pageInfo {
-         hasNextPage
       }
     }
   }
@@ -476,7 +472,6 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
       limit: $limit,
       limitScope: $limitScope,
       query: $term,
-      sortKey: RELEVANCE,
       types: $types,
     ) {
       articles {
@@ -515,7 +510,7 @@ async function predictiveSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
-  const limit = Number(url.searchParams.get('limit') || 1000);
+  const limit = Number(url.searchParams.get('limit') || 10);
   const type = 'predictive';
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
