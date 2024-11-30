@@ -23,10 +23,9 @@ export async function loader({ request, context }) {
 
   const term = searchParams.get('q') || '';
   const after = searchParams.get('after') || null; // Cursor for pagination
-  const first = 10; // Number of items per page
-  const filterQueryParts = [];
+  const first = 10; // Items per page
 
-  // Build filter query dynamically
+  const filterQueryParts = [];
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '');
@@ -42,14 +41,11 @@ export async function loader({ request, context }) {
     });
 
     return json({
-      result: {
-        products,
-        total: products.edges.length,
-      },
-      term,
+      products,
+      pageInfo: products.pageInfo,
     });
   } catch (error) {
-    console.error('Error fetching filtered products:', error);
+    console.error('Error fetching products:', error);
     throw new Response('Failed to fetch products', { status: 500 });
   }
 }
@@ -113,51 +109,42 @@ export default function SearchPage() {
           <div>
             <Pagination connection={result.products}>
               {({ nodes, isLoading, NextLink, PreviousLink }) => {
-                const ItemsMarkup = nodes.map((product) => {
-                  const productUrl = `/products/${product.handle}`;
-
-                  return (
-                    <div className="search-results-item product-card" key={product.id}>
-                      <Link
-                        prefetch="intent"
-                        to={productUrl}
-                        className="collection-product-link"
-                      >
-                        {product.variants.nodes[0]?.image && (
-                          <Image
-                            data={product.variants.nodes[0].image}
-                            alt={product.title}
-                            width={150}
-                          />
-                        )}
-                        <div className="search-result-txt">
-                          <p className="product-description">{product.title}</p>
-                          <small className="price-container">
-                            <Money data={product.variants.nodes[0].price} />
-                          </small>
-                        </div>
-                      </Link>
-                    </div>
-                  );
-                });
+                const ItemsMarkup = nodes.map((product) => (
+                  <div className="product-card" key={product.id}>
+                    <Link to={`/products/${product.handle}`}>
+                      {product.variants.nodes[0]?.image && (
+                        <Image
+                          data={product.variants.nodes[0].image}
+                          alt={product.title}
+                          width={150}
+                        />
+                      )}
+                      <div>
+                        <p>{product.title}</p>
+                        <Money data={product.variants.nodes[0].price} />
+                      </div>
+                    </Link>
+                  </div>
+                ));
 
                 return (
                   <div>
-                    <div className="view-more">
-                      <PreviousLink>
-                        {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-                      </PreviousLink>
-                    </div>
-                    <div className="search-result-container">{ItemsMarkup}</div>
-                    <div className="view-more">
-                      <NextLink>
-                        {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                    <div>{ItemsMarkup}</div>
+                    {result.pageInfo.hasNextPage && (
+                      <NextLink
+                        to={(params) => {
+                          params.set('after', result.pageInfo.endCursor);
+                          return `/search?${params.toString()}`;
+                        }}
+                      >
+                        {isLoading ? 'Loading...' : 'Load more ↓'}
                       </NextLink>
-                    </div>
+                    )}
                   </div>
                 );
               }}
             </Pagination>
+
           </div>
           <br />
         </div>
@@ -168,7 +155,7 @@ export default function SearchPage() {
   );
 }
 
-const FILTERED_PRODUCTS_QUERY = `
+const FILTERED_PRODUCTS_QUERY = `#graphql
   query FilteredProducts($filterQuery: String!, $first: Int, $after: String) {
     products(first: $first, after: $after, query: $filterQuery) {
       edges {
