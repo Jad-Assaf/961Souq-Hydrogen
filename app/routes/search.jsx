@@ -31,29 +31,29 @@ export async function loader({ request, context }) {
   }
 
   const term = searchParams.get('q') || '';
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
-  console.log('Filter Query:', filterQuery); // Debugging
+  const after = searchParams.get('after') || null; // Cursor for pagination
+  const first = 10; // Number of items per page
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`.trim();
 
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context }) // Unmodified predictiveSearch function
-    : regularSearch({ request, context, filterQuery });
-
-  searchPromise.catch((error) => {
-    console.error('Search Error:', error);
-    return { term: '', result: null, error: error.message };
+  const predictiveResults = await predictiveSearch({
+    request,
+    context,
+    term: filterQuery,
+    first,
+    after,
   });
 
-  const result = await searchPromise;
-  console.log('Search Result:', result); // Debugging
-  return json(result);
+  return json({
+    term,
+    result: predictiveResults,
+  });
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { term, result } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
@@ -64,8 +64,7 @@ export default function SearchPage() {
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map((word) => word + '*').join(' ');
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
@@ -140,7 +139,7 @@ export default function SearchPage() {
         <div className="search-results">
           {result.products.edges.map(({ node: product }) => (
             <div className="product-card" key={product.id}>
-              <a href={`/products/${product.handle}`} className="product-link">
+              <Link to={`/products/${product.handle}`} className="product-link">
                 {product.variants.nodes[0]?.image && (
                   <Image
                     data={product.variants.nodes[0].image}
@@ -154,9 +153,33 @@ export default function SearchPage() {
                     <Money data={product.variants.nodes[0].price} />
                   </p>
                 </div>
-              </a>
+              </Link>
             </div>
           ))}
+          <div className="pagination">
+            {result.products.pageInfo.hasPreviousPage && (
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams);
+                  params.set('after', result.products.pageInfo.startCursor);
+                  navigate(`/search?${params.toString()}`);
+                }}
+              >
+                Previous
+              </button>
+            )}
+            {result.products.pageInfo.hasNextPage && (
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams);
+                  params.set('after', result.products.pageInfo.endCursor);
+                  navigate(`/search?${params.toString()}`);
+                }}
+              >
+                Next
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <p>No results found</p>
@@ -461,41 +484,52 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
-    $country: CountryCode
-    $language: LanguageCode
-    $limit: Int!
-    $limitScope: PredictiveSearchLimitScope!
-    $term: String!
-    $types: [PredictiveSearchType!]
-  ) @inContext(country: $country, language: $language) {
-    predictiveSearch(
-      limit: $limit,
-      limitScope: $limitScope,
+    $term: String!,
+    $first: Int,
+    $after: String
+  ) {
+    products: search(
       query: $term,
-      types: $types,
+      types: [PRODUCT],
+      first: $first,
+      after: $after,
+      sortKey: RELEVANCE
     ) {
-      articles {
-        ...PredictiveArticle
+      edges {
+        node {
+          id
+          title
+          handle
+          vendor
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          variants(first: 1) {
+            nodes {
+              id
+              image {
+                url
+                altText
+              }
+              price {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
       }
-      collections {
-        ...PredictiveCollection
-      }
-      pages {
-        ...PredictivePage
-      }
-      products {
-        ...PredictiveProduct
-      }
-      queries {
-        ...PredictiveQuery
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
       }
     }
   }
-  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
-  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
 
 /**
