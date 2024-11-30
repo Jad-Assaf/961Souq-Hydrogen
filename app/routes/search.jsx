@@ -104,26 +104,57 @@ export default function SearchPage() {
       </div>
 
       {result?.products?.edges?.length > 0 ? (
-        <div className="search-results">
-          {result.products.edges.map(({ node: product }) => (
-            <div className="product-card" key={product.id}>
-              <a href={`/products/${product.handle}`} className="product-link">
-                {product.variants.nodes[0]?.image && (
-                  <Image
-                    data={product.variants.nodes[0].image}
-                    alt={product.title}
-                    width={150}
-                  />
-                )}
-                <div className="product-details">
-                  <h2 className="product-title">{product.title}</h2>
-                  <p className="product-price">
-                    <Money data={product.variants.nodes[0].price} />
-                  </p>
-                </div>
-              </a>
-            </div>
-          ))}
+        <div className="search-result">
+          <div>
+            <Pagination connection={result.products}>
+              {({ nodes, isLoading, NextLink, PreviousLink }) => {
+                const ItemsMarkup = nodes.map((product) => {
+                  const productUrl = `/products/${product.handle}`;
+
+                  return (
+                    <div className="search-results-item product-card" key={product.id}>
+                      <Link
+                        prefetch="intent"
+                        to={productUrl}
+                        className="collection-product-link"
+                      >
+                        {product.variants.nodes[0]?.image && (
+                          <Image
+                            data={product.variants.nodes[0].image}
+                            alt={product.title}
+                            width={150}
+                          />
+                        )}
+                        <div className="search-result-txt">
+                          <p className="product-description">{product.title}</p>
+                          <small className="price-container">
+                            <Money data={product.variants.nodes[0].price} />
+                          </small>
+                        </div>
+                      </Link>
+                    </div>
+                  );
+                });
+
+                return (
+                  <div>
+                    <div className="view-more">
+                      <PreviousLink>
+                        {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                      </PreviousLink>
+                    </div>
+                    <div className="search-result-container">{ItemsMarkup}</div>
+                    <div className="view-more">
+                      <NextLink>
+                        {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                      </NextLink>
+                    </div>
+                  </div>
+                );
+              }}
+            </Pagination>
+          </div>
+          <br />
         </div>
       ) : (
         <p>No results found</p>
