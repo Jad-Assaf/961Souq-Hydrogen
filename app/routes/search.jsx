@@ -439,7 +439,6 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
       limit: $limit,
       limitScope: $limitScope,
       query: $term,
-      sortKey: RELEVANCE,
       types: $types,
     ) {
       articles {
