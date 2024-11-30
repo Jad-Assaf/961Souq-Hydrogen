@@ -5,8 +5,6 @@ import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef } from 'react';
-import { useSearchParams, useNavigate } from '@remix-run/react';
-
 
 /**
  * @type {MetaFunction}
@@ -19,35 +17,60 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 export async function loader({ request, context }) {
+  const { storefront } = context;
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
+  const searchParams = url.searchParams;
 
-  // Extract filters from URL
-  const filters = [];
-  for (const [key, value] of url.searchParams.entries()) {
+  const term = searchParams.get('q') || '';
+  const filterQueryParts = [];
+
+  // Build filter query dynamically
+  for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '');
-      filters.push({ [filterKey]: value });
+      filterQueryParts.push(`${filterKey}:${value}`);
     }
   }
 
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+
+  // Use the existing search logic
   const searchPromise = isPredictive
-    ? predictiveSearch({ request, context, filters })
-    : regularSearch({ request, context, filters });
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context });
 
   searchPromise.catch((error) => {
     console.error(error);
     return { term: '', result: null, error: error.message };
   });
 
-  return json(await searchPromise);
+  try {
+    // Fetch filtered results
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+      variables: { filterQuery },
+    });
+
+    return json({
+      term,
+      result: {
+        products,
+        total: products.edges.length,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching filtered products:', error);
+    throw new Response('Failed to fetch products', { status: 500 });
+  }
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { products, term } = useLoaderData();
+  const { result, term } = useLoaderData();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const formRef = useRef(null);
 
   const handleFormSubmit = (event) => {
@@ -55,88 +78,9 @@ export default function SearchPage() {
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
       const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map((word) => word + '*').join(' ');
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
-
-  return (
-    <div className="search">
-      <h1>Search Results</h1>
-      <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
-
-      {!term || !products.edges.length ? (
-        <p>No results found</p>
-      ) : (
-        <div className="search-result">
-          <Pagination connection={products}>
-            {({ nodes = [], isLoading, NextLink, PreviousLink }) => {
-              const ItemsMarkup = nodes.map((product) => {
-                const productUrl = `/products/${product.handle}`;
-
-                return (
-                  <div className="search-results-item product-card" key={product.id}>
-                    <Link
-                      prefetch="intent"
-                      to={productUrl}
-                      className="collection-product-link"
-                    >
-                      {product.variants.nodes[0]?.image && (
-                        <Image
-                          data={product.variants.nodes[0].image}
-                          alt={product.title}
-                          width={150}
-                        />
-                      )}
-                      <div className="search-result-txt">
-                        <p className="product-description">{product.title}</p>
-                        <small className="price-container">
-                          <Money data={product.variants.nodes[0].price} />
-                        </small>
-                      </div>
-                    </Link>
-                  </div>
-                );
-              });
-
-              return (
-                <div>
-                  <div className="view-more">
-                    <PreviousLink
-                      to={(params) => {
-                        const newParams = new URLSearchParams(params);
-                        newParams.set('after', products.pageInfo?.startCursor || '');
-                        return `/search?${newParams.toString()}`;
-                      }}
-                    >
-                      {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-                    </PreviousLink>
-                  </div>
-                  <div className="search-result-container">{ItemsMarkup}</div>
-                  <div className="view-more">
-                    <NextLink
-                      to={(params) => {
-                        const newParams = new URLSearchParams(params);
-                        newParams.set('after', products.pageInfo?.endCursor || '');
-                        return `/search?${newParams.toString()}`;
-                      }}
-                    >
-                      {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-                    </NextLink>
-                  </div>
-                </div>
-              );
-            }}
-          </Pagination>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FilterUI() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const handleFilterChange = (filterKey, value) => {
     const params = new URLSearchParams(searchParams);
@@ -149,26 +93,117 @@ function FilterUI() {
   };
 
   return (
-    <div className="filters">
-      <label>
-        Vendor:
-        <select onChange={(e) => handleFilterChange('vendor', e.target.value)}>
-          <option value="">All</option>
-          <option value="apple">Apple</option>
-          <option value="samsung">Samsung</option>
-        </select>
-      </label>
-      <label>
-        Price:
-        <select onChange={(e) => handleFilterChange('price', e.target.value)}>
-          <option value="">All</option>
-          <option value=">100">Over $100</option>
-          <option value="<100">Under $100</option>
-        </select>
-      </label>
+    <div className="search">
+      <h1>Search Results</h1>
+      <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
+
+      {/* Filter UI */}
+      <div>
+        <button onClick={() => handleFilterChange('vendor', 'apple')}>
+          Filter by Apple
+        </button>
+        <button onClick={() => handleFilterChange('price', '>20')}>
+          Price Greater than $20
+        </button>
+      </div>
+
+      {/* Search Results */}
+      {!term || !result?.total ? (
+        <SearchResults.Empty />
+      ) : (
+        <SearchResults result={result} term={term}>
+          {({ products }) => (
+            <div>
+              <Pagination connection={products}>
+                {({ nodes, isLoading, NextLink, PreviousLink }) => {
+                  const ItemsMarkup = nodes.map((product) => {
+                    const productUrl = `/products/${product.handle}`;
+
+                    return (
+                      <div className="search-results-item product-card" key={product.id}>
+                        <Link prefetch="intent" to={productUrl} className="collection-product-link">
+                          {product.variants.nodes[0]?.image && (
+                            <Image
+                              data={product.variants.nodes[0].image}
+                              alt={product.title}
+                              width={150}
+                            />
+                          )}
+                          <div className="search-result-txt">
+                            <p className="product-description">{product.title}</p>
+                            <small className="price-container">
+                              <Money data={product.variants.nodes[0].price} />
+                            </small>
+                          </div>
+                        </Link>
+                      </div>
+                    );
+                  });
+
+                  return (
+                    <div>
+                      <div className="view-more">
+                        <PreviousLink>
+                          {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                        </PreviousLink>
+                      </div>
+                      <div className="search-result-container">{ItemsMarkup}</div>
+                      <div className="view-more">
+                        <NextLink>
+                          {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                        </NextLink>
+                      </div>
+                    </div>
+                  );
+                }}
+              </Pagination>
+            </div>
+          )}
+        </SearchResults>
+      )}
     </div>
   );
 }
+
+const FILTERED_PRODUCTS_QUERY = `
+  query FilteredProducts($filterQuery: String!) {
+    products(first: 10, query: $filterQuery) {
+      edges {
+        node {
+          id
+          title
+          vendor
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          variants(first: 1) {
+            nodes {
+              id
+              price {
+                amount
+                currencyCode
+              }
+              image {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
+      }
+    }
+  }
+`;
 
 /**
  * Regular search query and fragments
@@ -309,38 +344,31 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filters }) {
+async function regularSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
-  const term = url.searchParams.get('q') || '';
+  const variables = getPaginationVariables(request, { pageBy: 24 });
+  const term = String(url.searchParams.get('q') || '');
 
-  // Build the filter query dynamically
-  const filterQueryParts = filters.map(
-    (filter) => `${Object.keys(filter)[0]}:${Object.values(filter)[0]}`
-  );
-  const query = `${term} ${filterQueryParts.join(' AND ')}`.trim();
+  // Search articles, pages, and products for the `q` term
+  const { errors, ...items } = await storefront.query(SEARCH_QUERY, {
+    variables: { ...variables, term },
+  });
 
-  try {
-    const variables = {
-      term: query,
-      first: 24, // Number of items per page
-    };
-
-    const { products } = await storefront.query(SEARCH_QUERY, { variables });
-
-    // Ensure `products.edges` and `products.pageInfo` exist
-    if (!products || !products.edges || !products.pageInfo) {
-      throw new Error('Invalid products data structure');
-    }
-
-    return {
-      term,
-      result: { products },
-    };
-  } catch (error) {
-    console.error('Error during regular search:', error);
-    return { term, result: null, error: error.message };
+  if (!items) {
+    throw new Error('No search data returned from Shopify API');
   }
+
+  const total = Object.values(items).reduce(
+    (acc, { nodes }) => acc + nodes.length,
+    0,
+  );
+
+  const error = errors
+    ? errors.map(({ message }) => message).join(', ')
+    : undefined;
+
+  return { type: 'regular', term, error, result: { total, items } };
 }
 
 /**
