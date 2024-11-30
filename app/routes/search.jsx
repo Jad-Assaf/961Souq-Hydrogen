@@ -4,8 +4,7 @@ import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
-import '../styles/SearchPage.css'
+import { useRef } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -22,11 +21,14 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  const term = String(searchParams.get('q') || '');
-  const sortKey = searchParams.get('sort') || 'RELEVANCE';
+  const term = searchParams.get('q') || '';
   const filters = [];
+  const variables = {
+    query: term,
+    first: 24, // Number of items to fetch per page
+  };
 
-  // Extract filters from searchParams
+  // Add dynamic filters from query parameters
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '');
@@ -34,41 +36,35 @@ export async function loader({ request, context }) {
     }
   }
 
-  const variables = getPaginationVariables(request, { pageBy: 24 });
+  variables.filters = filters.length > 0 ? filters : undefined;
 
-  const { products } = await storefront.query(SEARCH_QUERY, {
-    variables: {
-      ...variables,
-      term,
-      filters,
-      sortKey,
-    },
-  });
+  try {
+    const { products } = await storefront.query(FILTERED_SEARCH_QUERY, {
+      variables,
+    });
 
-  if (!products) {
-    throw new Error('No search data returned from Shopify API');
+    return json({
+      products: products.edges.map((edge) => edge.node),
+      filters: products.filters,
+    });
+  } catch (error) {
+    console.error('Error fetching filtered products:', error);
+    throw new Response('Failed to fetch products', { status: 500 });
   }
-
-  return json({
-    filters: products.filters || [],
-    result: products.nodes,
-    term,
-    total: products.nodes.length,
-  });
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { filters, result, term, total } = useLoaderData();
+  const { products, filters } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const handleFilterChange = (filterId, value) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
-      params.set(`filter_${filterId}`, JSON.stringify(value));
+      params.set(`filter_${filterId}`, value);
     } else {
       params.delete(`filter_${filterId}`);
     }
@@ -76,17 +72,17 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="search-page-container">
-      <h1 className="text-xl font-bold mb-4">Search Results</h1>
+    <div>
+      <h1>Search Results</h1>
 
-      {/* Filters Section */}
-      <div className="filters-container">
+      {/* Filters */}
+      <div>
         {filters.map((filter) => (
-          <div key={filter.id} className="filter">
+          <div key={filter.id}>
             <label>{filter.label}</label>
             <select
               onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-              defaultValue={searchParams.get(`filter_${filter.id}`) || ''}
+              value={searchParams.get(`filter_${filter.id}`) || ''}
             >
               <option value="">All</option>
               {filter.values.map((value) => (
@@ -99,13 +95,23 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {/* Search Results Section */}
-      <SearchResults result={result} term={term} />
-
-      {/* Analytics */}
-      <Analytics.SearchView
-        data={{ searchTerm: term, searchResults: result }}
-      />
+      {/* Products */}
+      <div>
+        {products.length === 0 ? (
+          <p>No products found</p>
+        ) : (
+          products.map((product) => (
+            <div key={product.id}>
+              <h2>{product.title}</h2>
+              <p>Vendor: {product.vendor}</p>
+              <p>
+                Price: {product.priceRange.minVariantPrice.amount}{' '}
+                {product.priceRange.minVariantPrice.currencyCode}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
@@ -182,29 +188,38 @@ const PAGE_INFO_FRAGMENT = `#graphql
   }
 `;
 
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-export const SEARCH_QUERY = `#graphql
-  query RegularSearch(
-    $country: CountryCode
-    $endCursor: String
+const FILTERED_SEARCH_QUERY = `#graphql
+  query FilteredSearch(
+    $query: String!
     $first: Int
-    $language: LanguageCode
-    $last: Int
-    $term: String!
+    $after: String
     $filters: [ProductFilter!]
-    $sortKey: ProductSearchSortKeys
-    $reverse: Boolean
-  ) @inContext(country: $country, language: $language) {
-    products: search(
-      query: $term,
-      filters: $filters,
-      sortKey: $sortKey,
-      reverse: $reverse,
-      first: $first,
-      after: $endCursor
-    ) {
-      nodes {
-        ...SearchProduct
+  ) {
+    products(query: $query, first: $first, after: $after, filters: $filters) {
+      edges {
+        node {
+          id
+          title
+          vendor
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
       filters {
         id
@@ -217,12 +232,66 @@ export const SEARCH_QUERY = `#graphql
           input
         }
       }
+    }
+  }
+`;
+
+// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
+export const SEARCH_QUERY = `#graphql
+  query RegularSearch(
+    $country: CountryCode
+    $endCursor: String
+    $first: Int
+    $language: LanguageCode
+    $last: Int
+    $term: String!
+    $startCursor: String
+  ) @inContext(country: $country, language: $language) {
+    articles: search(
+      query: $term,
+      types: [ARTICLE],
+      first: $first,
+    ) {
+      nodes {
+        ...on Article {
+          ...SearchArticle
+        }
+      }
+    }
+    pages: search(
+      query: $term,
+      types: [PAGE],
+      first: $first,
+    ) {
+      nodes {
+        ...on Page {
+          ...SearchPage
+        }
+      }
+    }
+    products: search(
+      after: $endCursor,
+      before: $startCursor,
+      first: $first,
+      last: $last,
+      query: $term,
+      sortKey: RELEVANCE,
+      types: [PRODUCT],
+      unavailableProducts: HIDE,
+    ) {
+      nodes {
+        ...on Product {
+          ...SearchProduct
+        }
+      }
       pageInfo {
         ...PageInfoFragment
       }
     }
   }
   ${SEARCH_PRODUCT_FRAGMENT}
+  ${SEARCH_PAGE_FRAGMENT}
+  ${SEARCH_ARTICLE_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
 `;
 
