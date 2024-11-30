@@ -40,7 +40,10 @@ export async function loader({ request, context }) {
     });
 
     return json({
-      products: products.edges.map((edge) => edge.node),
+      products: {
+        ...products,
+        nodes: products.edges.map((edge) => edge.node),
+      },
       term,
     });
   } catch (error) {
@@ -71,8 +74,7 @@ export default function SearchPage() {
       <h1>Search Results</h1>
       <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
-      {/* Render SearchResults Component */}
-      {!term || products.length === 0 ? (
+      {!term || !products?.nodes.length ? (
         <SearchResults.Empty />
       ) : (
         <SearchResults result={{ products }} term={term}>
