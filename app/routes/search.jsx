@@ -4,7 +4,7 @@ import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrog
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef } from 'react';
+import { useState, useRef } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -36,7 +36,7 @@ export async function loader({ request, context }) {
 
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
+    ? predictiveSearch({ request, context }) // Unmodified predictiveSearch function
     : regularSearch({ request, context, filterQuery });
 
   searchPromise.catch((error) => {
@@ -57,6 +57,7 @@ export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
+  const [predictiveResults, setPredictiveResults] = useState([]);
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -78,10 +79,41 @@ export default function SearchPage() {
     navigate(`/search?${params.toString()}`);
   };
 
+  const handlePredictiveSearch = async (term) => {
+    if (!term) {
+      setPredictiveResults([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/predictive-search?q=${encodeURIComponent(term)}`);
+      const data = await response.json();
+      setPredictiveResults(data.result.items.products || []);
+    } catch (error) {
+      console.error('Error fetching predictive results:', error);
+    }
+  };
+
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
+      <SearchForm
+        ref={formRef}
+        onSubmit={handleFormSubmit}
+        onInput={(e) => handlePredictiveSearch(e.target.value)}
+      />
+
+      {/* Predictive Results */}
+      {predictiveResults.length > 0 && (
+        <div className="predictive-results">
+          <h2>Suggestions</h2>
+          {predictiveResults.map((product) => (
+            <div key={product.id}>
+              <Link to={`/products/${product.handle}`}>{product.title}</Link>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="filters">
@@ -103,6 +135,7 @@ export default function SearchPage() {
         </label>
       </div>
 
+      {/* Regular Results */}
       {result?.products?.edges?.length > 0 ? (
         <div className="search-results">
           {result.products.edges.map(({ node: product }) => (
@@ -482,12 +515,11 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
+  // Predictively search articles, collections, pages, products, and queries
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
-        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term,
@@ -512,6 +544,7 @@ async function predictiveSearch({ request, context }) {
 
   return { type, term, result: { items, total } };
 }
+
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @typedef {import('@shopify/remix-oxygen').ActionFunctionArgs} ActionFunctionArgs */
