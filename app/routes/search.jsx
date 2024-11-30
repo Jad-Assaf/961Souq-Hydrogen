@@ -4,7 +4,7 @@ import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { SearchForm } from '~/components/SearchForm';
 import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 /**
  * @type {MetaFunction}
@@ -22,37 +22,26 @@ export async function loader({ request, context }) {
   const searchParams = url.searchParams;
 
   const term = searchParams.get('q') || '';
-  const filters = [];
-  const variables = {
-    query: term,
-    first: 24, // Number of items to fetch per page
-  };
+  const filterQueryParts = [];
 
-  // Add dynamic filters from query parameters
+  // Build filter query dynamically
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '');
-      // Ensure values are parsed correctly
-      try {
-        filters.push({ [filterKey]: JSON.parse(value) });
-      } catch (e) {
-        console.warn(`Invalid filter value for ${filterKey}: ${value}`);
-      }
+      filterQueryParts.push(`${filterKey}:${value}`);
     }
   }
 
-  variables.filters = filters.length > 0 ? filters : undefined;
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
   try {
-    const { products } = await storefront.query(FILTERED_SEARCH_QUERY, {
-      variables,
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+      variables: { filterQuery },
     });
-
-    if (!products) throw new Error('No products returned.');
 
     return json({
       products: products.edges.map((edge) => edge.node),
-      filters: products.filters,
+      term,
     });
   } catch (error) {
     console.error('Error fetching filtered products:', error);
@@ -64,65 +53,84 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { products, filters } = useLoaderData();
+  const { products, term } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const formRef = useRef(null);
+  const [filterQuery, setFilterQuery] = useState("");
 
-  const handleFilterChange = (filterId, value) => {
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    const searchInput = formRef.current.querySelector('input[name="q"]');
+    if (searchInput) {
+      const query = searchInput.value;
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
+  const handleFilterChange = (filterKey, value) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
-      params.set(`filter_${filterId}`, value);
+      params.set(`filter_${filterKey}`, value);
     } else {
-      params.delete(`filter_${filterId}`);
+      params.delete(`filter_${filterKey}`);
     }
     navigate(`/search?${params.toString()}`);
   };
 
   return (
-    <div>
+    <div className="search">
       <h1>Search Results</h1>
+      <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
-      {/* Filters */}
+      {/* Example Filter UI */}
       <div>
-        {filters.map((filter) => (
-          <div key={filter.id}>
-            <label>{filter.label}</label>
-            <select
-              onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-              value={searchParams.get(`filter_${filter.id}`) || ''}
-            >
-              <option value="">All</option>
-              {filter.values.map((value) => (
-                <option key={value.id} value={value.input}>
-                  {value.label} ({value.count})
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+        <button onClick={() => handleFilterChange('vendor', 'apple')}>
+          Filter by Apple
+        </button>
+        <button onClick={() => handleFilterChange('price', '>20')}>
+          Price Greater than $20
+        </button>
       </div>
 
-
-      {/* Products */}
-      <div>
-        {products.length === 0 ? (
-          <p>No products found</p>
-        ) : (
-          products.map((product) => (
+      {/* Results */}
+      {!products.length ? (
+        <p>No products found</p>
+      ) : (
+        <div>
+          {products.map((product) => (
             <div key={product.id}>
               <h2>{product.title}</h2>
               <p>Vendor: {product.vendor}</p>
-              <p>
-                Price: {product.priceRange.minVariantPrice.amount}{' '}
-                {product.priceRange.minVariantPrice.currencyCode}
-              </p>
+              <p>Price: ${product.priceRange.minVariantPrice.amount}</p>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+
+// Shopify GraphQL Query
+const FILTERED_PRODUCTS_QUERY = `
+  query FilteredProducts($filterQuery: String!) {
+    products(first: 10, query: $filterQuery) {
+      edges {
+        node {
+          id
+          title
+          vendor
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 /**
  * Regular search query and fragments
@@ -193,54 +201,6 @@ const PAGE_INFO_FRAGMENT = `#graphql
     hasPreviousPage
     startCursor
     endCursor
-  }
-`;
-
-const FILTERED_SEARCH_QUERY = `#graphql
-  query FilteredSearch(
-    $query: String!
-    $first: Int
-    $after: String
-    $filters: [ProductFilter!]
-  ) {
-    products(query: $query, first: $first, after: $after, filters: $filters) {
-      edges {
-        node {
-          id
-          title
-          vendor
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          images(first: 1) {
-            edges {
-              node {
-                url
-                altText
-              }
-            }
-          }
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      filters {
-        id
-        label
-        type
-        values {
-          id
-          label
-          count
-          input
-        }
-      }
-    }
   }
 `;
 
@@ -435,37 +395,27 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
     $limitScope: PredictiveSearchLimitScope!
     $term: String!
     $types: [PredictiveSearchType!]
-    $filters: [ProductFilter!]
   ) @inContext(country: $country, language: $language) {
     predictiveSearch(
       limit: $limit,
       limitScope: $limitScope,
       query: $term,
       types: $types,
-      filters: $filters
     ) {
+      articles {
+        ...PredictiveArticle
+      }
+      collections {
+        ...PredictiveCollection
+      }
+      pages {
+        ...PredictivePage
+      }
       products {
-        id
-        title
-        vendor
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-        images(first: 1) {
-          edges {
-            node {
-              url
-              altText
-            }
-          }
-        }
+        ...PredictiveProduct
       }
       queries {
-        text
-        styledText
+        ...PredictiveQuery
       }
     }
   }
@@ -489,41 +439,39 @@ async function predictiveSearch({ request, context }) {
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
   const limit = Number(url.searchParams.get('limit') || 10);
-  const filters = [];
+  const type = 'predictive';
 
-  // Collect filters from query parameters
-  for (const [key, value] of url.searchParams.entries()) {
-    if (key.startsWith('filter_')) {
-      const filterKey = key.replace('filter_', '');
-      try {
-        filters.push({ [filterKey]: JSON.parse(value) });
-      } catch (e) {
-        console.warn(`Invalid filter for key: ${filterKey}, value: ${value}`);
-      }
-    }
-  }
+  if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  if (!term) return { type: 'predictive', term, result: getEmptyPredictiveSearchResult() };
-
-  try {
-    const { predictiveSearch } = await storefront.query(PREDICTIVE_SEARCH_QUERY, {
+  // Predictively search articles, collections, pages, products, and queries (suggestions)
+  const { predictiveSearch: items, errors } = await storefront.query(
+    PREDICTIVE_SEARCH_QUERY,
+    {
       variables: {
-        term,
+        // customize search options as needed
         limit,
         limitScope: 'EACH',
-        filters: filters.length > 0 ? filters : undefined,
+        term,
       },
-    });
+    },
+  );
 
-    return {
-      type: 'predictive',
-      term,
-      result: predictiveSearch,
-    };
-  } catch (error) {
-    console.error('Error in predictive search:', error);
-    throw new Response('Failed to fetch predictive search results', { status: 500 });
+  if (errors) {
+    throw new Error(
+      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
+    );
   }
+
+  if (!items) {
+    throw new Error('No predictive search data returned from Shopify API');
+  }
+
+  const total = Object.values(items).reduce(
+    (acc, item) => acc + item.length,
+    0,
+  );
+
+  return { type, term, result: { items, total } };
 }
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
