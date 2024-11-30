@@ -32,7 +32,12 @@ export async function loader({ request, context }) {
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '');
-      filters.push({ [filterKey]: JSON.parse(value) });
+      // Ensure values are parsed correctly
+      try {
+        filters.push({ [filterKey]: JSON.parse(value) });
+      } catch (e) {
+        console.warn(`Invalid filter value for ${filterKey}: ${value}`);
+      }
     }
   }
 
@@ -42,6 +47,8 @@ export async function loader({ request, context }) {
     const { products } = await storefront.query(FILTERED_SEARCH_QUERY, {
       variables,
     });
+
+    if (!products) throw new Error('No products returned.');
 
     return json({
       products: products.edges.map((edge) => edge.node),
