@@ -18,6 +18,13 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const { storefront } = context;
+
+  // Fetch vendors
+  const vendorResult = await storefront.query(VENDORS_QUERY);
+  const vendors = [
+    ...new Set(vendorResult?.products?.edges.map(({ node }) => node.vendor)),
+  ].sort();
+
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
@@ -39,21 +46,34 @@ export async function loader({ request, context }) {
     ? predictiveSearch({ request, context })
     : regularSearch({ request, context, filterQuery });
 
-  searchPromise.catch((error) => {
+  const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
     return { term: '', result: null, error: error.message };
   });
 
-  const result = await searchPromise;
-  console.log('Search Result:', result); // Debugging
-  return json(result);
+  return json({
+    ...result,
+    vendors,
+  });
 }
+
+const VENDORS_QUERY = `
+  query Vendors {
+    products(first: 250) {
+      edges {
+        node {
+          vendor
+        }
+      }
+    }
+  }
+`;
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData();
+  const { type, term, result, vendors, error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
@@ -78,8 +98,11 @@ export default function SearchPage() {
           Vendor:
           <select onChange={(e) => handleFilterChange('vendor', e.target.value)}>
             <option value="">All</option>
-            <option value="apple">Apple</option>
-            <option value="samsung">Samsung</option>
+            {vendors.map((vendor) => (
+              <option key={vendor} value={vendor}>
+                {vendor}
+              </option>
+            ))}
           </select>
         </label>
         <label>
