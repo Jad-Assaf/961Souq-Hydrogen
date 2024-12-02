@@ -151,7 +151,7 @@ export default function SearchPage() {
 
 const FILTERED_PRODUCTS_QUERY = `
   query FilteredProducts($filterQuery: String!) {
-    products(first: 250, query: $filterQuery, sortKey: RELEVANCE) {
+    products(first: 50, query: $filterQuery, sortKey: RELEVANCE) {
       edges {
         node {
           vendor
