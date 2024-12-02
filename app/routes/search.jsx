@@ -1,8 +1,6 @@
 import { json } from '@shopify/remix-oxygen';
 import { useLoaderData, useSearchParams, useNavigate, Link } from '@remix-run/react';
 import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrogen';
-import { SearchForm } from '~/components/SearchForm';
-import { SearchResults } from '~/components/SearchResults';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef } from 'react';
 
@@ -19,17 +17,18 @@ export const meta = () => {
 // loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
 
   // Fetch all vendors
-  const vendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+  const allVendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
     variables: { filterQuery: '' }, // Fetch all products to get all vendors
   });
   const allVendors = [
-    ...new Set(vendorResult?.products?.edges.map(({ node }) => node.vendor)),
+    ...new Set(
+      allVendorResult?.products?.edges.map(({ node }) => node.vendor)
+    ),
   ].sort();
-
-  const url = new URL(request.url);
-  const searchParams = url.searchParams;
 
   // Extract filters
   const filterQueryParts = [];
@@ -42,8 +41,8 @@ export async function loader({ request, context }) {
 
   const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
-  console.log('Filter Query:', filterQuery); // Debugging
 
+  // Fetch products based on filters
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
@@ -56,7 +55,7 @@ export async function loader({ request, context }) {
 
   return json({
     ...result,
-    vendors: allVendors,
+    vendors: allVendors, // Include all vendors irrespective of the filters
   });
 }
 
@@ -64,9 +63,6 @@ export default function SearchPage() {
   const { type, term, result, vendors = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const formRef = useRef(null);
-
-  console.log('Vendors in Component:', vendors); // Debugging
 
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
@@ -77,10 +73,10 @@ export default function SearchPage() {
       params.append(`filter_${filterKey}`, value);
     } else {
       // Remove the unselected filter
-      params.delete(`filter_${filterKey}`);
       currentFilters
         .filter((item) => item !== value)
         .forEach((item) => params.append(`filter_${filterKey}`, item));
+      params.delete(`filter_${filterKey}`);
     }
 
     navigate(`/search?${params.toString()}`);
