@@ -253,6 +253,44 @@ export default function SearchPage() {
             )}
           </fieldset>
         </div>
+
+        {result?.products?.edges?.length > 0 ? (
+          <div className="search-results">
+            <div>
+              <label htmlFor="sort-select">Sort by:</label>
+              <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
+                <option value="featured">Featured</option>
+                <option value="price-low-high">Price: Low - High</option>
+                <option value="price-high-low">Price: High - Low</option>
+                <option value="best-selling">Best Selling</option>
+                <option value="newest">Newest</option>
+              </select>
+            </div>
+            <div className="search-results-grid">
+            {result.products.edges.map(({ node: product }) => (
+              <div className="product-card" key={product.id}>
+                <a href={`/products/${product.handle}`} className="product-link">
+                  {product.variants.nodes[0]?.image && (
+                    <Image
+                      data={product.variants.nodes[0].image}
+                      alt={product.title}
+                      width={150}
+                    />
+                  )}
+                  <div className="product-details">
+                    <h2 className="product-title">{product.title}</h2>
+                    <p className="product-price">
+                      <Money data={product.variants.nodes[0].price} />
+                    </p>
+                  </div>
+                </a>
+              </div>
+            ))}
+            </div>
+          </div>
+        ) : (
+          <p>No results found</p>
+        )}
       </div>
     </div>
   );
