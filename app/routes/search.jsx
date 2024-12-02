@@ -21,16 +21,6 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  // Fetch all vendors (unfiltered)
-  const allVendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-    variables: { filterQuery: '' }, // Fetch all products to get all vendors
-  });
-  const allVendors = [
-    ...new Set(
-      allVendorResult?.products?.edges.map(({ node }) => node.vendor)
-    ),
-  ].sort();
-
   // Extract filters
   const filterQueryParts = [];
   for (const [key, value] of searchParams.entries()) {
@@ -63,13 +53,12 @@ export async function loader({ request, context }) {
 
   return json({
     ...result,
-    allVendors, // Include all vendors (unfiltered)
-    filteredVendors, // Filtered vendors based on current search results
+    vendors: filteredVendors, // Filtered vendors based on current search results
   });
 }
 
 export default function SearchPage() {
-  const { type, term, result, allVendors = [], filteredVendors = [], error } = useLoaderData();
+  const { type, term, result, vendors = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -98,7 +87,7 @@ export default function SearchPage() {
       <div className="filters">
         <fieldset>
           <legend>Vendors</legend>
-          {allVendors.map((vendor) => {
+          {vendors.map((vendor) => {
             const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
             return (
               <div key={vendor}>
