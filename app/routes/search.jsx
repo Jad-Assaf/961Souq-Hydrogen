@@ -64,19 +64,19 @@ export default function SearchPage() {
 
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
-    const currentFilters = params.getAll(`filter_${filterKey}`);
 
     if (checked) {
       // Add the selected filter
       params.append(`filter_${filterKey}`, value);
     } else {
       // Remove the unselected filter
-      currentFilters
-        .filter((item) => item !== value)
-        .forEach((item) => params.append(`filter_${filterKey}`, item));
+      const currentFilters = params.getAll(`filter_${filterKey}`);
+      const updatedFilters = currentFilters.filter((item) => item !== value);
       params.delete(`filter_${filterKey}`);
+      updatedFilters.forEach((item) => params.append(`filter_${filterKey}`, item));
     }
 
+    // Retain all vendors, even if not selected
     navigate(`/search?${params.toString()}`);
   };
 
