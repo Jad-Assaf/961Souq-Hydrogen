@@ -146,7 +146,7 @@ export default function SearchPage() {
       <h1>Search Results</h1>
       <div className="search-filters-container" style={{ display: 'flex' }}>
         {/* Filters */}
-        <div className="filters" style={{ display: 'flex', gap: '1rem', flexDirection: 'column', marginTop: '50px' }}>
+        <div className="filters">
           <fieldset>
             <button
               type="button"
