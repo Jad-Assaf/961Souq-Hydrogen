@@ -3,6 +3,28 @@
     margin: 75px;
 }
 
-.collection-product-link{
+.collection-product-link {
     width: 100% !important;
+}
+
+.search-filters-container fieldset {
+    padding: 0;
+    width: 200px;
+}
+
+.filter-option {
+    gap: 10px;
+    display: flex;
+}
+
+.price-filter-btn {
+    padding: 3px 5px;
+    border: 1px solid #2172af;
+    border-radius: 5px;
+}
+
+.price-filter-apply {
+    border: 1px solid #2172af;
+    padding: 5px 10px;
+    border-radius: 5px;
 }

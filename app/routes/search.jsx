@@ -3,6 +3,7 @@ import { useLoaderData, useSearchParams, useNavigate, Link } from '@remix-run/re
 import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrogen';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef, useState } from 'react';
+import '../styles/SearchPage.css'
 
 /**
  * @type {MetaFunction}
@@ -155,7 +156,7 @@ export default function SearchPage() {
                 {vendors.map((vendor) => {
                   const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
                   return (
-                    <div key={vendor}>
+                    <div key={vendor} className='filter-option'>
                       <input
                         type="checkbox"
                         id={`vendor-${vendor}`}
@@ -182,7 +183,7 @@ export default function SearchPage() {
                 {productTypes.map((productType) => {
                   const isChecked = searchParams.getAll('filter_productType').includes(productType);
                   return (
-                    <div key={productType}>
+                    <div key={productType} className='filter-option'>
                       <input
                         type="checkbox"
                         id={`productType-${productType}`}
@@ -214,6 +215,7 @@ export default function SearchPage() {
                       name="minPrice"
                       value={minPrice}
                       onChange={(e) => setMinPrice(e.target.value)}
+                      className='price-filter-btn'
                     />
                   </label>
                 </div>
@@ -225,28 +227,29 @@ export default function SearchPage() {
                       name="maxPrice"
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(e.target.value)}
+                      className='price-filter-btn'
                     />
                   </label>
                 </div>
-                <button onClick={applyPriceFilter}>Apply</button>
+                <button className='price-filter-apply' onClick={applyPriceFilter}>Apply</button>
               </div>
             )}
           </fieldset>
 
-          <div>
-            <label htmlFor="sort-select">Sort by:</label>
-            <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
-              <option value="featured">Featured</option>
-              <option value="price-low-high">Price: Low - High</option>
-              <option value="price-high-low">Price: High - Low</option>
-              <option value="best-selling">Best Selling</option>
-              <option value="newest">Newest</option>
-            </select>
-          </div>
         </div>
 
         {result?.products?.edges?.length > 0 ? (
           <div className="search-results">
+            <div>
+              <label htmlFor="sort-select">Sort by:</label>
+              <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
+                <option value="featured">Featured</option>
+                <option value="price-low-high">Price: Low - High</option>
+                <option value="price-high-low">Price: High - Low</option>
+                <option value="best-selling">Best Selling</option>
+                <option value="newest">Newest</option>
+              </select>
+            </div>
             {result.products.edges.map(({ node: product }) => (
               <div className="product-card" key={product.id}>
                 <a href={`/products/${product.handle}`} className="product-link">
