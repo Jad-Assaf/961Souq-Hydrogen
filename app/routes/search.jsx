@@ -62,7 +62,7 @@ export default function SearchPage() {
     event.preventDefault();
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
-      const query = searchInput.value.trim().replace(/\s+/g, '/'); // Replace spaces with slashes
+      const query = searchInput.value.trim().replace(/\s+/g, '-'); // Replace spaces with dashes
       window.location.href = `/search?q=${encodeURIComponent(query)}`;
     }
   };
