@@ -33,25 +33,39 @@ export async function loader({ request, context }) {
   const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
-  // Fetch products based on filters
+  // Handle sorting
+  const sortKeyMapping = {
+    featured: 'RELEVANCE',
+    'price-low-high': 'PRICE',
+    'price-high-low': 'PRICE',
+    'best-selling': 'BEST_SELLING',
+    newest: 'CREATED',
+  };
+  const reverseMapping = {
+    'price-high-low': true,
+  };
+
+  const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
+  const reverse = reverseMapping[searchParams.get('sort')] || false;
+
+  // Fetch products based on filters and sorting
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery });
+    : regularSearch({ request, context, filterQuery, sortKey, reverse });
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
     return { term: '', result: null, error: error.message };
   });
 
-  // Extract vendors from filtered products
+  // Extract vendors and product types from filtered products
   const filteredVendors = [
     ...new Set(
       result?.result?.products?.edges.map(({ node }) => node.vendor)
     ),
   ].sort();
 
-  // Extract product types from filtered products
   const filteredProductTypes = [
     ...new Set(
       result?.result?.products?.edges.map(({ node }) => node.productType)
@@ -60,8 +74,8 @@ export async function loader({ request, context }) {
 
   return json({
     ...result,
-    vendors: filteredVendors, // Filtered vendors based on current search results
-    productTypes: filteredProductTypes, // Filtered product types based on current search results
+    vendors: filteredVendors,
+    productTypes: filteredProductTypes,
   });
 }
 
@@ -87,9 +101,27 @@ export default function SearchPage() {
     navigate(`/search?${params.toString()}`);
   };
 
+  const handleSortChange = (e) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('sort', e.target.value);
+    navigate(`/search?${params.toString()}`);
+  };
+
   return (
     <div className="search">
       <h1>Search Results</h1>
+
+      {/* Sorting */}
+      <div>
+        <label htmlFor="sort-select">Sort by:</label>
+        <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
+          <option value="featured">Featured</option>
+          <option value="price-low-high">Price: Low - High</option>
+          <option value="price-high-low">Price: High - Low</option>
+          <option value="best-selling">Best Selling</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
 
       {/* Filters */}
       <div className="filters" style={{ display: 'flex', gap: '1rem' }}>
@@ -134,17 +166,6 @@ export default function SearchPage() {
             );
           })}
         </fieldset>
-
-        <fieldset>
-          <legend>Price</legend>
-          <select
-            onChange={(e) => handleFilterChange('price', e.target.value, true)}
-          >
-            <option value="">All</option>
-            <option value=">100">Over $100</option>
-            <option value="<100">Under $100</option>
-          </select>
-        </fieldset>
       </div>
 
       {result?.products?.edges?.length > 0 ? (
@@ -177,8 +198,8 @@ export default function SearchPage() {
 }
 
 const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts($filterQuery: String!) {
-    products(first: 250, query: $filterQuery, sortKey: RELEVANCE) {
+  query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    products(first: 50, query: $filterQuery, sortKey: $sortKey, reverse: $reverse) {
       edges {
         node {
           vendor
