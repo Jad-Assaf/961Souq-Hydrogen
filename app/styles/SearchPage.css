@@ -146,3 +146,13 @@ select#sort-select {
         transform: translateY(0);
     }
 }
+
+.mobile-filters-panel fieldset {
+    align-items: start;
+}
+
+.mobile-filters-panel fieldset button {
+    display: flex;
+    justify-content: space-between;
+    width: 50%;
+}
