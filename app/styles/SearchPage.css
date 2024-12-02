@@ -1,3 +1,12 @@
+.search{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 1500px;
+    margin: auto;
+}
+
 .filter-sort-container {
     position: relative;
     margin: 75px;
@@ -27,4 +36,10 @@
     border: 1px solid #2172af;
     padding: 5px 10px;
     border-radius: 5px;
+}
+
+.search-results-grid{
+    display: flex;
+    flex-wrap: wrap;
+
 }
