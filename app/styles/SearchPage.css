@@ -66,11 +66,7 @@ select#sort-select {
     display: block;
     width: 90%;
     padding: 0.5rem 0;
-}
-
-.filter-toggle:focus {
-    outline: 1px solid #2172af;
-    border-radius: 10px;
+    border-bottom: 1px solid grey;
 }
 
 .filter-option {
