@@ -16,6 +16,7 @@ export const meta = () => {
 /**
  * @param {LoaderFunctionArgs}
  */
+// loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
@@ -34,6 +35,7 @@ export async function loader({ request, context }) {
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
   console.log('Filter Query:', filterQuery); // Debugging
 
+  // Determine whether to use predictive or regular search
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
@@ -44,12 +46,16 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
-  // Extract vendors from fetched products
+  // Debug result to ensure product data is available
+  console.log('Search Result Products:', result?.products?.edges);
+
+  // Extract unique vendors
   const vendors = [
     ...new Set(
-      result?.products?.edges
-        ?.map(({ node }) => node.vendor)
-        .filter(Boolean) // Remove undefined or empty values
+      result?.products?.edges?.map(({ node }) => {
+        console.log('Product Vendor:', node.vendor); // Debugging each vendor
+        return node.vendor;
+      }).filter(Boolean) // Remove undefined or empty values
     ),
   ].sort();
 
@@ -61,16 +67,14 @@ export async function loader({ request, context }) {
   });
 }
 
-/**
- * Renders the /search route
- */
+// SearchPage component
 export default function SearchPage() {
   const { type, term, result, vendors = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
 
-  console.log('Vendors in Component:', vendors); // Debugging
+  console.log('Vendors in Component:', vendors); // Ensure vendors are passed correctly
 
   const handleFilterChange = (filterKey, value) => {
     const params = new URLSearchParams(searchParams);
@@ -92,11 +96,17 @@ export default function SearchPage() {
           Vendor:
           <select onChange={(e) => handleFilterChange('vendor', e.target.value)}>
             <option value="">All</option>
-            {vendors.map((vendor) => (
-              <option key={vendor} value={vendor}>
-                {vendor}
+            {vendors.length > 0 ? (
+              vendors.map((vendor) => (
+                <option key={vendor} value={vendor}>
+                  {vendor}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>
+                No vendors available
               </option>
-            ))}
+            )}
           </select>
         </label>
         <label>
