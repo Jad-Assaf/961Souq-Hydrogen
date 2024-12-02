@@ -33,20 +33,17 @@ export async function loader({ request, context }) {
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
   // Fetch products based on filters
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery });
+  const searchPromise = regularSearch({ request, context, filterQuery });
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
     return { term: '', result: null, error: error.message };
   });
 
-  // Extract vendors from the current filtered results
+  // Extract vendors from the filtered results
   const vendors = [
     ...new Set(
-      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Filter out empty or undefined vendors
+      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Remove empty values
     ),
   ].sort();
 
@@ -57,7 +54,7 @@ export async function loader({ request, context }) {
 }
 
 export default function SearchPage() {
-  const { type, term, result, vendors = [], error } = useLoaderData();
+  const { result, vendors = [] } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -66,10 +63,8 @@ export default function SearchPage() {
     const currentFilters = params.getAll(`filter_${filterKey}`);
 
     if (checked) {
-      // Add the selected filter
       params.append(`filter_${filterKey}`, value);
     } else {
-      // Remove the unselected filter
       currentFilters
         .filter((item) => item !== value)
         .forEach((item) => params.append(`filter_${filterKey}`, item));
@@ -87,44 +82,39 @@ export default function SearchPage() {
       <div className="filters">
         <fieldset>
           <legend>Vendors</legend>
-          {vendors.map((vendor) => {
-            const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
-            return (
-              <div key={vendor}>
-                <input
-                  type="checkbox"
-                  id={`vendor-${vendor}`}
-                  value={vendor}
-                  checked={isChecked}
-                  onChange={(e) =>
-                    handleFilterChange('vendor', vendor, e.target.checked)
-                  }
-                />
-                <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
-              </div>
-            );
-          })}
-        </fieldset>
-        <fieldset>
-          <legend>Price</legend>
-          <select
-            onChange={(e) => handleFilterChange('price', e.target.value, true)}
-          >
-            <option value="">All</option>
-            <option value=">100">Over $100</option>
-            <option value="<100">Under $100</option>
-          </select>
+          {vendors.length > 0 ? (
+            vendors.map((vendor) => {
+              const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+              return (
+                <div key={vendor}>
+                  <input
+                    type="checkbox"
+                    id={`vendor-${vendor}`}
+                    value={vendor}
+                    checked={isChecked}
+                    onChange={(e) =>
+                      handleFilterChange('vendor', vendor, e.target.checked)
+                    }
+                  />
+                  <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
+                </div>
+              );
+            })
+          ) : (
+            <p>No vendors available</p>
+          )}
         </fieldset>
       </div>
 
+      {/* Search Results */}
       {result?.products?.edges?.length > 0 ? (
         <div className="search-results">
           {result.products.edges.map(({ node: product }) => (
             <div className="product-card" key={product.id}>
               <a href={`/products/${product.handle}`} className="product-link">
                 {product.variants.nodes[0]?.image && (
-                  <Image
-                    data={product.variants.nodes[0].image}
+                  <img
+                    src={product.variants.nodes[0].image.url}
                     alt={product.title}
                     width={150}
                   />
@@ -132,7 +122,7 @@ export default function SearchPage() {
                 <div className="product-details">
                   <h2 className="product-title">{product.title}</h2>
                   <p className="product-price">
-                    <Money data={product.variants.nodes[0].price} />
+                    ${product.priceRange.minVariantPrice.amount}
                   </p>
                 </div>
               </a>
@@ -145,6 +135,7 @@ export default function SearchPage() {
     </div>
   );
 }
+
 
 const FILTERED_PRODUCTS_QUERY = `
   query FilteredProducts($filterQuery: String!) {
@@ -324,18 +315,12 @@ async function regularSearch({ request, context, filterQuery }) {
   const { storefront } = context;
 
   try {
-    const variables = {
-      filterQuery,
-    };
-
-    console.log('Query Variables:', variables); // Debugging
-
+    const variables = { filterQuery };
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
     if (!products?.edges?.length) {
-      console.error('No products found in response:', products); // Debugging
       return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
     }
 
