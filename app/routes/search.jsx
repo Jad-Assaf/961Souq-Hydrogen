@@ -250,6 +250,7 @@ export default function SearchPage() {
                 <option value="newest">Newest</option>
               </select>
             </div>
+            <div className="search-results-grid">
             {result.products.edges.map(({ node: product }) => (
               <div className="product-card" key={product.id}>
                 <a href={`/products/${product.handle}`} className="product-link">
@@ -269,6 +270,7 @@ export default function SearchPage() {
                 </a>
               </div>
             ))}
+            </div>
           </div>
         ) : (
           <p>No results found</p>
