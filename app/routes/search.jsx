@@ -15,20 +15,11 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 // loader function
+// loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
-
-  // Fetch all vendors
-  const allVendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-    variables: { filterQuery: '' }, // Fetch all products to get all vendors
-  });
-  const allVendors = [
-    ...new Set(
-      allVendorResult?.products?.edges.map(({ node }) => node.vendor)
-    ),
-  ].sort();
 
   // Extract filters
   const filterQueryParts = [];
@@ -53,9 +44,16 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
+  // Extract vendors from filtered products
+  const filteredVendors = [
+    ...new Set(
+      result?.result?.products?.edges.map(({ node }) => node.vendor)
+    ),
+  ].sort();
+
   return json({
     ...result,
-    vendors: allVendors, // Include all vendors irrespective of the filters
+    vendors: filteredVendors, // Filtered vendors based on current search results
   });
 }
 
