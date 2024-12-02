@@ -43,22 +43,22 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
-  // Debug: Log the result structure
+  // Debug: Log the structure of products
   console.log('Search Result:', result);
 
-  // Extract vendors from the search results
+  // Extract vendors based on structure
+  const products = isPredictive ? result?.products || [] : result?.products?.edges || [];
   const vendors = [
     ...new Set(
-      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Ensure non-empty vendors
+      products.map((item) => (item.node ? item.node.vendor : item.vendor)).filter(Boolean)
     ),
   ].sort();
 
-  // Debug: Log extracted vendors
   console.log('Extracted Vendors:', vendors);
 
   return json({
     ...result,
-    vendors: vendors || [], // Vendors based on the current search results
+    vendors, // Vendors based on the current search results
   });
 }
 
