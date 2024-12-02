@@ -39,10 +39,10 @@ export async function loader({ request, context }) {
     'price-low-high': 'PRICE',
     'price-high-low': 'PRICE',
     'best-selling': 'BEST_SELLING',
-    newest: 'CREATED',
+    newest: 'CREATED_AT',
   };
   const reverseMapping = {
-    'price-high-low': true,
+    'price-high-low': true, // Only reverse for descending sorts
   };
 
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
@@ -103,8 +103,8 @@ export default function SearchPage() {
 
   const handleSortChange = (e) => {
     const params = new URLSearchParams(searchParams);
-    params.set('sort', e.target.value);
-    navigate(`/search?${params.toString()}`);
+    params.set('sort', e.target.value); // Update the sort parameter
+    navigate(`/search?${params.toString()}`); // Trigger navigation with updated parameters
   };
 
   return (
@@ -372,12 +372,14 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filterQuery }) {
+async function regularSearch({ request, context, filterQuery, sortKey, reverse }) {
   const { storefront } = context;
 
   try {
     const variables = {
       filterQuery,
+      sortKey,
+      reverse,
     };
 
     console.log('Query Variables:', variables); // Debugging
