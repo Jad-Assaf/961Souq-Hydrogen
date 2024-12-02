@@ -35,28 +35,17 @@ export async function loader({ request, context }) {
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
   console.log('Filter Query:', filterQuery); // Debugging
 
-  // Determine whether to use predictive or regular search
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery });
+  // Fetch products with the filter query
+  const result = await storefront
+    .query(FILTERED_PRODUCTS_QUERY, { variables: { filterQuery } })
+    .catch((error) => {
+      console.error('Error fetching products:', error);
+      return { products: { edges: [] } };
+    });
 
-  const result = await searchPromise.catch((error) => {
-    console.error('Search Error:', error);
-    return { term: '', result: null, error: error.message };
-  });
-
-  // Debug result to ensure product data is available
-  console.log('Search Result Products:', result?.products?.edges);
-
-  // Extract unique vendors
+  // Extract unique vendors from the fetched products
   const vendors = [
-    ...new Set(
-      result?.products?.edges?.map(({ node }) => {
-        console.log('Product Vendor:', node.vendor); // Debugging each vendor
-        return node.vendor;
-      }).filter(Boolean) // Remove undefined or empty values
-    ),
+    ...new Set(result?.products?.edges.map(({ node }) => node.vendor)),
   ].sort();
 
   console.log('Extracted Vendors:', vendors); // Debugging
@@ -67,14 +56,11 @@ export async function loader({ request, context }) {
   });
 }
 
-// SearchPage component
 export default function SearchPage() {
-  const { type, term, result, vendors = [], error } = useLoaderData();
+  const { result, vendors = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
-
-  console.log('Vendors in Component:', vendors); // Ensure vendors are passed correctly
 
   const handleFilterChange = (filterKey, value) => {
     const params = new URLSearchParams(searchParams);
@@ -153,9 +139,9 @@ const FILTERED_PRODUCTS_QUERY = `
     products(first: 250, query: $filterQuery, sortKey: RELEVANCE) {
       edges {
         node {
+          vendor
           id
           title
-          vendor
           handle
           priceRange {
             minVariantPrice {
