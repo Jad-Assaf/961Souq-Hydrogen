@@ -218,7 +218,7 @@ export default function SearchPage() {
               className="filter-toggle"
               aria-expanded={showPriceRange}
             >
-              Price Range {showPriceRange ? '-' : '+'}
+              Price Range <span>{showPriceRange ? '-' : '+'}</span>
             </button>
             {showPriceRange && (
               <div>

@@ -64,12 +64,13 @@ select#sort-select {
     text-align: left;
     cursor: pointer;
     display: block;
-    width: 100%;
+    width: 90%;
     padding: 0.5rem 0;
 }
 
 .filter-toggle:focus {
     outline: 1px solid #2172af;
+    border-radius: 10px;
 }
 
 .filter-option {
