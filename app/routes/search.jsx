@@ -105,6 +105,9 @@ export default function SearchPage() {
   const [showProductTypes, setShowProductTypes] = useState(false);
   const [showPriceRange, setShowPriceRange] = useState(false);
 
+  // State for mobile filters
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
 
@@ -171,7 +174,7 @@ export default function SearchPage() {
                           handleFilterChange('vendor', vendor, e.target.checked)
                         }
                       />
-                      <label className='filter-label' htmlFor={`vendor-${vendor}`}>{vendor}</label>
+                      <label className="filter-label" htmlFor={`vendor-${vendor}`}>{vendor}</label>
                     </div>
                   );
                 })}
@@ -203,7 +206,7 @@ export default function SearchPage() {
                           handleFilterChange('productType', productType, e.target.checked)
                         }
                       />
-                      <label className='filter-label' htmlFor={`productType-${productType}`}>{productType}</label>
+                      <label className="filter-label" htmlFor={`productType-${productType}`}>{productType}</label>
                     </div>
                   );
                 })}
@@ -267,31 +270,73 @@ export default function SearchPage() {
               </select>
             </div>
             <div className="search-results-grid">
-            {result.products.edges.map(({ node: product }) => (
-              <div className="product-card" key={product.id}>
-                <a href={`/products/${product.handle}`} className="product-link">
-                  {product.variants.nodes[0]?.image && (
-                    <Image
-                      data={product.variants.nodes[0].image}
-                      alt={product.title}
-                      width={150}
-                    />
-                  )}
-                  <div className="product-details">
-                    <h2 className="product-title">{product.title}</h2>
-                    <p className="product-price">
-                      <Money data={product.variants.nodes[0].price} />
-                    </p>
-                  </div>
-                </a>
-              </div>
-            ))}
+              {result.products.edges.map(({ node: product }) => (
+                <div className="product-card" key={product.id}>
+                  <a href={`/products/${product.handle}`} className="product-link">
+                    {product.variants.nodes[0]?.image && (
+                      <Image
+                        data={product.variants.nodes[0].image}
+                        alt={product.title}
+                        width={150}
+                      />
+                    )}
+                    <div className="product-details">
+                      <h2 className="product-title">{product.title}</h2>
+                      <p className="product-price">
+                        <Money data={product.variants.nodes[0].price} />
+                      </p>
+                    </div>
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
         ) : (
           <p>No results found</p>
         )}
       </div>
+
+      {/* Mobile Filters */}
+      <button
+        className="mobile-filters-toggle"
+        onClick={() => setIsMobileFiltersOpen(true)}
+      >
+        Filters
+      </button>
+
+      {isMobileFiltersOpen && (
+        <div className="mobile-filters-overlay">
+          <div className="mobile-filters-panel">
+            <button
+              className="close-mobile-filters"
+              onClick={() => setIsMobileFiltersOpen(false)}
+            >
+              Close
+            </button>
+            <fieldset>
+              <legend>Vendors</legend>
+              {vendors.map((vendor) => {
+                const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+                return (
+                  <div key={vendor}>
+                    <input
+                      type="checkbox"
+                      id={`mobile-vendor-${vendor}`}
+                      value={vendor}
+                      checked={isChecked}
+                      onChange={(e) =>
+                        handleFilterChange('vendor', vendor, e.target.checked)
+                      }
+                    />
+                    <label htmlFor={`mobile-vendor-${vendor}`}>{vendor}</label>
+                  </div>
+                );
+              })}
+            </fieldset>
+            {/* Add more fields like product types and price range */}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
