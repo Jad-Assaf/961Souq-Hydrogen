@@ -107,6 +107,9 @@ export default function SearchPage() {
 
   // State for mobile filters
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [mobileShowVendors, setMobileShowVendors] = useState(false);
+  const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
+  const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
 
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
@@ -314,26 +317,100 @@ export default function SearchPage() {
               Close
             </button>
             <fieldset>
-              <legend>Vendors</legend>
-              {vendors.map((vendor) => {
-                const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
-                return (
-                  <div key={vendor}>
-                    <input
-                      type="checkbox"
-                      id={`mobile-vendor-${vendor}`}
-                      value={vendor}
-                      checked={isChecked}
-                      onChange={(e) =>
-                        handleFilterChange('vendor', vendor, e.target.checked)
-                      }
-                    />
-                    <label htmlFor={`mobile-vendor-${vendor}`}>{vendor}</label>
-                  </div>
-                );
-              })}
+              <button
+                type="button"
+                onClick={() => setMobileShowVendors(!mobileShowVendors)}
+              >
+                Vendors <span>{mobileShowVendors ? '-' : '+'}</span>
+              </button>
+              {mobileShowVendors && (
+                <div>
+                  {vendors.map((vendor) => {
+                    const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+                    return (
+                      <div key={vendor}>
+                        <input
+                          type="checkbox"
+                          id={`mobile-vendor-${vendor}`}
+                          value={vendor}
+                          checked={isChecked}
+                          onChange={(e) =>
+                            handleFilterChange('vendor', vendor, e.target.checked)
+                          }
+                        />
+                        <label htmlFor={`mobile-vendor-${vendor}`}>{vendor}</label>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </fieldset>
-            {/* Add more fields like product types and price range */}
+
+            <fieldset>
+              <button
+                type="button"
+                onClick={() => setMobileShowProductTypes(!mobileShowProductTypes)}
+              >
+                Product Types <span>{mobileShowProductTypes ? '-' : '+'}</span>
+              </button>
+              {mobileShowProductTypes && (
+                <div>
+                  {productTypes.map((productType) => {
+                    const isChecked = searchParams.getAll('filter_productType').includes(productType);
+                    return (
+                      <div key={productType}>
+                        <input
+                          type="checkbox"
+                          id={`mobile-productType-${productType}`}
+                          value={productType}
+                          checked={isChecked}
+                          onChange={(e) =>
+                            handleFilterChange('productType', productType, e.target.checked)
+                          }
+                        />
+                        <label htmlFor={`mobile-productType-${productType}`}>{productType}</label>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </fieldset>
+
+            <fieldset>
+              <button
+                type="button"
+                onClick={() => setMobileShowPriceRange(!mobileShowPriceRange)}
+              >
+                Price Range <span>{mobileShowPriceRange ? '-' : '+'}</span>
+              </button>
+              {mobileShowPriceRange && (
+                <div>
+                  <div>
+                    <label>
+                      Min Price:
+                      <input
+                        type="number"
+                        name="minPrice"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      Max Price:
+                      <input
+                        type="number"
+                        name="maxPrice"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <button onClick={applyPriceFilter}>Apply</button>
+                </div>
+              )}
+            </fieldset>
           </div>
         </div>
       )}
