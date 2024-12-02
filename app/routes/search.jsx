@@ -219,6 +219,7 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
         product {
           handle
           title
+          vendor
         }
       }
     }
@@ -407,6 +408,7 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
     __typename
     id
     title
+    vendor
     description
     handle
     trackingParameters
