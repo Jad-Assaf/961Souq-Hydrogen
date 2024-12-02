@@ -20,16 +20,6 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  // Fetch all vendors
-  const allVendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-    variables: { filterQuery: '' }, // Fetch all products to get all vendors
-  });
-  const allVendors = [
-    ...new Set(
-      allVendorResult?.products?.edges.map(({ node }) => node.vendor)
-    ),
-  ].sort();
-
   // Extract filters
   const filterQueryParts = [];
   for (const [key, value] of searchParams.entries()) {
@@ -42,7 +32,7 @@ export async function loader({ request, context }) {
   const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
-  // Fetch products based on filters
+  // Determine the type of search
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
@@ -53,9 +43,16 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
+  // Extract vendors from the search results
+  const vendors = [
+    ...new Set(
+      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Filter valid vendors
+    ),
+  ].sort();
+
   return json({
     ...result,
-    vendors: allVendors, // Include all vendors irrespective of the filters
+    vendors, // Vendors based on the current search results
   });
 }
 
