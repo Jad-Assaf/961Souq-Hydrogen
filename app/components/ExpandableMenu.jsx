@@ -62,7 +62,7 @@ const ExpandableMenuItem = ({ item, index, isExpanded, isCollapsing, onCategoryC
         if ([0, 3, 6, 9].includes(index)) {
             // First, 4th, 7th, 10th: Align to the right
             dropdown.style.left = "100%";
-        } else if ([2, 5, 8].includes(index)) {
+        } else if ([2, 5, 8, 11].includes(index)) {
             // 3rd, 6th, 9th: Align to the left
             dropdown.style.left = "-100%";
         } else if ([12].includes(index)) {
