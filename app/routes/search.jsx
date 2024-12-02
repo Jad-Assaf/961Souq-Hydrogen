@@ -20,16 +20,6 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  // Fetch all vendors
-  const allVendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-    variables: { filterQuery: '' }, // Fetch all products to get all vendors
-  });
-  const allVendors = [
-    ...new Set(
-      allVendorResult?.products?.edges.map(({ node }) => node.vendor)
-    ),
-  ].sort();
-
   // Extract filters
   const filterQueryParts = [];
   for (const [key, value] of searchParams.entries()) {
@@ -53,9 +43,16 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
+  // Extract vendors from the current filtered results
+  const vendors = [
+    ...new Set(
+      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Filter out empty or undefined vendors
+    ),
+  ].sort();
+
   return json({
     ...result,
-    vendors: allVendors, // Include all vendors irrespective of the filters
+    vendors,
   });
 }
 
@@ -151,7 +148,7 @@ export default function SearchPage() {
 
 const FILTERED_PRODUCTS_QUERY = `
   query FilteredProducts($filterQuery: String!) {
-    products(first: 50, query: $filterQuery, sortKey: RELEVANCE) {
+    products(first: 50, query: $filterQuery) {
       edges {
         node {
           vendor
