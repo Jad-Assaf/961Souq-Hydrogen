@@ -31,6 +31,17 @@ export async function loader({ request, context }) {
   }
 
   const term = searchParams.get('q') || '';
+  const minPrice = searchParams.get('minPrice');
+  const maxPrice = searchParams.get('maxPrice');
+
+  // Add price conditions to filterQuery
+  if (minPrice) {
+    filterQueryParts.push(`variants.price:>${minPrice}`);
+  }
+  if (maxPrice) {
+    filterQueryParts.push(`variants.price:<${maxPrice}`);
+  }
+
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
   // Handle sorting
@@ -48,15 +59,11 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  // Extract price range
-  const minPrice = parseFloat(searchParams.get('minPrice')) || null;
-  const maxPrice = parseFloat(searchParams.get('maxPrice')) || null;
-
-  // Fetch products based on filters, sorting, and price range
+  // Fetch products based on filters and sorting
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice });
+    : regularSearch({ request, context, filterQuery, sortKey, reverse });
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
@@ -177,31 +184,31 @@ export default function SearchPage() {
           })}
         </fieldset>
 
-        <fieldset>
-          <legend>Price Range</legend>
-          <div>
-            <label>
-              Min Price:
-              <input
-                type="number"
-                name="minPrice"
-                value={searchParams.get('minPrice') || ''}
-                onChange={handlePriceChange}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Max Price:
-              <input
-                type="number"
-                name="maxPrice"
-                value={searchParams.get('maxPrice') || ''}
-                onChange={handlePriceChange}
-              />
-            </label>
-          </div>
-        </fieldset>
+         <fieldset>
+        <legend>Price Range</legend>
+        <div>
+          <label>
+            Min Price:
+            <input
+              type="number"
+              name="minPrice"
+              value={searchParams.get('minPrice') || ''}
+              onChange={handlePriceChange}
+            />
+          </label>
+        </div>
+        <div>
+          <label>
+            Max Price:
+            <input
+              type="number"
+              name="maxPrice"
+              value={searchParams.get('maxPrice') || ''}
+              onChange={handlePriceChange}
+            />
+          </label>
+        </div>
+      </fieldset>
       </div>
 
       {result?.products?.edges?.length > 0 ? (
@@ -234,16 +241,12 @@ export default function SearchPage() {
 }
 
 const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean, $minPrice: Float, $maxPrice: Float) {
+  query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(
-      first: 50, 
+      first: 250, 
       query: $filterQuery, 
       sortKey: $sortKey, 
-      reverse: $reverse, 
-      filters: [
-        { price: { min: $minPrice } }, 
-        { price: { max: $maxPrice } }
-      ]
+      reverse: $reverse
     ) {
       edges {
         node {
