@@ -171,7 +171,7 @@ export default function SearchPage() {
                           handleFilterChange('vendor', vendor, e.target.checked)
                         }
                       />
-                      <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
+                      <label className='filter-label' htmlFor={`vendor-${vendor}`}>{vendor}</label>
                     </div>
                   );
                 })}
@@ -203,7 +203,7 @@ export default function SearchPage() {
                           handleFilterChange('productType', productType, e.target.checked)
                         }
                       />
-                      <label htmlFor={`productType-${productType}`}>{productType}</label>
+                      <label className='filter-label' htmlFor={`productType-${productType}`}>{productType}</label>
                     </div>
                   );
                 })}

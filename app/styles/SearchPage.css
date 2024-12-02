@@ -18,6 +18,7 @@
 
 .search-filters-container fieldset {
     padding: 0;
+    margin: 0;
     width: 200px;
 }
 
@@ -38,7 +39,7 @@
     border-radius: 5px;
 }
 
-.search-results{
+.search-results {
     justify-content: flex-end;
 }
 
@@ -63,12 +64,18 @@ select#sort-select {
     font-weight: bold;
     text-align: left;
     cursor: pointer;
-    display: block;
+    display: flex;
     width: 90%;
     padding: 0.5rem 0;
     border-bottom: 1px solid grey;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
 .filter-option {
     margin-right: 10px;
+}
+
+.filter-label {
+    font-size: 14px;
 }
