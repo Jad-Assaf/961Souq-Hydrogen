@@ -43,16 +43,22 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
+  // Debug: Log the result structure
+  console.log('Search Result:', result);
+
   // Extract vendors from the search results
   const vendors = [
     ...new Set(
-      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Filter valid vendors
+      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Ensure non-empty vendors
     ),
   ].sort();
 
+  // Debug: Log extracted vendors
+  console.log('Extracted Vendors:', vendors);
+
   return json({
     ...result,
-    vendors, // Vendors based on the current search results
+    vendors: vendors || [], // Vendors based on the current search results
   });
 }
 
@@ -404,9 +410,9 @@ const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
 const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment PredictiveProduct on Product {
     __typename
+    vendor
     id
     title
-    vendor
     description
     handle
     trackingParameters
