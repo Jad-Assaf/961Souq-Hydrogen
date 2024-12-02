@@ -126,6 +126,8 @@ select#sort-select {
     padding: 20px;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
     animation: slideUp 0.3s ease-in-out;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .close-mobile-filters {
@@ -154,5 +156,5 @@ select#sort-select {
 .mobile-filters-panel fieldset button {
     display: flex;
     justify-content: space-between;
-    width: 50%;
+    width: 150px;
 }
