@@ -32,7 +32,7 @@ export async function loader({ request, context }) {
 
   const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
-  console.log('Filter Query:', filterQuery); // Debugging
+  console.log('Filter Query:', filterQuery);
 
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
@@ -47,7 +47,7 @@ export async function loader({ request, context }) {
   // Extract vendors from fetched products
   const vendors = [
     ...new Set(
-      result?.products?.edges.map(({ node }) => node.vendor)
+      result?.products?.edges.map(({ node }) => node.vendor).filter(Boolean)
     ),
   ].sort();
 
@@ -57,11 +57,12 @@ export async function loader({ request, context }) {
   });
 }
 
+
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, vendors, error } = useLoaderData();
+  const { result, vendors } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
@@ -305,37 +306,32 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filterQuery }) {
+async function regularSearch({ context, filterQuery }) {
   const { storefront } = context;
 
   try {
-    const variables = {
-      filterQuery,
-    };
+    const variables = { filterQuery };
 
-    console.log('Query Variables:', variables); // Debugging
+    console.log('Query Variables:', variables);
 
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
     if (!products?.edges?.length) {
-      console.error('No products found in response:', products); // Debugging
-      return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
+      console.error('No products found in response:', products);
+      return { products: { edges: [] } };
     }
 
     return {
-      term: filterQuery,
-      result: {
-        products,
-        total: products.edges.length,
-      },
+      products,
     };
   } catch (error) {
     console.error('Error during regular search:', error);
-    return { term: filterQuery, result: null, error: error.message };
+    return { products: { edges: [] }, error: error.message };
   }
 }
+
 
 /**
  * Predictive search query and fragments
