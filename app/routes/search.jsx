@@ -31,6 +31,7 @@ export async function loader({ request, context }) {
 
   const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  console.log('Filter Query:', filterQuery); // Debugging
 
   // Fetch products based on filters
   const searchPromise = regularSearch({ request, context, filterQuery });
@@ -40,12 +41,20 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
-  // Extract vendors from the filtered results
+  // Log the products to debug
+  console.log('Products:', result?.products?.edges);
+
+  // Extract vendors from the current filtered results
   const vendors = [
     ...new Set(
-      result?.products?.edges?.map(({ node }) => node.vendor).filter(Boolean) // Remove empty values
+      result?.products?.edges?.map(({ node }) => {
+        console.log('Vendor:', node.vendor); // Debugging each vendor
+        return node.vendor;
+      }).filter(Boolean) // Remove empty or undefined vendors
     ),
   ].sort();
+
+  console.log('Extracted Vendors:', vendors); // Debugging vendors array
 
   return json({
     ...result,
