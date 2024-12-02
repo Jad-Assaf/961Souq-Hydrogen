@@ -44,13 +44,17 @@ export async function loader({ request, context }) {
   });
 
   // Debug: Log the structure of products
-  console.log('Search Result:', result);
+  console.log('Predictive Search Result:', isPredictive ? result.products : null);
+  console.log('Regular Search Result:', !isPredictive ? result.products : null);
 
-  // Extract vendors based on structure
-  const products = isPredictive ? result?.products || [] : result?.products?.edges || [];
+  // Extract vendors based on the actual data structure
+  const products = isPredictive ? result.products || [] : result.products.edges || [];
   const vendors = [
     ...new Set(
-      products.map((item) => (item.node ? item.node.vendor : item.vendor)).filter(Boolean)
+      products.map((item) => {
+        // Handle different structures
+        return item.node ? item.node.vendor : item.vendor;
+      }).filter(Boolean) // Filter out undefined or null vendors
     ),
   ].sort();
 
