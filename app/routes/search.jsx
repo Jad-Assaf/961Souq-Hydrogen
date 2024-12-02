@@ -143,133 +143,134 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
-
-      {/* Filters */}
-      <div className="filters" style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-        <fieldset>
-          <legend onClick={() => setShowVendors(!showVendors)} style={{ cursor: 'pointer' }}>
-            Vendors {showVendors ? '-' : '+'}
-          </legend>
-          {showVendors && (
-            <div>
-              {vendors.map((vendor) => {
-                const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
-                return (
-                  <div key={vendor}>
-                    <input
-                      type="checkbox"
-                      id={`vendor-${vendor}`}
-                      value={vendor}
-                      checked={isChecked}
-                      onChange={(e) =>
-                        handleFilterChange('vendor', vendor, e.target.checked)
-                      }
-                    />
-                    <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </fieldset>
-
-        <fieldset>
-          <legend onClick={() => setShowProductTypes(!showProductTypes)} style={{ cursor: 'pointer' }}>
-            Product Types {showProductTypes ? '-' : '+'}
-          </legend>
-          {showProductTypes && (
-            <div>
-              {productTypes.map((productType) => {
-                const isChecked = searchParams.getAll('filter_productType').includes(productType);
-                return (
-                  <div key={productType}>
-                    <input
-                      type="checkbox"
-                      id={`productType-${productType}`}
-                      value={productType}
-                      checked={isChecked}
-                      onChange={(e) =>
-                        handleFilterChange('productType', productType, e.target.checked)
-                      }
-                    />
-                    <label htmlFor={`productType-${productType}`}>{productType}</label>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </fieldset>
-
-        <fieldset>
-          <legend onClick={() => setShowPriceRange(!showPriceRange)} style={{ cursor: 'pointer' }}>
-            Price Range {showPriceRange ? '-' : '+'}
-          </legend>
-          {showPriceRange && (
-            <div>
+      <div className="search-filters-container" style={{ display: 'flex'}}>
+        {/* Filters */}
+        <div className="filters" style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+          <fieldset>
+            <legend onClick={() => setShowVendors(!showVendors)} style={{ cursor: 'pointer' }}>
+              Vendors {showVendors ? '-' : '+'}
+            </legend>
+            {showVendors && (
               <div>
-                <label>
-                  Min Price:
-                  <input
-                    type="number"
-                    name="minPrice"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                  />
-                </label>
+                {vendors.map((vendor) => {
+                  const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+                  return (
+                    <div key={vendor}>
+                      <input
+                        type="checkbox"
+                        id={`vendor-${vendor}`}
+                        value={vendor}
+                        checked={isChecked}
+                        onChange={(e) =>
+                          handleFilterChange('vendor', vendor, e.target.checked)
+                        }
+                      />
+                      <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
+                    </div>
+                  );
+                })}
               </div>
+            )}
+          </fieldset>
+
+          <fieldset>
+            <legend onClick={() => setShowProductTypes(!showProductTypes)} style={{ cursor: 'pointer' }}>
+              Product Types {showProductTypes ? '-' : '+'}
+            </legend>
+            {showProductTypes && (
               <div>
-                <label>
-                  Max Price:
-                  <input
-                    type="number"
-                    name="maxPrice"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                  />
-                </label>
+                {productTypes.map((productType) => {
+                  const isChecked = searchParams.getAll('filter_productType').includes(productType);
+                  return (
+                    <div key={productType}>
+                      <input
+                        type="checkbox"
+                        id={`productType-${productType}`}
+                        value={productType}
+                        checked={isChecked}
+                        onChange={(e) =>
+                          handleFilterChange('productType', productType, e.target.checked)
+                        }
+                      />
+                      <label htmlFor={`productType-${productType}`}>{productType}</label>
+                    </div>
+                  );
+                })}
               </div>
-              <button onClick={applyPriceFilter}>Apply</button>
-            </div>
-          )}
-        </fieldset>
+            )}
+          </fieldset>
 
-        <div>
-          <label htmlFor="sort-select">Sort by:</label>
-          <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
-            <option value="featured">Featured</option>
-            <option value="price-low-high">Price: Low - High</option>
-            <option value="price-high-low">Price: High - Low</option>
-            <option value="best-selling">Best Selling</option>
-            <option value="newest">Newest</option>
-          </select>
-        </div>
-      </div>
-
-      {result?.products?.edges?.length > 0 ? (
-        <div className="search-results">
-          {result.products.edges.map(({ node: product }) => (
-            <div className="product-card" key={product.id}>
-              <a href={`/products/${product.handle}`} className="product-link">
-                {product.variants.nodes[0]?.image && (
-                  <Image
-                    data={product.variants.nodes[0].image}
-                    alt={product.title}
-                    width={150}
-                  />
-                )}
-                <div className="product-details">
-                  <h2 className="product-title">{product.title}</h2>
-                  <p className="product-price">
-                    <Money data={product.variants.nodes[0].price} />
-                  </p>
+          <fieldset>
+            <legend onClick={() => setShowPriceRange(!showPriceRange)} style={{ cursor: 'pointer' }}>
+              Price Range {showPriceRange ? '-' : '+'}
+            </legend>
+            {showPriceRange && (
+              <div>
+                <div>
+                  <label>
+                    Min Price:
+                    <input
+                      type="number"
+                      name="minPrice"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                    />
+                  </label>
                 </div>
-              </a>
-            </div>
-          ))}
+                <div>
+                  <label>
+                    Max Price:
+                    <input
+                      type="number"
+                      name="maxPrice"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                    />
+                  </label>
+                </div>
+                <button onClick={applyPriceFilter}>Apply</button>
+              </div>
+            )}
+          </fieldset>
+
+          <div>
+            <label htmlFor="sort-select">Sort by:</label>
+            <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
+              <option value="featured">Featured</option>
+              <option value="price-low-high">Price: Low - High</option>
+              <option value="price-high-low">Price: High - Low</option>
+              <option value="best-selling">Best Selling</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
         </div>
-      ) : (
-        <p>No results found</p>
-      )}
+
+        {result?.products?.edges?.length > 0 ? (
+          <div className="search-results">
+            {result.products.edges.map(({ node: product }) => (
+              <div className="product-card" key={product.id}>
+                <a href={`/products/${product.handle}`} className="product-link">
+                  {product.variants.nodes[0]?.image && (
+                    <Image
+                      data={product.variants.nodes[0].image}
+                      alt={product.title}
+                      width={150}
+                    />
+                  )}
+                  <div className="product-details">
+                    <h2 className="product-title">{product.title}</h2>
+                    <p className="product-price">
+                      <Money data={product.variants.nodes[0].price} />
+                    </p>
+                  </div>
+                </a>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No results found</p>
+        )}
+      </div>
     </div>
   );
 }
