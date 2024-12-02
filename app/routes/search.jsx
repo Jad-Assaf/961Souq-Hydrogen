@@ -209,6 +209,17 @@ export default function SearchPage() {
           </div>
           <button onClick={applyPriceFilter}>Apply</button>
         </fieldset>
+
+        <div>
+          <label htmlFor="sort-select">Sort by:</label>
+          <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
+            <option value="featured">Featured</option>
+            <option value="price-low-high">Price: Low - High</option>
+            <option value="price-high-low">Price: High - Low</option>
+            <option value="best-selling">Best Selling</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
       </div>
 
       {result?.products?.edges?.length > 0 ? (
