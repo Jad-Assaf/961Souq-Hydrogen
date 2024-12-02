@@ -62,9 +62,8 @@ export default function SearchPage() {
     event.preventDefault();
     const searchInput = formRef.current.querySelector('input[name="q"]');
     if (searchInput) {
-      const query = searchInput.value;
-      const modifiedQuery = query.split(' ').map((word) => word + '*').join(' ');
-      window.location.href = `/search?q=${encodeURIComponent(modifiedQuery)}`;
+      const query = searchInput.value.trim().replace(/\s+/g, '/'); // Replace spaces with slashes
+      window.location.href = `/search?q=${encodeURIComponent(query)}`;
     }
   };
 
