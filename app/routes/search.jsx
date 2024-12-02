@@ -20,6 +20,16 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
+  // Fetch all vendors
+  const allVendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+    variables: { filterQuery: '' }, // Fetch all products to get all vendors
+  });
+  const allVendors = [
+    ...new Set(
+      allVendorResult?.products?.edges.map(({ node }) => node.vendor)
+    ),
+  ].sort();
+
   // Extract filters
   const filterQueryParts = [];
   for (const [key, value] of searchParams.entries()) {
@@ -32,7 +42,7 @@ export async function loader({ request, context }) {
   const term = searchParams.get('q') || '';
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
-  // Determine the type of search
+  // Fetch products based on filters
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
@@ -43,26 +53,9 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
-  // Debug: Log the structure of products
-  console.log('Predictive Search Result:', isPredictive ? result.products : null);
-  console.log('Regular Search Result:', !isPredictive ? result.products : null);
-
-  // Extract vendors based on the actual data structure
-  const products = isPredictive ? result.products || [] : result.products.edges || [];
-  const vendors = [
-    ...new Set(
-      products.map((item) => {
-        // Handle different structures
-        return item.node ? item.node.vendor : item.vendor;
-      }).filter(Boolean) // Filter out undefined or null vendors
-    ),
-  ].sort();
-
-  console.log('Extracted Vendors:', vendors);
-
   return json({
     ...result,
-    vendors, // Vendors based on the current search results
+    vendors: allVendors, // Include all vendors irrespective of the filters
   });
 }
 
@@ -414,9 +407,9 @@ const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
 const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment PredictiveProduct on Product {
     __typename
-    vendor
     id
     title
+    vendor
     description
     handle
     trackingParameters
