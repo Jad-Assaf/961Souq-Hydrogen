@@ -47,9 +47,13 @@ export async function loader({ request, context }) {
   // Extract vendors from fetched products
   const vendors = [
     ...new Set(
-      result?.products?.edges.map(({ node }) => node.vendor)
+      result?.products?.edges
+        ?.map(({ node }) => node.vendor)
+        .filter(Boolean) // Remove undefined or empty values
     ),
   ].sort();
+
+  console.log('Extracted Vendors:', vendors); // Debugging
 
   return json({
     ...result,
@@ -61,10 +65,12 @@ export async function loader({ request, context }) {
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, vendors, error } = useLoaderData();
+  const { type, term, result, vendors = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
+
+  console.log('Vendors in Component:', vendors); // Debugging
 
   const handleFilterChange = (filterKey, value) => {
     const params = new URLSearchParams(searchParams);
