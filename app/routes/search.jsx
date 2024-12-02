@@ -36,7 +36,7 @@ export async function loader({ request, context }) {
   console.log('Filter Query:', filterQuery); // Debugging
 
   // Fetch products with the filter query
-  const result = await storefront
+  const { products } = await storefront
     .query(FILTERED_PRODUCTS_QUERY, { variables: { filterQuery } })
     .catch((error) => {
       console.error('Error fetching products:', error);
@@ -45,19 +45,20 @@ export async function loader({ request, context }) {
 
   // Extract unique vendors from the fetched products
   const vendors = [
-    ...new Set(result?.products?.edges.map(({ node }) => node.vendor)),
+    ...new Set(products?.edges.map(({ node }) => node.vendor).filter(Boolean)),
   ].sort();
 
   console.log('Extracted Vendors:', vendors); // Debugging
+  console.log('Fetched Products:', products?.edges); // Debugging
 
   return json({
-    ...result,
+    products,
     vendors,
   });
 }
 
 export default function SearchPage() {
-  const { result, vendors = [], error } = useLoaderData();
+  const { products = { edges: [] }, vendors = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
@@ -82,17 +83,11 @@ export default function SearchPage() {
           Vendor:
           <select onChange={(e) => handleFilterChange('vendor', e.target.value)}>
             <option value="">All</option>
-            {vendors.length > 0 ? (
-              vendors.map((vendor) => (
-                <option key={vendor} value={vendor}>
-                  {vendor}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>
-                No vendors available
+            {vendors.map((vendor) => (
+              <option key={vendor} value={vendor}>
+                {vendor}
               </option>
-            )}
+            ))}
           </select>
         </label>
         <label>
@@ -105,9 +100,9 @@ export default function SearchPage() {
         </label>
       </div>
 
-      {result?.products?.edges?.length > 0 ? (
+      {products?.edges?.length > 0 ? (
         <div className="search-results">
-          {result.products.edges.map(({ node: product }) => (
+          {products.edges.map(({ node: product }) => (
             <div className="product-card" key={product.id}>
               <a href={`/products/${product.handle}`} className="product-link">
                 {product.variants.nodes[0]?.image && (
