@@ -99,6 +99,11 @@ export default function SearchPage() {
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
 
+  // State for collapsible filters
+  const [showVendors, setShowVendors] = useState(false);
+  const [showProductTypes, setShowProductTypes] = useState(false);
+  const [showPriceRange, setShowPriceRange] = useState(false);
+
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
 
@@ -140,74 +145,92 @@ export default function SearchPage() {
       <h1>Search Results</h1>
 
       {/* Filters */}
-      <div className="filters" style={{ display: 'flex', gap: '1rem' }}>
+      <div className="filters" style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
         <fieldset>
-          <legend>Vendors</legend>
-          {vendors.map((vendor) => {
-            const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
-            return (
-              <div key={vendor}>
-                <input
-                  type="checkbox"
-                  id={`vendor-${vendor}`}
-                  value={vendor}
-                  checked={isChecked}
-                  onChange={(e) =>
-                    handleFilterChange('vendor', vendor, e.target.checked)
-                  }
-                />
-                <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
-              </div>
-            );
-          })}
+          <legend onClick={() => setShowVendors(!showVendors)} style={{ cursor: 'pointer' }}>
+            Vendors {showVendors ? '-' : '+'}
+          </legend>
+          {showVendors && (
+            <div>
+              {vendors.map((vendor) => {
+                const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+                return (
+                  <div key={vendor}>
+                    <input
+                      type="checkbox"
+                      id={`vendor-${vendor}`}
+                      value={vendor}
+                      checked={isChecked}
+                      onChange={(e) =>
+                        handleFilterChange('vendor', vendor, e.target.checked)
+                      }
+                    />
+                    <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </fieldset>
 
         <fieldset>
-          <legend>Product Types</legend>
-          {productTypes.map((productType) => {
-            const isChecked = searchParams.getAll('filter_productType').includes(productType);
-            return (
-              <div key={productType}>
-                <input
-                  type="checkbox"
-                  id={`productType-${productType}`}
-                  value={productType}
-                  checked={isChecked}
-                  onChange={(e) =>
-                    handleFilterChange('productType', productType, e.target.checked)
-                  }
-                />
-                <label htmlFor={`productType-${productType}`}>{productType}</label>
-              </div>
-            );
-          })}
+          <legend onClick={() => setShowProductTypes(!showProductTypes)} style={{ cursor: 'pointer' }}>
+            Product Types {showProductTypes ? '-' : '+'}
+          </legend>
+          {showProductTypes && (
+            <div>
+              {productTypes.map((productType) => {
+                const isChecked = searchParams.getAll('filter_productType').includes(productType);
+                return (
+                  <div key={productType}>
+                    <input
+                      type="checkbox"
+                      id={`productType-${productType}`}
+                      value={productType}
+                      checked={isChecked}
+                      onChange={(e) =>
+                        handleFilterChange('productType', productType, e.target.checked)
+                      }
+                    />
+                    <label htmlFor={`productType-${productType}`}>{productType}</label>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </fieldset>
 
         <fieldset>
-          <legend>Price Range</legend>
-          <div>
-            <label>
-              Min Price:
-              <input
-                type="number"
-                name="minPrice"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Max Price:
-              <input
-                type="number"
-                name="maxPrice"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-              />
-            </label>
-          </div>
-          <button onClick={applyPriceFilter}>Apply</button>
+          <legend onClick={() => setShowPriceRange(!showPriceRange)} style={{ cursor: 'pointer' }}>
+            Price Range {showPriceRange ? '-' : '+'}
+          </legend>
+          {showPriceRange && (
+            <div>
+              <div>
+                <label>
+                  Min Price:
+                  <input
+                    type="number"
+                    name="minPrice"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div>
+                <label>
+                  Max Price:
+                  <input
+                    type="number"
+                    name="maxPrice"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                  />
+                </label>
+              </div>
+              <button onClick={applyPriceFilter}>Apply</button>
+            </div>
+          )}
         </fieldset>
 
         <div>
