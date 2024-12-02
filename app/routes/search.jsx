@@ -51,14 +51,22 @@ export async function loader({ request, context }) {
     ),
   ].sort();
 
+  // Extract product types from filtered products
+  const filteredProductTypes = [
+    ...new Set(
+      result?.result?.products?.edges.map(({ node }) => node.productType)
+    ),
+  ].sort();
+
   return json({
     ...result,
     vendors: filteredVendors, // Filtered vendors based on current search results
+    productTypes: filteredProductTypes, // Filtered product types based on current search results
   });
 }
 
 export default function SearchPage() {
-  const { type, term, result, vendors = [], error } = useLoaderData();
+  const { type, term, result, vendors = [], productTypes = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -84,7 +92,7 @@ export default function SearchPage() {
       <h1>Search Results</h1>
 
       {/* Filters */}
-      <div className="filters">
+      <div className="filters" style={{ display: 'flex', gap: '1rem' }}>
         <fieldset>
           <legend>Vendors</legend>
           {vendors.map((vendor) => {
@@ -105,6 +113,28 @@ export default function SearchPage() {
             );
           })}
         </fieldset>
+
+        <fieldset>
+          <legend>Product Types</legend>
+          {productTypes.map((productType) => {
+            const isChecked = searchParams.getAll('filter_productType').includes(productType);
+            return (
+              <div key={productType}>
+                <input
+                  type="checkbox"
+                  id={`productType-${productType}`}
+                  value={productType}
+                  checked={isChecked}
+                  onChange={(e) =>
+                    handleFilterChange('productType', productType, e.target.checked)
+                  }
+                />
+                <label htmlFor={`productType-${productType}`}>{productType}</label>
+              </div>
+            );
+          })}
+        </fieldset>
+
         <fieldset>
           <legend>Price</legend>
           <select
@@ -155,6 +185,7 @@ const FILTERED_PRODUCTS_QUERY = `
           id
           title
           handle
+          productType
           priceRange {
             minVariantPrice {
               amount
