@@ -55,3 +55,23 @@ select#sort-select {
     margin-left: 5px;
     font-size: 14px;
 }
+
+.filter-toggle {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0;
+}
+
+.filter-toggle:focus {
+    outline: 2px solid #0073e6;
+}
+
+.filter-option {
+    margin-left: 1rem;
+}

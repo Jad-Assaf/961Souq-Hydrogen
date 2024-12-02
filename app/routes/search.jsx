@@ -144,19 +144,24 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <div className="search-filters-container" style={{ display: 'flex'}}>
+      <div className="search-filters-container" style={{ display: 'flex' }}>
         {/* Filters */}
-        <div className="filters" style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+        <div className="filters" style={{ display: 'flex', gap: '1rem', flexDirection: 'column', marginTop: '50px' }}>
           <fieldset>
-            <legend onClick={() => setShowVendors(!showVendors)} style={{ cursor: 'pointer' }}>
+            <button
+              type="button"
+              onClick={() => setShowVendors(!showVendors)}
+              className="filter-toggle"
+              aria-expanded={showVendors}
+            >
               Vendors {showVendors ? '-' : '+'}
-            </legend>
+            </button>
             {showVendors && (
               <div>
                 {vendors.map((vendor) => {
                   const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
                   return (
-                    <div key={vendor} className='filter-option'>
+                    <div key={vendor} className="filter-option">
                       <input
                         type="checkbox"
                         id={`vendor-${vendor}`}
@@ -175,15 +180,20 @@ export default function SearchPage() {
           </fieldset>
 
           <fieldset>
-            <legend onClick={() => setShowProductTypes(!showProductTypes)} style={{ cursor: 'pointer' }}>
+            <button
+              type="button"
+              onClick={() => setShowProductTypes(!showProductTypes)}
+              className="filter-toggle"
+              aria-expanded={showProductTypes}
+            >
               Product Types {showProductTypes ? '-' : '+'}
-            </legend>
+            </button>
             {showProductTypes && (
               <div>
                 {productTypes.map((productType) => {
                   const isChecked = searchParams.getAll('filter_productType').includes(productType);
                   return (
-                    <div key={productType} className='filter-option'>
+                    <div key={productType} className="filter-option">
                       <input
                         type="checkbox"
                         id={`productType-${productType}`}
@@ -202,9 +212,14 @@ export default function SearchPage() {
           </fieldset>
 
           <fieldset>
-            <legend onClick={() => setShowPriceRange(!showPriceRange)} style={{ cursor: 'pointer' }}>
+            <button
+              type="button"
+              onClick={() => setShowPriceRange(!showPriceRange)}
+              className="filter-toggle"
+              aria-expanded={showPriceRange}
+            >
               Price Range {showPriceRange ? '-' : '+'}
-            </legend>
+            </button>
             {showPriceRange && (
               <div>
                 <div>
@@ -215,7 +230,7 @@ export default function SearchPage() {
                       name="minPrice"
                       value={minPrice}
                       onChange={(e) => setMinPrice(e.target.value)}
-                      className='price-filter-btn'
+                      className="price-filter-btn"
                     />
                   </label>
                 </div>
@@ -227,54 +242,17 @@ export default function SearchPage() {
                       name="maxPrice"
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(e.target.value)}
-                      className='price-filter-btn'
+                      className="price-filter-btn"
                     />
                   </label>
                 </div>
-                <button className='price-filter-apply' onClick={applyPriceFilter}>Apply</button>
+                <button className="price-filter-apply" onClick={applyPriceFilter}>
+                  Apply
+                </button>
               </div>
             )}
           </fieldset>
-
         </div>
-
-        {result?.products?.edges?.length > 0 ? (
-          <div className="search-results">
-            <div>
-              <label htmlFor="sort-select">Sort by:</label>
-              <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
-                <option value="featured">Featured</option>
-                <option value="price-low-high">Price: Low - High</option>
-                <option value="price-high-low">Price: High - Low</option>
-                <option value="best-selling">Best Selling</option>
-                <option value="newest">Newest</option>
-              </select>
-            </div>
-            <div className="search-results-grid">
-            {result.products.edges.map(({ node: product }) => (
-              <div className="product-card" key={product.id}>
-                <a href={`/products/${product.handle}`} className="product-link">
-                  {product.variants.nodes[0]?.image && (
-                    <Image
-                      data={product.variants.nodes[0].image}
-                      alt={product.title}
-                      width={150}
-                    />
-                  )}
-                  <div className="product-details">
-                    <h2 className="product-title">{product.title}</h2>
-                    <p className="product-price">
-                      <Money data={product.variants.nodes[0].price} />
-                    </p>
-                  </div>
-                </a>
-              </div>
-            ))}
-            </div>
-          </div>
-        ) : (
-          <p>No results found</p>
-        )}
       </div>
     </div>
   );
