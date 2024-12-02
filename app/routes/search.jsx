@@ -154,7 +154,7 @@ export default function SearchPage() {
               className="filter-toggle"
               aria-expanded={showVendors}
             >
-              Vendors {showVendors ? '-' : '+'}
+              Vendors <span>{showVendors ? '-' : '+'}</span>
             </button>
             {showVendors && (
               <div>
@@ -186,7 +186,7 @@ export default function SearchPage() {
               className="filter-toggle"
               aria-expanded={showProductTypes}
             >
-              Product Types {showProductTypes ? '-' : '+'}
+              Product Types <span>{showProductTypes ? '-' : '+'}</span>
             </button>
             {showProductTypes && (
               <div>
