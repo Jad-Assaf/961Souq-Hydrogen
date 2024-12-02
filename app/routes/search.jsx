@@ -18,13 +18,6 @@ export const meta = () => {
  */
 export async function loader({ request, context }) {
   const { storefront } = context;
-
-  // Fetch vendors
-  const vendorResult = await storefront.query(VENDORS_QUERY);
-  const vendors = [
-    ...new Set(vendorResult?.products?.edges.map(({ node }) => node.vendor)),
-  ].sort();
-
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
@@ -51,23 +44,18 @@ export async function loader({ request, context }) {
     return { term: '', result: null, error: error.message };
   });
 
+  // Extract vendors from fetched products
+  const vendors = [
+    ...new Set(
+      result?.products?.edges.map(({ node }) => node.vendor)
+    ),
+  ].sort();
+
   return json({
     ...result,
     vendors,
   });
 }
-
-const VENDORS_QUERY = `
-  query Vendors {
-    products(first: 250) {
-      edges {
-        node {
-          vendor
-        }
-      }
-    }
-  }
-`;
 
 /**
  * Renders the /search route
