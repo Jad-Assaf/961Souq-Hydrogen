@@ -95,14 +95,16 @@ export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  // Local state for price range
+  const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
+  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
+
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
 
     if (checked) {
-      // Add the selected filter
       params.append(`filter_${filterKey}`, value);
     } else {
-      // Remove the unselected filter
       const currentFilters = params.getAll(`filter_${filterKey}`);
       const updatedFilters = currentFilters.filter((item) => item !== value);
       params.delete(`filter_${filterKey}`);
@@ -114,13 +116,22 @@ export default function SearchPage() {
 
   const handleSortChange = (e) => {
     const params = new URLSearchParams(searchParams);
-    params.set('sort', e.target.value); // Update the sort parameter
-    navigate(`/search?${params.toString()}`); // Trigger navigation with updated parameters
+    params.set('sort', e.target.value);
+    navigate(`/search?${params.toString()}`);
   };
 
-  const handlePriceChange = (e) => {
+  const applyPriceFilter = () => {
     const params = new URLSearchParams(searchParams);
-    params.set(e.target.name, e.target.value); // Update minPrice or maxPrice
+    if (minPrice) {
+      params.set('minPrice', minPrice);
+    } else {
+      params.delete('minPrice');
+    }
+    if (maxPrice) {
+      params.set('maxPrice', maxPrice);
+    } else {
+      params.delete('maxPrice');
+    }
     navigate(`/search?${params.toString()}`);
   };
 
@@ -172,42 +183,32 @@ export default function SearchPage() {
           })}
         </fieldset>
 
-         <fieldset>
-        <legend>Price Range</legend>
-        <div>
-          <label>
-            Min Price:
-            <input
-              type="number"
-              name="minPrice"
-              value={searchParams.get('minPrice') || ''}
-              onChange={handlePriceChange}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Max Price:
-            <input
-              type="number"
-              name="maxPrice"
-              value={searchParams.get('maxPrice') || ''}
-              onChange={handlePriceChange}
-            />
-          </label>
-        </div>
-      </fieldset>
-        {/* Sorting */}
-        <div>
-          <label htmlFor="sort-select">Sort by:</label>
-          <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
-            <option value="featured">Featured</option>
-            <option value="price-low-high">Price: Low - High</option>
-            <option value="price-high-low">Price: High - Low</option>
-            <option value="best-selling">Best Selling</option>
-            <option value="newest">Newest</option>
-          </select>
-        </div>
+        <fieldset>
+          <legend>Price Range</legend>
+          <div>
+            <label>
+              Min Price:
+              <input
+                type="number"
+                name="minPrice"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Max Price:
+              <input
+                type="number"
+                name="maxPrice"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+              />
+            </label>
+          </div>
+          <button onClick={applyPriceFilter}>Apply</button>
+        </fieldset>
       </div>
 
       {result?.products?.edges?.length > 0 ? (
