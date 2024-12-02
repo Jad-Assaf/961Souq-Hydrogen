@@ -58,17 +58,6 @@ export default function SearchPage() {
   const navigate = useNavigate();
   const formRef = useRef(null);
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-    const searchInput = formRef.current.querySelector('input[name="q"]');
-    if (searchInput) {
-      // Replace spaces with dashes
-      const query = searchInput.value.trim().replace(/\s+/g, '-');
-      // Use the query directly without encoding spaces as `%20`
-      window.location.href = `/search?q=${query}`;
-    }
-  };
-
   const handleFilterChange = (filterKey, value) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
@@ -82,7 +71,6 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
-      <SearchForm ref={formRef} onSubmit={handleFormSubmit} />
 
       {/* Filters */}
       <div className="filters">
