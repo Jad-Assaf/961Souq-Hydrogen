@@ -19,6 +19,15 @@ export const meta = () => {
 // loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
+
+  // Fetch all vendors
+  const vendorResult = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+    variables: { filterQuery: '' }, // Fetch all products to get all vendors
+  });
+  const allVendors = [
+    ...new Set(vendorResult?.products?.edges.map(({ node }) => node.vendor)),
+  ].sort();
+
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
@@ -35,41 +44,45 @@ export async function loader({ request, context }) {
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
   console.log('Filter Query:', filterQuery); // Debugging
 
-  // Fetch products with the filter query
-  const { products } = await storefront
-    .query(FILTERED_PRODUCTS_QUERY, { variables: { filterQuery } })
-    .catch((error) => {
-      console.error('Error fetching products:', error);
-      return { products: { edges: [] } };
-    });
+  const isPredictive = searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context, filterQuery });
 
-  // Extract unique vendors from the fetched products
-  const vendors = [
-    ...new Set(products?.edges.map(({ node }) => node.vendor).filter(Boolean)),
-  ].sort();
-
-  console.log('Extracted Vendors:', vendors); // Debugging
-  console.log('Fetched Products:', products?.edges); // Debugging
+  const result = await searchPromise.catch((error) => {
+    console.error('Search Error:', error);
+    return { term: '', result: null, error: error.message };
+  });
 
   return json({
-    products,
-    vendors,
+    ...result,
+    vendors: allVendors,
   });
 }
 
 export default function SearchPage() {
-  const { products = { edges: [] }, vendors = [], error } = useLoaderData();
+  const { type, term, result, vendors = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const formRef = useRef(null);
 
-  const handleFilterChange = (filterKey, value) => {
+  console.log('Vendors in Component:', vendors); // Debugging
+
+  const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set(`filter_${filterKey}`, value);
+    const currentFilters = params.getAll(`filter_${filterKey}`);
+
+    if (checked) {
+      // Add the selected filter
+      params.append(`filter_${filterKey}`, value);
     } else {
+      // Remove the unselected filter
       params.delete(`filter_${filterKey}`);
+      currentFilters
+        .filter((item) => item !== value)
+        .forEach((item) => params.append(`filter_${filterKey}`, item));
     }
+
     navigate(`/search?${params.toString()}`);
   };
 
@@ -79,30 +92,41 @@ export default function SearchPage() {
 
       {/* Filters */}
       <div className="filters">
-        <label>
-          Vendor:
-          <select onChange={(e) => handleFilterChange('vendor', e.target.value)}>
-            <option value="">All</option>
-            {vendors.map((vendor) => (
-              <option key={vendor} value={vendor}>
-                {vendor}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Price:
-          <select onChange={(e) => handleFilterChange('price', e.target.value)}>
+        <fieldset>
+          <legend>Vendors</legend>
+          {vendors.map((vendor) => {
+            const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+            return (
+              <div key={vendor}>
+                <input
+                  type="checkbox"
+                  id={`vendor-${vendor}`}
+                  value={vendor}
+                  checked={isChecked}
+                  onChange={(e) =>
+                    handleFilterChange('vendor', vendor, e.target.checked)
+                  }
+                />
+                <label htmlFor={`vendor-${vendor}`}>{vendor}</label>
+              </div>
+            );
+          })}
+        </fieldset>
+        <fieldset>
+          <legend>Price</legend>
+          <select
+            onChange={(e) => handleFilterChange('price', e.target.value, true)}
+          >
             <option value="">All</option>
             <option value=">100">Over $100</option>
             <option value="<100">Under $100</option>
           </select>
-        </label>
+        </fieldset>
       </div>
 
-      {products?.edges?.length > 0 ? (
+      {result?.products?.edges?.length > 0 ? (
         <div className="search-results">
-          {products.edges.map(({ node: product }) => (
+          {result.products.edges.map(({ node: product }) => (
             <div className="product-card" key={product.id}>
               <a href={`/products/${product.handle}`} className="product-link">
                 {product.variants.nodes[0]?.image && (
