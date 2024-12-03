@@ -117,20 +117,26 @@ export default function SearchPage() {
 
   const startDrag = (e) => {
     const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
-    const initialHeight = mobileFiltersHeight;
 
-    if (startY === undefined) return;
+    if (startY === undefined) {
+      console.log("Start position undefined"); // Debugging
+      return;
+    }
+
+    console.log("Drag started at:", startY); // Debugging
+
+    const initialHeight = mobileFiltersHeight;
 
     const handleDrag = (event) => {
       const currentY = event.clientY || (event.touches && event.touches[0]?.clientY);
-      if (currentY === undefined) return;
 
-      const newHeight = initialHeight + (startY - currentY);
-
-      if (newHeight < 100) {
-        closeMobileFilters(); // Close if height is too small
+      if (currentY === undefined) {
+        console.log("Current position undefined"); // Debugging
         return;
       }
+
+      const newHeight = initialHeight + (startY - currentY);
+      console.log("Dragging... Current Y:", currentY, "New Height:", newHeight); // Debugging
 
       if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
         setMobileFiltersHeight(newHeight);
@@ -149,6 +155,10 @@ export default function SearchPage() {
     document.addEventListener('mouseup', stopDrag);
     document.addEventListener('touchmove', handleDrag, { passive: false });
     document.addEventListener('touchend', stopDrag, { passive: false });
+
+    if (e.type === 'touchstart') {
+      e.preventDefault(); // Prevent passive event issues
+    }
   };
 
   useEffect(() => {
