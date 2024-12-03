@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Image } from "@shopify/hydrogen";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-/**
- * BannerSlideshow component that cycles through banners with animations and swipe support.
- */
 export function BannerSlideshow({ banners, interval = 10000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -16,7 +13,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
         }, interval);
 
         return () => clearInterval(timer);
-    }, [banners, interval]);
+    }, [banners.length, interval]);
 
     const handleDragEnd = (event, info) => {
         const { offset } = info;
@@ -35,65 +32,84 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
         }
     };
 
-    return (
-        <div className="banner-slideshow" style={styles.bannerSlideshow}>
-            {banners.map((banner, index) => (
+    // Memoize banners to avoid unnecessary re-renders
+    const renderedBanners = useMemo(
+        () =>
+            banners.map((banner, index) => (
                 <motion.div
                     key={index}
-                    className={`banner-slide ${index === currentIndex ? "active" : "inactive"}`}
-                    initial={{ opacity: 0, x: 50 }} // Start with opacity 0 and slide in from the right
-                    animate={index === currentIndex ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }} // Animate to visible or fade out
-                    exit={{ opacity: 0, x: -50 }} // Exit animation for inactive slides
-                    transition={{ duration: 0.8 }} // Smooth animation
-                    drag="x" // Enable horizontal dragging
-                    dragConstraints={{ left: 0, right: 0 }} // Constrain drag to horizontal direction
-                    onDragEnd={handleDragEnd} // Handle swipe gesture
+                    className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                        }`}
+                    initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }} // Direction-aware animation
+                    animate={
+                        index === currentIndex
+                            ? { opacity: 1, x: 0 }
+                            : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                    }
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    drag="x"
+                    dragElastic={0.2} // Allow slight elasticity for a smoother drag
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={handleDragEnd}
                     style={styles.bannerSlide}
                 >
-                    {index === currentIndex && (
-                        <a href={banner.link} target="_self" rel="noopener noreferrer">
-                            <Image
-                                data={{
-                                    url: banner.imageUrl,
-                                    altText: `Banner ${index + 1}`,
-                                }}
-                                width="100vw"
-                                height="auto"
-                                aspectRatio="16/9"
-                                sizes="(max-width: 768px) 100vw, 1920px"
-                                className="banner-image"
-                                style={styles.bannerImage}
-                            />
-                        </a>
-                    )}
+                    <a
+                        href={banner.link}
+                        target="_self"
+                        rel="noopener noreferrer"
+                        style={styles.link}
+                    >
+                        <Image
+                            data={{
+                                url: banner.imageUrl,
+                                altText: `Banner ${index + 1}`,
+                            }}
+                            width="100vw"
+                            height="auto"
+                            aspectRatio="16/9"
+                            sizes="(max-width: 768px) 100vw, 1920px"
+                            className="banner-image"
+                            style={styles.bannerImage}
+                        />
+                    </a>
                 </motion.div>
-            ))}
+            )),
+        [banners, currentIndex]
+    );
+
+    return (
+        <div className="banner-slideshow" style={styles.bannerSlideshow}>
+            <AnimatePresence initial={false}>{renderedBanners[currentIndex]}</AnimatePresence>
         </div>
     );
 }
 
 const styles = {
     bannerSlideshow: {
-        position: 'relative',
-        width: '100vw',
-        height: '300px',
-        overflow: 'hidden',
+        position: "relative",
+        width: "100vw",
+        height: "300px",
+        overflow: "hidden",
     },
     bannerSlide: {
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        opacity: '0',
-        transition: 'opacity 1s ease-in-out',
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
     },
     bannerImage: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        display: 'block',
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+    },
+    link: {
+        width: "100%",
+        height: "100%",
+        display: "block",
     },
 };

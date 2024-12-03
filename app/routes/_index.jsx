@@ -258,7 +258,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
         url
         altText
       }
-      products(first: 15) {
+      products(first: 10) {
         nodes {
           id
           title
