@@ -116,31 +116,27 @@ export default function SearchPage() {
   );
 
   const handleDragStart = (e) => {
-    e.preventDefault(); // Prevent default action
-    const startY = e.clientY || e.touches[0].clientY;
-    const startHeight = mobileFiltersHeight;
+  const startY = e.touches[0].clientY;
+  const startHeight = mobileFiltersHeight;
 
-    const handleDragMove = (event) => {
-      event.preventDefault(); // Prevent default scrolling
-      const currentY = event.clientY || event.touches[0].clientY;
-      const newHeight = startHeight + (startY - currentY);
-      if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
-        setMobileFiltersHeight(newHeight);
-      }
-    };
-
-    const handleDragEnd = () => {
-      window.removeEventListener('mousemove', handleDragMove, { passive: false });
-      window.removeEventListener('mouseup', handleDragEnd, { passive: false });
-      window.removeEventListener('touchmove', handleDragMove, { passive: false });
-      window.removeEventListener('touchend', handleDragEnd, { passive: false });
-    };
-
-    window.addEventListener('mousemove', handleDragMove, { passive: false });
-    window.addEventListener('mouseup', handleDragEnd, { passive: false });
-    window.addEventListener('touchmove', handleDragMove, { passive: false });
-    window.addEventListener('touchend', handleDragEnd, { passive: false });
+  const handleDragMove = (event) => {
+    const currentY = event.touches[0].clientY;
+    const newHeight = startHeight + (startY - currentY);
+    if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
+      setMobileFiltersHeight(newHeight);
+    }
+    event.preventDefault(); // Prevent scrolling while dragging
   };
+
+  const handleDragEnd = () => {
+    window.removeEventListener('touchmove', handleDragMove, { passive: false });
+    window.removeEventListener('touchend', handleDragEnd, { passive: false });
+  };
+
+  window.addEventListener('touchmove', handleDragMove, { passive: false });
+  window.addEventListener('touchend', handleDragEnd, { passive: false });
+};
+
 
   const closeMobileFilters = () => {
     setIsClosing(true); // Trigger closing animation
