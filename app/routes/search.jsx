@@ -147,8 +147,8 @@ export default function SearchPage() {
       console.log("Drag stopped"); // Debugging
       document.removeEventListener('mousemove', handleDrag);
       document.removeEventListener('mouseup', stopDrag);
-      document.removeEventListener('touchmove', handleDrag);
-      document.removeEventListener('touchend', stopDrag);
+      document.removeEventListener('touchmove', handleDrag, { passive: false });
+      document.removeEventListener('touchend', stopDrag, { passive: false });
     };
 
     document.addEventListener('mousemove', handleDrag);
@@ -160,6 +160,8 @@ export default function SearchPage() {
       e.preventDefault(); // Prevent passive event issues
     }
   };
+
+  document.addEventListener('touchstart', startDrag, { passive: false });
 
   useEffect(() => {
     if (isMobileFiltersOpen) {
