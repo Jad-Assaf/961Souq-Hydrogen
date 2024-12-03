@@ -144,14 +144,6 @@ export default function SearchPage() {
     document.addEventListener('touchend', stopDrag, { passive: false });
   };
 
-  useEffect(() => {
-    if (isMobileFiltersOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }, [isMobileFiltersOpen]);
-
   const closeMobileFilters = () => {
     setIsClosing(true); // Trigger closing animation
     setTimeout(() => {
