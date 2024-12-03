@@ -1,138 +1,57 @@
-// CollectionSlider.jsx (CategorySlider.jsx)
+// CategorySlider.jsx
 import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 
-export const CategorySlider = ({ menu, sliderCollections }) => {
-    if (!menu || !menu.items) {
-        return null; // or some fallback UI
-    }
-
-    const [expandedCategories, setExpandedCategories] = useState([]);
-
-    // Create a mapping from collection handle to collection object
-    const collectionMap = {};
-    sliderCollections.forEach((collection) => {
-        collectionMap[collection.handle] = collection;
-    });
-
-    const handleCategoryClick = (id) => {
-        setExpandedCategories((prevExpanded) =>
-            prevExpanded.includes(id)
-                ? prevExpanded.filter((categoryId) => categoryId !== id)
-                : [...prevExpanded, id]
-        );
-    };
-
+export const CategorySlider = ({ sliderCollections }) => {
     return (
         <div className="slide-con">
             <h3 className="cat-h3">Shop By Categories</h3>
             <div className="category-slider">
-                {menu.items.map((item, index) => (
-                    <CategoryItem
-                        key={item.id}
-                        item={item}
-                        index={index}
-                        expandedCategories={expandedCategories}
-                        onCategoryClick={handleCategoryClick}
-                        collectionMap={collectionMap}
-                    />
+                {sliderCollections.map((collection, index) => (
+                    <CategoryItem key={collection.id} collection={collection} index={index} />
                 ))}
             </div>
         </div>
     );
 };
 
-function CategoryItem({ item, index, expandedCategories, onCategoryClick, collectionMap }) {
-    const isExpanded = expandedCategories.includes(item.id);
+function CategoryItem({ collection, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
-    const hasSubItems = item.items && item.items.length > 0;
-
-    const handleClick = (e) => {
-        if (hasSubItems) {
-            e.preventDefault();
-            onCategoryClick(item.id);
-        }
-    };
 
     return (
-        <div className={`category-item ${isExpanded ? 'expanded' : ''}`}>
-            <motion.div
-                ref={ref}
-                initial={{ opacity: 0, x: -30 }}
-                animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ delay: index * 0.01, duration: 0.5 }}
-                className="category-container"
-            >
-                {hasSubItems ? (
-                    <div onClick={handleClick} className="category-link">
-                        <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
-                    </div>
-                ) : (
-                    <Link to={item.url} className="category-link">
-                        <CategoryContent item={item} isInView={isInView} collectionMap={collectionMap} />
-                    </Link>
-                )}
-            </motion.div>
-            {isExpanded && hasSubItems && (
-                <div className="subcategory-list">
-                    {item.items.map((subItem, subIndex) => (
-                        <CategoryItem
-                            key={subItem.id}
-                            item={subItem}
-                            index={subIndex}
-                            expandedCategories={expandedCategories}
-                            onCategoryClick={onCategoryClick}
-                            collectionMap={collectionMap}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
-function CategoryContent({ item, isInView, collectionMap }) {
-    const title = item.title;
-
-    // Extract the handle from the item's URL
-    const handle = extractHandleFromUrl(item.url);
-    const collection = handle ? collectionMap[handle] : null;
-
-    return (
-        <>
-            <motion.div
-                initial={{ filter: 'blur(10px)', opacity: 0 }}
-                animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
-                transition={{ duration: 0.5 }}
-                className="category-image-container"
-            >
-                {collection && collection.image ? (
+        <motion.div
+            ref={ref}
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ delay: index * 0.01, duration: 0.5 }}
+            className="category-container"
+        >
+            <Link to={`/collections/${collection.handle}`}>
+                <motion.div
+                    initial={{ filter: 'blur(10px)', opacity: 0 }}
+                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                    transition={{ duration: 0.5 }}
+                    width="150px"
+                    height="150px"
+                >
                     <Image
                         data={collection.image}
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
-                        alt={collection.image?.altText || title}
+                        srcSet={`${collection.image?.url}?width=300&quality=30 300w,
+                                 ${collection.image?.url}?width=600&quality=30 600w,
+                                 ${collection.image?.url}?width=1200&quality=30 1200w`}
+                        alt={collection.image?.altText || collection.title}
                         className="category-image"
                         width="150px"
                         height="150px"
                     />
-                ) : (
-                    <div className="category-placeholder-image"></div>
-                )}
-            </motion.div>
-            <div className="category-title">{title}</div>
-        </>
+                </motion.div>
+                <div className="category-title">{collection.title}</div>
+            </Link>
+        </motion.div>
     );
-}
-
-// Helper function to extract handle from URL
-function extractHandleFromUrl(url) {
-    const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-    if (match && match[1]) {
-        return match[1];
-    }
-    return null;
 }
