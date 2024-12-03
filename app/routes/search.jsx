@@ -116,18 +116,17 @@ export default function SearchPage() {
   );
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (isMobileFiltersOpen) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
+    const disableScroll = () => (document.body.style.overflow = "hidden");
+    const enableScroll = () => (document.body.style.overflow = "");
+
+    if (isMobileFiltersOpen) {
+      disableScroll();
+    } else {
+      enableScroll();
     }
 
     return () => {
-      if (typeof window !== "undefined") {
-        document.body.style.overflow = "";
-      }
+      enableScroll(); // Cleanup: ensure scroll is enabled when component unmounts
     };
   }, [isMobileFiltersOpen]);
 
