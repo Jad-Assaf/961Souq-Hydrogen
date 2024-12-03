@@ -114,7 +114,7 @@ export default function SearchPage() {
   const [mobileFiltersHeight, setMobileFiltersHeight] = useState(
     typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
   );
-  
+
   const startDrag = (e) => {
     const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
     const initialHeight = mobileFiltersHeight;
@@ -123,16 +123,22 @@ export default function SearchPage() {
 
     const handleDrag = (event) => {
       const currentY = event.clientY || (event.touches && event.touches[0]?.clientY);
-      console.log('Dragging at Y:', currentY);
       if (currentY === undefined) return;
 
       const newHeight = initialHeight + (startY - currentY);
+
+      if (newHeight < 100) {
+        closeMobileFilters(); // Close if height is too small
+        return;
+      }
+
       if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
         setMobileFiltersHeight(newHeight);
       }
     };
 
     const stopDrag = () => {
+      console.log("Drag stopped"); // Debugging
       document.removeEventListener('mousemove', handleDrag);
       document.removeEventListener('mouseup', stopDrag);
       document.removeEventListener('touchmove', handleDrag);
@@ -365,8 +371,7 @@ export default function SearchPage() {
       {isMobileFiltersOpen && (
         <div className="mobile-filters-overlay">
           <div
-            className={`mobile-filters-panel ${isClosing ? 'closing' : ''
-              }`}
+            className={`mobile-filters-panel ${isClosing ? 'closing' : ''}`}
             style={{ height: `${mobileFiltersHeight}px` }}
           >
             <div

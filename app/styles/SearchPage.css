@@ -214,3 +214,7 @@ select#sort-select {
     max-height: 300px;
     overflow-y: auto;
 }
+
+.mobile-filters-panel {
+    transition: height 0.3s ease;
+}
