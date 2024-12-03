@@ -37,6 +37,6 @@
 
 .brand-item img {
     width: 186px;
-    height: 75px;
+    height: auto;
     border-radius: 20px;
 }
