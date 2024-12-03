@@ -114,7 +114,20 @@ export default function SearchPage() {
   const [mobileFiltersHeight, setMobileFiltersHeight] = useState(
     typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
   );
-  
+
+  useEffect(() => {
+    if (isMobileFiltersOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup function to reset overflow in case of unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileFiltersOpen]);
+
   const startDrag = (e) => {
     const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
     const initialHeight = mobileFiltersHeight;
