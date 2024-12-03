@@ -111,6 +111,33 @@ export default function SearchPage() {
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
   const [isClosing, setIsClosing] = useState(false); // New state for closing animation
+  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(window.innerHeight * 0.8);
+
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    const startY = e.clientY || e.touches[0].clientY;
+    const startHeight = mobileFiltersHeight;
+
+    const handleDragMove = (event) => {
+      const currentY = event.clientY || event.touches[0].clientY;
+      const newHeight = startHeight + (startY - currentY);
+      if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
+        setMobileFiltersHeight(newHeight);
+      }
+    };
+
+    const handleDragEnd = () => {
+      window.removeEventListener('mousemove', handleDragMove);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDragMove);
+      window.removeEventListener('touchend', handleDragEnd);
+    };
+
+    window.addEventListener('mousemove', handleDragMove);
+    window.addEventListener('mouseup', handleDragEnd);
+    window.addEventListener('touchmove', handleDragMove);
+    window.addEventListener('touchend', handleDragEnd);
+  };
 
   const closeMobileFilters = () => {
     setIsClosing(true); // Trigger closing animation
@@ -154,34 +181,6 @@ export default function SearchPage() {
       params.delete('maxPrice');
     }
     navigate(`/search?${params.toString()}`);
-  };
-
-  const overlayRef = useRef(null); // Reference to the overlay for height adjustment
-
-  const handleDragStart = (e) => {
-    e.preventDefault();
-    const startY = e.clientY || e.touches[0].clientY;
-    const startHeight = overlayRef.current.offsetHeight;
-
-    const handleDragMove = (event) => {
-      const currentY = event.clientY || event.touches[0].clientY;
-      const newHeight = startHeight - (currentY - startY);
-      if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
-        setMobileFiltersHeight(newHeight);
-      }
-    };
-
-    const handleDragEnd = () => {
-      window.removeEventListener('mousemove', handleDragMove);
-      window.removeEventListener('mouseup', handleDragEnd);
-      window.removeEventListener('touchmove', handleDragMove);
-      window.removeEventListener('touchend', handleDragEnd);
-    };
-
-    window.addEventListener('mousemove', handleDragMove);
-    window.addEventListener('mouseup', handleDragEnd);
-    window.addEventListener('touchmove', handleDragMove);
-    window.addEventListener('touchend', handleDragEnd);
   };
 
   return (
@@ -339,10 +338,7 @@ export default function SearchPage() {
       {/* Mobile Filters */}
       <button
         className="mobile-filters-toggle"
-        onClick={() => {
-          setIsMobileFiltersOpen(true);
-          setMobileFiltersHeight(window.innerHeight * 0.8);
-        }}
+        onClick={() => setIsMobileFiltersOpen(true)}
       >
         Filter
       </button>
@@ -350,9 +346,8 @@ export default function SearchPage() {
       {isMobileFiltersOpen && (
         <div className="mobile-filters-overlay">
           <div
-            ref={overlayRef}
-            className="mobile-filters-panel"
-            style={{ height: `${mobileFiltersHeight}px` }}
+            className={`mobile-filters-panel ${isClosing ? 'closing' : ''
+              }`} style={{ height: `${mobileFiltersHeight}px` }}
           >
             <hr
               className="mobile-filters-hr"
@@ -360,9 +355,9 @@ export default function SearchPage() {
               onTouchStart={handleDragStart}
             />
             <button
-              className="close-mobile-filters"
-              onClick={() => setIsMobileFiltersOpen(false)}
-            >
+                className="close-mobile-filters"
+                onClick={closeMobileFilters}
+              >
               <svg fill="#2172af" height="30px" width="30px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 460.775 460.775" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55 l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719 c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path> </g></svg>
             </button>
             <fieldset>
