@@ -322,6 +322,7 @@ export default function SearchPage() {
             className={`mobile-filters-panel ${isClosing ? 'closing' : ''
               }`}
           >
+            <hr className='mobile-filters-hr'/>
             <button
                 className="close-mobile-filters"
                 onClick={closeMobileFilters}

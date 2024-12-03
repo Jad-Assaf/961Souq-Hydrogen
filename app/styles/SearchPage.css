@@ -130,6 +130,7 @@ select#sort-select {
     padding: 20px;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
     animation: slideUp 0.3s ease-in-out;
+    min-height: 80vh;
     max-height: 80vh;
     overflow-y: auto;
 }
@@ -188,4 +189,12 @@ select#sort-select {
 
 .mobile-filters-panel.closing {
     animation: slideDown 0.3s ease-in-out forwards;
+}
+
+.mobile-filters-hr {
+    width: 50px;
+    border: 2px solid #bbb8b8;
+    border-radius: 100px;
+    position: relative;
+    left: 45%;
 }
