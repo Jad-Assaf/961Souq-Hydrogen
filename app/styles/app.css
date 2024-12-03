@@ -205,6 +205,15 @@ button {
   max-width: unset;
 }
 
+@media (max-width: 510px) {
+  .grid-cols-2 .product-card,
+  .grid-cols-3 .product-card,
+  .grid-cols-4 .product-card,
+  .grid-cols-5 .product-card {
+    min-height: unset;
+  }
+}
+
 .grid-cols-2 h4,
 .grid-cols-3 h4,
 .grid-cols-4 h4,
@@ -1436,13 +1445,13 @@ button#headlessui-menu-button-\:R3lab5\: {
   height: auto;
 }
 
-.search-results{
+.search-results {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.search-results img{
+.search-results img {
   width: 100%;
   height: auto;
 }

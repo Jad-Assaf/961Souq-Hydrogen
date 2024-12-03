@@ -45,7 +45,7 @@ export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const searchParams = new URL(request.url).searchParams;
-  const paginationVariables = getPaginationVariables(request, { pageBy: 50 });
+  const paginationVariables = getPaginationVariables(request, { pageBy: 30 });
 
   // Set default sort to 'newest' if no sort parameter is provided
   const sort = searchParams.get('sort') || 'newest';
@@ -398,16 +398,14 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
   const isInView = useInView(ref, { once: true, margin: '0px 0px 50px 0px' });
   const controls = useAnimation();
 
-  // Calculate row and column delay
-  const rowIndex = Math.floor(index / numberInRow);
-  const columnIndex = index % numberInRow;
-  const delay = Math.min(rowIndex * 0.1 + columnIndex * 0.05, 1); // Cap delay at 0.5s
+  // Cap the delay to prevent excessive loading times for items lower on the page
+  const delay = Math.min(0.1 * (index % numberInRow), 0.5);
 
   useEffect(() => {
     if (isInView) {
       controls.start("visible");
     }
-  }, [isInView, controls, index, numberInRow]);
+  }, [isInView, controls]);
 
   const [selectedVariant, setSelectedVariant] = useState(() => {
     return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
@@ -427,7 +425,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           visible: {
             opacity: 1,
             x: 0,
-            transition: { delay, duration: 0.2 }
+            transition: { delay, duration: 0.2 } // Use capped or fixed delay
           }
         }}
       >
@@ -442,8 +440,8 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
               >
                 <Image
                   srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                         ${product.featuredImage.url}?width=600&quality=30 600w,
-                         ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+                           ${product.featuredImage.url}?width=600&quality=30 600w,
+                           ${product.featuredImage.url}?width=1200&quality=30 1200w`}
                   alt={product.featuredImage.altText || product.title}
                   loading="lazy"
                   width="180px"
@@ -459,7 +457,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
               {typeof window !== "undefined" &&
                 window.innerWidth > 1500 &&
                 numberInRow === 1 &&
-                product.description && ( // Ensure description exists
+                product.description && (
                   <p className="product-description">
                     {truncateText(product.description, 200)}
                   </p>
@@ -491,7 +489,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
       </motion.div>
     </div>
   );
-})
+});
 
 /**
  * @param {{
