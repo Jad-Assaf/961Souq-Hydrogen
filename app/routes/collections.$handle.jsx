@@ -178,13 +178,14 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
-  const calculateNumberInRow = (width) => {
+  const [userSelectedNumberInRow, setUserSelectedNumberInRow] = useState(null); // Tracks user selection
+  const calculateNumberInRow = (width, userSelection) => {
+    if (userSelection !== null) return userSelection; // Respect user selection
     if (width >= 1500) return 5;
     if (width >= 1200) return 4;
     if (width >= 550) return 3;
     return 1;
   };
-
   const [screenWidth, setScreenWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
@@ -200,7 +201,7 @@ export default function Collection() {
     const updateLayout = () => {
       const width = window.innerWidth;
       setScreenWidth(width);
-      setNumberInRow(calculateNumberInRow(width));
+      setNumberInRow(calculateNumberInRow(width, userSelectedNumberInRow));
     };
 
     updateLayout(); // Set layout on initial render
@@ -220,10 +221,11 @@ export default function Collection() {
     return () => {
       window.removeEventListener("resize", debouncedUpdateLayout);
     };
-  }, []);
+  }, [userSelectedNumberInRow]); // Add userSelectedNumberInRow as a dependency
 
   const handleLayoutChange = (number) => {
-    setNumberInRow(number);
+    setUserSelectedNumberInRow(number); // Save user preference
+    setNumberInRow(number); // Immediately update the layout
   };
 
   const handleFilterRemove = (filter) => {
