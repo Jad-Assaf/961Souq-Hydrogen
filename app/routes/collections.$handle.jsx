@@ -178,9 +178,18 @@ function loadDeferredData({ context }) {
 
 export default function Collection() {
   const { collection, appliedFilters, sliderCollections } = useLoaderData();
-  const [numberInRow, setNumberInRow] = useState(5);
+  const calculateNumberInRow = (width) => {
+    if (width >= 1500) return 5;
+    if (width >= 1200) return 4;
+    if (width >= 550) return 3;
+    return 1;
+  };
+
   const [screenWidth, setScreenWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1500
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+  const [numberInRow, setNumberInRow] = useState(
+    typeof window !== "undefined" ? calculateNumberInRow(window.innerWidth) : 1
   );
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [searchParams] = useSearchParams();
@@ -188,31 +197,29 @@ export default function Collection() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const debounce = (fn, delay) => {
-        let timeoutId;
-        return (...args) => {
-          clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => fn(...args), delay);
-        };
+    const updateLayout = () => {
+      const width = window.innerWidth;
+      setScreenWidth(width);
+      setNumberInRow(calculateNumberInRow(width));
+    };
+
+    updateLayout(); // Set layout on initial render
+
+    const debounce = (fn, delay) => {
+      let timeoutId;
+      return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
       };
+    };
 
-      const updateScreenWidth = debounce(() => {
-        const width = window.innerWidth;
-        setScreenWidth(width);
-        if (width >= 1500) setNumberInRow(5);
-        else if (width >= 1200) setNumberInRow(4);
-        else if (width >= 550) setNumberInRow(3);
-        else setNumberInRow(1);
-      }, 100);
+    const debouncedUpdateLayout = debounce(updateLayout, 100);
 
-      updateScreenWidth();
-      window.addEventListener("resize", updateScreenWidth);
+    window.addEventListener("resize", debouncedUpdateLayout);
 
-      return () => {
-        window.removeEventListener("resize", updateScreenWidth);
-      };
-    }
+    return () => {
+      window.removeEventListener("resize", debouncedUpdateLayout);
+    };
   }, []);
 
   const handleLayoutChange = (number) => {
