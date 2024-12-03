@@ -111,7 +111,9 @@ export default function SearchPage() {
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
   const [isClosing, setIsClosing] = useState(false); // New state for closing animation
-  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(window.innerHeight * 0.8);
+  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(
+    typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
+  );
 
   const handleDragStart = (e) => {
     e.preventDefault();
