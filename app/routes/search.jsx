@@ -111,44 +111,35 @@ export default function SearchPage() {
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
   const [isClosing, setIsClosing] = useState(false); // New state for closing animation
-  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(
-    typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
-  );
-
-  const handleDragStart = (e) => {
+  
+  const startDrag = (e) => {
     const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
-    const startHeight = mobileFiltersHeight;
+    const initialHeight = mobileFiltersHeight;
 
-    if (startY === undefined) return; // Prevent error if neither `clientY` nor `touches` is available
+    if (startY === undefined) return;
 
-    const handleDragMove = (event) => {
+    const handleDrag = (event) => {
       const currentY = event.clientY || (event.touches && event.touches[0]?.clientY);
       if (currentY === undefined) return;
 
-      const newHeight = startHeight + (startY - currentY);
+      const newHeight = initialHeight + (startY - currentY);
       if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
         setMobileFiltersHeight(newHeight);
       }
-
-      if (event.cancelable) {
-        event.preventDefault(); // Prevent scrolling or default behavior
-      }
     };
 
-    const handleDragEnd = () => {
-      window.removeEventListener('mousemove', handleDragMove);
-      window.removeEventListener('mouseup', handleDragEnd);
-      window.removeEventListener('touchmove', handleDragMove, { passive: false });
-      window.removeEventListener('touchend', handleDragEnd, { passive: false });
+    const stopDrag = () => {
+      document.removeEventListener('mousemove', handleDrag);
+      document.removeEventListener('mouseup', stopDrag);
+      document.removeEventListener('touchmove', handleDrag);
+      document.removeEventListener('touchend', stopDrag);
     };
 
-    if (e.type === 'mousedown') {
-      window.addEventListener('mousemove', handleDragMove);
-      window.addEventListener('mouseup', handleDragEnd);
-    } else if (e.type === 'touchstart') {
-      window.addEventListener('touchmove', handleDragMove, { passive: false });
-      window.addEventListener('touchend', handleDragEnd, { passive: false });
-    }
+    // Add event listeners for dragging
+    document.addEventListener('mousemove', handleDrag);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', handleDrag, { passive: false });
+    document.addEventListener('touchend', stopDrag, { passive: false });
   };
 
   const closeMobileFilters = () => {
@@ -359,12 +350,12 @@ export default function SearchPage() {
         <div className="mobile-filters-overlay">
           <div
             className={`mobile-filters-panel ${isClosing ? 'closing' : ''
-              }`} style={{ height: `${mobileFiltersHeight}px` }}
+              }`}
           >
-            <hr
-              className="mobile-filters-hr"
-              onMouseDown={handleDragStart}
-              onTouchStart={handleDragStart}
+            <div
+              className="mobile-filters-draggable"
+              onMouseDown={startDrag}
+              onTouchStart={startDrag}
             />
             <button
               className="close-mobile-filters"
