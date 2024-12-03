@@ -367,7 +367,7 @@ export default function SearchPage() {
                 Product Types <span>{mobileShowProductTypes ? '-' : '+'}</span>
               </button>
               {mobileShowProductTypes && (
-                <div>
+                <div className='filter-options-container'>
                   {productTypes.map((productType) => {
                     const isChecked = searchParams.getAll('filter_productType').includes(productType);
                     return (
