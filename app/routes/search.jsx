@@ -2,7 +2,7 @@ import { json } from '@shopify/remix-oxygen';
 import { useLoaderData, useSearchParams, useNavigate, Link } from '@remix-run/react';
 import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrogen';
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../styles/SearchPage.css'
 
 /**
@@ -146,12 +146,15 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (isMobileFiltersOpen) {
-      document.body.classList.add('no-scroll');
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.classList.remove('no-scroll');
+      document.body.style.overflow = '';
     }
-    // Cleanup in case of component unmount
-    return () => document.body.classList.remove('no-scroll');
+
+    // Cleanup function to reset overflow in case of unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isMobileFiltersOpen]);
 
   const closeMobileFilters = () => {

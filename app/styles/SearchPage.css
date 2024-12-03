@@ -214,7 +214,3 @@ select#sort-select {
     max-height: 300px;
     overflow-y: auto;
 }
-
-.no-scroll {
-    overflow: hidden;
-}
