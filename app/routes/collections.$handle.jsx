@@ -247,6 +247,20 @@ export default function Collection() {
     });
   }, [collection?.products?.nodes]);
 
+  useEffect(() => {
+    const url = new URL(window.location.href); // Get the current URL
+    const query = url.search; // Get the query string
+
+    // Check if 'direction' exists in the query string
+    if (query.includes('?direction')) {
+      // Retain everything before '?direction'
+      const cleanUrl = url.origin + url.pathname;
+
+      // Update the URL without reloading the page
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }, []);
+
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
