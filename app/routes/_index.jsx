@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -6,7 +6,6 @@ import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
-import { ExpandableMenu } from '~/components/ExpandableMenu';
 
 /**
  * @type {MetaFunction}
@@ -35,9 +34,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  const newMenuItems = await fetchNewMenuItems(args.context);
-
-  return defer({ ...criticalData, banners, newMenuItems });
+  return defer({ ...criticalData, banners });
 }
 
 async function loadCriticalData({ context }) {
@@ -79,83 +76,6 @@ async function loadCriticalData({ context }) {
   return { collections, sliderCollections, menu };
 }
 
-async function fetchNewMenuItems(context) {
-  const menuQuery = `
-    query FetchNewMenu($handle: String!) {
-      menu(handle: $handle) {
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
-  `;
-
-  const collectionQuery = `
-    query GetCollectionByHandle($handle: String!) {
-      collectionByHandle(handle: $handle) {
-        id
-        title
-        handle
-        image {
-          url
-          altText
-        }
-      }
-    }
-  `;
-
-  try {
-    const menuHandle = 'new-main-menu';
-    const { menu } = await context.storefront.query(menuQuery, { variables: { handle: menuHandle } });
-
-    if (!menu || !menu.items) {
-      return []; // Return empty array if menu is not found
-    }
-
-    async function fetchCollectionForMenuItem(item) {
-      try {
-        const handle = extractHandleFromUrl(item.url);
-        let collection = null;
-
-        if (handle) {
-          const { collectionByHandle } = await context.storefront.query(collectionQuery, { variables: { handle } });
-          collection = collectionByHandle || null;
-        }
-
-        // Recurse into sub-items
-        const subItems = item.items ? await Promise.all(item.items.map(fetchCollectionForMenuItem)) : [];
-
-        return {
-          ...item,
-          image: collection?.image || null,
-          items: subItems,
-        };
-      } catch (error) {
-        // Fallback for individual item errors
-        return { ...item, image: null, items: [] };
-      }
-    }
-
-    return await Promise.all(menu.items.map(fetchCollectionForMenuItem));
-  } catch (error) {
-    // Return an empty array in case of critical failure
-    return [];
-  }
-}
-
-// Helper function to extract handle from URL
-function extractHandleFromUrl(url) {
-  const match = url?.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-  return match?.[1] || null;
-}
-
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple.png?v=1648112715", link: "/collections/apple" },
   { name: "HP", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/hp.png?v=1648112715", link: "/collections/hp-products" },
@@ -193,8 +113,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menu, newMenuItems } = useLoaderData();
-
+  const { banners, collections, sliderCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -301,8 +220,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <ExpandableMenu menuItems={newMenuItems || []} />
-      {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
       <div className="collections-container">
         <>
           {/* Render "New Arrivals" and "Laptops" rows at the start */}
