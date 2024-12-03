@@ -16,7 +16,6 @@ export const BrandSection = ({ brands }) => {
                                 }}
                                 width="186px" // Set a reasonable width for brand logos
                                 height="auto" // Set a reasonable height for brand logos
-                                aspectRatio="1/1" // Force a square aspect ratio
                                 sizes="(min-width: 45em) 10vw, 20vw" // Responsive sizes
                             />
                         </a>
