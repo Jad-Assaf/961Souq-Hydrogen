@@ -161,8 +161,6 @@ export default function SearchPage() {
     }
   };
 
-  document.addEventListener('touchstart', startDrag, { passive: false });
-
   useEffect(() => {
     if (isMobileFiltersOpen) {
       document.body.style.overflow = 'hidden';
