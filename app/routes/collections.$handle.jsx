@@ -45,7 +45,7 @@ export async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
   const searchParams = new URL(request.url).searchParams;
-  const paginationVariables = getPaginationVariables(request, { pageBy: 30 });
+  const paginationVariables = getPaginationVariables(request, { pageBy: 20 });
 
   // Set default sort to 'newest' if no sort parameter is provided
   const sort = searchParams.get('sort') || 'newest';
