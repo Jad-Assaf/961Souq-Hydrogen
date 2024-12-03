@@ -111,20 +111,23 @@ export default function SearchPage() {
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
   const [isClosing, setIsClosing] = useState(false); // New state for closing animation
-  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(
-    typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
+  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(() =>
+    typeof window !== "undefined" ? window.innerHeight * 0.8 : 600
   );
 
   useEffect(() => {
-    if (isMobileFiltersOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+    if (typeof window !== "undefined") {
+      if (isMobileFiltersOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
     }
 
-    // Cleanup function to reset overflow in case of unmount
     return () => {
-      document.body.style.overflow = '';
+      if (typeof window !== "undefined") {
+        document.body.style.overflow = "";
+      }
     };
   }, [isMobileFiltersOpen]);
 
