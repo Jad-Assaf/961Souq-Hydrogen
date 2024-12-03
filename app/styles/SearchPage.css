@@ -204,6 +204,7 @@ select#sort-select {
     left: 45%;
     cursor: ns-resize;
     transition: background-color 0.2s ease;
+    border: 1px solid #bbb8b8;
 }
 
 .mobile-filters-hr:hover {
@@ -221,8 +222,31 @@ select#sort-select {
     /* Smooth height changes */
 }
 
-.mobile-min-price-filter label, .mobile-max-price-filter label {
+.mobile-min-price-filter label,
+.mobile-max-price-filter label {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
+}
+
+.mobile-min-price-filter,
+.mobile-max-price-filter {
+    max-width: 300px;
+}
+
+.mobile-min-price-filter label input,
+.mobile-max-price-filter label input {
+    border: 0.01rem solid #f5f5f5;
+    padding: 5px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+
+.mobile-min-price-filter label button,
+.mobile-max-price-filter label button {
+    border: 1px solid #2172af;
+    width: auto;
+    height: auto;
+    text-align: center;
+    padding: 5px 20px;
+    border-radius: 30px;
 }
