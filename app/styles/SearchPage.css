@@ -139,8 +139,9 @@ select#sort-select {
     border: none;
     font-size: 20px;
     font-weight: bold;
-    float: right;
+    text-align: end;
     cursor: pointer;
+    width: 100%;
 }
 
 @keyframes slideUp {
