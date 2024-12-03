@@ -249,4 +249,5 @@ select#sort-select {
     text-align: center;
     padding: 5px 20px;
     border-radius: 30px;
+    margin-top: 10px;
 }
