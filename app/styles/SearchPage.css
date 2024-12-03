@@ -137,11 +137,16 @@ select#sort-select {
 .close-mobile-filters {
     background-color: transparent;
     border: none;
-    font-size: 20px;
     font-weight: bold;
-    text-align: end;
     cursor: pointer;
     width: 100%;
+    justify-content: flex-end;
+    display: flex;
+}
+
+.close-mobile-filters svg {
+    width: 14px;
+    height: 30px;
 }
 
 @keyframes slideUp {
