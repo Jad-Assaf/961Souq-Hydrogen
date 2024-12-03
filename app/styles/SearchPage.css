@@ -166,7 +166,7 @@ select#sort-select {
     padding: 0;
 }
 
-.mobile-filters-panel fieldset button {
+.mobile-filters-panel fieldset>button {
     display: flex;
     justify-content: space-between;
     width: 100%;
