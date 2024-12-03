@@ -92,6 +92,7 @@ export async function loadCriticalData({ context, params, request }) {
     const { collection } = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
+        first: 20,
         filters: filters.length ? filters : undefined,
         sortKey,
         reverse,
