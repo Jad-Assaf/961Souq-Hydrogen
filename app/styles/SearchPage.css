@@ -86,11 +86,11 @@ select#sort-select {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #007bff;
+    background-color: #2172af;
     color: white;
     padding: 10px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 30px;
     cursor: pointer;
     z-index: 1000;
 }
@@ -103,6 +103,10 @@ select#sort-select {
     .filters {
         display: none;
         /* Hide desktop filters */
+    }
+
+    .search-results-grid {
+        justify-content: space-around;
     }
 }
 
@@ -161,7 +165,21 @@ select#sort-select {
     height: 50px;
 }
 
-.search-results-grid .product-card{
+.search-results-grid .product-card {
     width: 45%;
     max-width: 200px;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(100%);
+    }
+}
+
+.mobile-filters-panel.closing {
+    animation: slideDown 0.3s ease-in-out forwards;
 }

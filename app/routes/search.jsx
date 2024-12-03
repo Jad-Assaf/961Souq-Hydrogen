@@ -110,6 +110,15 @@ export default function SearchPage() {
   const [mobileShowVendors, setMobileShowVendors] = useState(false);
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
+  const [isClosing, setIsClosing] = useState(false); // New state for closing animation
+
+  const closeMobileFilters = () => {
+    setIsClosing(true); // Trigger closing animation
+    setTimeout(() => {
+      setIsMobileFiltersOpen(false);
+      setIsClosing(false); // Reset closing state after animation ends
+    }, 300); // Duration matches the animation timing
+  };
 
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
@@ -304,16 +313,19 @@ export default function SearchPage() {
         className="mobile-filters-toggle"
         onClick={() => setIsMobileFiltersOpen(true)}
       >
-        Filters
+        Filter
       </button>
 
       {isMobileFiltersOpen && (
         <div className="mobile-filters-overlay">
-          <div className="mobile-filters-panel">
+          <div
+            className={`mobile-filters-panel ${isClosing ? 'closing' : ''
+              }`}
+          >
             <button
-              className="close-mobile-filters"
-              onClick={() => setIsMobileFiltersOpen(false)}
-            >
+                className="close-mobile-filters"
+                onClick={closeMobileFilters}
+              >
               Close
             </button>
             <fieldset>
