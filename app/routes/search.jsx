@@ -111,25 +111,10 @@ export default function SearchPage() {
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
   const [isClosing, setIsClosing] = useState(false); // New state for closing animation
-  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(() =>
-    typeof window !== "undefined" ? window.innerHeight * 0.8 : 600
+  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(
+    typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
   );
-
-  useEffect(() => {
-    const disableScroll = () => (document.body.style.overflow = "hidden");
-    const enableScroll = () => (document.body.style.overflow = "");
-
-    if (isMobileFiltersOpen) {
-      disableScroll();
-    } else {
-      enableScroll();
-    }
-
-    return () => {
-      enableScroll(); // Cleanup: ensure scroll is enabled when component unmounts
-    };
-  }, [isMobileFiltersOpen]);
-
+  
   const startDrag = (e) => {
     const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
     const initialHeight = mobileFiltersHeight;
