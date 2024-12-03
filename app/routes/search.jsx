@@ -337,7 +337,7 @@ export default function SearchPage() {
                 Vendors <span>{mobileShowVendors ? '-' : '+'}</span>
               </button>
               {mobileShowVendors && (
-                <div>
+                <div className='filter-options-container'>
                   {vendors.map((vendor) => {
                     const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
                     return (

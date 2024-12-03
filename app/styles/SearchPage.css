@@ -201,3 +201,9 @@ select#sort-select {
     position: relative;
     left: 45%;
 }
+
+.filter-options-container {
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+}
