@@ -195,7 +195,7 @@ select#sort-select {
     animation: slideDown 0.3s ease-in-out forwards;
 }
 
-.mobile-filters-draggable {
+.mobile-filters-hr {
     width: 50px;
     height: 4px;
     border-radius: 100px;
@@ -206,7 +206,7 @@ select#sort-select {
     transition: background-color 0.2s ease;
 }
 
-.mobile-filters-draggable:hover {
+.mobile-filters-hr:hover {
     background-color: #888;
 }
 
@@ -219,4 +219,10 @@ select#sort-select {
 .mobile-filters-panel {
     transition: height 0.3s ease;
     /* Smooth height changes */
+}
+
+.mobile-min-price-filter label, .mobile-max-price-filter label {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
