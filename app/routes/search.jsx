@@ -111,6 +111,9 @@ export default function SearchPage() {
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
   const [isClosing, setIsClosing] = useState(false); // New state for closing animation
+  const [mobileFiltersHeight, setMobileFiltersHeight] = useState(
+    typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
+  );
   
   const startDrag = (e) => {
     const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
@@ -135,12 +138,19 @@ export default function SearchPage() {
       document.removeEventListener('touchend', stopDrag);
     };
 
-    // Add event listeners for dragging
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('mouseup', stopDrag);
     document.addEventListener('touchmove', handleDrag, { passive: false });
     document.addEventListener('touchend', stopDrag, { passive: false });
   };
+
+  useEffect(() => {
+    if (isMobileFiltersOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isMobileFiltersOpen]);
 
   const closeMobileFilters = () => {
     setIsClosing(true); // Trigger closing animation
@@ -351,6 +361,7 @@ export default function SearchPage() {
           <div
             className={`mobile-filters-panel ${isClosing ? 'closing' : ''
               }`}
+            style={{ height: `${mobileFiltersHeight}px` }}
           >
             <div
               className="mobile-filters-draggable"
