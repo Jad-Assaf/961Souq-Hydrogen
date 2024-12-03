@@ -328,7 +328,7 @@ export default function SearchPage() {
                   {vendors.map((vendor) => {
                     const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
                     return (
-                      <div key={vendor}>
+                      <div key={vendor} className='filter-option'>
                         <input
                           type="checkbox"
                           id={`mobile-vendor-${vendor}`}
@@ -358,7 +358,7 @@ export default function SearchPage() {
                   {productTypes.map((productType) => {
                     const isChecked = searchParams.getAll('filter_productType').includes(productType);
                     return (
-                      <div key={productType}>
+                      <div key={productType} className='filter-option'>
                         <input
                           type="checkbox"
                           id={`mobile-productType-${productType}`}

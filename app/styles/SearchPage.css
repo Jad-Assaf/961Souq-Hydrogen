@@ -4,7 +4,7 @@
     justify-content: center;
     align-items: center;
     max-width: 1500px;
-    margin: auto;
+    margin: 50px auto;
 }
 
 .filter-sort-container {
@@ -151,10 +151,17 @@ select#sort-select {
 
 .mobile-filters-panel fieldset {
     align-items: start;
+    padding: 0;
 }
 
 .mobile-filters-panel fieldset button {
     display: flex;
     justify-content: space-between;
     width: 150px;
+    height: 50px;
+}
+
+.search-results-grid .product-card{
+    width: 45%;
+    max-width: 200px;
 }
