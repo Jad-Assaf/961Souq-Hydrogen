@@ -116,11 +116,10 @@ export default function SearchPage() {
   );
 
   const handleDragStart = (e) => {
-    e.preventDefault(); // Prevent default action for the initial event
     const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
     const startHeight = mobileFiltersHeight;
 
-    if (startY === undefined) return;
+    if (startY === undefined) return; // Prevent error if neither `clientY` nor `touches` is available
 
     const handleDragMove = (event) => {
       const currentY = event.clientY || (event.touches && event.touches[0]?.clientY);
@@ -131,45 +130,30 @@ export default function SearchPage() {
         setMobileFiltersHeight(newHeight);
       }
 
-      event.preventDefault(); // Prevent default scrolling or behavior
+      if (event.cancelable) {
+        event.preventDefault(); // Prevent scrolling or default behavior
+      }
     };
 
     const handleDragEnd = () => {
-      window.removeEventListener('mousemove', handleDragMove, { passive: false });
+      window.removeEventListener('mousemove', handleDragMove);
       window.removeEventListener('mouseup', handleDragEnd);
       window.removeEventListener('touchmove', handleDragMove, { passive: false });
-      window.removeEventListener('touchend', handleDragEnd);
+      window.removeEventListener('touchend', handleDragEnd, { passive: false });
     };
 
     if (e.type === 'mousedown') {
-      window.addEventListener('mousemove', handleDragMove, { passive: false });
+      window.addEventListener('mousemove', handleDragMove);
       window.addEventListener('mouseup', handleDragEnd);
     } else if (e.type === 'touchstart') {
       window.addEventListener('touchmove', handleDragMove, { passive: false });
-      window.addEventListener('touchend', handleDragEnd);
+      window.addEventListener('touchend', handleDragEnd, { passive: false });
     }
-  };
-
-  // Lock scroll when mobile filters are open
-  const lockScroll = () => {
-    document.body.style.overflow = 'hidden';
-  };
-
-  // Unlock scroll when mobile filters are closed
-  const unlockScroll = () => {
-    document.body.style.overflow = '';
-  };
-
-  // Update the state changes to manage scroll lock
-  const openMobileFilters = () => {
-    lockScroll();
-    setIsMobileFiltersOpen(true);
   };
 
   const closeMobileFilters = () => {
     setIsClosing(true); // Trigger closing animation
     setTimeout(() => {
-      unlockScroll();
       setIsMobileFiltersOpen(false);
       setIsClosing(false); // Reset closing state after animation ends
     }, 300); // Duration matches the animation timing
@@ -366,7 +350,7 @@ export default function SearchPage() {
       {/* Mobile Filters */}
       <button
         className="mobile-filters-toggle"
-        onClick={openMobileFilters}
+        onClick={() => setIsMobileFiltersOpen(true)}
       >
         Filter
       </button>

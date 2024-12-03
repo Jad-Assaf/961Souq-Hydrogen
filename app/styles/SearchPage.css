@@ -202,6 +202,7 @@ select#sort-select {
     left: 45%;
     cursor: ns-resize;
     transition: background-color 0.2s ease;
+    touch-action: none;
 }
 
 .filter-options-container {
