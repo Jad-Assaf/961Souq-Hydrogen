@@ -144,11 +144,21 @@ export default function SearchPage() {
     document.addEventListener('touchend', stopDrag, { passive: false });
   };
 
+  useEffect(() => {
+    if (isMobileFiltersOpen) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+    // Cleanup in case of component unmount
+    return () => document.body.classList.remove('no-scroll');
+  }, [isMobileFiltersOpen]);
+
   const closeMobileFilters = () => {
     setIsClosing(true); // Trigger closing animation
     setTimeout(() => {
       setIsMobileFiltersOpen(false);
-      setIsClosing(false); // Reset closing state after animation ends
+      setIsClosing(false); // Reset closing state
     }, 300); // Duration matches the animation timing
   };
 
