@@ -116,27 +116,38 @@ export default function SearchPage() {
   );
 
   const handleDragStart = (e) => {
-  const startY = e.touches[0].clientY;
-  const startHeight = mobileFiltersHeight;
+    const startY = e.clientY || (e.touches && e.touches[0]?.clientY);
+    const startHeight = mobileFiltersHeight;
 
-  const handleDragMove = (event) => {
-    const currentY = event.touches[0].clientY;
-    const newHeight = startHeight + (startY - currentY);
-    if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
-      setMobileFiltersHeight(newHeight);
+    if (startY === undefined) return; // Prevent error if neither `clientY` nor `touches` is available
+
+    const handleDragMove = (event) => {
+      const currentY = event.clientY || (event.touches && event.touches[0]?.clientY);
+      if (currentY === undefined) return;
+
+      const newHeight = startHeight + (startY - currentY);
+      if (newHeight >= 100 && newHeight <= window.innerHeight * 0.8) {
+        setMobileFiltersHeight(newHeight);
+      }
+
+      event.preventDefault(); // Prevent scrolling or default behavior
+    };
+
+    const handleDragEnd = () => {
+      window.removeEventListener('mousemove', handleDragMove);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDragMove, { passive: false });
+      window.removeEventListener('touchend', handleDragEnd, { passive: false });
+    };
+
+    if (e.type === 'mousedown') {
+      window.addEventListener('mousemove', handleDragMove);
+      window.addEventListener('mouseup', handleDragEnd);
+    } else if (e.type === 'touchstart') {
+      window.addEventListener('touchmove', handleDragMove, { passive: false });
+      window.addEventListener('touchend', handleDragEnd, { passive: false });
     }
-    event.preventDefault(); // Prevent scrolling while dragging
   };
-
-  const handleDragEnd = () => {
-    window.removeEventListener('touchmove', handleDragMove, { passive: false });
-    window.removeEventListener('touchend', handleDragEnd, { passive: false });
-  };
-
-  window.addEventListener('touchmove', handleDragMove, { passive: false });
-  window.addEventListener('touchend', handleDragEnd, { passive: false });
-};
-
 
   const closeMobileFilters = () => {
     setIsClosing(true); // Trigger closing animation
