@@ -130,16 +130,16 @@ export default function SearchPage() {
     };
 
     const handleDragEnd = () => {
-      window.removeEventListener('mousemove', handleDragMove);
-      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('mousemove', handleDragMove, { passive: false });
+      window.removeEventListener('mouseup', handleDragEnd, { passive: false });
       window.removeEventListener('touchmove', handleDragMove, { passive: false });
-      window.removeEventListener('touchend', handleDragEnd);
+      window.removeEventListener('touchend', handleDragEnd, { passive: false });
     };
 
-    window.addEventListener('mousemove', handleDragMove);
-    window.addEventListener('mouseup', handleDragEnd);
+    window.addEventListener('mousemove', handleDragMove, { passive: false });
+    window.addEventListener('mouseup', handleDragEnd, { passive: false });
     window.addEventListener('touchmove', handleDragMove, { passive: false });
-    window.addEventListener('touchend', handleDragEnd);
+    window.addEventListener('touchend', handleDragEnd, { passive: false });
   };
 
   const closeMobileFilters = () => {
