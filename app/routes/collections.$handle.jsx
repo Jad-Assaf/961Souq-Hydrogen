@@ -439,9 +439,9 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
                 className='collection-product-image'
               >
                 <Image
-                  srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                           ${product.featuredImage.url}?width=600&quality=30 600w,
-                           ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+                  srcSet={`${product.featuredImage.url}?width=300&quality=15 300w,
+                           ${product.featuredImage.url}?width=600&quality=15 600w,
+                           ${product.featuredImage.url}?width=1200&quality=15 1200w`}
                   alt={product.featuredImage.altText || product.title}
                   loading="lazy"
                   width="180px"
