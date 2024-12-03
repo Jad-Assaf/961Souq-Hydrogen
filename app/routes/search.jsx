@@ -123,6 +123,7 @@ export default function SearchPage() {
 
     const handleDrag = (event) => {
       const currentY = event.clientY || (event.touches && event.touches[0]?.clientY);
+      console.log('Dragging at Y:', currentY);
       if (currentY === undefined) return;
 
       const newHeight = initialHeight + (startY - currentY);
