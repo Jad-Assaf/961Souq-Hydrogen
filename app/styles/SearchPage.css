@@ -117,7 +117,7 @@ select#sort-select {
     right: 0;
     top: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+    z-index: 1001;
 }
 
 .mobile-filters-panel {
@@ -200,10 +200,16 @@ select#sort-select {
     border-radius: 100px;
     position: relative;
     left: 45%;
+    cursor: ns-resize;
+    transition: background-color 0.2s ease;
 }
 
 .filter-options-container {
     width: 100%;
     max-height: 300px;
     overflow-y: auto;
+}
+
+.mobile-filters-hr:hover {
+    background-color: #2172af;
 }
