@@ -4,7 +4,7 @@ import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 
-export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
+export const CategorySlider = ({ menu, sliderCollections }) => {
     if (!menu || !menu.items) {
         return null; // or some fallback UI
     }
@@ -13,8 +13,7 @@ export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
 
     // Create a mapping from collection handle to collection object
     const collectionMap = {};
-    // Merge sliderCollections and subCollections into collectionMap
-    [...sliderCollections, ...subCollections].forEach((collection) => {
+    sliderCollections.forEach((collection) => {
         collectionMap[collection.handle] = collection;
     });
 
@@ -37,7 +36,7 @@ export const CategorySlider = ({ menu, sliderCollections, subCollections }) => {
                         index={index}
                         expandedCategories={expandedCategories}
                         onCategoryClick={handleCategoryClick}
-                        collectionMap={collectionMap} // Pass the updated collectionMap
+                        collectionMap={collectionMap}
                     />
                 ))}
             </div>
@@ -131,6 +130,9 @@ function CategoryContent({ item, isInView, collectionMap }) {
 
 // Helper function to extract handle from URL
 function extractHandleFromUrl(url) {
-  const match = url?.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
-  return match?.[1] || null;
+    const match = url.match(/\/collections\/([a-zA-Z0-9\-_]+)/);
+    if (match && match[1]) {
+        return match[1];
+    }
+    return null;
 }
