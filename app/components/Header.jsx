@@ -98,12 +98,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               useFocusOnCmdK(inputRef);
 
               const [isOverlayVisible, setOverlayVisible] = useState(false);
+              const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
 
               const handleFocus = () => {
                 if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.add("fixed-search");
                   setOverlayVisible(true);
-                  document.body.style.overflow = "hidden"; // Disable scrolling
                 }
                 setSearchResultsVisible(true);
               };
@@ -114,7 +114,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   if (!inputValue) {
                     searchContainerRef.current?.classList.remove("fixed-search");
                     setOverlayVisible(false);
-                    document.body.style.overflow = ""; // Re-enable scrolling
                   }
                 }
               };
@@ -123,7 +122,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 searchContainerRef.current?.classList.remove("fixed-search");
                 setOverlayVisible(false);
                 setSearchResultsVisible(false);
-                document.body.style.overflow = ""; // Re-enable scrolling
               };
 
               const handleKeyDown = (e) => {
@@ -142,12 +140,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 }
               };
 
-              // Ensure scrolling is disabled even if the component is unmounted
+              // Manage scroll-lock when overlay is visible
               useEffect(() => {
-                return () => {
+                if (isOverlayVisible) {
+                  document.body.style.overflow = "hidden";
+                } else {
                   document.body.style.overflow = "";
+                }
+
+                return () => {
+                  document.body.style.overflow = ""; // Ensure cleanup
                 };
-              }, []);
+              }, [isOverlayVisible]);
 
               return (
                 <>
@@ -170,7 +174,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         }}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
-                        onKeyDown={handleKeyDown} // Add keydown listener
+                        onKeyDown={handleKeyDown}
                         className="search-bar"
                       />
                       {inputRef.current?.value && (
@@ -195,7 +199,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         </button>
                       )}
                       <button
-                        onClick={handleSearch} // Use handleSearch
+                        onClick={handleSearch}
                         className="search-bar-submit"
                       >
                         <SearchIcon />
