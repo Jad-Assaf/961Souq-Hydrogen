@@ -687,6 +687,7 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
   margin-bottom: 20px;
   font-weight: 500;
+  gap: 10px;
 }
 
 /* Submenu List */
