@@ -107,8 +107,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
               const handleBlur = () => {
                 if (window.innerWidth < 1024) {
+                  const inputValue = inputRef.current?.value.trim();
+                  if (!inputValue) {
+                    searchContainerRef.current?.classList.remove("fixed-search");
+                  }
+                }
+              };
+
+              const handleCloseSearch = () => {
+                if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.remove("fixed-search");
                 }
+                setSearchResultsVisible(false);
               };
 
               return (
@@ -129,7 +139,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     <button
                       onClick={() => {
                         if (inputRef.current) {
-                          const term = inputRef.current.value.trim().replace(/\s+/g, '-');
+                          const term = inputRef.current.value.trim().replace(/\s+/g, "-");
                           window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
                         }
                       }}
@@ -158,7 +168,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                                 products={products}
                                 closeSearch={() => {
                                   closeSearch();
-                                  setSearchResultsVisible(false);
+                                  handleCloseSearch();
                                 }}
                                 term={term}
                               />
@@ -166,7 +176,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                                 <Link
                                   onClick={() => {
                                     closeSearch();
-                                    setSearchResultsVisible(false);
+                                    handleCloseSearch();
                                   }}
                                   to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
                                     /\s+/g,
