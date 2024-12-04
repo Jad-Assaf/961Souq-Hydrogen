@@ -75,14 +75,12 @@ export async function loader(args) {
 /**
  * Load data necessary for rendering content above the fold.
  */
-function processMenuItems(items) {
+const processMenuItems = (items) => {
   return items.map((item) => ({
     ...item,
-    imageUrl: item.resourceId?.image?.url || null, // Extract image URL
-    altText: item.resourceId?.image?.altText || null,
-    items: item.items ? processMenuItems(item.items) : [], // Recursively process submenus
+    items: item.items ? processMenuItems(item.items) : [],
   }));
-}
+};
 
 async function loadCriticalData({ context }) {
   const { storefront } = context;

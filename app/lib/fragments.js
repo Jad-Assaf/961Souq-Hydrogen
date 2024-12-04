@@ -170,14 +170,6 @@ const MENU_FRAGMENT = `#graphql
     title
     type
     url
-    resourceId {
-      ... on Collection {
-        image {
-          url
-          altText
-        }
-      }
-    }
   }
   fragment ChildMenuItem on MenuItem {
     ...MenuItem
@@ -231,7 +223,6 @@ export const HEADER_QUERY = `#graphql
   query Header(
     $country: CountryCode
     $headerMenuHandle: String!
-    $fetchCollectionImages: Boolean!
     $language: LanguageCode
   ) @inContext(language: $language, country: $country) {
     shop {
