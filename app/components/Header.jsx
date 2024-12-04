@@ -309,10 +309,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   <button onClick={() => openSubmenu(item.id)}>
                     {/* Display the image */}
                     {item.imageUrl && (
-                      <img
+                      <Image
                         src={item.imageUrl}
                         alt={item.altText || item.title}
                         className="menu-item-image"
+                        width="75px"
+                        height="75px"
                       />
                     )}
                     {/* Title */}
@@ -382,10 +384,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         onClick={closeMobileMenu}
                       >
                         {subItem.imageUrl && (
-                          <img
+                          <Image
                             src={subItem.imageUrl}
                             alt={subItem.altText || subItem.title}
                             className="submenu-item-image"
+                            width="75px"
+                            height="75px"
                           />
                         )}
                         {subItem.title}
