@@ -279,7 +279,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
       </header>
 
       <>
-        {/* Overlay for Mobile Menu */}
+        {/* Background overlay */}
         {isMobileMenuOpen && (
           <div
             className="mobile-menu-backdrop"
