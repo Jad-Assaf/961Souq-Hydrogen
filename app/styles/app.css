@@ -920,7 +920,7 @@ button.reset:hover:not(:has(> *)) {
   align-items: center;
   max-width: 500px;
   position: relative;
-  transition: transform 0.3s ease, top 0.3s ease;
+  transition: transform 0.5s ease, top 0.5s ease;
   z-index: 1001;
 }
 
@@ -954,6 +954,7 @@ button.reset:hover:not(:has(> *)) {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
+  backdrop-filter: blur(20px);
 }
 
 .search-overlay.active {
@@ -964,6 +965,7 @@ button.reset:hover:not(:has(> *)) {
 .search-container .search-bar {
   width: 100vw;
   max-width: 500px;
+  margin: 0;
   border: 1px solid #2172af54;
   border-radius: 30px;
   color: #000 !important;
@@ -976,7 +978,6 @@ button.reset:hover:not(:has(> *)) {
 
 .search-bar-submit {
   position: relative;
-  top: -2px;
   border: 1px solid #2172af54;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
