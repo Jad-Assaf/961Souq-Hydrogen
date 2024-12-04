@@ -78,22 +78,33 @@ export async function loader(args) {
 const processMenuItems = (items) => {
   return items.map((item) => ({
     ...item,
-    items: item.items ? processMenuItems(item.items) : [],
+    imageUrl: item.resource?.image?.src || null, // Extract image URL if available
+    altText: item.resource?.image?.altText || item.title, // Use altText or fallback to title
+    items: item.items ? processMenuItems(item.items) : [], // Recursively process submenus
   }));
 };
 
 async function loadCriticalData({ context }) {
   const { storefront } = context;
-  const header = await storefront.query(HEADER_QUERY, {
-    variables: { headerMenuHandle: 'new-main-menu' },
-  });
 
-  // Process nested menus
-  if (header?.menu?.items) {
-    header.menu.items = processMenuItems(header.menu.items);
+  try {
+    // Fetch header data using the HEADER_QUERY
+    const header = await storefront.query(HEADER_QUERY, {
+      variables: { headerMenuHandle: 'new-main-menu' },
+    });
+
+    // Process nested menus to extract images
+    if (header?.menu?.items) {
+      header.menu.items = processMenuItems(header.menu.items);
+    }
+
+    console.log('Processed Menu Items:', header.menu.items);
+
+    return { header };
+  } catch (error) {
+    console.error('Error fetching header data:', error);
+    return { header: null }; // Fallback in case of error
   }
-
-  return { header };
 }
 
 /**
