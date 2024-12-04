@@ -316,7 +316,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                           className="menu-item-image"
                         />
                       )}
-                      {item.title} <span className="mobile-menu-arrow"><svg fill="#2172af" height="18px" width="18px" version="1.1" id="XMLID_287_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24.00 24.00" xml:space="preserve" stroke="#2172af" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <g id="next"> <g> <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon> </g> </g> </g></svg></span>
+                      {item.title} <span className="mobile-menu-arrow"><svg fill="#2172af" height="16px" width="16px" version="1.1" id="XMLID_287_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24.00 24.00" xml:space="preserve" stroke="#2172af" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <g id="next"> <g> <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon> </g> </g> </g></svg></span>
                     </button>
                   </div>
                 );
@@ -361,97 +361,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   );
 }
 
-export function HeaderMenu({ menu, viewport }) {
-  const { close } = useAside();
-
-  useEffect(() => {
-    const menuItems = document.querySelectorAll('.menu-item-level-1');
-
-    const handleMouseEnter = (event) => {
-      const submenus = event.currentTarget.querySelectorAll('.submenu');
-      submenus.forEach((submenu) => {
-        submenu.classList.add('show');
-      });
-    };
-
-    const handleMouseLeave = (event) => {
-      const submenus = event.currentTarget.querySelectorAll('.submenu');
-      submenus.forEach((submenu) => {
-        submenu.classList.remove('show');
-      });
-    };
-
-    const handleLinkClick = () => {
-      menuItems.forEach((item) => {
-        const submenus = item.querySelectorAll('.submenu');
-        submenus.forEach((submenu) => {
-          submenu.classList.remove('show');
-        });
-      });
-    };
-
-    menuItems.forEach((item) => {
-      item.addEventListener('mouseenter', handleMouseEnter);
-      item.addEventListener('mouseleave', handleMouseLeave);
-
-      const links = item.querySelectorAll('a');
-      links.forEach((link) => {
-        link.addEventListener('click', handleLinkClick);
-      });
-    });
-
-    return () => {
-      menuItems.forEach((item) => {
-        item.removeEventListener('mouseenter', handleMouseEnter);
-        item.removeEventListener('mouseleave', handleMouseLeave);
-
-        const links = item.querySelectorAll('a');
-        links.forEach((link) => {
-          link.removeEventListener('click', handleLinkClick);
-        });
-      });
-    };
-  }, []);
-
-  const renderMenuItems = (items = [], level = 1) =>
-    items.map((item) => (
-      <div key={item.id} className={`menu-item-level-${level}`}>
-        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
-        {item.items?.length > 0 && (
-          <div className={`submenu submenu-level-${level}`}>
-            {renderMenuItems(item.items, level + 1)}
-          </div>
-        )}
-      </div>
-    ));
-
-  return (
-    <nav className={`header-menu-${viewport}`} role="navigation">
-      {renderMenuItems(menu?.items || FALLBACK_HEADER_MENU.items)}
-    </nav>
-  );
-}
-
-function HeaderMenuMobileToggle({ toggleMobileMenu }) {
-  return (
-    <button
-      className="header-menu-mobile-toggle reset"
-      onClick={toggleMobileMenu}
-    >
-      <h3>☰</h3>
-    </button>
-  );
-}
-
-// function SearchToggle() {
-//   const { open } = useAside();
-//   return (
-//     <button className="search-toggle reset" onClick={() => open('search')}>
-//       <SearchIcon />
-//     </button>
-//   );
-// }
-
 function CartToggle({ cart }) {
   const { open } = useAside();
 
@@ -489,36 +398,6 @@ function CartIcon() {
     <svg viewBox="0 0 1024 1024" class="icon icon-cart  stroke-w-5" xmlns="http://www.w3.org/2000/svg"><path class="path1" d="M409.6 1024c-56.464 0-102.4-45.936-102.4-102.4s45.936-102.4 102.4-102.4S512 865.136 512 921.6 466.064 1024 409.6 1024zm0-153.6c-28.232 0-51.2 22.968-51.2 51.2s22.968 51.2 51.2 51.2 51.2-22.968 51.2-51.2-22.968-51.2-51.2-51.2z"></path><path class="path2" d="M768 1024c-56.464 0-102.4-45.936-102.4-102.4S711.536 819.2 768 819.2s102.4 45.936 102.4 102.4S824.464 1024 768 1024zm0-153.6c-28.232 0-51.2 22.968-51.2 51.2s22.968 51.2 51.2 51.2 51.2-22.968 51.2-51.2-22.968-51.2-51.2-51.2z"></path><path class="path3" d="M898.021 228.688C885.162 213.507 865.763 204.8 844.8 204.8H217.954l-5.085-30.506C206.149 133.979 168.871 102.4 128 102.4H76.8c-14.138 0-25.6 11.462-25.6 25.6s11.462 25.6 25.6 25.6H128c15.722 0 31.781 13.603 34.366 29.112l85.566 513.395C254.65 736.421 291.929 768 332.799 768h512c14.139 0 25.6-11.461 25.6-25.6s-11.461-25.6-25.6-25.6h-512c-15.722 0-31.781-13.603-34.366-29.11l-12.63-75.784 510.206-44.366c39.69-3.451 75.907-36.938 82.458-76.234l34.366-206.194c3.448-20.677-1.952-41.243-14.813-56.424zm-35.69 48.006l-34.366 206.194c-2.699 16.186-20.043 32.221-36.39 33.645l-514.214 44.714-50.874-305.246h618.314c5.968 0 10.995 2.054 14.155 5.782 3.157 3.73 4.357 9.024 3.376 14.912z"></path></svg>
   );
 }
-
-const FALLBACK_HEADER_MENU = {
-  id: 'gid://shopify/Menu/199655587896',
-  items: [
-    {
-      id: 'gid://shopify/MenuItem/461609500728',
-      title: 'Collections',
-      url: '/collections',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609533496',
-      title: 'Blog',
-      url: '/blogs/journal',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609566264',
-      title: 'Policies',
-      url: '/policies',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609599032',
-      title: 'About',
-      url: '/pages/about',
-      items: [],
-    },
-  ],
-};
 
 function activeLinkStyle({ isActive, isPending }) {
   return {
