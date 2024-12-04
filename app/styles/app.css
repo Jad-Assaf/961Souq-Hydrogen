@@ -673,7 +673,13 @@ button.reset:hover:not(:has(> *)) {
 
 /* Active Submenu Drawer - Slides into View */
 .mobile-submenu-drawer.active {
-  transform: translateX(0);
+  transform: translateX(-15px);
+}
+
+.submenu-list a{
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Back Button for Submenu */
