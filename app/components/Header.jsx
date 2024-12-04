@@ -104,6 +104,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.add("fixed-search");
                   setOverlayVisible(true);
+                  document.body.style.overflow = "hidden"; // Disable scrolling
                 }
                 setSearchResultsVisible(true);
               };
@@ -114,6 +115,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   if (!inputValue) {
                     searchContainerRef.current?.classList.remove("fixed-search");
                     setOverlayVisible(false);
+                    document.body.style.overflow = ""; // Re-enable scrolling
                   }
                 }
               };
@@ -121,10 +123,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               const handleCloseSearch = () => {
                 if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.remove("fixed-search");
-                  setOverlayVisible(false);
                 }
+                setOverlayVisible(false);
                 setSearchResultsVisible(false);
+                document.body.style.overflow = ""; // Re-enable scrolling
               };
+
+              // Ensure scrolling is disabled even if the component is unmounted
+              useEffect(() => {
+                return () => {
+                  document.body.style.overflow = "";
+                };
+              }, []);
 
               return (
                 <>
