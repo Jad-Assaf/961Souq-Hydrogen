@@ -149,7 +149,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     <div className="search-container">
                       <input
                         ref={inputRef}
-                        type="search"
+                        type="text" /* Change to 'text' */
                         placeholder="Search products"
                         onChange={(e) => {
                           fetchResults(e);
@@ -159,6 +159,18 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         onBlur={handleBlur}
                         className="search-bar"
                       />
+                      {inputRef.current?.value && (
+                        <button
+                          className="clear-search-button"
+                          onClick={() => {
+                            inputRef.current.value = "";
+                            setSearchResultsVisible(false);
+                            fetchResults({ target: { value: "" } }); // Reset search results
+                          }}
+                        >
+                          ✖
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           if (inputRef.current) {

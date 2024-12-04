@@ -1252,6 +1252,41 @@ li.cart-line .product-price {
   }
 }
 
+/* Ensure visibility on all devices */
+.clear-search-button {
+  position: absolute;
+  right: 50px;
+  /* Adjust based on design */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #888;
+  /* Adjust color */
+  cursor: pointer;
+  z-index: 10;
+}
+
+.clear-search-button:hover {
+  color: #333;
+  /* Hover state */
+}
+
+/* Disable Safari's default clear button */
+input.search-bar::-webkit-clear-button {
+  -webkit-appearance: none;
+  display: none;
+}
+
+/* Ensure it is visible on iOS */
+@media (max-width: 1024px) {
+  .clear-search-button {
+    display: block;
+    /* Force visibility */
+  }
+}
+
 input.search-bar:focus-visible {
   outline: none;
 }
