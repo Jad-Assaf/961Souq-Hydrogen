@@ -98,7 +98,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               useFocusOnCmdK(inputRef);
 
               const [isOverlayVisible, setOverlayVisible] = useState(false);
-              const skipBlurRef = useRef(false); // To track whether to skip the blur logic
 
               const handleFocus = () => {
                 if (window.innerWidth < 1024) {
@@ -110,27 +109,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               };
 
               const handleBlur = () => {
-                if (skipBlurRef.current) {
-                  skipBlurRef.current = false; // Reset skipBlur
-                  return;
-                }
-
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
                   if (!inputValue) {
                     searchContainerRef.current?.classList.remove("fixed-search");
                     setOverlayVisible(false);
                     document.body.style.overflow = ""; // Re-enable scrolling
-                  }
-                }
-              };
-
-              const handleSubmit = () => {
-                if (inputRef.current) {
-                  const term = inputRef.current.value.trim().replace(/\s+/g, "-");
-                  if (term) {
-                    skipBlurRef.current = true; // Prevent onBlur from clearing the input
-                    window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
                   }
                 }
               };
@@ -142,6 +126,23 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 document.body.style.overflow = ""; // Re-enable scrolling
               };
 
+              const handleKeyDown = (e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault(); // Prevent default form submission
+                  handleSearch();
+                }
+              };
+
+              const handleSearch = () => {
+                if (inputRef.current) {
+                  const term = inputRef.current.value.trim().replace(/\s+/g, "-");
+                  if (term) {
+                    window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
+                  }
+                }
+              };
+
+              // Ensure scrolling is disabled even if the component is unmounted
               useEffect(() => {
                 return () => {
                   document.body.style.overflow = "";
@@ -169,6 +170,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         }}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
+                        onKeyDown={handleKeyDown} // Add keydown listener
                         className="search-bar"
                       />
                       {inputRef.current?.value && (
@@ -177,7 +179,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                           onClick={() => {
                             inputRef.current.value = "";
                             setSearchResultsVisible(false);
-                            fetchResults({ target: { value: "" } });
+                            fetchResults({ target: { value: "" } }); // Reset search results
                           }}
                         >
                           <svg
@@ -193,7 +195,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         </button>
                       )}
                       <button
-                        onClick={handleSubmit}
+                        onClick={handleSearch} // Use handleSearch
                         className="search-bar-submit"
                       >
                         <SearchIcon />
