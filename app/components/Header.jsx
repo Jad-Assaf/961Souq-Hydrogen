@@ -7,13 +7,13 @@ import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 import { motion, useInView } from 'framer-motion';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
   const searchContainerRef = useRef(null);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
 
   const menuImages = [
     { id: "item1", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/d9be8a2496eb547df3ff8f98aa4f95ad.jpg?v=1712759458", alt: "Apple Products" },
