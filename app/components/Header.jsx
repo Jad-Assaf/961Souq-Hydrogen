@@ -98,9 +98,12 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               // Apply the useFocusOnCmdK hook
               useFocusOnCmdK(inputRef);
 
+              const [isOverlayVisible, setOverlayVisible] = useState(false);
+
               const handleFocus = () => {
                 if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.add("fixed-search");
+                  setOverlayVisible(true);
                 }
                 setSearchResultsVisible(true);
               };
@@ -110,6 +113,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                   const inputValue = inputRef.current?.value.trim();
                   if (!inputValue) {
                     searchContainerRef.current?.classList.remove("fixed-search");
+                    setOverlayVisible(false);
                   }
                 }
               };
@@ -117,85 +121,95 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               const handleCloseSearch = () => {
                 if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.remove("fixed-search");
+                  setOverlayVisible(false);
                 }
                 setSearchResultsVisible(false);
               };
 
               return (
-                <div ref={searchContainerRef} className="main-search">
-                  <div className="search-container">
-                    <input
-                      ref={inputRef}
-                      type="search"
-                      placeholder="Search products"
-                      onChange={(e) => {
-                        fetchResults(e);
-                        setSearchResultsVisible(true);
-                      }}
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
-                      className="search-bar"
-                    />
-                    <button
-                      onClick={() => {
-                        if (inputRef.current) {
-                          const term = inputRef.current.value.trim().replace(/\s+/g, "-");
-                          window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
-                        }
-                      }}
-                      className="search-bar-submit"
-                    >
-                      <SearchIcon />
-                    </button>
-                  </div>
-                  {isSearchResultsVisible && (
-                    <div className="search-results-container">
-                      <SearchResultsPredictive>
-                        {({ items, total, term, state, closeSearch }) => {
-                          const { products } = items;
+                <>
+                  {/* Fullscreen Overlay */}
+                  <div
+                    className={`search-overlay ${isOverlayVisible ? "active" : ""}`}
+                    onClick={handleCloseSearch}
+                  ></div>
 
-                          if (state === "loading" && term.current) {
-                            return <div>Loading...</div>;
+                  {/* Main Search Form */}
+                  <div ref={searchContainerRef} className="main-search">
+                    <div className="search-container">
+                      <input
+                        ref={inputRef}
+                        type="search"
+                        placeholder="Search products"
+                        onChange={(e) => {
+                          fetchResults(e);
+                          setSearchResultsVisible(true);
+                        }}
+                        onFocus={handleFocus}
+                        onBlur={handleBlur}
+                        className="search-bar"
+                      />
+                      <button
+                        onClick={() => {
+                          if (inputRef.current) {
+                            const term = inputRef.current.value.trim().replace(/\s+/g, "-");
+                            window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
                           }
+                        }}
+                        className="search-bar-submit"
+                      >
+                        <SearchIcon />
+                      </button>
+                    </div>
+                    {isSearchResultsVisible && (
+                      <div className="search-results-container">
+                        <SearchResultsPredictive>
+                          {({ items, total, term, state, closeSearch }) => {
+                            const { products } = items;
 
-                          if (!total) {
-                            return <SearchResultsPredictive.Empty term={term} />;
-                          }
+                            if (state === "loading" && term.current) {
+                              return <div>Loading...</div>;
+                            }
 
-                          return (
-                            <>
-                              <SearchResultsPredictive.Products
-                                products={products}
-                                closeSearch={() => {
-                                  closeSearch();
-                                  handleCloseSearch();
-                                }}
-                                term={term}
-                              />
-                              {term.current && total ? (
-                                <Link
-                                  onClick={() => {
+                            if (!total) {
+                              return <SearchResultsPredictive.Empty term={term} />;
+                            }
+
+                            return (
+                              <>
+                                <SearchResultsPredictive.Products
+                                  products={products}
+                                  closeSearch={() => {
                                     closeSearch();
                                     handleCloseSearch();
                                   }}
-                                  to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
-                                    /\s+/g,
-                                    "-"
-                                  )}`}
-                                  className="view-all-results"
-                                >
-                                  <p>
-                                    View all results for <q>{term.current}</q> &nbsp; →
-                                  </p>
-                                </Link>
-                              ) : null}
-                            </>
-                          );
-                        }}
-                      </SearchResultsPredictive>
-                    </div>
-                  )}
-                </div>
+                                  term={term}
+                                />
+                                {term.current && total ? (
+                                  <Link
+                                    onClick={() => {
+                                      closeSearch();
+                                      handleCloseSearch();
+                                    }}
+                                    to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
+                                      /\s+/g,
+                                      "-"
+                                    )}`}
+                                    className="view-all-results"
+                                  >
+                                    <p>
+                                      View all results for <q>{term.current}</q> &nbsp; →
+                                    </p>
+                                  </Link>
+                                ) : null}
+                              </>
+                            );
+                          }}
+                        </SearchResultsPredictive>
+                      </div>
+                    )}
+                  </div>
+                </>
               );
             }}
           </SearchFormPredictive>

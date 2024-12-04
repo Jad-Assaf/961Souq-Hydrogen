@@ -206,6 +206,7 @@ button {
 }
 
 @media (max-width: 510px) {
+
   .grid-cols-2 .product-card,
   .grid-cols-3 .product-card,
   .grid-cols-4 .product-card,
@@ -918,12 +919,46 @@ button.reset:hover:not(:has(> *)) {
   justify-content: start;
   align-items: center;
   max-width: 500px;
+  position: relative;
+  transition: transform 0.3s ease, top 0.3s ease;
+  z-index: 1001;
+}
+
+.main-search.fixed-search {
+  position: fixed;
+  top: 0;
+  transform: translateY(0);
+  background-color: #fff;
+  /* Ensures it has a background */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  /* Optional shadow */
+  z-index: 1002;
+  /* Above the overlay */
 }
 
 .search-container {
   display: flex;
   align-items: center;
   z-index: 10000
+}
+
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  /* Semi-transparent black */
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.search-overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
 
 .search-container .search-bar {
@@ -1176,7 +1211,6 @@ li.cart-line .product-price {
   }
 
   .search-container {
-    margin: auto !important;
     width: 100% !important;
   }
 
@@ -1215,17 +1249,6 @@ li.cart-line .product-price {
   .search-result-txt {
     padding: 0 0 10px 0 !important;
   }
-}
-
-.fixed-search {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-  background-color: #fff;
-  /* Optional: to ensure it's visible */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  /* Optional: for a shadow effect */
 }
 
 input.search-bar:focus-visible {
