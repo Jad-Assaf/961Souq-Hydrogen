@@ -12,8 +12,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
   const searchContainerRef = useRef(null);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
 
   const menuImages = [
     { id: "item1", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/d9be8a2496eb547df3ff8f98aa4f95ad.jpg?v=1712759458", alt: "Apple Products" },
@@ -313,11 +311,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     {/* Display the image */}
                     {item.imageUrl && (
                       <motion.div
-                        ref={ref} // Pass the ref to the motion.div
                         initial={{ filter: 'blur(10px)', opacity: 0 }}
-                        animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}} // Animate only when in view
+                        animate={{ filter: 'blur(0px)', opacity: 1 }}
                         transition={{ duration: 0.5 }}
-                        style={{ width: '50px', height: '50px' }}
+                        style={{ width: '50px', height: '50px' }} // Ensure the motion div matches the image size
                       >
                         <Image
                           sizes="(min-width: 45em) 20vw, 40vw"
@@ -399,11 +396,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                       >
                         {subItem.imageUrl && (
                           <motion.div
-                            ref={ref} // Pass the ref to the motion.div
                             initial={{ filter: 'blur(10px)', opacity: 0 }}
-                            animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}} // Animate only when in view
+                            animate={{ filter: 'blur(0px)', opacity: 1 }}
                             transition={{ duration: 0.5 }}
-                            style={{ width: '50px', height: '50px' }}
+                            style={{ width: '50px', height: '50px' }} // Ensure the motion div matches the image size
                           >
                             <Image
                               sizes="(min-width: 45em) 20vw, 40vw"
