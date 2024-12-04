@@ -189,10 +189,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                           {({ items, total, term, state, closeSearch }) => {
                             const { products } = items;
 
-                            if (state === "loading" && term.current) {
-                              return <div>Loading...</div>;
-                            }
-
                             if (!total) {
                               return <SearchResultsPredictive.Empty term={term} />;
                             }
