@@ -75,12 +75,14 @@ export async function loader(args) {
 /**
  * Load data necessary for rendering content above the fold.
  */
-const processMenuItems = (items) => {
+function processMenuItems(items) {
   return items.map((item) => ({
     ...item,
-    items: item.items ? processMenuItems(item.items) : [],
+    imageUrl: item.resourceId?.image?.url || null, // Extract image URL
+    altText: item.resourceId?.image?.altText || null,
+    items: item.items ? processMenuItems(item.items) : [], // Recursively process submenus
   }));
-};
+}
 
 async function loadCriticalData({ context }) {
   const { storefront } = context;

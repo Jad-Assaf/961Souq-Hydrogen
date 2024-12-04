@@ -309,10 +309,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 return (
                   <div key={item.id} className="mobile-menu-item">
                     <button onClick={() => openSubmenu(item.id)}>
-                      {image && (
+                      {item.imageUrl && (
                         <img
-                          src={image.url}
-                          alt={image.alt || item.title}
+                          src={item.imageUrl}
+                          alt={item.altText || item.title}
                           className="menu-item-image"
                         />
                       )}
