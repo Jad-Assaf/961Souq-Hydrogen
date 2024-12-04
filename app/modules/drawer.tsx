@@ -38,7 +38,7 @@ export function Drawer({
   heading?: string;
   open: boolean;
   onClose: () => void;
-  openFrom: "right" | "left" | "top";
+  openFrom: "right" | "left" | "top" | "bottom";
   isBackMenu?: boolean;
   bordered?: boolean;
   spacing?: "sm" | "md" | "lg";
@@ -48,6 +48,7 @@ export function Drawer({
     right: "translate-x-full",
     left: "-translate-x-full",
     top: "-translate-y-full",
+    bottom: "translate-y-full",
   };
 
   return (
@@ -71,23 +72,25 @@ export function Drawer({
                 "fixed inset-y-0 flex",
                 openFrom === "right" && "right-0 max-w-full",
                 openFrom === "top" && "overflow-hidden w-screen",
+                openFrom === "bottom" && "overflow-hidden w-screen bottom-0",
               )}
             >
               <TransitionChild
                 as={Fragment}
                 enter="transform transition ease-in-out duration-300"
                 enterFrom={offScreen[openFrom]}
-                enterTo="translate-x-0"
+                enterTo="translate-x-0 translate-y-0"
                 leave="transform transition ease-in-out duration-300"
-                leaveFrom="translate-x-0"
+                leaveFrom="translate-x-0 translate-y-0"
                 leaveTo={offScreen[openFrom]}
-              >
+              />
                 <DialogPanel
                   className={cn(
                     "text-left align-middle transition-transform transform shadow-xl bg-background",
-                    openFrom === "top"
+                    openFrom === "top" || openFrom === "bottom"
                       ? "h-fit w-screen"
                       : "max-w-lg h-screen-dynamic",
+                    openFrom === "bottom" && "rounded-t-lg" // Add rounded corners for bottom drawer
                   )}
                 >
                   {openFrom !== "top" && (

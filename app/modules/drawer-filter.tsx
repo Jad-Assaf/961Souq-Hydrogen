@@ -345,10 +345,10 @@ export function DrawerFilter({
             <Drawer
               open={isOpen}
               onClose={closeDrawer}
-              openFrom="left"
+              openFrom="bottom"
               heading="Filter"
             >
-              <div className="px-5 w-[360px] rounded-3xl">
+              <div className="px-5 w-full rounded-t-3xl">
                 <FiltersDrawer
                   filters={filters}
                   appliedFilters={appliedFilters}
