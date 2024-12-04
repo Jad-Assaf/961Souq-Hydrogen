@@ -41,9 +41,9 @@ function CategoryItem({ collection, index }) {
                         data={collection.image}
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
-                        srcSet={`${collection.image?.url}?width=300&quality=30 300w,
-                                 ${collection.image?.url}?width=600&quality=30 600w,
-                                 ${collection.image?.url}?width=1200&quality=30 1200w`}
+                        srcSet={`${collection.image?.url}?width=300&quality=20 300w,
+                                 ${collection.image?.url}?width=600&quality=20 600w,
+                                 ${collection.image?.url}?width=1200&quality=20 1200w`}
                         alt={collection.image?.altText || collection.title}
                         className="category-image"
                         width="150px"
