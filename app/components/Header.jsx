@@ -4,9 +4,11 @@ import { useAside } from '~/components/Aside';
 import { Image } from '@shopify/hydrogen-react';
 import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
   const { shop, menu } = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
