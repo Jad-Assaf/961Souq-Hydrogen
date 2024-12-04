@@ -1,7 +1,7 @@
 import {Await, Link} from '@remix-run/react';
 import {Suspense, useId} from 'react';
 import {Aside} from '~/components/Aside';
-import {Header} from '~/components/Header';
+import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
@@ -51,7 +51,7 @@ export function PageLayout({
     <Aside.Provider>
       <CartAside cart={cart} />
       <SearchAside />
-      {/* <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} /> */}
+      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
       {header && (
         <Header
           header={header}

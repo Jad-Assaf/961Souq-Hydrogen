@@ -361,6 +361,77 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   );
 }
 
+export function HeaderMenu({ menu, viewport }) {
+  const { close } = useAside();
+
+  useEffect(() => {
+    const menuItems = document.querySelectorAll('.menu-item-level-1');
+
+    const handleMouseEnter = (event) => {
+      const submenus = event.currentTarget.querySelectorAll('.submenu');
+      submenus.forEach((submenu) => {
+        submenu.classList.add('show');
+      });
+    };
+
+    const handleMouseLeave = (event) => {
+      const submenus = event.currentTarget.querySelectorAll('.submenu');
+      submenus.forEach((submenu) => {
+        submenu.classList.remove('show');
+      });
+    };
+
+    const handleLinkClick = () => {
+      menuItems.forEach((item) => {
+        const submenus = item.querySelectorAll('.submenu');
+        submenus.forEach((submenu) => {
+          submenu.classList.remove('show');
+        });
+      });
+    };
+
+    menuItems.forEach((item) => {
+      item.addEventListener('mouseenter', handleMouseEnter);
+      item.addEventListener('mouseleave', handleMouseLeave);
+
+      const links = item.querySelectorAll('a');
+      links.forEach((link) => {
+        link.addEventListener('click', handleLinkClick);
+      });
+    });
+
+    return () => {
+      menuItems.forEach((item) => {
+        item.removeEventListener('mouseenter', handleMouseEnter);
+        item.removeEventListener('mouseleave', handleMouseLeave);
+
+        const links = item.querySelectorAll('a');
+        links.forEach((link) => {
+          link.removeEventListener('click', handleLinkClick);
+        });
+      });
+    };
+  }, []);
+
+  const renderMenuItems = (items = [], level = 1) =>
+    items.map((item) => (
+      <div key={item.id} className={`menu-item-level-${level}`}>
+        <NavLink to={new URL(item.url).pathname}>{item.title}</NavLink>
+        {item.items?.length > 0 && (
+          <div className={`submenu submenu-level-${level}`}>
+            {renderMenuItems(item.items, level + 1)}
+          </div>
+        )}
+      </div>
+    ));
+
+  return (
+    <nav className={`header-menu-${viewport}`} role="navigation">
+      {renderMenuItems(menu?.items)}
+    </nav>
+  );
+}
+
 function CartToggle({ cart }) {
   const { open } = useAside();
 
