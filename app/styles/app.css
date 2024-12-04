@@ -1218,6 +1218,17 @@ li.cart-line .product-price {
   }
 }
 
+.fixed-search {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: #fff;
+  /* Optional: to ensure it's visible */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Optional: for a shadow effect */
+}
+
 input.search-bar:focus-visible {
   outline: none;
 }

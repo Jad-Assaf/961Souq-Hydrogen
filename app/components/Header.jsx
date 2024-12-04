@@ -98,6 +98,19 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               // Apply the useFocusOnCmdK hook
               useFocusOnCmdK(inputRef);
 
+              const handleFocus = () => {
+                if (window.innerWidth < 1024) {
+                  searchContainerRef.current?.classList.add("fixed-search");
+                }
+                setSearchResultsVisible(true);
+              };
+
+              const handleBlur = () => {
+                if (window.innerWidth < 1024) {
+                  searchContainerRef.current?.classList.remove("fixed-search");
+                }
+              };
+
               return (
                 <div ref={searchContainerRef} className="main-search">
                   <div className="search-container">
@@ -109,7 +122,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         fetchResults(e);
                         setSearchResultsVisible(true);
                       }}
-                      onFocus={() => setSearchResultsVisible(true)}
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
                       className="search-bar"
                     />
                     <button
@@ -130,7 +144,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                         {({ items, total, term, state, closeSearch }) => {
                           const { products } = items;
 
-                          if (state === 'loading' && term.current) {
+                          if (state === "loading" && term.current) {
                             return <div>Loading...</div>;
                           }
 
@@ -154,7 +168,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                                     closeSearch();
                                     setSearchResultsVisible(false);
                                   }}
-                                  to={`${SEARCH_ENDPOINT}?q=${term.current.replace(/\s+/g, '-')}`}
+                                  to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
+                                    /\s+/g,
+                                    "-"
+                                  )}`}
                                   className="view-all-results"
                                 >
                                   <p>
