@@ -678,12 +678,15 @@ button.reset:hover:not(:has(> *)) {
 
 /* Back Button for Submenu */
 .back-button {
+  display: flex;
+  align-items: center;
   align-self: flex-start;
   background: none;
   border: none;
   font-size: 18px;
   cursor: pointer;
   margin-bottom: 20px;
+  font-weight: 500;
 }
 
 /* Submenu List */
