@@ -75,6 +75,7 @@ export function Drawer({
                 openFrom === "top" && "overflow-hidden w-screen",
                 openFrom === "bottom" && "overflow-hidden w-screen bottom-0",
               )}
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(15px)'}}
             >
               <TransitionChild
                 as={Fragment}
@@ -87,7 +88,7 @@ export function Drawer({
               >
                 <DialogPanel
                   className={cn(
-                    "text-left align-middle transition-transform transform shadow-xl bg-background",
+                    "text-left align-middle transition-transform transform shadow-xl bg-background overflow-y-auto",
                     openFrom === "bottom"
                       ? "w-screen max-h-[80vh] rounded-t-lg fixed bottom-0" // Limit height and stick to bottom
                       : "max-w-lg h-screen-dynamic",
@@ -97,7 +98,7 @@ export function Drawer({
                   {openFrom !== "top" && (
                     <header
                       className={clsx(
-                        "sticky top-0 flex items-center h-nav",
+                        "top-0 flex items-center h-nav",
                         DRAWER_HEADER_SPACING[spacing],
                         isBackMenu
                           ? "justify-start gap-4"
