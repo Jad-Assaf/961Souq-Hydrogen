@@ -87,10 +87,10 @@ export function Drawer({
                 <DialogPanel
                   className={cn(
                     "text-left align-middle transition-transform transform shadow-xl bg-background",
-                    openFrom === "top" || openFrom === "bottom"
-                      ? "h-fit w-screen"
+                    openFrom === "bottom"
+                      ? "w-screen max-h-[80vh] rounded-t-lg fixed bottom-0" // Limit height and stick to bottom
                       : "max-w-lg h-screen-dynamic",
-                    openFrom === "bottom" && "rounded-t-lg" // Add rounded corners for bottom drawer
+                    openFrom === "top" && "h-fit w-screen"
                   )}
                 >
                   {openFrom !== "top" && (

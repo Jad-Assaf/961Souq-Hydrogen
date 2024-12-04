@@ -1970,3 +1970,22 @@ button.layout-buttons.first-btn svg {
   height: 24px;
   stroke: #fff;
 }
+
+.drawer {
+  max-height: 80vh;
+  /* Limit drawer height */
+  overflow-y: auto;
+  /* Allow scrolling for overflowing content */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  background-color: white;
+  z-index: 50;
+}
+
+.drawer-content {
+  padding: 16px;
+}
