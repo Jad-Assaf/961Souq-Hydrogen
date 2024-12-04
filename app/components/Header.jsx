@@ -95,10 +95,10 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
 
           <SearchFormPredictive className="header-search">
             {({ inputRef, fetchResults, goToSearch, fetcher }) => {
-              // Apply the useFocusOnCmdK hook
               useFocusOnCmdK(inputRef);
 
               const [isOverlayVisible, setOverlayVisible] = useState(false);
+              const skipBlurRef = useRef(false); // To track whether to skip the blur logic
 
               const handleFocus = () => {
                 if (window.innerWidth < 1024) {
@@ -110,6 +110,11 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               };
 
               const handleBlur = () => {
+                if (skipBlurRef.current) {
+                  skipBlurRef.current = false; // Reset skipBlur
+                  return;
+                }
+
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
                   if (!inputValue) {
@@ -120,16 +125,23 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                 }
               };
 
-              const handleCloseSearch = () => {
-                if (window.innerWidth < 1024) {
-                  searchContainerRef.current?.classList.remove("fixed-search");
+              const handleSubmit = () => {
+                if (inputRef.current) {
+                  const term = inputRef.current.value.trim().replace(/\s+/g, "-");
+                  if (term) {
+                    skipBlurRef.current = true; // Prevent onBlur from clearing the input
+                    window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
+                  }
                 }
+              };
+
+              const handleCloseSearch = () => {
+                searchContainerRef.current?.classList.remove("fixed-search");
                 setOverlayVisible(false);
                 setSearchResultsVisible(false);
                 document.body.style.overflow = ""; // Re-enable scrolling
               };
 
-              // Ensure scrolling is disabled even if the component is unmounted
               useEffect(() => {
                 return () => {
                   document.body.style.overflow = "";
@@ -149,7 +161,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     <div className="search-container">
                       <input
                         ref={inputRef}
-                        type="text" /* Change to 'text' */
+                        type="text"
                         placeholder="Search products"
                         onChange={(e) => {
                           fetchResults(e);
@@ -165,19 +177,23 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                           onClick={() => {
                             inputRef.current.value = "";
                             setSearchResultsVisible(false);
-                            fetchResults({ target: { value: "" } }); // Reset search results
+                            fetchResults({ target: { value: "" } });
                           }}
                         >
-                          <svg fill="#2172af" height="12px" width="12px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 460.775 460.775" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55 l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719 c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path> </g></svg>
+                          <svg
+                            fill="#2172af"
+                            height="12px"
+                            width="12px"
+                            version="1.1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 460.775 460.775"
+                          >
+                            <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55 l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719 c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path>
+                          </svg>
                         </button>
                       )}
                       <button
-                        onClick={() => {
-                          if (inputRef.current) {
-                            const term = inputRef.current.value.trim().replace(/\s+/g, "-");
-                            window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
-                          }
-                        }}
+                        onClick={handleSubmit}
                         className="search-bar-submit"
                       >
                         <SearchIcon />
@@ -209,10 +225,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                                       closeSearch();
                                       handleCloseSearch();
                                     }}
-                                    to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
-                                      /\s+/g,
-                                      "-"
-                                    )}`}
+                                    to={`${SEARCH_ENDPOINT}?q=${term.current.replace(/\s+/g, "-")}`}
                                     className="view-all-results"
                                   >
                                     <p>
