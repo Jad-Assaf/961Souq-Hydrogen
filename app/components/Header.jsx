@@ -4,7 +4,7 @@ import { useAside } from '~/components/Aside';
 import { Image } from '@shopify/hydrogen-react';
 import { SearchFormPredictive, SEARCH_ENDPOINT } from './SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
-import { motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const { shop, menu } = header;
@@ -313,17 +313,17 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     {/* Display the image */}
                     {item.imageUrl && (
                       <motion.div
+                        ref={ref} // Pass the ref to the motion.div
                         initial={{ filter: 'blur(10px)', opacity: 0 }}
-                        animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                        animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}} // Animate only when in view
                         transition={{ duration: 0.5 }}
-                        width="auto"
-                        height="auto"
+                        style={{ width: '50px', height: '50px' }}
                       >
                         <Image
                           sizes="(min-width: 45em) 20vw, 40vw"
                           srcSet={`${item.imageUrl}?width=300&quality=10 300w,
-                                 ${item.imageUrl}?width=600&quality=10 600w,
-                                 ${item.imageUrl}?width=1200&quality=10 1200w`}
+                                   ${item.imageUrl}?width=600&quality=10 600w,
+                                   ${item.imageUrl}?width=1200&quality=10 1200w`}
                           alt={item.altText || item.title}
                           className="menu-item-image"
                           width="50px"
@@ -399,11 +399,11 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                       >
                         {subItem.imageUrl && (
                           <motion.div
+                            ref={ref} // Pass the ref to the motion.div
                             initial={{ filter: 'blur(10px)', opacity: 0 }}
-                            animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                            animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}} // Animate only when in view
                             transition={{ duration: 0.5 }}
-                            width="auto"
-                            height="auto"
+                            style={{ width: '50px', height: '50px' }}
                           >
                             <Image
                               sizes="(min-width: 45em) 20vw, 40vw"
