@@ -7,6 +7,7 @@ import {
 } from "@headlessui/react";
 import { useLocation } from "@remix-run/react";
 import clsx from "clsx";
+import React from "react";
 import { Fragment, useEffect, useState } from "react";
 import { IconCaretLeft, IconX } from "~/components/icons";
 import { cn } from "~/lib/cn";
@@ -78,11 +79,11 @@ export function Drawer({
               <TransitionChild
                 as={Fragment}
                 enter="transform transition ease-in-out duration-300"
-                enterFrom={offScreen[openFrom]}
-                enterTo="translate-x-0 translate-y-0"
+                enterFrom="translate-y-full" /* Start fully offscreen */
+                enterTo="translate-y-0" /* Stop at the bottom of the screen */
                 leave="transform transition ease-in-out duration-300"
-                leaveFrom="translate-x-0 translate-y-0"
-                leaveTo={offScreen[openFrom]}
+                leaveFrom="translate-y-0"
+                leaveTo="translate-y-full"
               >
                 <DialogPanel
                   className={cn(
@@ -134,6 +135,7 @@ export function Drawer({
                       )}
                     </header>
                   )}
+                  <div className="h-1 w-12 bg-gray-300 rounded-full mx-auto mb-4"></div>
                   {children}
                 </DialogPanel>
               </TransitionChild>
