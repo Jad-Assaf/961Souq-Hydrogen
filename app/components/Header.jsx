@@ -313,7 +313,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                       <motion.div
                         initial={{ filter: 'blur(10px)', opacity: 0 }}
                         animate={{ filter: 'blur(0px)', opacity: 1 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 1 }}
                         style={{ width: '50px', height: '50px' }} // Ensure the motion div matches the image size
                       >
                         <Image
@@ -398,7 +398,7 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                           <motion.div
                             initial={{ filter: 'blur(10px)', opacity: 0 }}
                             animate={{ filter: 'blur(0px)', opacity: 1 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: 1 }}
                             style={{ width: '50px', height: '50px' }} // Ensure the motion div matches the image size
                           >
                             <Image
