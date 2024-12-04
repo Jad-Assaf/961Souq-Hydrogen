@@ -83,7 +83,7 @@ export function Drawer({
                 leave="transform transition ease-in-out duration-300"
                 leaveFrom="translate-x-0 translate-y-0"
                 leaveTo={offScreen[openFrom]}
-              />
+              >
                 <DialogPanel
                   className={cn(
                     "text-left align-middle transition-transform transform shadow-xl bg-background",
