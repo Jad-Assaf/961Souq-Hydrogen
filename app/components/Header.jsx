@@ -304,53 +304,93 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             </button>
             <h3>Menu</h3>
             <div className={`mobile-menu-content ${activeSubmenu ? 'hidden' : ''}`}>
-              {menu.items.map((item) => {
-                const image = menuImages.find((img) => img.id === item.id);
-                return (
-                  <div key={item.id} className="mobile-menu-item">
-                    <button onClick={() => openSubmenu(item.id)}>
-                      {image && (
-                        <img
-                          src={image.url}
-                          alt={image.alt || item.title}
-                          className="menu-item-image"
-                        />
-                      )}
-                      {item.title} <span className="mobile-menu-arrow"><svg fill="#2172af" height="14px" width="14px" version="1.1" id="XMLID_287_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24.00 24.00" xml:space="preserve" stroke="#2172af" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <g id="next"> <g> <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon> </g> </g> </g></svg></span>
-                    </button>
-                  </div>
-                );
-              })}
+              {menu.items.map((item) => (
+                <div key={item.id} className="mobile-menu-item">
+                  <button onClick={() => openSubmenu(item.id)}>
+                    {/* Display the image */}
+                    {item.imageUrl && (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.altText || item.title}
+                        className="menu-item-image"
+                      />
+                    )}
+                    {/* Title */}
+                    {item.title}
+                    <span className="mobile-menu-arrow">
+                      <svg
+                        fill="#2172af"
+                        height="14px"
+                        width="14px"
+                        version="1.1"
+                        id="XMLID_287_"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                        viewBox="0 0 24.00 24.00"
+                        xml:space="preserve"
+                        stroke="#2172af"
+                        stroke-width="0.00024000000000000003"
+                      >
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.096"></g>
+                        <g id="SVGRepo_iconCarrier">
+                          <g id="next">
+                            <g>
+                              <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon>
+                            </g>
+                          </g>
+                        </g>
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              ))}
             </div>
 
             {activeSubmenu && (
               <div className="mobile-submenu-drawer" data-id={activeSubmenu}>
                 <button className="back-button" onClick={closeSubmenu}>
-                  <svg fill="#2172af" height="14px" width="14px" version="1.1" id="XMLID_287_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24.00 24.00" xml:space="preserve" stroke="#2172af" stroke-width="0.00024000000000000003" transform="matrix(-1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <g id="next"> <g> <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon> </g> </g> </g></svg>
-                   Back
+                  <svg
+                    fill="#2172af"
+                    height="14px"
+                    width="14px"
+                    version="1.1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24.00 24.00"
+                    xml:space="preserve"
+                    transform="matrix(-1, 0, 0, 1, 0, 0)"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="next">
+                        <g>
+                          <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                  Back
                 </button>
                 <div className="submenu-list">
                   {menu.items
                     .find((item) => item.id === activeSubmenu)
-                    ?.items.map((subItem) => {
-                      const image = menuImages.find((img) => img.id === subItem.id);
-                      return (
-                        <NavLink
-                          key={subItem.id}
-                          to={new URL(subItem.url).pathname}
-                          onClick={closeMobileMenu}
-                        >
-                          {image && (
-                            <img
-                              src={image.url}
-                              alt={image.alt || subItem.title}
-                              className="submenu-item-image"
-                            />
-                          )}
-                          {subItem.title}
-                        </NavLink>
-                      );
-                    })}
+                    ?.items.map((subItem) => (
+                      <NavLink
+                        key={subItem.id}
+                        to={new URL(subItem.url).pathname}
+                        onClick={closeMobileMenu}
+                      >
+                        {subItem.imageUrl && (
+                          <img
+                            src={subItem.imageUrl}
+                            alt={subItem.altText || subItem.title}
+                            className="submenu-item-image"
+                          />
+                        )}
+                        {subItem.title}
+                      </NavLink>
+                    ))}
                 </div>
               </div>
             )}
