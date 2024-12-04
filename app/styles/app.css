@@ -732,11 +732,15 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
 }
 
+.mobile-menu-close h3{
+  font-weight: 500;
+}
+
 /* Menu Content */
 .mobile-menu-content {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   width: 100%;
   margin-top: 20px;
 }
