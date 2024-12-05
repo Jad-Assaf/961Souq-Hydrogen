@@ -86,7 +86,15 @@
     }
 }
 
-.category-svg, .category-svg svg{
+.category-svg,
+.category-svg svg {
     width: 65px;
     height: auto;
+}
+
+.category-container a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
