@@ -5,7 +5,7 @@ import "../styles/BrandsSection.css";
 export const BrandSection = ({ brands }) => {
     return (
         <section className="brand-section">
-            <h3>Shop By Brand</h3>
+            <h2>Shop By Brand</h2>
             <div className="brand-grid">
                 {brands.map((brand, index) => (
                     <a key={index} href={brand.link} className="brand-item">

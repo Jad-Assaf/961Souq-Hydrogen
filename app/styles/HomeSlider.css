@@ -57,7 +57,7 @@
         padding: 30px 10px;
     }
     .category-slider {
-        /* flex-wrap: wrap; */
+        flex-wrap: wrap;
         padding-bottom: 10px;
         margin: auto;
         justify-content: space-evenly;
