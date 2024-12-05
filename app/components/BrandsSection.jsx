@@ -6,6 +6,7 @@ export const BrandSection = ({ brands }) => {
     return (
         <section className="brand-section">
                 <div className="brand-grid">
+                    <h3>Shop By Brand</h3>
                     {brands.map((brand, index) => (
                         <a key={index} href={brand.link} className="brand-item">
                             <Image
@@ -17,7 +18,6 @@ export const BrandSection = ({ brands }) => {
                                 height="auto" // Set a reasonable height for brand logos
                                 sizes="(min-width: 45em) 10vw, 20vw" // Responsive sizes
                             />
-                            <h3 className="brand-name">{brand.name}</h3>
                         </a>
                     ))}
                 </div>
