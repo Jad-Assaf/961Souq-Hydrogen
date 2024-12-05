@@ -19,6 +19,7 @@ import { getAppliedFilterLink } from '../lib/filter';
 import { AddToCartButton } from '../components/AddToCartButton';
 import { useAside } from '~/components/Aside';
 import { motion, useAnimation, useInView } from 'framer-motion';
+import '../styles/CollectionSlider.css'
 
 /**
  * @type {MetaFunction<typeof loader>}
