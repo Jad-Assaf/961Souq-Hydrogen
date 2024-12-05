@@ -19,16 +19,16 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     max-width: 1500px;
-    gap: 1rem;
+    gap: 25px;
+    margin: auto;
 }
 
 .brand-item {
-    transition: transform .3s ease, box-shadow .3s ease;
+    transition: transform .5s linear, box-shadow .3s ease;
 }
 
 .brand-item:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transform: scale(0.95);
 }
 
 .brand-item img {
