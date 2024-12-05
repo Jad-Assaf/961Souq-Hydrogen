@@ -1,7 +1,7 @@
 .brand-section {
     padding: 2rem 0;
     background-color: #f9f9f9;
-    /* Light background */
+    margin-bottom: 30px;
 }
 
 .container {
@@ -21,6 +21,7 @@
     max-width: 1500px;
     gap: 25px;
     margin: auto;
+    padding: 0 10px;
 }
 
 .brand-item {
@@ -36,4 +37,14 @@
     height: auto;
     border-radius: 50%;
     max-width: unset !important;
+}
+
+@media (max-width: 1024px){
+    .brand-section{
+        margin-bottom: 50px !important;
+    }
+
+    .brand-item img{
+        width: 100px;
+    }
 }
