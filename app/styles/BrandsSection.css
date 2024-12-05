@@ -37,6 +37,7 @@
     height: auto;
     border-radius: 50%;
     max-width: unset !important;
+    filter: invert(1);
 }
 
 @media (max-width: 1024px){
