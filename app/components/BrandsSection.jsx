@@ -17,6 +17,7 @@ export const BrandSection = ({ brands }) => {
                                 height="auto" // Set a reasonable height for brand logos
                                 sizes="(min-width: 45em) 10vw, 20vw" // Responsive sizes
                             />
+                            <h3 className="brand-name">{brand.name}</h3>
                         </a>
                     ))}
                 </div>

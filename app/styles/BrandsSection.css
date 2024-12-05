@@ -1,7 +1,11 @@
 .brand-section {
-    padding: 2rem 0;
+    padding: 30px 10px;
     background-color: #f9f9f9;
     margin-bottom: 30px;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto 30px;
+    border-radius: 20px;
 }
 
 .container {
@@ -40,12 +44,12 @@
     filter: invert(1);
 }
 
-@media (max-width: 1024px){
-    .brand-section{
+@media (max-width: 1024px) {
+    .brand-section {
         margin-bottom: 50px !important;
     }
 
-    .brand-item img{
+    .brand-item img {
         width: 100px;
     }
 }
