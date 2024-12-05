@@ -227,14 +227,14 @@ export default function Homepage() {
           {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
         </>
       </div>
+      <Suspense fallback={<div>Loading brands...</div>}>
+        <DeferredBrandSection brands={brandsData} />
+      </Suspense>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
         <DeferredCollectionDisplay collections={collections} images={images} />
       </Suspense>
 
-      <Suspense fallback={<div>Loading brands...</div>}>
-        <DeferredBrandSection brands={brandsData} />
-      </Suspense>
     </div>
   );
 }
