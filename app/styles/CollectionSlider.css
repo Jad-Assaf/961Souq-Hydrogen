@@ -89,7 +89,7 @@
 .category-svg,
 .category-svg svg {
     width: 65px;
-    height: auto;
+    height: 65px;
 }
 
 .category-container a {
