@@ -53,9 +53,11 @@
 }
 
 @media screen and (max-width: 1024px) {
+    .slide-con{
+        padding: 30px 10px;
+    }
     .category-slider {
         /* flex-wrap: wrap; */
-        width: 97vw;
         padding-bottom: 10px;
         margin: auto;
         justify-content: space-evenly;
