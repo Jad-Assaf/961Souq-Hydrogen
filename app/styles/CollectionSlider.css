@@ -85,3 +85,8 @@
         width: 200px;
     }
 }
+
+.category-svg, .category-svg svg{
+    width: 100px;
+    height: auto;
+}
