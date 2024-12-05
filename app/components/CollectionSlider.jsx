@@ -3,6 +3,7 @@ import { Link } from '@remix-run/react';
 import { Image } from '@shopify/hydrogen-react';
 import { motion, useInView } from 'framer-motion';
 import React, { useRef } from 'react';
+import '../styles/HomeSlider.css'
 
 export const CategorySlider = ({ sliderCollections }) => {
     return (
