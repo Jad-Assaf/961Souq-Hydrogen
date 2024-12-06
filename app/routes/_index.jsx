@@ -53,7 +53,7 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  const menuCollections = [
+  const menuHandless = [
     'apple',
     'gaming',
     'mobiles',
@@ -67,7 +67,7 @@ async function loadCriticalData({ context }) {
 
   // Fetch collections for the slider using hardcoded handles
   const menuCollections = await Promise.all(
-    menuHandles.map(async (handle) => {
+    menuHandless.map(async (handle) => {
       const { collectionByHandle } = await context.storefront.query(
         GET_COLLECTION_BY_HANDLE_QUERY,
         { variables: { handle } }
