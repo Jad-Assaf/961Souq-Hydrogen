@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from '@remix-run/react';
 import { ProductRow } from './CollectionDisplay';
+import { LeftArrowIcon } from './CollectionDisplay';
+import { RightArrowIcon } from './CollectionDisplay';
 
 const CollectionRows = ({ collections, menuCollections }) => {
     // Filter out collections with the handles "new-arrivals" and "laptops"
@@ -21,6 +23,7 @@ const CollectionRows = ({ collections, menuCollections }) => {
                         {isMenuRow && currentMenu && (
                             <div className="menu-slider-container">
                                 <div className="menu-category-slider">
+                                    <LeftArrowIcon />
                                     {currentMenu.map((menuCollection) => (
                                         <Link
                                             key={menuCollection.id}
@@ -41,6 +44,7 @@ const CollectionRows = ({ collections, menuCollections }) => {
                                             </div>
                                         </Link>
                                     ))}
+                                    <RightArrowIcon />
                                 </div>
                             </div>
                         )}
