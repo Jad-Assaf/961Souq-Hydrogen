@@ -14,23 +14,24 @@ const CollectionRows = ({ collections, menuCollections }) => {
                     <React.Fragment key={collection.id}>
                         {/* Render the menu slider row */}
                         {isMenuRow && currentMenu && (
-                            <div className="menu-slider-row">
-                                <h2 className="menu-title">Menu {menuIndex + 1}</h2>
-                                <div className="category-slider">
+                            <div className="menu-slider-container">
+                                <div className="menu-category-slider">
                                     {currentMenu.map((menuCollection) => (
                                         <Link
                                             key={menuCollection.id}
                                             to={`/collections/${menuCollection.handle}`}
-                                            className="menu-item"
+                                            className="menu-item-container"
                                         >
                                             {menuCollection.image && (
                                                 <img
                                                     src={menuCollection.image.url}
                                                     alt={menuCollection.image.altText || menuCollection.title}
-                                                    className="menu-image"
+                                                    className="menu-item-image"
+                                                    width={150}
+                                                    height={150}
                                                 />
                                             )}
-                                            <div className="menu-collection-title">
+                                            <div className="menu-item-title">
                                                 {menuCollection.title}
                                             </div>
                                         </Link>
