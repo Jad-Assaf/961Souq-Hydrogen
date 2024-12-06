@@ -34,7 +34,11 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners, deferredData: loadDeferredData(args), });
+  return defer({
+    banners,
+    ...criticalData, // Ensure critical data is included
+    deferredData: loadDeferredData(args), // Add deferred data
+  });
 }
 
 async function loadCriticalData({ context }) {
@@ -55,8 +59,8 @@ async function loadCriticalData({ context }) {
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   return {
-    sliderCollections,
-    menu, // Include menu as part of the critical data
+    sliderCollections, // Critical: slider collections for homepage
+    menu, // Critical: the main menu for the homepage
   };
 }
 
@@ -90,7 +94,9 @@ async function loadDeferredData({ context }) {
             const sanitizedHandle = sanitizeHandle(item.title);
             const { collectionByHandle } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
-              { variables: { handle: sanitizedHandle } }
+              {
+                variables: { handle: sanitizedHandle },
+              }
             );
             return collectionByHandle || null;
           })
@@ -120,7 +126,7 @@ async function loadDeferredData({ context }) {
 
   return {
     collections,
-    menuCollections: menuCollections.filter(Boolean), // Include menuCollections
+    menuCollections: menuCollections.filter(Boolean), // Include menu collections
   };
 }
 
@@ -170,10 +176,9 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, menu } = useLoaderData();
-  const deferredData = useLoaderData()?.deferredData;
+  const { banners, sliderCollections, menu, deferredData } = useLoaderData();
 
-  // Wait for deferred data to resolve
+  // Ensure deferred data resolves fully
   const collections = deferredData?.collections || [];
   const menuCollections = deferredData?.menuCollections || [];
 
@@ -198,12 +203,15 @@ export default function Homepage() {
   );
 }
 
-// Create deferred versions of components
 function DeferredCollectionDisplay({ collections, menuCollections }) {
+  if (!collections?.length) {
+    return <div>No collections available to display.</div>;
+  }
+
   return (
     <CollectionDisplay
       collections={collections}
-      menuCollections={menuCollections}
+      menuCollections={menuCollections || []}
     />
   );
 }
