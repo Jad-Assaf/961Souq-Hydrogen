@@ -125,7 +125,7 @@
 }
 
 .menu-item-container {
-    margin: 30px 20px;
+    margin: 30px 15px;
     scroll-snap-align: start;
     text-align: center;
     display: flex;
