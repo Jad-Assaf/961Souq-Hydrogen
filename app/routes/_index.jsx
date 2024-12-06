@@ -121,7 +121,7 @@ async function loadCriticalData({ context }) {
   return {
     collections,
     sliderCollections,
-    menuCollections: menuCollections.filter(Boolean), // Filter out null menus
+    menuCollections, // Filter out null menus
     menu,
   };
 }
