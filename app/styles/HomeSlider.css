@@ -119,6 +119,7 @@
     width: 100%;
     background-color: #f5f5f5;
     border-radius: 20px;
+    margin: auto;
 }
 
 .menu-category-slider {
@@ -131,6 +132,7 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     max-width: 1500px;
+    margin-left: 15px;
 }
 
 .menu-item-container {

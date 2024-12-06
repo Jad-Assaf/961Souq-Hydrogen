@@ -20,8 +20,6 @@ const CollectionRows = ({ collections, menuCollections }) => {
                         {/* Render the menu slider row */}
                         {isMenuRow && currentMenu && (
                             <div className="menu-slider-container">
-                                {/* Display the dynamic menu title */}
-                                <h2 className="menu-title">{currentMenu.title}</h2>
                                 <div className="menu-category-slider">
                                     {currentMenu.map((menuCollection) => (
                                         <Link
