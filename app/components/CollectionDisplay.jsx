@@ -1,35 +1,27 @@
-import React, { Suspense, lazy, useRef, useState } from 'react';
+import React, { Suspense, lazy, useRef, useState, useEffect } from 'react';
 import { Link } from '@remix-run/react';
-import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
+import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
-// import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 
-const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load the CollectionRows component
+const CollectionRows = lazy(() => import('./CollectionRows'));
 
-// Truncate text to fit within the given max word count
-export function truncateText(text, maxWords) {
-    if (!text || typeof text !== "string") {
-        return ""; // Return an empty string if text is undefined or not a string
-    }
-    const words = text.split(' ');
-    return words.length > maxWords
-        ? words.slice(0, maxWords).join(' ') + '...'
-        : text;
-}
-
-export const CollectionDisplay = React.memo(({ collections, images }) => {
+export const CollectionDisplay = React.memo(({ collections, images, sliderCollections }) => {
     return (
         <div className="collections-container">
             <Suspense fallback={<div>Loading collections...</div>}>
-                <CollectionRows collections={collections} images={images} />
+                <CollectionRows
+                    collections={collections}
+                    images={images}
+                    sliderCollections={sliderCollections}
+                />
             </Suspense>
         </div>
     );
 });
 
-export function ProductRow({ products }) {
+export function ProductRow({ products, sliderCollections, manualHandles }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -56,6 +48,15 @@ export function ProductRow({ products }) {
         rowRef.current.scrollBy({ left: distance, behavior: 'smooth' });
     };
 
+    const combinedData = products.reduce((acc, product, index) => {
+        if (index % 3 === 0 && sliderCollections.length) {
+            const sliderIndex = Math.floor(index / 3) % sliderCollections.length;
+            acc.push({ type: 'slider', data: sliderCollections[sliderIndex] });
+        }
+        acc.push({ type: 'product', data: product });
+        return acc;
+    }, []);
+
     return (
         <div className="product-row-container">
             <button className="home-prev-button" onClick={() => scrollRow(-600)}>
@@ -69,9 +70,29 @@ export function ProductRow({ products }) {
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
             >
-                {products.map((product, index) => (
-                    <ProductItem key={product.id} product={product} index={index} />
-                ))}
+                {combinedData.map((item, index) => {
+                    if (item.type === 'product') {
+                        return <ProductItem key={item.data.id} product={item.data} index={index} />;
+                    } else if (item.type === 'slider') {
+                        return (
+                            <div key={`slider-${index}`} className="slider-collection">
+                                <Link to={`/collections/${item.data.handle}`}>
+                                    {item.data.image && (
+                                        <img
+                                            src={item.data.image.url}
+                                            alt={item.data.image.altText || item.data.title}
+                                            className="slider-image"
+                                            width={150}
+                                            height={150}
+                                        />
+                                    )}
+                                    <div className="slider-title">{item.data.title}</div>
+                                </Link>
+                            </div>
+                        );
+                    }
+                    return null;
+                })}
             </div>
             <button className="home-next-button" onClick={() => scrollRow(600)}>
                 <RightArrowIcon />
@@ -80,6 +101,7 @@ export function ProductRow({ products }) {
     );
 }
 
+// Arrow Icons
 const LeftArrowIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
@@ -92,17 +114,16 @@ const RightArrowIcon = () => (
     </svg>
 );
 
+// ProductItem Component remains the same
 function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const { open } = useAside();
 
-    // Check for available variants and set up selected variant
     const selectedVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
     const hasVariants = product.variants.nodes.length > 1;
-
-    // Determine if there's a discount by comparing the regular and discounted prices
-    const hasDiscount = product.compareAtPriceRange &&
+    const hasDiscount =
+        product.compareAtPriceRange &&
         product.compareAtPriceRange.minVariantPrice.amount >
         product.priceRange.minVariantPrice.amount;
 
@@ -143,12 +164,10 @@ function ProductItem({ product, index }) {
                     </div>
                 </Link>
 
-                {/* Add to Cart Button */}
                 <AddToCartButton
                     disabled={!selectedVariant || !selectedVariant.availableForSale}
                     onClick={() => {
                         if (hasVariants) {
-                            // Navigate to product page if multiple variants
                             window.location.href = `/products/${product.handle}`;
                         } else {
                             open('cart');

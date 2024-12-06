@@ -39,6 +39,13 @@ export async function loader(args) {
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
+
+  // Manual menu handles for sliderCollections
+  const manualMenuHandles = [
+    'apple', 'gaming', 'mobiles', 'fitness',
+    'audio', 'business-monitors', 'photography', 'home-appliances', 'smart-devices'
+  ];
+
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -47,33 +54,49 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Existing code to fetch collections
-  // Extract handles from the menu items.
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+  // Fetch collections for the slider using manual menu handles
+  const sliderCollections = await fetchCollectionsByHandles(context, manualMenuHandles);
 
-  // Fetch collections for the slider using menu handles.
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
-  // Hardcoded handles for product rows.
+  // Hardcoded handles for product rows
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
   ];
 
-  // Fetch collections for product rows.
+  // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
   return { collections, sliderCollections, menu };
+}
+
+/**
+ * Helper function to fetch collections by their handles.
+ * @param {object} context - Shopify storefront context.
+ * @param {array} handles - List of collection handles to fetch.
+ * @returns {Promise<Array>} - Fetched collections.
+ */
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    try {
+      const { collectionByHandle } = await context.storefront.query(
+        GET_COLLECTION_BY_HANDLE_QUERY,
+        { variables: { handle } }
+      );
+      if (collectionByHandle) collections.push(collectionByHandle);
+    } catch (error) {
+      console.error(`Error fetching collection with handle "${handle}":`, error);
+    }
+  }
+  return collections;
 }
 
 const brandsData = [
@@ -227,12 +250,12 @@ export default function Homepage() {
           {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
         </>
       </div>
-      <Suspense fallback={<div>Loading brands...</div>}>
-        <DeferredBrandSection brands={brandsData} />
-      </Suspense>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
         <DeferredCollectionDisplay collections={collections} images={images} />
+      </Suspense>
+      <Suspense fallback={<div>Loading brands...</div>}>
+        <DeferredBrandSection brands={brandsData} />
       </Suspense>
 
     </div>
