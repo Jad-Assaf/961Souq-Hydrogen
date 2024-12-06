@@ -53,7 +53,7 @@ function CategoryItem({ collection, index }) {
                     animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
                     transition={{ duration: 0.5 }}
                     className="category-svg-wrapper"
-                    style={{ width: '75px', height: '75px' }} // Ensure consistent size
+                    style={{ width: '60px', height: '60px' }} // Ensure consistent size
                 >
                     <div
                         dangerouslySetInnerHTML={{ __html: svgs[index % svgs.length] }}
