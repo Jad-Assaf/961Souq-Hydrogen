@@ -15,29 +15,25 @@ const CollectionRows = ({ collections, menuCollections }) => {
                     <React.Fragment key={collection.id}>
                         {/* Render the menu slider row */}
                         {isMenuRow && currentMenu && (
-                            <div className="slider-row">
+                            <div className="menu-slider-row">
+                                <h2 className="menu-title">Menu</h2>
                                 <div className="category-slider">
                                     {currentMenu.map((menuCollection) => (
                                         <Link
                                             key={menuCollection.id}
                                             to={`/collections/${menuCollection.handle}`}
-                                            className="category-container"
+                                            className="menu-item"
                                         >
-                                            {menuCollections.map((menu) => (
-                                                <div key={menu.menuHandle}>
-                                                    <h2>{menu.menuTitle}</h2>
-                                                    <div className="menu-slider">
-                                                        {menu.collections.map((collection) => (
-                                                            <div key={collection.id} className="collection-card">
-                                                                <img src={collection.image.url} alt={collection.image.altText || collection.title} />
-                                                                <h3>{collection.title}</h3>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-
-                                            <div className="category-title">{menuCollection.title}</div>
+                                            {menuCollection.image && (
+                                                <img
+                                                    src={menuCollection.image.url}
+                                                    alt={menuCollection.image.altText || menuCollection.title}
+                                                    className="menu-image"
+                                                />
+                                            )}
+                                            <div className="menu-collection-title">
+                                                {menuCollection.title}
+                                            </div>
                                         </Link>
                                     ))}
                                 </div>
@@ -62,3 +58,4 @@ const CollectionRows = ({ collections, menuCollections }) => {
 };
 
 export default CollectionRows;
+
