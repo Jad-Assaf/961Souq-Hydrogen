@@ -18,23 +18,17 @@ export const meta = () => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  const banners = [
-    {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
-      link: '/collections/google-pixel',
-    },
-    {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
-      link: '/collections/garmin',
-    },
-    {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
-      link: '/collections/remarkable',
-    },
-  ];
-
+  // Fetch critical data
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners });
+
+  // Fetch slider collections as part of critical data
+  const { sliderCollections } = criticalData;
+
+  // Return deferred data along with critical data
+  return defer({
+    ...criticalData,
+    deferredData: loadDeferredData(args),
+  });
 }
 
 async function loadCriticalData({ context }) {
@@ -52,6 +46,16 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
+  // Fetch slider collections (critical data)
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  return {
+    sliderCollections,
+    menu, // Include menu as part of the critical data
+  };
+}
+
+async function loadDeferredData({ context }) {
   // Hardcoded menu handles to fetch their menus
   const menuHandless = [
     'apple',
@@ -98,9 +102,6 @@ async function loadCriticalData({ context }) {
     })
   );
 
-  // Fetch collections for the slider using menu handles
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
   // Hardcoded handles for product rows
   const hardcodedHandles = [
     'new-arrivals', 'laptops',
@@ -117,12 +118,9 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
   return {
     collections,
-    sliderCollections,
-    menuCollections, // Filter out null menus
-    menu,
+    menuCollections, // Include menu collections for deferred data
   };
 }
 
