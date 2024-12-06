@@ -18,21 +18,22 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
-export const CollectionDisplay = React.memo(({ collections, images, sliderCollections }) => {
+export const CollectionDisplay = React.memo(({ collections, images, productSliderCollections = [] }) => {
     return (
         <div className="collections-container">
             <Suspense fallback={<div>Loading collections...</div>}>
                 <CollectionRows
                     collections={collections}
                     images={images}
-                    sliderCollections={sliderCollections}
+                    productSliderCollections={productSliderCollections}
                 />
             </Suspense>
         </div>
     );
 });
 
-export function ProductRow({ products, sliderCollections, manualHandles }) {
+
+export function ProductRow({ products, productSliderCollections = [] }) {
     const rowRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -60,9 +61,9 @@ export function ProductRow({ products, sliderCollections, manualHandles }) {
     };
 
     const combinedData = products.reduce((acc, product, index) => {
-        if (index % 3 === 0 && sliderCollections.length) {
-            const sliderIndex = Math.floor(index / 3) % sliderCollections.length;
-            acc.push({ type: 'slider', data: sliderCollections[sliderIndex] });
+        if (index % 3 === 0 && productSliderCollections.length > 0) {
+            const sliderIndex = Math.floor(index / 3) % productSliderCollections.length;
+            acc.push({ type: 'slider', data: productSliderCollections[sliderIndex] });
         }
         acc.push({ type: 'product', data: product });
         return acc;

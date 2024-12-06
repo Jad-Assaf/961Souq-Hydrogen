@@ -34,18 +34,12 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({ ...criticalData, banners });
+  const productSliderCollections = await loadProductSliderCollections(args);
+  return defer({ ...criticalData, banners, productSliderCollections });
 }
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
-
-  // Manual menu handles for sliderCollections
-  const manualMenuHandles = [
-    'apple', 'gaming', 'mobiles', 'fitness',
-    'audio', 'business-monitors', 'photography', 'home-appliances', 'smart-devices'
-  ];
-
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -54,23 +48,29 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Fetch collections for the slider using manual menu handles
-  const sliderCollections = await fetchCollectionsByHandles(context, manualMenuHandles);
+  // Existing code to fetch collections
+  // Extract handles from the menu items.
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
-  // Hardcoded handles for product rows
+  // Fetch collections for the slider using menu handles.
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
+    'new-arrivals', 'laptops', 
+    'apple-macbook', 'apple-iphone', 'apple-accessories', 
+    'gaming-laptops', 'gaming-consoles', 'console-games', 
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
+    'earbuds', 'speakers', 'surround-systems', 
+    'desktops', 'pc-parts', 'business-monitors', 
+    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
-  // Fetch collections for product rows
+  // Fetch collections for product rows.
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
@@ -78,25 +78,17 @@ async function loadCriticalData({ context }) {
 }
 
 /**
- * Helper function to fetch collections by their handles.
- * @param {object} context - Shopify storefront context.
- * @param {array} handles - List of collection handles to fetch.
- * @returns {Promise<Array>} - Fetched collections.
+ * Loader function for `ProductSliderCollections`
  */
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    try {
-      const { collectionByHandle } = await context.storefront.query(
-        GET_COLLECTION_BY_HANDLE_QUERY,
-        { variables: { handle } }
-      );
-      if (collectionByHandle) collections.push(collectionByHandle);
-    } catch (error) {
-      console.error(`Error fetching collection with handle "${handle}":`, error);
-    }
-  }
-  return collections;
+async function loadProductSliderCollections({ context }) {
+  const productSliderHandles = [
+    'new-arrivals', 'laptops', 'apple-iphone', 'gaming-laptops',
+    'smart-devices', 'garmin-smart-watch', 'samsung-mobile-phones',
+  ];
+
+  const productSliderCollections = await fetchCollectionsByHandles(context, productSliderHandles);
+
+  return productSliderCollections || []; // Ensure it's always defined
 }
 
 const brandsData = [
@@ -122,6 +114,18 @@ const brandsData = [
   { name: "Ubiquiti", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ubiquiti-new.jpg?v=1733388855", link: "/collections/ubiquiti-products" },
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Philips-new.jpg?v=1733388855", link: "/collections/philips-products" },
 ];
+
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menu } = useLoaderData();
@@ -240,7 +244,7 @@ export default function Homepage() {
       </div>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections} images={images} />
+        <DeferredCollectionDisplay collections={collections} images={images} productSliderCollections={productSliderCollections} />
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
         <DeferredBrandSection brands={brandsData} />
@@ -252,7 +256,11 @@ export default function Homepage() {
 
 // Create deferred versions of components
 function DeferredCollectionDisplay({ collections, images }) {
-  return <CollectionDisplay collections={collections} images={images} />;
+  return <CollectionDisplay
+    collections={collections}
+    images={images}
+    productSliderCollections={productSliderCollections}
+  />;
 }
 
 function DeferredBrandSection({ brands }) {
