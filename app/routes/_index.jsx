@@ -189,6 +189,12 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
+      <div className="collections-container">
+        <>
+          {/* Render "New Arrivals" and "Laptops" rows at the start */}
+          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+        </>
+      </div>
       {/* Deferred components */}
       <Suspense fallback={<div>Loading collections...</div>}>
         <CollectionDisplay collections={collections} menuCollections={menuCollections} />
