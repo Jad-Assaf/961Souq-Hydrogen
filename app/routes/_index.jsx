@@ -170,9 +170,10 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menuCollections, menu } = useLoaderData();
+  const { banners, sliderCollections, menu } = useLoaderData();
   const deferredData = useLoaderData()?.deferredData;
 
+  // Wait for deferred data to resolve
   const collections = deferredData?.collections || [];
   const menuCollections = deferredData?.menuCollections || [];
 
