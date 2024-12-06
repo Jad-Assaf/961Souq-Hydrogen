@@ -7,6 +7,17 @@ import { useAside } from './Aside';
 
 const CollectionRows = lazy(() => import('./CollectionRows'));
 
+// Truncate text to fit within the given max word count
+export function truncateText(text, maxWords) {
+    if (!text || typeof text !== "string") {
+        return ""; // Return an empty string if text is undefined or not a string
+    }
+    const words = text.split(' ');
+    return words.length > maxWords
+        ? words.slice(0, maxWords).join(' ') + '...'
+        : text;
+}
+
 export const CollectionDisplay = React.memo(({ collections, images, sliderCollections }) => {
     return (
         <div className="collections-container">
@@ -125,7 +136,7 @@ function ProductItem({ product, index }) {
     const hasDiscount =
         product.compareAtPriceRange &&
         product.compareAtPriceRange.minVariantPrice.amount >
-        product.priceRange.minVariantPrice.amount;
+            product.priceRange.minVariantPrice.amount;
 
     return (
         <motion.div
