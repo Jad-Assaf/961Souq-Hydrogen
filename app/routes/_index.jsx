@@ -171,30 +171,28 @@ const brandsData = [
 
 export default function Homepage() {
   const { banners, collections, sliderCollections, menuCollections, menu } = useLoaderData();
+  const deferredData = useLoaderData()?.deferredData;
 
-  const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
+  const collections = deferredData?.collections || [];
+  const menuCollections = deferredData?.menuCollections || [];
+
+  const newArrivalsCollection = collections.find(
+    (collection) => collection.handle === "new-arrivals"
+  );
 
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
       <div className="collections-container">
-        <>
-          {/* Render "New Arrivals" and "Laptops" rows at the start */}
-          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
-        </>
+        {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
       </div>
-      {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay
-          collections={collections}
-          menuCollections={menuCollections}
-        />
+        <DeferredCollectionDisplay collections={collections} menuCollections={menuCollections} />
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
         <DeferredBrandSection brands={brandsData} />
       </Suspense>
-
     </div>
   );
 }
