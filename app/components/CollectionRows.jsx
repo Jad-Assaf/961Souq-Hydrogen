@@ -3,9 +3,14 @@ import { Link } from '@remix-run/react';
 import { ProductRow } from './CollectionDisplay';
 
 const CollectionRows = ({ collections, menuCollections }) => {
+    // Filter out collections with the handles "new-arrivals" and "laptops"
+    const filteredCollections = collections.filter(
+        (collection) => collection.handle !== "new-arrivals" && collection.handle !== "laptops"
+    );
+
     return (
         <>
-            {collections.map((collection, index) => {
+            {filteredCollections.map((collection, index) => {
                 const isMenuRow = index % 3 === 0; // Every 3 rows, display a menu
                 const menuIndex = Math.floor(index / 3); // Determine the menu index
                 const currentMenu = menuCollections[menuIndex]; // Fetch the corresponding menu
