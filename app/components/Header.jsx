@@ -322,7 +322,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                                    ${item.imageUrl}?width=600&quality=10 600w,
                                    ${item.imageUrl}?width=1200&quality=10 1200w`}
                           alt={item.altText || item.title}
-                          className="menu-item-image"
                           width="50px"
                           height="50px"
                         />

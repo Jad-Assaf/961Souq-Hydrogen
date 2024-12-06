@@ -13,7 +13,7 @@
     font-size: 20px;
     margin: 0px auto 30px auto;
     max-width: 1500px;
-    width: 100%;
+    width: 90%;
     font-weight: 500;
 }
 
@@ -119,13 +119,6 @@
     width: 100%;
     background-color: #f5f5f5;
     border-radius: 20px;
-}
-
-.cat-h3 {
-    font-size: 20px;
-    margin-left: 15px;
-    max-width: 1500px;
-    font-weight: 500;
 }
 
 .menu-category-slider {

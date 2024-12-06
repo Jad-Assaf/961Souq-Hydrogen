@@ -996,7 +996,7 @@ button.reset:hover:not(:has(> *)) {
   width: 100vw;
   max-width: 500px;
   margin: 0;
-  border: 1px solid #2172af54;
+  border: 1px solid #c2c2c2;
   border-radius: 30px;
   color: #000 !important;
   padding: 10px 15px;
@@ -1004,17 +1004,19 @@ button.reset:hover:not(:has(> *)) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   background-color: #fff;
+  box-shadow: rgb(255 255 255 / 25%) 0px 30px 60px -12px inset, rgb(0 0 0 / 12%) 0px 18px 36px -18px inset;
 }
 
 .search-bar-submit {
   position: relative;
-  border: 1px solid #2172af54;
+  border: 1px solid #c2c2c2;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
   border-left: none;
   height: 46px;
   padding: 0px 15px;
   background: #fff;
+  box-shadow: rgb(255 255 255 / 25%) 0px 30px 60px -12px inset, rgb(0 0 0 / 12%) 0px 18px 36px -18px inset;
 }
 
 .search-results-container {
