@@ -183,16 +183,20 @@ export default function Homepage() {
   const { banners, menu, sliderCollections, collections, menuCollections } =
     useLoaderData();
 
+  const newArrivalsCollection = collections.find(
+    (collection) => collection.handle === 'new-arrivals'
+  );
+
   return (
     <div className="home">
       {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
-
       <div className="collections-container">
         <>
-          {/* Render "New Arrivals" and "Laptops" rows at the start */}
-          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+          {newArrivalsCollection && (
+            <TopProductSections collection={newArrivalsCollection} />
+          )}
         </>
       </div>
       {/* Deferred components */}
