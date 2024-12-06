@@ -47,12 +47,12 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Existing code to fetch collections
   // Extract handles from the menu items.
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
+  // Hardcoded handles for fetching their menus
   const menuHandless = [
     'apple',
     'gaming',
@@ -65,21 +65,48 @@ async function loadCriticalData({ context }) {
     'smart-devices',
   ];
 
-  // Fetch collections for the slider using hardcoded handles
+  // Fetch menus and collections within each menu handle
   const menuCollections = await Promise.all(
     menuHandless.map(async (handle) => {
-      const { collectionByHandle } = await context.storefront.query(
-        GET_COLLECTION_BY_HANDLE_QUERY,
-        { variables: { handle } }
-      );
-      return collectionByHandle ? [collectionByHandle] : [];
+      try {
+        // Fetch the menu for the handle
+        const { menu } = await context.storefront.query(MENU_QUERY, {
+          variables: { handle },
+        });
+
+        if (!menu || !menu.items || menu.items.length === 0) {
+          return null;
+        }
+
+        // Fetch collection data for each menu item
+        const collections = await Promise.all(
+          menu.items.map(async (item) => {
+            const sanitizedHandle = sanitizeHandle(item.title);
+            const { collectionByHandle } = await context.storefront.query(
+              GET_COLLECTION_BY_HANDLE_QUERY,
+              { variables: { handle: sanitizedHandle } }
+            );
+            return collectionByHandle ? collectionByHandle : null;
+          })
+        );
+
+        // Return the menu and its collections
+        return {
+          menuHandle: handle,
+          menuTitle: menu.title,
+          collections: collections.filter((c) => c !== null), // Filter out null collections
+        };
+      } catch (error) {
+        console.error(`Error fetching menu or collections for handle ${handle}:`, error);
+        return null;
+      }
     })
   );
 
-  // Fetch collections for the slider using menu handles.
+  // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Hardcoded handles for product rows.
+  // Hardcoded handles for product rows
   const hardcodedHandles = [
     'new-arrivals', 'laptops',
     'apple-macbook', 'apple-iphone', 'apple-accessories',
@@ -89,14 +116,28 @@ async function loadCriticalData({ context }) {
     'earbuds', 'speakers', 'surround-systems',
     'desktops', 'pc-parts', 'business-monitors',
     'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
   ];
 
-  // Fetch collections for product rows.
+  // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, sliderCollections, menuCollections, menu };
+  return {
+    collections,
+    sliderCollections,
+    menuCollections: menuCollections.filter((m) => m !== null), // Filter out null menus
+    menu,
+  };
+}
+
+function sanitizeHandle(handle) {
+  return handle
+    .toLowerCase()
+    .replace(/"/g, '') // Remove quotes
+    .replace(/&/g, '') // Remove ampersands
+    .replace(/\./g, '-') // Replace periods
+    .replace(/\s+/g, '-'); // Replace spaces with hyphens
 }
 
 const brandsData = [
