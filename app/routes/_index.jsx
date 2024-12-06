@@ -70,29 +70,29 @@ async function loadCriticalData({ context }) {
     menuHandless.map(async (handle) => {
       try {
         // Fetch the menu for this handle
-        const { menu: collectionMenu } = await context.storefront.query(GET_MENU_QUERY, {
+        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
           variables: { handle },
         });
 
-        if (!collectionMenu || !collectionMenu.items || collectionMenu.items.length === 0) {
+        if (!menu || !menu.items || menu.items.length === 0) {
           return null; // No menu or items for this handle
         }
 
-        // Fetch the collections within this menu
+        // Fetch collections for each menu item
         const collections = await Promise.all(
-          collectionMenu.items.map(async (item) => {
-            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize handle
-            const { collection: menuCollection } = await context.storefront.query(
+          menu.items.map(async (item) => {
+            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
+            const { collectionByHandle } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
               { variables: { handle: sanitizedHandle } }
             );
-            return menuCollection || null; // Return collection data or null if not found
+            return collectionByHandle || null; // Return the collection data or null if not found
           })
         );
 
-        return collections.filter(Boolean); // Filter out null values
+        return collections.filter(Boolean); // Filter out any null collections
       } catch (error) {
-        console.error(`Error fetching menu or collections for ${handle}:`, error);
+        console.error(`Error fetching menu or collections for handle: ${handle}`, error);
         return null;
       }
     })

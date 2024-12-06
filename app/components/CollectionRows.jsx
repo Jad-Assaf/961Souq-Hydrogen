@@ -1,14 +1,13 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { ProductRow } from './CollectionDisplay';
 import { Link } from '@remix-run/react';
+import { ProductRow } from './CollectionDisplay';
 
 const CollectionRows = ({ collections, menuCollections }) => {
     return (
         <>
             {collections.map((collection, index) => {
                 const isMenuRow = index % 3 === 0; // Every 3 rows, display a menu
-                const menuIndex = Math.floor(index / 3);
+                const menuIndex = Math.floor(index / 3); // Determine the menu index
                 const currentMenu = menuCollections[menuIndex]; // Fetch the corresponding menu
 
                 return (
@@ -16,7 +15,7 @@ const CollectionRows = ({ collections, menuCollections }) => {
                         {/* Render the menu slider row */}
                         {isMenuRow && currentMenu && (
                             <div className="menu-slider-row">
-                                <h2 className="menu-title">Menu</h2>
+                                <h2 className="menu-title">Menu {menuIndex + 1}</h2>
                                 <div className="category-slider">
                                     {currentMenu.map((menuCollection) => (
                                         <Link
@@ -58,4 +57,3 @@ const CollectionRows = ({ collections, menuCollections }) => {
 };
 
 export default CollectionRows;
-
