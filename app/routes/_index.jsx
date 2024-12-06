@@ -34,11 +34,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  return defer({
-    banners,
-    ...criticalData, // Ensure critical data is included
-    deferredData: loadDeferredData(args), // Add deferred data
-  });
+  return defer({ ...criticalData, banners });
 }
 
 async function loadCriticalData({ context }) {
@@ -56,16 +52,7 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
-  return {
-    sliderCollections, // Critical: slider collections for homepage
-    menu, // Critical: the main menu for the homepage
-  };
-}
-
-// Function to load deferred data
-async function loadDeferredData({ context }) {
+  // Hardcoded menu handles to fetch their menus
   const menuHandless = [
     'apple',
     'gaming',
@@ -78,31 +65,32 @@ async function loadDeferredData({ context }) {
     'smart-devices',
   ];
 
+  // Fetch menus and collections for each handle in `menuHandless`
   const menuCollections = await Promise.all(
     menuHandless.map(async (handle) => {
       try {
+        // Fetch the menu for this handle
         const { menu } = await context.storefront.query(GET_MENU_QUERY, {
           variables: { handle },
         });
 
         if (!menu || !menu.items || menu.items.length === 0) {
-          return null;
+          return null; // No menu or items for this handle
         }
 
+        // Fetch collections for each menu item
         const collections = await Promise.all(
           menu.items.map(async (item) => {
-            const sanitizedHandle = sanitizeHandle(item.title);
+            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
             const { collectionByHandle } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
-              {
-                variables: { handle: sanitizedHandle },
-              }
+              { variables: { handle: sanitizedHandle } }
             );
-            return collectionByHandle || null;
+            return collectionByHandle || null; // Return the collection data or null if not found
           })
         );
 
-        return collections.filter(Boolean);
+        return collections.filter(Boolean); // Filter out any null collections
       } catch (error) {
         console.error(`Error fetching menu or collections for handle: ${handle}`, error);
         return null;
@@ -110,6 +98,10 @@ async function loadDeferredData({ context }) {
     })
   );
 
+  // Fetch collections for the slider using menu handles
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  // Hardcoded handles for product rows
   const hardcodedHandles = [
     'new-arrivals', 'laptops',
     'apple-macbook', 'apple-iphone', 'apple-accessories',
@@ -122,11 +114,15 @@ async function loadDeferredData({ context }) {
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
   ];
 
+  // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
+  // Return menu along with other data
   return {
     collections,
-    menuCollections: menuCollections.filter(Boolean), // Include menu collections
+    sliderCollections,
+    menuCollections: menuCollections.filter(Boolean), // Filter out null menus
+    menu,
   };
 }
 
@@ -137,18 +133,6 @@ function sanitizeHandle(handle) {
     .replace(/&/g, '') // Remove ampersands
     .replace(/\./g, '-') // Replace periods
     .replace(/\s+/g, '-'); // Replace spaces with hyphens
-}
-
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
 }
 
 const brandsData = [
@@ -175,43 +159,154 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Philips-new.jpg?v=1733388855", link: "/collections/philips-products" },
 ];
 
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
+
 export default function Homepage() {
-  const { banners, sliderCollections, menu, deferredData } = useLoaderData();
+  const { banners, collections, sliderCollections, menuCollections, menu } = useLoaderData();
 
-  // Ensure deferred data resolves fully
-  const collections = deferredData?.collections || [];
-  const menuCollections = deferredData?.menuCollections || [];
+  const images = [
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
+      link: '/collections/apple', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/APPLE-IPHONE-16-wh.jpg?v=1728307748',
+      link: '/collections/apple-iphone', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
+      link: '/collections/sony-playstation', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps-studios.jpg?v=1728486402',
+      link: '/collections/console-games', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cmf-phone-1-banner-1.jpg?v=1727944715',
+      link: '/collections/nothing-phones', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-s24.jpg?v=1732281967',
+      link: '/collections/samsung-mobile-phones', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-watch-ultra.jpg?v=1732281967',
+      link: '/products/samsung-galaxy-watch-ultra', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-banner.jpg?v=1727943839',
+      link: '/collections/garmin-smart-watch', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-eaubuds.jpg?v=1732284726',
+      link: '/collections/earbuds', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-speakers.jpg?v=1711034859',
+      link: '/collections/gaming-speakers', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-desktops.jpg?v=1732287092',
+      link: '/collections/gaming-desktops', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-monitors_6069e5a5-45c8-4ff2-8543-67de7c8ee0f4.jpg?v=1732287093',
+      link: '/collections/gaming-monitors', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenses.jpg?v=1732289718',
+      link: '/collections/camera-lenses', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/action.jpg?v=1732289718',
+      link: '/collections/action-cameras', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/govee-rgb.jpg?v=1732288379',
+      link: '/collections/lighting', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dyson-vacuums.jpg?v=1732288379',
+      link: '/collections/vacuum-cleaners', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/streaming.jpg?v=1732289074',
+      link: '/collections/streaming-devices', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/smart-home.jpg?v=1732289074',
+      link: '/collections/smart-devices', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
+      link: '/collections/apple-products', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/APPLE-IPHONE-16-wh.jpg?v=1728307748',
+      link: '/collections/apple-iphone', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
+      link: '/collections/playstation', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-products_29a11658-9601-44a9-b13a-9a52c10013be.jpg?v=1728311525',
+      link: '/collections/apple-products', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/APPLE-IPHONE-16-wh.jpg?v=1728307748',
+      link: '/collections/apple-iphone', // Add link
+    },
+    {
+      src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
+      link: '/collections/playstation', // Add link
+    },
 
-  const newArrivalsCollection = collections.find(
-    (collection) => collection.handle === "new-arrivals"
-  );
+  ];
+
+  const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
 
   return (
     <div className="home">
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
       <div className="collections-container">
-        {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+        <>
+          {/* Render "New Arrivals" and "Laptops" rows at the start */}
+          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
+        </>
       </div>
+      {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections} menuCollections={menuCollections} />
+        <DeferredCollectionDisplay
+          collections={collections}
+          menuCollections={menuCollections}
+        />
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
         <DeferredBrandSection brands={brandsData} />
       </Suspense>
+
     </div>
   );
 }
 
+// Create deferred versions of components
 function DeferredCollectionDisplay({ collections, menuCollections }) {
-  if (!collections?.length) {
-    return <div>No collections available to display.</div>;
-  }
-
   return (
     <CollectionDisplay
       collections={collections}
-      menuCollections={menuCollections || []}
+      menuCollections={menuCollections}
     />
   );
 }
