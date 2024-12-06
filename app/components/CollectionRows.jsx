@@ -37,7 +37,7 @@ const CollectionRows = ({ collections, menuCollections }) => {
                                                     height={150}
                                                 />
                                             )}
-                                            <div className="menu-item-title">
+                                            <div className="category-title">
                                                 {menuCollection.title}
                                             </div>
                                         </Link>
