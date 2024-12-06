@@ -38,10 +38,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: white;
+    /* background: white;
     border-radius: 60%;
     width: 130px;
-    height: 130px;
+    height: 130px; */
 }
 
 .category-title {
@@ -67,8 +67,8 @@
 
     .category-container {
         padding: 0px !important;
-        width: 100px !important;
-        height: 100px !important;
+        /* width: 100px !important;
+        height: 100px !important; */
         border: 1px solid #0366d64d;
     }
 
@@ -85,8 +85,8 @@
 
 .category-svg,
 .category-svg svg {
-    width: 40px;
-    height: 40px;
+    width: 75px;
+    height: 75px;
 }
 
 .category-container a {
@@ -94,8 +94,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 150px;
-    height: auto;
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 50%;
 }
 
 
