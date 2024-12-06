@@ -69,7 +69,7 @@
         padding: 0px !important;
         width: 100px !important;
         height: 100px !important;
-        box-shadow: rgba(3, 102, 214, 0.3) 0px 0px 0px 1px;
+        border: 1px solid #0366d64d;
     }
 
     .category-container a {
@@ -79,6 +79,7 @@
 
     .category-title {
         font-size: 11px !important;
+        width: 90px;
     }
 }
 
