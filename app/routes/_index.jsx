@@ -34,8 +34,7 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  const productSliderCollections = await loadProductSliderCollections(args);
-  return defer({ ...criticalData, banners, productSliderCollections });
+  return defer({ ...criticalData, banners });
 }
 
 async function loadCriticalData({ context }) {
@@ -77,20 +76,6 @@ async function loadCriticalData({ context }) {
   return { collections, sliderCollections, menu };
 }
 
-/**
- * Loader function for `ProductSliderCollections`
- */
-async function loadProductSliderCollections({ context }) {
-  const productSliderHandles = [
-    'new-arrivals', 'laptops', 'apple-iphone', 'gaming-laptops',
-    'smart-devices', 'garmin-smart-watch', 'samsung-mobile-phones',
-  ];
-
-  const productSliderCollections = await fetchCollectionsByHandles(context, productSliderHandles);
-
-  return productSliderCollections || []; // Ensure it's always defined
-}
-
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-new.jpg?v=1733388855", link: "/collections/apple" },
   { name: "HP", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/hp-new.jpg?v=1733388855", link: "/collections/hp-products" },
@@ -128,7 +113,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menu, productSliderCollections } = useLoaderData();
+  const { banners, collections, sliderCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -244,7 +229,7 @@ export default function Homepage() {
       </div>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections} images={images} productSliderCollections={productSliderCollections} />
+        <DeferredCollectionDisplay collections={collections} images={images} />
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
         <DeferredBrandSection brands={brandsData} />
@@ -256,11 +241,7 @@ export default function Homepage() {
 
 // Create deferred versions of components
 function DeferredCollectionDisplay({ collections, images }) {
-  return <CollectionDisplay
-    collections={collections}
-    images={images}
-    productSliderCollections={productSliderCollections}
-  />;
+  return <CollectionDisplay collections={collections} images={images} />;
 }
 
 function DeferredBrandSection({ brands }) {
