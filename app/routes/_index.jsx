@@ -19,15 +19,17 @@ export const meta = () => {
  */
 export async function loader(args) {
   const banners = [
-    {
+    { rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
       link: '/collections/google-pixel',
     },
     {
+      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
       link: '/collections/garmin',
     },
     {
+      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
       link: '/collections/remarkable',
     },
