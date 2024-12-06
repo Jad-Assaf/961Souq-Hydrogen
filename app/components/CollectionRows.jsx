@@ -21,7 +21,9 @@ const CollectionRows = ({ collections, menuCollections }) => {
                         {isMenuRow && currentMenu && (
                             <div className="menu-slider-container">
                                 <div className="menu-category-slider">
-                                    <LeftArrowIcon />
+                                    <button className="home-prev-button" onClick={() => scrollRow(-600)}>
+                                        <LeftArrowIcon />
+                                    </button>
                                     {currentMenu.map((menuCollection) => (
                                         <Link
                                             key={menuCollection.id}
@@ -42,7 +44,9 @@ const CollectionRows = ({ collections, menuCollections }) => {
                                             </div>
                                         </Link>
                                     ))}
-                                    <RightArrowIcon />
+                                    <button className="home-next-button" onClick={() => scrollRow(600)}>
+                                        <RightArrowIcon />
+                                    </button>
                                 </div>
                             </div>
                         )}
