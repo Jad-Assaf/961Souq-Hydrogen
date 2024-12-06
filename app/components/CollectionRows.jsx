@@ -3,45 +3,43 @@ import { motion } from 'framer-motion';
 import { ProductRow } from './CollectionDisplay';
 import { Link } from '@remix-run/react';
 
-const CollectionRows = ({ collections, alternateCollections }) => {
+const CollectionRows = ({ collections, menuCollections }) => {
     return (
         <>
             {collections.map((collection, index) => {
-                const isSliderRow = index % 3 === 0; // Display slider every 3 product rows
-                const sliderIndex = Math.floor(index / 3);
-                const currentSlider = alternateCollections[sliderIndex];
+                const isMenuRow = index % 3 === 0; // Every 3 rows, display a menu
+                const menuIndex = Math.floor(index / 3);
+                const currentMenu = menuCollections[menuIndex]; // Fetch the corresponding menu
 
                 return (
                     <React.Fragment key={collection.id}>
-                        {/* Render the collections slider row */}
-                        {isSliderRow && Array.isArray(currentSlider) && (
+                        {/* Render the menu slider row */}
+                        {isMenuRow && currentMenu && (
                             <div className="slider-row">
                                 <div className="category-slider">
-                                    {currentSlider.map((sliderCollection) => (
-                                        sliderCollection && (
-                                            <Link
-                                                key={sliderCollection.id}
-                                                to={`/collections/${sliderCollection.handle}`}
-                                                className="category-container"
-                                            >
-                                                {sliderCollection.image && (
-                                                    <img
-                                                        src={sliderCollection.image.url}
-                                                        alt={sliderCollection.image.altText || sliderCollection.title}
-                                                        className="category-image"
-                                                        width={150}
-                                                        height={150}
-                                                    />
-                                                )}
-                                                <div className="category-title">{sliderCollection.title}</div>
-                                            </Link>
-                                        )
+                                    {currentMenu.map((menuCollection) => (
+                                        <Link
+                                            key={menuCollection.id}
+                                            to={`/collections/${menuCollection.handle}`}
+                                            className="category-container"
+                                        >
+                                            {menuCollection.image && (
+                                                <img
+                                                    src={menuCollection.image.url}
+                                                    alt={menuCollection.image.altText || menuCollection.title}
+                                                    className="category-image"
+                                                    width={150}
+                                                    height={150}
+                                                />
+                                            )}
+                                            <div className="category-title">{menuCollection.title}</div>
+                                        </Link>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* Render product row */}
+                        {/* Render the product row */}
                         <div className="collection-section">
                             <div className="collection-header">
                                 <h3>{collection.title}</h3>

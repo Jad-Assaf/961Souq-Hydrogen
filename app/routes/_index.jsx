@@ -53,7 +53,7 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  const alternateHandles = [
+  const menuCollections = [
     'apple',
     'gaming',
     'mobiles',
@@ -66,13 +66,15 @@ async function loadCriticalData({ context }) {
   ];
 
   // Fetch collections for the slider using hardcoded handles
-  const fetchedCollections = await fetchCollectionsByHandles(context, alternateHandles);
-
-  // Group collections into subarrays for each slider row
-  const alternateCollections = [];
-  for (let i = 0; i < fetchedCollections.length; i += 3) {
-    alternateCollections.push(fetchedCollections.slice(i, i + 3)); // Group into chunks of 3
-  }
+  const menuCollections = await Promise.all(
+    menuHandles.map(async (handle) => {
+      const { collectionByHandle } = await context.storefront.query(
+        GET_COLLECTION_BY_HANDLE_QUERY,
+        { variables: { handle } }
+      );
+      return collectionByHandle ? [collectionByHandle] : [];
+    })
+  );
 
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
@@ -94,7 +96,7 @@ async function loadCriticalData({ context }) {
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, sliderCollections, alternateCollections, menu };
+  return { collections, sliderCollections, menuCollections, menu };
 }
 
 const brandsData = [
@@ -134,7 +136,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, alternateCollections, menu } = useLoaderData();
+  const { banners, collections, sliderCollections, menuCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -252,7 +254,7 @@ export default function Homepage() {
       <Suspense fallback={<div>Loading collections...</div>}>
         <DeferredCollectionDisplay
           collections={collections}
-          alternateCollections={alternateCollections}
+          menuCollections={menuCollections}
         />
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
@@ -264,11 +266,11 @@ export default function Homepage() {
 }
 
 // Create deferred versions of components
-function DeferredCollectionDisplay({ collections, alternateCollections }) {
+function DeferredCollectionDisplay({ collections, menuCollections }) {
   return (
     <CollectionDisplay
       collections={collections}
-      alternateCollections={alternateCollections}
+      menuCollections={menuCollections}
     />
   );
 }
