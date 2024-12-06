@@ -70,7 +70,7 @@ async function loadCriticalData({ context }) {
     menuHandless.map(async (handle) => {
       try {
         // Fetch the menu for this handle
-        const { menu: collectionMenu } = await context.storefront.query(MENU_QUERY, {
+        const { menu: collectionMenu } = await context.storefront.query(GET_MENU_QUERY, {
           variables: { handle },
         });
 
