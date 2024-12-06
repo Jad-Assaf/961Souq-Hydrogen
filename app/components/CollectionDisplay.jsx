@@ -19,11 +19,11 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
-export const CollectionDisplay = React.memo(({ collections, images }) => {
+export const CollectionDisplay = React.memo(({ collections, alternateCollections }) => {
     return (
         <div className="collections-container">
             <Suspense fallback={<div>Loading collections...</div>}>
-                <CollectionRows collections={collections} images={images} />
+                <CollectionRows collections={collections} alternateCollections={alternateCollections} />
             </Suspense>
         </div>
     );

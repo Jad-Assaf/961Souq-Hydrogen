@@ -53,19 +53,34 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
+  const alternateHandles = [
+    'apple',
+    'gaming',
+    'mobiles',
+    'fitness',
+    'audio',
+    'business-monitors',
+    'photography',
+    'home-appliances',
+    'smart-devices',
+  ];
+
+  // Fetch collections for the slider using the hardcoded handles
+  const alternateCollections = await fetchCollectionsByHandles(context, alternateHandles);
+
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows.
   const hardcodedHandles = [
-    'new-arrivals', 'laptops', 
-    'apple-macbook', 'apple-iphone', 'apple-accessories', 
-    'gaming-laptops', 'gaming-consoles', 'console-games', 
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories', 
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands', 
-    'earbuds', 'speakers', 'surround-systems', 
-    'desktops', 'pc-parts', 'business-monitors', 
-    'action-cameras', 'cameras', 'surveillance-cameras', 
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty'
   ];
 
@@ -73,7 +88,7 @@ async function loadCriticalData({ context }) {
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
   // Return menu along with other data
-  return { collections, sliderCollections, menu };
+  return { collections, sliderCollections, alternateCollections, menu };
 }
 
 const brandsData = [
@@ -113,7 +128,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menu } = useLoaderData();
+  const { banners, collections, sliderCollections, alternateCollections, menu } = useLoaderData();
 
   const images = [
     {
@@ -212,7 +227,7 @@ export default function Homepage() {
       src: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-banner.jpg?v=1728289818',
       link: '/collections/playstation', // Add link
     },
-    
+
   ];
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
@@ -229,7 +244,10 @@ export default function Homepage() {
       </div>
       {/* Defer these sections */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay collections={collections} images={images} />
+        <DeferredCollectionDisplay
+          collections={collections}
+          alternateCollections={alternateCollections}
+        />
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
         <DeferredBrandSection brands={brandsData} />
@@ -240,8 +258,13 @@ export default function Homepage() {
 }
 
 // Create deferred versions of components
-function DeferredCollectionDisplay({ collections, images }) {
-  return <CollectionDisplay collections={collections} images={images} />;
+function DeferredCollectionDisplay({ collections, alternateCollections }) {
+  return (
+    <CollectionDisplay
+      collections={collections}
+      alternateCollections={alternateCollections}
+    />
+  );
 }
 
 function DeferredBrandSection({ brands }) {
