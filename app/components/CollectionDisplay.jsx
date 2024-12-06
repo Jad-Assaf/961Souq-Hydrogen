@@ -22,12 +22,13 @@ export function truncateText(text, maxWords) {
 export const CollectionDisplay = React.memo(({ collections, menuCollections }) => {
     return (
         <div className="collections-container">
-            <Suspense fallback={<div>Loading collections...</div>}>
+            <Suspense fallback={<div>Loading collection rows...</div>}>
                 <CollectionRows collections={collections} menuCollections={menuCollections} />
             </Suspense>
         </div>
     );
 });
+
 
 export function ProductRow({ products }) {
     const rowRef = useRef(null);
