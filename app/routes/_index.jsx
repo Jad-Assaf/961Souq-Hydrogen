@@ -47,12 +47,12 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from the menu items.
+  // Extract handles from the menu items
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Hardcoded handles for fetching their menus
+  // Hardcoded menu handles to fetch their menus
   const menuHandless = [
     'apple',
     'gaming',
@@ -65,39 +65,34 @@ async function loadCriticalData({ context }) {
     'smart-devices',
   ];
 
-  // Fetch menus and collections within each menu handle
+  // Fetch menus and collections for each handle in `menuHandless`
   const menuCollections = await Promise.all(
     menuHandless.map(async (handle) => {
       try {
-        // Fetch the menu for the handle
-        const { menu } = await context.storefront.query(MENU_QUERY, {
+        // Fetch the menu for this handle
+        const { menu: collectionMenu } = await context.storefront.query(MENU_QUERY, {
           variables: { handle },
         });
 
-        if (!menu || !menu.items || menu.items.length === 0) {
-          return null;
+        if (!collectionMenu || !collectionMenu.items || collectionMenu.items.length === 0) {
+          return null; // No menu or items for this handle
         }
 
-        // Fetch collection data for each menu item
+        // Fetch the collections within this menu
         const collections = await Promise.all(
-          menu.items.map(async (item) => {
-            const sanitizedHandle = sanitizeHandle(item.title);
-            const { collectionByHandle } = await context.storefront.query(
+          collectionMenu.items.map(async (item) => {
+            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize handle
+            const { collection: menuCollection } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
               { variables: { handle: sanitizedHandle } }
             );
-            return collectionByHandle ? collectionByHandle : null;
+            return menuCollection || null; // Return collection data or null if not found
           })
         );
 
-        // Return the menu and its collections
-        return {
-          menuHandle: handle,
-          menuTitle: menu.title,
-          collections: collections.filter((c) => c !== null), // Filter out null collections
-        };
+        return collections.filter(Boolean); // Filter out null values
       } catch (error) {
-        console.error(`Error fetching menu or collections for handle ${handle}:`, error);
+        console.error(`Error fetching menu or collections for ${handle}:`, error);
         return null;
       }
     })
@@ -126,7 +121,7 @@ async function loadCriticalData({ context }) {
   return {
     collections,
     sliderCollections,
-    menuCollections: menuCollections.filter((m) => m !== null), // Filter out null menus
+    menuCollections: menuCollections.filter(Boolean), // Filter out null menus
     menu,
   };
 }
