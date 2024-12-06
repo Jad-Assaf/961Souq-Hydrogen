@@ -65,8 +65,14 @@ async function loadCriticalData({ context }) {
     'smart-devices',
   ];
 
-  // Fetch collections for the slider using the hardcoded handles
-  const alternateCollections = await fetchCollectionsByHandles(context, alternateHandles);
+  // Fetch collections for the slider using hardcoded handles
+  const fetchedCollections = await fetchCollectionsByHandles(context, alternateHandles);
+
+  // Group collections into subarrays for each slider row
+  const alternateCollections = [];
+  for (let i = 0; i < fetchedCollections.length; i += 3) {
+    alternateCollections.push(fetchedCollections.slice(i, i + 3)); // Group into chunks of 3
+  }
 
   // Fetch collections for the slider using menu handles.
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);

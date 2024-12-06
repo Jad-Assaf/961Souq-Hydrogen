@@ -9,14 +9,15 @@ const CollectionRows = ({ collections, alternateCollections }) => {
             {collections.map((collection, index) => {
                 const isSliderRow = index % 3 === 0; // Display slider every 3 product rows
                 const sliderIndex = Math.floor(index / 3);
+                const currentSlider = alternateCollections[sliderIndex];
 
                 return (
                     <React.Fragment key={collection.id}>
                         {/* Render the collections slider row */}
-                        {isSliderRow && alternateCollections.length > sliderIndex && (
+                        {isSliderRow && Array.isArray(currentSlider) && (
                             <div className="slider-row">
                                 <div className="category-slider">
-                                    {alternateCollections[sliderIndex].map((sliderCollection) => (
+                                    {currentSlider.map((sliderCollection) => (
                                         sliderCollection && (
                                             <Link
                                                 key={sliderCollection.id}
@@ -58,4 +59,3 @@ const CollectionRows = ({ collections, alternateCollections }) => {
 };
 
 export default CollectionRows;
-
