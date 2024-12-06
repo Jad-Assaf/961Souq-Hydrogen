@@ -20,6 +20,7 @@ const CollectionRows = ({ collections, menuCollections }) => {
                         {/* Render the menu slider row */}
                         {isMenuRow && currentMenu && (
                             <div className="menu-slider-container">
+                                <h2 className="cat-h3">{menuIndex + 1}</h2>
                                 <div className="menu-category-slider">
                                     {currentMenu.map((menuCollection) => (
                                         <Link
