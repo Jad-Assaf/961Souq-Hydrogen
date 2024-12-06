@@ -68,10 +68,6 @@
         width: 100px !important;
         height: 100px !important;
     }
-
-    .category-title {
-        font-size: 11px !important;
-    }
 }
 
 .category-svg,
@@ -129,7 +125,7 @@
 }
 
 .menu-item-container {
-    margin: 30px 20px 0px 20px;
+    margin: 30px 20px;
     scroll-snap-align: start;
     text-align: center;
     display: flex;
