@@ -76,7 +76,7 @@ async function loadCriticalData({ context }) {
 
   // Fetch menus and collections for each handle in `menuHandless`
   const menuCollections = await Promise.all(
-    menuHandless.map(async (handle) => {
+    menuHandles.map(async (handle) => {
       try {
         // Fetch the menu for this handle
         const { menu } = await context.storefront.query(GET_MENU_QUERY, {
@@ -220,7 +220,7 @@ function DeferredCollectionDisplay() {
     return <div>Loading collections...</div>;
   }
 
-  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
+  return <CollectionDisplay collections={collections} menuCollections={sliderCollections} />;
 }
 
 function DeferredBrandSection() {
