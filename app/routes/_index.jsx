@@ -145,7 +145,6 @@ export default function Homepage() {
   const { banners, menu, sliderCollections, deferredData } = useLoaderData();
 
   const collections = deferredData?.collections || [];
-  const menuCollections = deferredData?.menuCollections || [];
 
   const newArrivalsCollection = collections.find(
     (collection) => collection.handle === 'new-arrivals'
@@ -163,7 +162,8 @@ export default function Homepage() {
         )}
       </div>
 
-      <CollectionDisplay collections={collections} menuCollections={menuCollections} />
+      {/* Use sliderCollections instead of menuCollections */}
+      <CollectionDisplay collections={collections} menuCollections={sliderCollections} />
 
       <BrandSection brands={brandsData} />
     </div>
