@@ -199,9 +199,9 @@ export default function Homepage() {
         )}
       </div>
 
-        <DeferredCollectionDisplay />
+        {/* <DeferredCollectionDisplay />
 
-        <DeferredBrandSection />
+        <DeferredBrandSection /> */}
     </div>
   );
 }
