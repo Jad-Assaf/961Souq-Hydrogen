@@ -1,11 +1,10 @@
-import React, { Suspense, lazy, useRef, useState } from 'react';
+import React, { Suspense, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
+import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
-
-const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load CollectionRows
+import CollectionRows from './CollectionRows'; // Standard import for CollectionRows
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
@@ -22,13 +21,10 @@ export function truncateText(text, maxWords) {
 export const CollectionDisplay = React.memo(({ collections, menuCollections }) => {
     return (
         <div className="collections-container">
-            {/* Pass collections and menuCollections directly to CollectionRows */}
             <CollectionRows collections={collections} menuCollections={menuCollections} />
         </div>
     );
 });
-
-
 
 export function ProductRow({ products }) {
     const rowRef = useRef(null);

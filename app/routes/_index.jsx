@@ -199,9 +199,13 @@ export default function Homepage() {
         )}
       </div>
 
+      <Suspense fallback={<div>Loading collection display...</div>}>
         <DeferredCollectionDisplay />
+      </Suspense>
 
+      <Suspense fallback={<div>Loading brand section...</div>}>
         <DeferredBrandSection />
+      </Suspense>
     </div>
   );
 }
@@ -210,9 +214,11 @@ export default function Homepage() {
 function DeferredCollectionDisplay() {
   const { deferredData } = useLoaderData();
 
-  // Safely extract collections and menuCollections
-  const collections = deferredData?.collections || [];
-  const menuCollections = deferredData?.menuCollections || [];
+  if (!deferredData) {
+    return <div>Loading collections...</div>;
+  }
+
+  const { collections = [], menuCollections = [] } = deferredData;
 
   if (!collections.length || !menuCollections.length) {
     return <div>Loading collections...</div>;
