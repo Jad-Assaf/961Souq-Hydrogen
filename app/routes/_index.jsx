@@ -114,7 +114,7 @@ async function fetchCollectionsByHandles(context, handles) {
     })
   );
 
-  return collections.filter(Boolean); // Filter out null collections
+  return collections.filter(Boolean); // Ensure it is an array of collections
 }
 
 const brandsData = [
@@ -152,7 +152,6 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
@@ -162,7 +161,6 @@ export default function Homepage() {
         )}
       </div>
 
-      {/* Use sliderCollections instead of menuCollections */}
       <CollectionDisplay collections={collections} menuCollections={sliderCollections} />
 
       <BrandSection brands={brandsData} />
