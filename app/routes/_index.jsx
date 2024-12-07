@@ -191,9 +191,7 @@ export default function Homepage() {
     <div className="home">
       {/* Critical components */}
       <BannerSlideshow banners={banners} />
-      <React.Suspense fallback={<div>Loading category slider...</div>}>
-        <CategorySlider menu={menu} sliderCollections={sliderCollections} />
-      </React.Suspense>
+      <CategorySlider sliderCollections={sliderCollections} />
 
       <React.Suspense fallback={<div>Loading product sections...</div>}>
         <div className="collections-container">

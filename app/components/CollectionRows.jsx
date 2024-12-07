@@ -31,9 +31,9 @@ const CollectionRows = ({ collections, menuCollections }) => {
                                         >
                                             {menuCollection.image && (
                                                 <Image
-                                                    srcSet={`${menuCollection.image.url}?width=300&quality=10 300w,
-                                                             ${menuCollection.image.url}?width=600&quality=10 600w,
-                                                             ${menuCollection.image.url}?width=1200&quality=10 1200w`}
+                                                    srcSet={`${menuCollection.image.url}?width=300&quality=20 300w,
+                                                             ${menuCollection.image.url}?width=600&quality=20 600w,
+                                                             ${menuCollection.image.url}?width=1200&quality=20 1200w`}
                                                     alt={menuCollection.image.altText || menuCollection.title}
                                                     className="menu-item-image"
                                                     width={150}
