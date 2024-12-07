@@ -181,32 +181,30 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, menu, sliderCollections, deferredData } = useLoaderData();
-
-  const newArrivalsCollection = deferredData?.collections?.find(
-    (collection) => collection.handle === 'new-arrivals'
-  );
+  const { banners, menu, deferredData } = useLoaderData();
 
   return (
     <div className="home">
-      {/* Critical components */}
+      {/* Load banners immediately (Critical for LCP) */}
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
-      <div className="collections-container">
-        {newArrivalsCollection && (
-          <TopProductSections collection={newArrivalsCollection} />
-        )}
-      </div>
+      {/* Defer loading of other components */}
+      <React.Suspense fallback={<div>Loading category slider...</div>}>
+        <CategorySlider menu={menu} />
+      </React.Suspense>
 
+      <React.Suspense fallback={<div>Loading product sections...</div>}>
         <DeferredCollectionDisplay />
+      </React.Suspense>
 
+      <React.Suspense fallback={<div>Loading brands...</div>}>
         <DeferredBrandSection />
+      </React.Suspense>
     </div>
   );
 }
 
-// Deferred component
+// Deferred components
 function DeferredCollectionDisplay() {
   const { deferredData } = useLoaderData();
 
