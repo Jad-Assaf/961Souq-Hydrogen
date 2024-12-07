@@ -82,8 +82,7 @@ async function loadCriticalData({ context }) {
   const menuCollections = menuHandles.map((handle) =>
     data.collections.find((collection) => collection.handle === handle)
   );
-  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
   return {
     menu,
     collections,
