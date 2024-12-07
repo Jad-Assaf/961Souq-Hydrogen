@@ -99,7 +99,7 @@
     display: flex;
     flex-wrap: nowrap;
     flex-direction: row !important;
-    justify-content: flex-start;
+    justify-content: center;
     overflow-x: auto;
     scrollbar-width: none;
     scroll-snap-type: x mandatory;
@@ -115,13 +115,12 @@
     display: flex;
     flex-wrap: nowrap;
     flex-direction: row !important;
-    justify-content: flex-start;
+    justify-content: center;
     overflow-x: auto;
     scrollbar-width: none;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     max-width: 1500px;
-    margin-left: 15px;
 }
 
 .menu-item-container {
