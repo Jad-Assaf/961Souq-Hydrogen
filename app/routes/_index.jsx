@@ -37,11 +37,12 @@ export async function loader(args) {
 
   return defer({
     banners,
-    menu: criticalData.menu, // Critical for `CategorySlider`
-    sliderCollections: criticalData.sliderCollections, // Critical for `CategorySlider`
-    // Deferred non-critical data
-    collections: criticalData.collections,
-    menuCollections: criticalData.menuCollections,
+    menu: criticalData.menu,
+    sliderCollections: criticalData.sliderCollections,
+    deferredData: {
+      collections: criticalData.collections,
+      menuCollections: criticalData.menuCollections,
+    },
   });
 }
 
@@ -180,10 +181,9 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, menu, sliderCollections, collections, menuCollections } =
-    useLoaderData();
+  const { banners, menu, sliderCollections, deferredData } = useLoaderData();
 
-  const newArrivalsCollection = collections.find(
+  const newArrivalsCollection = deferredData.collections?.find(
     (collection) => collection.handle === 'new-arrivals'
   );
 
@@ -201,29 +201,24 @@ export default function Homepage() {
       </div>
       {/* Deferred components */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        {startTransition(() => (
-          <CollectionDisplay collections={collections} menuCollections={menuCollections} />
-        ))}
+        <DeferredCollectionDisplay />
       </Suspense>
       <Suspense fallback={<div>Loading brands...</div>}>
-        {startTransition(() => (
-          <BrandSection brands={brandsData} />
-        ))}
+        <DeferredBrandSection />
       </Suspense>
     </div>
   );
 }
 
 // Deferred component
-function DeferredCollectionDisplay({ deferredData }) {
-  const { collections, menuCollections } = useLoaderData(deferredData);
+function DeferredCollectionDisplay() {
+  const { collections, menuCollections } = useLoaderData().deferredData;
+  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
+}
 
-  return (
-    <>
-      <CollectionDisplay collections={collections} menuCollections={menuCollections} />
-      <BrandSection brands={brandsData} />
-    </>
-  );
+function DeferredBrandSection() {
+  const brands = brandsData; // Static data
+  return <BrandSection brands={brands} />;
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
