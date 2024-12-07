@@ -60,7 +60,7 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for the slider using menu handles
+  // Fetch collections for slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows
@@ -152,16 +152,15 @@ export default function Homepage() {
 function DeferredCollectionDisplay({ sliderCollections }) {
   const { deferredData } = useLoaderData();
 
-  if (!deferredData) {
+  // Ensure `collections` is valid
+  const collections = deferredData?.collections || [];
+
+  // Directly use `sliderCollections` assuming it is passed correctly
+  if (!collections.length || !sliderCollections?.length) {
     return <div>Loading collections...</div>;
   }
 
-  const { collections = [] } = deferredData;
-
-  if (!collections.length || !sliderCollections.length) {
-    return <div>Loading collections...</div>;
-  }
-
+  // Pass both collections and sliderCollections to the component
   return <CollectionDisplay collections={collections} menuCollections={sliderCollections} />;
 }
 
