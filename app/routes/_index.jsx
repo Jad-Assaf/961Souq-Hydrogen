@@ -1,11 +1,13 @@
 import React, { Suspense, lazy, startTransition } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
-import { BannerSlideshow } from '../components/BannerSlideshow';
-import { CategorySlider } from '~/components/CollectionSlider';
-import { TopProductSections } from '~/components/TopProductSections';
-import { CollectionDisplay } from '~/components/CollectionDisplay';
-import { BrandSection } from '~/components/BrandsSection';
+
+// Lazy load components
+const BannerSlideshow = lazy(() => import('../components/BannerSlideshow'));
+const CategorySlider = lazy(() => import('~/components/CollectionSlider'));
+const TopProductSections = lazy(() => import('~/components/TopProductSections'));
+const CollectionDisplay = lazy(() => import('~/components/CollectionDisplay'));
+const BrandSection = lazy(() => import('~/components/BrandsSection'));
 
 /**
  * @type {MetaFunction}
@@ -118,7 +120,8 @@ async function loadCriticalData({ context }) {
     'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
     'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
     'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
+    'desktops', 'pc-parts',
+    'business-monitors',
     'action-cameras', 'cameras', 'surveillance-cameras',
     'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
   ];
@@ -190,18 +193,28 @@ export default function Homepage() {
   return (
     <div className="home">
       {/* Critical components */}
-      <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
+      <Suspense fallback={<div>Loading banners...</div>}>
+        <BannerSlideshow banners={banners} />
+      </Suspense>
+      <Suspense fallback={<div>Loading categories...</div>}>
+        <CategorySlider menu={menu} sliderCollections={sliderCollections} />
+      </Suspense>
 
       <div className="collections-container">
         {newArrivalsCollection && (
-          <TopProductSections collection={newArrivalsCollection} />
+          <Suspense fallback={<div>Loading new arrivals...</div>}>
+            <TopProductSections collection={newArrivalsCollection} />
+          </Suspense>
         )}
       </div>
 
+      <Suspense fallback={<div>Loading collections...</div>}>
         <DeferredCollectionDisplay />
+      </Suspense>
 
+      <Suspense fallback={<div>Loading brands...</div>}>
         <DeferredBrandSection />
+      </Suspense>
     </div>
   );
 }
