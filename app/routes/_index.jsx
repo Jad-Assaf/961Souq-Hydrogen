@@ -190,7 +190,7 @@ export default function Homepage() {
   return (
     <div className="home">
       {/* Critical components */}
-      <BannerSlideshow banners={banners} />
+      {/* <BannerSlideshow banners={banners} /> */}
       {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
 
       <div className="collections-container">
