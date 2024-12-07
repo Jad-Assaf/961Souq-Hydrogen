@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from '@remix-run/react';
 import { ProductRow } from './CollectionDisplay';
+import { Image } from '@shopify/hydrogen-react';
 
 const CollectionRows = ({ collections, menuCollections }) => {
     // Filter out collections with the handles "new-arrivals" and "laptops"
@@ -21,7 +22,7 @@ const CollectionRows = ({ collections, menuCollections }) => {
                         {isMenuRow && currentMenu && (
                             <div className="menu-slider-container">
                                 <div className="menu-category-slider">
-                                    
+
                                     {currentMenu.map((menuCollection) => (
                                         <Link
                                             key={menuCollection.id}
@@ -29,8 +30,10 @@ const CollectionRows = ({ collections, menuCollections }) => {
                                             className="menu-item-container"
                                         >
                                             {menuCollection.image && (
-                                                <img
-                                                    src={menuCollection.image.url}
+                                                <Image
+                                                    srcSet={`${menuCollection.image.url}?width=300&quality=10 300w,
+                                                             ${menuCollection.image.url}?width=600&quality=10 600w,
+                                                             ${menuCollection.image.url}?width=1200&quality=10 1200w`}
                                                     alt={menuCollection.image.altText || menuCollection.title}
                                                     className="menu-item-image"
                                                     width={150}
@@ -42,7 +45,7 @@ const CollectionRows = ({ collections, menuCollections }) => {
                                             </div>
                                         </Link>
                                     ))}
-                                    
+
                                 </div>
                             </div>
                         )}
