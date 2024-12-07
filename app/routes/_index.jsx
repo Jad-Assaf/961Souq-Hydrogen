@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, SuspenseList, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -189,23 +189,26 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
+
       <div className="collections-container">
-        <>
-          {newArrivalsCollection && (
-            <TopProductSections collection={newArrivalsCollection} />
-          )}
-        </>
+        {newArrivalsCollection && (
+          <TopProductSections collection={newArrivalsCollection} />
+        )}
       </div>
-      {/* Deferred components */}
-      <Suspense fallback={<div>Loading collections...</div>}>
-        <CollectionDisplay collections={collections} menuCollections={menuCollections} />
-      </Suspense>
-      <Suspense fallback={<div>Loading brands...</div>}>
-        <BrandSection brands={brandsData} />
-      </Suspense>
+
+      <SuspenseList revealOrder="together">
+        <Suspense fallback={<div>Loading collections...</div>}>
+          <CollectionDisplay
+            collections={collections}
+            menuCollections={menuCollections}
+          />
+        </Suspense>
+        <Suspense fallback={<div>Loading brands...</div>}>
+          <BrandSection brands={brandsData} />
+        </Suspense>
+      </SuspenseList>
     </div>
   );
 }
