@@ -75,37 +75,8 @@ async function loadCriticalData({ context }) {
   ];
 
   // Fetch menus and collections for each handle in `menuHandless`
-  const menuCollections = await Promise.all(
-    menuHandless.map(async (handle) => {
-      try {
-        // Fetch the menu for this handle
-        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-          variables: { handle },
-        });
-
-        if (!menu || !menu.items || menu.items.length === 0) {
-          return null; // No menu or items for this handle
-        }
-
-        // Fetch collections for each menu item
-        const collections = await Promise.all(
-          menu.items.map(async (item) => {
-            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
-            const { collectionByHandle } = await context.storefront.query(
-              GET_COLLECTION_BY_HANDLE_QUERY,
-              { variables: { handle: sanitizedHandle } }
-            );
-            return collectionByHandle || null; // Return the collection data or null if not found
-          })
-        );
-
-        return collections.filter(Boolean); // Filter out any null collections
-      } catch (error) {
-        console.error(`Error fetching menu or collections for handle: ${handle}`, error);
-        return null;
-      }
-    })
-  );
+  // Use menuHandles to fetch collections directly
+  const menuCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
