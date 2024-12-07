@@ -60,7 +60,7 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for slider using menu handles
+  // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows
@@ -141,7 +141,7 @@ export default function Homepage() {
         )}
       </div>
 
-      <DeferredCollectionDisplay sliderCollections={sliderCollections} />
+      <DeferredCollectionDisplay />
 
       <DeferredBrandSection />
     </div>
@@ -149,19 +149,20 @@ export default function Homepage() {
 }
 
 // Deferred component
-function DeferredCollectionDisplay({ sliderCollections }) {
+function DeferredCollectionDisplay() {
   const { deferredData } = useLoaderData();
 
-  // Ensure `collections` is valid
-  const collections = deferredData?.collections || [];
-
-  // Directly use `sliderCollections` assuming it is passed correctly
-  if (!collections.length || !sliderCollections?.length) {
+  if (!deferredData) {
     return <div>Loading collections...</div>;
   }
 
-  // Pass both collections and sliderCollections to the component
-  return <CollectionDisplay collections={collections} menuCollections={sliderCollections} />;
+  const { collections = [], menuCollections = [] } = deferredData;
+
+  if (!collections.length || !menuCollections.length) {
+    return <div>Loading collections...</div>;
+  }
+
+  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
 }
 
 function DeferredBrandSection() {
