@@ -184,7 +184,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, menu, sliderCollections, deferredData } = useLoaderData();
+  const { banners = [], menu = {}, sliderCollections = [], deferredData } = useLoaderData();
 
   const newArrivalsCollection = deferredData?.collections?.find(
     (collection) => collection.handle === 'new-arrivals'
@@ -192,7 +192,6 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      {/* Critical components */}
       <Suspense fallback={<div>Loading banners...</div>}>
         <BannerSlideshow banners={banners} />
       </Suspense>
