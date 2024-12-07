@@ -41,7 +41,6 @@ export async function loader(args) {
     sliderCollections: criticalData.sliderCollections,
     deferredData: {
       collections: criticalData.collections,
-      menuCollections: criticalData.menuCollections, // Dynamic menuCollections from menuHandles
     },
   });
 }
@@ -61,25 +60,7 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for each handle in `menuHandles`
-  const menuCollections = (
-    await Promise.all(
-      menuHandles.map(async (handle) => {
-        try {
-          const { collectionByHandle } = await context.storefront.query(
-            GET_COLLECTION_BY_HANDLE_QUERY,
-            { variables: { handle } }
-          );
-          return collectionByHandle || null;
-        } catch (error) {
-          console.error(`Error fetching collection for handle: ${handle}`, error);
-          return null;
-        }
-      })
-    )
-  ).filter(Boolean); // Ensure only valid collections are included
-
-  // Fetch collections for the slider using menu handles
+  // Fetch collections for slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows
@@ -101,7 +82,6 @@ async function loadCriticalData({ context }) {
   return {
     collections,
     sliderCollections,
-    menuCollections,
     menu,
   };
 }
@@ -178,20 +158,19 @@ export default function Homepage() {
 }
 
 // Deferred component
-function DeferredCollectionDisplay() {
+function DeferredCollectionDisplay({ sliderCollections }) {
   const { deferredData } = useLoaderData();
 
-  if (!deferredData) {
+  // Ensure `collections` is valid
+  const collections = deferredData?.collections || [];
+
+  // Directly use `sliderCollections` assuming it is passed correctly
+  if (!collections.length || !sliderCollections?.length) {
     return <div>Loading collections...</div>;
   }
 
-  const { collections = [], menuCollections = [] } = deferredData;
-
-  if (!collections.length || !menuCollections.length) {
-    return <div>Loading collections...</div>;
-  }
-
-  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
+  // Pass both collections and sliderCollections to the component
+  return <CollectionDisplay collections={collections} menuCollections={sliderCollections} />;
 }
 
 function DeferredBrandSection() {
