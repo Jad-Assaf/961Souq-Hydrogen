@@ -79,7 +79,7 @@ async function loadCriticalData({ context }) {
 
   // Fetch menus and collections for each handle in `menuHandless`
   const menuCollections = await Promise.all(
-    menuHandles.map(async (handle) => {
+    menuHandless.map(async (handle) => {
       try {
         // Fetch the menu for this handle
         const { menu } = await context.storefront.query(GET_MENU_QUERY, {
