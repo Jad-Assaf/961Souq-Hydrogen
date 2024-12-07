@@ -41,6 +41,7 @@ export async function loader(args) {
     sliderCollections: criticalData.sliderCollections,
     deferredData: {
       collections: criticalData.collections,
+      menuCollections: criticalData.menuCollections, // Dynamic menuCollections from menuHandles
     },
   });
 }
@@ -59,6 +60,24 @@ async function loadCriticalData({ context }) {
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
+
+  // Fetch collections for each handle in `menuHandles`
+  const menuCollections = (
+    await Promise.all(
+      menuHandles.map(async (handle) => {
+        try {
+          const { collectionByHandle } = await context.storefront.query(
+            GET_COLLECTION_BY_HANDLE_QUERY,
+            { variables: { handle } }
+          );
+          return collectionByHandle || null;
+        } catch (error) {
+          console.error(`Error fetching collection for handle: ${handle}`, error);
+          return null;
+        }
+      })
+    )
+  ).filter(Boolean); // Ensure only valid collections are included
 
   // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
@@ -82,6 +101,7 @@ async function loadCriticalData({ context }) {
   return {
     collections,
     sliderCollections,
+    menuCollections,
     menu,
   };
 }
@@ -96,6 +116,15 @@ async function fetchCollectionsByHandles(context, handles) {
     if (collectionByHandle) collections.push(collectionByHandle);
   }
   return collections;
+}
+
+function sanitizeHandle(handle) {
+  return handle
+    .toLowerCase()
+    .replace(/"/g, '') // Remove quotes
+    .replace(/&/g, '') // Remove ampersands
+    .replace(/\./g, '-') // Replace periods
+    .replace(/\s+/g, '-'); // Replace spaces with hyphens
 }
 
 const brandsData = [
@@ -141,7 +170,7 @@ export default function Homepage() {
         )}
       </div>
 
-      <DeferredCollectionDisplay sliderCollections={sliderCollections} />
+      <DeferredCollectionDisplay />
 
       <DeferredBrandSection />
     </div>
@@ -149,26 +178,25 @@ export default function Homepage() {
 }
 
 // Deferred component
-function DeferredCollectionDisplay({ sliderCollections }) {
+function DeferredCollectionDisplay() {
   const { deferredData } = useLoaderData();
 
   if (!deferredData) {
     return <div>Loading collections...</div>;
   }
 
-  const { collections = [] } = deferredData;
+  const { collections = [], menuCollections = [] } = deferredData;
 
-  if (!collections.length || !sliderCollections.length) {
+  if (!collections.length || !menuCollections.length) {
     return <div>Loading collections...</div>;
   }
 
-  return <CollectionDisplay collections={collections} menuCollections={sliderCollections} />;
+  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
 }
 
 function DeferredBrandSection() {
   return <BrandSection brands={brandsData} />;
 }
-
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
