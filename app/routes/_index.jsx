@@ -41,6 +41,7 @@ export async function loader(args) {
     sliderCollections: criticalData.sliderCollections,
     deferredData: {
       collections: criticalData.collections,
+      menuCollections: criticalData.menuCollections, // Using dynamic menuHandles
     },
   });
 }
@@ -60,7 +61,23 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch menus and collections using menuHandles
+  // Fetch collections for each handle in `menuHandles`
+  const menuCollections = await Promise.all(
+    menuHandles.map(async (handle) => {
+      try {
+        const { collectionByHandle } = await context.storefront.query(
+          GET_COLLECTION_BY_HANDLE_QUERY,
+          { variables: { handle } }
+        );
+        return collectionByHandle || null;
+      } catch (error) {
+        console.error(`Error fetching collection for handle: ${handle}`, error);
+        return null;
+      }
+    })
+  );
+
+  // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows
@@ -82,17 +99,9 @@ async function loadCriticalData({ context }) {
   return {
     collections,
     sliderCollections,
+    menuCollections: menuCollections.filter(Boolean), // Filter out null collections
     menu,
   };
-}
-
-function sanitizeHandle(handle) {
-  return handle
-    .toLowerCase()
-    .replace(/"/g, '') // Remove quotes
-    .replace(/&/g, '') // Remove ampersands
-    .replace(/\./g, '-') // Replace periods
-    .replace(/\s+/g, '-'); // Replace spaces with hyphens
 }
 
 async function fetchCollectionsByHandles(context, handles) {
@@ -105,6 +114,15 @@ async function fetchCollectionsByHandles(context, handles) {
     if (collectionByHandle) collections.push(collectionByHandle);
   }
   return collections;
+}
+
+function sanitizeHandle(handle) {
+  return handle
+    .toLowerCase()
+    .replace(/"/g, '') // Remove quotes
+    .replace(/&/g, '') // Remove ampersands
+    .replace(/\./g, '-') // Replace periods
+    .replace(/\s+/g, '-'); // Replace spaces with hyphens
 }
 
 const brandsData = [
@@ -165,13 +183,13 @@ function DeferredCollectionDisplay() {
     return <div>Loading collections...</div>;
   }
 
-  const { collections = [] } = deferredData;
+  const { collections = [], menuCollections = [] } = deferredData;
 
-  if (!collections.length) {
+  if (!collections.length || !menuCollections.length) {
     return <div>Loading collections...</div>;
   }
 
-  return <CollectionDisplay collections={collections} />;
+  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
 }
 
 function DeferredBrandSection() {
