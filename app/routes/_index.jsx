@@ -184,7 +184,8 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menuCollections } = useLoaderData();
+  const { banners, collections, sliderCollections, menuCollections, menu } = useLoaderData();
+
 
   const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
 
