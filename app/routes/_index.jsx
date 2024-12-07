@@ -183,7 +183,7 @@ async function fetchCollectionsByHandles(context, handles) {
 export default function Homepage() {
   const { banners, menu, sliderCollections, deferredData } = useLoaderData();
 
-  const newArrivalsCollection = deferredData.collections?.find(
+  const newArrivalsCollection = deferredData?.collections?.find(
     (collection) => collection.handle === 'new-arrivals'
   );
 
@@ -192,19 +192,20 @@ export default function Homepage() {
       {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
+
       <div className="collections-container">
-        <>
-          {newArrivalsCollection && (
-            <TopProductSections collection={newArrivalsCollection} />
-          )}
-        </>
+        {newArrivalsCollection && (
+          <TopProductSections collection={newArrivalsCollection} />
+        )}
       </div>
+
       {/* Deferred components */}
       <Suspense fallback={<div>Loading collections...</div>}>
         <DeferredCollectionDisplay />
       </Suspense>
+
       <Suspense fallback={<div>Loading brands...</div>}>
-        <DeferredBrandSection />
+        <BrandSection brands={brandsData} />
       </Suspense>
     </div>
   );
@@ -212,7 +213,16 @@ export default function Homepage() {
 
 // Deferred component
 function DeferredCollectionDisplay() {
-  const { collections, menuCollections } = useLoaderData().deferredData;
+  const { deferredData } = useLoaderData();
+
+  // Safely extract collections and menuCollections from deferred data
+  const { collections, menuCollections } = deferredData || {};
+
+  if (!collections || !menuCollections) {
+    // Fallback during loading
+    return <div>Loading collections...</div>;
+  }
+
   return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
 }
 

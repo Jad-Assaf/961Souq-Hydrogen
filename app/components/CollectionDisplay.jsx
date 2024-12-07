@@ -1,17 +1,16 @@
-import React, { Suspense, lazy, useRef, useState } from 'react';
+import React, { lazy } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen'; // Import Image from hydrogen
 import { motion, useInView } from 'framer-motion';
-// import '../styles/CollectionSlider.css';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 
-const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load the CollectionRows component
+const CollectionRows = lazy(() => import('./CollectionRows')); // Lazy load CollectionRows
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
-    if (!text || typeof text !== "string") {
-        return ""; // Return an empty string if text is undefined or not a string
+    if (!text || typeof text !== 'string') {
+        return ''; // Return an empty string if text is undefined or not a string
     }
     const words = text.split(' ');
     return words.length > maxWords
@@ -19,15 +18,16 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
+// Simplified CollectionDisplay
 export const CollectionDisplay = React.memo(({ collections, menuCollections }) => {
     return (
         <div className="collections-container">
-            <Suspense fallback={<div>Loading collection rows...</div>}>
-                <CollectionRows collections={collections} menuCollections={menuCollections} />
-            </Suspense>
+            {/* Pass collections and menuCollections directly to CollectionRows */}
+            <CollectionRows collections={collections} menuCollections={menuCollections} />
         </div>
     );
 });
+
 
 
 export function ProductRow({ products }) {
