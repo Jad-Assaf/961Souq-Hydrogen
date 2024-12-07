@@ -191,7 +191,7 @@ export default function Homepage() {
     <div className="home">
       {/* Critical components */}
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} />
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
       <div className="collections-container">
         {newArrivalsCollection && (
