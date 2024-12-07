@@ -41,6 +41,7 @@ export async function loader(args) {
     sliderCollections: criticalData.sliderCollections,
     deferredData: {
       collections: criticalData.collections,
+      menuCollections: criticalData.menuCollections,
     },
   });
 }
@@ -60,7 +61,53 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for slider using menu handles
+  // Hardcoded menu handles to fetch their menus
+  const menuHandless = [
+    'apple',
+    'gaming',
+    'mobiles',
+    'fitness',
+    'audio',
+    'business-monitors',
+    'photography',
+    'home-appliances',
+    'smart-devices',
+  ];
+
+  // Fetch menus and collections for each handle in `menuHandless`
+  const menuCollections = await Promise.all(
+    menuHandless.map(async (handle) => {
+      try {
+        // Fetch the menu for this handle
+        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+          variables: { handle },
+        });
+
+        if (!menu || !menu.items || menu.items.length === 0) {
+          return null; // No menu or items for this handle
+        }
+
+        // Fetch collections for each menu item
+        const collections = await Promise.all(
+          menu.items.map(async (item) => {
+            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
+            const { collectionByHandle } = await context.storefront.query(
+              GET_COLLECTION_BY_HANDLE_QUERY,
+              { variables: { handle: sanitizedHandle } }
+            );
+            return collectionByHandle || null; // Return the collection data or null if not found
+          })
+        );
+
+        return collections.filter(Boolean); // Filter out any null collections
+      } catch (error) {
+        console.error(`Error fetching menu or collections for handle: ${handle}`, error);
+        return null;
+      }
+    })
+  );
+
+  // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows
@@ -79,23 +126,13 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
+  // Return menu along with other data
   return {
     collections,
     sliderCollections,
+    menuCollections: menuCollections.filter(Boolean), // Filter out null menus
     menu,
   };
-}
-
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
 }
 
 function sanitizeHandle(handle) {
@@ -131,10 +168,24 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Philips-new.jpg?v=1733388855", link: "/collections/philips-products" },
 ];
 
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
+
 export default function Homepage() {
   const { banners, menu, sliderCollections, deferredData } = useLoaderData();
 
-  const newArrivalsCollection = deferredData?.collections?.find(
+  const collections = deferredData?.collections || [];
+
+  const newArrivalsCollection = collections.find(
     (collection) => collection.handle === 'new-arrivals'
   );
 
@@ -150,31 +201,12 @@ export default function Homepage() {
         )}
       </div>
 
-      <DeferredCollectionDisplay />
+      {/* Pass sliderCollections instead of menuCollections */}
+      <CollectionDisplay collections={collections} menuCollections={sliderCollections} />
 
-      <DeferredBrandSection />
+      <BrandSection brands={brandsData} />
     </div>
   );
-}
-
-// Deferred component
-function DeferredCollectionDisplay({ sliderCollections }) {
-  const { deferredData } = useLoaderData();
-
-  // Ensure `collections` is valid
-  const collections = deferredData?.collections || [];
-
-  // Directly use `sliderCollections` assuming it is passed correctly
-  if (!collections.length || !sliderCollections?.length) {
-    return <div>Loading collections...</div>;
-  }
-
-  // Pass both collections and sliderCollections to the component
-  return <CollectionDisplay collections={collections} menuCollections={sliderCollections} />;
-}
-
-function DeferredBrandSection() {
-  return <BrandSection brands={brandsData} />;
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
