@@ -199,14 +199,9 @@ export default function Homepage() {
         )}
       </div>
 
-      {/* Deferred components */}
-      <Suspense fallback={<div>Loading collections...</div>}>
         <DeferredCollectionDisplay />
-      </Suspense>
 
-      <Suspense fallback={<div>Loading brands...</div>}>
-        <BrandSection brands={brandsData} />
-      </Suspense>
+        <DeferredBrandSection />
     </div>
   );
 }
@@ -215,11 +210,11 @@ export default function Homepage() {
 function DeferredCollectionDisplay() {
   const { deferredData } = useLoaderData();
 
-  // Safely extract collections and menuCollections from deferred data
-  const { collections, menuCollections } = deferredData || {};
+  // Safely extract collections and menuCollections
+  const collections = deferredData?.collections || [];
+  const menuCollections = deferredData?.menuCollections || [];
 
-  if (!collections || !menuCollections) {
-    // Fallback during loading
+  if (!collections.length || !menuCollections.length) {
     return <div>Loading collections...</div>;
   }
 
@@ -227,8 +222,7 @@ function DeferredCollectionDisplay() {
 }
 
 function DeferredBrandSection() {
-  const brands = brandsData; // Static data
-  return <BrandSection brands={brands} />;
+  return <BrandSection brands={brandsData} />;
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
