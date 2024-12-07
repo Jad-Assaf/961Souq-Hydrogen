@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, startTransition } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -19,15 +19,17 @@ export const meta = () => {
  */
 export async function loader(args) {
   const banners = [
-    {
+    { rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
       link: '/collections/google-pixel',
     },
     {
+      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
       link: '/collections/garmin',
     },
     {
+      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
       link: '/collections/remarkable',
     },
@@ -35,10 +37,11 @@ export async function loader(args) {
 
   const criticalData = await loadCriticalData(args);
 
+  // Fetch non-critical data and defer it
   return defer({
     banners,
-    menu: criticalData.menu,
-    sliderCollections: criticalData.sliderCollections,
+    menu: criticalData.menu, // Critical for `CategorySlider`
+    sliderCollections: criticalData.sliderCollections, // Critical for `CategorySlider`
     deferredData: {
       collections: criticalData.collections,
       menuCollections: criticalData.menuCollections,
@@ -183,48 +186,30 @@ async function fetchCollectionsByHandles(context, handles) {
 export default function Homepage() {
   const { banners, menu, sliderCollections, deferredData } = useLoaderData();
 
-  const newArrivalsCollection = deferredData?.collections?.find(
-    (collection) => collection.handle === 'new-arrivals'
-  );
-
   return (
     <div className="home">
       {/* Critical components */}
-      {/* <BannerSlideshow banners={banners} /> */}
-      {/* <CategorySlider menu={menu} sliderCollections={sliderCollections} /> */}
+      <BannerSlideshow banners={banners} />
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
-      <div className="collections-container">
-        {newArrivalsCollection && (
-          <TopProductSections collection={newArrivalsCollection} />
-        )}
-      </div>
-
-        {/* <DeferredCollectionDisplay />
-
-        <DeferredBrandSection /> */}
+      {/* Deferred components */}
+      <Suspense fallback={<div>Loading collections...</div>}>
+        <DeferredCollectionDisplay deferredData={deferredData} />
+      </Suspense>
     </div>
   );
 }
 
 // Deferred component
-function DeferredCollectionDisplay() {
-  const { deferredData } = useLoaderData();
+function DeferredCollectionDisplay({ deferredData }) {
+  const { collections, menuCollections } = useLoaderData(deferredData);
 
-  if (!deferredData) {
-    return <div>Loading collections...</div>;
-  }
-
-  const { collections = [], menuCollections = [] } = deferredData;
-
-  if (!collections.length || !menuCollections.length) {
-    return <div>Loading collections...</div>;
-  }
-
-  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
-}
-
-function DeferredBrandSection() {
-  return <BrandSection brands={brandsData} />;
+  return (
+    <>
+      <CollectionDisplay collections={collections} menuCollections={menuCollections} />
+      <BrandSection brands={brandsData} />
+    </>
+  );
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
