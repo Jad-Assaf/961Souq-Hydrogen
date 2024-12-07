@@ -191,21 +191,17 @@ export default function Homepage() {
     <div className="home">
       {/* Critical components */}
       <BannerSlideshow banners={banners} />
-      <CategorySlider sliderCollections={sliderCollections} />
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
-      <React.Suspense fallback={<div>Loading product sections...</div>}>
-        <div className="collections-container">
-          {newArrivalsCollection && (
-            <TopProductSections collection={newArrivalsCollection} />
-          )}
-        </div>
-      </React.Suspense>
-      <React.Suspense fallback={<div>Loading product sections...</div>}>
+      <div className="collections-container">
+        {newArrivalsCollection && (
+          <TopProductSections collection={newArrivalsCollection} />
+        )}
+      </div>
+
         <DeferredCollectionDisplay />
-      </React.Suspense>
-      <React.Suspense fallback={<div>Loading product sections...</div>}>
+
         <DeferredBrandSection />
-      </React.Suspense>
     </div>
   );
 }
