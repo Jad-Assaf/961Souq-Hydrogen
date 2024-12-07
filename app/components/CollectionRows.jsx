@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from '@remix-run/react';
 import { ProductRow } from './CollectionDisplay';
 import { Image } from '@shopify/hydrogen-react';
+import { motion, useInView } from 'framer-motion';
 
 const CollectionRows = ({ collections, menuCollections }) => {
-    // Filter out collections with the handles "new-arrivals" and "laptops"
     const filteredCollections = collections.filter(
         (collection) => collection.handle !== "new-arrivals" && collection.handle !== "laptops"
     );
@@ -12,17 +12,28 @@ const CollectionRows = ({ collections, menuCollections }) => {
     return (
         <>
             {filteredCollections.map((collection, index) => {
-                const isMenuRow = index % 3 === 0; // Every 3 rows, display a menu
-                const menuIndex = Math.floor(index / 3); // Determine the menu index
-                const currentMenu = menuCollections[menuIndex]; // Fetch the corresponding menu
+                const isMenuRow = index % 3 === 0;
+                const menuIndex = Math.floor(index / 3);
+                const currentMenu = menuCollections[menuIndex];
+                const ref = useRef(null);
+                const isInView = useInView(ref, { once: true });
 
                 return (
                     <React.Fragment key={collection.id}>
-                        {/* Render the menu slider row */}
                         {isMenuRow && currentMenu && (
-                            <div className="menu-slider-container">
-                                <div className="menu-category-slider">
-
+                            <motion.div
+                                ref={ref}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={isInView ? { opacity: 1, x: 0 } : {}}
+                                transition={{ delay: index * 0.01, duration: 0.5 }}
+                                className="menu-slider-container"
+                            >
+                                <motion.div
+                                    initial={{ filter: 'blur(10px)', opacity: 0 }}
+                                    animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                                    transition={{ duration: 0.5 }}
+                                    className="menu-category-slider"
+                                >
                                     {currentMenu.map((menuCollection) => (
                                         <Link
                                             key={menuCollection.id}
@@ -45,12 +56,10 @@ const CollectionRows = ({ collections, menuCollections }) => {
                                             </div>
                                         </Link>
                                     ))}
-
-                                </div>
-                            </div>
+                                </motion.div>
+                            </motion.div>
                         )}
 
-                        {/* Render the product row */}
                         <div className="collection-section">
                             <div className="collection-header">
                                 <h3>{collection.title}</h3>
