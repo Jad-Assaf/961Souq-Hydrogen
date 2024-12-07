@@ -4,12 +4,8 @@ import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
-// import { CollectionDisplay } from '~/components/CollectionDisplay';
-// import { BrandSection } from '~/components/BrandsSection';
-
-const LazyCollectionDisplay = lazy(() => import('~/components/CollectionDisplay'));
-const LazyBrandSection = lazy(() => import('~/components/BrandsSection'));
-
+import { CollectionDisplay } from '~/components/CollectionDisplay';
+import { BrandSection } from '~/components/BrandsSection';
 
 /**
  * @type {MetaFunction}
@@ -52,7 +48,7 @@ export async function loader(args) {
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
-  const { menu } = await context.storefront.query(GET_MENU_AND_COLLECTIONS_QUERY, {
+  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
 
@@ -83,7 +79,7 @@ async function loadCriticalData({ context }) {
     menuHandless.map(async (handle) => {
       try {
         // Fetch the menu for this handle
-        const { menu } = await context.storefront.query(GET_MENU_AND_COLLECTIONS_QUERY, {
+        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
           variables: { handle },
         });
 
@@ -193,6 +189,7 @@ export default function Homepage() {
 
   return (
     <div className="home">
+      {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
@@ -202,41 +199,37 @@ export default function Homepage() {
         )}
       </div>
 
-      {/* Suspense with pre-fetched props */}
-      <React.Suspense fallback={<div>Loading collections...</div>}>
-        <LazyCollectionDisplay
-          collections={deferredData.collections}
-          menuCollections={deferredData.menuCollections}
-        />
-      </React.Suspense>
+        <DeferredCollectionDisplay />
 
-      <React.Suspense fallback={<div>Loading brands...</div>}>
-        <LazyBrandSection brands={brandsData} />
-      </React.Suspense>
+        <DeferredBrandSection />
     </div>
   );
 }
 
-const GET_MENU_AND_COLLECTIONS_QUERY = `#graphql
-  query GetMenuAndCollections($menuHandle: String!, $collectionHandles: [String!]!) {
-    menu(handle: $menuHandle) {
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
-    collections: collectionsByHandle(handles: $collectionHandles) {
+// Deferred component
+function DeferredCollectionDisplay() {
+  const { deferredData } = useLoaderData();
+
+  if (!deferredData) {
+    return <div>Loading collections...</div>;
+  }
+
+  const { collections = [], menuCollections = [] } = deferredData;
+
+  if (!collections.length || !menuCollections.length) {
+    return <div>Loading collections...</div>;
+  }
+
+  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
+}
+
+function DeferredBrandSection() {
+  return <BrandSection brands={brandsData} />;
+}
+
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
       id
       title
       handle
@@ -291,82 +284,24 @@ const GET_MENU_AND_COLLECTIONS_QUERY = `#graphql
   }
 `;
 
-
-// const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
-//   query GetCollectionByHandle($handle: String!) {
-//     collectionByHandle(handle: $handle) {
-//       id
-//       title
-//       handle
-//       image {
-//         url
-//         altText
-//       }
-//       products(first: 10) {
-//         nodes {
-//           id
-//           title
-//           handle
-//           priceRange {
-//             minVariantPrice {
-//               amount
-//               currencyCode
-//             }
-//           }
-//           compareAtPriceRange {
-//             minVariantPrice {
-//               amount
-//               currencyCode
-//             }
-//           }
-//           images(first: 1) {
-//             nodes {
-//               url
-//               altText
-//             }
-//           }
-//           variants(first: 5) {
-//             nodes {
-//               id
-//               availableForSale
-//               price {
-//                 amount
-//                 currencyCode
-//               }
-//               compareAtPrice {
-//                 amount
-//                 currencyCode
-//               }
-//               selectedOptions {
-//                 name
-//                 value
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// `;
-
-// export const GET_MENU_QUERY = `#graphql
-//   query GetMenu($handle: String!) {
-//     menu(handle: $handle) {
-//       items {
-//         id
-//         title
-//         url
-//         items {
-//           id
-//           title
-//           url
-//           items {
-//             id
-//             title
-//             url
-//           }
-//         }
-//       }
-//     }
-//   }
-// `;
+export const GET_MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
+        items {
+          id
+          title
+          url
+          items {
+            id
+            title
+            url
+          }
+        }
+      }
+    }
+  }
+`;
