@@ -202,12 +202,16 @@ export default function Homepage() {
         )}
       </div>
 
+      {/* Suspense with pre-fetched props */}
       <React.Suspense fallback={<div>Loading collections...</div>}>
-        <LazyCollectionDisplay />
+        <LazyCollectionDisplay
+          collections={deferredData.collections}
+          menuCollections={deferredData.menuCollections}
+        />
       </React.Suspense>
 
       <React.Suspense fallback={<div>Loading brands...</div>}>
-        <LazyBrandSection />
+        <LazyBrandSection brands={brandsData} />
       </React.Suspense>
     </div>
   );
