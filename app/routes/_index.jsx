@@ -65,10 +65,11 @@ async function loadCriticalData({ context }) {
     'business-monitors', 'photography', 'home-appliances', 'smart-devices',
   ];
 
-  const { data } = await context.storefront.query(GET_COMBINED_QUERY, {
+  const { data } = await context.storefront.query(GET_MENU_AND_COLLECTIONS_QUERY, {
     variables: {
-      menuHandle,
-      collectionHandles: [...hardcodedHandles, ...menuHandles],
+      handle: menuHandle,
+      sliderHandles: menuHandles,
+      productRowHandles: hardcodedHandles,
     },
   });
 
@@ -77,10 +78,10 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  const collections = data.collections.filter((collection) => hardcodedHandles.includes(collection.handle));
-  const sliderCollections = data.collections.filter((collection) => menuHandles.includes(collection.handle));
+  const sliderCollections = data.sliderCollections;
+  const collections = data.productCollections;
   const menuCollections = menuHandles.map((handle) =>
-    data.collections.find((collection) => collection.handle === handle)
+    data.sliderCollections.find((collection) => collection.handle === handle)
   );
 
   return {
@@ -150,9 +151,9 @@ function DeferredBrandSection() {
   return <BrandSection brands={brandsData} />;
 }
 
-const GET_COMBINED_QUERY = `#graphql
-  query GetCombinedData($menuHandle: String!, $collectionHandles: [String!]!) {
-    menu(handle: $menuHandle) {
+const GET_MENU_AND_COLLECTIONS_QUERY = `#graphql
+  query GetMenuAndCollections($handle: String!, $sliderHandles: [String!]!, $productRowHandles: [String!]!) {
+    menu(handle: $handle) {
       items {
         id
         title
@@ -169,7 +170,16 @@ const GET_COMBINED_QUERY = `#graphql
         }
       }
     }
-    collections: collectionsByHandle(handles: $collectionHandles) {
+    sliderCollections: collectionsByHandle(handles: $sliderHandles) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+    }
+    productCollections: collectionsByHandle(handles: $productRowHandles) {
       id
       title
       handle
