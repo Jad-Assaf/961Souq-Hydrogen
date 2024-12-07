@@ -141,7 +141,7 @@ export default function Homepage() {
         )}
       </div>
 
-      <DeferredCollectionDisplay />
+      <DeferredCollectionDisplay sliderCollections={sliderCollections} />
 
       <DeferredBrandSection />
     </div>
@@ -149,25 +149,26 @@ export default function Homepage() {
 }
 
 // Deferred component
-function DeferredCollectionDisplay() {
+function DeferredCollectionDisplay({ sliderCollections }) {
   const { deferredData } = useLoaderData();
 
   if (!deferredData) {
     return <div>Loading collections...</div>;
   }
 
-  const { collections = [], menuCollections = [] } = deferredData;
+  const { collections = [] } = deferredData;
 
-  if (!collections.length || !menuCollections.length) {
+  if (!collections.length || !sliderCollections.length) {
     return <div>Loading collections...</div>;
   }
 
-  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
+  return <CollectionDisplay collections={collections} menuCollections={sliderCollections} />;
 }
 
 function DeferredBrandSection() {
   return <BrandSection brands={brandsData} />;
 }
+
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
