@@ -14,33 +14,33 @@ const CollectionRows = ({ collections, menuCollections }) => {
         const isMenuRow = index % 3 === 0;
         const menuIndex = Math.floor(index / 3);
         const currentMenu = Array.isArray(menuCollections)
-          ? menuCollections[menuIndex]
-          : []; // Ensure it is an array
+          ? menuCollections[menuIndex]?.items || [] // Access menu items
+          : [];
 
         return (
           <React.Fragment key={collection.id}>
             {/* Render the menu slider row */}
-            {isMenuRow && currentMenu && currentMenu.length > 0 && (
+            {isMenuRow && currentMenu.length > 0 && (
               <div className="menu-slider-container">
                 <div className="menu-category-slider">
-                  {currentMenu.map((menuCollection) => (
+                  {currentMenu.map((menuItem) => (
                     <Link
-                      key={menuCollection.id}
-                      to={`/collections/${menuCollection.handle}`}
+                      key={menuItem.id}
+                      to={menuItem.url}
                       className="menu-item-container"
                     >
-                      {menuCollection.image && (
+                      {menuItem.image && (
                         <Image
-                          srcSet={`${menuCollection.image.url}?width=300&quality=20 300w,
-                                   ${menuCollection.image.url}?width=600&quality=20 600w,
-                                   ${menuCollection.image.url}?width=1200&quality=20 1200w`}
-                          alt={menuCollection.image.altText || menuCollection.title}
+                          srcSet={`${menuItem.image.url}?width=300&quality=20 300w,
+                                   ${menuItem.image.url}?width=600&quality=20 600w,
+                                   ${menuItem.image.url}?width=1200&quality=20 1200w`}
+                          alt={menuItem.image.altText || menuItem.title}
                           className="menu-item-image"
                           width={150}
                           height={150}
                         />
                       )}
-                      <div className="category-title">{menuCollection.title}</div>
+                      <div className="category-title">{menuItem.title}</div>
                     </Link>
                   ))}
                 </div>

@@ -59,30 +59,44 @@ async function loadCriticalData({ context }) {
   }
 
   // Extract handles from the menu items
-  const menuHandles = menu.items.map((item) =>
-    sanitizeHandle(item.title)
+  const menuHandles = menu.items.map((item) => sanitizeHandle(item.title));
+
+  // Fetch collections for menu handles
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  // Fetch menus within each collection handle
+  const menuCollections = await Promise.all(
+    sliderCollections.map(async (collection) => {
+      try {
+        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+          variables: { handle: collection.handle }, // Use the handle of each collection
+        });
+        return menu || null; // Return the menu or null if not found
+      } catch (error) {
+        console.error(`Error fetching menu for collection handle: ${collection.handle}`, error);
+        return null;
+      }
+    })
   );
 
-  // Fetch collections for menu handles and hardcoded handles
-  const [sliderCollections, collections] = await Promise.all([
-    fetchCollectionsByHandles(context, menuHandles), // For slider
-    fetchCollectionsByHandles(context, [
-      'new-arrivals', 'laptops',
-      'apple-macbook', 'apple-iphone', 'apple-accessories',
-      'gaming-laptops', 'gaming-consoles', 'console-games',
-      'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-      'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-      'earbuds', 'speakers', 'surround-systems',
-      'desktops', 'pc-parts', 'business-monitors',
-      'action-cameras', 'cameras', 'surveillance-cameras',
-      'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices',
-      'smart-devices', 'health-beauty',
-    ]), // For product rows
+  // Fetch collections for hardcoded handles
+  const collections = await fetchCollectionsByHandles(context, [
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices',
+    'smart-devices', 'health-beauty',
   ]);
 
   return {
     menu,
     sliderCollections,
+    menuCollections: menuCollections.filter(Boolean), // Ensure only valid menus
     collections,
   };
 }
