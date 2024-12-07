@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, startTransition } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -19,17 +19,15 @@ export const meta = () => {
  */
 export async function loader(args) {
   const banners = [
-    { rel: 'preload',
+    {
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
       link: '/collections/google-pixel',
     },
     {
-      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
       link: '/collections/garmin',
     },
     {
-      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
       link: '/collections/remarkable',
     },
@@ -37,11 +35,10 @@ export async function loader(args) {
 
   const criticalData = await loadCriticalData(args);
 
-  // Fetch non-critical data and defer it
   return defer({
     banners,
-    menu: criticalData.menu, // Critical for `CategorySlider`
-    sliderCollections: criticalData.sliderCollections, // Critical for `CategorySlider`
+    menu: criticalData.menu,
+    sliderCollections: criticalData.sliderCollections,
     deferredData: {
       collections: criticalData.collections,
       menuCollections: criticalData.menuCollections,
@@ -184,48 +181,50 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, collections, sliderCollections, menuCollections, menu } = useLoaderData();
+  const { banners, menu, sliderCollections, deferredData } = useLoaderData();
 
-
-  const newArrivalsCollection = collections.find((collection) => collection.handle === "new-arrivals");
+  const newArrivalsCollection = deferredData?.collections?.find(
+    (collection) => collection.handle === 'new-arrivals'
+  );
 
   return (
     <div className="home">
+      {/* Critical components */}
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} /> {/* Pass sliderCollections */}
-      <div className="collections-container">
-        <>
-          {/* Render "New Arrivals" and "Laptops" rows at the start */}
-          {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
-        </>
-      </div>
-      {/* Defer these sections */}
-      <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay
-          collections={collections}
-          menuCollections={menuCollections}
-        />
-      </Suspense>
-      <Suspense fallback={<div>Loading brands...</div>}>
-        <DeferredBrandSection brands={brandsData} />
-      </Suspense>
+      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
+      <div className="collections-container">
+        {newArrivalsCollection && (
+          <TopProductSections collection={newArrivalsCollection} />
+        )}
+      </div>
+
+      <DeferredCollectionDisplay />
+
+      <DeferredBrandSection />
     </div>
   );
 }
 
-// Create deferred versions of components
-function DeferredCollectionDisplay({ collections, menuCollections }) {
-  return (
-    <CollectionDisplay
-      collections={collections}
-      menuCollections={menuCollections}
-    />
-  );
+// Deferred component
+function DeferredCollectionDisplay() {
+  const { deferredData } = useLoaderData();
+
+  if (!deferredData) {
+    return <div>Loading collections...</div>;
+  }
+
+  const { collections = [], menuCollections = [] } = deferredData;
+
+  if (!collections.length || !menuCollections.length) {
+    return <div>Loading collections...</div>;
+  }
+
+  return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
 }
 
-function DeferredBrandSection({ brands }) {
-  return <BrandSection brands={brands} />;
+function DeferredBrandSection() {
+  return <BrandSection brands={brandsData} />;
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
