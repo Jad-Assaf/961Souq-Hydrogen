@@ -13,23 +13,6 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
   const searchContainerRef = useRef(null);
 
-  const menuImages = [
-    { id: "item1", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/d9be8a2496eb547df3ff8f98aa4f95ad.jpg?v=1712759458", alt: "Apple Products" },
-    { id: "item2", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/Gaming-Devices.jpg?v=1714467789", alt: "Gaming" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/img_proxy_997bd251-f559-46a5-878b-02ffed1f1de3.jpg?v=1711637450", alt: "Laptops" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/hp-victus-desktop_80818ad8-f8ea-4ac1-93c9-f16b5924765f.jpg?v=1684332622", alt: "Desktops" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/computer-components.jpg?v=1712759555", alt: "PC Parts" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/bf6ff9dcfae258049d4cc08fc220169b.jpg?v=1711623551", alt: "Networking Devices" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/monitors_cc32b522-52d2-478f-9237-6ab0e493b8d8.jpg?v=1730888129", alt: "Monitors" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/img_proxy.jpg?v=1712759701", alt: "Mobiles" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/42032952eabd9ed13e4183a3a5b19fc5.jpg?v=1711642519", alt: "Tablets" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/audio-equipement.jpg?v=1711623037", alt: "Audio" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/6f077fae6887e771883c237901912b4a.jpg?v=1711623140", alt: "Accessories" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/img_proxy_c8148b75-3d0f-45f0-a28c-8fb83f6ecd40.jpg?v=1711623339", alt: "Fitness" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/camera.jpg?v=1711623025", alt: "Photography" },
-    { id: "item3", url: "https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/SMART-HOME-DEVICES.jpg?v=1711623085", alt: "Home Appliances" },
-  ];
-
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
     if (!isMobileMenuOpen) setActiveSubmenu(null); // Reset submenu when closing
