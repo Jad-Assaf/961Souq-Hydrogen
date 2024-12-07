@@ -19,32 +19,25 @@ export const meta = () => {
  */
 export async function loader(args) {
   const banners = [
-    { rel: 'preload',
+    {
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
       link: '/collections/google-pixel',
     },
     {
-      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
       link: '/collections/garmin',
     },
     {
-      rel: 'preload',
       imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
       link: '/collections/remarkable',
     },
   ];
 
-  const criticalData = await loadCriticalData(args);
-
-  // Fetch non-critical data and defer it
+  // Immediately return banners, while deferring other data
   return defer({
-    banners,
-    menu: criticalData.menu, // Critical for `CategorySlider`
-    sliderCollections: criticalData.sliderCollections, // Critical for `CategorySlider`
+    banners, // Immediate data
     deferredData: {
-      collections: criticalData.collections,
-      menuCollections: criticalData.menuCollections,
+      criticalData: loadCriticalData(args), // Defer loading menu, slider collections, etc.
     },
   });
 }
@@ -79,7 +72,7 @@ async function loadCriticalData({ context }) {
 
   // Fetch menus and collections for each handle in `menuHandless`
   const menuCollections = await Promise.all(
-    menuHandless.map(async (handle) => {
+    menuHandles.map(async (handle) => {
       try {
         // Fetch the menu for this handle
         const { menu } = await context.storefront.query(GET_MENU_QUERY, {
@@ -184,30 +177,41 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, menu, sliderCollections, deferredData } = useLoaderData();
+  const { banners, deferredData } = useLoaderData();
 
   return (
     <div className="home">
-      {/* Critical components */}
+      {/* Render the banner slideshow immediately */}
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
-      {/* Deferred components */}
+      {/* Render other sections with deferred loading */}
       <Suspense fallback={<div>Loading collections...</div>}>
-        <DeferredCollectionDisplay deferredData={deferredData} />
+        <DeferredSections deferredData={deferredData} />
       </Suspense>
     </div>
   );
 }
 
-// Deferred component
-function DeferredCollectionDisplay({ deferredData }) {
-  const { collections, menuCollections } = useLoaderData(deferredData);
+// Deferred sections rendering
+function DeferredSections({ deferredData }) {
+  if (!deferredData) return null;
+
+  const { criticalData } = deferredData;
 
   return (
     <>
-      <CollectionDisplay collections={collections} menuCollections={menuCollections} />
-      <BrandSection brands={brandsData} />
+      <Suspense fallback={<div>Loading category slider...</div>}>
+        <CategorySliderLoader criticalData={criticalData} />
+      </Suspense>
+      <Suspense fallback={<div>Loading top products...</div>}>
+        <TopProductSectionsLoader criticalData={criticalData} />
+      </Suspense>
+      <Suspense fallback={<div>Loading collections...</div>}>
+        <CollectionDisplayLoader criticalData={criticalData} />
+      </Suspense>
+      <Suspense fallback={<div>Loading brands...</div>}>
+        <BrandSectionLoader />
+      </Suspense>
     </>
   );
 }
