@@ -189,28 +189,19 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
-
       <div className="collections-container">
         {newArrivalsCollection && (
           <TopProductSections collection={newArrivalsCollection} />
         )}
       </div>
-
-      <Suspense fallback={<div>Loading collection display...</div>}>
-        <DeferredCollectionDisplay />
-      </Suspense>
-
-      <Suspense fallback={<div>Loading brand section...</div>}>
-        <DeferredBrandSection />
-      </Suspense>
+      <DeferredCollectionDisplay />
+      <BrandSection brands={brandsData} />
     </div>
   );
 }
 
-// Deferred component
 function DeferredCollectionDisplay() {
   const { deferredData } = useLoaderData();
 
@@ -225,10 +216,6 @@ function DeferredCollectionDisplay() {
   }
 
   return <CollectionDisplay collections={collections} menuCollections={menuCollections} />;
-}
-
-function DeferredBrandSection() {
-  return <BrandSection brands={brandsData} />;
 }
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
