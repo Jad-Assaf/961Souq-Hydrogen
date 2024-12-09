@@ -3,11 +3,14 @@ import { Image } from "@shopify/hydrogen";
 import { motion, AnimatePresence } from "framer-motion";
 
 function useIsMobile() {
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(() => {
+        // Initialize on server-side render fallback
+        return typeof window !== "undefined" && window.innerWidth <= 1024;
+    });
 
     useEffect(() => {
         const updateIsMobile = () => setIsMobile(window.innerWidth <= 1024);
-        updateIsMobile(); // Check on initial render
+        updateIsMobile(); // Initial check
         window.addEventListener("resize", updateIsMobile);
 
         return () => window.removeEventListener("resize", updateIsMobile);
@@ -45,55 +48,55 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
         }
     };
 
-    const renderedBanners = useMemo(
-        () =>
-            banners.map((banner, index) => (
-                <motion.div
-                    key={index}
-                    className={`banner-slide ${index === currentIndex ? "active" : "inactive"
-                        }`}
-                    initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
-                    animate={
-                        index === currentIndex
-                            ? { opacity: 1, x: 0 }
-                            : { opacity: 0, x: index > currentIndex ? -50 : 50 }
-                    }
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ type: "spring", stiffness: 100, damping: 10 }}
-                    drag="x"
-                    dragElastic={0.2}
-                    dragConstraints={{ left: 0, right: 0 }}
-                    onDragEnd={handleDragEnd}
-                    style={styles.bannerSlide}
+    const renderedBanners = useMemo(() => {
+        return banners.map((banner, index) => (
+            <motion.div
+                key={index}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                    }`}
+                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                animate={
+                    index === currentIndex
+                        ? { opacity: 1, x: 0 }
+                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                }
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ type: "spring", stiffness: 100, damping: 10 }}
+                drag="x"
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd}
+                style={styles.bannerSlide}
+            >
+                <a
+                    href={banner.link}
+                    target="_self"
+                    rel="noopener noreferrer"
+                    style={styles.link}
                 >
-                    <a
-                        href={banner.link}
-                        target="_self"
-                        rel="noopener noreferrer"
-                        style={styles.link}
-                    >
-                        <Image
-                            data={{
-                                altText: `Banner ${index + 1}`,
-                                url: isMobile
-                                    ? banner.mobileImageUrl
-                                    : banner.desktopImageUrl,
-                            }}
-                            width="100vw"
-                            height="auto"
-                            aspectRatio="16/9"
-                            className="banner-image"
-                            style={styles.bannerImage}
-                        />
-                    </a>
-                </motion.div>
-            )),
-        [banners, currentIndex, isMobile]
-    );
+                    <Image
+                        data={{
+                            altText: `Banner ${index + 1}`,
+                            url: isMobile
+                                ? banner.mobileImageUrl
+                                : banner.desktopImageUrl,
+                        }}
+                        width="100vw"
+                        height="auto"
+                        aspectRatio="16/9"
+                        className="banner-image"
+                        style={styles.bannerImage}
+                    />
+                </a>
+            </motion.div>
+        ));
+    }, [banners, currentIndex, isMobile]);
 
     return (
         <div className="banner-slideshow" style={styles.bannerSlideshow}>
-            <AnimatePresence initial={false}>{renderedBanners[currentIndex]}</AnimatePresence>
+            <AnimatePresence initial={false}>
+                {renderedBanners[currentIndex]}
+            </AnimatePresence>
         </div>
     );
 }
