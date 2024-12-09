@@ -130,32 +130,3 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         </div>
     );
 }
-
-const styles = {
-    bannerSlideshow: {
-        position: "relative",
-        width: "100vw",
-        height: "400px",
-        overflow: "hidden",
-    },
-    bannerSlide: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    bannerImage: {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-    },
-    link: {
-        width: "100%",
-        height: "100%",
-        display: "block",
-    },
-};
