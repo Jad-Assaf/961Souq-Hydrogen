@@ -66,7 +66,7 @@ async function loadCriticalData({ context }) {
     menuHandles.map(async (handle) => {
       try {
         // Fetch the menu for this handle
-        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+        const { menu } = await context.storefront.query(GET_ONE_LEVEL_MENU_QUERY, {
           variables: { handle },
         });
 
@@ -77,9 +77,10 @@ async function loadCriticalData({ context }) {
         // Fetch collections for each menu item
         const collections = await Promise.all(
           menu.items.map(async (item) => {
+            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
             const { collectionByHandle } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
-              { variables: { handle: item.handle } } // Use item.handle directly
+              { variables: { handle: sanitizedHandle } }
             );
             return collectionByHandle || null; // Return the collection data or null if not found
           })
@@ -119,6 +120,15 @@ async function loadCriticalData({ context }) {
     menuCollections: menuCollections.filter(Boolean), // Filter out null menus
     menu,
   };
+}
+
+function sanitizeHandle(handle) {
+  return handle
+    .toLowerCase()
+    .replace(/"/g, '') // Remove quotes
+    .replace(/&/g, '') // Remove ampersands
+    .replace(/\./g, '-') // Replace periods
+    .replace(/\s+/g, '-'); // Replace spaces with hyphens
 }
 
 const brandsData = [
@@ -260,6 +270,18 @@ export const GET_MENU_QUERY = `#graphql
             url
           }
         }
+      }
+    }
+  }
+`;
+
+export const GET_ONE_LEVEL_MENU_QUERY = `#graphql
+  query GetOneLevelMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        id
+        title
+        url
       }
     }
   }
