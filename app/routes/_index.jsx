@@ -59,10 +59,10 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for menu items and sliders in bulk
-  const [menuCollections, sliderCollections] = await Promise.all([
-    fetchCollectionsGroupedByMenu(context, menuHandles),
+  // Fetch collections for sliders and menu items
+  const [sliderCollections, menuCollections] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
+    fetchMenuCollections(context, menuHandles),
   ]);
 
   return {
@@ -71,37 +71,46 @@ async function loadCriticalData({ context }) {
   };
 }
 
-// Fetch collections grouped by menu handles
-async function fetchCollectionsGroupedByMenu(context, menuHandles) {
-  const menuData = await fetchMenusByHandles(context, menuHandles);
+// Fetch menu collections
+async function fetchMenuCollections(context, menuHandles) {
+  const collectionsPromises = menuHandles.map(async (handle) => {
+    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+      variables: { handle },
+    });
 
-  // Extract unique collection handles
-  const collectionHandles = menuData
-    .flatMap((menu) => menu.items.map((item) => item.title.toLowerCase().replace(/\s+/g, '-')))
-    .filter(Boolean);
+    if (!menu || !menu.items || menu.items.length === 0) {
+      return null;
+    }
 
-  // Fetch collections for those handles
-  return await fetchCollectionsByHandles(context, collectionHandles);
+    const collectionPromises = menu.items.map(async (item) => {
+      const sanitizedHandle = item.title.toLowerCase().replace(/\s+/g, '-');
+      const { collectionByHandle } = await context.storefront.query(
+        GET_COLLECTION_BY_HANDLE_QUERY,
+        { variables: { handle: sanitizedHandle } }
+      );
+      return collectionByHandle || null;
+    });
+
+    const collections = await Promise.all(collectionPromises);
+    return collections.filter(Boolean); // Filter out null collections
+  });
+
+  const collectionsGrouped = await Promise.all(collectionsPromises);
+  return collectionsGrouped.filter(Boolean); // Filter out null or empty groups
 }
 
-// Fetch menus by handles in bulk
-async function fetchMenusByHandles(context, handles) {
-  const menuQueries = handles.map((handle) =>
-    context.storefront.query(GET_MENU_QUERY, { variables: { handle } })
-  );
-  return await Promise.all(menuQueries);
-}
-
-// Fetch collections by a list of handles
+// Fetch collections by handles for sliders
 async function fetchCollectionsByHandles(context, handles) {
-  if (handles.length === 0) return [];
+  const collectionPromises = handles.map(async (handle) => {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    return collectionByHandle || null;
+  });
 
-  const { collectionsByHandles } = await context.storefront.query(
-    GET_COLLECTIONS_BY_HANDLES_QUERY,
-    { variables: { handles } }
-  );
-
-  return collectionsByHandles || [];
+  const collections = await Promise.all(collectionPromises);
+  return collections.filter(Boolean);
 }
 
 const brandsData = [
@@ -156,9 +165,9 @@ export default function Homepage() {
   );
 }
 
-const GET_COLLECTIONS_BY_HANDLES_QUERY = `#graphql
-  query GetCollectionsByHandles($handles: [String!]!) {
-    collectionsByHandles(handles: $handles) {
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
       id
       title
       handle
