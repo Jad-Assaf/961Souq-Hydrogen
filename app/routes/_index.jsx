@@ -168,7 +168,7 @@ async function fetchCollectionsByHandles(context, handles) {
 }
 
 export default function Homepage() {
-  const { banners, menu, sliderCollections, deferredData } = useLoaderData();
+  const { banners, sliderCollections, deferredData } = useLoaderData();
 
   const collections = deferredData?.collections || [];
   const menuCollections = deferredData?.menuCollections || [];
@@ -181,7 +181,7 @@ export default function Homepage() {
     <div className="home">
       {/* Critical components */}
       <BannerSlideshow banners={banners} />
-      <CategorySlider menu={menu} sliderCollections={sliderCollections} />
+      <CategorySlider sliderCollections={sliderCollections} />
 
       <div className="collections-container">
         {newArrivalsCollection && (
