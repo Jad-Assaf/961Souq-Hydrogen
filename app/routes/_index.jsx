@@ -37,6 +37,7 @@ export async function loader(args) {
 
   return defer({
     banners,
+    menu: criticalData.menu,
     sliderCollections: criticalData.sliderCollections,
     deferredData: {
       collections: criticalData.collections,
@@ -55,8 +56,10 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract dynamic handles from the menu items
-  const menuHandles = menu.items.map((item) => item.handle);
+  // Extract handles from the menu items
+  const menuHandles = menu.items.map((item) =>
+    item.title.toLowerCase().replace(/\s+/g, '-')
+  );
 
   // Fetch menus and collections for each handle in `menuHandles`
   const menuCollections = await Promise.all(
@@ -76,13 +79,13 @@ async function loadCriticalData({ context }) {
           menu.items.map(async (item) => {
             const { collectionByHandle } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
-              { variables: { handle: item.handle } }
+              { variables: { handle: item.handle } } // Use item.handle directly
             );
             return collectionByHandle || null; // Return the collection data or null if not found
           })
         );
 
-        return collections.filter(Boolean); // Filter out null collections
+        return collections.filter(Boolean); // Filter out any null collections
       } catch (error) {
         console.error(`Error fetching menu or collections for handle: ${handle}`, error);
         return null;
@@ -90,7 +93,7 @@ async function loadCriticalData({ context }) {
     })
   );
 
-  // Fetch collections for the slider using the dynamic menu handles
+  // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows
@@ -109,11 +112,12 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return fetched data
+  // Return menu along with other data
   return {
     collections,
     sliderCollections,
     menuCollections: menuCollections.filter(Boolean), // Filter out null menus
+    menu,
   };
 }
 
