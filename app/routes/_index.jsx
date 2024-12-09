@@ -142,21 +142,15 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  const collections = await Promise.all(
-    handles.map(async (handle) => {
-      try {
-        const { collectionByHandle } = await context.storefront.query(
-          GET_COLLECTION_BY_HANDLE_QUERY,
-          { variables: { handle } }
-        );
-        return collectionByHandle || null;
-      } catch (error) {
-        console.error(`Error fetching collection for handle: ${handle}`, error);
-        return null;
-      }
-    })
-  );
-  return collections.filter(Boolean);
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
 }
 
 export default function Homepage() {
