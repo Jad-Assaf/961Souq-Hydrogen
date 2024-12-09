@@ -65,7 +65,7 @@ button {
 .banner-slideshow {
   position: relative;
   width: 100vw;
-  height: auto;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -109,7 +109,7 @@ button {
   }
 
   .banner-slide{
-    margin-top: 40px;
+    margin-top: px;
   }
 }
 
