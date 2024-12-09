@@ -79,7 +79,7 @@ async function loadCriticalData({ context }) {
           menu.items.map(async (item) => {
             const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
             const { collectionByHandle } = await context.storefront.query(
-              GET_COLLECTION_BY_HANDLE_QUERY,
+              GET_BASIC_COLLECTION_BY_HANDLE_QUERY,
               { variables: { handle: sanitizedHandle } }
             );
             return collectionByHandle || null; // Return the collection data or null if not found
@@ -195,6 +195,20 @@ export default function Homepage() {
     </div>
   );
 }
+
+const GET_BASIC_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetBasicCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+    }
+  }
+`;
 
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {
