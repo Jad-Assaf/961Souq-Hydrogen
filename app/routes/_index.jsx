@@ -66,7 +66,7 @@ async function loadCriticalData({ context }) {
     menuHandles.map(async (handle) => {
       try {
         // Fetch the menu for this handle
-        const { menu } = await context.storefront.query(GET_ONE_LEVEL_MENU_QUERY, {
+        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
           variables: { handle },
         });
 
@@ -255,28 +255,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
 
 export const GET_MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
-    menu(handle: $handle) {
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
-          items {
-            id
-            title
-            url
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const GET_ONE_LEVEL_MENU_QUERY = `#graphql
-  query GetOneLevelMenu($handle: String!) {
     menu(handle: $handle) {
       items {
         id
