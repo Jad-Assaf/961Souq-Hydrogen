@@ -128,15 +128,6 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Philips-new.jpg?v=1733388855", link: "/collections/philips-products" },
 ];
 
-async function fetchCollectionsByHandles(context, handles) {
-  const { collectionsByHandles } = await context.storefront.query(
-    GET_COLLECTION_BY_HANDLE_QUERY,
-    { variables: { handles } }
-  );
-  return collectionsByHandles || [];
-}
-
-
 export default function Homepage() {
   const { banners, sliderCollections, deferredData } = useLoaderData();
 
