@@ -113,9 +113,9 @@ function ProductItem({ product, index }) {
             initial={{ filter: 'blur(20px)', opacity: 0, x: -50 }}
             animate={isInView ? { filter: 'blur(0px)', opacity: 1, x: 0 } : {}}
             transition={{
-                x: { type: 'spring', stiffness: 100, damping: 15 },
-                opacity: { duration: 0.5 },
-                filter: { duration: 0.5 },
+                x: { type: 'spring', stiffness: 100, damping: 20 },
+                opacity: { duration: 0.3 },
+                filter: { duration: 0.3 },
                 delay: index * 0.1,
             }}
             className="product-card"
