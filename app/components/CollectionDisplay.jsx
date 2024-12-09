@@ -95,13 +95,17 @@ function ProductItem({ product, index }) {
     const { open } = useAside();
 
     // Check for available variants and set up selected variant
-    const selectedVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
-    const hasVariants = product.variants.nodes.length > 1;
+    const selectedVariant =
+        product.variants?.nodes?.find(variant => variant.availableForSale) ||
+        product.variants?.nodes?.[0] ||
+        null;
+
+    const hasVariants = product.variants?.nodes?.length > 1;
 
     // Determine if there's a discount by comparing the regular and discounted prices
-    const hasDiscount = product.compareAtPriceRange &&
-        product.compareAtPriceRange.minVariantPrice.amount >
-        product.priceRange.minVariantPrice.amount;
+    const hasDiscount =
+        selectedVariant?.compareAtPrice &&
+        selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
     return (
         <motion.div
@@ -118,20 +122,22 @@ function ProductItem({ product, index }) {
                 className="product-card"
             >
                 <Link to={`/products/${product.handle}`}>
-                    <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 40vw"
-                        srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=10 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
-                        alt={product.images.nodes[0].altText || 'Product Image'}
-                        width="180px"
-                        height="180px"
-                    />
+                    {product.images?.nodes?.[0] && (
+                        <Image
+                            data={product.images.nodes[0]}
+                            aspectRatio="1/1"
+                            sizes="(min-width: 45em) 20vw, 40vw"
+                            srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
+                       ${product.images.nodes[0].url}?width=600&quality=10 600w,
+                       ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
+                            alt={product.images.nodes[0].altText || 'Product Image'}
+                            width="180px"
+                            height="180px"
+                        />
+                    )}
                     <h4 className="product-title">{truncateText(product.title, 50)}</h4>
                     <div className="product-price">
-                        <Money data={selectedVariant.price} />
+                        {selectedVariant?.price && <Money data={selectedVariant.price} />}
                         {hasDiscount && (
                             <small className="discountedPrice">
                                 <Money data={selectedVariant.compareAtPrice} />
