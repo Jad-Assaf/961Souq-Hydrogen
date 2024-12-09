@@ -75,6 +75,10 @@ button {
   display: none;
 }
 
+.banner-slide {
+  max-height: 300px !important;
+}
+
 @media (max-width: 1024px) {
   .desktop-banners {
     display: none;
@@ -86,6 +90,10 @@ button {
 
   .banner-slideshow {
     height: 75vw;
+    max-height: unset !important;
+  }
+
+  .banner-slide {
     max-height: unset !important;
   }
 }

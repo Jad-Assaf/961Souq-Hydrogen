@@ -146,7 +146,6 @@ const styles = {
         display: "flex",
         justifyContent: "center",
         alignItems: "start",
-        maxHeight: "300px",
     },
     bannerImage: {
         width: "100vw",
