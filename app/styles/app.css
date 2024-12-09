@@ -86,6 +86,7 @@ button {
 
   .banner-slideshow {
     height: 75vw;
+    max-height: unset !important;
   }
 }
 
