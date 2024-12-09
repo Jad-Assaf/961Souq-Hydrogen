@@ -59,7 +59,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                             : { opacity: 0, x: index > currentIndex ? -50 : 50 }
                     }
                     exit={{ opacity: 0, x: -50 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    transition={{ type: "spring", stiffness: 100, damping: 10 }}
                     drag="x"
                     dragElastic={0.2}
                     dragConstraints={{ left: 0, right: 0 }}
