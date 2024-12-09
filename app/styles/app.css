@@ -62,6 +62,10 @@ button {
   cursor: pointer !important;
 }
 
+.banner-slideshow {
+  height: 20vw;
+}
+
 .desktop-banners {
   display: block;
 }
@@ -77,6 +81,10 @@ button {
 
   .mobile-banners {
     display: block;
+  }
+
+  .banner-slideshow {
+    height: 75vw;
   }
 }
 

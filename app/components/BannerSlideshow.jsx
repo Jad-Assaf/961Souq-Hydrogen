@@ -135,7 +135,6 @@ const styles = {
     bannerSlideshow: {
         position: "relative",
         width: "100vw",
-        height: "400px",
         overflow: "hidden",
     },
     bannerSlide: {
