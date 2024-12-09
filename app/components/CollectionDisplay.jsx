@@ -110,7 +110,7 @@ function ProductItem({ product, index }) {
     return (
         <motion.div
             ref={ref}
-            initial={{ filter: 'blur(10px)', opacity: 0, x: -10 }}
+            initial={{ filter: 'blur(20px)', opacity: 0, x: -5 }}
             animate={isInView ? { filter: 'blur(0px)', opacity: 1, x: 0 } : {}}
             transition={{ delay: index * 0.01, duration: 0.5 }}
             className="product-card"
