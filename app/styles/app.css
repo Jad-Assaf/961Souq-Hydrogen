@@ -62,10 +62,6 @@ button {
   cursor: pointer !important;
 }
 
-/* .banner-slide.active {
-  opacity: 1;
-} */
-
 .banner-slideshow {
   position: relative;
   width: 100vw;
@@ -114,31 +110,12 @@ button {
   }
 }
 
-/* Extended Styles for ProductRow with Prev/Next Buttons */
-
 /* Hide the scrollbar for a cleaner look */
 .collection-products-row::-webkit-scrollbar {
   display: none;
 }
 
-/* Collections Container */
-.collections-container {
-  /* padding: 2rem; */
-}
-
 @media (max-width: 768px) {
-  .image-row {
-    display: flex !important;
-    gap: 2rem !important;
-    width: 90vw !important;
-    flex-direction: column !important;
-  }
-
-  .row-image {
-    height: unset !important;
-    margin: 0 auto !important;
-  }
-
   .product-item {
     min-width: unset !important;
     width: 175px !important;
@@ -1073,8 +1050,6 @@ button.reset:hover:not(:has(> *)) {
   background: #fff;
   z-index: 9999;
   margin-top: -3%;
-  /* -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px); */
   border-radius: 30px;
   box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
 }
@@ -1145,27 +1120,6 @@ button.reset:hover:not(:has(> *)) {
   text-decoration: line-through;
   color: #7f7f7f;
   text-align: end;
-}
-
-/*
-* --------------------------------------------------
-* components/Footer
-* --------------------------------------------------
-*/
-.footer {
-  background: var(--color-dark);
-  margin-top: auto;
-}
-
-.footer-menu {
-  align-items: center;
-  display: flex;
-  grid-gap: 1rem;
-  padding: 1rem;
-}
-
-.footer-menu a {
-  color: var(--color-light);
 }
 
 /*
