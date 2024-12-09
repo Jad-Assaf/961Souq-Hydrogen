@@ -64,6 +64,7 @@ button {
 
 .banner-slideshow {
   height: 20vw;
+  max-height: 300px;
 }
 
 .desktop-banners {

@@ -146,11 +146,14 @@ const styles = {
         display: "flex",
         justifyContent: "center",
         alignItems: "start",
+        maxHeight: "300px",
     },
     bannerImage: {
         width: "100vw",
         height: "100%",
         objectFit: "contain",
+        maxWidth: "1500px",
+        margin: "auto",
     },
     link: {
         width: "100vw",
