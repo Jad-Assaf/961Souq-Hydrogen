@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, startTransition, useEffect, useState } from 'react';
+import React, { Suspense, lazy, startTransition } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -143,17 +143,11 @@ async function fetchCollectionsByHandles(context, handles) {
 export default function Homepage() {
   const { banners, sliderCollections, deferredData } = useLoaderData();
 
-  const [isDomLoaded, setIsDomLoaded] = useState(false);
   const menuCollections = deferredData?.menuCollections || [];
 
   const newArrivalsCollection = menuCollections
     .flat()
     .find((collection) => collection.handle === 'new-arrivals');
-
-  useEffect(() => {
-    // Delay rendering until DOM has fully loaded
-    setIsDomLoaded(true);
-  }, []);
 
   return (
     <div className="home">
@@ -167,8 +161,7 @@ export default function Homepage() {
         )}
       </div>
 
-      {/* Conditionally render CollectionDisplay */}
-      {isDomLoaded && <CollectionDisplay menuCollections={menuCollections} />}
+      <CollectionDisplay menuCollections={menuCollections} />
 
       <BrandSection brands={brandsData} />
     </div>
