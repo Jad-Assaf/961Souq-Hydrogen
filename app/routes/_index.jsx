@@ -20,16 +20,49 @@ export const meta = () => {
 export async function loader(args) {
   const banners = [
     {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
-      link: '/collections/google-pixel',
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/christmas-banner.jpg?v=1733318318',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/christmas-mobile-banner.jpg?v=1733318318',
+      link: '/collections/christmas-sale',
     },
     {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
-      link: '/collections/garmin',
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-pro-m4-banner_756f37f6-cf6d-4484-80ed-8b510a64db28.jpg?v=1731332730',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-pro-m4-mobilebanner.jpg?v=1731333133',
+      link: '/collections/apple-macbook',
     },
     {
-      imageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
-      link: '/collections/remarkable',
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-mobilebanner.jpg?v=1728123476',
+      link: '/collections/google-products',
+    },
+    {
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-mobile-banner-1.jpg?v=1729678484',
+      link: '/collections/remarkable-paper-pro',
+    },
+    {
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold-6.jpg?v=1727957859',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold6.jpg?v=1727957858',
+      link: '/collections/samsung-mobile-phones',
+    },
+    {
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-banner.jpg?v=1726322159',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-Mobile.jpg?v=1726321600',
+      link: '/collections/apple-iphone',
+    },
+    {
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-Pro_655c6ee7-a66c-4ed9-9976-99be3122e7b6.jpg?v=1726321897',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-Pro-mobile.jpg?v=1726321600',
+      link: '/collections/apple-iphone',
+    },
+    {
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin-mobile-banner.jpg?v=1726321601',
+      link: '/products/garmin-fenix®-8-47-mm-amoled-sapphire-premium-multisport-gps-watch',
+    },
+    {
+      desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-banner-2_a2c3f993-278f-48c1-82de-ac42ceb6f3fc.jpg?v=1716031887',
+      mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad_3a178a79-4428-4aac-b5bd-41ad3f04e33a.jpg?v=1716031354',
+      link: '/collections/apple-ipad',
     },
   ];
 

@@ -17,22 +17,19 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
 
     const handleDragEnd = (event, info) => {
         const { offset } = info;
-        const swipeThreshold = 100; // Minimum swipe distance to trigger a change
+        const swipeThreshold = 100;
 
         if (offset.x > swipeThreshold) {
-            // Swipe right (previous banner)
             setCurrentIndex((prevIndex) =>
                 prevIndex === 0 ? banners.length - 1 : prevIndex - 1
             );
         } else if (offset.x < -swipeThreshold) {
-            // Swipe left (next banner)
             setCurrentIndex((prevIndex) =>
                 prevIndex === banners.length - 1 ? 0 : prevIndex + 1
             );
         }
     };
 
-    // Memoize banners to avoid unnecessary re-renders
     const renderedBanners = useMemo(
         () =>
             banners.map((banner, index) => (
@@ -40,7 +37,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                     key={index}
                     className={`banner-slide ${index === currentIndex ? "active" : "inactive"
                         }`}
-                    initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }} // Direction-aware animation
+                    initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
                     animate={
                         index === currentIndex
                             ? { opacity: 1, x: 0 }
@@ -49,7 +46,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                     exit={{ opacity: 0, x: -50 }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     drag="x"
-                    dragElastic={0.2} // Allow slight elasticity for a smoother drag
+                    dragElastic={0.2}
                     dragConstraints={{ left: 0, right: 0 }}
                     onDragEnd={handleDragEnd}
                     style={styles.bannerSlide}
@@ -62,13 +59,14 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                     >
                         <Image
                             data={{
-                                url: banner.imageUrl,
                                 altText: `Banner ${index + 1}`,
+                                url: banner.desktopImageUrl, // Default image (desktop)
                             }}
+                            srcSet={`${banner.mobileImageUrl} 600w, ${banner.desktopImageUrl} 1200w`}
+                            sizes="(max-width: 1024px) 100vw, (min-width: 1025px) 1920px"
                             width="100vw"
                             height="auto"
                             aspectRatio="16/9"
-                            sizes="(max-width: 768px) 100vw, 1920px"
                             className="banner-image"
                             style={styles.bannerImage}
                         />
