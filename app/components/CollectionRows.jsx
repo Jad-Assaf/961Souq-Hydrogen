@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { Link } from '@remix-run/react';
 import { ProductRow } from './CollectionDisplay';
 import { Image } from '@shopify/hydrogen-react';
 
 const CollectionRows = ({ menuCollections }) => {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
+
     return (
         <>
             {menuCollections.map((menuCollection, index) => (
@@ -12,26 +16,41 @@ const CollectionRows = ({ menuCollections }) => {
                     <div className="menu-slider-container">
                         <div className="menu-category-slider">
                             {menuCollection.map((collection) => (
-                                <Link
-                                    key={collection.id}
-                                    to={`/collections/${collection.handle}`}
-                                    className="menu-item-container"
+                                <motion.div
+                                    ref={ref}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={isInView ? { opacity: 1, x: 0 } : {}}
+                                    transition={{ delay: index * 0.01, duration: 0.5 }}
+                                    className="product-item"
                                 >
-                                    {collection.image && (
-                                        <Image
-                                            srcSet={`${collection.image.url}?width=300&quality=15 300w,
-                                                     ${collection.image.url}?width=600&quality=15 600w,
-                                                     ${collection.image.url}?width=1200&quality=15 1200w`}
-                                            alt={collection.image.altText || collection.title}
-                                            className="menu-item-image"
-                                            width={150}
-                                            height={150}
-                                        />
-                                    )}
-                                    <div className="category-title">
-                                        {collection.title}
-                                    </div>
-                                </Link>
+                                    <motion.div
+                                        initial={{ filter: 'blur(10px)', opacity: 0 }}
+                                        animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
+                                        transition={{ duration: 0.5 }}
+                                        className="product-card"
+                                    >
+                                        <Link
+                                            key={collection.id}
+                                            to={`/collections/${collection.handle}`}
+                                            className="menu-item-container"
+                                        >
+                                            {collection.image && (
+                                                <Image
+                                                    srcSet={`${collection.image.url}?width=300&quality=15 300w,
+                                                             ${collection.image.url}?width=600&quality=15 600w,
+                                                             ${collection.image.url}?width=1200&quality=15 1200w`}
+                                                    alt={collection.image.altText || collection.title}
+                                                    className="menu-item-image"
+                                                    width={150}
+                                                    height={150}
+                                                />
+                                            )}
+                                            <div className="category-title">
+                                                {collection.title}
+                                            </div>
+                                        </Link>
+                                    </motion.div>
+                                </motion.div>
                             ))}
                         </div>
                     </div>
