@@ -38,18 +38,19 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                 key={index}
                 className={`banner-slide ${index === currentIndex ? "active" : "inactive"
                     }`}
-                initial={{ scale: 0.9, opacity: 0 }}
+                initial={{ x: index === currentIndex ? 0 : 300, opacity: 0 }}
                 animate={
                     index === currentIndex
-                        ? { scale: 1, opacity: 1 }
-                        : { scale: 0.9, opacity: 0 }
+                        ? { x: 0, opacity: 1 }
+                        : { x: -300, opacity: 0 }
                 }
-                exit={{ scale: 0.9, opacity: 0 }}
+                exit={{ x: -300, opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
                 drag="x"
                 dragElastic={0.2}
                 dragConstraints={{ left: 0, right: 0 }}
                 onDragEnd={handleDragEnd} // Handle swipe logic
+                style={{ position: "absolute", top: 0, left: 0, width: "100%" }}
             >
                 <a href={banner.link} target="_self" rel="noopener noreferrer">
                     <Image
@@ -72,18 +73,19 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                 key={index}
                 className={`banner-slide ${index === currentIndex ? "active" : "inactive"
                     }`}
-                initial={{ scale: 0.9, opacity: 0 }}
+                initial={{ x: index === currentIndex ? 0 : 300, opacity: 0 }}
                 animate={
                     index === currentIndex
-                        ? { scale: 1, opacity: 1 }
-                        : { scale: 0.9, opacity: 0 }
+                        ? { x: 0, opacity: 1 }
+                        : { x: -300, opacity: 0 }
                 }
-                exit={{ scale: 0.9, opacity: 0 }}
+                exit={{ x: -300, opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
                 drag="x"
                 dragElastic={0.2}
                 dragConstraints={{ left: 0, right: 0 }}
                 onDragEnd={handleDragEnd} // Handle swipe logic
+                style={{ position: "absolute", top: 0, left: 0, width: "100%" }}
             >
                 <a href={banner.link} target="_self" rel="noopener noreferrer">
                     <Image
