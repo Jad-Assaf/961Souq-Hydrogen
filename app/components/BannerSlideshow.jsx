@@ -20,65 +20,104 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         const swipeThreshold = 100;
 
         if (offset.x > swipeThreshold) {
-            // Swipe to the right (previous image)
             setCurrentIndex((prevIndex) =>
                 prevIndex === 0 ? banners.length - 1 : prevIndex - 1
             );
         } else if (offset.x < -swipeThreshold) {
-            // Swipe to the left (next image)
             setCurrentIndex((prevIndex) =>
                 prevIndex === banners.length - 1 ? 0 : prevIndex + 1
             );
         }
     };
 
-    const renderedBanners = (imageKey) =>
-        useMemo(() => {
-            return banners.map((banner, index) => (
-                <motion.div
-                    key={index}
-                    className={`banner-slide ${index === currentIndex ? "active" : "inactive"}`}
-                    initial={{ opacity: 0, transform: "scale(0.95)" }}
-                    animate={
-                        index === currentIndex
-                            ? { opacity: 1, transform: "scale(1)" }
-                            : { opacity: 0, transform: "scale(0.95)" }
-                    }
-                    exit={{ opacity: 0, transform: "scale(0.95)" }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                    drag="x"
-                    dragElastic={0.2}
-                    dragConstraints={{ left: 0, right: 0 }}
-                    onDragEnd={handleDragEnd}
+    const renderedDesktopBanners = useMemo(() => {
+        return banners.map((banner, index) => (
+            <motion.div
+                key={index}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                    }`}
+                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                animate={
+                    index === currentIndex
+                        ? { opacity: 1, x: 0 }
+                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                }
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ type: "spring", stiffness: 100, damping: 10 }}
+                drag="x"
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd}
+            >
+                <a
+                    href={banner.link}
+                    target="_self"
+                    rel="noopener noreferrer"                >
+                    <Image
+                        data={{
+                            altText: `Banner ${index + 1}`,
+                            url: banner.desktopImageUrl,
+                        }}
+                        width="100vw"
+                        height="auto"
+                        className="banner-image"
+                    />
+                </a>
+            </motion.div>
+        ));
+    }, [banners, currentIndex]);
+
+    const renderedMobileBanners = useMemo(() => {
+        return banners.map((banner, index) => (
+            <motion.div
+                key={index}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                    }`}
+                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                animate={
+                    index === currentIndex
+                        ? { opacity: 1, x: 0 }
+                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                }
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ type: "spring", stiffness: 100, damping: 10 }}
+                drag="x"
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd}
+            >
+                <a
+                    href={banner.link}
+                    target="_self"
+                    rel="noopener noreferrer"
                 >
-                    <a href={banner.link} target="_self" rel="noopener noreferrer">
-                        <Image
-                            data={{
-                                altText: `Banner ${index + 1}`,
-                                url: banner[imageKey],
-                            }}
-                            width="100%"
-                            height="auto"
-                            className="banner-image"
-                        />
-                    </a>
-                </motion.div>
-            ));
-        }, [banners, currentIndex]);
+                    <Image
+                        data={{
+                            altText: `Banner ${index + 1}`,
+                            url: banner.mobileImageUrl,
+                        }}
+                        width="100vw"
+                        height="auto"
+                        className="banner-image"
+                    />
+                </a>
+            </motion.div>
+        ));
+    }, [banners, currentIndex]);
 
     return (
         <div className="banner-slideshow">
             {/* Desktop Banners */}
             <div className="desktop-banners">
                 <AnimatePresence initial={false}>
-                    {renderedBanners("desktopImageUrl")[currentIndex]}
+                    {renderedDesktopBanners[currentIndex]}
                 </AnimatePresence>
             </div>
 
             {/* Mobile Banners */}
             <div className="mobile-banners">
                 <AnimatePresence initial={false}>
-                    {renderedBanners("mobileImageUrl")[currentIndex]}
+                    {renderedMobileBanners[currentIndex]}
                 </AnimatePresence>
             </div>
         </div>

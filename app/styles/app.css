@@ -65,21 +65,30 @@ button {
 .banner-slideshow {
   position: relative;
   width: 100vw;
+  height: 100%;
   overflow: hidden;
 }
 
 .banner-slide {
-  position: relative; /* Stays in the document flow */
-  width: 100%; /* Full width */
-  height: auto; /* Adjust height dynamically based on content */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
 .banner-image {
-  width: 100%; /* Scales the image to fit */
-  height: auto; /* Maintains aspect ratio */
+  width: 100vw;
+  height: auto;
+}
+
+.link {
+  width: 100vw;
+  height: auto;
+  display: block;
 }
 
 .desktop-banners {
@@ -97,6 +106,10 @@ button {
 
   .mobile-banners {
     display: block;
+  }
+
+  .banner-slide{
+    margin-top: px;
   }
 }
 
