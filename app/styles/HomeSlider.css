@@ -109,18 +109,6 @@
     background-color: #f5f5f5;
     border-radius: 20px;
     margin: auto;
-}
-
-.menu-category-slider {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row !important;
-    justify-content: flex-start;
-    overflow-x: auto;
-    scrollbar-width: none;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    max-width: 1500px;
     margin-left: 15px;
     overflow-y: hidden;
 }
