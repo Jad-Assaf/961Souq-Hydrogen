@@ -108,13 +108,6 @@ function ProductItem({ product, index }) {
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
     return (
-        <motion.div
-            ref={ref}
-            initial={{ opacity: 0, x: -20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: index * 0.01, duration: 0.5 }}
-            className="product-item"
-        >
             <motion.div
                 initial={{ filter: 'blur(10px)', opacity: 0 }}
                 animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
@@ -181,6 +174,5 @@ function ProductItem({ product, index }) {
                             : 'Add to cart'}
                 </AddToCartButton>
             </motion.div>
-        </motion.div>
     );
 }
