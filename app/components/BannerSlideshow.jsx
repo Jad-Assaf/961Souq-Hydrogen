@@ -4,13 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(() => {
-        // Initialize on server-side render fallback
-        return typeof window !== "undefined" && window.innerWidth <= 1024;
+        if (typeof window !== "undefined") {
+            return window.innerWidth <= 1024;
+        }
+        return null; // Null indicates that we haven't determined the screen size yet
     });
 
     useEffect(() => {
         const updateIsMobile = () => setIsMobile(window.innerWidth <= 1024);
-        updateIsMobile(); // Initial check
         window.addEventListener("resize", updateIsMobile);
 
         return () => window.removeEventListener("resize", updateIsMobile);
@@ -47,6 +48,11 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
             );
         }
     };
+
+    // Only render banners when `isMobile` has been determined
+    if (isMobile === null) {
+        return null; // Or return a loader if necessary
+    }
 
     const renderedBanners = useMemo(() => {
         return banners.map((banner, index) => (
@@ -105,7 +111,7 @@ const styles = {
     bannerSlideshow: {
         position: "relative",
         width: "100vw",
-        height: "300px",
+        height: "400px",
         overflow: "hidden",
     },
     bannerSlide: {
