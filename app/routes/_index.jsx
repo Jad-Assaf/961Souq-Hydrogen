@@ -61,22 +61,9 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Hardcoded menu handles to fetch their menus
-  const menuHandless = [
-    'apple',
-    'gaming',
-    'mobiles',
-    'fitness',
-    'audio',
-    'business-monitors',
-    'photography',
-    'home-appliances',
-    'smart-devices',
-  ];
-
-  // Fetch menus and collections for each handle in `menuHandless`
+  // Fetch menus and collections for each handle in `menuHandles`
   const menuCollections = await Promise.all(
-    menuHandless.map(async (handle) => {
+    menuHandles.map(async (handle) => {
       try {
         // Fetch the menu for this handle
         const { menu } = await context.storefront.query(GET_MENU_QUERY, {
