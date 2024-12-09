@@ -115,7 +115,7 @@ function ProductItem({ product, index }) {
             transition={{
                 x: { type: 'spring', stiffness: 100, damping: 20 },
                 opacity: { duration: 0.3 },
-                filter: { duration: 0.3 },
+                filter: { duration: 0.5 },
                 delay: index * 0.1,
             }}
             className="product-card"
