@@ -37,11 +37,10 @@ export async function loader(args) {
 
   return defer({
     banners,
-    menu: criticalData.menu,
-    sliderCollections: criticalData.sliderCollections,
+    menu: criticalData.menu, // Optional: Retain if needed elsewhere
+    sliderCollections: criticalData.sliderCollections, // Sliders for menu sliders
     deferredData: {
-      collections: criticalData.collections,
-      menuCollections: criticalData.menuCollections,
+      menuCollections: criticalData.menuCollections, // Rows below sliders
     },
   });
 }
@@ -97,28 +96,11 @@ async function loadCriticalData({ context }) {
   // Fetch collections for the slider using menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
-  // Hardcoded handles for product rows
-  const hardcodedHandles = [
-    'new-arrivals', 'laptops',
-    'apple-macbook', 'apple-iphone', 'apple-accessories',
-    'gaming-laptops', 'gaming-consoles', 'console-games',
-    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-    'earbuds', 'speakers', 'surround-systems',
-    'desktops', 'pc-parts', 'business-monitors',
-    'action-cameras', 'cameras', 'surveillance-cameras',
-    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
-  ];
-
-  // Fetch collections for product rows
-  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
-
   // Return menu along with other data
   return {
-    collections,
-    sliderCollections,
-    menuCollections: menuCollections.filter(Boolean), // Filter out null menus
-    menu,
+    sliderCollections, // Sliders data for menu sliders
+    menuCollections: menuCollections.filter(Boolean), // Collections data grouped by slider
+    menu, // Optional: Retain if needed elsewhere
   };
 }
 
@@ -170,7 +152,6 @@ async function fetchCollectionsByHandles(context, handles) {
 export default function Homepage() {
   const { banners, sliderCollections, deferredData } = useLoaderData();
 
-  const collections = deferredData?.collections || [];
   const menuCollections = deferredData?.menuCollections || [];
 
   const newArrivalsCollection = collections.find(
@@ -189,7 +170,7 @@ export default function Homepage() {
         )}
       </div>
 
-      <CollectionDisplay collections={collections} menuCollections={menuCollections} />
+      <CollectionDisplay menuCollections={menuCollections} />
 
       <BrandSection brands={brandsData} />
     </div>
