@@ -48,8 +48,6 @@ export async function loader(args) {
 
 async function loadCriticalData({ context }) {
   const menuHandle = 'new-main-menu';
-
-  // Fetch main menu
   const { menu } = await context.storefront.query(GET_MENU_QUERY, {
     variables: { handle: menuHandle },
   });
@@ -60,34 +58,83 @@ async function loadCriticalData({ context }) {
 
   // Extract handles from the menu items
   const menuHandles = menu.items.map((item) =>
-    sanitizeHandle(item.title)
+    item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for menu handles and hardcoded handles
-  const [sliderCollections, collections] = await Promise.all([
-    fetchCollectionsByHandles(context, menuHandles), // For slider
-    fetchCollectionsByHandles(context, [
-      'new-arrivals', 'laptops',
-      'apple-macbook', 'apple-iphone', 'apple-accessories',
-      'gaming-laptops', 'gaming-consoles', 'console-games',
-      'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
-      'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
-      'earbuds', 'speakers', 'surround-systems',
-      'desktops', 'pc-parts', 'business-monitors',
-      'action-cameras', 'cameras', 'surveillance-cameras',
-      'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices',
-      'smart-devices', 'health-beauty',
-    ]), // For product rows
-  ]);
+  // Hardcoded menu handles to fetch their menus
+  const menuHandless = [
+    'apple',
+    'gaming',
+    'mobiles',
+    'fitness',
+    'audio',
+    'business-monitors',
+    'photography',
+    'home-appliances',
+    'smart-devices',
+  ];
 
+  // Fetch menus and collections for each handle in `menuHandless`
+  const menuCollections = await Promise.all(
+    menuHandless.map(async (handle) => {
+      try {
+        // Fetch the menu for this handle
+        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+          variables: { handle },
+        });
+
+        if (!menu || !menu.items || menu.items.length === 0) {
+          return null; // No menu or items for this handle
+        }
+
+        // Fetch collections for each menu item
+        const collections = await Promise.all(
+          menu.items.map(async (item) => {
+            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
+            const { collectionByHandle } = await context.storefront.query(
+              GET_COLLECTION_BY_HANDLE_QUERY,
+              { variables: { handle: sanitizedHandle } }
+            );
+            return collectionByHandle || null; // Return the collection data or null if not found
+          })
+        );
+
+        return collections.filter(Boolean); // Filter out any null collections
+      } catch (error) {
+        console.error(`Error fetching menu or collections for handle: ${handle}`, error);
+        return null;
+      }
+    })
+  );
+
+  // Fetch collections for the slider using menu handles
+  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
+
+  // Hardcoded handles for product rows
+  const hardcodedHandles = [
+    'new-arrivals', 'laptops',
+    'apple-macbook', 'apple-iphone', 'apple-accessories',
+    'gaming-laptops', 'gaming-consoles', 'console-games',
+    'samsung-mobile-phones', 'google-pixel-phones', 'mobile-accessories',
+    'garmin-smart-watch', 'samsung-watches', 'fitness-bands',
+    'earbuds', 'speakers', 'surround-systems',
+    'desktops', 'pc-parts', 'business-monitors',
+    'action-cameras', 'cameras', 'surveillance-cameras',
+    'kitchen-appliances', 'cleaning-devices', 'lighting', 'streaming-devices', 'smart-devices', 'health-beauty',
+  ];
+
+  // Fetch collections for product rows
+  const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
+
+  // Return menu along with other data
   return {
-    menu,
-    sliderCollections,
     collections,
+    sliderCollections,
+    menuCollections: menuCollections.filter(Boolean), // Filter out null menus
+    menu,
   };
 }
 
-// Sanitize handle function
 function sanitizeHandle(handle) {
   return handle
     .toLowerCase()
@@ -95,26 +142,6 @@ function sanitizeHandle(handle) {
     .replace(/&/g, '') // Remove ampersands
     .replace(/\./g, '-') // Replace periods
     .replace(/\s+/g, '-'); // Replace spaces with hyphens
-}
-
-// Helper function to fetch collections by handles
-async function fetchCollectionsByHandles(context, handles) {
-  const collections = await Promise.all(
-    handles.map(async (handle) => {
-      try {
-        const { collectionByHandle } = await context.storefront.query(
-          GET_COLLECTION_BY_HANDLE_QUERY,
-          { variables: { handle } }
-        );
-        return collectionByHandle || null;
-      } catch (error) {
-        console.error(`Error fetching collection for handle: ${handle}`, error);
-        return null;
-      }
-    })
-  );
-
-  return collections.filter(Boolean); // Ensure it is an array of collections
 }
 
 const brandsData = [
@@ -141,10 +168,23 @@ const brandsData = [
   { name: "Philips", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Philips-new.jpg?v=1733388855", link: "/collections/philips-products" },
 ];
 
+async function fetchCollectionsByHandles(context, handles) {
+  const collections = [];
+  for (const handle of handles) {
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (collectionByHandle) collections.push(collectionByHandle);
+  }
+  return collections;
+}
+
 export default function Homepage() {
   const { banners, menu, sliderCollections, deferredData } = useLoaderData();
 
   const collections = deferredData?.collections || [];
+  const menuCollections = deferredData?.menuCollections || [];
 
   const newArrivalsCollection = collections.find(
     (collection) => collection.handle === 'new-arrivals'
@@ -152,6 +192,7 @@ export default function Homepage() {
 
   return (
     <div className="home">
+      {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider menu={menu} sliderCollections={sliderCollections} />
 
@@ -161,7 +202,7 @@ export default function Homepage() {
         )}
       </div>
 
-      <CollectionDisplay collections={collections} menuCollections={sliderCollections} />
+      <CollectionDisplay collections={collections} menuCollections={menuCollections} />
 
       <BrandSection brands={brandsData} />
     </div>

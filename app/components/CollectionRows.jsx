@@ -4,64 +4,67 @@ import { ProductRow } from './CollectionDisplay';
 import { Image } from '@shopify/hydrogen-react';
 
 const CollectionRows = ({ collections, menuCollections }) => {
-  const filteredCollections = collections.filter(
-    (collection) => collection.handle !== "new-arrivals" && collection.handle !== "laptops"
-  );
+    // Filter out collections with the handles "new-arrivals" and "laptops"
+    const filteredCollections = collections.filter(
+        (collection) => collection.handle !== "new-arrivals" && collection.handle !== "laptops"
+    );
 
-  return (
-    <>
-      {filteredCollections.map((collection, index) => {
-        const isMenuRow = index % 3 === 0;
-        const menuIndex = Math.floor(index / 3);
-        const currentMenu = Array.isArray(menuCollections)
-          ? menuCollections[menuIndex]?.items || [] // Access menu items
-          : [];
+    return (
+        <>
+            {filteredCollections.map((collection, index) => {
+                const isMenuRow = index % 3 === 0; // Every 3 rows, display a menu
+                const menuIndex = Math.floor(index / 3); // Determine the menu index
+                const currentMenu = menuCollections[menuIndex]; // Fetch the corresponding menu
 
-        return (
-          <React.Fragment key={collection.id}>
-            {/* Render the menu slider row */}
-            {isMenuRow && currentMenu.length > 0 && (
-              <div className="menu-slider-container">
-                <div className="menu-category-slider">
-                  {currentMenu.map((menuItem) => (
-                    <Link
-                      key={menuItem.id}
-                      to={menuItem.url}
-                      className="menu-item-container"
-                    >
-                      {menuItem.image && (
-                        <Image
-                          srcSet={`${menuItem.image.url}?width=300&quality=20 300w,
-                                   ${menuItem.image.url}?width=600&quality=20 600w,
-                                   ${menuItem.image.url}?width=1200&quality=20 1200w`}
-                          alt={menuItem.image.altText || menuItem.title}
-                          className="menu-item-image"
-                          width={150}
-                          height={150}
-                        />
-                      )}
-                      <div className="category-title">{menuItem.title}</div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
+                return (
+                    <React.Fragment key={collection.id}>
+                        {/* Render the menu slider row */}
+                        {isMenuRow && currentMenu && (
+                            <div className="menu-slider-container">
+                                <div className="menu-category-slider">
 
-            {/* Render the product row */}
-            <div className="collection-section">
-              <div className="collection-header">
-                <h3>{collection.title}</h3>
-                <Link to={`/collections/${collection.handle}`} className="view-all-link">
-                  View All
-                </Link>
-              </div>
-              <ProductRow products={collection.products.nodes} />
-            </div>
-          </React.Fragment>
-        );
-      })}
-    </>
-  );
+                                    {currentMenu.map((menuCollection) => (
+                                        <Link
+                                            key={menuCollection.id}
+                                            to={`/collections/${menuCollection.handle}`}
+                                            className="menu-item-container"
+                                        >
+                                            {menuCollection.image && (
+                                                <Image
+                                                    srcSet={`${menuCollection.image.url}?width=300&quality=20 300w,
+                                                             ${menuCollection.image.url}?width=600&quality=20 600w,
+                                                             ${menuCollection.image.url}?width=1200&quality=20 1200w`}
+                                                    alt={menuCollection.image.altText || menuCollection.title}
+                                                    className="menu-item-image"
+                                                    width={150}
+                                                    height={150}
+                                                />
+                                            )}
+                                            <div className="category-title">
+                                                {menuCollection.title}
+                                            </div>
+                                        </Link>
+                                    ))}
+
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Render the product row */}
+                        <div className="collection-section">
+                            <div className="collection-header">
+                                <h3>{collection.title}</h3>
+                                <Link to={`/collections/${collection.handle}`} className="view-all-link">
+                                    View All
+                                </Link>
+                            </div>
+                            <ProductRow products={collection.products.nodes} />
+                        </div>
+                    </React.Fragment>
+                );
+            })}
+        </>
+    );
 };
 
 const LeftArrowIcon = () => (
