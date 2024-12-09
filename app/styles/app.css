@@ -73,7 +73,7 @@ button {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
   height: auto;
   display: flex;
   justify-content: center;
@@ -81,12 +81,12 @@ button {
 }
 
 .banner-image {
-  width: 100%;
+  width: 100vw;
   height: auto;
 }
 
 .link {
-  width: 100%;
+  width: 100vw;
   height: auto;
   display: block;
 }
@@ -106,6 +106,10 @@ button {
 
   .mobile-banners {
     display: block;
+  }
+
+  .banner-slide{
+    margin-top: 40px;
   }
 }
 
