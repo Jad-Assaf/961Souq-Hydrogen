@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
@@ -17,11 +17,37 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
-// Simplified CollectionDisplay
+const CHUNK_SIZE = 5; // Number of collections per chunk
+
 export const CollectionDisplay = React.memo(({ menuCollections }) => {
+    const [visibleChunks, setVisibleChunks] = useState(1);
+
+    // Calculate the currently visible collections
+    const visibleCollections = menuCollections.slice(0, visibleChunks * CHUNK_SIZE);
+
+    // Handle automatic chunk loading on scroll
+    const handleScroll = () => {
+        if (
+            window.innerHeight + document.documentElement.scrollTop >=
+            document.documentElement.offsetHeight - 200
+        ) {
+            if (visibleChunks * CHUNK_SIZE < menuCollections.length) {
+                setVisibleChunks((prev) => prev + 1);
+            }
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [visibleChunks, menuCollections]);
+
     return (
         <div className="collections-container">
-            <CollectionRows menuCollections={menuCollections} />
+            <CollectionRows menuCollections={visibleCollections} />
+            {visibleChunks * CHUNK_SIZE < menuCollections.length && (
+                <div>Loading more collections...</div>
+            )}
         </div>
     );
 });
@@ -127,12 +153,13 @@ function ProductItem({ product, index }) {
                             data={product.images.nodes[0]}
                             aspectRatio="1/1"
                             sizes="(min-width: 45em) 20vw, 40vw"
-                            srcSet={`${product.images.nodes[0].url}?width=300&quality=5 300w,
-                       ${product.images.nodes[0].url}?width=600&quality=5 600w,
-                       ${product.images.nodes[0].url}?width=1200&quality=5 1200w`}
+                            srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
+                       ${product.images.nodes[0].url}?width=600&quality=10 600w,
+                       ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
                             alt={product.images.nodes[0].altText || 'Product Image'}
                             width="180px"
                             height="180px"
+                            loading="lazy"
                         />
                     )}
                     <h4 className="product-title">{truncateText(product.title, 50)}</h4>
