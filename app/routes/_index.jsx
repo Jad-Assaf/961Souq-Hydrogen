@@ -143,11 +143,17 @@ async function fetchCollectionsByHandles(context, handles) {
 export default function Homepage() {
   const { banners, sliderCollections, deferredData } = useLoaderData();
 
+  const [isDomLoaded, setIsDomLoaded] = useState(false);
   const menuCollections = deferredData?.menuCollections || [];
 
   const newArrivalsCollection = menuCollections
     .flat()
     .find((collection) => collection.handle === 'new-arrivals');
+
+  useEffect(() => {
+    // Delay rendering until DOM has fully loaded
+    setIsDomLoaded(true);
+  }, []);
 
   return (
     <div className="home">
@@ -161,7 +167,8 @@ export default function Homepage() {
         )}
       </div>
 
-      <CollectionDisplay menuCollections={menuCollections} />
+      {/* Conditionally render CollectionDisplay */}
+      {isDomLoaded && <CollectionDisplay menuCollections={menuCollections} />}
 
       <BrandSection brands={brandsData} />
     </div>
