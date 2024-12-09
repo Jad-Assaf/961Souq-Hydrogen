@@ -69,28 +69,17 @@ button {
 }
 
 .banner-slide {
-  position: relative;
-  /* Stay in the flow */
-  width: 100%;
-  /* Full width */
-  height: auto;
-  /* Adjust to the height of the image */
+  position: relative; /* Stays in the document flow */
+  width: 100%; /* Full width */
+  height: auto; /* Adjust height dynamically based on content */
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
 .banner-image {
-  width: 100%;
-  /* Image scales to fit */
-  height: auto;
-  /* Maintain aspect ratio */
-}
-
-.link {
-  width: 100%;
-  height: auto;
-  display: block;
+  width: 100%; /* Scales the image to fit */
+  height: auto; /* Maintains aspect ratio */
 }
 
 .desktop-banners {
@@ -110,6 +99,7 @@ button {
     display: block;
   }
 }
+
 /* Hide the scrollbar for a cleaner look */
 .collection-products-row::-webkit-scrollbar {
   display: none;

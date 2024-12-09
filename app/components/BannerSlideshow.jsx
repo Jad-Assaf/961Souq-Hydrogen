@@ -17,7 +17,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
 
     const handleDragEnd = (event, info) => {
         const { offset } = info;
-        const swipeThreshold = 100; // Minimum distance to trigger a swipe
+        const swipeThreshold = 100;
 
         if (offset.x > swipeThreshold) {
             // Swipe to the right (previous image)
@@ -37,14 +37,14 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
             return banners.map((banner, index) => (
                 <motion.div
                     key={index}
-                    className="banner-slide"
-                    initial={{ opacity: 0, transform: "translateX(100%)" }}
+                    className={`banner-slide ${index === currentIndex ? "active" : "inactive"}`}
+                    initial={{ opacity: 0, transform: "scale(0.95)" }}
                     animate={
                         index === currentIndex
-                            ? { opacity: 1, transform: "translateX(0%)" }
-                            : { opacity: 0, transform: "translateX(-100%)" }
+                            ? { opacity: 1, transform: "scale(1)" }
+                            : { opacity: 0, transform: "scale(0.95)" }
                     }
-                    exit={{ opacity: 0, transform: "translateX(-100%)" }}
+                    exit={{ opacity: 0, transform: "scale(0.95)" }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
                     drag="x"
                     dragElastic={0.2}
