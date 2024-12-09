@@ -65,6 +65,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                         height="auto"
                         className="banner-image"
                         style={styles.bannerImage}
+                        loading="eager"
                     />
                 </a>
             </motion.div>
@@ -106,6 +107,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                         height="auto"
                         className="banner-image"
                         style={styles.bannerImage}
+                        loading="eager"
                     />
                 </a>
             </motion.div>
