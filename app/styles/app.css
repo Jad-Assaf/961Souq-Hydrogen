@@ -69,26 +69,22 @@ button {
 }
 
 .banner-slide {
-  position: absolute;
-  /* Stack all slides on top of each other */
-  top: 0;
-  left: 0;
+  position: relative;
+  /* Stay in the flow */
   width: 100%;
-  /* Full width of the container */
+  /* Full width */
   height: auto;
   /* Adjust to the height of the image */
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  /* Smooth animation */
 }
 
 .banner-image {
   width: 100%;
-  /* Ensure the image scales to fit */
+  /* Image scales to fit */
   height: auto;
-  /* Maintain the aspect ratio */
+  /* Maintain aspect ratio */
 }
 
 .link {
@@ -114,7 +110,6 @@ button {
     display: block;
   }
 }
-
 /* Hide the scrollbar for a cleaner look */
 .collection-products-row::-webkit-scrollbar {
   display: none;

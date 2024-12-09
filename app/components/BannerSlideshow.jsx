@@ -15,50 +15,29 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         return () => clearInterval(timer);
     }, [banners.length, interval]);
 
-    const handleDragEnd = (event, info) => {
-        const { offset } = info;
-        const swipeThreshold = 100;
-
-        if (offset.x > swipeThreshold) {
-            setCurrentIndex((prevIndex) =>
-                prevIndex === 0 ? banners.length - 1 : prevIndex - 1
-            );
-        } else if (offset.x < -swipeThreshold) {
-            setCurrentIndex((prevIndex) =>
-                prevIndex === banners.length - 1 ? 0 : prevIndex + 1
-            );
-        }
-    };
-
     const renderedDesktopBanners = useMemo(() => {
         return banners.map((banner, index) => (
             <motion.div
                 key={index}
-                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
-                    }`}
-                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                className={`banner-slide ${
+                    index === currentIndex ? "active" : "inactive"
+                }`}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={
                     index === currentIndex
-                        ? { opacity: 1, x: 0 }
-                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                        ? { scale: 1, opacity: 1 }
+                        : { scale: 0.9, opacity: 0 }
                 }
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ type: "spring", stiffness: 100, damping: 10 }}
-                drag="x"
-                dragElastic={0.2}
-                dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={handleDragEnd}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
             >
-                <a
-                    href={banner.link}
-                    target="_self"
-                    rel="noopener noreferrer"                >
+                <a href={banner.link} target="_self" rel="noopener noreferrer">
                     <Image
                         data={{
                             altText: `Banner ${index + 1}`,
                             url: banner.desktopImageUrl,
                         }}
-                        width="100vw"
+                        width="100%"
                         height="auto"
                         className="banner-image"
                     />
@@ -71,28 +50,25 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         return banners.map((banner, index) => (
             <motion.div
                 key={index}
-                className={`banner-slide ${index === currentIndex ? "active" : "inactive"}`}
-                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                className={`banner-slide ${
+                    index === currentIndex ? "active" : "inactive"
+                }`}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={
                     index === currentIndex
-                        ? { opacity: 1, x: 0 }
-                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                        ? { scale: 1, opacity: 1 }
+                        : { scale: 0.9, opacity: 0 }
                 }
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ type: "spring", stiffness: 100, damping: 10 }}
-                drag="x"
-                dragElastic={0.2}
-                dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={handleDragEnd}
-                style={{ position: "absolute", width: "100%" }} // Ensures stacking
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
             >
                 <a href={banner.link} target="_self" rel="noopener noreferrer">
                     <Image
                         data={{
                             altText: `Banner ${index + 1}`,
-                            url: banner.desktopImageUrl,
+                            url: banner.mobileImageUrl,
                         }}
-                        width="100vw"
+                        width="100%"
                         height="auto"
                         className="banner-image"
                     />
