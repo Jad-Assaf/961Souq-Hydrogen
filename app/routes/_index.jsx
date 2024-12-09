@@ -54,55 +54,55 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from the menu items
+  // Extract handles from menu items
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch menus and collections for each handle in `menuHandles`
-  const menuCollections = await Promise.all(
-    menuHandles.map(async (handle) => {
-      try {
-        // Fetch the menu for this handle
-        const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-          variables: { handle },
-        });
+  // Fetch collections for menu items and sliders in bulk
+  const [menuCollections, sliderCollections] = await Promise.all([
+    fetchCollectionsGroupedByMenu(context, menuHandles),
+    fetchCollectionsByHandles(context, menuHandles),
+  ]);
 
-        if (!menu || !menu.items || menu.items.length === 0) {
-          return null; // No menu or items for this handle
-        }
-
-        // Fetch collections for each menu item
-        const collections = await Promise.all(
-          menu.items.map(async (item) => {
-            // Use the same method for generating sanitized handles
-            const sanitizedHandle = item.title.toLowerCase().replace(/\s+/g, '-');
-            const { collectionByHandle } = await context.storefront.query(
-              GET_COLLECTION_BY_HANDLE_QUERY,
-              { variables: { handle: sanitizedHandle } }
-            );
-            return collectionByHandle || null; // Return the collection data or null if not found
-          })
-        );
-
-        return collections.filter(Boolean); // Filter out any null collections
-      } catch (error) {
-        console.error(`Error fetching menu or collections for handle: ${handle}`, error);
-        return null;
-      }
-    })
-  );
-
-  // Fetch collections for the slider using menu handles
-  const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
-
-  // Return menu along with other data
   return {
-    sliderCollections, // Sliders data for menu sliders
-    menuCollections: menuCollections.filter(Boolean), // Collections data grouped by slider
+    sliderCollections, // Slider data
+    menuCollections, // Menu data grouped by collections
   };
 }
 
+// Fetch collections grouped by menu handles
+async function fetchCollectionsGroupedByMenu(context, menuHandles) {
+  const menuData = await fetchMenusByHandles(context, menuHandles);
+
+  // Extract unique collection handles
+  const collectionHandles = menuData
+    .flatMap((menu) => menu.items.map((item) => item.title.toLowerCase().replace(/\s+/g, '-')))
+    .filter(Boolean);
+
+  // Fetch collections for those handles
+  return await fetchCollectionsByHandles(context, collectionHandles);
+}
+
+// Fetch menus by handles in bulk
+async function fetchMenusByHandles(context, handles) {
+  const menuQueries = handles.map((handle) =>
+    context.storefront.query(GET_MENU_QUERY, { variables: { handle } })
+  );
+  return await Promise.all(menuQueries);
+}
+
+// Fetch collections by a list of handles
+async function fetchCollectionsByHandles(context, handles) {
+  if (handles.length === 0) return [];
+
+  const { collectionsByHandles } = await context.storefront.query(
+    GET_COLLECTIONS_BY_HANDLES_QUERY,
+    { variables: { handles } }
+  );
+
+  return collectionsByHandles || [];
+}
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-new.jpg?v=1733388855", link: "/collections/apple" },
@@ -129,16 +129,13 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
+  const { collectionsByHandles } = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    { variables: { handles } }
+  );
+  return collectionsByHandles || [];
 }
+
 
 export default function Homepage() {
   const { banners, sliderCollections, deferredData } = useLoaderData();
@@ -168,9 +165,9 @@ export default function Homepage() {
   );
 }
 
-const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
-  query GetCollectionByHandle($handle: String!) {
-    collectionByHandle(handle: $handle) {
+const GET_COLLECTIONS_BY_HANDLES_QUERY = `#graphql
+  query GetCollectionsByHandles($handles: [String!]!) {
+    collectionsByHandles(handles: $handles) {
       id
       title
       handle

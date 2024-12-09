@@ -9,7 +9,7 @@ const CollectionRows = ({ menuCollections }) => {
             {menuCollections.map((menuCollection, index) => (
                 <React.Fragment key={menuCollection.id}>
                     {/* Render the menu slider */}
-                    {/* <div className="menu-slider-container">
+                    <div className="menu-slider-container">
                         <div className="menu-category-slider">
                             {menuCollection.map((collection) => (
                                 <Link
@@ -34,7 +34,7 @@ const CollectionRows = ({ menuCollections }) => {
                                 </Link>
                             ))}
                         </div>
-                    </div> */}
+                    </div>
 
                     {/* Render the product rows for this menu slider */}
                     {menuCollection.map((collection) => (
