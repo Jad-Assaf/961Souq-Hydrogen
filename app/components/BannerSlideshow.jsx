@@ -2,27 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Image } from "@shopify/hydrogen";
 import { motion, AnimatePresence } from "framer-motion";
 
-function useIsMobile() {
-    const [isMobile, setIsMobile] = useState(() => {
-        if (typeof window !== "undefined") {
-            return window.innerWidth <= 1024;
-        }
-        return null; // Null indicates that we haven't determined the screen size yet
-    });
-
-    useEffect(() => {
-        const updateIsMobile = () => setIsMobile(window.innerWidth <= 1024);
-        window.addEventListener("resize", updateIsMobile);
-
-        return () => window.removeEventListener("resize", updateIsMobile);
-    }, []);
-
-    return isMobile;
-}
-
 export function BannerSlideshow({ banners, interval = 10000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const isMobile = useIsMobile();
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -49,12 +30,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
         }
     };
 
-    // Only render banners when `isMobile` has been determined
-    if (isMobile === null) {
-        return null; // Or return a loader if necessary
-    }
-
-    const renderedBanners = useMemo(() => {
+    const renderedDesktopBanners = useMemo(() => {
         return banners.map((banner, index) => (
             <motion.div
                 key={index}
@@ -83,9 +59,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                     <Image
                         data={{
                             altText: `Banner ${index + 1}`,
-                            url: isMobile
-                                ? banner.mobileImageUrl
-                                : banner.desktopImageUrl,
+                            url: banner.desktopImageUrl,
                         }}
                         width="100vw"
                         height="auto"
@@ -96,13 +70,65 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                 </a>
             </motion.div>
         ));
-    }, [banners, currentIndex, isMobile]);
+    }, [banners, currentIndex]);
+
+    const renderedMobileBanners = useMemo(() => {
+        return banners.map((banner, index) => (
+            <motion.div
+                key={index}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                    }`}
+                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                animate={
+                    index === currentIndex
+                        ? { opacity: 1, x: 0 }
+                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                }
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ type: "spring", stiffness: 100, damping: 10 }}
+                drag="x"
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd}
+                style={styles.bannerSlide}
+            >
+                <a
+                    href={banner.link}
+                    target="_self"
+                    rel="noopener noreferrer"
+                    style={styles.link}
+                >
+                    <Image
+                        data={{
+                            altText: `Banner ${index + 1}`,
+                            url: banner.mobileImageUrl,
+                        }}
+                        width="100vw"
+                        height="auto"
+                        aspectRatio="16/9"
+                        className="banner-image"
+                        style={styles.bannerImage}
+                    />
+                </a>
+            </motion.div>
+        ));
+    }, [banners, currentIndex]);
 
     return (
         <div className="banner-slideshow" style={styles.bannerSlideshow}>
-            <AnimatePresence initial={false}>
-                {renderedBanners[currentIndex]}
-            </AnimatePresence>
+            {/* Desktop Banners */}
+            <div className="desktop-banners">
+                <AnimatePresence initial={false}>
+                    {renderedDesktopBanners[currentIndex]}
+                </AnimatePresence>
+            </div>
+
+            {/* Mobile Banners */}
+            <div className="mobile-banners">
+                <AnimatePresence initial={false}>
+                    {renderedMobileBanners[currentIndex]}
+                </AnimatePresence>
+            </div>
         </div>
     );
 }
@@ -133,5 +159,20 @@ const styles = {
         width: "100%",
         height: "100%",
         display: "block",
+    },
+    desktopBanners: {
+        display: "block",
+    },
+    mobileBanners: {
+        display: "none",
+    },
+    // Media query styles for mobile
+    "@media (max-width: 1024px)": {
+        desktopBanners: {
+            display: "none",
+        },
+        mobileBanners: {
+            display: "block",
+        },
     },
 };
