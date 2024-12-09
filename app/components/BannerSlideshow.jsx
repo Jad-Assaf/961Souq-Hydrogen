@@ -15,13 +15,29 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         return () => clearInterval(timer);
     }, [banners.length, interval]);
 
+    const handleDragEnd = (event, info) => {
+        const { offset } = info;
+        const swipeThreshold = 100; // Minimum distance to trigger a swipe
+
+        if (offset.x > swipeThreshold) {
+            // Swipe to the right (previous image)
+            setCurrentIndex((prevIndex) =>
+                prevIndex === 0 ? banners.length - 1 : prevIndex - 1
+            );
+        } else if (offset.x < -swipeThreshold) {
+            // Swipe to the left (next image)
+            setCurrentIndex((prevIndex) =>
+                prevIndex === banners.length - 1 ? 0 : prevIndex + 1
+            );
+        }
+    };
+
     const renderedDesktopBanners = useMemo(() => {
         return banners.map((banner, index) => (
             <motion.div
                 key={index}
-                className={`banner-slide ${
-                    index === currentIndex ? "active" : "inactive"
-                }`}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                    }`}
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={
                     index === currentIndex
@@ -30,6 +46,10 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                 }
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
+                drag="x"
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd} // Handle swipe logic
             >
                 <a href={banner.link} target="_self" rel="noopener noreferrer">
                     <Image
@@ -37,7 +57,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                             altText: `Banner ${index + 1}`,
                             url: banner.desktopImageUrl,
                         }}
-                        width="100%"
+                        width="100vw"
                         height="auto"
                         className="banner-image"
                     />
@@ -50,9 +70,8 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         return banners.map((banner, index) => (
             <motion.div
                 key={index}
-                className={`banner-slide ${
-                    index === currentIndex ? "active" : "inactive"
-                }`}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                    }`}
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={
                     index === currentIndex
@@ -61,6 +80,10 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                 }
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
+                drag="x"
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd} // Handle swipe logic
             >
                 <a href={banner.link} target="_self" rel="noopener noreferrer">
                     <Image
@@ -68,7 +91,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                             altText: `Banner ${index + 1}`,
                             url: banner.mobileImageUrl,
                         }}
-                        width="100%"
+                        width="100vw"
                         height="auto"
                         className="banner-image"
                     />
