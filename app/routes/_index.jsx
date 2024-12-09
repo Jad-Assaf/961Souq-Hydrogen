@@ -37,7 +37,6 @@ export async function loader(args) {
 
   return defer({
     banners,
-    menu: criticalData.menu,
     sliderCollections: criticalData.sliderCollections,
     deferredData: {
       collections: criticalData.collections,
@@ -56,10 +55,8 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from the menu items
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
+  // Extract dynamic handles from the menu items
+  const menuHandles = menu.items.map((item) => item.handle);
 
   // Fetch menus and collections for each handle in `menuHandles`
   const menuCollections = await Promise.all(
@@ -77,16 +74,15 @@ async function loadCriticalData({ context }) {
         // Fetch collections for each menu item
         const collections = await Promise.all(
           menu.items.map(async (item) => {
-            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
             const { collectionByHandle } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
-              { variables: { handle: sanitizedHandle } }
+              { variables: { handle: item.handle } }
             );
             return collectionByHandle || null; // Return the collection data or null if not found
           })
         );
 
-        return collections.filter(Boolean); // Filter out any null collections
+        return collections.filter(Boolean); // Filter out null collections
       } catch (error) {
         console.error(`Error fetching menu or collections for handle: ${handle}`, error);
         return null;
@@ -94,7 +90,7 @@ async function loadCriticalData({ context }) {
     })
   );
 
-  // Fetch collections for the slider using menu handles
+  // Fetch collections for the slider using the dynamic menu handles
   const sliderCollections = await fetchCollectionsByHandles(context, menuHandles);
 
   // Hardcoded handles for product rows
@@ -113,22 +109,12 @@ async function loadCriticalData({ context }) {
   // Fetch collections for product rows
   const collections = await fetchCollectionsByHandles(context, hardcodedHandles);
 
-  // Return menu along with other data
+  // Return fetched data
   return {
     collections,
     sliderCollections,
     menuCollections: menuCollections.filter(Boolean), // Filter out null menus
-    menu,
   };
-}
-
-function sanitizeHandle(handle) {
-  return handle
-    .toLowerCase()
-    .replace(/"/g, '') // Remove quotes
-    .replace(/&/g, '') // Remove ampersands
-    .replace(/\./g, '-') // Replace periods
-    .replace(/\s+/g, '-'); // Replace spaces with hyphens
 }
 
 const brandsData = [
@@ -156,15 +142,21 @@ const brandsData = [
 ];
 
 async function fetchCollectionsByHandles(context, handles) {
-  const collections = [];
-  for (const handle of handles) {
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (collectionByHandle) collections.push(collectionByHandle);
-  }
-  return collections;
+  const collections = await Promise.all(
+    handles.map(async (handle) => {
+      try {
+        const { collectionByHandle } = await context.storefront.query(
+          GET_COLLECTION_BY_HANDLE_QUERY,
+          { variables: { handle } }
+        );
+        return collectionByHandle || null;
+      } catch (error) {
+        console.error(`Error fetching collection for handle: ${handle}`, error);
+        return null;
+      }
+    })
+  );
+  return collections.filter(Boolean);
 }
 
 export default function Homepage() {
