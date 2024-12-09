@@ -154,9 +154,9 @@ export default function Homepage() {
 
   const menuCollections = deferredData?.menuCollections || [];
 
-  const newArrivalsCollection = collections.find(
-    (collection) => collection.handle === 'new-arrivals'
-  );
+  const newArrivalsCollection = menuCollections
+    .flat()
+    .find((collection) => collection.handle === 'new-arrivals');
 
   return (
     <div className="home">
