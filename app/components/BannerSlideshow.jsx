@@ -2,8 +2,23 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Image } from "@shopify/hydrogen";
 import { motion, AnimatePresence } from "framer-motion";
 
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const updateIsMobile = () => setIsMobile(window.innerWidth <= 1024);
+        updateIsMobile(); // Check on initial render
+        window.addEventListener("resize", updateIsMobile);
+
+        return () => window.removeEventListener("resize", updateIsMobile);
+    }, []);
+
+    return isMobile;
+}
+
 export function BannerSlideshow({ banners, interval = 10000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -60,10 +75,10 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                         <Image
                             data={{
                                 altText: `Banner ${index + 1}`,
-                                url: banner.desktopImageUrl, // Default image (desktop)
+                                url: isMobile
+                                    ? banner.mobileImageUrl
+                                    : banner.desktopImageUrl,
                             }}
-                            srcSet={`${banner.mobileImageUrl} 600w, ${banner.desktopImageUrl} 1200w`}
-                            sizes="(max-width: 1024px) 100vw, (min-width: 1025px) 1920px"
                             width="100vw"
                             height="auto"
                             aspectRatio="16/9"
@@ -73,7 +88,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                     </a>
                 </motion.div>
             )),
-        [banners, currentIndex]
+        [banners, currentIndex, isMobile]
     );
 
     return (
