@@ -71,8 +71,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         return banners.map((banner, index) => (
             <motion.div
                 key={index}
-                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
-                    }`}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"}`}
                 initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
                 animate={
                     index === currentIndex
@@ -85,16 +84,13 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                 dragElastic={0.2}
                 dragConstraints={{ left: 0, right: 0 }}
                 onDragEnd={handleDragEnd}
+                style={{ position: "absolute", width: "100%" }} // Ensures stacking
             >
-                <a
-                    href={banner.link}
-                    target="_self"
-                    rel="noopener noreferrer"
-                >
+                <a href={banner.link} target="_self" rel="noopener noreferrer">
                     <Image
                         data={{
                             altText: `Banner ${index + 1}`,
-                            url: banner.mobileImageUrl,
+                            url: banner.desktopImageUrl,
                         }}
                         width="100vw"
                         height="auto"
