@@ -48,11 +48,14 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                 dragElastic={0.2}
                 dragConstraints={{ left: 0, right: 0 }}
                 onDragEnd={handleDragEnd}
+                style={styles.bannerSlide}
             >
                 <a
                     href={banner.link}
                     target="_self"
-                    rel="noopener noreferrer"                >
+                    rel="noopener noreferrer"
+                    style={styles.link}
+                >
                     <Image
                         data={{
                             altText: `Banner ${index + 1}`,
@@ -61,6 +64,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                         width="100vw"
                         height="auto"
                         className="banner-image"
+                        style={styles.bannerImage}
                     />
                 </a>
             </motion.div>
@@ -85,11 +89,13 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                 dragElastic={0.2}
                 dragConstraints={{ left: 0, right: 0 }}
                 onDragEnd={handleDragEnd}
+                style={styles.bannerSlide}
             >
                 <a
                     href={banner.link}
                     target="_self"
                     rel="noopener noreferrer"
+                    style={styles.link}
                 >
                     <Image
                         data={{
@@ -99,6 +105,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
                         width="100vw"
                         height="auto"
                         className="banner-image"
+                        style={styles.bannerImage}
                     />
                 </a>
             </motion.div>
@@ -106,7 +113,7 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
     }, [banners, currentIndex]);
 
     return (
-        <div className="banner-slideshow">
+        <div className="banner-slideshow" style={styles.bannerSlideshow}>
             {/* Desktop Banners */}
             <div className="desktop-banners">
                 <AnimatePresence initial={false}>
@@ -123,3 +130,32 @@ export function BannerSlideshow({ banners, interval = 300000 }) {
         </div>
     );
 }
+
+const styles = {
+    bannerSlideshow: {
+        position: "relative",
+        width: "100vw",
+        height: "400px",
+        overflow: "hidden",
+    },
+    bannerSlide: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "start",
+    },
+    bannerImage: {
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+    },
+    link: {
+        width: "100%",
+        height: "100%",
+        display: "block",
+    },
+};
