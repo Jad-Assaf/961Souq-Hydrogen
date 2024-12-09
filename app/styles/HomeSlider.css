@@ -122,6 +122,7 @@
     -webkit-overflow-scrolling: touch;
     max-width: 1500px;
     margin-left: 15px;
+    overflow-y: hidden;
 }
 
 .menu-item-container {
