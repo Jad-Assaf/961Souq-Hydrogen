@@ -22,8 +22,8 @@ const CollectionRows = ({ menuCollections }) => {
                         </div>
                     </div>
 
-                    {/* Render the product rows for this menu slider */}
-                    {menuCollection.map((collection) => (
+                    {/* Render the product rows for this menu slider (limited to 4) */}
+                    {menuCollection.slice(0, 4).map((collection) => (
                         <div key={collection.id} className="collection-section">
                             <div className="collection-header">
                                 <h3>{collection.title}</h3>
