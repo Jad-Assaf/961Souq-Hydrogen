@@ -63,7 +63,6 @@ export function BannerSlideshow({ banners, interval = 30000 }) {
                         }}
                         width="100vw"
                         height="auto"
-                        aspectRatio="16/9"
                         className="banner-image"
                         style={styles.bannerImage}
                     />
@@ -105,7 +104,6 @@ export function BannerSlideshow({ banners, interval = 30000 }) {
                         }}
                         width="100vw"
                         height="auto"
-                        aspectRatio="16/9"
                         className="banner-image"
                         style={styles.bannerImage}
                     />

@@ -65,7 +65,7 @@ button {
 .banner-slideshow {
   position: relative;
   width: 100vw;
-  height: 400px;
+  height: auto;
   overflow: hidden;
 }
 
@@ -74,21 +74,20 @@ button {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: auto;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .banner-image {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
 }
 
 .link {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: block;
 }
 
