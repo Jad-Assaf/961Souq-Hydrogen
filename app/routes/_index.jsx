@@ -37,7 +37,6 @@ export async function loader(args) {
 
   return defer({
     banners,
-    menu: criticalData.menu, // Optional: Retain if needed elsewhere
     sliderCollections: criticalData.sliderCollections, // Sliders for menu sliders
     deferredData: {
       menuCollections: criticalData.menuCollections, // Rows below sliders
@@ -76,7 +75,8 @@ async function loadCriticalData({ context }) {
         // Fetch collections for each menu item
         const collections = await Promise.all(
           menu.items.map(async (item) => {
-            const sanitizedHandle = sanitizeHandle(item.title); // Sanitize the handle
+            // Use the same method for generating sanitized handles
+            const sanitizedHandle = item.title.toLowerCase().replace(/\s+/g, '-');
             const { collectionByHandle } = await context.storefront.query(
               GET_COLLECTION_BY_HANDLE_QUERY,
               { variables: { handle: sanitizedHandle } }
@@ -100,18 +100,9 @@ async function loadCriticalData({ context }) {
   return {
     sliderCollections, // Sliders data for menu sliders
     menuCollections: menuCollections.filter(Boolean), // Collections data grouped by slider
-    menu, // Optional: Retain if needed elsewhere
   };
 }
 
-function sanitizeHandle(handle) {
-  return handle
-    .toLowerCase()
-    .replace(/"/g, '') // Remove quotes
-    .replace(/&/g, '') // Remove ampersands
-    .replace(/\./g, '-') // Replace periods
-    .replace(/\s+/g, '-'); // Replace spaces with hyphens
-}
 
 const brandsData = [
   { name: "Apple", image: "https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-new.jpg?v=1733388855", link: "/collections/apple" },
