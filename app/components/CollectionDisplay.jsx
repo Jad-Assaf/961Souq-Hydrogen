@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
@@ -17,37 +17,11 @@ export function truncateText(text, maxWords) {
         : text;
 }
 
-const CHUNK_SIZE = 5; // Number of collections per chunk
-
+// Simplified CollectionDisplay
 export const CollectionDisplay = React.memo(({ menuCollections }) => {
-    const [visibleChunks, setVisibleChunks] = useState(1);
-
-    // Calculate the currently visible collections
-    const visibleCollections = menuCollections.slice(0, visibleChunks * CHUNK_SIZE);
-
-    // Handle automatic chunk loading on scroll
-    const handleScroll = () => {
-        if (
-            window.innerHeight + document.documentElement.scrollTop >=
-            document.documentElement.offsetHeight - 200
-        ) {
-            if (visibleChunks * CHUNK_SIZE < menuCollections.length) {
-                setVisibleChunks((prev) => prev + 1);
-            }
-        }
-    };
-
-    useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [visibleChunks, menuCollections]);
-
     return (
         <div className="collections-container">
-            <CollectionRows menuCollections={visibleCollections} />
-            {visibleChunks * CHUNK_SIZE < menuCollections.length && (
-                <div>Loading more collections...</div>
-            )}
+            <CollectionRows menuCollections={menuCollections} />
         </div>
     );
 });
