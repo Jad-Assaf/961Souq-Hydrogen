@@ -110,9 +110,14 @@ function ProductItem({ product, index }) {
     return (
         <motion.div
             ref={ref}
-            initial={{ filter: 'blur(20px)', opacity: 0, x: -5 }}
+            initial={{ filter: 'blur(20px)', opacity: 0, x: -50 }}
             animate={isInView ? { filter: 'blur(0px)', opacity: 1, x: 0 } : {}}
-            transition={{ delay: index * 0.01, duration: 0.5 }}
+            transition={{
+                x: { type: 'spring', stiffness: 100, damping: 15 },
+                opacity: { duration: 0.5 },
+                filter: { duration: 0.5 },
+                delay: index * 0.1,
+            }}
             className="product-card"
         >
             <Link to={`/products/${product.handle}`}>
@@ -122,8 +127,8 @@ function ProductItem({ product, index }) {
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=10 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
+                         ${product.images.nodes[0].url}?width=600&quality=10 600w,
+                         ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
                         alt={product.images.nodes[0].altText || 'Product Image'}
                         width="180px"
                         height="180px"
@@ -155,24 +160,24 @@ function ProductItem({ product, index }) {
                 lines={
                     selectedVariant && !hasVariants
                         ? [
-                              {
-                                  merchandiseId: selectedVariant.id,
-                                  quantity: 1,
-                                  product: {
-                                      ...product,
-                                      selectedVariant,
-                                      handle: product.handle,
-                                  },
-                              },
-                          ]
+                            {
+                                merchandiseId: selectedVariant.id,
+                                quantity: 1,
+                                product: {
+                                    ...product,
+                                    selectedVariant,
+                                    handle: product.handle,
+                                },
+                            },
+                        ]
                         : []
                 }
             >
                 {!selectedVariant?.availableForSale
                     ? 'Sold out'
                     : hasVariants
-                    ? 'Select Options'
-                    : 'Add to cart'}
+                        ? 'Select Options'
+                        : 'Add to cart'}
             </AddToCartButton>
         </motion.div>
     );
