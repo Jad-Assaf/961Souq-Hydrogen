@@ -36,10 +36,13 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                 key={index}
                 className={`banner-slide ${index === currentIndex ? "active" : "inactive"
                     }`}
-                initial={{ x: index > currentIndex ? 50 : -50 }}
-                animate={{
-                    x: index === currentIndex ? 0 : index > currentIndex ? -50 : 50,
-                }}
+                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                animate={
+                    index === currentIndex
+                        ? { opacity: 1, x: 0 }
+                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                }
+                exit={{ opacity: 0, x: -50 }}
                 transition={{ type: "spring", stiffness: 100, damping: 10 }}
                 drag="x"
                 dragElastic={0.2}
@@ -75,10 +78,13 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
                 key={index}
                 className={`banner-slide ${index === currentIndex ? "active" : "inactive"
                     }`}
-                initial={{ x: index > currentIndex ? 50 : -50 }}
-                animate={{
-                    x: index === currentIndex ? 0 : index > currentIndex ? -50 : 50,
-                }}
+                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                animate={
+                    index === currentIndex
+                        ? { opacity: 1, x: 0 }
+                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                }
+                exit={{ opacity: 0, x: -50 }}
                 transition={{ type: "spring", stiffness: 100, damping: 10 }}
                 drag="x"
                 dragElastic={0.2}
@@ -111,14 +117,14 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
     return (
         <div className="banner-slideshow" style={styles.bannerSlideshow}>
             {/* Desktop Banners */}
-            <div className="desktop-banners" style={styles.desktopBanners}>
+            <div className="desktop-banners">
                 <AnimatePresence initial={false}>
                     {renderedDesktopBanners[currentIndex]}
                 </AnimatePresence>
             </div>
 
             {/* Mobile Banners */}
-            <div className="mobile-banners" style={styles.mobileBanners}>
+            <div className="mobile-banners">
                 <AnimatePresence initial={false}>
                     {renderedMobileBanners[currentIndex]}
                 </AnimatePresence>
@@ -153,19 +159,5 @@ const styles = {
         width: "100%",
         height: "100%",
         display: "block",
-    },
-    desktopBanners: {
-        display: "block",
-    },
-    mobileBanners: {
-        display: "none",
-    },
-    "@media (max-width: 1024px)": {
-        desktopBanners: {
-            display: "none",
-        },
-        mobileBanners: {
-            display: "block",
-        },
     },
 };

@@ -62,8 +62,26 @@ button {
   cursor: pointer !important;
 }
 
-.banner-slide.active {
+/* .banner-slide.active {
   opacity: 1;
+} */
+
+.desktop-banners {
+  display: block;
+}
+
+.mobile-banners {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-banners {
+    display: none;
+  }
+
+  .mobile-banners {
+    display: block;
+  }
 }
 
 /* Extended Styles for ProductRow with Prev/Next Buttons */
