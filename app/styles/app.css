@@ -1072,7 +1072,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .search-result-title {
-  font-size: 15px;
+  font-size: 13px;
   color: #3c476e;
 }
 
@@ -1091,7 +1091,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .search-result-description {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 300;
   color: #7f7f7f;
 }
