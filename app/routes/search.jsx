@@ -16,7 +16,6 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 // loader function
-// loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
@@ -26,11 +25,15 @@ export async function loader({ request, context }) {
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
+  // Build the filter query
   const filterQueryParts = [];
   if (minPrice) filterQueryParts.push(`variants.price:>${minPrice}`);
   if (maxPrice) filterQueryParts.push(`variants.price:<${maxPrice}`);
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  const filterQuery = term
+    ? `${term} ${filterQueryParts.join(' AND ')}`
+    : filterQueryParts.join(' AND ');
 
+  // Define sorting options
   const sortKeyMapping = {
     featured: 'RELEVANCE',
     'price-low-high': 'PRICE',
@@ -45,19 +48,28 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  try {
-    const variables = {
-      filterQuery,
-      sortKey,
-      reverse,
-      limit: 250,
-      country: 'US', // Adjust as needed
-      language: 'EN', // Adjust as needed
-    };
+  const variables = {
+    filterQuery,
+    sortKey,
+    reverse,
+    limit: 250,
+    country: 'US', // Adjust for your store
+    language: 'EN',
+  };
 
+  console.log('Query Variables:', variables); // Debugging
+
+  try {
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
+
+    console.log('API Response:', products); // Debugging
+
+    if (!products?.edges?.length) {
+      console.warn('No products found. Check filterQuery:', filterQuery);
+      return json({ products: null, vendors: [], productTypes: [], total: 0 });
+    }
 
     const filteredVendors = [
       ...new Set(products.edges.map(({ node }) => node.vendor)),
@@ -71,9 +83,10 @@ export async function loader({ request, context }) {
       products,
       vendors: filteredVendors,
       productTypes: filteredProductTypes,
+      total: products.edges.length,
     });
   } catch (error) {
-    console.error('Error fetching filtered products:', error);
+    console.error('Error fetching products:', error);
     return json({ error: error.message });
   }
 }
