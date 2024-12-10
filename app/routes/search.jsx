@@ -22,19 +22,30 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
+  // Extract filters
+  const filterQueryParts = [];
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith('filter_')) {
+      const filterKey = key.replace('filter_', '');
+      filterQueryParts.push(`${filterKey}:${value}`);
+    }
+  }
+
   const term = searchParams.get('q') || '';
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
-  // Build the filter query
-  const filterQueryParts = [];
-  if (minPrice) filterQueryParts.push(`variants.price:>${minPrice}`);
-  if (maxPrice) filterQueryParts.push(`variants.price:<${maxPrice}`);
-  const filterQuery = term
-    ? `${term} ${filterQueryParts.join(' AND ')}`
-    : filterQueryParts.join(' AND ');
+  // Add price conditions to filterQuery
+  if (minPrice) {
+    filterQueryParts.push(`variants.price:>${minPrice}`);
+  }
+  if (maxPrice) {
+    filterQueryParts.push(`variants.price:<${maxPrice}`);
+  }
 
-  // Define sorting options
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+
+  // Handle sorting
   const sortKeyMapping = {
     featured: 'RELEVANCE',
     'price-low-high': 'PRICE',
@@ -49,47 +60,35 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  const variables = {
-    filterQuery,
-    sortKey,
-    reverse,
-    limit: 250,
-    country: 'US', // Adjust for your store
-    language: 'EN',
-  };
+  // Fetch products based on filters and sorting
+  const isPredictive = searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context, filterQuery, sortKey, reverse });
 
-  console.log('Query Variables:', variables); // Debugging
+  const result = await searchPromise.catch((error) => {
+    console.error('Search Error:', error);
+    return { term: '', result: null, error: error.message };
+  });
 
-  try {
-    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-      variables,
-    });
+  // Extract vendors and product types from filtered products
+  const filteredVendors = [
+    ...new Set(
+      result?.result?.products?.edges.map(({ node }) => node.vendor)
+    ),
+  ].sort();
 
-    console.log('API Response:', products); // Debugging
+  const filteredProductTypes = [
+    ...new Set(
+      result?.result?.products?.edges.map(({ node }) => node.productType)
+    ),
+  ].sort();
 
-    if (!products?.edges?.length) {
-      console.warn('No products found. Check filterQuery:', filterQuery);
-      return json({ products: null, vendors: [], productTypes: [], total: 0 });
-    }
-
-    const filteredVendors = [
-      ...new Set(products.edges.map(({ node }) => node.vendor)),
-    ].sort();
-
-    const filteredProductTypes = [
-      ...new Set(products.edges.map(({ node }) => node.productType)),
-    ].sort();
-
-    return json({
-      products,
-      vendors: filteredVendors,
-      productTypes: filteredProductTypes,
-      total: products.edges.length,
-    });
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return json({ error: error.message });
-  }
+  return json({
+    ...result,
+    vendors: filteredVendors,
+    productTypes: filteredProductTypes,
+  });
 }
 
 export default function SearchPage() {
@@ -271,33 +270,42 @@ export default function SearchPage() {
         </div>
 
         {result?.products?.edges?.length > 0 ? (
-          result.products.edges.map(({ node: product }) => (
-            <div className="product-card" key={product.id}>
-              <a href={`/products/${product.handle}`} className="product-link">
-                {product.variants?.nodes?.[0]?.image && (
-                  <Image
-                    data={product.variants.nodes[0].image}
-                    alt={product.title || 'Product'}
-                    width={150}
-                  />
-                )}
-                <div className="product-details">
-                  <h2 className="product-title">{product.title || 'Untitled Product'}</h2>
-                  <p className="product-price">
-                    {product.variants?.nodes?.[0]?.price ? (
-                      <Money data={product.variants.nodes[0].price} />
-                    ) : (
-                      'Price not available'
-                    )}
-                  </p>
-                </div>
-              </a>
+          <div className="search-results">
+            <div>
+              <label htmlFor="sort-select">Sort by:</label>
+              <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
+                <option value="featured">Featured</option>
+                <option value="price-low-high">Price: Low - High</option>
+                <option value="price-high-low">Price: High - Low</option>
+                <option value="best-selling">Best Selling</option>
+                <option value="newest">Newest</option>
+              </select>
             </div>
-          ))
+            <div className="search-results-grid">
+              {result.products.edges.map(({ node: product }) => (
+                <div className="product-card" key={product.id}>
+                  <a href={`/products/${product.handle}`} className="product-link">
+                    {product.variants.nodes[0]?.image && (
+                      <Image
+                        data={product.variants.nodes[0].image}
+                        alt={product.title}
+                        width={150}
+                      />
+                    )}
+                    <div className="product-details">
+                      <h2 className="product-title">{product.title}</h2>
+                      <p className="product-price">
+                        <Money data={product.variants.nodes[0].price} />
+                      </p>
+                    </div>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : (
           <p>No results found</p>
         )}
-
       </div>
 
       {/* Mobile Filters */}
@@ -423,29 +431,28 @@ export default function SearchPage() {
   );
 }
 
-const FILTERED_PRODUCTS_QUERY = `#graphql
-  query FilteredProducts(
-    $country: CountryCode
-    $language: LanguageCode
-    $limit: Int
-    $filterQuery: String!
-    $sortKey: ProductSortKeys
-    $reverse: Boolean
-  ) @inContext(country: $country, language: $language) {
+const FILTERED_PRODUCTS_QUERY = `
+    query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(
-      first: $limit,
+      first: 250,
       query: $filterQuery,
       sortKey: $sortKey,
       reverse: $reverse
     ) {
       edges {
         node {
+          vendor
           id
           title
           handle
-          vendor
           productType
           description
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
           variants(first: 1) {
             nodes {
               id
@@ -453,47 +460,14 @@ const FILTERED_PRODUCTS_QUERY = `#graphql
                 amount
                 currencyCode
               }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
               sku
               image {
                 url
                 altText
-                width
-                height
               }
-            }
-          }
-          trackingParameters
-          images(first: 1) {
-            edges {
-              node {
-                url
-                altText
-                width
-                height
-              }
-            }
-          }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-            maxVariantPrice {
-              amount
-              currencyCode
             }
           }
         }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
       }
     }
   }
