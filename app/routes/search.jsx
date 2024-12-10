@@ -16,6 +16,7 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 // loader function
+// loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
