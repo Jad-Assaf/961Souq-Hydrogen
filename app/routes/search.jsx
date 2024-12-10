@@ -43,7 +43,10 @@ export async function loader({ request, context }) {
     filterQueryParts.push(`variants.price:<${maxPrice}`);
   }
 
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  const filterQuery = filterQueryParts.length
+    ? `${term} AND (${filterQueryParts.join(' AND ')})`
+    : term;
+
 
   // Include SKU and description search
   if (term) {
