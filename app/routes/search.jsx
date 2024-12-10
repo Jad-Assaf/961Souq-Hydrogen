@@ -441,42 +441,50 @@ export default function SearchPage() {
 }
 
 const FILTERED_PRODUCTS_QUERY = `
-    query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
+  query FilteredProducts($query: String!, $first: Int = 20, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(
-      first: 250,
-      query: $filterQuery,
+      query: $query,
+      first: $first,
       sortKey: $sortKey,
       reverse: $reverse
     ) {
       edges {
         node {
-          vendor
           id
           title
           handle
-          productType
+          vendor
           description
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
+          productType
           variants(first: 1) {
             nodes {
               id
+              sku
               price {
                 amount
                 currencyCode
               }
-              sku
+              compareAtPrice {
+                amount
+                currencyCode
+              }
               image {
                 url
                 altText
               }
             }
           }
+          images(first: 1) {
+            nodes {
+              url
+              altText
+            }
+          }
         }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
       }
     }
   }
