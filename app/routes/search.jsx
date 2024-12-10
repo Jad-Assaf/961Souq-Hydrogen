@@ -43,9 +43,7 @@ export async function loader({ request, context }) {
     filterQueryParts.push(`variants.price:<${maxPrice}`);
   }
 
-  const filterQuery = filterQueryParts.length
-    ? `${term} AND (${filterQueryParts.join(' AND ')})`
-    : term;
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
   // Handle sorting
   const sortKeyMapping = {
@@ -62,52 +60,35 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  try {
-    const variables = {
-      term: filterQuery || term,
-      limit: 250, // Adjust limit as needed
-      limitScope: 'EACH',
-      types: ['PRODUCT'], // Searching only products
-    };
+  // Fetch products based on filters and sorting
+  const isPredictive = searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context, filterQuery, sortKey, reverse });
 
-    console.log('Predictive Search Variables:', variables); // Debugging
+  const result = await searchPromise.catch((error) => {
+    console.error('Search Error:', error);
+    return { term: '', result: null, error: error.message };
+  });
 
-    const { predictiveSearch } = await storefront.query(PREDICTIVE_SEARCH_QUERY, {
-      variables,
-    });
+  // Extract vendors and product types from filtered products
+  const filteredVendors = [
+    ...new Set(
+      result?.result?.products?.edges.map(({ node }) => node.vendor)
+    ),
+  ].sort();
 
-    if (!predictiveSearch) {
-      throw new Error('No predictive search data returned from Shopify API');
-    }
+  const filteredProductTypes = [
+    ...new Set(
+      result?.result?.products?.edges.map(({ node }) => node.productType)
+    ),
+  ].sort();
 
-    const { products = [], articles = [], pages = [] } = predictiveSearch;
-
-    // Extract vendors and product types from filtered products
-    const filteredVendors = [
-      ...new Set(products.map(({ vendor }) => vendor).filter(Boolean)),
-    ].sort();
-
-    const filteredProductTypes = [
-      ...new Set(products.map(({ productType }) => productType).filter(Boolean)),
-    ].sort();
-
-    return json({
-      term,
-      result: {
-        items: predictiveSearch,
-        total: products.length,
-      },
-      vendors: filteredVendors,
-      productTypes: filteredProductTypes,
-    });
-  } catch (error) {
-    console.error('Predictive Search Error:', error);
-    return json({
-      term,
-      result: null,
-      error: error.message,
-    });
-  }
+  return json({
+    ...result,
+    vendors: filteredVendors,
+    productTypes: filteredProductTypes,
+  });
 }
 
 export default function SearchPage() {
