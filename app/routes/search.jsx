@@ -618,8 +618,12 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse }
     return {
       term,
       result: {
-        products,
-        total: products.edges.length,
+        items: {
+          articles: response.articles || [],
+          pages: response.pages || [],
+          products: response.products || [],
+        },
+        total: totalCount || 0,
       },
     };
   } catch (error) {
