@@ -31,7 +31,7 @@ export async function loader({ request, context }) {
     }
   }
 
-  const term = searchParams.get('q') || '';
+  const term = String(url.searchParams.get('q') || '').trim();
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
@@ -67,8 +67,10 @@ export async function loader({ request, context }) {
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
   // Fetch products based on filters and sorting
-  const searchPromise = predictiveSearch({ request, context });
-
+  const isPredictive = searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context, filterQuery, sortKey, reverse });
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
@@ -745,41 +747,33 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
-    $country: CountryCode
-    $language: LanguageCode
-    $limit: Int!
-    $limitScope: PredictiveSearchLimitScope!
     $term: String!
-    $types: [PredictiveSearchType!]
-  ) @inContext(country: $country, language: $language) {
+    $limit: Int = 1000
+    $types: [PredictiveSearchType!] = [PRODUCT]
+  ) {
     predictiveSearch(
-      limit: $limit,
-      limitScope: $limitScope,
-      query: $term,
-      types: $types,
+      query: $term
+      limit: $limit
+      types: $types
     ) {
-      articles {
-        ...PredictiveArticle
-      }
-      collections {
-        ...PredictiveCollection
-      }
-      pages {
-        ...PredictivePage
-      }
       products {
-        ...PredictiveProduct
-      }
-      queries {
-        ...PredictiveQuery
+        id
+        title
+        handle
+        vendor
+        variants(first: 1) {
+          nodes {
+            price {
+              amount
+            }
+            image {
+              url
+            }
+          }
+        }
       }
     }
   }
-  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
-  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
 
 /**
