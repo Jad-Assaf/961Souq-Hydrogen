@@ -31,7 +31,7 @@ export async function loader({ request, context }) {
     }
   }
 
-  const term = String(url.searchParams.get('q') || '').trim();
+  const term = searchParams.get('q') || '';
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
@@ -747,33 +747,41 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
+    $country: CountryCode
+    $language: LanguageCode
+    $limit: Int!
+    $limitScope: PredictiveSearchLimitScope!
     $term: String!
-    $limit: Int = 1000
-    $types: [PredictiveSearchType!] = [PRODUCT]
-  ) {
+    $types: [PredictiveSearchType!]
+  ) @inContext(country: $country, language: $language) {
     predictiveSearch(
-      query: $term
-      limit: $limit
-      types: $types
+      limit: $limit,
+      limitScope: $limitScope,
+      query: $term,
+      types: $types,
     ) {
+      articles {
+        ...PredictiveArticle
+      }
+      collections {
+        ...PredictiveCollection
+      }
+      pages {
+        ...PredictivePage
+      }
       products {
-        id
-        title
-        handle
-        vendor
-        variants(first: 1) {
-          nodes {
-            price {
-              amount
-            }
-            image {
-              url
-            }
-          }
-        }
+        ...PredictiveProduct
+      }
+      queries {
+        ...PredictiveQuery
       }
     }
   }
+  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
+  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
+  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
+  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
+  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
 
 /**
