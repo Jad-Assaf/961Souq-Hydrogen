@@ -121,7 +121,13 @@ async function fetchMenuCollections(context, menuHandles) {
         GET_COLLECTION_BY_HANDLE_QUERY,
         { variables: { handle: sanitizedHandle } }
       );
-      return collectionByHandle || null;
+
+      if (collectionByHandle) {
+        return {
+          handle: sanitizedHandle, // Ensure handle is included
+          ...collectionByHandle,
+        };
+      }
     });
 
     const collections = await Promise.all(collectionPromises);
