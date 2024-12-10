@@ -95,6 +95,14 @@ export default function SearchPage() {
   const { type, term, result, vendors = [], productTypes = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [isFetchingAll, setIsFetchingAll] = useState(false);
+  
+  const fetchAllResults = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set('fetchAll', 'true'); // Add a query parameter to trigger fetching all results
+    navigate(`/search?${params.toString()}`);
+    setIsFetchingAll(true);
+  };
 
   // Local state for price range
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
@@ -301,6 +309,11 @@ export default function SearchPage() {
                   </a>
                 </div>
               ))}
+            </div>
+            <div>
+              <button onClick={fetchAllResults} className="fetch-all-button">
+                Fetch All Results
+              </button>
             </div>
           </div>
         ) : (
