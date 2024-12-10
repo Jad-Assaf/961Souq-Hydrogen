@@ -795,10 +795,16 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Adjust query for SKU and partial matching
-  const queryTerm = term.match(/^\w+$/)
-    ? `(variants.sku:${term}* OR title:${term}* OR description:${term}*)`
-    : term;
+  // Break the search term into individual words
+  const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
+
+  // Construct a flexible query that matches any word in title, description, or SKU
+  const queryTerm = terms
+    .map(
+      (word) =>
+        `(variants.sku:${word}* OR title:${word}* OR description:${word}*)`
+    )
+    .join(' AND ');
 
   console.log('Querying with term:', queryTerm); // Debugging
 
