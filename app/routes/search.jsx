@@ -792,20 +792,23 @@ async function predictiveSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
-  const limit = Number(url.searchParams.get('limit') || 1000);
+  const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Adjust query for SKU matching
-  const queryTerm = term.match(/^\w+$/) ? `variants.sku:${term} OR ${term}` : term;
+  // Adjust query for SKU and partial matching
+  const queryTerm = term.match(/^\w+$/)
+    ? `(variants.sku:${term}* OR title:${term}* OR description:${term}*)`
+    : term;
+
+  console.log('Querying with term:', queryTerm); // Debugging
 
   // Predictively search articles, collections, pages, products, and queries (suggestions)
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
-        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term: queryTerm,

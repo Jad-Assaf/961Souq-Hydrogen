@@ -1556,6 +1556,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  flex-direction: column;
 }
 
 .search-results img {
