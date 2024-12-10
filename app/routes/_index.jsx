@@ -143,9 +143,15 @@ async function fetchCollectionsByHandles(context, handles) {
   const collectionPromises = handles.map(async (handle) => {
     const { collectionByHandle } = await context.storefront.query(
       GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
+      { variables: { handle: sanitizedHandle } }
     );
-    return collectionByHandle || null;
+
+    if (collectionByHandle) {
+      return {
+        handle: sanitizedHandle, // Ensure handle is included
+        ...collectionByHandle,
+      };
+    }
   });
 
   const collections = await Promise.all(collectionPromises);

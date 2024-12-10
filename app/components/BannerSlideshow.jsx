@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Image } from "@shopify/hydrogen";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function BannerSlideshow({ banners, interval = 300000 }) {
+export function BannerSlideshow({ banners, interval = 5000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
