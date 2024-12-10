@@ -68,12 +68,19 @@ export async function loader(args) {
 
   const criticalData = await loadCriticalData(args);
 
+  const { context } = args;
+  const { collectionByHandle: newArrivalsCollection } = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    { variables: { handle: 'new-arrivals' } }
+  );
+
   return defer({
     banners,
-    sliderCollections: criticalData.sliderCollections, // Sliders for menu sliders
+    sliderCollections: criticalData.sliderCollections,
     deferredData: {
-      menuCollections: criticalData.menuCollections, // Rows below sliders
+      menuCollections: criticalData.menuCollections,
     },
+    newArrivalsCollection, // Pass the fetched collection here
   });
 }
 
@@ -121,13 +128,7 @@ async function fetchMenuCollections(context, menuHandles) {
         GET_COLLECTION_BY_HANDLE_QUERY,
         { variables: { handle: sanitizedHandle } }
       );
-
-      if (collectionByHandle) {
-        return {
-          handle: sanitizedHandle, // Ensure handle is included
-          ...collectionByHandle,
-        };
-      }
+      return collectionByHandle || null;
     });
 
     const collections = await Promise.all(collectionPromises);
@@ -143,15 +144,9 @@ async function fetchCollectionsByHandles(context, handles) {
   const collectionPromises = handles.map(async (handle) => {
     const { collectionByHandle } = await context.storefront.query(
       GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle: sanitizedHandle } }
+      { variables: { handle } }
     );
-
-    if (collectionByHandle) {
-      return {
-        handle: sanitizedHandle, // Ensure handle is included
-        ...collectionByHandle,
-      };
-    }
+    return collectionByHandle || null;
   });
 
   const collections = await Promise.all(collectionPromises);
@@ -183,13 +178,9 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData } = useLoaderData();
+  const { banners, sliderCollections, deferredData, newArrivalsCollection } = useLoaderData();
 
   const menuCollections = deferredData?.menuCollections || [];
-
-  const newArrivalsCollection = menuCollections
-    .flat()
-    .find((collection) => collection.handle === 'new-arrivals');
 
   return (
     <div className="home">
