@@ -22,30 +22,15 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  // Extract filters
-  const filterQueryParts = [];
-  for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith('filter_')) {
-      const filterKey = key.replace('filter_', '');
-      filterQueryParts.push(`${filterKey}:${value}`);
-    }
-  }
-
   const term = searchParams.get('q') || '';
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
-  // Add price conditions to filterQuery
-  if (minPrice) {
-    filterQueryParts.push(`variants.price:>${minPrice}`);
-  }
-  if (maxPrice) {
-    filterQueryParts.push(`variants.price:<${maxPrice}`);
-  }
-
+  const filterQueryParts = [];
+  if (minPrice) filterQueryParts.push(`variants.price:>${minPrice}`);
+  if (maxPrice) filterQueryParts.push(`variants.price:<${maxPrice}`);
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
-  // Handle sorting
   const sortKeyMapping = {
     featured: 'RELEVANCE',
     'price-low-high': 'PRICE',
@@ -60,35 +45,37 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  // Fetch products based on filters and sorting
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery, sortKey, reverse });
+  try {
+    const variables = {
+      filterQuery,
+      sortKey,
+      reverse,
+      limit: 250,
+      country: 'US', // Adjust as needed
+      language: 'EN', // Adjust as needed
+    };
 
-  const result = await searchPromise.catch((error) => {
-    console.error('Search Error:', error);
-    return { term: '', result: null, error: error.message };
-  });
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+      variables,
+    });
 
-  // Extract vendors and product types from filtered products
-  const filteredVendors = [
-    ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.vendor)
-    ),
-  ].sort();
+    const filteredVendors = [
+      ...new Set(products.edges.map(({ node }) => node.vendor)),
+    ].sort();
 
-  const filteredProductTypes = [
-    ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.productType)
-    ),
-  ].sort();
+    const filteredProductTypes = [
+      ...new Set(products.edges.map(({ node }) => node.productType)),
+    ].sort();
 
-  return json({
-    ...result,
-    vendors: filteredVendors,
-    productTypes: filteredProductTypes,
-  });
+    return json({
+      products,
+      vendors: filteredVendors,
+      productTypes: filteredProductTypes,
+    });
+  } catch (error) {
+    console.error('Error fetching filtered products:', error);
+    return json({ error: error.message });
+  }
 }
 
 export default function SearchPage() {
@@ -431,28 +418,29 @@ export default function SearchPage() {
   );
 }
 
-const FILTERED_PRODUCTS_QUERY = `
-    query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
+const FILTERED_PRODUCTS_QUERY = `#graphql
+  query FilteredProducts(
+    $country: CountryCode
+    $language: LanguageCode
+    $limit: Int
+    $filterQuery: String!
+    $sortKey: ProductSortKeys
+    $reverse: Boolean
+  ) @inContext(country: $country, language: $language) {
     products(
-      first: 250,
+      first: $limit,
       query: $filterQuery,
       sortKey: $sortKey,
       reverse: $reverse
     ) {
       edges {
         node {
-          vendor
           id
           title
           handle
+          vendor
           productType
           description
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
           variants(first: 1) {
             nodes {
               id
@@ -460,14 +448,47 @@ const FILTERED_PRODUCTS_QUERY = `
                 amount
                 currencyCode
               }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
               sku
               image {
                 url
                 altText
+                width
+                height
               }
             }
           }
+          trackingParameters
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+            maxVariantPrice {
+              amount
+              currencyCode
+            }
+          }
         }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
     }
   }
