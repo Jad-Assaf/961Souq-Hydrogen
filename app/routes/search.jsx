@@ -95,14 +95,6 @@ export default function SearchPage() {
   const { type, term, result, vendors = [], productTypes = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [isFetchingAll, setIsFetchingAll] = useState(false);
-  
-  const fetchAllResults = () => {
-    const params = new URLSearchParams(searchParams);
-    params.set('fetchAll', 'true'); // Add a query parameter to trigger fetching all results
-    navigate(`/search?${params.toString()}`);
-    setIsFetchingAll(true);
-  };
 
   // Local state for price range
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
@@ -309,11 +301,6 @@ export default function SearchPage() {
                   </a>
                 </div>
               ))}
-            </div>
-            <div>
-              <button onClick={fetchAllResults} className="fetch-all-button">
-                Fetch All Results
-              </button>
             </div>
           </div>
         ) : (
@@ -627,44 +614,34 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filterQuery, sortKey, reverse }) {
+async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
   const { storefront } = context;
-  let hasNextPage = true;
-  let endCursor = null;
-  const allProducts = [];
 
   try {
-    while (hasNextPage) {
-      const variables = {
-        filterQuery,
-        sortKey,
-        reverse,
-        after: endCursor,
-        first: 250, // Maximum limit Shopify allows per query
-      };
+    const variables = {
+      filterQuery,
+      sortKey,
+      reverse,
+      minPrice,
+      maxPrice,
+    };
 
-      const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-        variables,
-      });
+    console.log('Query Variables:', variables); // Debugging
 
-      if (products?.edges?.length) {
-        allProducts.push(...products.edges);
-      }
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+      variables,
+    });
 
-      hasNextPage = products?.pageInfo?.hasNextPage || false;
-      endCursor = products?.pageInfo?.endCursor || null;
-    }
-
-    if (!allProducts.length) {
-      console.error('No products found in response:', allProducts); // Debugging
+    if (!products?.edges?.length) {
+      console.error('No products found in response:', products); // Debugging
       return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
     }
 
     return {
       term: filterQuery,
       result: {
-        products: { edges: allProducts },
-        total: allProducts.length,
+        products,
+        total: products.edges.length,
       },
     };
   } catch (error) {
