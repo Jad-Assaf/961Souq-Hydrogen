@@ -77,17 +77,19 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
             />
           </NavLink>
 
-          <SearchForm className="header-search" action={SEARCH_ENDPOINT}>
-            {({ inputRef }) => {
+          <SearchFormPredictive className="header-search">
+            {({ inputRef, fetchResults, goToSearch, fetcher }) => {
               useFocusOnCmdK(inputRef);
 
               const [isOverlayVisible, setOverlayVisible] = useState(false);
+              const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
 
               const handleFocus = () => {
                 if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.add("fixed-search");
                   setOverlayVisible(true);
                 }
+                setSearchResultsVisible(true);
               };
 
               const handleBlur = () => {
@@ -103,8 +105,26 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
               const handleCloseSearch = () => {
                 searchContainerRef.current?.classList.remove("fixed-search");
                 setOverlayVisible(false);
+                setSearchResultsVisible(false);
               };
 
+              const handleKeyDown = (e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault(); // Prevent default form submission
+                  handleSearch();
+                }
+              };
+
+              const handleSearch = () => {
+                if (inputRef.current) {
+                  const term = inputRef.current.value.trim().replace(/\s+/g, "-");
+                  if (term) {
+                    window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
+                  }
+                }
+              };
+
+              // Manage scroll-lock when overlay is visible
               useEffect(() => {
                 if (isOverlayVisible) {
                   document.body.style.overflow = "hidden";
@@ -130,11 +150,15 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                     <div className="search-container">
                       <input
                         ref={inputRef}
-                        type="search"
-                        name="q"
+                        type="text"
                         placeholder="Search products"
+                        onChange={(e) => {
+                          fetchResults(e);
+                          setSearchResultsVisible(true);
+                        }}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
+                        onKeyDown={handleKeyDown}
                         className="search-bar"
                       />
                       {inputRef.current?.value && (
@@ -142,6 +166,8 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                           className="clear-search-button"
                           onClick={() => {
                             inputRef.current.value = "";
+                            setSearchResultsVisible(false);
+                            fetchResults({ target: { value: "" } }); // Reset search results
                           }}
                         >
                           <svg
@@ -156,16 +182,58 @@ export function Header({ header, isLoggedIn, cart, publicStoreDomain }) {
                           </svg>
                         </button>
                       )}
-                      <button type="submit" className="search-bar-submit">
+                      <button
+                        onClick={handleSearch}
+                        className="search-bar-submit"
+                      >
                         <SearchIcon />
                       </button>
                     </div>
+                    {isSearchResultsVisible && (
+                      <div className="search-results-container">
+                        <SearchResultsPredictive>
+                          {({ items, total, term, state, closeSearch }) => {
+                            const { products } = items;
+
+                            if (!total) {
+                              return <SearchResultsPredictive.Empty term={term} />;
+                            }
+
+                            return (
+                              <>
+                                <SearchResultsPredictive.Products
+                                  products={products}
+                                  closeSearch={() => {
+                                    closeSearch();
+                                    handleCloseSearch();
+                                  }}
+                                  term={term}
+                                />
+                                {term.current && total ? (
+                                  <Link
+                                    onClick={() => {
+                                      closeSearch();
+                                      handleCloseSearch();
+                                    }}
+                                    to={`${SEARCH_ENDPOINT}?q=${term.current.replace(/\s+/g, "-")}`}
+                                    className="view-all-results"
+                                  >
+                                    <p>
+                                      View all results for <q>{term.current}</q> &nbsp; →
+                                    </p>
+                                  </Link>
+                                ) : null}
+                              </>
+                            );
+                          }}
+                        </SearchResultsPredictive>
+                      </div>
+                    )}
                   </div>
                 </>
               );
             }}
-          </SearchForm>
-
+          </SearchFormPredictive>
 
           <div className="header-ctas">
             <NavLink
