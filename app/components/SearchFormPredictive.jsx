@@ -36,11 +36,21 @@ export function SearchFormPredictive({
 
   /** Fetch search results based on the input value */
   function fetchResults(event) {
-    fetcher.submit(
-      {q: event.target.value || '', limit: 10, predictive: true},
-      {method: 'GET', action: SEARCH_ENDPOINT},
-    );
+    const searchParams = new URLSearchParams({
+      q: event.target.value || '',
+      predictive: true,
+      limit: 250, // Align with search page limit
+    });
+
+    // Include other filters if needed
+    const minPrice = searchParams.get('minPrice');
+    const maxPrice = searchParams.get('maxPrice');
+    if (minPrice) searchParams.set('minPrice', minPrice);
+    if (maxPrice) searchParams.set('maxPrice', maxPrice);
+
+    fetcher.submit(searchParams, { method: 'GET', action: SEARCH_ENDPOINT });
   }
+
 
   // ensure the passed input has a type of search, because SearchResults
   // will select the element based on the input

@@ -51,7 +51,6 @@ export async function loader({ request, context }) {
     filterQueryParts.push(`description:*${term}*`);
   }
 
-
   // Handle sorting
   const sortKeyMapping = {
     featured: 'RELEVANCE',
@@ -747,42 +746,41 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
 const PREDICTIVE_SEARCH_QUERY = `#graphql
+  # Predictive Search Query Fragment
   query PredictiveSearch(
     $country: CountryCode
     $language: LanguageCode
     $limit: Int!
-    $limitScope: PredictiveSearchLimitScope!
     $term: String!
     $types: [PredictiveSearchType!]
   ) @inContext(country: $country, language: $language) {
     predictiveSearch(
       limit: $limit,
-      limitScope: $limitScope,
       query: $term,
       types: $types,
     ) {
-      articles {
-        ...PredictiveArticle
-      }
-      collections {
-        ...PredictiveCollection
-      }
-      pages {
-        ...PredictivePage
-      }
       products {
-        ...PredictiveProduct
-      }
-      queries {
-        ...PredictiveQuery
+        id
+        title
+        description
+        vendor
+        handle
+        variants(first: 1) {
+          nodes {
+            sku
+            price {
+              amount
+              currencyCode
+            }
+            image {
+              url
+              altText
+            }
+          }
+        }
       }
     }
   }
-  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
-  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
 
 /**
