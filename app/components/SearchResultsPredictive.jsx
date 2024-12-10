@@ -210,6 +210,7 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                       </>
                     )}
                   </small>
+                  <p className="product-sku">SKU: {product.variants.nodes[0].sku}</p>
                 </div>
               </Link>
             </li>

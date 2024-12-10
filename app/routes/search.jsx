@@ -456,11 +456,11 @@ const FILTERED_PRODUCTS_QUERY = `
           variants(first: 1) {
             nodes {
               id
+              sku
               price {
                 amount
                 currencyCode
               }
-              sku
               image {
                 url
                 altText
@@ -489,6 +489,7 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
     variants(first: 1) {
       nodes {
         id
+        sku
         image {
           url
           altText
@@ -710,6 +711,7 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
     variants(first: 1) {
       nodes {
         id
+        sku
         image {
           url
           altText
