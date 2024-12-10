@@ -35,6 +35,7 @@ export async function loader({ request, context }) {
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
+  // Add price conditions to filterQuery
   if (minPrice) {
     filterQueryParts.push(`variants.price:>${minPrice}`);
   }
@@ -43,10 +44,6 @@ export async function loader({ request, context }) {
   }
 
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
-
-  // Pagination parameters
-  const first = parseInt(searchParams.get('first') || '20', 10); // Default 20 items per page
-  const after = searchParams.get('after') || null;
 
   // Handle sorting
   const sortKeyMapping = {
@@ -67,15 +64,7 @@ export async function loader({ request, context }) {
   const isPredictive = searchParams.has('predictive');
   const searchPromise = isPredictive
     ? predictiveSearch({ request, context })
-    : regularSearch({
-      request,
-      context,
-      filterQuery,
-      sortKey,
-      reverse,
-      first,
-      after,
-    });
+    : regularSearch({ request, context, filterQuery, sortKey, reverse });
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
@@ -99,27 +88,13 @@ export async function loader({ request, context }) {
     ...result,
     vendors: filteredVendors,
     productTypes: filteredProductTypes,
-    pageInfo: result?.result?.products?.pageInfo || {}, // Include pageInfo for pagination
   });
 }
 
 export default function SearchPage() {
-  const { type, term, result, vendors = [], productTypes = [], pageInfo, error } = useLoaderData();
+  const { type, term, result, vendors = [], productTypes = [], error } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  const goToNextPage = () => {
-    const params = new URLSearchParams(searchParams);
-    params.set('after', pageInfo.endCursor);
-    navigate(`/search?${params.toString()}`);
-  };
-
-  const goToPreviousPage = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('after'); // Clear "after" for the previous page
-    params.set('after', pageInfo.startCursor);
-    navigate(`/search?${params.toString()}`);
-  };
 
   // Local state for price range
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
@@ -326,14 +301,6 @@ export default function SearchPage() {
                   </a>
                 </div>
               ))}
-              <div className="pagination-controls">
-                {pageInfo?.hasPreviousPage && (
-                  <button onClick={goToPreviousPage}>Previous</button>
-                )}
-                {pageInfo?.hasNextPage && (
-                  <button onClick={goToNextPage}>Next</button>
-                )}
-              </div>
             </div>
           </div>
         ) : (
@@ -465,18 +432,11 @@ export default function SearchPage() {
 }
 
 const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts(
-    $filterQuery: String!
-    $sortKey: ProductSortKeys
-    $reverse: Boolean
-    $first: Int
-    $after: String
-  ) {
+    query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(
-      first: $first
-      after: $after
-      query: $filterQuery
-      sortKey: $sortKey
+      first: 250,
+      query: $filterQuery,
+      sortKey: $sortKey,
       reverse: $reverse
     ) {
       edges {
@@ -508,12 +468,6 @@ const FILTERED_PRODUCTS_QUERY = `
             }
           }
         }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        endCursor
-        startCursor
       }
     }
   }
