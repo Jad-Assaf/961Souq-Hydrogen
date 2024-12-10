@@ -22,39 +22,7 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  // Extract filters
-  const filterQueryParts = [];
-  for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith('filter_')) {
-      const filterKey = key.replace('filter_', '');
-      filterQueryParts.push(`${filterKey}:${value}`);
-    }
-  }
-
   const term = searchParams.get('q') || '';
-  const minPrice = searchParams.get('minPrice');
-  const maxPrice = searchParams.get('maxPrice');
-
-  // Add price conditions to filterQuery
-  if (minPrice) {
-    filterQueryParts.push(`variants.price:>${minPrice}`);
-  }
-  if (maxPrice) {
-    filterQueryParts.push(`variants.price:<${maxPrice}`);
-  }
-
-  const filterQuery = filterQueryParts.length
-    ? `${term} AND (${filterQueryParts.join(' AND ')})`
-    : term;
-
-
-  // Include SKU and description search
-  if (term) {
-    filterQueryParts.push(`variants.sku:*${term}*`);
-    filterQueryParts.push(`description:*${term}*`);
-  }
-
-  // Handle sorting
   const sortKeyMapping = {
     featured: 'RELEVANCE',
     'price-low-high': 'PRICE',
@@ -69,18 +37,19 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  // Fetch products based on filters and sorting
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery, sortKey, reverse });
+  const searchPromise = regularSearch({
+    request,
+    context,
+    filterQuery: term, // Simplified query logic.
+    sortKey,
+    reverse,
+  });
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
     return { term: '', result: null, error: error.message };
   });
 
-  // Extract vendors and product types from filtered products
   const filteredVendors = [
     ...new Set(
       result?.result?.products?.edges.map(({ node }) => node.vendor)
@@ -630,31 +599,24 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
+async function regularSearch({ request, context, filterQuery, sortKey, reverse }) {
   const { storefront } = context;
 
+  const term = filterQuery.trim(); // Ensure the query is clean.
+  const variables = {
+    query: term,
+    first: 20, // Match predictive query default limit.
+    sortKey,
+    reverse,
+  };
+
   try {
-    const variables = {
-      filterQuery,
-      sortKey,
-      reverse,
-      minPrice,
-      maxPrice,
-    };
-
-    console.log('Query Variables:', variables); // Debugging
-
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
-    if (!products?.edges?.length) {
-      console.error('No products found in response:', products); // Debugging
-      return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
-    }
-
     return {
-      term: filterQuery,
+      term,
       result: {
         products,
         total: products.edges.length,
@@ -662,7 +624,7 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
     };
   } catch (error) {
     console.error('Error during regular search:', error);
-    return { term: filterQuery, result: null, error: error.message };
+    return { term, result: null, error: error.message };
   }
 }
 
