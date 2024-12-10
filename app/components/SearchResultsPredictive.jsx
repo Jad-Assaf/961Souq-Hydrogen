@@ -197,6 +197,7 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                   <div className="search-result-titDesc">
                     <p className='search-result-title'>{truncateText(product.title, 75)}</p>
                     <p className='search-result-description'>{truncateText(product.description, 100)}</p>
+                    <p className='search-result-description'>SKU: {product.variants.nodes[0].sku}</p>
                   </div>
                   <small className='search-result-price'>
                     {product?.variants?.nodes?.[0].price && (
@@ -210,7 +211,6 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                       </>
                     )}
                   </small>
-                  <p className="product-sku">SKU: {product.variants.nodes[0].sku}</p>
                 </div>
               </Link>
             </li>
