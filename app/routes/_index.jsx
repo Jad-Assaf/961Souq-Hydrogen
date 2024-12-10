@@ -102,7 +102,7 @@ async function loadCriticalData({ context }) {
   // Fetch collections for sliders and menu items
   const [sliderCollections, menuCollections] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
-    fetchMenuCollections(context, menuHandles),
+    fetchMenuCollections(context, extendedHandles),
   ]);
 
   return {
@@ -112,11 +112,20 @@ async function loadCriticalData({ context }) {
 }
 
 // Fetch menu collections
-async function fetchMenuCollections(context, menuHandles) {
-  const collectionsPromises = menuHandles.map(async (handle) => {
+async function fetchMenuCollections(context, handles) {
+  const collectionsPromises = handles.map(async (handle) => {
     const { menu } = await context.storefront.query(GET_MENU_QUERY, {
       variables: { handle },
     });
+
+    // Check if the handle corresponds to `new-arrivals` or a regular menu handle
+    if (!menu && handle === 'new-arrivals') {
+      const { collectionByHandle } = await context.storefront.query(
+        GET_COLLECTION_BY_HANDLE_QUERY,
+        { variables: { handle } }
+      );
+      return collectionByHandle ? [collectionByHandle] : null; // Wrap in an array for consistency
+    }
 
     if (!menu || !menu.items || menu.items.length === 0) {
       return null;
@@ -178,9 +187,13 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData, newArrivalsCollection } = useLoaderData();
-
+  const { banners, sliderCollections, deferredData } = useLoaderData();
   const menuCollections = deferredData?.menuCollections || [];
+
+  // Find `new-arrivals` collection
+  const newArrivalsCollection = menuCollections.flat().find(
+    (collection) => collection.handle === 'new-arrivals'
+  );
 
   return (
     <div className="home">
