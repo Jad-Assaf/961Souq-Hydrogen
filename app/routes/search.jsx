@@ -614,34 +614,44 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
+async function regularSearch({ request, context, filterQuery, sortKey, reverse }) {
   const { storefront } = context;
+  let hasNextPage = true;
+  let endCursor = null;
+  const allProducts = [];
 
   try {
-    const variables = {
-      filterQuery,
-      sortKey,
-      reverse,
-      minPrice,
-      maxPrice,
-    };
+    while (hasNextPage) {
+      const variables = {
+        filterQuery,
+        sortKey,
+        reverse,
+        after: endCursor,
+        first: 250, // Maximum limit Shopify allows per query
+      };
 
-    console.log('Query Variables:', variables); // Debugging
+      const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+        variables,
+      });
 
-    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-      variables,
-    });
+      if (products?.edges?.length) {
+        allProducts.push(...products.edges);
+      }
 
-    if (!products?.edges?.length) {
-      console.error('No products found in response:', products); // Debugging
+      hasNextPage = products?.pageInfo?.hasNextPage || false;
+      endCursor = products?.pageInfo?.endCursor || null;
+    }
+
+    if (!allProducts.length) {
+      console.error('No products found in response:', allProducts); // Debugging
       return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
     }
 
     return {
       term: filterQuery,
       result: {
-        products,
-        total: products.edges.length,
+        products: { edges: allProducts },
+        total: allProducts.length,
       },
     };
   } catch (error) {
