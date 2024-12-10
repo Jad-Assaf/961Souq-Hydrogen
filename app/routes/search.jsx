@@ -43,13 +43,13 @@ export async function loader({ request, context }) {
     filterQueryParts.push(`variants.price:<${maxPrice}`);
   }
 
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
-
   // Include SKU and description search
   if (term) {
     filterQueryParts.push(`variants.sku:*${term}*`);
     filterQueryParts.push(`description:*${term}*`);
   }
+
+  const filterQuery = filterQueryParts.join(' AND ');
 
   // Handle sorting
   const sortKeyMapping = {
@@ -66,35 +66,49 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  // Fetch products based on filters and sorting
+  // Determine if the request is predictive
   const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery, sortKey, reverse });
+  const limit = isPredictive ? 10 : 250; // Limit results for predictive search
 
-  const result = await searchPromise.catch((error) => {
+  try {
+    // Fetch products using a unified query logic
+    const variables = {
+      filterQuery,
+      sortKey,
+      reverse,
+      limit,
+    };
+
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+      variables,
+    });
+
+    // Extract vendors and product types for filters
+    const filteredVendors = [
+      ...new Set(products?.edges?.map(({ node }) => node.vendor)),
+    ].sort();
+
+    const filteredProductTypes = [
+      ...new Set(products?.edges?.map(({ node }) => node.productType)),
+    ].sort();
+
+    return json({
+      term,
+      result: {
+        products,
+        total: products.edges.length,
+      },
+      vendors: filteredVendors,
+      productTypes: filteredProductTypes,
+    });
+  } catch (error) {
     console.error('Search Error:', error);
-    return { term: '', result: null, error: error.message };
-  });
-
-  // Extract vendors and product types from filtered products
-  const filteredVendors = [
-    ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.vendor)
-    ),
-  ].sort();
-
-  const filteredProductTypes = [
-    ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.productType)
-    ),
-  ].sort();
-
-  return json({
-    ...result,
-    vendors: filteredVendors,
-    productTypes: filteredProductTypes,
-  });
+    return json({
+      term,
+      result: null,
+      error: error.message,
+    });
+  }
 }
 
 export default function SearchPage() {
@@ -288,7 +302,7 @@ export default function SearchPage() {
               </select>
             </div>
             <div className="search-results-grid">
-              {result.products.edges.map(({ node: product }) => (
+              {result.products.edges.map(({ node }) => (
                 <div className="product-card" key={product.id}>
                   <a href={`/products/${product.handle}`} className="product-link">
                     {product.variants.nodes[0]?.image && (
