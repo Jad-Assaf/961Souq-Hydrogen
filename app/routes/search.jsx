@@ -67,10 +67,8 @@ export async function loader({ request, context }) {
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
   // Fetch products based on filters and sorting
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery, sortKey, reverse });
+  const searchPromise = predictiveSearch({ request, context });
+
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
