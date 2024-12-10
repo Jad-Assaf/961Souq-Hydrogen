@@ -797,6 +797,9 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
+  // Adjust query for SKU matching
+  const queryTerm = term.match(/^\w+$/) ? `variants.sku:${term} OR ${term}` : term;
+
   // Predictively search articles, collections, pages, products, and queries (suggestions)
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
@@ -805,7 +808,7 @@ async function predictiveSearch({ request, context }) {
         // customize search options as needed
         limit,
         limitScope: 'EACH',
-        term,
+        term: queryTerm,
       },
     },
   );
