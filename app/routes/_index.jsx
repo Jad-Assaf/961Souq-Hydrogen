@@ -99,33 +99,38 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
+  // Add `new-arrivals` handle dynamically
+  const extendedHandles = [...menuHandles, 'new-arrivals'];
+
   // Fetch collections for sliders and menu items
   const [sliderCollections, menuCollections] = await Promise.all([
-    fetchCollectionsByHandles(context, menuHandles),
-    fetchMenuCollections(context, extendedHandles),
+    fetchCollectionsByHandles(context, extendedHandles), // Include `new-arrivals` in handles
+    fetchMenuCollections(context, menuHandles), // Only fetch regular menu collections
   ]);
 
+  // Separate `new-arrivals` collection
+  const newArrivalsCollection = sliderCollections.find(
+    (collection) => collection.handle === 'new-arrivals'
+  );
+
+  // Exclude `new-arrivals` from the rest of the slider collections
+  const filteredSliderCollections = sliderCollections.filter(
+    (collection) => collection.handle !== 'new-arrivals'
+  );
+
   return {
-    sliderCollections, // Slider data
+    sliderCollections: filteredSliderCollections, // Slider data without `new-arrivals`
     menuCollections, // Menu data grouped by collections
+    newArrivalsCollection, // `new-arrivals` collection
   };
 }
 
 // Fetch menu collections
-async function fetchMenuCollections(context, handles) {
-  const collectionsPromises = handles.map(async (handle) => {
+async function fetchMenuCollections(context, menuHandles) {
+  const collectionsPromises = menuHandles.map(async (handle) => {
     const { menu } = await context.storefront.query(GET_MENU_QUERY, {
       variables: { handle },
     });
-
-    // Check if the handle corresponds to `new-arrivals` or a regular menu handle
-    if (!menu && handle === 'new-arrivals') {
-      const { collectionByHandle } = await context.storefront.query(
-        GET_COLLECTION_BY_HANDLE_QUERY,
-        { variables: { handle } }
-      );
-      return collectionByHandle ? [collectionByHandle] : null; // Wrap in an array for consistency
-    }
 
     if (!menu || !menu.items || menu.items.length === 0) {
       return null;
@@ -187,13 +192,10 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData } = useLoaderData();
-  const menuCollections = deferredData?.menuCollections || [];
+  const { banners, sliderCollections, deferredData, newArrivalsCollection } =
+    useLoaderData();
 
-  // Find `new-arrivals` collection
-  const newArrivalsCollection = menuCollections.flat().find(
-    (collection) => collection.handle === 'new-arrivals'
-  );
+  const menuCollections = deferredData?.menuCollections || [];
 
   return (
     <div className="home">
