@@ -22,7 +22,32 @@ export async function loader({ request, context }) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
+  // Extract filters
+  const filterQueryParts = [];
+  for (const [key, value] of searchParams.entries()) {
+    if (key.startsWith('filter_')) {
+      const filterKey = key.replace('filter_', '');
+      filterQueryParts.push(`${filterKey}:${value}`);
+    }
+  }
+
   const term = searchParams.get('q') || '';
+  const minPrice = searchParams.get('minPrice');
+  const maxPrice = searchParams.get('maxPrice');
+
+  // Add price conditions to filterQuery
+  if (minPrice) {
+    filterQueryParts.push(`variants.price:>${minPrice}`);
+  }
+  if (maxPrice) {
+    filterQueryParts.push(`variants.price:<${maxPrice}`);
+  }
+
+  const filterQuery = filterQueryParts.length
+    ? `${term} AND (${filterQueryParts.join(' AND ')})`
+    : term;
+
+  // Handle sorting
   const sortKeyMapping = {
     featured: 'RELEVANCE',
     'price-low-high': 'PRICE',
@@ -37,36 +62,52 @@ export async function loader({ request, context }) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  const searchPromise = regularSearch({
-    request,
-    context,
-    filterQuery: term, // Simplified query logic.
-    sortKey,
-    reverse,
-  });
+  try {
+    const variables = {
+      term: filterQuery || term,
+      limit: 250, // Adjust limit as needed
+      limitScope: 'EACH',
+      types: ['PRODUCT'], // Searching only products
+    };
 
-  const result = await searchPromise.catch((error) => {
-    console.error('Search Error:', error);
-    return { term: '', result: null, error: error.message };
-  });
+    console.log('Predictive Search Variables:', variables); // Debugging
 
-  const filteredVendors = [
-    ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.vendor)
-    ),
-  ].sort();
+    const { predictiveSearch } = await storefront.query(PREDICTIVE_SEARCH_QUERY, {
+      variables,
+    });
 
-  const filteredProductTypes = [
-    ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.productType)
-    ),
-  ].sort();
+    if (!predictiveSearch) {
+      throw new Error('No predictive search data returned from Shopify API');
+    }
 
-  return json({
-    ...result,
-    vendors: filteredVendors,
-    productTypes: filteredProductTypes,
-  });
+    const { products = [], articles = [], pages = [] } = predictiveSearch;
+
+    // Extract vendors and product types from filtered products
+    const filteredVendors = [
+      ...new Set(products.map(({ vendor }) => vendor).filter(Boolean)),
+    ].sort();
+
+    const filteredProductTypes = [
+      ...new Set(products.map(({ productType }) => productType).filter(Boolean)),
+    ].sort();
+
+    return json({
+      term,
+      result: {
+        items: predictiveSearch,
+        total: products.length,
+      },
+      vendors: filteredVendors,
+      productTypes: filteredProductTypes,
+    });
+  } catch (error) {
+    console.error('Predictive Search Error:', error);
+    return json({
+      term,
+      result: null,
+      error: error.message,
+    });
+  }
 }
 
 export default function SearchPage() {
@@ -410,50 +451,42 @@ export default function SearchPage() {
 }
 
 const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts($query: String!, $first: Int = 20, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(
-      query: $query,
-      first: $first,
+      first: 250,
+      query: $filterQuery,
       sortKey: $sortKey,
       reverse: $reverse
     ) {
       edges {
         node {
+          vendor
           id
           title
           handle
-          vendor
-          description
           productType
+          description
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
           variants(first: 1) {
             nodes {
               id
-              sku
               price {
                 amount
                 currencyCode
               }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
+              sku
               image {
                 url
                 altText
               }
             }
           }
-          images(first: 1) {
-            nodes {
-              url
-              altText
-            }
-          }
         }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
       }
     }
   }
@@ -599,36 +632,39 @@ export const SEARCH_QUERY = `#graphql
  * >}
  * @return {Promise<RegularSearchReturn>}
  */
-async function regularSearch({ request, context, filterQuery, sortKey, reverse }) {
+async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
   const { storefront } = context;
 
-  const term = filterQuery.trim(); // Ensure the query is clean.
-  const variables = {
-    query: term,
-    first: 20, // Match predictive query default limit.
-    sortKey,
-    reverse,
-  };
-
   try {
+    const variables = {
+      filterQuery,
+      sortKey,
+      reverse,
+      minPrice,
+      maxPrice,
+    };
+
+    console.log('Query Variables:', variables); // Debugging
+
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
+    if (!products?.edges?.length) {
+      console.error('No products found in response:', products); // Debugging
+      return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
+    }
+
     return {
-      term,
+      term: filterQuery,
       result: {
-        items: {
-          articles: response.articles || [],
-          pages: response.pages || [],
-          products: response.products || [],
-        },
-        total: totalCount || 0,
+        products,
+        total: products.edges.length,
       },
     };
   } catch (error) {
     console.error('Error during regular search:', error);
-    return { term, result: null, error: error.message };
+    return { term: filterQuery, result: null, error: error.message };
   }
 }
 
