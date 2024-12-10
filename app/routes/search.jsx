@@ -45,6 +45,13 @@ export async function loader({ request, context }) {
 
   const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
+  // Include SKU and description search
+  if (term) {
+    filterQueryParts.push(`variants.sku:*${term}*`);
+    filterQueryParts.push(`description:*${term}*`);
+  }
+
+
   // Handle sorting
   const sortKeyMapping = {
     featured: 'RELEVANCE',
@@ -432,11 +439,11 @@ export default function SearchPage() {
 }
 
 const FILTERED_PRODUCTS_QUERY = `
-  query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(
-      first: 250, 
-      query: $filterQuery, 
-      sortKey: $sortKey, 
+      first: 250,
+      query: $filterQuery,
+      sortKey: $sortKey,
       reverse: $reverse
     ) {
       edges {
@@ -446,6 +453,7 @@ const FILTERED_PRODUCTS_QUERY = `
           title
           handle
           productType
+          description
           priceRange {
             minVariantPrice {
               amount
@@ -459,6 +467,7 @@ const FILTERED_PRODUCTS_QUERY = `
                 amount
                 currencyCode
               }
+              sku
               image {
                 url
                 altText
