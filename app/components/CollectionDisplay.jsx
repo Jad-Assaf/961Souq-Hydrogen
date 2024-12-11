@@ -94,7 +94,12 @@ export function ProductItem({ product, index }) {
     const isInView = useInView(ref, { once: true });
     const { open } = useAside();
 
-    // Determine the selected variant
+    // Check product validity
+    if (!product || !product.handle) {
+        console.error('Invalid product:', product);
+        return null; // Render nothing for invalid products
+    }
+
     const selectedVariant =
         product.variants?.nodes?.find((variant) => variant.availableForSale) ||
         product.variants?.nodes?.[0] ||
@@ -103,8 +108,6 @@ export function ProductItem({ product, index }) {
     if (!selectedVariant) {
         console.error("No valid variant found for product:", product.title);
     }
-
-    const hasVariants = product.variants?.nodes?.length > 1;
 
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
@@ -123,7 +126,6 @@ export function ProductItem({ product, index }) {
             }}
             className="product-card"
         >
-            {/* Product Link */}
             <Link to={`/products/${product.handle}`}>
                 {product.images?.nodes?.[0] && (
                     <Image
@@ -131,8 +133,8 @@ export function ProductItem({ product, index }) {
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
-                         ${product.images.nodes[0].url}?width=600&quality=10 600w,
-                         ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
+                                 ${product.images.nodes[0].url}?width=600&quality=10 600w,
+                                 ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
                         alt={product.images.nodes[0].altText || 'Product Image'}
                         width="180px"
                         height="180px"
@@ -150,7 +152,6 @@ export function ProductItem({ product, index }) {
                 </div>
             </Link>
 
-            {/* Updated Add to Cart Button */}
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 lines={
@@ -159,7 +160,6 @@ export function ProductItem({ product, index }) {
                             {
                                 merchandiseId: selectedVariant.id,
                                 quantity: 1,
-                                selectedVariant, // Include the selectedVariant here
                             },
                         ]
                         : []
@@ -169,7 +169,7 @@ export function ProductItem({ product, index }) {
                         console.warn("No variant selected. Cannot add to cart.");
                         return;
                     }
-                    open('cart'); // Open the cart UI immediately
+                    open('cart');
                 }}
             >
                 {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
@@ -177,4 +177,3 @@ export function ProductItem({ product, index }) {
         </motion.div>
     );
 }
-
