@@ -266,7 +266,7 @@ export default function Collection() {
     <div className="collection">
       <h1>{collection.title}</h1>
 
-      {sliderCollections && sliderCollections.length > 0 && (
+      {/* {sliderCollections && sliderCollections.length > 0 && (
         <div className="slide-con">
           <div className="category-slider">
             {sliderCollections.map((sliderCollection) => (
@@ -290,7 +290,7 @@ export default function Collection() {
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="flex flex-col lg:flex-row w-[100%]">
         {isDesktop && (
@@ -557,40 +557,40 @@ function ProductForm({ product, selectedVariant, setSelectedVariant }) {
   );
 }
 
-/**
- * @param {{ option: VariantOption }}
- */
-function ProductOptions({ option }) {
-  return (
-    <div className="product-options" key={option.name}>
-      <h5>{option.name}</h5>
-      <div className="product-options-grid">
-        {option.values.map(({ value, isAvailable, isActive, to }) => {
-          return (
-            <Link
-              className="product-options-item"
-              key={option.name + value}
-              prefetch="intent"
-              preventScrollReset
-              replace
-              to={to}
-              onClick={(e) => {
-                e.preventDefault(); // Add this line
-                // Handle variant selection here if needed
-              }}
-              style={{
-                border: isActive ? '1px solid black' : '1px solid transparent',
-                opacity: isAvailable ? 1 : 0.3,
-              }}
-            >
-              {value}
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+// /**
+//  * @param {{ option: VariantOption }}
+//  */
+// function ProductOptions({ option }) {
+//   return (
+//     <div className="product-options" key={option.name}>
+//       <h5>{option.name}</h5>
+//       <div className="product-options-grid">
+//         {option.values.map(({ value, isAvailable, isActive, to }) => {
+//           return (
+//             <Link
+//               className="product-options-item"
+//               key={option.name + value}
+//               prefetch="intent"
+//               preventScrollReset
+//               replace
+//               to={to}
+//               onClick={(e) => {
+//                 e.preventDefault(); // Add this line
+//                 // Handle variant selection here if needed
+//               }}
+//               style={{
+//                 border: isActive ? '1px solid black' : '1px solid transparent',
+//                 opacity: isAvailable ? 1 : 0.3,
+//               }}
+//             >
+//               {value}
+//             </Link>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   );
+// }
 
 const MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
