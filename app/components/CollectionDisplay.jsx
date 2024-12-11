@@ -1,12 +1,10 @@
 import React, { Suspense, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money, Image, useOptimisticVariant } from '@shopify/hydrogen';
+import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
-import { ProductForm } from './ProductForm';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 import CollectionRows from './CollectionRows'; // Standard import for CollectionRows
-
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
@@ -94,18 +92,17 @@ const RightArrowIcon = () => (
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
+    const { open } = useAside();
 
-    // Optimistically manage variant selection
-    const selectedVariant = useOptimisticVariant(
-        product.selectedVariant,
-        product.variants?.nodes
-    );
+    // Check for available variants and set up selected variant
+    const selectedVariant =
+        product.variants?.nodes?.find(variant => variant.availableForSale) ||
+        product.variants?.nodes?.[0] ||
+        null;
 
-    const [quantity, setQuantity] = useState(1);
+    const hasVariants = product.variants?.nodes?.length > 1;
 
-    const incrementQuantity = () => setQuantity((prev) => prev + 1);
-    const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-
+    // Determine if there's a discount by comparing the regular and discounted prices
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
@@ -123,7 +120,6 @@ export function ProductItem({ product, index }) {
             }}
             className="product-card"
         >
-            {/* Product Image and Title */}
             <Link to={`/products/${product.handle}`}>
                 {product.images?.nodes?.[0] && (
                     <Image
@@ -131,43 +127,58 @@ export function ProductItem({ product, index }) {
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=10 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
+                         ${product.images.nodes[0].url}?width=600&quality=10 600w,
+                         ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
                         alt={product.images.nodes[0].altText || 'Product Image'}
                         width="180px"
                         height="180px"
                         loading="lazy"
                     />
                 )}
-                <h4 className="product-title">{product.title}</h4>
+                <h4 className="product-title">{truncateText(product.title, 50)}</h4>
+                <div className="product-price">
+                    {selectedVariant?.price && <Money data={selectedVariant.price} />}
+                    {hasDiscount && (
+                        <small className="discountedPrice">
+                            <Money data={selectedVariant.compareAtPrice} />
+                        </small>
+                    )}
+                </div>
             </Link>
 
-            {/* Price Information */}
-            <div className="product-price">
-                {selectedVariant?.price && <Money data={selectedVariant.price} />}
-                {hasDiscount && (
-                    <small className="discountedPrice">
-                        <Money data={selectedVariant.compareAtPrice} />
-                    </small>
-                )}
-            </div>
-
-            {/* Quantity Selector */}
-            <div className="quantity-selector">
-                <button onClick={decrementQuantity} disabled={quantity <= 1}>
-                    -
-                </button>
-                <span>{quantity}</span>
-                <button onClick={incrementQuantity}>+</button>
-            </div>
-
-            {/* ProductForm */}
-            <ProductForm
-                product={product}
-                selectedVariant={selectedVariant}
-                variants={product.variants?.nodes || []}
-                quantity={quantity}
-            />
+            {/* Add to Cart Button */}
+            <AddToCartButton
+                disabled={!selectedVariant || !selectedVariant.availableForSale}
+                onClick={() => {
+                    if (hasVariants) {
+                        // Navigate to product page if multiple variants
+                        window.location.href = `/products/${product.handle}`;
+                    } else {
+                        open('cart');
+                    }
+                }}
+                lines={
+                    selectedVariant && !hasVariants
+                        ? [
+                            {
+                                merchandiseId: selectedVariant.id,
+                                quantity: 1,
+                                product: {
+                                    ...product,
+                                    selectedVariant,
+                                    handle: product.handle,
+                                },
+                            },
+                        ]
+                        : []
+                }
+            >
+                {!selectedVariant?.availableForSale
+                    ? 'Sold out'
+                    : hasVariants
+                        ? 'Select Options'
+                        : 'Add to cart'}
+            </AddToCartButton>
         </motion.div>
     );
 }
