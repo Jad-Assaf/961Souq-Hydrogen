@@ -1143,6 +1143,7 @@ button.reset:hover:not(:has(> *)) {
   flex-direction: column;
   justify-content: center;
   align-items: start;
+  max-width: 300px;
 }
 
 .cart-line img {

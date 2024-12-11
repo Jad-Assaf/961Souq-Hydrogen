@@ -94,21 +94,15 @@ export function ProductItem({ product, index }) {
     const isInView = useInView(ref, { once: true });
     const { open } = useAside();
 
-    // Check product validity
-    if (!product || !product.handle) {
-        console.error('Invalid product:', product);
-        return null; // Render nothing for invalid products
-    }
-
+    // Check for available variants and set up selected variant
     const selectedVariant =
-        product.variants?.nodes?.find((variant) => variant.availableForSale) ||
+        product.variants?.nodes?.find(variant => variant.availableForSale) ||
         product.variants?.nodes?.[0] ||
         null;
 
-    if (!selectedVariant) {
-        console.error("No valid variant found for product:", product.title);
-    }
+    const hasVariants = product.variants?.nodes?.length > 1;
 
+    // Determine if there's a discount by comparing the regular and discounted prices
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
@@ -133,8 +127,8 @@ export function ProductItem({ product, index }) {
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=10 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
+                         ${product.images.nodes[0].url}?width=600&quality=10 600w,
+                         ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
                         alt={product.images.nodes[0].altText || 'Product Image'}
                         width="180px"
                         height="180px"
@@ -152,27 +146,38 @@ export function ProductItem({ product, index }) {
                 </div>
             </Link>
 
+            {/* Add to Cart Button */}
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
+                onClick={() => {
+                    if (hasVariants) {
+                        // Navigate to product page if multiple variants
+                        window.location.href = `/products/${product.handle}`;
+                    } else {
+                        open('cart');
+                    }
+                }}
                 lines={
-                    selectedVariant
+                    selectedVariant && !hasVariants
                         ? [
                             {
                                 merchandiseId: selectedVariant.id,
                                 quantity: 1,
+                                product: {
+                                    ...product,
+                                    selectedVariant,
+                                    handle: product.handle,
+                                },
                             },
                         ]
                         : []
                 }
-                onClick={() => {
-                    if (!selectedVariant) {
-                        console.warn("No variant selected. Cannot add to cart.");
-                        return;
-                    }
-                    open('cart');
-                }}
             >
-                {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+                {!selectedVariant?.availableForSale
+                    ? 'Sold out'
+                    : hasVariants
+                        ? 'Select Options'
+                        : 'Add to cart'}
             </AddToCartButton>
         </motion.div>
     );
