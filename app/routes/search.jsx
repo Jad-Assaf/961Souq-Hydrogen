@@ -432,6 +432,12 @@ const FILTERED_PRODUCTS_QUERY = `
           handle
           productType
           description
+          images(first: 1) {
+            nodes {
+              url
+              altText
+            }
+          }
           priceRange {
             minVariantPrice {
               amount
@@ -446,11 +452,9 @@ const FILTERED_PRODUCTS_QUERY = `
                 amount
                 currencyCode
               }
-              image(first: 1) {
-                nodes {
-                  url
-                  altText
-                }
+              image {
+                url
+                altText
               }
             }
           }
