@@ -1,8 +1,5 @@
-@media (min-width: 768px) {
-    .mobile-app-download-bar {
-        display: none;
-        /* Hide the bar on larger screens */
-    }
+.add-to-cart-button {
+    display: none;
 }
 
 .slide-con {
