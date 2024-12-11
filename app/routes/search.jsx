@@ -4,6 +4,7 @@ import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrog
 import { getEmptyPredictiveSearchResult } from '~/lib/search';
 import { useRef, useState } from 'react';
 import '../styles/SearchPage.css'
+import { ProductItem } from '~/components/CollectionDisplay';
 
 /**
  * @type {MetaFunction}
@@ -282,25 +283,9 @@ export default function SearchPage() {
               </select>
             </div>
             <div className="search-results-grid">
-              {/* {result.products.edges.map(({ node: product }) => (
-                <div className="product-card" key={product.id}>
-                  <a href={`/products/${product.handle}`} className="product-link">
-                    {product.variants.nodes[0]?.image && (
-                      <Image
-                        data={product.variants.nodes[0].image}
-                        alt={product.title}
-                        width={150}
-                      />
-                    )}
-                    <div className="product-details">
-                      <h2 className="product-title">{product.title}</h2>
-                      <p className="product-price">
-                        <Money data={product.variants.nodes[0].price} />
-                      </p>
-                    </div>
-                  </a>
-                </div>
-              ))} */}
+              {result.products.edges.map(({ node: product }, index) => (
+                <ProductItem product={product} index={index} key={product.id} />
+              ))}
             </div>
           </div>
         ) : (

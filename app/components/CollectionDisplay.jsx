@@ -89,7 +89,7 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-function ProductItem({ product, index }) {
+export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const { open } = useAside();
