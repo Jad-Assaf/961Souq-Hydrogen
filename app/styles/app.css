@@ -209,6 +209,7 @@ button {
   min-width: 175px;
   max-width: 200px;
   margin-left: 5px;
+  text-align: center;
 }
 
 .grid-cols-2 .product-card,
