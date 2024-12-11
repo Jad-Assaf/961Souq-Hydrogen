@@ -271,7 +271,7 @@ export default function SearchPage() {
 
         {result?.products?.edges?.length > 0 ? (
           <div className="search-results">
-            {/* <div>
+            <div>
               <label htmlFor="sort-select">Sort by:</label>
               <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
                 <option value="featured">Featured</option>
@@ -280,7 +280,7 @@ export default function SearchPage() {
                 <option value="best-selling">Best Selling</option>
                 <option value="newest">Newest</option>
               </select>
-            </div> */}
+            </div>
             <div className="search-results-grid">
               {result.products.edges.map(({ node: product }) => (
                 <div className="product-card" key={product.id}>
