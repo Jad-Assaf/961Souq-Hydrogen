@@ -94,11 +94,9 @@ export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
 
-    // Use useOptimisticVariant to handle variant selection
-    const selectedVariant = useOptimisticVariant(
-        product.selectedVariant,
-        product.variants?.nodes
-    );
+    // Ensure variants are properly initialized
+    const variants = product.variants?.nodes || [];
+    const selectedVariant = useOptimisticVariant(product.selectedVariant, variants);
 
     const [quantity, setQuantity] = useState(1);
     const incrementQuantity = () => setQuantity((prev) => prev + 1);
@@ -107,6 +105,11 @@ export function ProductItem({ product, index }) {
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
+
+    // Debugging
+    console.log('Product:', product);
+    console.log('Variants:', variants);
+    console.log('Selected Variant:', selectedVariant);
 
     return (
         <motion.div
@@ -121,7 +124,6 @@ export function ProductItem({ product, index }) {
             }}
             className="product-card"
         >
-            {/* Product Image and Title */}
             <Link to={`/products/${product.handle}`}>
                 {product.images?.nodes?.[0] && (
                     <Image
@@ -140,7 +142,6 @@ export function ProductItem({ product, index }) {
                 <h4 className="product-title">{product.title}</h4>
             </Link>
 
-            {/* Price Information */}
             <div className="product-price">
                 {selectedVariant?.price && <Money data={selectedVariant.price} />}
                 {hasDiscount && (
@@ -150,7 +151,6 @@ export function ProductItem({ product, index }) {
                 )}
             </div>
 
-            {/* Quantity Selector */}
             <div className="quantity-selector">
                 <button onClick={decrementQuantity} disabled={quantity <= 1}>
                     -
@@ -159,11 +159,10 @@ export function ProductItem({ product, index }) {
                 <button onClick={incrementQuantity}>+</button>
             </div>
 
-            {/* Product Form for Add to Cart */}
             <ProductForm
                 product={product}
                 selectedVariant={selectedVariant}
-                variants={product.variants?.nodes || []}
+                variants={variants}
                 quantity={quantity}
             />
         </motion.div>
