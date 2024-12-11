@@ -152,6 +152,10 @@ export function ProductItem({ product, index }) {
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 onClick={() => {
+                    if (!selectedVariant) {
+                        console.warn("No variant selected. Cannot add to cart.");
+                        return;
+                    }
                     open('cart');
                 }}
                 lines={
@@ -159,7 +163,7 @@ export function ProductItem({ product, index }) {
                         ? [
                             {
                                 merchandiseId: selectedVariant.id,
-                                quantity: 1, // Ensure quantity is valid
+                                quantity: 1, // Set a fixed quantity or use a similar variable like safeQuantity
                             },
                         ]
                         : []
