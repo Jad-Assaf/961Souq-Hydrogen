@@ -70,13 +70,15 @@ export function CartLineItem({ layout, line }) {
 function CartLineQuantity({ line }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
   const { id: lineId, quantity, isOptimistic } = line;
+
+  const maxQuantity = 5; // Set the maximum allowed quantity
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
-  const nextQuantity = Number((quantity + 1).toFixed(0));
+  const nextQuantity = Number(Math.min(maxQuantity, quantity + 1).toFixed(0)); // Limit to maxQuantity
 
   return (
     <div className="cart-line-quantity">
       <small><strong>Quantity:</strong> {quantity} &nbsp;&nbsp;</small>
-      <div style={{display: 'flex', gap: '5px'}}>
+      <div style={{ display: 'flex', gap: '5px' }}>
         <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
           <button
             aria-label="Decrease quantity"
@@ -85,7 +87,7 @@ function CartLineQuantity({ line }) {
             className="decrease-quantity"
             value={prevQuantity}
           >
-            <span>&#8722; </span>
+            <span>&#8722;</span>
           </button>
         </CartLineUpdateButton>
         &nbsp;
@@ -95,7 +97,7 @@ function CartLineQuantity({ line }) {
             name="increase-quantity"
             className="increase-quantity"
             value={nextQuantity}
-            disabled={!!isOptimistic}
+            disabled={quantity >= maxQuantity || !!isOptimistic} // Disable button when maxQuantity is reached
           >
             <span>&#43;</span>
           </button>
