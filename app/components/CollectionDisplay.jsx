@@ -152,32 +152,20 @@ export function ProductItem({ product, index }) {
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 onClick={() => {
-                    if (!selectedVariant) {
-                        console.warn("No variant selected. Cannot add to cart.");
-                        return;
-                    }
-                    if (hasVariants) {
-                        window.location.href = `/products/${product.handle}`;
-                    } else {
-                        open('cart');
-                    }
+                    open('cart');
                 }}
                 lines={
                     selectedVariant
                         ? [
                             {
                                 merchandiseId: selectedVariant.id,
-                                quantity: 1,
+                                quantity: 1, // Ensure quantity is valid
                             },
                         ]
-                        : undefined
+                        : []
                 }
             >
-                {!selectedVariant?.availableForSale
-                    ? 'Sold out'
-                    : hasVariants
-                        ? 'Select Options'
-                        : 'Add to cart'}
+                {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
             </AddToCartButton>
         </motion.div>
     );
