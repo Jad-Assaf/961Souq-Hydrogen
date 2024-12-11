@@ -286,38 +286,39 @@ export default function SearchPage() {
               </select>
             </div>
             <div className="search-results-grid">
-              {result.products.edges.map(({ node: product }) => (
-                <div
-                  className="product-card"
-                  key={product?.id || product?.handle || 'fallback-key'}
-                >
-                  <a
-                    href={`/products/${product?.handle || '#'}`}
-                    className="product-link"
+              {result.products.edges.map(({ node: product }) => {
+                const image = product?.variants?.nodes?.[0]?.image;
+                const price = product?.variants?.nodes?.[0]?.price || {
+                  amount: 0,
+                  currencyCode: 'USD',
+                };
+
+                return (
+                  <div
+                    className="product-card"
+                    key={product?.id || product?.handle || 'fallback-key'}
                   >
-                    {product?.variants?.nodes[0]?.image && (
-                      <Image
-                        data={product.variants.nodes[0].image}
-                        alt={product.title || 'Product Image'}
-                        width={150}
-                      />
-                    )}
-                    <div className="product-details">
-                      <h2 className="product-title">{product?.title || 'Untitled'}</h2>
-                      <p className="product-price">
-                        <Money
-                          data={
-                            product?.variants?.nodes[0]?.price || {
-                              amount: 0,
-                              currencyCode: 'USD',
-                            }
-                          }
+                    <a
+                      href={`/products/${product?.handle || '#'}`}
+                      className="product-link"
+                    >
+                      {image && (
+                        <Image
+                          data={image}
+                          alt={product?.title || 'Product Image'}
+                          width={150}
                         />
-                      </p>
-                    </div>
-                  </a>
-                </div>
-              ))}
+                      )}
+                      <div className="product-details">
+                        <h2 className="product-title">{product?.title || 'Untitled'}</h2>
+                        <p className="product-price">
+                          <Money data={price} />
+                        </p>
+                      </div>
+                    </a>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (
