@@ -150,8 +150,11 @@ export function ProductItem({ product, index }) {
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 onClick={() => {
+                    if (!selectedVariant) {
+                        console.warn("No variant selected. Cannot add to cart.");
+                        return;
+                    }
                     if (hasVariants) {
-                        // Navigate to product page if multiple variants
                         window.location.href = `/products/${product.handle}`;
                     } else {
                         open('cart');
@@ -170,7 +173,7 @@ export function ProductItem({ product, index }) {
                                 },
                             },
                         ]
-                        : []
+                        : undefined
                 }
             >
                 {!selectedVariant?.availableForSale
