@@ -286,10 +286,11 @@ export default function SearchPage() {
                 <div className="product-card" key={product.id}>
                   <a href={`/products/${product.handle}`} className="product-link">
                     {product.variants.nodes[0]?.image && (
-                      <Image
+                      <img
                         data={product.variants.nodes[0].image}
                         alt={product.title}
-                        width={150}
+                        width='150'
+                        height='150'
                       />
                     )}
                     <div className="product-details">
