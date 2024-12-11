@@ -1592,9 +1592,9 @@ button#headlessui-menu-button-\:R3lab5\: {
   justify-content: space-between;
 }
 
-.product-info-container .add-to-cart-button {
+/* .product-info-container .add-to-cart-button {
   display: none;
-}
+} */
 
 .add-to-cart-button {
   display: none;
