@@ -89,13 +89,6 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-import React, { useRef } from 'react';
-import { Link } from '@remix-run/react';
-import { Money, Image } from '@shopify/hydrogen';
-import { motion, useInView } from 'framer-motion';
-import { AddToCartButton } from './AddToCartButton';
-import { useAside } from './Aside';
-
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
