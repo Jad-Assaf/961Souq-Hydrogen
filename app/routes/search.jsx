@@ -446,9 +446,11 @@ const FILTERED_PRODUCTS_QUERY = `
                 amount
                 currencyCode
               }
-              image {
-                url
-                altText
+              image(first: 1) {
+                nodes {
+                  url
+                  altText
+                }
               }
             }
           }
