@@ -89,14 +89,21 @@ const RightArrowIcon = () => (
     </svg>
 );
 
+import React, { useRef } from 'react';
+import { Link } from '@remix-run/react';
+import { Money, Image } from '@shopify/hydrogen';
+import { motion, useInView } from 'framer-motion';
+import { AddToCartButton } from './AddToCartButton';
+import { useAside } from './Aside';
+
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const { open } = useAside();
 
-    // Check for available variants and set up selected variant
+    // Determine the selected variant
     const selectedVariant =
-        product.variants?.nodes?.find(variant => variant.availableForSale) ||
+        product.variants?.nodes?.find((variant) => variant.availableForSale) ||
         product.variants?.nodes?.[0] ||
         null;
 
@@ -123,6 +130,7 @@ export function ProductItem({ product, index }) {
             }}
             className="product-card"
         >
+            {/* Product Link */}
             <Link to={`/products/${product.handle}`}>
                 {product.images?.nodes?.[0] && (
                     <Image
@@ -149,39 +157,31 @@ export function ProductItem({ product, index }) {
                 </div>
             </Link>
 
+            {/* Updated Add to Cart Button */}
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
-                onClick={() => {
-                    if (hasVariants) {
-                        // Navigate to product page
-                        window.location.href = `/products/${product.handle}`;
-                    } else {
-                        open('cart');
-                    }
-                }}
                 lines={
-                    selectedVariant && !hasVariants
+                    selectedVariant
                         ? [
                             {
                                 merchandiseId: selectedVariant.id,
                                 quantity: 1,
-                                attributes: [],
-                                product: {
-                                    ...product,
-                                    selectedVariant,
-                                    handle: product.handle,
-                                },
+                                selectedVariant, // Include the selectedVariant here
                             },
                         ]
                         : []
                 }
+                onClick={() => {
+                    if (!selectedVariant) {
+                        console.warn("No variant selected. Cannot add to cart.");
+                        return;
+                    }
+                    open('cart'); // Open the cart UI immediately
+                }}
             >
-                {!selectedVariant?.availableForSale
-                    ? 'Sold out'
-                    : hasVariants
-                        ? 'Select Options'
-                        : 'Add to cart'}
+                {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
             </AddToCartButton>
         </motion.div>
     );
 }
+
