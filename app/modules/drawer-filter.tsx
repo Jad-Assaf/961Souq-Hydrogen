@@ -203,7 +203,7 @@ export function FiltersDrawer({
         <Disclosure
           as="div"
           key={filter.id}
-          className="w-full pt-7 border-t border-[#808080]"
+          className="w-full pt-[20px] border-t border-[#808080]"
         >
           {({ open }) => (
             <>
