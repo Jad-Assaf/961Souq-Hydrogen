@@ -289,8 +289,8 @@ export default function SearchPage() {
                       <img
                         data={product.variants.nodes[0].image}
                         alt={product.title}
-                        width='150'
-                        height='150'
+                        width={150}
+                        height={150}
                       />
                     )}
                     <div className="product-details">
