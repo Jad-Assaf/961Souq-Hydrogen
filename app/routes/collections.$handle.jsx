@@ -303,7 +303,7 @@ export default function Collection() {
                 { handle: "gaming", title: "Gaming" },
                 { handle: "laptops", title: "Laptops" },
                 { handle: "desktops", title: "Desktops" },
-                { handle: "desktops", title: "Desktops" },
+                { handle: "monitors", title: "Monitors" },
               ]}
 
               onRemoveFilter={handleFilterRemove}
@@ -449,18 +449,18 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           visible: {
             opacity: 1,
             x: 0,
-            transition: { delay, duration: 0.2 } // Use capped or fixed delay
+            transition: { delay, duration: 0.2 }
           }
         }}
       >
-        <div className='mobile-container'>
-          <Link key={product.id} prefetch="intent" to={variantUrl} className='collection-product-link'>
+        <div className="mobile-container">
+          <Link key={product.id} prefetch="intent" to={variantUrl} className="collection-product-link">
             {product.featuredImage && isInView && (
               <motion.div
-                initial={{ filter: 'blur(10px)', opacity: 0 }}
-                animate={{ filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)', opacity: 1 }}
+                initial={{ filter: "blur(10px)", opacity: 0 }}
+                animate={{ filter: isImageLoaded ? "blur(0px)" : "blur(10px)", opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                className='collection-product-image'
+                className="collection-product-image"
               >
                 <Image
                   srcSet={`${product.featuredImage.url}?width=300&quality=15 300w,
@@ -475,20 +475,12 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
               </motion.div>
             )}
           </Link>
-          <div className='product-info-container'>
-            <Link key={product.id} prefetch="intent" to={variantUrl} className=''>
+          <div className="product-info-container">
+            <Link key={product.id} prefetch="intent" to={variantUrl}>
               <h4>{truncateText(product.title, 50)}</h4>
-              {typeof window !== "undefined" &&
-                window.innerWidth > 1500 &&
-                numberInRow === 1 &&
-                product.description && (
-                  <p className="product-description">
-                    {truncateText(product.description, 200)}
-                  </p>
-                )}
-
+              <p className="product-description">{truncateText(product.description, 200)}</p> {/* Add truncated description */}
               <div className="price-container">
-                <small className={`product-price ${hasDiscount ? 'discounted' : ''}`}>
+                <small className={`product-price ${hasDiscount ? "discounted" : ""}`}>
                   <Money data={selectedVariant.price} />
                 </small>
                 {hasDiscount && selectedVariant.compareAtPrice && (
@@ -635,6 +627,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     id
     handle
     title
+    description # Add description field here
     featuredImage {
       id
       altText
@@ -662,7 +655,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 250) {
+    variants(first: 25) {
       nodes {
         id
         availableForSale
