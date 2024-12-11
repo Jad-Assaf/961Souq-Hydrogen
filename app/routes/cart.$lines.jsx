@@ -1,4 +1,4 @@
-import {redirect} from '@shopify/remix-oxygen';
+import { redirect } from '@shopify/remix-oxygen';
 
 /**
  * Automatically creates a new cart based on the URL and redirects straight to checkout.
@@ -19,10 +19,12 @@ import {redirect} from '@shopify/remix-oxygen';
  * ```
  * @param {LoaderFunctionArgs}
  */
-export async function loader({request, context, params}) {
-  const {cart} = context;
-  const {lines} = params;
+export async function loader({ request, context, params }) {
+  const { cart } = context;
+  const { lines } = params;
   if (!lines) return redirect('/cart');
+
+  // Parse the product variant and quantity from the URL
   const linesMap = lines.split(',').map((line) => {
     const lineDetails = line.split(':');
     const variantId = lineDetails[0];
@@ -34,13 +36,24 @@ export async function loader({request, context, params}) {
     };
   });
 
+  // Enforce maximum quantity limit
+  const maxAllowedQuantity = 10; // Set your desired limit here
+  const totalQuantity = linesMap.reduce((total, line) => total + line.quantity, 0);
+
+  if (totalQuantity > maxAllowedQuantity) {
+    throw new Response(
+      `The total quantity of items in the cart cannot exceed ${maxAllowedQuantity}. Please reduce the quantities and try again.`,
+      { status: 400 }
+    );
+  }
+
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
 
   const discount = searchParams.get('discount');
   const discountArray = discount ? [discount] : [];
 
-  // create a cart
+  // Create a cart
   const result = await cart.create({
     lines: linesMap,
     discountCodes: discountArray,
@@ -54,12 +67,12 @@ export async function loader({request, context, params}) {
     });
   }
 
-  // Update cart id in cookie
+  // Update cart ID in cookie
   const headers = cart.setCartId(cartResult.id);
 
-  // redirect to checkout
+  // Redirect to checkout
   if (cartResult.checkoutUrl) {
-    return redirect(cartResult.checkoutUrl, {headers});
+    return redirect(cartResult.checkoutUrl, { headers });
   } else {
     throw new Error('No checkout URL found');
   }
