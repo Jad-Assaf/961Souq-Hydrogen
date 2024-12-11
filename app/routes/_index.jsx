@@ -87,30 +87,20 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
+  // Extract handles from menu items
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Include `new-arrivals` in the list of handles
-  const allHandles = [...menuHandles, 'new-arrivals'];
-
   // Fetch collections for sliders and menu items
-  const [sliderCollections, allCollections] = await Promise.all([
+  const [sliderCollections, menuCollections] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
-    fetchCollectionsByHandles(context, allHandles), // Fetch all, including `new-arrivals`
+    fetchMenuCollections(context, menuHandles),
   ]);
 
-  // Extract the `new-arrivals` collection
-  const newArrivalsCollection = allCollections.find(
-    (collection) => collection.handle === 'new-arrivals'
-  );
-
   return {
-    sliderCollections,
-    menuCollections: allCollections.filter(
-      (collection) => collection.handle !== 'new-arrivals'
-    ), // Exclude `new-arrivals` from menu collections
-    newArrivalsCollection, // Pass `new-arrivals` separately
+    sliderCollections, // Slider data
+    menuCollections, // Menu data grouped by collections
   };
 }
 
@@ -181,25 +171,28 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData, newArrivalsCollection } =
-    useLoaderData();
+  const { banners, sliderCollections, deferredData } = useLoaderData();
 
   const menuCollections = deferredData?.menuCollections || [];
 
+  const newArrivalsCollection = menuCollections
+    .flat()
+    .find((collection) => collection.handle === 'new-arrivals');
+
   return (
     <div className="home">
+      {/* Critical components */}
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
 
       <div className="collections-container">
-        {newArrivalsCollection ? (
+        {newArrivalsCollection && (
           <TopProductSections collection={newArrivalsCollection} />
-        ) : (
-          <p>No New Arrivals Found</p>
         )}
       </div>
 
       <CollectionDisplay menuCollections={menuCollections} />
+
       <BrandSection brands={brandsData} />
     </div>
   );
