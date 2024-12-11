@@ -29,31 +29,9 @@ export async function action({request, context}) {
   let result;
 
   switch (action) {
-    case CartForm.ACTIONS.LinesAdd: {
-      // Get the current cart to check the total quantity
-      const currentCart = await cart.fetch();
-      const currentTotalQuantity = currentCart?.lines?.reduce(
-        (total, line) => total + line.quantity,
-        0
-      ) || 0;
-
-      const newItemsTotalQuantity = inputs.lines.reduce(
-        (total, line) => total + line.quantity,
-        0
-      );
-
-      const maxAllowedQuantity = 10; // Set your desired limit here
-
-      if (currentTotalQuantity + newItemsTotalQuantity > maxAllowedQuantity) {
-        throw new Error(
-          `Cannot add more items. The maximum allowed quantity in the cart is ${maxAllowedQuantity}.`
-        );
-      }
-
-      // Proceed with adding items if the limit is not exceeded
+    case CartForm.ACTIONS.LinesAdd:
       result = await cart.addLines(inputs.lines);
       break;
-    }
     case CartForm.ACTIONS.LinesUpdate:
       result = await cart.updateLines(inputs.lines);
       break;
