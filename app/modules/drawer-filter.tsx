@@ -96,15 +96,15 @@ function ListItemFilter({
 export function FiltersDrawer({
   filters = [],
   appliedFilters = [],
+  collections = [], // Add collections to props
   onRemoveFilter,
 }: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
-  const [params] = useSearchParams();
-  const location = useLocation();
+  const navigate = useNavigate();
 
   const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
     switch (filter.type) {
       case "PRICE_RANGE": {
-        let priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
+        let priceFilter = new URLSearchParams(window.location.search).get(`${FILTER_URL_PREFIX}price`);
         let price = priceFilter
           ? (JSON.parse(priceFilter) as ProductFilter["price"])
           : undefined;
@@ -120,43 +120,72 @@ export function FiltersDrawer({
   };
 
   return (
-    <div className="text-sm" style={{position: 'sticky', top: '0'}}>
+    <div className="text-sm" style={{ position: "sticky", top: "0" }}>
+      {/* Collections Menu */}
+      {collections.length > 0 && (
+        <div className="collections-menu mb-4">
+          <h3 className="font-semibold text-lg mb-2">Collections</h3>
+          <Menu as="div" className="relative inline-block text-left">
+            <MenuButton className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+              Select Collection
+              <CaretDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
+            </MenuButton>
+            <Transition
+              as={React.Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <MenuItems className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                {collections.map((collection) => (
+                  <MenuItem key={collection.handle}>
+                    {({ active }) => (
+                      <button
+                        className={`${active ? "bg-gray-100" : ""
+                          } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                        onClick={() => navigate(`/collections/${collection.handle}`)}
+                      >
+                        {collection.title}
+                      </button>
+                    )}
+                  </MenuItem>
+                ))}
+              </MenuItems>
+            </Transition>
+          </Menu>
+        </div>
+      )}
+
+      {/* Applied Filters */}
       {appliedFilters.length > 0 ? (
-        <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
+        <div className="applied-filters mb-4" style={{ minHeight: "100px" }}>
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
             {appliedFilters.map((filter, index) => {
-              // Parse the filter label if it's a JSON string
               let displayLabel = filter.label;
               try {
                 const parsedFilter = JSON.parse(filter.label);
                 if (parsedFilter && parsedFilter.value) {
                   displayLabel = parsedFilter.value;
                 }
-              } catch (e) {
-                // If parsing fails, use the original label
-              }
-
-              // Remove quotes from the beginning and end of the displayLabel
-              displayLabel = displayLabel.replace(/^["'](.+(?=["']$))["']$/, '$1');
+              } catch { }
+              displayLabel = displayLabel.replace(/^["'](.+(?=["']$))["']$/, "$1");
 
               return (
                 <div
                   key={`${filter.label}-${index}`}
-                  className="applied-filter bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
+                  className="bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
                 >
                   <span className="font-medium mr-1">{displayLabel}</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (typeof onRemoveFilter === 'function') {
-                        onRemoveFilter(filter);
-                      }
-                    }}
-                    className="ml-1 text-gray-500 hover:text-gray-700 focus:outline-none"
-                    aria-label={`Remove ${displayLabel} filter`}
+                    onClick={() => onRemoveFilter(filter)}
+                    className="ml-1 text-gray-500 hover:text-gray-700"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -165,14 +194,9 @@ export function FiltersDrawer({
             })}
           </div>
         </div>
-      ) : (
-        <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
-          <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
-          <div className="flex flex-wrap gap-2">
-            {/* <p>Apply Some Filters</p> */}
-          </div>
-        </div>
-      )}
+      ) : null}
+
+      {/* Filters */}
       {filters.map((filter: Filter) => (
         <Disclosure
           as="div"
@@ -181,30 +205,23 @@ export function FiltersDrawer({
         >
           {({ open }) => (
             <>
-              <DisclosureButton className="flex w-full justify-between items-center mb-[20px]">
-                <span className="text-sm" style={{ textTransform: 'uppercase' }}>{filter.label}</span>
+              <DisclosureButton className="flex w-full justify-between items-center mb-2">
+                <span className="text-sm uppercase">{filter.label}</span>
                 {open ? (
                   <IconCaretDown className="w-4 h-4" />
                 ) : (
                   <IconCaretRight className="w-4 h-4" />
                 )}
               </DisclosureButton>
-              <Transition
-                enter="transition-all duration-300 ease-out"
-                enterFrom="transform opacity-0 max-h-0"
-                enterTo="transform opacity-100 max-h-[350px]"
-                leave="transition-all duration-300 ease-in"
-                leaveFrom="transform opacity-100 max-h-[350px]"
-                leaveTo="transform opacity-0 max-h-0"
-              >
-                <DisclosurePanel key={filter.id}>
-                  <ul key={filter.id} className="space-y-5 filter-scroll overflow-hidden">
-                    {filter.values?.map((option) => (
-                      <li key={option.id}>{filterMarkup(filter, option)}</li>
-                    ))}
-                  </ul>
-                </DisclosurePanel>
-              </Transition>
+              <DisclosurePanel>
+                <ul className="space-y-5">
+                  {filter.values?.map((option) => (
+                    <li key={option.id}>
+                      <ListItemFilter appliedFilters={appliedFilters} option={option} />
+                    </li>
+                  ))}
+                </ul>
+              </DisclosurePanel>
             </>
           )}
         </Disclosure>

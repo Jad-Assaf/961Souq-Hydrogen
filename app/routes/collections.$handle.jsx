@@ -298,6 +298,11 @@ export default function Collection() {
             <FiltersDrawer
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
+              collections={[
+                { handle: "apple-products", title: "Apple" },
+                { handle: "gaming", title: "Gaming" },
+              ]}
+
               onRemoveFilter={handleFilterRemove}
             />
           </div>
