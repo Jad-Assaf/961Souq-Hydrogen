@@ -1,6 +1,6 @@
 import React, { Suspense, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money, Image, useOptimisticVariant } from '@shopify/hydrogen';
+import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
@@ -94,17 +94,15 @@ export function ProductItem({ product, index }) {
     const isInView = useInView(ref, { once: true });
     const { open } = useAside();
 
-    // Use useOptimisticVariant to handle variant selection
-    const selectedVariant = useOptimisticVariant(
-        product.selectedVariant,
-        product.variants?.nodes
-    );
-
-    const [quantity, setQuantity] = useState(1);
-    const incrementQuantity = () => setQuantity((prev) => prev + 1);
-    const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+    // Check for available variants and set up selected variant
+    const selectedVariant =
+        product.variants?.nodes?.find(variant => variant.availableForSale) ||
+        product.variants?.nodes?.[0] ||
+        null;
 
     const hasVariants = product.variants?.nodes?.length > 1;
+
+    // Determine if there's a discount by comparing the regular and discounted prices
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
@@ -129,51 +127,47 @@ export function ProductItem({ product, index }) {
                         aspectRatio="1/1"
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
-                                 ${product.images.nodes[0].url}?width=600&quality=10 600w,
-                                 ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
+                         ${product.images.nodes[0].url}?width=600&quality=10 600w,
+                         ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
                         alt={product.images.nodes[0].altText || 'Product Image'}
                         width="180px"
                         height="180px"
                         loading="lazy"
                     />
                 )}
-                <h4 className="product-title">{product.title}</h4>
+                <h4 className="product-title">{truncateText(product.title, 50)}</h4>
+                <div className="product-price">
+                    {selectedVariant?.price && <Money data={selectedVariant.price} />}
+                    {hasDiscount && (
+                        <small className="discountedPrice">
+                            <Money data={selectedVariant.compareAtPrice} />
+                        </small>
+                    )}
+                </div>
             </Link>
-
-            <div className="product-price">
-                {selectedVariant?.price && <Money data={selectedVariant.price} />}
-                {hasDiscount && (
-                    <small className="discountedPrice">
-                        <Money data={selectedVariant.compareAtPrice} />
-                    </small>
-                )}
-            </div>
-
-            <div className="quantity-selector">
-                <button onClick={decrementQuantity} disabled={quantity <= 1}>
-                    -
-                </button>
-                <span>{quantity}</span>
-                <button onClick={incrementQuantity}>+</button>
-            </div>
 
             {/* Add to Cart Button */}
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 onClick={() => {
                     if (hasVariants) {
+                        // Navigate to product page if multiple variants
                         window.location.href = `/products/${product.handle}`;
                     } else {
                         open('cart');
                     }
                 }}
                 lines={
-                    selectedVariant
+                    selectedVariant && !hasVariants
                         ? [
                             {
                                 merchandiseId: selectedVariant.id,
-                                quantity: quantity,
-                                selectedVariant,
+                                quantity: 1,
+                                product: {
+                                    ...product,
+                                    selectedVariant,
+                                    handle: product.handle,
+                                },
                             },
                         ]
                         : []
