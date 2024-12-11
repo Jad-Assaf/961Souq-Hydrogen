@@ -477,7 +477,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           </Link>
           <div className="product-info-container">
             <Link key={product.id} prefetch="intent" to={variantUrl}>
-              <h4>{truncateText(product.title, 10)}</h4>
+              <h4>{truncateText(product.title, 30)}</h4>
               <p className="product-description">{truncateText(product.description, 30)}</p> {/* Add truncated description */}
               <div className="price-container">
                 <small className={`product-price ${hasDiscount ? "discounted" : ""}`}>
