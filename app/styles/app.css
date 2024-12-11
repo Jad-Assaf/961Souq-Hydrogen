@@ -1585,6 +1585,10 @@ button#headlessui-menu-button-\:R3lab5\: {
   }
 }
 
+.grid-cols-1 .product-description {
+  display: block;
+}
+
 .grid-cols-1 .product-info-container {
   width: 80%;
   display: flex;
@@ -1605,6 +1609,13 @@ button#headlessui-menu-button-\:R3lab5\: {
 .grid-cols-4 .add-to-cart-button,
 .grid-cols-5 .add-to-cart-button {
   display: block;
+}
+
+.grid-cols-2 .product-description,
+.grid-cols-3 .product-description,
+.grid-cols-4 .product-description,
+.grid-cols-5 .product-description {
+  display: none;
 }
 
 .grid-cols-2 .product-info-container .add-to-cart-button,
