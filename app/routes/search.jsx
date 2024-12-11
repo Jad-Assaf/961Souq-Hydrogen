@@ -285,14 +285,13 @@ export default function SearchPage() {
               {result.products.edges.map(({ node: product }) => (
                 <div className="product-card" key={product.id}>
                   <a href={`/products/${product.handle}`} className="product-link">
-                    {product.variants.nodes[0]?.image && (
-                      <img
+                    {/* {product.variants.nodes[0]?.image && (
+                      <Image
                         data={product.variants.nodes[0].image}
                         alt={product.title}
                         width={150}
-                        height={150}
                       />
-                    )}
+                    )} */}
                     <div className="product-details">
                       <h2 className="product-title">{product.title}</h2>
                       <p className="product-price">
