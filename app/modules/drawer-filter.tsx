@@ -99,12 +99,14 @@ export function FiltersDrawer({
   collections = [], // Add collections to props
   onRemoveFilter,
 }: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
+  const [params] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
     switch (filter.type) {
       case "PRICE_RANGE": {
-        let priceFilter = new URLSearchParams(window.location.search).get(`${FILTER_URL_PREFIX}price`);
+        let priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
         let price = priceFilter
           ? (JSON.parse(priceFilter) as ProductFilter["price"])
           : undefined;
@@ -217,7 +219,7 @@ export function FiltersDrawer({
                 <ul className="space-y-5">
                   {filter.values?.map((option) => (
                     <li key={option.id}>
-                      <ListItemFilter appliedFilters={appliedFilters} option={option} />
+                      {filterMarkup(filter, option)}
                     </li>
                   ))}
                 </ul>

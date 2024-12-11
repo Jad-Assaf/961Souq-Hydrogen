@@ -299,8 +299,11 @@ export default function Collection() {
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
               collections={[
-                { handle: "apple-products", title: "Apple" },
+                { handle: "apple", title: "Apple" },
                 { handle: "gaming", title: "Gaming" },
+                { handle: "laptops", title: "Laptops" },
+                { handle: "desktops", title: "Desktops" },
+                { handle: "desktops", title: "Desktops" },
               ]}
 
               onRemoveFilter={handleFilterRemove}
