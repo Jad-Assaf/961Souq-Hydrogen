@@ -1,6 +1,6 @@
 import React, { Suspense, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { Money, Image } from '@shopify/hydrogen';
+import { Money, Image, useOptimisticVariant } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
