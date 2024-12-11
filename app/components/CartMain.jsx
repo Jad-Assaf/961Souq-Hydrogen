@@ -1,18 +1,32 @@
-import {useOptimisticCart} from '@shopify/hydrogen';
-import {Link} from '@remix-run/react';
-import {useAside} from '~/components/Aside';
-import {CartLineItem} from '~/components/CartLineItem';
-import {CartSummary} from './CartSummary';
+import { useOptimisticCart } from '@shopify/hydrogen';
+import { Link } from '@remix-run/react';
+import { useAside } from '~/components/Aside';
+import { CartLineItem } from '~/components/CartLineItem';
+import { CartSummary } from './CartSummary';
+import { useState, useEffect } from 'react';
 
 /**
  * The main cart component that displays the cart items and summary.
  * It is used by both the /cart route and the cart aside dialog.
  * @param {CartMainProps}
  */
-export function CartMain({layout, cart: originalCart}) {
+export function CartMain({ layout, cart: originalCart }) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
+
+  // Loader state to track pending cart updates
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Track cart fetcher state
+  useEffect(() => {
+    // If cart has pending actions, set loading state
+    if (cart?.pendingActions?.length > 0) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [cart?.pendingActions]);
 
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
@@ -23,6 +37,13 @@ export function CartMain({layout, cart: originalCart}) {
 
   return (
     <div className={className}>
+      {/* Loader */}
+      {isLoading && (
+        <div className="cart-loader">
+          <p>Updating cart...</p>
+        </div>
+      )}
+
       <CartEmpty hidden={linesCount} layout={layout} />
       <div className="cart-details">
         <div aria-labelledby="cart-lines">
@@ -44,8 +65,8 @@ export function CartMain({layout, cart: originalCart}) {
  *   layout?: CartMainProps['layout'];
  * }}
  */
-function CartEmpty({hidden = false}) {
-  const {close} = useAside();
+function CartEmpty({ hidden = false }) {
+  const { close } = useAside();
   return (
     <div hidden={hidden}>
       <br />
