@@ -151,26 +151,27 @@ export function ProductItem({ product, index }) {
 
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
+                lines={
+                    selectedVariant
+                        ? [
+                            {
+                                merchandiseId: selectedVariant.id, // MUST be a valid variant ID
+                                quantity: 1,
+                            },
+                        ]
+                        : []
+                }
                 onClick={() => {
                     if (!selectedVariant) {
                         console.warn("No variant selected. Cannot add to cart.");
                         return;
                     }
-                    open('cart');
+                    open('cart'); // Open the cart UI immediately
                 }}
-                lines={
-                    selectedVariant
-                        ? [
-                            {
-                                merchandiseId: selectedVariant.id,
-                                quantity: 1, // Set a fixed quantity or use a similar variable like safeQuantity
-                            },
-                        ]
-                        : []
-                }
             >
                 {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
             </AddToCartButton>
+
         </motion.div>
     );
 }
