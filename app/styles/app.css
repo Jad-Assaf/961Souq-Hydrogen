@@ -1583,6 +1583,14 @@ button#headlessui-menu-button-\:R3lab5\: {
   .grid-cols-1 .collection-product-link {
     width: 80% !important;
   }
+
+  .grid-cols-1 .product-description {
+    font-size: 10px;
+  }
+
+  .collection h4 {
+    font-size: 13px;
+  }
 }
 
 .grid-cols-1 .product-description {
@@ -1634,6 +1642,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .collection h4 {
   min-height: unset;
+  font-size: 15px;
 }
 
 .grid-cols-1 .mobile-container {
@@ -1716,7 +1725,7 @@ button.layout-buttons.first-btn svg {
 /* Collection Title Styling */
 .collection h4 {
   max-height: 80px;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   min-height: 50px;
   overflow-y: auto;
