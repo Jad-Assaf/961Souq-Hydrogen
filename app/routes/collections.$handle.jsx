@@ -168,11 +168,6 @@ function sanitizeHandle(handle) {
     .replace(/\s+/g, '-');  // Replace spaces with hyphens (keeping this from the original code)
 }
 
-export function truncateText(text, maxLength) {
-  if (!text || typeof text !== "string") return "";
-  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
-}
-
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
  * fetched after the initial page load. If it's unavailable, the page should still 200.
@@ -483,7 +478,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           <div className="product-info-container">
             <Link key={product.id} prefetch="intent" to={variantUrl}>
               <h4>{truncateText(product.title, 50)}</h4>
-              <p className="product-description">{truncateText(product.description || "", 200)}</p>
+              <p className="product-description">{truncateText(product.description, 100)}</p> {/* Add truncated description */}
               <div className="price-container">
                 <small className={`product-price ${hasDiscount ? "discounted" : ""}`}>
                   <Money data={selectedVariant.price} />
