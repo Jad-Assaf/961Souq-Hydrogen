@@ -2,10 +2,11 @@ import React, { Suspense, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image, useOptimisticVariant } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
+import { ProductForm } from './ProductForm';
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 import CollectionRows from './CollectionRows'; // Standard import for CollectionRows
-import { ProductForm } from './ProductForm';
+
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
@@ -94,22 +95,20 @@ export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
 
-    // Ensure variants are properly initialized
-    const variants = product.variants?.nodes || [];
-    const selectedVariant = useOptimisticVariant(product.selectedVariant, variants);
+    // Optimistically manage variant selection
+    const selectedVariant = useOptimisticVariant(
+        product.selectedVariant,
+        product.variants?.nodes
+    );
 
     const [quantity, setQuantity] = useState(1);
+
     const incrementQuantity = () => setQuantity((prev) => prev + 1);
     const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
-
-    // Debugging
-    console.log('Product:', product);
-    console.log('Variants:', variants);
-    console.log('Selected Variant:', selectedVariant);
 
     return (
         <motion.div
@@ -124,6 +123,7 @@ export function ProductItem({ product, index }) {
             }}
             className="product-card"
         >
+            {/* Product Image and Title */}
             <Link to={`/products/${product.handle}`}>
                 {product.images?.nodes?.[0] && (
                     <Image
@@ -142,6 +142,7 @@ export function ProductItem({ product, index }) {
                 <h4 className="product-title">{product.title}</h4>
             </Link>
 
+            {/* Price Information */}
             <div className="product-price">
                 {selectedVariant?.price && <Money data={selectedVariant.price} />}
                 {hasDiscount && (
@@ -151,6 +152,7 @@ export function ProductItem({ product, index }) {
                 )}
             </div>
 
+            {/* Quantity Selector */}
             <div className="quantity-selector">
                 <button onClick={decrementQuantity} disabled={quantity <= 1}>
                     -
@@ -159,10 +161,11 @@ export function ProductItem({ product, index }) {
                 <button onClick={incrementQuantity}>+</button>
             </div>
 
+            {/* ProductForm */}
             <ProductForm
                 product={product}
                 selectedVariant={selectedVariant}
-                variants={variants}
+                variants={product.variants?.nodes || []}
                 quantity={quantity}
             />
         </motion.div>
