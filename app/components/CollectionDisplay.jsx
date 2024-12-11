@@ -94,9 +94,9 @@ export function ProductItem({ product, index }) {
     const isInView = useInView(ref, { once: true });
     const { open } = useAside();
 
-    // Check for available variants and set up selected variant
+    // Determine the selected variant
     const selectedVariant =
-        product.variants?.nodes?.find(variant => variant.availableForSale) ||
+        product.variants?.nodes?.find((variant) => variant.availableForSale) ||
         product.variants?.nodes?.[0] ||
         null;
 
@@ -123,6 +123,7 @@ export function ProductItem({ product, index }) {
             }}
             className="product-card"
         >
+            {/* Product Link */}
             <Link to={`/products/${product.handle}`}>
                 {product.images?.nodes?.[0] && (
                     <Image
@@ -149,13 +150,14 @@ export function ProductItem({ product, index }) {
                 </div>
             </Link>
 
+            {/* Updated Add to Cart Button */}
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 lines={
                     selectedVariant
                         ? [
                             {
-                                merchandiseId: selectedVariant.id, // MUST be a valid variant ID
+                                merchandiseId: selectedVariant.id,
                                 quantity: 1,
                             },
                         ]
@@ -171,7 +173,6 @@ export function ProductItem({ product, index }) {
             >
                 {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
             </AddToCartButton>
-
         </motion.div>
     );
 }
