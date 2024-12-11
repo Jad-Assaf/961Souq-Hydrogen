@@ -3,7 +3,7 @@ html {
 }
 
 :root {
-  --aside-width: 80vw;
+  --aside-width: 20vw;
   --cart-aside-summary-height-with-discount: 300px;
   --cart-aside-summary-height: 250px;
   --grid-item-width: 355px;
@@ -394,7 +394,7 @@ aside {
   background: var(--color-light);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
   height: 100vh;
-  max-width: var(--aside-width);
+  max-width: 80vw;
   min-width: var(--aside-width);
   position: fixed;
   right: calc(-1 * var(--aside-width));
@@ -1160,10 +1160,10 @@ button.reset:hover:not(:has(> *)) {
 .cart-summary-aside {
   background: white;
   border-top: 1px solid var(--color-dark);
-  bottom: 0;
+  bottom: 50px;
   padding-top: 0.75rem;
   position: absolute;
-  width: calc(var(--aside-width) - 40px);
+  width: 90%;
 }
 
 .cart-line-quantity {
