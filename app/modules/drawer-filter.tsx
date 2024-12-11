@@ -96,59 +96,67 @@ function ListItemFilter({
 export function FiltersDrawer({
   filters = [],
   appliedFilters = [],
-  collections = [], // Add collections to props
   onRemoveFilter,
 }: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
-  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const location = useLocation();
+
+  const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
+    switch (filter.type) {
+      case "PRICE_RANGE": {
+        let priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
+        let price = priceFilter
+          ? (JSON.parse(priceFilter) as ProductFilter["price"])
+          : undefined;
+        let min = price?.min ? Number(price.min) : undefined;
+        let max = price?.max ? Number(price.max) : undefined;
+        return <PriceRangeFilter min={min} max={max} />;
+      }
+      default:
+        return (
+          <ListItemFilter appliedFilters={appliedFilters} option={option} />
+        );
+    }
+  };
 
   return (
-    <div className="text-sm" style={{ position: 'sticky', top: '0' }}>
-      {/* Collections Menu */}
-      {collections.length > 0 && (
-        <div className="collections-menu mb-4">
-          <h3 className="font-semibold text-lg mb-2">Collections:</h3>
-          <ul className="space-y-2">
-            {collections.map((collection) => (
-              <li key={collection.handle}>
-                <button
-                  className="text-sm text-blue-600 hover:underline"
-                  onClick={() => navigate(`/collections/${collection.handle}`)}
-                >
-                  {collection.title}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Applied Filters */}
+    <div className="text-sm" style={{position: 'sticky', top: '0'}}>
       {appliedFilters.length > 0 ? (
-        <div className="applied-filters mb-4">
+        <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
             {appliedFilters.map((filter, index) => {
+              // Parse the filter label if it's a JSON string
               let displayLabel = filter.label;
               try {
                 const parsedFilter = JSON.parse(filter.label);
-                if (parsedFilter?.value) displayLabel = parsedFilter.value;
-              } catch { }
+                if (parsedFilter && parsedFilter.value) {
+                  displayLabel = parsedFilter.value;
+                }
+              } catch (e) {
+                // If parsing fails, use the original label
+              }
 
+              // Remove quotes from the beginning and end of the displayLabel
               displayLabel = displayLabel.replace(/^["'](.+(?=["']$))["']$/, '$1');
 
               return (
                 <div
                   key={`${filter.label}-${index}`}
-                  className="bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
+                  className="applied-filter bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
                 >
                   <span className="font-medium mr-1">{displayLabel}</span>
                   <button
                     type="button"
-                    onClick={() => onRemoveFilter(filter)}
-                    className="ml-1 text-gray-500 hover:text-gray-700"
+                    onClick={() => {
+                      if (typeof onRemoveFilter === 'function') {
+                        onRemoveFilter(filter);
+                      }
+                    }}
+                    className="ml-1 text-gray-500 hover:text-gray-700 focus:outline-none"
                     aria-label={`Remove ${displayLabel} filter`}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -157,9 +165,14 @@ export function FiltersDrawer({
             })}
           </div>
         </div>
-      ) : null}
-
-      {/* Filters */}
+      ) : (
+        <div className="applied-filters mb-4" style={{ minHeight: '100px' }}>
+          <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
+          <div className="flex flex-wrap gap-2">
+            {/* <p>Apply Some Filters</p> */}
+          </div>
+        </div>
+      )}
       {filters.map((filter: Filter) => (
         <Disclosure
           as="div"
@@ -168,23 +181,30 @@ export function FiltersDrawer({
         >
           {({ open }) => (
             <>
-              <DisclosureButton className="flex w-full justify-between items-center mb-2">
-                <span className="text-sm uppercase">{filter.label}</span>
+              <DisclosureButton className="flex w-full justify-between items-center mb-[20px]">
+                <span className="text-sm" style={{ textTransform: 'uppercase' }}>{filter.label}</span>
                 {open ? (
                   <IconCaretDown className="w-4 h-4" />
                 ) : (
                   <IconCaretRight className="w-4 h-4" />
                 )}
               </DisclosureButton>
-              <DisclosurePanel>
-                <ul className="space-y-5">
-                  {filter.values?.map((option) => (
-                    <li key={option.id}>
-                      <ListItemFilter appliedFilters={appliedFilters} option={option} />
-                    </li>
-                  ))}
-                </ul>
-              </DisclosurePanel>
+              <Transition
+                enter="transition-all duration-300 ease-out"
+                enterFrom="transform opacity-0 max-h-0"
+                enterTo="transform opacity-100 max-h-[350px]"
+                leave="transition-all duration-300 ease-in"
+                leaveFrom="transform opacity-100 max-h-[350px]"
+                leaveTo="transform opacity-0 max-h-0"
+              >
+                <DisclosurePanel key={filter.id}>
+                  <ul key={filter.id} className="space-y-5 filter-scroll overflow-hidden">
+                    {filter.values?.map((option) => (
+                      <li key={option.id}>{filterMarkup(filter, option)}</li>
+                    ))}
+                  </ul>
+                </DisclosurePanel>
+              </Transition>
             </>
           )}
         </Disclosure>
