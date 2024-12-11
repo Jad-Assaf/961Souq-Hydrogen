@@ -100,9 +100,12 @@ export function ProductItem({ product, index }) {
         product.variants?.nodes?.[0] ||
         null;
 
+    if (!selectedVariant) {
+        console.error("No valid variant found for product:", product.title);
+    }
+
     const hasVariants = product.variants?.nodes?.length > 1;
 
-    // Determine if there's a discount by comparing the regular and discounted prices
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
@@ -146,7 +149,6 @@ export function ProductItem({ product, index }) {
                 </div>
             </Link>
 
-            {/* Add to Cart Button */}
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 onClick={() => {
@@ -161,16 +163,11 @@ export function ProductItem({ product, index }) {
                     }
                 }}
                 lines={
-                    selectedVariant && !hasVariants
+                    selectedVariant
                         ? [
                             {
                                 merchandiseId: selectedVariant.id,
                                 quantity: 1,
-                                product: {
-                                    ...product,
-                                    selectedVariant,
-                                    handle: product.handle,
-                                },
                             },
                         ]
                         : undefined
