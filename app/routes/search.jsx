@@ -799,16 +799,21 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Break the search term into individual words
-  const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
+  // Generate substrings for partial matching
+  const substrings = [];
+  for (let i = 0; i < term.length; i++) {
+    for (let j = i + 1; j <= term.length; j++) {
+      substrings.push(term.slice(i, j));
+    }
+  }
 
-  // Construct a flexible query that matches any word in title, description, or SKU
-  const queryTerm = terms
+  // Construct query for all substrings
+  const queryTerm = substrings
     .map(
-      (word) =>
-        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
+      (substring) =>
+        `(variants.sku:${substring} OR title:${substring} OR description:${substring})`
     )
-    .join(' AND ');
+    .join(' OR ');
 
   // Predictively search with additional searchable fields
   const { predictiveSearch: items, errors } = await storefront.query(
@@ -819,7 +824,7 @@ async function predictiveSearch({ request, context }) {
         limitScope: 'EACH',
         term: queryTerm,
         types: ['PRODUCT'], // Limiting to products
-        searchableFields: ['TITLE', 'PRODUCT_TYPE', 'VARIANT_TITLE', 'VENDOR', 'VARIANT_SKU'], // Added searchable fields
+        searchableFields: ['TITLE', 'PRODUCT_TYPE', 'VARIANT_TITLE', 'VENDOR', 'VARIANT_SKU'], // Ensure all fields are included
       },
     },
   );
