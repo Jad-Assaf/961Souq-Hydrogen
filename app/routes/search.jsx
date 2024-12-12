@@ -799,26 +799,13 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Generate meaningful substrings (minimum 3 characters)
-  const substrings = [];
-  for (let i = 0; i < term.length; i++) {
-    for (let j = i + 3; j <= term.length; j++) { // Minimum substring length = 3
-      substrings.push(term.slice(i, j));
-    }
-  }
+  // Convert term to lowercase for case-insensitive matching
+  const lowercaseTerm = term.toLowerCase();
 
-  // Construct the query: include only the full term and meaningful substrings
-  const meaningfulQueries = [
-    `(variants.sku:${term} OR title:${term} OR description:${term})`, // Full term match
-    ...substrings.map(
-      (substring) =>
-        `(variants.sku:${substring} OR title:${substring} OR description:${substring})`
-    ),
-  ];
+  // Construct the query to match substrings in a case-insensitive manner
+  const queryTerm = `(title:*${lowercaseTerm}* OR description:*${lowercaseTerm}* OR variants.sku:*${lowercaseTerm}*)`;
 
-  const queryTerm = meaningfulQueries.join(' OR ');
-
-  // Predictively search with the constructed query
+  // Predictively search for products using the modified query
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
@@ -826,8 +813,8 @@ async function predictiveSearch({ request, context }) {
         limit,
         limitScope: 'EACH',
         term: queryTerm,
-        types: ['PRODUCT'], // Limiting to products
-        searchableFields: ['TITLE', 'PRODUCT_TYPE', 'VARIANT_TITLE', 'VENDOR', 'VARIANT_SKU'], // Ensure all fields are included
+        types: ['PRODUCT'], // Search products only
+        searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure relevant fields are included
       },
     },
   );
