@@ -17,6 +17,7 @@ export const meta = () => {
  * @param {LoaderFunctionArgs}
  */
 // loader function
+// loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
@@ -31,7 +32,7 @@ export async function loader({ request, context }) {
     }
   }
 
-  const term = searchParams.get('q')?.toLowerCase().trim() || '';
+  const term = searchParams.get('q') || '';
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
@@ -43,12 +44,7 @@ export async function loader({ request, context }) {
     filterQueryParts.push(`variants.price:<${maxPrice}`);
   }
 
-  // Tokenize the search term to handle substrings
-  const tokenizeTerm = (term) => term.split(/(\d+)/).filter(Boolean);
-  const tokens = tokenizeTerm(term).map((token) => `*${token}*`);
-  const filterQuery = tokens
-    .map((token) => `(title:${token} OR description:${token} OR variants.sku:${token})`)
-    .join(' AND ');
+  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
 
   // Handle sorting
   const sortKeyMapping = {
@@ -66,7 +62,10 @@ export async function loader({ request, context }) {
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
   // Fetch products based on filters and sorting
-  const searchPromise = regularSearch({ request, context, filterQuery, sortKey, reverse });
+  const isPredictive = searchParams.has('predictive');
+  const searchPromise = isPredictive
+    ? predictiveSearch({ request, context })
+    : regularSearch({ request, context, filterQuery, sortKey, reverse });
 
   const result = await searchPromise.catch((error) => {
     console.error('Search Error:', error);
@@ -623,7 +622,6 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
   const { storefront } = context;
 
   try {
-    // Define query variables
     const variables = {
       filterQuery,
       sortKey,
@@ -634,7 +632,6 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
 
     console.log('Query Variables:', variables); // Debugging
 
-    // Fetch products from the Shopify Storefront API
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
@@ -644,26 +641,11 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
       return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
     }
 
-    // Filtered products to ensure precise substring matches, if needed
-    const filteredEdges = products.edges.filter(({ node }) => {
-      const tokens = filterQuery.toLowerCase().split(/\s+/); // Break filter query into tokens
-      return tokens.some((token) => {
-        const lowerTitle = node.title.toLowerCase();
-        const lowerDescription = node.description?.toLowerCase() || '';
-        const skus = node.variants.nodes.map((variant) => variant.sku?.toLowerCase() || '');
-        return (
-          lowerTitle.includes(token) ||
-          lowerDescription.includes(token) ||
-          skus.some((sku) => sku.includes(token))
-        );
-      });
-    });
-
     return {
       term: filterQuery,
       result: {
-        products: { edges: filteredEdges },
-        total: filteredEdges.length,
+        products,
+        total: products.edges.length,
       },
     };
   } catch (error) {
@@ -811,7 +793,7 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
 async function predictiveSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
-  const term = searchParams.get('q')?.toLowerCase().trim() || '';
+  const term = String(url.searchParams.get('q') || '').trim();
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
@@ -819,7 +801,7 @@ async function predictiveSearch({ request, context }) {
 
   // Break the search term into individual words
   const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
-  
+
   // Construct a flexible query that matches any word in title, description, or SKU
   const queryTerm = terms
     .map(
