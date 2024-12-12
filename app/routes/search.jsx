@@ -799,79 +799,45 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Function for simple autocorrect suggestions
-  function suggestCorrections(input, dictionary) {
-    const suggestions = [];
-    const lowerInput = input.toLowerCase();
+  // Break the search term into individual words
+  const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
 
-    dictionary.forEach(word => {
-      if (word.toLowerCase().startsWith(lowerInput)) {
-        suggestions.push(word);
-      }
-    });
+  // Construct a flexible query that matches any word in title, description, or SKU
+  const queryTerm = terms
+    .map(
+      (word) =>
+        `(variants.sku:*${word}* OR title:*${word}* OR title:*-*${word}* OR description:*${word}*)`
+    )
+    .join(' AND ');
 
-    return suggestions;
-  }
-
-  // A predefined dictionary of common terms (this can be extended)
-  const dictionary = [
-    "sony", "wireless", "headphones", "xm5", "1000xm5", "noise-canceling",
-    "over-ear", "comfort", "silver", "advanced", "sound"
-  ];
-
-  // Get suggestions for the search term
-  const suggestions = suggestCorrections(term, dictionary);
-
-  // If no direct results, use suggestions
-  let queryTerm;
-  if (suggestions.length > 0) {
-    queryTerm = suggestions
-      .map(
-        (word) =>
-          `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
-      )
-      .join(' AND ');
-  } else {
-    // If no suggestions, use the original term as a fallback
-    queryTerm = `(variants.sku:*${term}* OR title:*${term}* OR description:*${term}*)`;
-  }
-
-  console.log("Constructed Query with Suggestions:", queryTerm); // Debugging
-
-  try {
-    const { predictiveSearch: items, errors } = await storefront.query(
-      PREDICTIVE_SEARCH_QUERY,
-      {
-        variables: {
-          limit,
-          limitScope: 'EACH',
-          term: queryTerm,
-          types: ['PRODUCT'], // Search within products only
-          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure we search relevant fields
-        },
+  // Predictively search articles, collections, pages, products, and queries (suggestions)
+  const { predictiveSearch: items, errors } = await storefront.query(
+    PREDICTIVE_SEARCH_QUERY,
+    {
+      variables: {
+        limit,
+        limitScope: 'EACH',
+        term: queryTerm,
       },
+    },
+  );
+
+  if (errors) {
+    throw new Error(
+      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
     );
-
-    if (errors) {
-      throw new Error(
-        `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
-      );
-    }
-
-    if (!items) {
-      throw new Error('No predictive search data returned from Shopify API');
-    }
-
-    const total = Object.values(items).reduce(
-      (acc, item) => acc + item.length,
-      0,
-    );
-
-    return { type, term, result: { items, total, suggestions } };
-  } catch (error) {
-    console.error('Error during predictive search:', error);
-    return { type, term, result: null, error: error.message };
   }
+
+  if (!items) {
+    throw new Error('No predictive search data returned from Shopify API');
+  }
+
+  const total = Object.values(items).reduce(
+    (acc, item) => acc + item.length,
+    0,
+  );
+
+  return { type, term, result: { items, total } };
 }
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
