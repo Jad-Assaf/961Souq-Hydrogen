@@ -4,7 +4,7 @@ import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
-import { CollectionDisplay } from '~/components/CollectionDisplay';
+import { CollectionDisplay, ProductRow } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
 
 /**
