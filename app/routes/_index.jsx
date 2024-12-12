@@ -194,10 +194,7 @@ export default function Homepage() {
 
       {/* New Arrivals Section */}
       {newArrivalsCollection && (
-        <div className="collections-container">
-          <h3>{newArrivalsCollection.title}</h3>
           <TopProductSections collection={newArrivalsCollection} />
-        </div>
       )}
 
       <CollectionDisplay menuCollections={menuCollections} />
