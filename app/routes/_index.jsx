@@ -92,21 +92,18 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for sliders, menu items, and new arrivals
-  const [sliderCollections, menuCollections, newArrivalsCollection] = await Promise.all([
+  // Fetch collections for sliders and menu items
+  const [sliderCollections, menuCollections] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
     fetchMenuCollections(context, menuHandles),
-    fetchCollectionByHandle(context, 'new-arrivals'),
   ]);
 
   return {
     sliderCollections, // Slider data
     menuCollections, // Menu data grouped by collections
-    newArrivalsCollection, // New arrivals collection
   };
 }
 
-// Fetch a single collection by handle
 async function fetchCollectionByHandle(context, handle) {
   const { collectionByHandle } = await context.storefront.query(
     GET_COLLECTION_BY_HANDLE_QUERY,
@@ -182,10 +179,19 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData, newArrivalsCollection } =
-    useLoaderData();
+  const { banners, sliderCollections, deferredData } = useLoaderData();
 
+  const [newArrivalsCollection, setNewArrivalsCollection] = useState(null);
   const menuCollections = deferredData?.menuCollections || [];
+
+  useEffect(() => {
+    async function loadNewArrivals() {
+      const context = {}; // Replace with your context if needed
+      const newArrivals = await fetchCollectionByHandle(context, 'new-arrivals');
+      setNewArrivalsCollection(newArrivals);
+    }
+    loadNewArrivals();
+  }, []);
 
   return (
     <div className="home">
@@ -198,7 +204,7 @@ export default function Homepage() {
         {newArrivalsCollection ? (
           <TopProductSections collection={newArrivalsCollection} />
         ) : (
-          <p>No New Arrivals Found</p>
+          <p>Loading New Arrivals...</p>
         )}
       </div>
 
