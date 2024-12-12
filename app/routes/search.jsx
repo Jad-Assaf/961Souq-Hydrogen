@@ -621,9 +621,13 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
   const { storefront } = context;
 
+  // Add wildcards for substring matching
+  const term = filterQuery || '';
+  const wildcardFilterQuery = `*${term}*`;
+
   try {
     const variables = {
-      filterQuery,
+      filterQuery: wildcardFilterQuery,
       sortKey,
       reverse,
       minPrice,
@@ -638,11 +642,11 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
 
     if (!products?.edges?.length) {
       console.error('No products found in response:', products); // Debugging
-      return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
+      return { term: wildcardFilterQuery, result: { products: { edges: [] }, total: 0 } };
     }
 
     return {
-      term: filterQuery,
+      term: wildcardFilterQuery,
       result: {
         products,
         total: products.edges.length,
@@ -650,7 +654,7 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
     };
   } catch (error) {
     console.error('Error during regular search:', error);
-    return { term: filterQuery, result: null, error: error.message };
+    return { term: wildcardFilterQuery, result: null, error: error.message };
   }
 }
 
@@ -802,7 +806,7 @@ async function predictiveSearch({ request, context }) {
   // Break the search term into individual words
   const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
 
-  // Construct a flexible query that matches any word in title, description, or SKU
+  // Construct a flexible query that matches substrings in title, description, or SKU
   const queryTerm = terms
     .map(
       (word) =>
@@ -810,34 +814,38 @@ async function predictiveSearch({ request, context }) {
     )
     .join(' AND ');
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
-  const { predictiveSearch: items, errors } = await storefront.query(
-    PREDICTIVE_SEARCH_QUERY,
-    {
-      variables: {
-        limit,
-        limitScope: 'EACH',
-        term: queryTerm,
+  try {
+    const { predictiveSearch: items, errors } = await storefront.query(
+      PREDICTIVE_SEARCH_QUERY,
+      {
+        variables: {
+          limit,
+          limitScope: 'EACH',
+          term: queryTerm,
+        },
       },
-    },
-  );
-
-  if (errors) {
-    throw new Error(
-      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
     );
+
+    if (errors) {
+      throw new Error(
+        `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
+      );
+    }
+
+    if (!items) {
+      throw new Error('No predictive search data returned from Shopify API');
+    }
+
+    const total = Object.values(items).reduce(
+      (acc, item) => acc + item.length,
+      0,
+    );
+
+    return { type, term, result: { items, total } };
+  } catch (error) {
+    console.error('Error during predictive search:', error);
+    return { type, term, result: null, error: error.message };
   }
-
-  if (!items) {
-    throw new Error('No predictive search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, item) => acc + item.length,
-    0,
-  );
-
-  return { type, term, result: { items, total } };
 }
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
