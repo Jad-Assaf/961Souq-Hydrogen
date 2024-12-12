@@ -74,6 +74,7 @@ export async function loader(args) {
     deferredData: {
       menuCollections: criticalData.menuCollections, // Rows below sliders
     },
+    context,
   });
 }
 
@@ -179,19 +180,19 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData } = useLoaderData();
+  const { banners, sliderCollections, deferredData, context } = useLoaderData();
 
   const [newArrivalsCollection, setNewArrivalsCollection] = useState(null);
   const menuCollections = deferredData?.menuCollections || [];
 
   useEffect(() => {
     async function loadNewArrivals() {
-      const context = {}; // Replace with your context if needed
+      if (!context) return;
       const newArrivals = await fetchCollectionByHandle(context, 'new-arrivals');
       setNewArrivalsCollection(newArrivals);
     }
     loadNewArrivals();
-  }, []);
+  }, [context]);
 
   return (
     <div className="home">
