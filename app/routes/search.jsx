@@ -799,9 +799,13 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Wildcard-based term
-  const wildcardTerm = `*${term.toLowerCase()}*`;
-  const queryTerm = `(title:${wildcardTerm} OR description:${wildcardTerm} OR variants.sku:${wildcardTerm})`;
+  // Prepare the search term for partial matching
+  const modifiedTerm = term.toLowerCase();
+
+  // Use Shopify's `prefix` for partial matching on the last term
+  const queryTerm = `(title:*${modifiedTerm}* OR description:*${modifiedTerm}* OR variants.sku:*${modifiedTerm}*)`;
+
+  console.log("Constructed Query:", queryTerm); // Debugging
 
   try {
     const { predictiveSearch: items, errors } = await storefront.query(
@@ -811,9 +815,9 @@ async function predictiveSearch({ request, context }) {
           limit,
           limitScope: 'EACH',
           term: queryTerm,
-          types: ['PRODUCT'],
+          types: ['PRODUCT'], // Search within products only
           prefix: 'LAST', // Adds support for partial matching
-          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Explicit searchable fields
+          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure we search relevant fields
         },
       },
     );
