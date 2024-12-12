@@ -73,6 +73,7 @@ export async function loader(args) {
     sliderCollections: criticalData.sliderCollections, // Sliders for menu sliders
     deferredData: {
       menuCollections: criticalData.menuCollections, // Rows below sliders
+      newArrivalsCollection: criticalData.newArrivalsCollection, // New arrivals
     },
   });
 }
@@ -87,21 +88,30 @@ async function loadCriticalData({ context }) {
     throw new Response('Menu not found', { status: 404 });
   }
 
-  // Extract handles from menu items
   const menuHandles = menu.items.map((item) =>
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for sliders and menu items
-  const [sliderCollections, menuCollections] = await Promise.all([
+  const [sliderCollections, menuCollections, newArrivalsCollection] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
     fetchMenuCollections(context, menuHandles),
+    fetchCollectionByHandle(context, 'new-arrivals'),
   ]);
 
   return {
-    sliderCollections, // Slider data
-    menuCollections, // Menu data grouped by collections
+    sliderCollections,
+    menuCollections,
+    newArrivalsCollection,
   };
+}
+
+// Fetch a single collection by handle
+async function fetchCollectionByHandle(context, handle) {
+  const { collectionByHandle } = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    { variables: { handle } }
+  );
+  return collectionByHandle || null;
 }
 
 // Fetch menu collections
@@ -174,10 +184,7 @@ export default function Homepage() {
   const { banners, sliderCollections, deferredData } = useLoaderData();
 
   const menuCollections = deferredData?.menuCollections || [];
-
-  const newArrivalsCollection = menuCollections
-    .flat()
-    .find((collection) => collection.handle === 'new-arrivals');
+  const newArrivalsCollection = deferredData?.newArrivalsCollection;
 
   return (
     <div className="home">
@@ -185,14 +192,15 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
 
-      <div className="collections-container">
-        {newArrivalsCollection && (
+      {/* New Arrivals Section */}
+      {newArrivalsCollection && (
+        <div className="collections-container">
+          <h3>{newArrivalsCollection.title}</h3>
           <TopProductSections collection={newArrivalsCollection} />
-        )}
-      </div>
+        </div>
+      )}
 
       <CollectionDisplay menuCollections={menuCollections} />
-
       <BrandSection brands={brandsData} />
     </div>
   );
