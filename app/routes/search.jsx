@@ -621,12 +621,13 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
   const { storefront } = context;
 
-  // Extract the search term and apply wildcards for substring matching
   const term = filterQuery || '';
-  const modifiedFilterQuery = term
+  const queryTerm = term
     .split(/\s+/)
-    .map((word) => `*${word}*`) // Add wildcards to each word
-    .join(' AND ');
+    .map((word) => `*${word}*`) // Add wildcards around each search term
+    .join(' '); // Combine terms for substring matching
+
+  const modifiedFilterQuery = `${queryTerm}`; // Include other filters or logic as needed
 
   try {
     const variables = {
