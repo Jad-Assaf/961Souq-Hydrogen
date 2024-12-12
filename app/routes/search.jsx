@@ -799,24 +799,19 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Normalize special characters in the search term
+  // Normalize the search term: handle special characters and case sensitivity
   const normalize = (input) =>
-    input.toLowerCase().replace(/[-_]/g, ' '); // Replace dashes and underscores with spaces
+    input.toLowerCase().replace(/[-_]/g, ' '); // Replace dashes/underscores with spaces
 
   const normalizedTerm = normalize(term);
 
-  // Break the normalized search term into individual words
-  const terms = normalizedTerm.split(/\s+/).filter(Boolean);
+  // Add wildcards for partial matching
+  const wildcardTerm = `*${normalizedTerm}*`;
 
-  // Construct a flexible query that matches any word in title, description, or SKU
-  const queryTerm = terms
-    .map(
-      (word) =>
-        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
-    )
-    .join(' AND ');
+  // Construct a query to search with wildcards in title, description, and SKU
+  const queryTerm = `(title:${wildcardTerm} OR description:${wildcardTerm} OR variants.sku:${wildcardTerm})`;
 
-  console.log("Constructed Query with Normalization:", queryTerm); // Debugging
+  console.log("Constructed Query for Partial Matching:", queryTerm); // Debugging
 
   try {
     const { predictiveSearch: items, errors } = await storefront.query(
@@ -849,7 +844,7 @@ async function predictiveSearch({ request, context }) {
 
     return { type, term, result: { items, total } };
   } catch (error) {
-    console.error('Error during predictive search:', error);
+    console.error('Error during predictive search:", error');
     return { type, term, result: null, error: error.message };
   }
 }
