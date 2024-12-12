@@ -4,7 +4,7 @@ import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
-import { CollectionDisplay, ProductRow } from '~/components/CollectionDisplay';
+import { CollectionDisplay } from '~/components/CollectionDisplay';
 import { BrandSection } from '~/components/BrandsSection';
 
 /**
@@ -67,12 +67,6 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
-  const newArrivals = await fetchCollectionByHandle(
-    args.context,
-    'new-arrivals'
-  );
-
-
 
   return defer({
     banners,
@@ -80,7 +74,6 @@ export async function loader(args) {
     deferredData: {
       menuCollections: criticalData.menuCollections, // Rows below sliders
     },
-    newArrivals,
   });
 }
 
@@ -139,14 +132,6 @@ async function fetchMenuCollections(context, menuHandles) {
   return collectionsGrouped.filter(Boolean); // Filter out null or empty groups
 }
 
-async function fetchCollectionByHandle(context, handle) {
-  const { collectionByHandle } = await context.storefront.query(
-    GET_COLLECTION_BY_HANDLE_QUERY,
-    { variables: { handle } }
-  );
-  return collectionByHandle || null;
-}
-
 // Fetch collections by handles for sliders
 async function fetchCollectionsByHandles(context, handles) {
   const collectionPromises = handles.map(async (handle) => {
@@ -186,7 +171,7 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData, newArrivals } = useLoaderData();
+  const { banners, sliderCollections, deferredData } = useLoaderData();
 
   const menuCollections = deferredData?.menuCollections || [];
 
@@ -200,20 +185,11 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
 
-      {newArrivals && (
-        <div key={collection.id} className="collection-section">
-          <div className="collection-header">
-            <h3>{collection.title}</h3>
-            <Link
-              to={`/collections/${collection.handle}`}
-              className="view-all-link"
-            >
-              View All
-            </Link>
-          </div>
-          <ProductRow products={newArrivals.products.nodes} />
-        </div>
-      )}
+      <div className="collections-container">
+        {newArrivalsCollection && (
+          <TopProductSections collection={newArrivalsCollection} />
+        )}
+      </div>
 
       <CollectionDisplay menuCollections={menuCollections} />
 
