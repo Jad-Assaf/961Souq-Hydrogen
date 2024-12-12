@@ -799,17 +799,19 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Normalize the search term: handle special characters and case sensitivity
+  // Normalize and preprocess the search term
   const normalize = (input) =>
-    input.toLowerCase().replace(/[-_]/g, ' '); // Replace dashes/underscores with spaces
+    input.toLowerCase().replace(/[^a-z0-9]/gi, ' '); // Replace non-alphanumeric characters with spaces
 
   const normalizedTerm = normalize(term);
 
-  // Add wildcards for partial matching
-  const wildcardTerm = `*${normalizedTerm}*`;
+  // Tokenize and allow partial matches
+  const terms = normalizedTerm.split(/\s+/).filter(Boolean);
 
-  // Construct a query to search with wildcards in title, description, and SKU
-  const queryTerm = `(title:${wildcardTerm} OR description:${wildcardTerm} OR variants.sku:${wildcardTerm})`;
+  // Construct a query to match substrings
+  const queryTerm = terms
+    .map((word) => `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`)
+    .join(' AND ');
 
   console.log("Constructed Query for Partial Matching:", queryTerm); // Debugging
 
@@ -822,7 +824,7 @@ async function predictiveSearch({ request, context }) {
           limitScope: 'EACH',
           term: queryTerm,
           types: ['PRODUCT'], // Search within products only
-          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure we search relevant fields
+          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure relevant fields are searched
         },
       },
     );
@@ -844,7 +846,7 @@ async function predictiveSearch({ request, context }) {
 
     return { type, term, result: { items, total } };
   } catch (error) {
-    console.error('Error during predictive search:", error');
+    console.error('Error during predictive search:', error);
     return { type, term, result: null, error: error.message };
   }
 }
