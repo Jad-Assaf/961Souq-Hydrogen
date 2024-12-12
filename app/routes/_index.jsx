@@ -93,15 +93,27 @@ async function loadCriticalData({ context }) {
   );
 
   // Fetch collections for sliders and menu items
-  const [sliderCollections, menuCollections] = await Promise.all([
+  const [sliderCollections, menuCollections, newArrivalsCollection] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
     fetchMenuCollections(context, menuHandles),
+    fetchNewArrivalsCollection(context), // Fetch new-arrivals separately
   ]);
 
   return {
     sliderCollections, // Slider data
     menuCollections, // Menu data grouped by collections
+    newArrivalsCollection, // New arrivals collection
   };
+}
+
+// Fetch a single collection by handle
+async function fetchNewArrivalsCollection(context) {
+  const handle = 'new-arrivals';
+  const { collectionByHandle } = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    { variables: { handle } }
+  );
+  return collectionByHandle || null;
 }
 
 // Fetch menu collections
@@ -171,13 +183,9 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData } = useLoaderData();
+  const { banners, sliderCollections, deferredData, newArrivalsCollection } = useLoaderData();
 
   const menuCollections = deferredData?.menuCollections || [];
-
-  const newArrivalsCollection = menuCollections
-    .flat()
-    .find((collection) => collection.handle === 'new-arrivals');
 
   return (
     <div className="home">
@@ -185,14 +193,16 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
 
+      {/* New Arrivals Section */}
       <div className="collections-container">
-        {newArrivalsCollection && (
+        {newArrivalsCollection ? (
           <TopProductSections collection={newArrivalsCollection} />
+        ) : (
+          <p>No New Arrivals Found</p>
         )}
       </div>
 
       <CollectionDisplay menuCollections={menuCollections} />
-
       <BrandSection brands={brandsData} />
     </div>
   );
