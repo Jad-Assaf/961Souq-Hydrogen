@@ -67,6 +67,12 @@ export async function loader(args) {
   ];
 
   const criticalData = await loadCriticalData(args);
+  const newArrivals = await fetchCollectionByHandle(
+    args.context,
+    'new-arrivals'
+  );
+
+
 
   return defer({
     banners,
@@ -74,6 +80,7 @@ export async function loader(args) {
     deferredData: {
       menuCollections: criticalData.menuCollections, // Rows below sliders
     },
+    newArrivals,
   });
 }
 
@@ -171,7 +178,7 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData } = useLoaderData();
+  const { banners, sliderCollections, deferredData, newArrivals } = useLoaderData();
 
   const menuCollections = deferredData?.menuCollections || [];
 
@@ -185,11 +192,12 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
 
-      <div className="collections-container">
-        {newArrivalsCollection && (
-          <TopProductSections collection={newArrivalsCollection} />
-        )}
-      </div>
+      {newArrivals && (
+        <div className="collections-container">
+          <h3>New Arrivals</h3>
+          <ProductRow products={newArrivals.products.nodes} />
+        </div>
+      )}
 
       <CollectionDisplay menuCollections={menuCollections} />
 
