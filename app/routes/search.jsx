@@ -801,14 +801,11 @@ async function predictiveSearch({ request, context }) {
 
   // Break the search term into individual words
   const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
-
-  // Construct a flexible query that matches any word in title, description, or SKU
-  const queryTerm = terms
-    .map(
-      (word) =>
-        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
-    )
-    .join(' AND ');
+  
+  const tokens = term.split(/(\d+)/).filter(Boolean);
+  const queryTerm = tokens
+    .map((token) => `*${token}*`) // Wildcards for partial matching
+    .join(' ');
 
   // Predictively search articles, collections, pages, products, and queries (suggestions)
   const { predictiveSearch: items, errors } = await storefront.query(
