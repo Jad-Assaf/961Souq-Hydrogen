@@ -810,7 +810,7 @@ async function predictiveSearch({ request, context }) {
     )
     .join(' AND ');
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
+  // Predictively search with additional searchable fields
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
@@ -818,6 +818,8 @@ async function predictiveSearch({ request, context }) {
         limit,
         limitScope: 'EACH',
         term: queryTerm,
+        types: ['PRODUCT'], // Limiting to products
+        searchableFields: ['TITLE', 'PRODUCT_TYPE', 'VARIANT_TITLE', 'VENDOR', 'VARIANT_SKU'], // Added searchable fields
       },
     },
   );
