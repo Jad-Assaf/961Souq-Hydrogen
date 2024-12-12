@@ -806,11 +806,9 @@ async function predictiveSearch({ request, context }) {
   const queryTerm = terms
     .map(
       (word) =>
-        `(variants.sku:${word}* OR title:${word}* OR description:${word}*)`
+        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
     )
     .join(' AND ');
-
-  console.log('Querying with term:', queryTerm); // Debugging
 
   // Predictively search articles, collections, pages, products, and queries (suggestions)
   const { predictiveSearch: items, errors } = await storefront.query(
