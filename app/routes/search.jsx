@@ -799,21 +799,16 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Normalize and preprocess the search term
-  const normalize = (input) =>
-    input.toLowerCase().replace(/[^a-z0-9]/gi, ' '); // Replace non-alphanumeric characters with spaces
+  // Normalize the search term
+  const normalizedTerm = term.toLowerCase();
 
-  const normalizedTerm = normalize(term);
+  // Function to separate each character in the title with spaces
+  const separateCharacters = (input) => input.split('').join(' ').toLowerCase();
 
-  // Tokenize and allow partial matches
-  const terms = normalizedTerm.split(/\s+/).filter(Boolean);
+  // Modify query to include separated characters in the title
+  const queryTerm = `(title:${normalizedTerm}* OR description:${normalizedTerm}* OR variants.sku:${normalizedTerm}* OR title:${separateCharacters(normalizedTerm)})`;
 
-  // Construct a query to match substrings
-  const queryTerm = terms
-    .map((word) => `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`)
-    .join(' AND ');
-
-  console.log("Constructed Query for Partial Matching:", queryTerm); // Debugging
+  console.log("Constructed Query for Character Separation:", queryTerm); // Debugging
 
   try {
     const { predictiveSearch: items, errors } = await storefront.query(
@@ -824,7 +819,7 @@ async function predictiveSearch({ request, context }) {
           limitScope: 'EACH',
           term: queryTerm,
           types: ['PRODUCT'], // Search within products only
-          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure relevant fields are searched
+          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure relevant fields are included
         },
       },
     );
