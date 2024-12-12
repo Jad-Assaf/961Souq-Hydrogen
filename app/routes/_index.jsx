@@ -92,11 +92,11 @@ async function loadCriticalData({ context }) {
     item.title.toLowerCase().replace(/\s+/g, '-')
   );
 
-  // Fetch collections for sliders and menu items
+  // Fetch collections for sliders, menu items, and new arrivals
   const [sliderCollections, menuCollections, newArrivalsCollection] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
     fetchMenuCollections(context, menuHandles),
-    fetchNewArrivalsCollection(context), // Fetch new-arrivals separately
+    fetchCollectionByHandle(context, 'new-arrivals'),
   ]);
 
   return {
@@ -107,21 +107,12 @@ async function loadCriticalData({ context }) {
 }
 
 // Fetch a single collection by handle
-async function fetchNewArrivalsCollection(context) {
-  try {
-    const handle = 'new-arrivals';
-    const { collectionByHandle } = await context.storefront.query(
-      GET_COLLECTION_BY_HANDLE_QUERY,
-      { variables: { handle } }
-    );
-    if (!collectionByHandle) {
-      console.warn('No collection found for handle:', handle);
-    }
-    return collectionByHandle || null;
-  } catch (error) {
-    console.error('Error fetching new-arrivals collection:', error);
-    return null;
-  }
+async function fetchCollectionByHandle(context, handle) {
+  const { collectionByHandle } = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    { variables: { handle } }
+  );
+  return collectionByHandle || null;
 }
 
 // Fetch menu collections
@@ -191,7 +182,8 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData, newArrivalsCollection } = useLoaderData();
+  const { banners, sliderCollections, deferredData, newArrivalsCollection } =
+    useLoaderData();
 
   const menuCollections = deferredData?.menuCollections || [];
 
