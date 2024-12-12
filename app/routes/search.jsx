@@ -799,26 +799,44 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Function to generate substrings of the search term
-  function generateSubstrings(term) {
-    const substrings = [];
-    for (let i = 0; i < term.length; i++) {
-      for (let j = i + 1; j <= term.length; j++) {
-        substrings.push(term.substring(i, j).toLowerCase());
+  // Function for simple autocorrect suggestions
+  function suggestCorrections(input, dictionary) {
+    const suggestions = [];
+    const lowerInput = input.toLowerCase();
+
+    dictionary.forEach(word => {
+      if (word.toLowerCase().startsWith(lowerInput)) {
+        suggestions.push(word);
       }
-    }
-    return substrings;
+    });
+
+    return suggestions;
   }
 
-  // Generate substrings of the search term
-  const substrings = generateSubstrings(term);
+  // A predefined dictionary of common terms (this can be extended)
+  const dictionary = [
+    "sony", "wireless", "headphones", "xm5", "1000xm5", "noise-canceling",
+    "over-ear", "comfort", "silver", "advanced", "sound"
+  ];
 
-  // Construct the query to include all substrings
-  const queryTerm = substrings
-    .map(sub => `(title:*${sub}* OR description:*${sub}* OR variants.sku:*${sub}*)`)
-    .join(' OR ');
+  // Get suggestions for the search term
+  const suggestions = suggestCorrections(term, dictionary);
 
-  console.log("Constructed Query with Substrings:", queryTerm); // Debugging
+  // If no direct results, use suggestions
+  let queryTerm;
+  if (suggestions.length > 0) {
+    queryTerm = suggestions
+      .map(
+        (word) =>
+          `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
+      )
+      .join(' AND ');
+  } else {
+    // If no suggestions, use the original term as a fallback
+    queryTerm = `(variants.sku:*${term}* OR title:*${term}* OR description:*${term}*)`;
+  }
+
+  console.log("Constructed Query with Suggestions:", queryTerm); // Debugging
 
   try {
     const { predictiveSearch: items, errors } = await storefront.query(
@@ -849,7 +867,7 @@ async function predictiveSearch({ request, context }) {
       0,
     );
 
-    return { type, term, result: { items, total } };
+    return { type, term, result: { items, total, suggestions } };
   } catch (error) {
     console.error('Error during predictive search:', error);
     return { type, term, result: null, error: error.message };
