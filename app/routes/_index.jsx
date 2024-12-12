@@ -108,12 +108,20 @@ async function loadCriticalData({ context }) {
 
 // Fetch a single collection by handle
 async function fetchNewArrivalsCollection(context) {
-  const handle = 'new-arrivals';
-  const { collectionByHandle } = await context.storefront.query(
-    GET_COLLECTION_BY_HANDLE_QUERY,
-    { variables: { handle } }
-  );
-  return collectionByHandle || null;
+  try {
+    const handle = 'new-arrivals';
+    const { collectionByHandle } = await context.storefront.query(
+      GET_COLLECTION_BY_HANDLE_QUERY,
+      { variables: { handle } }
+    );
+    if (!collectionByHandle) {
+      console.warn('No collection found for handle:', handle);
+    }
+    return collectionByHandle || null;
+  } catch (error) {
+    console.error('Error fetching new-arrivals collection:', error);
+    return null;
+  }
 }
 
 // Fetch menu collections
