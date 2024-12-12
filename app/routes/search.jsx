@@ -799,23 +799,24 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Generate substrings for partial matching
+  // Generate meaningful substrings (minimum 2 or 3 characters)
   const substrings = [];
   for (let i = 0; i < term.length; i++) {
-    for (let j = i + 1; j <= term.length; j++) {
+    for (let j = i + 2; j <= term.length; j++) { // Minimum substring length = 2
       substrings.push(term.slice(i, j));
     }
   }
 
-  // Construct query for all substrings
-  const queryTerm = substrings
-    .map(
+  // Construct query: include both the full term and substrings
+  const queryTerm = [
+    `(variants.sku:${term} OR title:${term} OR description:${term})`, // Full term
+    ...substrings.map(
       (substring) =>
         `(variants.sku:${substring} OR title:${substring} OR description:${substring})`
-    )
-    .join(' OR ');
+    ),
+  ].join(' OR ');
 
-  // Predictively search with additional searchable fields
+  // Predictively search with the constructed query
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
