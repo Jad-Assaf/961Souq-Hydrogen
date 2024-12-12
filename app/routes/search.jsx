@@ -799,51 +799,45 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Normalize the search term
-  const normalizedTerm = term.toLowerCase();
+  // Break the search term into individual words
+  const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
 
-  // Function to separate each character in the title with spaces
-  const separateCharacters = (input) => input.split('').join(' ').toLowerCase();
+  // Construct a flexible query that matches any word in title, description, or SKU
+  const queryTerm = terms
+    .map(
+      (word) =>
+        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
+    )
+    .join(' AND ');
 
-  // Modify query to include separated characters in the title
-  const queryTerm = `(title:${normalizedTerm}* OR description:${normalizedTerm}* OR variants.sku:${normalizedTerm}* OR title:${separateCharacters(normalizedTerm)})`;
-
-  console.log("Constructed Query for Character Separation:", queryTerm); // Debugging
-
-  try {
-    const { predictiveSearch: items, errors } = await storefront.query(
-      PREDICTIVE_SEARCH_QUERY,
-      {
-        variables: {
-          limit,
-          limitScope: 'EACH',
-          term: queryTerm,
-          types: ['PRODUCT'], // Search within products only
-          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure relevant fields are included
-        },
+  // Predictively search articles, collections, pages, products, and queries (suggestions)
+  const { predictiveSearch: items, errors } = await storefront.query(
+    PREDICTIVE_SEARCH_QUERY,
+    {
+      variables: {
+        limit,
+        limitScope: 'EACH',
+        term: queryTerm,
       },
+    },
+  );
+
+  if (errors) {
+    throw new Error(
+      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
     );
-
-    if (errors) {
-      throw new Error(
-        `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
-      );
-    }
-
-    if (!items) {
-      throw new Error('No predictive search data returned from Shopify API');
-    }
-
-    const total = Object.values(items).reduce(
-      (acc, item) => acc + item.length,
-      0,
-    );
-
-    return { type, term, result: { items, total } };
-  } catch (error) {
-    console.error('Error during predictive search:', error);
-    return { type, term, result: null, error: error.message };
   }
+
+  if (!items) {
+    throw new Error('No predictive search data returned from Shopify API');
+  }
+
+  const total = Object.values(items).reduce(
+    (acc, item) => acc + item.length,
+    0,
+  );
+
+  return { type, term, result: { items, total } };
 }
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
