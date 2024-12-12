@@ -139,6 +139,14 @@ async function fetchMenuCollections(context, menuHandles) {
   return collectionsGrouped.filter(Boolean); // Filter out null or empty groups
 }
 
+async function fetchCollectionByHandle(context, handle) {
+  const { collectionByHandle } = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    { variables: { handle } }
+  );
+  return collectionByHandle || null;
+}
+
 // Fetch collections by handles for sliders
 async function fetchCollectionsByHandles(context, handles) {
   const collectionPromises = handles.map(async (handle) => {
