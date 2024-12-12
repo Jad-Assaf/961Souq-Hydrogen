@@ -621,17 +621,21 @@ export const SEARCH_QUERY = `#graphql
 async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
   const { storefront } = context;
 
+  // Extract the search term
   const term = filterQuery || '';
-  const queryTerm = term
-    .split(/\s+/)
-    .map((word) => `*${word}*`) // Add wildcards around each search term
-    .join(' '); // Combine terms for substring matching
+  const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
 
-  const modifiedFilterQuery = `${queryTerm}`; // Include other filters or logic as needed
+  // Construct a Shopify-compatible query string
+  const queryTerm = terms
+    .map(
+      (word) =>
+        `(variants.sku:${word} OR title:${word} OR description:${word})`
+    )
+    .join(' AND ');
 
   try {
     const variables = {
-      filterQuery: modifiedFilterQuery,
+      filterQuery: queryTerm,
       sortKey,
       reverse,
       minPrice,
@@ -646,11 +650,11 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
 
     if (!products?.edges?.length) {
       console.error('No products found in response:', products); // Debugging
-      return { term: modifiedFilterQuery, result: { products: { edges: [] }, total: 0 } };
+      return { term: queryTerm, result: { products: { edges: [] }, total: 0 } };
     }
 
     return {
-      term: modifiedFilterQuery,
+      term: queryTerm,
       result: {
         products,
         total: products.edges.length,
@@ -658,7 +662,7 @@ async function regularSearch({ request, context, filterQuery, sortKey, reverse, 
     };
   } catch (error) {
     console.error('Error during regular search:', error);
-    return { term: modifiedFilterQuery, result: null, error: error.message };
+    return { term: queryTerm, result: null, error: error.message };
   }
 }
 
@@ -807,12 +811,14 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Break the search term into individual words and apply wildcards
+  // Break the search term into individual words
   const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
+
+  // Construct a Shopify-compatible query string
   const queryTerm = terms
     .map(
       (word) =>
-        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
+        `(variants.sku:${word} OR title:${word} OR description:${word})`
     )
     .join(' AND ');
 
