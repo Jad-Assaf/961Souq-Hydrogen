@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, startTransition, useEffect, useState } from 'react';
+import React, { Suspense, lazy, startTransition } from 'react';
 import { defer } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { BannerSlideshow } from '../components/BannerSlideshow';
@@ -62,7 +62,7 @@ export async function loader(args) {
     {
       desktopImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-banner-2_a2c3f993-278f-48c1-82de-ac42ceb6f3fc.jpg?v=1716031887',
       mobileImageUrl: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad_3a178a79-4428-4aac-b5bd-41ad3f04e33a.jpg?v=1716031354',
-      link: '/collections/apple-ipad',
+      link: '/collections/remarkable',
     },
   ];
 
@@ -74,74 +74,28 @@ export async function loader(args) {
     deferredData: {
       menuCollections: criticalData.menuCollections, // Rows below sliders
     },
-    context,
   });
 }
 
 async function loadCriticalData({ context }) {
-  const menuHandle = 'new-main-menu';
-  const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-    variables: { handle: menuHandle },
-  });
+  // Hardcode the collection handles
+  const hardcodedHandles = ['new-arrivals', 'apple', 'gaming', 'laptops', 'desktops', 'pc-parts', 'networking', 'monitors', 'mobiles', 'tablets', 'audio', 'accessories', 'fitness', 'photography', 'home-appliances'];
 
-  if (!menu) {
-    throw new Response('Menu not found', { status: 404 });
-  }
-
-  // Extract handles from menu items
-  const menuHandles = menu.items.map((item) =>
-    item.title.toLowerCase().replace(/\s+/g, '-')
-  );
-
-  // Fetch collections for sliders and menu items
-  const [sliderCollections, menuCollections] = await Promise.all([
-    fetchCollectionsByHandles(context, menuHandles),
-    fetchMenuCollections(context, menuHandles),
+  // Fetch collections based on hardcoded handles
+  const [sliderCollections, menuCollections, hardcodedCollections] = await Promise.all([
+    fetchCollectionsByHandles(context, ['slider-collection-handle-1', 'slider-collection-handle-2']), // Replace with actual handles for slider
+    fetchMenuCollections(context, ['menu-collection-handle-1', 'menu-collection-handle-2']), // Replace with actual handles for menu
+    fetchCollectionsByHandles(context, hardcodedHandles),
   ]);
 
   return {
     sliderCollections, // Slider data
     menuCollections, // Menu data grouped by collections
+    hardcodedCollections, // Hardcoded collections
   };
 }
 
-async function fetchCollectionByHandle(context, handle) {
-  const { collectionByHandle } = await context.storefront.query(
-    GET_COLLECTION_BY_HANDLE_QUERY,
-    { variables: { handle } }
-  );
-  return collectionByHandle || null;
-}
-
 // Fetch menu collections
-async function fetchMenuCollections(context, menuHandles) {
-  const collectionsPromises = menuHandles.map(async (handle) => {
-    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
-      variables: { handle },
-    });
-
-    if (!menu || !menu.items || menu.items.length === 0) {
-      return null;
-    }
-
-    const collectionPromises = menu.items.map(async (item) => {
-      const sanitizedHandle = item.title.toLowerCase().replace(/\s+/g, '-');
-      const { collectionByHandle } = await context.storefront.query(
-        GET_COLLECTION_BY_HANDLE_QUERY,
-        { variables: { handle: sanitizedHandle } }
-      );
-      return collectionByHandle || null;
-    });
-
-    const collections = await Promise.all(collectionPromises);
-    return collections.filter(Boolean); // Filter out null collections
-  });
-
-  const collectionsGrouped = await Promise.all(collectionsPromises);
-  return collectionsGrouped.filter(Boolean); // Filter out null or empty groups
-}
-
-// Fetch collections by handles for sliders
 async function fetchCollectionsByHandles(context, handles) {
   const collectionPromises = handles.map(async (handle) => {
     const { collectionByHandle } = await context.storefront.query(
@@ -152,7 +106,35 @@ async function fetchCollectionsByHandles(context, handles) {
   });
 
   const collections = await Promise.all(collectionPromises);
-  return collections.filter(Boolean);
+  return collections.filter(Boolean); // Filter out null collections
+}
+
+// Fetch menu collections
+async function fetchMenuCollections(context, handles) {
+  const collectionPromises = handles.map(async (handle) => {
+    const { menu } = await context.storefront.query(GET_MENU_QUERY, {
+      variables: { handle },
+    });
+
+    if (!menu || !menu.items || menu.items.length === 0) {
+      return null;
+    }
+
+    const subCollectionPromises = menu.items.map(async (item) => {
+      const sanitizedHandle = item.title.toLowerCase().replace(/\s+/g, '-');
+      const { collectionByHandle } = await context.storefront.query(
+        GET_COLLECTION_BY_HANDLE_QUERY,
+        { variables: { handle: sanitizedHandle } }
+      );
+      return collectionByHandle || null;
+    });
+
+    const subCollections = await Promise.all(subCollectionPromises);
+    return subCollections.filter(Boolean);
+  });
+
+  const groupedCollections = await Promise.all(collectionPromises);
+  return groupedCollections.filter(Boolean);
 }
 
 const brandsData = [
@@ -180,19 +162,13 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const { banners, sliderCollections, deferredData, context } = useLoaderData();
+  const { banners, sliderCollections, deferredData } = useLoaderData();
 
-  const [newArrivalsCollection, setNewArrivalsCollection] = useState(null);
-  const menuCollections = deferredData?.menuCollections || [];
-
-  useEffect(() => {
-    async function loadNewArrivals() {
-      if (!context) return;
-      const newArrivals = await fetchCollectionByHandle(context, 'new-arrivals');
-      setNewArrivalsCollection(newArrivals);
-    }
-    loadNewArrivals();
-  }, [context]);
+  // Extract hardcoded collections from deferredData
+  const hardcodedCollections = deferredData.hardcodedCollections || [];
+  const newArrivals = hardcodedCollections.find(
+    (collection) => collection.handle === 'new-arrivals'
+  );
 
   return (
     <div className="home">
@@ -200,16 +176,14 @@ export default function Homepage() {
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
 
-      {/* New Arrivals Section */}
-      <div className="collections-container">
-        {newArrivalsCollection ? (
-          <TopProductSections collection={newArrivalsCollection} />
-        ) : (
-          <p>Loading New Arrivals...</p>
-        )}
-      </div>
+      {/* Hardcoded collections */}
+      {newArrivals && (
+        <div className="collections-container">
+          <TopProductSections collection={newArrivals} />
+        </div>
+      )}
 
-      <CollectionDisplay menuCollections={menuCollections} />
+      <CollectionDisplay menuCollections={deferredData.menuCollections || []} />
       <BrandSection brands={brandsData} />
     </div>
   );
