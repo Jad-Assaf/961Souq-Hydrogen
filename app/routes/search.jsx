@@ -799,42 +799,46 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Convert term to lowercase for case-insensitive matching
-  const lowercaseTerm = term.toLowerCase();
+  // Add wildcards explicitly to the term for substring matching
+  const wildcardTerm = `*${term}*`.toLowerCase();
 
-  // Construct the query to match substrings in a case-insensitive manner
-  const queryTerm = `(title:*${lowercaseTerm}* OR description:*${lowercaseTerm}* OR variants.sku:*${lowercaseTerm}*)`;
+  // Construct query for predictive search
+  const queryTerm = `(title:${wildcardTerm} OR description:${wildcardTerm} OR variants.sku:${wildcardTerm})`;
 
-  // Predictively search for products using the modified query
-  const { predictiveSearch: items, errors } = await storefront.query(
-    PREDICTIVE_SEARCH_QUERY,
-    {
-      variables: {
-        limit,
-        limitScope: 'EACH',
-        term: queryTerm,
-        types: ['PRODUCT'], // Search products only
-        searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure relevant fields are included
+  try {
+    const { predictiveSearch: items, errors } = await storefront.query(
+      PREDICTIVE_SEARCH_QUERY,
+      {
+        variables: {
+          limit,
+          limitScope: 'EACH',
+          term: queryTerm,
+          types: ['PRODUCT'], // Limit to products
+          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Specify searchable fields
+        },
       },
-    },
-  );
-
-  if (errors) {
-    throw new Error(
-      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
     );
+
+    if (errors) {
+      throw new Error(
+        `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
+      );
+    }
+
+    if (!items) {
+      throw new Error('No predictive search data returned from Shopify API');
+    }
+
+    const total = Object.values(items).reduce(
+      (acc, item) => acc + item.length,
+      0,
+    );
+
+    return { type, term, result: { items, total } };
+  } catch (error) {
+    console.error('Error during predictive search:', error);
+    return { type, term, result: null, error: error.message };
   }
-
-  if (!items) {
-    throw new Error('No predictive search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, item) => acc + item.length,
-    0,
-  );
-
-  return { type, term, result: { items, total } };
 }
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
