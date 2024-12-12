@@ -799,13 +799,26 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Prepare the search term for partial matching
-  const modifiedTerm = term.toLowerCase();
+  // Function to generate substrings of the search term
+  function generateSubstrings(term) {
+    const substrings = [];
+    for (let i = 0; i < term.length; i++) {
+      for (let j = i + 1; j <= term.length; j++) {
+        substrings.push(term.substring(i, j).toLowerCase());
+      }
+    }
+    return substrings;
+  }
 
-  // Use Shopify's `prefix` for partial matching on the last term
-  const queryTerm = `(title:*${modifiedTerm}* OR description:*${modifiedTerm}* OR variants.sku:*${modifiedTerm}*)`;
+  // Generate substrings of the search term
+  const substrings = generateSubstrings(term);
 
-  console.log("Constructed Query:", queryTerm); // Debugging
+  // Construct the query to include all substrings
+  const queryTerm = substrings
+    .map(sub => `(title:*${sub}* OR description:*${sub}* OR variants.sku:*${sub}*)`)
+    .join(' OR ');
+
+  console.log("Constructed Query with Substrings:", queryTerm); // Debugging
 
   try {
     const { predictiveSearch: items, errors } = await storefront.query(
@@ -816,7 +829,6 @@ async function predictiveSearch({ request, context }) {
           limitScope: 'EACH',
           term: queryTerm,
           types: ['PRODUCT'], // Search within products only
-          prefix: 'LAST', // Adds support for partial matching
           searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Ensure we search relevant fields
         },
       },
