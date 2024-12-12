@@ -201,8 +201,16 @@ export default function Homepage() {
       <CategorySlider sliderCollections={sliderCollections} />
 
       {newArrivals && (
-        <div className="collections-container">
-          <h3>New Arrivals</h3>
+        <div key={collection.id} className="collection-section">
+          <div className="collection-header">
+            <h3>{collection.title}</h3>
+            <Link
+              to={`/collections/${collection.handle}`}
+              className="view-all-link"
+            >
+              View All
+            </Link>
+          </div>
           <ProductRow products={newArrivals.products.nodes} />
         </div>
       )}
