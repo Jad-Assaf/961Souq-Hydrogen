@@ -799,11 +799,13 @@ async function predictiveSearch({ request, context }) {
 
   if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
 
-  // Add wildcards explicitly to the term for substring matching
-  const wildcardTerm = `*${term}*`.toLowerCase();
+  // Prepare the term for exact or substring matching
+  const wildcardTerm = `*${term.toLowerCase()}*`;
 
-  // Construct query for predictive search
+  // Construct query to prioritize exact matches and substrings
   const queryTerm = `(title:${wildcardTerm} OR description:${wildcardTerm} OR variants.sku:${wildcardTerm})`;
+
+  console.log("Constructed Query:", queryTerm); // Debugging
 
   try {
     const { predictiveSearch: items, errors } = await storefront.query(
@@ -813,8 +815,8 @@ async function predictiveSearch({ request, context }) {
           limit,
           limitScope: 'EACH',
           term: queryTerm,
-          types: ['PRODUCT'], // Limit to products
-          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Specify searchable fields
+          types: ['PRODUCT'],
+          searchableFields: ['TITLE', 'DESCRIPTION', 'VARIANT_SKU'], // Explicit fields
         },
       },
     );
