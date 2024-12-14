@@ -176,11 +176,12 @@ export function ProductItem({ product, index }) {
     return (
         <motion.div
             ref={ref}
-            initial={{ opacity: 0, x: -20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            initial={{ filter: 5, opacity: 0, x: -20 }}
+            animate={isInView ? { filter: 0, opacity: 1, x: 0 } : {}}
             transition={{
                 x: { type: "spring", stiffness: 100, damping: 20 },
                 opacity: { duration: 0.3 },
+                filter: { duration: 0.5 },
                 delay: index * 0.1,
             }}
             className="product-card"
