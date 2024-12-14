@@ -85,12 +85,62 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
         ));
     }, [banners, currentIndex]);
 
+    const renderedMobileBanners = useMemo(() => {
+        return banners.map((banner, index) => (
+            <motion.div
+                key={index}
+                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
+                    }`}
+                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
+                animate={
+                    index === currentIndex
+                        ? { opacity: 1, x: 0 }
+                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
+                }
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ type: "spring", stiffness: 100, damping: 10 }}
+                drag="x"
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd}
+                style={styles.bannerSlide}
+            >
+                <a
+                    href={banner.link}
+                    target="_self"
+                    rel="noopener noreferrer"
+                    style={styles.link}
+                >
+                    <Image
+                        data={{
+                            altText: `Banner ${index + 1}`,
+                            url: banner.mobileImageUrl,
+                        }}
+                        width="100vw"
+                        height="auto"
+                        className="banner-image"
+                        style={styles.bannerImage}
+                        loading="eager"
+                        decoding="sync"
+                    />
+                </a>
+            </motion.div>
+        ));
+    }, [banners, currentIndex]);
+
     return (
         <div className="banner-slideshow" style={styles.bannerSlideshow}>
             {/* Desktop Banners */}
             <div className="desktop-banners">
                 <AnimatePresence initial={false}>
                     {renderedDesktopBanners[currentIndex]}
+                </AnimatePresence>
+            </div>
+
+            {/* Mobile Banners */}
+            <div className="mobile-banners">
+                <AnimatePresence initial={false}>
+                    {renderedMobileBanners[currentIndex]}
                 </AnimatePresence>
             </div>
 
@@ -113,7 +163,7 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
                         className={`dot ${index === currentIndex ? "active" : ""}`}
                         style={{
                             ...styles.dot,
-                            backgroundColor: index === currentIndex ? "#fff" : "#484848",
+                            backgroundColor: index === currentIndex ? "#000" : "#ccc",
                         }}
                         onClick={() => setCurrentIndex(index)}
                     ></div>
