@@ -199,8 +199,15 @@ export function ProductItem({ product, index }) {
                         <img
                             src={images[currentImageIndex]?.url}
                             alt={images[currentImageIndex]?.altText || "Product Image"}
-                            style={styles.image}
+                            aspectRatio="1/1"
+                            sizes="(min-width: 45em) 20vw, 40vw"
+                            srcSet={`${images[currentImageIndex]?.url}?width=300&quality=10 300w,
+                                     ${images[currentImageIndex]?.url}?width=600&quality=10 600w,
+                                     ${images[currentImageIndex]?.url}?width=1200&quality=10 1200w`}
+                            width="180px"
+                            height="180px"
                             loading="lazy"
+                            style={styles.image}
                             className="product-slideshow-image"
                         />
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
@@ -296,13 +303,11 @@ const styles = {
         width: "80%",
         height: "3px",
         backgroundColor: "#e0e0e0",
-        borderRadius: "30px",
     },
     progress: {
         height: "100%",
         backgroundColor: "#000",
         transition: "width 0.1s linear",
-        borderRadius: "30px",
     },
     dotsContainer: {
         position: "absolute",
@@ -320,5 +325,3 @@ const styles = {
         transition: "background-color 0.3s ease",
     },
 };
-
-
