@@ -102,11 +102,13 @@ export function ProductItem({ product, index }) {
 
     // Handle swipe gestures for mobile
     const handleTouchStart = (e) => {
+        e.stopPropagation(); // Prevent touch from propagating to the row
         const touch = e.touches[0];
         setStartTouch({ x: touch.clientX, y: touch.clientY });
     };
 
     const handleTouchMove = (e) => {
+        e.stopPropagation(); // Prevent touch from propagating to the row
         if (!startTouch) return;
         const touch = e.touches[0];
         const deltaX = touch.clientX - startTouch.x;
@@ -128,7 +130,8 @@ export function ProductItem({ product, index }) {
         }
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (e) => {
+        e.stopPropagation(); // Prevent touch from propagating to the row
         setStartTouch(null); // Reset touch start on touch end
     };
 
