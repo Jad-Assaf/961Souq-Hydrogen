@@ -163,7 +163,7 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
                         className={`dot ${index === currentIndex ? "active" : ""}`}
                         style={{
                             ...styles.dot,
-                            backgroundColor: index === currentIndex ? "#000" : "#ccc",
+                            backgroundColor: index === currentIndex ? "#fff" : "#484848",
                         }}
                         onClick={() => setCurrentIndex(index)}
                     ></div>
