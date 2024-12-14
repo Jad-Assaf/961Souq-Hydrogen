@@ -97,6 +97,10 @@ button {
   .banner-slide {
     max-height: unset !important;
   }
+
+  .product-slideshow-progress-bar {
+    display: none;
+  }
 }
 
 /* Hide the scrollbar for a cleaner look */
