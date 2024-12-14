@@ -222,21 +222,21 @@ export function ProductItem({ product, index }) {
 const styles = {
     slideshow: {
         position: "relative",
-        width: "180px",
-        height: "180px",
+        width: "100%",
+        height: "auto",
         overflow: "hidden",
     },
     image: {
         width: "100%",
-        height: "100%",
+        height: "auto",
         objectFit: "cover",
     },
     progressBar: {
         position: "absolute",
         bottom: "5px",
         left: "0",
-        width: "100%",
-        height: "5px",
+        width: "80%",
+        height: "3px",
         backgroundColor: "#e0e0e0",
     },
     progress: {
