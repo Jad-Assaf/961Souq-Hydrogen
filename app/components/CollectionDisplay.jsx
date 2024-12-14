@@ -92,17 +92,47 @@ const RightArrowIcon = () => (
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
-    const { open } = useAside();
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [progress, setProgress] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
+    const slideshowInterval = 3000; // Time for each slide
 
-    // Check for available variants and set up selected variant
+    const images = product.images?.nodes || [];
+
+    useEffect(() => {
+        let imageTimer, progressTimer;
+
+        if (isHovered) {
+            // Image slideshow timer
+            imageTimer = setInterval(() => {
+                setCurrentImageIndex((prevIndex) =>
+                    prevIndex === images.length - 1 ? 0 : prevIndex + 1
+                );
+            }, slideshowInterval);
+
+            // Progress bar timer
+            progressTimer = setInterval(() => {
+                setProgress((prev) => (prev >= 100 ? 0 : prev + 100 / (slideshowInterval / 100)));
+            }, 100);
+        } else {
+            setProgress(0); // Reset progress when not hovered
+        }
+
+        return () => {
+            clearInterval(imageTimer);
+            clearInterval(progressTimer);
+        };
+    }, [isHovered, images.length]);
+
+    useEffect(() => {
+        setProgress(0); // Reset progress when the current image changes
+    }, [currentImageIndex]);
+
     const selectedVariant =
-        product.variants?.nodes?.find(variant => variant.availableForSale) ||
+        product.variants?.nodes?.find((variant) => variant.availableForSale) ||
         product.variants?.nodes?.[0] ||
         null;
 
-    const hasVariants = product.variants?.nodes?.length > 1;
-
-    // Determine if there's a discount by comparing the regular and discounted prices
     const hasDiscount =
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
@@ -113,29 +143,36 @@ export function ProductItem({ product, index }) {
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{
-                x: { type: 'spring', stiffness: 100, damping: 20 },
+                x: { type: "spring", stiffness: 100, damping: 20 },
                 opacity: { duration: 0.3 },
-                // filter: { duration: 0.5 },
                 delay: index * 0.1,
             }}
             className="product-card"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
             <Link to={`/products/${product.handle}`}>
-                {product.images?.nodes?.[0] && (
-                    <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 40vw"
-                        srcSet={`${product.images.nodes[0].url}?width=300&quality=10 300w,
-                         ${product.images.nodes[0].url}?width=600&quality=10 600w,
-                         ${product.images.nodes[0].url}?width=1200&quality=10 1200w`}
-                        alt={product.images.nodes[0].altText || 'Product Image'}
-                        width="180px"
-                        height="180px"
-                        loading="lazy"
-                    />
+                {images.length > 0 && (
+                    <div className="product-slideshow" style={styles.slideshow}>
+                        <img
+                            src={images[currentImageIndex]?.url}
+                            alt={images[currentImageIndex]?.altText || "Product Image"}
+                            style={styles.image}
+                            loading="lazy"
+                            className="product-slideshow-image"
+                        />
+                        <div className="product-slideshow-progress-bar" style={styles.progressBar}>
+                            <div
+                                className="product-slideshow-progress"
+                                style={{
+                                    ...styles.progress,
+                                    width: `${progress}%`,
+                                }}
+                            ></div>
+                        </div>
+                    </div>
                 )}
-                <h4 className="product-title">{truncateText(product.title, 50)}</h4>
+                <h4 className="product-title">{product.title}</h4>
                 <div className="product-price">
                     {selectedVariant?.price && <Money data={selectedVariant.price} />}
                     {hasDiscount && (
@@ -150,15 +187,14 @@ export function ProductItem({ product, index }) {
             <AddToCartButton
                 disabled={!selectedVariant || !selectedVariant.availableForSale}
                 onClick={() => {
-                    if (hasVariants) {
-                        // Navigate to product page if multiple variants
+                    if (product.variants?.nodes?.length > 1) {
                         window.location.href = `/products/${product.handle}`;
                     } else {
-                        open('cart');
+                        // Trigger cart logic
                     }
                 }}
                 lines={
-                    selectedVariant && !hasVariants
+                    selectedVariant
                         ? [
                             {
                                 merchandiseId: selectedVariant.id,
@@ -174,11 +210,38 @@ export function ProductItem({ product, index }) {
                 }
             >
                 {!selectedVariant?.availableForSale
-                    ? 'Sold out'
-                    : hasVariants
-                        ? 'Select Options'
-                        : 'Add to cart'}
+                    ? "Sold out"
+                    : product.variants?.nodes?.length > 1
+                        ? "Select Options"
+                        : "Add to cart"}
             </AddToCartButton>
         </motion.div>
     );
 }
+
+const styles = {
+    slideshow: {
+        position: "relative",
+        width: "180px",
+        height: "180px",
+        overflow: "hidden",
+    },
+    image: {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+    },
+    progressBar: {
+        position: "absolute",
+        bottom: "5px",
+        left: "0",
+        width: "100%",
+        height: "5px",
+        backgroundColor: "#e0e0e0",
+    },
+    progress: {
+        height: "100%",
+        backgroundColor: "#000",
+        transition: "width 0.1s linear",
+    },
+};
