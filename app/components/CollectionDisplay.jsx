@@ -176,11 +176,11 @@ export function ProductItem({ product, index }) {
     return (
         <motion.div
             ref={ref}
-            initial={{ opacity: 0, x: -20, filter: "blur(5px)" }}
+            initial={{ opacity: 0, x: -20, filter: "blur(10px)" }}
             animate={{
                 opacity: isInView ? 1 : 0,
                 x: isInView ? 0 : -20,
-                filter: isInView ? "blur(0px)" : "blur(5px)",
+                filter: isInView ? "blur(0px)" : "blur(10px)",
             }}
             transition={{
                 x: { type: "spring", stiffness: 100, damping: 20 },
@@ -214,7 +214,7 @@ export function ProductItem({ product, index }) {
                             loading="lazy"
                             style={styles.image}
                             className="product-slideshow-image"
-                            initial={{ filter: "blur(5px)" }}
+                            initial={{ filter: "blur(10px)" }}
                             animate={{ filter: "blur(0px)" }}
                             transition={{ duration: 0.5 }}
                         />
