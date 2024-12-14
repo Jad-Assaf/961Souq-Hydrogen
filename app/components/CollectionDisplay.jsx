@@ -91,10 +91,9 @@ const RightArrowIcon = () => (
 
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: true });
+    const isInView = useInView(ref, { once: false, threshold: 0.5 });
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [isHovered, setIsHovered] = useState(false);
     const slideshowInterval = 3000; // Time for each slide
 
     const images = product.images?.nodes || [];
@@ -102,8 +101,8 @@ export function ProductItem({ product, index }) {
     useEffect(() => {
         let imageTimer, progressTimer;
 
-        if (isHovered) {
-            // Image slideshow timer
+        if (isInView) {
+            // Start slideshow when the card is in view
             imageTimer = setInterval(() => {
                 setCurrentImageIndex((prevIndex) =>
                     prevIndex === images.length - 1 ? 0 : prevIndex + 1
@@ -115,14 +114,14 @@ export function ProductItem({ product, index }) {
                 setProgress((prev) => (prev >= 100 ? 0 : prev + 100 / (slideshowInterval / 100)));
             }, 100);
         } else {
-            setProgress(0); // Reset progress when not hovered
+            setProgress(0); // Reset progress when out of view
         }
 
         return () => {
             clearInterval(imageTimer);
             clearInterval(progressTimer);
         };
-    }, [isHovered, images.length]);
+    }, [isInView, images.length]);
 
     useEffect(() => {
         setProgress(0); // Reset progress when the current image changes
@@ -148,18 +147,21 @@ export function ProductItem({ product, index }) {
                 delay: index * 0.1,
             }}
             className="product-card"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
             <Link to={`/products/${product.handle}`}>
                 {images.length > 0 && (
                     <div className="product-slideshow" style={styles.slideshow}>
-                        <img
+                        <motion.img
+                            key={currentImageIndex}
                             src={images[currentImageIndex]?.url}
                             alt={images[currentImageIndex]?.altText || "Product Image"}
                             style={styles.image}
                             loading="lazy"
                             className="product-slideshow-image"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
                         />
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
                             <div
@@ -276,4 +278,3 @@ const styles = {
         transition: "background-color 0.3s ease",
     },
 };
-
