@@ -176,8 +176,12 @@ export function ProductItem({ product, index }) {
     return (
         <motion.div
             ref={ref}
-            initial={{ filter: 5, opacity: 0, x: -20 }}
-            animate={isInView ? { filter: 0, opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, x: -20, filter: "blur(5px)" }}
+            animate={{
+                opacity: isInView ? 1 : 0,
+                x: isInView ? 0 : -20,
+                filter: isInView ? "blur(0px)" : "blur(5px)",
+            }}
             transition={{
                 x: { type: "spring", stiffness: 100, damping: 20 },
                 opacity: { duration: 0.3 },
@@ -197,7 +201,7 @@ export function ProductItem({ product, index }) {
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                     >
-                        <img
+                        <motion.img
                             src={images[currentImageIndex]?.url}
                             alt={images[currentImageIndex]?.altText || "Product Image"}
                             aspectRatio="1/1"
@@ -210,6 +214,9 @@ export function ProductItem({ product, index }) {
                             loading="lazy"
                             style={styles.image}
                             className="product-slideshow-image"
+                            initial={{ filter: "blur(5px)" }}
+                            animate={{ filter: "blur(0px)" }}
+                            transition={{ duration: 0.5 }}
                         />
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
                             <div
