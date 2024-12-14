@@ -90,26 +90,30 @@ const RightArrowIcon = () => (
 );
 
 export function ProductItem({ product, index }) {
-    const ref = useRef(null);
+    const elementRef = useRef(null); // Local ref for DOM operations
+    const { ref: inViewRef, inView: isInView } = useInView({
+        threshold: 0.5, // Detect when element is halfway in view
+        triggerOnce: false,
+    });
+    const combinedRef = (node) => {
+        elementRef.current = node;
+        inViewRef(node); // Combine refs
+    };
+
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const slideshowInterval = 3000; // Time for each slide
 
-    const { ref: inViewRef, inView: isInView } = useInView({
-        threshold: 0.5, // Approximately halfway into the viewport
-        triggerOnce: false,
-    });
-
     const images = product.images?.nodes || [];
 
-    // Function to check if the card's horizontal center is near the screen's center
+    // Function to check if the card is horizontally centered
     const isInHorizontalCenter = () => {
-        if (ref.current) {
-            const rect = ref.current.getBoundingClientRect();
+        if (elementRef.current) {
+            const rect = elementRef.current.getBoundingClientRect();
             const viewportCenter = window.innerWidth / 2;
             const cardCenter = rect.left + rect.width / 2;
-            return Math.abs(viewportCenter - cardCenter) < rect.width / 2; // Allow some leniency
+            return Math.abs(viewportCenter - cardCenter) < rect.width / 2;
         }
         return false;
     };
@@ -120,7 +124,7 @@ export function ProductItem({ product, index }) {
             // On desktop: Slide on hover
             return isHovered;
         } else {
-            // On mobile: Slide when vertically in view and horizontally near center
+            // On mobile: Slide when vertically in view and horizontally centered
             return isInView && isInHorizontalCenter();
         }
     };
@@ -163,15 +167,9 @@ export function ProductItem({ product, index }) {
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
-    // Combine refs for IntersectionObserver and local ref
-    const setRefs = (node) => {
-        ref.current = node;
-        inViewRef(node);
-    };
-
     return (
         <motion.div
-            ref={setRefs} // Combine refs
+            ref={combinedRef} // Properly combined refs
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{
