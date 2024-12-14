@@ -5,7 +5,6 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
-import NodeCache from 'node-cache';
 
 const LazyBrandSection = lazy(() => import('~/components/BrandsSection'));
 
@@ -26,8 +25,8 @@ export async function loader(args) {
   const cacheTTL = 86400 * 1000; // 24 hours in milliseconds
   const now = Date.now();
 
-  let cachedData = cache.get(cacheKey);
-
+  // Check if data is in cache
+  const cachedData = cache.get(cacheKey);
   if (cachedData && cachedData.expiry > now) {
     return defer(cachedData.value, {
       headers: {
@@ -95,7 +94,7 @@ export async function loader(args) {
     },
   };
 
-  // Store in cache
+  // Cache the new data
   cache.set(cacheKey, { value: newData, expiry: now + cacheTTL });
 
   return defer(newData, {
