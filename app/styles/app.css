@@ -212,6 +212,10 @@ button {
   text-align: center;
 }
 
+.collection-product-row:has(.product-card:hover) .product-card:not(:hover){
+  filter: blur(5px);
+}
+
 .grid-cols-2 .product-card,
 .grid-cols-3 .product-card,
 .grid-cols-4 .product-card,
