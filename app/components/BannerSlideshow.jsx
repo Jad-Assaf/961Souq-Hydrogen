@@ -113,7 +113,7 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
                         className={`dot ${index === currentIndex ? "active" : ""}`}
                         style={{
                             ...styles.dot,
-                            backgroundColor: index === currentIndex ? "#000" : "#ccc",
+                            backgroundColor: index === currentIndex ? "#fff" : "#000",
                         }}
                         onClick={() => setCurrentIndex(index)}
                     ></div>
@@ -156,26 +156,28 @@ const styles = {
         position: "absolute",
         bottom: "20px",
         left: 0,
-        width: "100%",
-        height: "5px",
-        backgroundColor: "#e0e0e0",
+        width: "45%",
+        height: "3px",
+        backgroundColor: "#000",
+        borderRadius: "20px",
     },
     progress: {
         height: "100%",
-        backgroundColor: "#000",
+        backgroundColor: "#fff",
         transition: "width 0.1s linear",
     },
     indicatorDots: {
         position: "absolute",
-        bottom: "10px",
-        left: "50%",
-        transform: "translateX(-50%)",
+        width: "100%",
+        bottom: "2px",
         display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         gap: "10px",
     },
     dot: {
-        width: "10px",
-        height: "10px",
+        width: "5px",
+        height: "5px",
         borderRadius: "50%",
         cursor: "pointer",
     },
