@@ -5,8 +5,7 @@ import { BannerSlideshow } from '../components/BannerSlideshow';
 import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
-
-const LazyBrandSection = lazy(() => import('../components/BrandsSection'));
+import BrandSection from '~/components/BrandsSection';
 
 const cache = new Map();
 
@@ -218,9 +217,7 @@ export default function Homepage() {
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivalsCollection && <TopProductSections collection={newArrivalsCollection} />}
       <CollectionDisplay menuCollections={menuCollections} />
-      <Suspense fallback={<p>Loading brands...</p>}>
-        <LazyBrandSection brands={brandsData} />
-      </Suspense>
+      <BrandSection brands={brandsData}/>
     </div>
   );
 }
@@ -252,7 +249,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               currencyCode
             }
           }
-          images(first: 5) {
+          images(first: 4) {
             nodes {
               url
               altText
