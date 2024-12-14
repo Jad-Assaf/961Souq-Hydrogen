@@ -170,6 +170,22 @@ export function ProductItem({ product, index }) {
                                 }}
                             ></div>
                         </div>
+                        {/* Indicator Dots */}
+                        <div className="product-slideshow-dots" style={styles.dotsContainer}>
+                            {images.map((_, index) => (
+                                <div
+                                    key={index}
+                                    className={`product-slideshow-dot ${currentImageIndex === index ? "active" : ""
+                                        }`}
+                                    style={{
+                                        ...styles.dot,
+                                        backgroundColor:
+                                            currentImageIndex === index ? "#000" : "#e0e0e0",
+                                    }}
+                                    onClick={() => setCurrentImageIndex(index)}
+                                ></div>
+                            ))}
+                        </div>
                     </div>
                 )}
                 <h4 className="product-title">{product.title}</h4>
@@ -234,7 +250,7 @@ const styles = {
     progressBar: {
         position: "absolute",
         bottom: "5px",
-        left: "0",
+        left: "10%",
         width: "80%",
         height: "3px",
         backgroundColor: "#e0e0e0",
@@ -244,4 +260,20 @@ const styles = {
         backgroundColor: "#000",
         transition: "width 0.1s linear",
     },
+    dotsContainer: {
+        position: "absolute",
+        bottom: "15px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        display: "flex",
+        gap: "8px",
+    },
+    dot: {
+        width: "5px",
+        height: "5px",
+        borderRadius: "50%",
+        cursor: "pointer",
+        transition: "background-color 0.3s ease",
+    },
 };
+
