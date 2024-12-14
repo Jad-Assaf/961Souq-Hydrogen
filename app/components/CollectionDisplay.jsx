@@ -135,6 +135,13 @@ export function ProductItem({ product, index }) {
         setStartTouch(null); // Reset touch start on touch end
     };
 
+    // Handle image click on mobile devices to switch images
+    const handleImageClick = () => {
+        setCurrentImageIndex((prevIndex) =>
+            prevIndex === images.length - 1 ? 0 : prevIndex + 1
+        );
+    };
+
     useEffect(() => {
         let imageTimer, progressTimer;
 
@@ -217,6 +224,7 @@ export function ProductItem({ product, index }) {
                             initial={{ filter: "blur(10px)" }}
                             animate={{ filter: "blur(0px)" }}
                             transition={{ duration: 0.5 }}
+                            onClick={handleImageClick} // Add click handler
                         />
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
                             <div
