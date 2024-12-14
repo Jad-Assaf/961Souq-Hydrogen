@@ -94,15 +94,24 @@ export function ProductItem({ product, index }) {
     const isInView = useInView(ref, { once: false, threshold: 0.5 });
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
     const slideshowInterval = 3000; // Time for each slide
 
     const images = product.images?.nodes || [];
 
+    const shouldSlide = () => {
+        // Desktop: slide only on hover; Mobile: slide when visible
+        if (window.innerWidth >= 768) {
+            return isHovered;
+        }
+        return isInView;
+    };
+
     useEffect(() => {
         let imageTimer, progressTimer;
 
-        if (isInView) {
-            // Start slideshow when the card is in view
+        if (shouldSlide()) {
+            // Start slideshow
             imageTimer = setInterval(() => {
                 setCurrentImageIndex((prevIndex) =>
                     prevIndex === images.length - 1 ? 0 : prevIndex + 1
@@ -114,14 +123,14 @@ export function ProductItem({ product, index }) {
                 setProgress((prev) => (prev >= 100 ? 0 : prev + 100 / (slideshowInterval / 100)));
             }, 100);
         } else {
-            setProgress(0); // Reset progress when out of view
+            setProgress(0); // Reset progress when not sliding
         }
 
         return () => {
             clearInterval(imageTimer);
             clearInterval(progressTimer);
         };
-    }, [isInView, images.length]);
+    }, [isHovered, isInView, images.length]);
 
     useEffect(() => {
         setProgress(0); // Reset progress when the current image changes
@@ -147,22 +156,33 @@ export function ProductItem({ product, index }) {
                 delay: index * 0.1,
             }}
             className="product-card"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
             <Link to={`/products/${product.handle}`}>
                 {images.length > 0 && (
                     <div className="product-slideshow" style={styles.slideshow}>
-                        <motion.img
+                        <motion.div
                             key={currentImageIndex}
-                            src={images[currentImageIndex]?.url}
-                            alt={images[currentImageIndex]?.altText || "Product Image"}
-                            style={styles.image}
-                            loading="lazy"
-                            className="product-slideshow-image"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.5 }}
-                        />
+                        >
+                            <Image
+                                data={images[currentImageIndex]}
+                                aspectRatio="1/1"
+                                sizes="(min-width: 45em) 20vw, 40vw"
+                                srcSet={`${images[currentImageIndex]?.url}?width=300&quality=10 300w,
+                                    ${images[currentImageIndex]?.url}?width=600&quality=10 600w,
+                                    ${images[currentImageIndex]?.url}?width=1200&quality=10 1200w`}
+                                alt={images[currentImageIndex]?.altText || "Product Image"}
+                                width="180px"
+                                height="180px"
+                                loading="lazy"
+                                className="product-slideshow-image"
+                            />
+                        </motion.div>
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
                             <div
                                 className="product-slideshow-progress"
@@ -243,11 +263,6 @@ const styles = {
         width: "100%",
         height: "auto",
         overflow: "hidden",
-    },
-    image: {
-        width: "100%",
-        height: "auto",
-        objectFit: "cover",
     },
     progressBar: {
         position: "absolute",
