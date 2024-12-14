@@ -296,11 +296,13 @@ const styles = {
         width: "80%",
         height: "3px",
         backgroundColor: "#e0e0e0",
+        borderRadius: "30px",
     },
     progress: {
         height: "100%",
         backgroundColor: "#000",
         transition: "width 0.1s linear",
+        borderRadius: "30px",
     },
     dotsContainer: {
         position: "absolute",
