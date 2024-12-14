@@ -95,47 +95,11 @@ export function ProductItem({ product, index }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
-    const [startTouch, setStartTouch] = useState(null); // Track the starting touch position
     const slideshowInterval = 3000; // Time for each slide
 
     const images = product.images?.nodes || [];
 
-    // Handle swipe gestures for mobile
-    const handleTouchStart = (e) => {
-        e.stopPropagation(); // Prevent touch from propagating to the row
-        const touch = e.touches[0];
-        setStartTouch({ x: touch.clientX, y: touch.clientY });
-    };
-
-    const handleTouchMove = (e) => {
-        e.stopPropagation(); // Prevent touch from propagating to the row
-        if (!startTouch) return;
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - startTouch.x;
-
-        // Swipe threshold to determine a valid swipe
-        if (Math.abs(deltaX) > 50) {
-            if (deltaX > 0) {
-                // Swipe right (previous image)
-                setCurrentImageIndex((prevIndex) =>
-                    prevIndex === 0 ? images.length - 1 : prevIndex - 1
-                );
-            } else {
-                // Swipe left (next image)
-                setCurrentImageIndex((prevIndex) =>
-                    prevIndex === images.length - 1 ? 0 : prevIndex + 1
-                );
-            }
-            setStartTouch(null); // Reset touch start after a swipe
-        }
-    };
-
-    const handleTouchEnd = (e) => {
-        e.stopPropagation(); // Prevent touch from propagating to the row
-        setStartTouch(null); // Reset touch start on touch end
-    };
-
-    // Handle image click on mobile devices to switch images
+    // Handle image click to switch images
     const handleImageClick = (e) => {
         e.preventDefault(); // Prevent the link from being triggered
         setCurrentImageIndex((prevIndex) =>
@@ -202,13 +166,7 @@ export function ProductItem({ product, index }) {
         >
             <Link to={`/products/${product.handle}`}>
                 {images.length > 0 && (
-                    <div
-                        className="product-slideshow"
-                        style={styles.slideshow}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                    >
+                    <div className="product-slideshow" style={styles.slideshow}>
                         <motion.img
                             src={images[currentImageIndex]?.url}
                             alt={images[currentImageIndex]?.altText || "Product Image"}
@@ -225,7 +183,7 @@ export function ProductItem({ product, index }) {
                             initial={{ filter: "blur(10px)" }}
                             animate={{ filter: "blur(0px)" }}
                             transition={{ duration: 0.5 }}
-                            onClick={handleImageClick} // Add click handler to prevent link click
+                            onClick={handleImageClick} // Click to switch images
                         />
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
                             <div
