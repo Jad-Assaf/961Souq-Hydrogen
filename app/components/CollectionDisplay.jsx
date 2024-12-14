@@ -137,7 +137,7 @@ export function ProductItem({ product, index }) {
 
     // Handle image click on mobile devices to switch images
     const handleImageClick = (e) => {
-        e.stopPropagation(); // Prevent link click
+        e.preventDefault(); // Prevent the link from being triggered
         setCurrentImageIndex((prevIndex) =>
             prevIndex === images.length - 1 ? 0 : prevIndex + 1
         );
