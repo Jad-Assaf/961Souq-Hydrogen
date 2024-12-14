@@ -110,7 +110,7 @@ export function ProductItem({ product, index }) {
     return (
         <motion.div
             ref={ref}
-            initial={{ filter: 'blur(20px)', opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{
                 x: { type: 'spring', stiffness: 100, damping: 20 },
