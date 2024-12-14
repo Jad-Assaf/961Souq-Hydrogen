@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function BannerSlideshow({ banners, interval = 5000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -12,8 +13,19 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
             );
         }, interval);
 
-        return () => clearInterval(timer);
+        const progressTimer = setInterval(() => {
+            setProgress((prev) => (prev >= 100 ? 0 : prev + 100 / (interval / 100)));
+        }, 100);
+
+        return () => {
+            clearInterval(timer);
+            clearInterval(progressTimer);
+        };
     }, [banners.length, interval]);
+
+    useEffect(() => {
+        setProgress(0);
+    }, [currentIndex]);
 
     const handleDragEnd = (event, info) => {
         const { offset } = info;
@@ -73,49 +85,6 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
         ));
     }, [banners, currentIndex]);
 
-    const renderedMobileBanners = useMemo(() => {
-        return banners.map((banner, index) => (
-            <motion.div
-                key={index}
-                className={`banner-slide ${index === currentIndex ? "active" : "inactive"
-                    }`}
-                initial={{ opacity: 0, x: index > currentIndex ? 50 : -50 }}
-                animate={
-                    index === currentIndex
-                        ? { opacity: 1, x: 0 }
-                        : { opacity: 0, x: index > currentIndex ? -50 : 50 }
-                }
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ type: "spring", stiffness: 100, damping: 10 }}
-                drag="x"
-                dragElastic={0.2}
-                dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={handleDragEnd}
-                style={styles.bannerSlide}
-            >
-                <a
-                    href={banner.link}
-                    target="_self"
-                    rel="noopener noreferrer"
-                    style={styles.link}
-                >
-                    <Image
-                        data={{
-                            altText: `Banner ${index + 1}`,
-                            url: banner.mobileImageUrl,
-                        }}
-                        width="100vw"
-                        height="auto"
-                        className="banner-image"
-                        style={styles.bannerImage}
-                        loading="eager"
-                        decoding="sync"
-                    />
-                </a>
-            </motion.div>
-        ));
-    }, [banners, currentIndex]);
-
     return (
         <div className="banner-slideshow" style={styles.bannerSlideshow}>
             {/* Desktop Banners */}
@@ -125,11 +94,30 @@ export function BannerSlideshow({ banners, interval = 5000 }) {
                 </AnimatePresence>
             </div>
 
-            {/* Mobile Banners */}
-            <div className="mobile-banners">
-                <AnimatePresence initial={false}>
-                    {renderedMobileBanners[currentIndex]}
-                </AnimatePresence>
+            {/* Progress Bar */}
+            <div className="progress-bar" style={styles.progressBar}>
+                <div
+                    className="progress"
+                    style={{
+                        ...styles.progress,
+                        width: `${progress}%`,
+                    }}
+                ></div>
+            </div>
+
+            {/* Indicator Dots */}
+            <div className="indicator-dots" style={styles.indicatorDots}>
+                {banners.map((_, index) => (
+                    <div
+                        key={index}
+                        className={`dot ${index === currentIndex ? "active" : ""}`}
+                        style={{
+                            ...styles.dot,
+                            backgroundColor: index === currentIndex ? "#000" : "#ccc",
+                        }}
+                        onClick={() => setCurrentIndex(index)}
+                    ></div>
+                ))}
             </div>
         </div>
     );
@@ -163,5 +151,32 @@ const styles = {
         width: "100vw",
         height: "100%",
         display: "block",
+    },
+    progressBar: {
+        position: "absolute",
+        bottom: "20px",
+        left: 0,
+        width: "100%",
+        height: "5px",
+        backgroundColor: "#e0e0e0",
+    },
+    progress: {
+        height: "100%",
+        backgroundColor: "#000",
+        transition: "width 0.1s linear",
+    },
+    indicatorDots: {
+        position: "absolute",
+        bottom: "10px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        display: "flex",
+        gap: "10px",
+    },
+    dot: {
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        cursor: "pointer",
     },
 };
