@@ -3,7 +3,7 @@ import { Image } from "@shopify/hydrogen"; // Import the Shopify Image component
 import { motion } from 'framer-motion';
 import "../styles/BrandsSection.css";
 
-export const BrandSection = ({ brands }) => {
+export default function BrandSection ({ brands }) {
     return (
         <section className="brand-section">
             <h2>Shop By Brand</h2>

@@ -6,7 +6,7 @@ import { CategorySlider } from '~/components/CollectionSlider';
 import { TopProductSections } from '~/components/TopProductSections';
 import { CollectionDisplay } from '~/components/CollectionDisplay';
 
-const LazyBrandSection = lazy(() => import('~/components/BrandsSection'));
+const LazyBrandSection = lazy(() => import('../components/BrandsSection'));
 
 const cache = new Map();
 
