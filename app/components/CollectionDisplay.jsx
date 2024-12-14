@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { Money, Image } from '@shopify/hydrogen';
 import { motion, useInView } from 'framer-motion';
