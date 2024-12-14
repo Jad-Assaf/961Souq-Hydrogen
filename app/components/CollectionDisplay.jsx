@@ -89,14 +89,6 @@ const RightArrowIcon = () => (
     </svg>
 );
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { useInView } from "react-intersection-observer";
-import { Image } from "@shopify/hydrogen-react";
-import { Money } from "@shopify/hydrogen-react";
-import { AddToCartButton } from "./AddToCartButton";
-
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
