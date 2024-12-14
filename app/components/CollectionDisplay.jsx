@@ -136,7 +136,8 @@ export function ProductItem({ product, index }) {
     };
 
     // Handle image click on mobile devices to switch images
-    const handleImageClick = () => {
+    const handleImageClick = (e) => {
+        e.stopPropagation(); // Prevent link click
         setCurrentImageIndex((prevIndex) =>
             prevIndex === images.length - 1 ? 0 : prevIndex + 1
         );
@@ -224,7 +225,7 @@ export function ProductItem({ product, index }) {
                             initial={{ filter: "blur(10px)" }}
                             animate={{ filter: "blur(0px)" }}
                             transition={{ duration: 0.5 }}
-                            onClick={handleImageClick} // Add click handler
+                            onClick={handleImageClick} // Add click handler to prevent link click
                         />
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
                             <div
