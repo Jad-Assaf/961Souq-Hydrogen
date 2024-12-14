@@ -91,20 +91,26 @@ const RightArrowIcon = () => (
 
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: false, threshold: 0.5 });
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const slideshowInterval = 3000; // Time for each slide
 
+    const { ref: inViewRef, inView: isInView } = useInView({
+        threshold: 0.5, // Approximation of center alignment
+        triggerOnce: false,
+    });
+
     const images = product.images?.nodes || [];
 
     const shouldSlide = () => {
-        // Desktop: slide only on hover; Mobile: slide when visible
         if (window.innerWidth >= 768) {
+            // On desktop: Only slide when hovered
             return isHovered;
+        } else {
+            // On mobile: Only slide when in the center of viewport
+            return isInView;
         }
-        return isInView;
     };
 
     useEffect(() => {
@@ -147,7 +153,10 @@ export function ProductItem({ product, index }) {
 
     return (
         <motion.div
-            ref={ref}
+            ref={(node) => {
+                ref.current = node;
+                inViewRef(node); // Combine refs for IntersectionObserver
+            }}
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{
