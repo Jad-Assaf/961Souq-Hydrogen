@@ -95,9 +95,42 @@ export function ProductItem({ product, index }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const [startTouch, setStartTouch] = useState(null); // Track the starting touch position
     const slideshowInterval = 3000; // Time for each slide
 
     const images = product.images?.nodes || [];
+
+    // Handle swipe gestures for mobile
+    const handleTouchStart = (e) => {
+        const touch = e.touches[0];
+        setStartTouch({ x: touch.clientX, y: touch.clientY });
+    };
+
+    const handleTouchMove = (e) => {
+        if (!startTouch) return;
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - startTouch.x;
+
+        // Swipe threshold to determine a valid swipe
+        if (Math.abs(deltaX) > 50) {
+            if (deltaX > 0) {
+                // Swipe right (previous image)
+                setCurrentImageIndex((prevIndex) =>
+                    prevIndex === 0 ? images.length - 1 : prevIndex - 1
+                );
+            } else {
+                // Swipe left (next image)
+                setCurrentImageIndex((prevIndex) =>
+                    prevIndex === images.length - 1 ? 0 : prevIndex + 1
+                );
+            }
+            setStartTouch(null); // Reset touch start after a swipe
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setStartTouch(null); // Reset touch start on touch end
+    };
 
     useEffect(() => {
         let imageTimer, progressTimer;
@@ -153,7 +186,13 @@ export function ProductItem({ product, index }) {
         >
             <Link to={`/products/${product.handle}`}>
                 {images.length > 0 && (
-                    <div className="product-slideshow" style={styles.slideshow}>
+                    <div
+                        className="product-slideshow"
+                        style={styles.slideshow}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                    >
                         <img
                             src={images[currentImageIndex]?.url}
                             alt={images[currentImageIndex]?.altText || "Product Image"}
@@ -276,4 +315,5 @@ const styles = {
         transition: "background-color 0.3s ease",
     },
 };
+
 
