@@ -215,6 +215,7 @@ const styles = {
         height: "100%",
         backgroundColor: "#fff",
         transition: "width 0.1s linear",
+        borderRadius: "30px",
     },
     indicatorDots: {
         position: "absolute",
