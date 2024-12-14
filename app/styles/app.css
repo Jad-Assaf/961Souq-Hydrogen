@@ -242,6 +242,11 @@ button {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
+.progress-bar {
+  left: 30% !important;
+  width: 40% !important;
+}
+
 /* Product Title Styling */
 .product-title {
   font-size: 14px;
