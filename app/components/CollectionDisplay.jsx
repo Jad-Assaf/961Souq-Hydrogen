@@ -91,10 +91,7 @@ const RightArrowIcon = () => (
 
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
-    const { ref: inViewRef, inView: isInView } = useInView({
-        threshold: 0.5, // Detect when the card is near the center of the viewport
-        triggerOnce: false,
-    });
+    const isInView = useInView(ref, { once: true });
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
@@ -102,23 +99,11 @@ export function ProductItem({ product, index }) {
 
     const images = product.images?.nodes || [];
 
-    // Function to determine if slideshow should play
-    const shouldSlide = () => {
-        if (window.innerWidth >= 768) {
-            // On desktop: Only slide when hovered
-            return isHovered;
-        } else {
-            // On mobile: Only slide when the card is near the center of viewport
-            return isInView;
-        }
-    };
-
-    // Handle slideshow functionality
     useEffect(() => {
         let imageTimer, progressTimer;
 
-        if (shouldSlide()) {
-            // Start slideshow
+        if (isHovered) {
+            // Image slideshow timer
             imageTimer = setInterval(() => {
                 setCurrentImageIndex((prevIndex) =>
                     prevIndex === images.length - 1 ? 0 : prevIndex + 1
@@ -130,18 +115,17 @@ export function ProductItem({ product, index }) {
                 setProgress((prev) => (prev >= 100 ? 0 : prev + 100 / (slideshowInterval / 100)));
             }, 100);
         } else {
-            setProgress(0); // Reset progress when not sliding
+            setProgress(0); // Reset progress when not hovered
         }
 
         return () => {
             clearInterval(imageTimer);
             clearInterval(progressTimer);
         };
-    }, [isHovered, isInView, images.length]);
+    }, [isHovered, images.length]);
 
-    // Reset progress when image changes
     useEffect(() => {
-        setProgress(0);
+        setProgress(0); // Reset progress when the current image changes
     }, [currentImageIndex]);
 
     const selectedVariant =
@@ -153,15 +137,9 @@ export function ProductItem({ product, index }) {
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
-    // Combined ref logic to handle `useRef` and `useInView`
-    const setRefs = (node) => {
-        ref.current = node;
-        inViewRef(node);
-    };
-
     return (
         <motion.div
-            ref={setRefs} // Use the combined ref here
+            ref={ref}
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{
@@ -176,27 +154,13 @@ export function ProductItem({ product, index }) {
             <Link to={`/products/${product.handle}`}>
                 {images.length > 0 && (
                     <div className="product-slideshow" style={styles.slideshow}>
-                        <motion.div
-                            key={currentImageIndex}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <Image
-                                data={images[currentImageIndex]}
-                                aspectRatio="1/1"
-                                sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${images[currentImageIndex]?.url}?width=300&quality=10 300w,
-                                    ${images[currentImageIndex]?.url}?width=600&quality=10 600w,
-                                    ${images[currentImageIndex]?.url}?width=1200&quality=10 1200w`}
-                                alt={images[currentImageIndex]?.altText || "Product Image"}
-                                width="180px"
-                                height="180px"
-                                loading="lazy"
-                                className="product-slideshow-image"
-                            />
-                        </motion.div>
+                        <img
+                            src={images[currentImageIndex]?.url}
+                            alt={images[currentImageIndex]?.altText || "Product Image"}
+                            style={styles.image}
+                            loading="lazy"
+                            className="product-slideshow-image"
+                        />
                         <div className="product-slideshow-progress-bar" style={styles.progressBar}>
                             <div
                                 className="product-slideshow-progress"
@@ -278,6 +242,11 @@ const styles = {
         height: "auto",
         overflow: "hidden",
     },
+    image: {
+        width: "100%",
+        height: "auto",
+        objectFit: "cover",
+    },
     progressBar: {
         position: "absolute",
         bottom: "5px",
@@ -307,3 +276,4 @@ const styles = {
         transition: "background-color 0.3s ease",
     },
 };
+
