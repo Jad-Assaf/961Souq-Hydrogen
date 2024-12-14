@@ -91,28 +91,29 @@ const RightArrowIcon = () => (
 
 export function ProductItem({ product, index }) {
     const ref = useRef(null);
+    const { ref: inViewRef, inView: isInView } = useInView({
+        threshold: 0.5, // Detect when the card is near the center of the viewport
+        triggerOnce: false,
+    });
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const slideshowInterval = 3000; // Time for each slide
 
-    const { ref: inViewRef, inView: isInView } = useInView({
-        threshold: 0.5, // Approximation of center alignment
-        triggerOnce: false,
-    });
-
     const images = product.images?.nodes || [];
 
+    // Function to determine if slideshow should play
     const shouldSlide = () => {
         if (window.innerWidth >= 768) {
             // On desktop: Only slide when hovered
             return isHovered;
         } else {
-            // On mobile: Only slide when in the center of viewport
+            // On mobile: Only slide when the card is near the center of viewport
             return isInView;
         }
     };
 
+    // Handle slideshow functionality
     useEffect(() => {
         let imageTimer, progressTimer;
 
@@ -138,8 +139,9 @@ export function ProductItem({ product, index }) {
         };
     }, [isHovered, isInView, images.length]);
 
+    // Reset progress when image changes
     useEffect(() => {
-        setProgress(0); // Reset progress when the current image changes
+        setProgress(0);
     }, [currentImageIndex]);
 
     const selectedVariant =
@@ -151,12 +153,15 @@ export function ProductItem({ product, index }) {
         selectedVariant?.compareAtPrice &&
         selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
+    // Combined ref logic to handle `useRef` and `useInView`
+    const setRefs = (node) => {
+        ref.current = node;
+        inViewRef(node);
+    };
+
     return (
         <motion.div
-            ref={(node) => {
-                ref.current = node;
-                inViewRef(node); // Combine refs for IntersectionObserver
-            }}
+            ref={setRefs} // Use the combined ref here
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{
