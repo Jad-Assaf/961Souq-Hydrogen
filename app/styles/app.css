@@ -204,16 +204,12 @@ button {
   background-color: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s linear, box-shadow 0.3s linear, filter 0.2s;
+  transition: transform 0.3s linear, box-shadow 0.3s linear;
   padding: 10px;
   min-width: 175px;
   max-width: 200px;
   margin-left: 5px;
   text-align: center;
-}
-
-.collection-products-row:has(.product-card:hover) .product-card:not(:hover){
-  filter: blur(2px);
 }
 
 .grid-cols-2 .product-card,
@@ -242,7 +238,7 @@ button {
 }
 
 .product-card:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 

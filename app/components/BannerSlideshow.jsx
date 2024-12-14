@@ -155,8 +155,8 @@ const styles = {
     progressBar: {
         position: "absolute",
         bottom: "20px",
-        left: 0,
-        width: "45%",
+        left: "45%",
+        width: "10%",
         height: "3px",
         backgroundColor: "#000",
         borderRadius: "20px",
