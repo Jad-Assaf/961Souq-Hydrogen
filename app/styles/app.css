@@ -1225,7 +1225,7 @@ button.reset:hover:not(:has(> *)) {
   margin: 0;
   border: 1px solid #c2c2c2;
   border-radius: 30px;
-  color: #2172af !important;
+  color: #232323 !important;
   padding: 10px 15px;
   border-right: none;
   border-top-right-radius: 0;
