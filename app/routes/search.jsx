@@ -15,7 +15,7 @@ import '../styles/SearchPage.css';
  * @type {import('@remix-run/react').MetaFunction}
  */
 export const meta = () => {
-  return [{ title: `Macarabia | Search` }];
+  return [{title: `961Souq | Search`}];
 };
 
 /**

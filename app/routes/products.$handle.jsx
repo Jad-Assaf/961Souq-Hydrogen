@@ -35,7 +35,7 @@ export const meta = ({data}) => {
 
   const image =
     product.images?.edges?.[0]?.node?.url ||
-    'https://cdn.shopify.com/s/files/1/0858/6821/6639/files/macarabialogo01_303ae373-185d-40f3-8271-df151d977a10.png?v=1706447237';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
 
   return getSeoMeta({
     title: truncate(

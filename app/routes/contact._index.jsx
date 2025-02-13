@@ -16,7 +16,7 @@ export default function ContactUs() {
         <div className="contact-info">
           <h3>Contact Information:</h3>
           <p>
-            <strong>Email:</strong> admin@macarabia.me
+            <strong>Email:</strong> admin@961souq.com
           </p>
           <p>
             <strong>Phone:</strong> <a href="tel:+9611888031">+961 1 888 031</a>
@@ -30,9 +30,9 @@ export default function ContactUs() {
             <a
               href="https://maps.app.goo.gl/wKNzrfSVrLm7srkB7"
               target="_blank"
-              title="Macarabia Store Location"
+              title="961Souq Store Location"
             >
-              Macarabia - Zalka High Way Facing white Tower hotel Ground Floor,
+              961Souq - Zalka High Way Facing white Tower hotel Ground Floor,
               Zalka, Lebanon.
             </a>
           </p>
