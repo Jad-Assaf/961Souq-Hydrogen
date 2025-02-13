@@ -56,7 +56,7 @@
     align-items: center;
     gap: 10px;
     margin: .5rem 0;
-    border: 1px solid #2172B0;
+    border: 1px solid #232323;
     border-radius: 30px;
     width: 200px;
     height: 40px;
@@ -95,8 +95,8 @@
 
 .buy-now-button {
     width: 90%;
-    background-color: #2172af;
-    color: #f5f5f5;
+    background-color: #fff;
+    color: #232323;
     padding: 12px 10px;
     border: none;
     border-radius: 30px;
@@ -113,8 +113,8 @@
 }
 
 .buy-now-button:hover {
-    background-color: #f5f5f5;
-    color: #2172af;
+    background-color: #232323;
+    color: #fff;
     transform: translateY(-2px);
     box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, #00000014 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
@@ -154,8 +154,8 @@
     display: block !important;
     width: 100%;
     max-width: 350px;
-    background-color: #f5f5f5;
-    color: #2172af;
+    background-color: #232323;
+    color: #fff;
     padding: 12px 10px;
     border: none;
     border-radius: 30px;
@@ -170,8 +170,8 @@
 }
 
 .add-to-cart-button:hover {
-    background-color: #2172af;
-    color: #f5f5f5;
+    background-color: #fff;
+    color: #232323;
     transform: translateY(-2px);
     box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, #00000014 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
@@ -286,7 +286,7 @@
     transform: translateX(-50%);
     width: 0;
     height: 1px;
-    background-color: #f39c12;
+    background-color: #232323;
     transition: width 0.3s ease-in-out;
 }
 
@@ -322,7 +322,7 @@
 }
 
 .whatsapp-share-button:hover {
-    background-color: #128C7E;
+    background-color: #25D366;
 }
 
 .tabs {
@@ -340,7 +340,7 @@
 }
 
 .tab-button.active {
-    border-bottom: 3px solid #007bff;
+    border-bottom: 3px solid #00172f;
     /* Change to your active color */
     font-weight: bold;
 }
@@ -359,7 +359,15 @@
 
 .ProductPageBottom * {
     line-height: 2;
-    list-style: inside;
+    /* list-style: inside; */
+}
+
+.ProductPageBottom table * {
+    vertical-align: top;
+}
+
+.ProductPageBottom table {
+    width: unset !important;
 }
 
 .ProductPageBottom h3 {
@@ -401,7 +409,8 @@ strong {
     width: 100%;
 }
 
-.product-details li, .product-metafields li{
+.product-details li,
+.product-metafields li {
     font-size: 12px;
     margin-bottom: 0.2rem;
     color: #4a4a4a;
@@ -413,4 +422,14 @@ strong {
     max-width: 450px;
     border-color: #cdcdcd;
     color: #cdcdcd;
+}
+
+.product-item,
+.product-item .product-card {
+    min-width: 180px !important;
+    max-width: 180px !important;
+}
+
+.collection-products-row {
+    gap: 5px !important;
 }

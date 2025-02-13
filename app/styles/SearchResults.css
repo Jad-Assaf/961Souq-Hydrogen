@@ -17,7 +17,7 @@
 .search form input {
     width: 275px;
     border-radius: 30px;
-    border: 1px solid #2172af;
+    border: 1px solid #000;
     color: #232323;
     text-align: center;
     background-color: #ffffff;
@@ -33,7 +33,7 @@
 
 .view-more a {
     padding: 10px 30px;
-    border: 1px solid #2172af;
+    border: 1px solid #000;
     border-radius: 30px;
     background-color: #f0f8ff87;
 }

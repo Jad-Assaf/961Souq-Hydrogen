@@ -1,20 +1,17 @@
 import { useRouteLoaderData } from "@remix-run/react";
 import { Script, useAnalytics, useNonce } from "@shopify/hydrogen";
+import React from "react";
 import { useEffect } from "react";
-import type { RootLoader } from "~/root";
+import type { RootLoader } from "../root";
 
 export function CustomAnalytics() {
-  const { subscribe, canTrack } = useAnalytics();
+  const { subscribe } = useAnalytics();
   const nonce = useNonce();
 
   const data = useRouteLoaderData<RootLoader>("root");
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    setTimeout(() => {
-      let isTrackingAllowed = canTrack();
-      console.log("CustomAnalytics - isTrackingAllowed", isTrackingAllowed);
-    }, 1000);
     // Standard events
     subscribe("page_viewed", (data) => {
       console.log("CustomAnalytics - Page viewed:", data);
@@ -65,7 +62,7 @@ export function CustomAnalytics() {
       />
 
       {/* Load GTM script */}
-      <Script async src={`https://www.googletagmanager.com/gtm.js?id=${id}`} />
+      <Script src={`https://www.googletagmanager.com/gtm.js?id=${id}`} />
     </>
   );
 }

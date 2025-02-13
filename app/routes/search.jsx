@@ -1,52 +1,140 @@
 import { json } from '@shopify/remix-oxygen';
-import { useLoaderData, useSearchParams, useNavigate, Link } from '@remix-run/react';
-import { getPaginationVariables, Analytics, Money, Image } from '@shopify/hydrogen';
-import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { useRef, useState } from 'react';
-import '../styles/SearchPage.css'
+import {
+  useLoaderData,
+  useSearchParams,
+  useNavigate,
+  Link,
+} from '@remix-run/react';
+import { useState, useEffect } from 'react';
 import { ProductItem } from '~/components/CollectionDisplay';
+import { getEmptyPredictiveSearchResult } from '~/lib/search';
+import { trackSearch } from '~/lib/metaPixelEvents'; // Import the trackSearch function
+import '../styles/SearchPage.css';
 
 /**
- * @type {MetaFunction}
+ * @type {import('@remix-run/react').MetaFunction}
  */
 export const meta = () => {
-  return [{ title: `Hydrogen | Search` }];
+  return [{ title: `Macarabia | Search` }];
 };
 
 /**
- * @param {LoaderFunctionArgs}
+ * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
  */
-// loader function
-// loader function
 export async function loader({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
-  // Extract filters
-  const filterQueryParts = [];
+  // -----------------------------------------
+  // Check if predictive search
+  // -----------------------------------------
+  const isPredictive = searchParams.has('predictive');
+  if (isPredictive) {
+    // Immediately do predictive
+    const result = await predictiveSearch({ request, context }).catch((error) => {
+      console.error('Predictive Search Error:', error);
+      return { type: 'predictive', term: '', result: null, error: error.message };
+    });
+    return json({
+      ...result,
+      vendors: [],
+      productTypes: [],
+      // No pagination needed for predictive results
+      pageInfo: {},
+    });
+  }
+
+  // -----------------------------------------
+  // Parse after/before for cursor-based pagination
+  // -----------------------------------------
+  const after = searchParams.get('after') || null;
+  const before = searchParams.get('before') || null;
+
+  // -----------------------------------------
+  // Build filters with OR for multiple values on the same key,
+  // and map `productType` => `product_type`.
+  // -----------------------------------------
+  const shopifyKeyMap = {
+    vendor: 'vendor',
+    productType: 'product_type', // important for Shopify's textual query
+  };
+
+  // Collect all filter values in a map:
+  //   filter_vendor=Nike, filter_vendor=Adidas => [Nike, Adidas]
+  //   filter_productType=Shirt => [Shirt]
+  const filterMap = new Map();
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
-      const filterKey = key.replace('filter_', '');
-      filterQueryParts.push(`${filterKey}:${value}`);
+      const rawKey = key.replace('filter_', ''); // e.g. vendor, productType
+      if (!filterMap.has(rawKey)) {
+        filterMap.set(rawKey, []);
+      }
+      filterMap.get(rawKey).push(value);
     }
   }
 
-  const term = searchParams.get('q') || '';
+  // Build the OR groups for each filter key
+  const filterQueryParts = [];
+  for (const [rawKey, values] of filterMap.entries()) {
+    // e.g. shopifyKey = product_type or vendor
+    const shopifyKey = shopifyKeyMap[rawKey] || rawKey;
+    if (values.length === 1) {
+      // single value => vendor:"Nike"
+      filterQueryParts.push(`${shopifyKey}:"${values[0]}"`);
+    } else {
+      // multiple => (vendor:"Nike" OR vendor:"Adidas")
+      const orGroup = values.map((v) => `${shopifyKey}:"${v}"`).join(' OR ');
+      filterQueryParts.push(`(${orGroup})`);
+    }
+  }
+
+  // -----------------------------------------
+  // Price range & text search
+  // -----------------------------------------
+  const rawTerm = searchParams.get('q') || '';
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
-  // Add price conditions to filterQuery
-  if (minPrice) {
-    filterQueryParts.push(`variants.price:>${minPrice}`);
-  }
-  if (maxPrice) {
-    filterQueryParts.push(`variants.price:<${maxPrice}`);
+  // Process the search term to include wildcards and specify fields
+  const terms = rawTerm
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter(Boolean)
+    .map((word) => `*${word}*`); // Add wildcards to each term
+
+  // **Step 1:** Start by searching only within the title
+  const fieldSpecificTerms = terms.map((word) => `title:${word}`).join(' OR '); // Use OR for field-specific terms
+
+  // **Step 2 (Optional):** Include description and variants.sku if needed
+  // Uncomment the following lines to include additional fields after verifying titles work
+  /*
+  const fieldSpecificTerms = terms
+    .map(
+      (word) =>
+        `(title:${word} OR description:${word} OR variants.sku:${word})`,
+    )
+    .join(' AND '); // Combine with AND for multiple terms
+  */
+
+  // Now, use 'fieldSpecificTerms' instead of 'termWithWildcards' in the filterQuery
+  let filterQuery = fieldSpecificTerms;
+
+  if (filterQueryParts.length > 0) {
+    if (filterQuery) {
+      // e.g. "title:*XM5* AND (vendor:"Sony" OR vendor:"Adidas")"
+      filterQuery += ' AND ' + filterQueryParts.join(' AND ');
+    } else {
+      filterQuery = filterQueryParts.join(' AND ');
+    }
   }
 
-  const filterQuery = `${term} ${filterQueryParts.join(' AND ')}`;
+  // **Debugging Step:** Log the constructed filterQuery
+  console.log('Filter Query:', filterQuery);
 
-  // Handle sorting
+  // -----------------------------------------
+  // Sort
+  // -----------------------------------------
   const sortKeyMapping = {
     featured: 'RELEVANCE',
     'price-low-high': 'PRICE',
@@ -57,31 +145,34 @@ export async function loader({ request, context }) {
   const reverseMapping = {
     'price-high-low': true,
   };
-
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  // Fetch products based on filters and sorting
-  const isPredictive = searchParams.has('predictive');
-  const searchPromise = isPredictive
-    ? predictiveSearch({ request, context })
-    : regularSearch({ request, context, filterQuery, sortKey, reverse });
-
-  const result = await searchPromise.catch((error) => {
+  // -----------------------------------------
+  // Perform the regular search with cursors
+  // -----------------------------------------
+  const result = await regularSearch({
+    request,
+    context,
+    filterQuery,
+    sortKey,
+    reverse,
+    after,
+    before,
+  }).catch((error) => {
     console.error('Search Error:', error);
     return { term: '', result: null, error: error.message };
   });
 
-  // Extract vendors and product types from filtered products
+  // -----------------------------------------
+  // Extract vendor / productType from *these* results
+  // -----------------------------------------
   const filteredVendors = [
-    ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.vendor)
-    ),
+    ...new Set(result?.result?.products?.edges.map(({ node }) => node.vendor)),
   ].sort();
-
   const filteredProductTypes = [
     ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.productType)
+      result?.result?.products?.edges.map(({ node }) => node.productType),
     ),
   ].sort();
 
@@ -92,35 +183,47 @@ export async function loader({ request, context }) {
   });
 }
 
+/* ------------------------------------------------------------------
+   REACT COMPONENT
+------------------------------------------------------------------- */
 export default function SearchPage() {
-  const { type, term, result, vendors = [], productTypes = [], error } = useLoaderData();
+  const {
+    type,
+    term,
+    result,
+    vendors = [],
+    productTypes = [],
+    error,
+  } = useLoaderData();
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Local state for price range
+  // Price range local states
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
 
-  // State for collapsible filters
+  // Desktop filter toggles
   const [showVendors, setShowVendors] = useState(false);
   const [showProductTypes, setShowProductTypes] = useState(false);
   const [showPriceRange, setShowPriceRange] = useState(false);
 
-  // State for mobile filters
+  // Mobile filters
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mobileShowVendors, setMobileShowVendors] = useState(false);
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
   const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
-  const [isClosing, setIsClosing] = useState(false); // New state for closing animation
+  const [isClosing, setIsClosing] = useState(false);
 
   const closeMobileFilters = () => {
-    setIsClosing(true); // Trigger closing animation
+    setIsClosing(true);
     setTimeout(() => {
       setIsMobileFiltersOpen(false);
-      setIsClosing(false); // Reset closing state after animation ends
-    }, 300); // Duration matches the animation timing
+      setIsClosing(false);
+    }, 300);
   };
 
+  // Filter changes (already supports multiple filters)
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
 
@@ -130,18 +233,28 @@ export default function SearchPage() {
       const currentFilters = params.getAll(`filter_${filterKey}`);
       const updatedFilters = currentFilters.filter((item) => item !== value);
       params.delete(`filter_${filterKey}`);
-      updatedFilters.forEach((item) => params.append(`filter_${filterKey}`, item));
+      updatedFilters.forEach((item) =>
+        params.append(`filter_${filterKey}`, item),
+      );
     }
 
+    // Reset cursors
+    params.delete('after');
+    params.delete('before');
     navigate(`/search?${params.toString()}`);
   };
 
+  // Sorting
   const handleSortChange = (e) => {
     const params = new URLSearchParams(searchParams);
     params.set('sort', e.target.value);
+    // Reset cursors
+    params.delete('after');
+    params.delete('before');
     navigate(`/search?${params.toString()}`);
   };
 
+  // Price filter
   const applyPriceFilter = () => {
     const params = new URLSearchParams(searchParams);
     if (minPrice) {
@@ -154,14 +267,59 @@ export default function SearchPage() {
     } else {
       params.delete('maxPrice');
     }
+    // Reset cursors
+    params.delete('after');
+    params.delete('before');
+    navigate(`/search?${params.toString()}`);
+  };
+
+  // Track Search event
+  useEffect(() => {
+    if (term) {
+      trackSearch(term);
+    }
+  }, [term]);
+
+  // If we have no products, show "no results"
+  const edges = result?.products?.edges || [];
+  if (!edges.length) {
+    return (
+      <div className="search">
+        <h1>Search Results</h1>
+        <p>No results found</p>
+      </div>
+    );
+  }
+
+  // Grab pageInfo so we know if there's a next / prev page
+  const pageInfo = result?.products?.pageInfo || {};
+  const hasNextPage = pageInfo.hasNextPage;
+  const hasPreviousPage = pageInfo.hasPreviousPage;
+
+  // Handler: next => set after = pageInfo.endCursor
+  const goNext = () => {
+    if (!hasNextPage) return;
+    const params = new URLSearchParams(searchParams);
+    params.set('after', pageInfo.endCursor);
+    params.delete('before');
+    navigate(`/search?${params.toString()}`);
+  };
+
+  // Handler: prev => set before = pageInfo.startCursor
+  const goPrev = () => {
+    if (!hasPreviousPage) return;
+    const params = new URLSearchParams(searchParams);
+    params.set('before', pageInfo.startCursor);
+    params.delete('after');
     navigate(`/search?${params.toString()}`);
   };
 
   return (
     <div className="search">
       <h1>Search Results</h1>
+
       <div className="search-filters-container" style={{ display: 'flex' }}>
-        {/* Filters */}
+        {/* Sidebar (Desktop) */}
         <div className="filters">
           <fieldset>
             <button
@@ -175,7 +333,9 @@ export default function SearchPage() {
             {showVendors && (
               <div>
                 {vendors.map((vendor) => {
-                  const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+                  const isChecked = searchParams
+                    .getAll('filter_vendor')
+                    .includes(vendor);
                   return (
                     <div key={vendor} className="filter-option">
                       <input
@@ -187,7 +347,12 @@ export default function SearchPage() {
                           handleFilterChange('vendor', vendor, e.target.checked)
                         }
                       />
-                      <label className="filter-label" htmlFor={`vendor-${vendor}`}>{vendor}</label>
+                      <label
+                        className="filter-label"
+                        htmlFor={`vendor-${vendor}`}
+                      >
+                        {vendor}
+                      </label>
                     </div>
                   );
                 })}
@@ -206,20 +371,31 @@ export default function SearchPage() {
             </button>
             {showProductTypes && (
               <div>
-                {productTypes.map((productType) => {
-                  const isChecked = searchParams.getAll('filter_productType').includes(productType);
+                {productTypes.map((ptype) => {
+                  const isChecked = searchParams
+                    .getAll('filter_productType')
+                    .includes(ptype);
                   return (
-                    <div key={productType} className="filter-option">
+                    <div key={ptype} className="filter-option">
                       <input
                         type="checkbox"
-                        id={`productType-${productType}`}
-                        value={productType}
+                        id={`productType-${ptype}`}
+                        value={ptype}
                         checked={isChecked}
                         onChange={(e) =>
-                          handleFilterChange('productType', productType, e.target.checked)
+                          handleFilterChange(
+                            'productType',
+                            ptype,
+                            e.target.checked,
+                          )
                         }
                       />
-                      <label className="filter-label" htmlFor={`productType-${productType}`}>{productType}</label>
+                      <label
+                        className="filter-label"
+                        htmlFor={`productType-${ptype}`}
+                      >
+                        {ptype}
+                      </label>
                     </div>
                   );
                 })}
@@ -262,7 +438,10 @@ export default function SearchPage() {
                     />
                   </label>
                 </div>
-                <button className="price-filter-apply" onClick={applyPriceFilter}>
+                <button
+                  className="price-filter-apply"
+                  onClick={applyPriceFilter}
+                >
                   Apply
                 </button>
               </div>
@@ -270,27 +449,70 @@ export default function SearchPage() {
           </fieldset>
         </div>
 
-        {result?.products?.edges?.length > 0 ? (
-          <div className="search-results">
-            <div>
-              <label htmlFor="sort-select">Sort by:</label>
-              <select id="sort-select" onChange={handleSortChange} value={searchParams.get('sort') || 'featured'}>
-                <option value="featured">Featured</option>
-                <option value="price-low-high">Price: Low - High</option>
-                <option value="price-high-low">Price: High - Low</option>
-                <option value="best-selling">Best Selling</option>
-                <option value="newest">Newest</option>
-              </select>
-            </div>
-            <div className="search-results-grid">
-              {result.products.edges.map(({ node: product }, index) => (
-                <ProductItem product={product} index={index} key={product.id} />
-              ))}
-            </div>
+        {/* Main Search Results */}
+        <div className="search-results">
+          {/* Sorting */}
+          <div>
+            <label htmlFor="sort-select">Sort by:</label>
+            <select
+              id="sort-select"
+              onChange={handleSortChange}
+              value={searchParams.get('sort') || 'featured'}
+            >
+              <option value="featured">Featured</option>
+              <option value="price-low-high">Price: Low - High</option>
+              <option value="price-high-low">Price: High - Low</option>
+              <option value="best-selling">Best Selling</option>
+              <option value="newest">Newest</option>
+            </select>
           </div>
-        ) : (
-          <p>No results found</p>
-        )}
+
+          {/* Product Grid */}
+          <div className="search-results-grid">
+            {edges.map(({ node: product }, idx) => (
+              <ProductItem product={product} index={idx} key={product.id} />
+            ))}
+          </div>
+
+          {/* Prev / Next Buttons */}
+          <div
+            style={{
+              marginTop: '1rem',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '50px',
+            }}
+          >
+            {pageInfo.hasPreviousPage && (
+              <button
+                onClick={goPrev}
+                style={{
+                  backgroundColor: '#fff',
+                  cursor: 'pointer',
+                  padding: '5px 10px',
+                  border: '1px solid #d1d7db',
+                  borderRadius: '30px',
+                }}
+              >
+                ← Previous Page
+              </button>
+            )}
+            {pageInfo.hasNextPage && (
+              <button
+                onClick={goNext}
+                style={{
+                  backgroundColor: '#fff',
+                  cursor: 'pointer',
+                  padding: '5px 10px',
+                  border: '1px solid #d1d7db',
+                  borderRadius: '30px',
+                }}
+              >
+                Next Page →
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Mobile Filters */}
@@ -303,17 +525,37 @@ export default function SearchPage() {
 
       {isMobileFiltersOpen && (
         <div className="mobile-filters-overlay">
-          <div
-            className={`mobile-filters-panel ${isClosing ? 'closing' : ''
-              }`}
-          >
-            <hr className='mobile-filters-hr' />
+          <div className={`mobile-filters-panel ${isClosing ? 'closing' : ''}`}>
+            <hr className="mobile-filters-hr" />
             <button
               className="close-mobile-filters"
               onClick={closeMobileFilters}
             >
-              <svg fill="#2172af" height="30px" width="30px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 460.775 460.775" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55 l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719 c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path> </g></svg>
+              <svg
+                fill="#000"
+                height="30px"
+                width="30px"
+                viewBox="0 0 460.775 460.775"
+              >
+                <g>
+                  <path
+                    d="M285.08,230.397L456.218,59.27
+                    c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
+                    c-4.127,0-8.08,1.639-10.993,4.55L285.08,171.705L59.25,4.565
+                    c-2.913-2.911-6.866-4.55-10.993-4.55
+                    c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284
+                    c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128
+                    L4.575,401.505c-6.074,6.077-6.074,15.911,0,21.986
+                    l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55
+                    c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12
+                    l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55
+                    c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
+                    c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
+                  />
+                </g>
+              </svg>
             </button>
+
             <fieldset>
               <button
                 type="button"
@@ -322,21 +564,29 @@ export default function SearchPage() {
                 Vendors <span>{mobileShowVendors ? '-' : '+'}</span>
               </button>
               {mobileShowVendors && (
-                <div className='filter-options-container'>
+                <div className="filter-options-container">
                   {vendors.map((vendor) => {
-                    const isChecked = searchParams.getAll('filter_vendor').includes(vendor);
+                    const isChecked = searchParams
+                      .getAll('filter_vendor')
+                      .includes(vendor);
                     return (
-                      <div key={vendor} className='filter-option'>
+                      <div key={vendor} className="filter-option">
                         <input
                           type="checkbox"
                           id={`mobile-vendor-${vendor}`}
                           value={vendor}
                           checked={isChecked}
                           onChange={(e) =>
-                            handleFilterChange('vendor', vendor, e.target.checked)
+                            handleFilterChange(
+                              'vendor',
+                              vendor,
+                              e.target.checked,
+                            )
                           }
                         />
-                        <label htmlFor={`mobile-vendor-${vendor}`}>{vendor}</label>
+                        <label htmlFor={`mobile-vendor-${vendor}`}>
+                          {vendor}
+                        </label>
                       </div>
                     );
                   })}
@@ -347,26 +597,36 @@ export default function SearchPage() {
             <fieldset>
               <button
                 type="button"
-                onClick={() => setMobileShowProductTypes(!mobileShowProductTypes)}
+                onClick={() =>
+                  setMobileShowProductTypes(!mobileShowProductTypes)
+                }
               >
                 Product Types <span>{mobileShowProductTypes ? '-' : '+'}</span>
               </button>
               {mobileShowProductTypes && (
-                <div className='filter-options-container'>
-                  {productTypes.map((productType) => {
-                    const isChecked = searchParams.getAll('filter_productType').includes(productType);
+                <div className="filter-options-container">
+                  {productTypes.map((type) => {
+                    const isChecked = searchParams
+                      .getAll('filter_productType')
+                      .includes(type);
                     return (
-                      <div key={productType} className='filter-option'>
+                      <div key={type} className="filter-option">
                         <input
                           type="checkbox"
-                          id={`mobile-productType-${productType}`}
-                          value={productType}
+                          id={`mobile-productType-${type}`}
+                          value={type}
                           checked={isChecked}
                           onChange={(e) =>
-                            handleFilterChange('productType', productType, e.target.checked)
+                            handleFilterChange(
+                              'productType',
+                              type,
+                              e.target.checked,
+                            )
                           }
                         />
-                        <label htmlFor={`mobile-productType-${productType}`}>{productType}</label>
+                        <label htmlFor={`mobile-productType-${type}`}>
+                          {type}
+                        </label>
                       </div>
                     );
                   })}
@@ -382,8 +642,8 @@ export default function SearchPage() {
                 Price Range <span>{mobileShowPriceRange ? '-' : '+'}</span>
               </button>
               {mobileShowPriceRange && (
-                <div className='mobile-price-filter-container'>
-                  <div className='mobile-min-price-filter'>
+                <div className="mobile-price-filter-container">
+                  <div className="mobile-min-price-filter">
                     <label>
                       Min Price:
                       <input
@@ -394,7 +654,7 @@ export default function SearchPage() {
                       />
                     </label>
                   </div>
-                  <div className='mobile-max-price-filter'>
+                  <div className="mobile-max-price-filter">
                     <label>
                       Max Price:
                       <input
@@ -416,13 +676,31 @@ export default function SearchPage() {
   );
 }
 
-const FILTERED_PRODUCTS_QUERY = `
-    query FilteredProducts($filterQuery: String!, $sortKey: ProductSortKeys, $reverse: Boolean) {
+/* ------------------------------------------------------------------
+   GRAPHQL + REGULAR SEARCH
+------------------------------------------------------------------- */
+
+/**
+ * Query for the subset with cursors
+ */
+const FILTERED_PRODUCTS_QUERY = `#graphql
+  query FilteredProducts(
+    $filterQuery: String,
+    $sortKey: ProductSortKeys,
+    $reverse: Boolean,
+    $after: String,
+    $before: String,
+    $first: Int,
+    $last: Int
+  ) {
     products(
-      first: 250,
       query: $filterQuery,
       sortKey: $sortKey,
-      reverse: $reverse
+      reverse: $reverse,
+      after: $after,
+      before: $before,
+      first: $first,
+      last: $last
     ) {
       edges {
         node {
@@ -432,7 +710,7 @@ const FILTERED_PRODUCTS_QUERY = `
           handle
           productType
           description
-          images(first: 1) {
+          images(first: 3) {
             nodes {
               url
               altText
@@ -457,10 +735,6 @@ const FILTERED_PRODUCTS_QUERY = `
                 altText
               }
               availableForSale
-              price {
-                amount
-                currencyCode
-              }
               compareAtPrice {
                 amount
                 currencyCode
@@ -473,191 +747,86 @@ const FILTERED_PRODUCTS_QUERY = `
           }
         }
       }
-    }
-  }
-`;
-
-/**
- * Regular search query and fragments
- * (adjust as needed)
- */
-const SEARCH_PRODUCT_FRAGMENT = `#graphql
-  fragment SearchProduct on Product {
-    __typename
-    handle
-    id
-    publishedAt
-    title
-    trackingParameters
-    vendor
-    variants(first: 1) {
-      nodes {
-        id
-        sku
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-        selectedOptions {
-          name
-          value
-        }
-        product {
-          handle
-          title
-          vendor
-        }
-      }
-    }
-  }
-`;
-
-const SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment SearchPage on Page {
-     __typename
-     handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment SearchArticle on Article {
-    __typename
-    handle
-    id
-    title
-    trackingParameters
-  }
-`;
-
-const PAGE_INFO_FRAGMENT = `#graphql
-  fragment PageInfoFragment on PageInfo {
-    hasNextPage
-    hasPreviousPage
-    startCursor
-    endCursor
-  }
-`;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-export const SEARCH_QUERY = `#graphql
-  query RegularSearch(
-    $country: CountryCode
-    $endCursor: String
-    $first: Int
-    $language: LanguageCode
-    $last: Int
-    $term: String!
-    $startCursor: String
-  ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
-    products: search(
-      after: $endCursor,
-      before: $startCursor,
-      first: $first,
-      last: $last,
-      query: $term,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
-    ) {
-      nodes {
-        ...on Product {
-          ...SearchProduct
-        }
-      }
       pageInfo {
-        ...PageInfoFragment
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
     }
   }
-  ${SEARCH_PRODUCT_FRAGMENT}
-  ${SEARCH_PAGE_FRAGMENT}
-  ${SEARCH_ARTICLE_FRAGMENT}
-  ${PAGE_INFO_FRAGMENT}
 `;
 
 /**
- * Regular search fetcher
- * @param {Pick<
- *   LoaderFunctionArgs,
- *   'request' | 'context'
- * >}
- * @return {Promise<RegularSearchReturn>}
+ * Regular search fetcher using cursors
+ * If `after` is present, we use `first=50`.
+ * If `before` is present, we use `last=50`.
+ * If neither is present, we do first=50 from the start.
  */
-async function regularSearch({ request, context, filterQuery, sortKey, reverse, minPrice, maxPrice }) {
+async function regularSearch({
+  request,
+  context,
+  filterQuery,
+  sortKey,
+  reverse,
+  after = null,
+  before = null,
+}) {
   const { storefront } = context;
 
+  let first = null;
+  let last = null;
+  if (after) {
+    first = 50; // going forward
+  } else if (before) {
+    last = 50; // going backward
+  } else {
+    // default: first page
+    first = 50;
+  }
+
+  const variables = {
+    filterQuery,
+    sortKey,
+    reverse,
+    after,
+    before,
+    first,
+    last,
+  };
+
   try {
-    const variables = {
-      filterQuery,
-      sortKey,
-      reverse,
-      minPrice,
-      maxPrice,
-    };
-
-    console.log('Query Variables:', variables); // Debugging
-
     const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
-    if (!products?.edges?.length) {
-      console.error('No products found in response:', products); // Debugging
-      return { term: filterQuery, result: { products: { edges: [] }, total: 0 } };
+    if (!products?.edges) {
+      return {
+        type: 'regular',
+        term: filterQuery,
+        result: { products: { edges: [] } },
+      };
     }
 
     return {
+      type: 'regular',
       term: filterQuery,
-      result: {
-        products,
-        total: products.edges.length,
-      },
+      result: { products },
     };
   } catch (error) {
-    console.error('Error during regular search:', error);
-    return { term: filterQuery, result: null, error: error.message };
+    console.error('Regular search error:', error);
+    return {
+      type: 'regular',
+      term: filterQuery,
+      result: null,
+      error: error.message,
+    };
   }
 }
 
-/**
- * Predictive search query and fragments
- * (adjust as needed)
- */
+/* ------------------------------------------------------------------
+   PREDICTIVE SEARCH (unchanged)
+------------------------------------------------------------------- */
 const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
   fragment PredictiveArticle on Article {
     __typename
@@ -676,7 +845,6 @@ const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
     trackingParameters
   }
 `;
-
 const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
   fragment PredictiveCollection on Collection {
     __typename
@@ -692,7 +860,6 @@ const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
     trackingParameters
   }
 `;
-
 const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
   fragment PredictivePage on Page {
     __typename
@@ -702,7 +869,6 @@ const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
     trackingParameters
   }
 `;
-
 const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment PredictiveProduct on Product {
     __typename
@@ -734,7 +900,6 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
     }
   }
 `;
-
 const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
   fragment PredictiveQuery on SearchQuerySuggestion {
     __typename
@@ -743,8 +908,6 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
     trackingParameters
   }
 `;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
     $country: CountryCode
@@ -756,7 +919,7 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
     predictiveSearch(
       limitScope: $limitScope,
       query: $term,
-      types: $types,
+      types: $types
     ) {
       articles {
         ...PredictiveArticle
@@ -781,15 +944,6 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
   ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
   ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
-
-/**
- * Predictive search fetcher
- * @param {Pick<
- *   ActionFunctionArgs,
- *   'request' | 'context'
- * >}
- * @return {Promise<PredictiveSearchReturn>}
- */
 async function predictiveSearch({ request, context }) {
   const { storefront } = context;
   const url = new URL(request.url);
@@ -797,20 +951,21 @@ async function predictiveSearch({ request, context }) {
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
-  if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
+  if (!term) {
+    return { type, term, result: getEmptyPredictiveSearchResult() };
+  }
 
-  // Break the search term into individual words
-  const terms = term.split(/\s+/).map((word) => word.trim()).filter(Boolean);
-
-  // Construct a flexible query that matches any word in title, description, or SKU
+  const terms = term
+    .split(/\s+/)
+    .map((w) => w.trim())
+    .filter(Boolean);
   const queryTerm = terms
     .map(
       (word) =>
-        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`
+        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`,
     )
     .join(' AND ');
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
   const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
@@ -827,22 +982,19 @@ async function predictiveSearch({ request, context }) {
       `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
     );
   }
-
   if (!items) {
     throw new Error('No predictive search data returned from Shopify API');
   }
 
-  const total = Object.values(items).reduce(
-    (acc, item) => acc + item.length,
-    0,
-  );
-
+  const total = Object.values(items).reduce((acc, arr) => acc + arr.length, 0);
   return { type, term, result: { items, total } };
 }
 
-/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
-/** @typedef {import('@shopify/remix-oxygen').ActionFunctionArgs} ActionFunctionArgs */
-/** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
-/** @typedef {import('~/lib/search').RegularSearchReturn} RegularSearchReturn */
-/** @typedef {import('~/lib/search').PredictiveSearchReturn} PredictiveSearchReturn */
-/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
+/**
+ * @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs
+ * @typedef {import('@shopify/remix-oxygen').ActionFunctionArgs} ActionFunctionArgs
+ * @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction
+ * @typedef {import('~/lib/search').RegularSearchReturn} RegularSearchReturn
+ * @typedef {import('~/lib/search').PredictiveSearchReturn} PredictiveSearchReturn
+ * @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData
+ */

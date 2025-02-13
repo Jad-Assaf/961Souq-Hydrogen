@@ -1,124 +1,125 @@
 import {flattenConnection} from '@shopify/hydrogen';
 
-/**
- * the google limit is 50K, however, the storefront API
- * allows querying only 250 resources per pagination page
- */
-const MAX_URLS = 250;
+const MAX_URLS_PER_PAGE = 250; // Shopify API limit per request
+const GOOGLE_SITEMAP_LIMIT = 50000; // Google sitemap limit for URLs
 
 /**
- * @param {LoaderFunctionArgs}
+ * @param {LoaderFunctionArgs} args
  */
 export async function loader({request, context: {storefront}}) {
-  const data = await storefront.query(SITEMAP_QUERY, {
-    variables: {
-      urlLimits: MAX_URLS,
-      language: storefront.i18n.language,
-    },
+  const baseUrl = new URL(request.url).origin;
+
+  // Fetch all resources using flattenConnection
+  const products = await fetchAllResources({
+    storefront,
+    query: PRODUCTS_QUERY,
+    field: 'products',
   });
 
-  if (!data) {
-    throw new Response('No data found', {status: 404});
-  }
+  const collections = await fetchAllResources({
+    storefront,
+    query: COLLECTIONS_QUERY,
+    field: 'collections',
+  });
 
-  const sitemap = generateSitemap({data, baseUrl: new URL(request.url).origin});
+  const pages = await fetchAllResources({
+    storefront,
+    query: PAGES_QUERY,
+    field: 'pages',
+  });
+
+  // Generate sitemap XML
+  const sitemap = generateSitemap({products, collections, pages, baseUrl});
 
   return new Response(sitemap, {
     headers: {
       'Content-Type': 'application/xml',
-
-      'Cache-Control': `max-age=${60 * 60 * 24}`,
+      'Cache-Control': `max-age=${60 * 60 * 24}`, // Cache for 24 hours
     },
   });
 }
 
 /**
- * @param {string} string
+ * Fetch all paginated resources using flattenConnection.
+ * @param {Object} options
  */
-function xmlEncode(string) {
-  return string.replace(/[&<>'"]/g, (char) => `&#${char.charCodeAt(0)};`);
+async function fetchAllResources({storefront, query, field}) {
+  let allNodes = [];
+  let nextPageCursor = null;
+
+  do {
+    const response = await storefront.query(query, {
+      variables: {
+        first: MAX_URLS_PER_PAGE,
+        after: nextPageCursor,
+      },
+    });
+
+    const connection = response?.[field];
+    if (!connection) break;
+
+    const nodes = flattenConnection(connection); // Flatten the nodes
+    allNodes = allNodes.concat(nodes);
+
+    nextPageCursor = connection.pageInfo.hasNextPage
+      ? connection.pageInfo.endCursor
+      : null;
+  } while (nextPageCursor && allNodes.length < GOOGLE_SITEMAP_LIMIT);
+
+  return allNodes.slice(0, GOOGLE_SITEMAP_LIMIT); // Enforce Google’s limit
 }
 
 /**
- * @param {{
- *   data: SitemapQuery;
- *   baseUrl: string;
- * }}
+ * Generate the sitemap XML.
  */
-function generateSitemap({data, baseUrl}) {
-  const products = flattenConnection(data.products)
-    .filter((product) => product.onlineStoreUrl)
-    .map((product) => {
-      const url = `${baseUrl}/products/${xmlEncode(product.handle)}`;
-
-      const productEntry = {
-        url,
-        lastMod: product.updatedAt,
-        changeFreq: 'daily',
-      };
-
-      if (product.featuredImage?.url) {
-        productEntry.image = {
-          url: xmlEncode(product.featuredImage.url),
-        };
-
-        if (product.title) {
-          productEntry.image.title = xmlEncode(product.title);
-        }
-
-        if (product.featuredImage.altText) {
-          productEntry.image.caption = xmlEncode(product.featuredImage.altText);
-        }
-      }
-
-      return productEntry;
-    });
-
-  const collections = flattenConnection(data.collections)
-    .filter((collection) => collection.onlineStoreUrl)
-    .map((collection) => {
-      const url = `${baseUrl}/collections/${collection.handle}`;
-
-      return {
-        url,
-        lastMod: collection.updatedAt,
-        changeFreq: 'daily',
-      };
-    });
-
-  const pages = flattenConnection(data.pages)
-    .filter((page) => page.onlineStoreUrl)
-    .map((page) => {
-      const url = `${baseUrl}/pages/${page.handle}`;
-
-      return {
-        url,
-        lastMod: page.updatedAt,
-        changeFreq: 'weekly',
-      };
-    });
-
-  const urls = [...products, ...collections, ...pages];
+function generateSitemap({products, collections, pages, baseUrl}) {
+  const urls = [
+    ...products.map((product) => ({
+      url: `${baseUrl}/products/${xmlEncode(product.handle)}`,
+      lastMod: product.updatedAt,
+      changeFreq: 'daily',
+      image: product.featuredImage
+        ? {
+            url: xmlEncode(product.featuredImage.url),
+            title: xmlEncode(product.title),
+            caption: xmlEncode(product.featuredImage.altText || ''),
+          }
+        : null,
+    })),
+    ...collections.map((collection) => ({
+      url: `${baseUrl}/collections/${xmlEncode(collection.handle)}`,
+      lastMod: collection.updatedAt,
+      changeFreq: 'daily',
+    })),
+    ...pages.map((page) => ({
+      url: `${baseUrl}/pages/${xmlEncode(page.handle)}`,
+      lastMod: page.updatedAt,
+      changeFreq: 'weekly',
+    })),
+  ];
 
   return `
     <urlset
       xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
       xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
     >
-      ${urls.map(renderUrlTag).join('')}
-    </urlset>`;
+      ${urls.map(renderUrlTag).join('\n')}
+    </urlset>
+  `.trim();
 }
 
 /**
- * @param {Entry}
+ * Render a single URL tag for the sitemap.
  */
 function renderUrlTag({url, lastMod, changeFreq, image}) {
   const imageTag = image
-    ? `<image:image>
-        <image:loc>${image.url}</image:loc>
-        <image:title>${image.title ?? ''}</image:title>
-        <image:caption>${image.caption ?? ''}</image:caption>
-      </image:image>`.trim()
+    ? `
+    <image:image>
+      <image:loc>${image.url}</image:loc>
+      <image:title>${image.title}</image:title>
+      <image:caption>${image.caption}</image:caption>
+    </image:image>
+  `.trim()
     : '';
 
   return `
@@ -131,17 +132,24 @@ function renderUrlTag({url, lastMod, changeFreq, image}) {
   `.trim();
 }
 
-const SITEMAP_QUERY = `#graphql
-  query Sitemap($urlLimits: Int, $language: LanguageCode)
-  @inContext(language: $language) {
-    products(
-      first: $urlLimits
-      query: "published_status:'online_store:visible'"
-    ) {
+/**
+ * XML-safe encoding for strings.
+ */
+function xmlEncode(string) {
+  return string.replace(/[&<>'"]/g, (char) => `&#${char.charCodeAt(0)};`);
+}
+
+// GraphQL Queries
+const PRODUCTS_QUERY = `#graphql
+  query Products($first: Int!, $after: String) {
+    products(first: $first, after: $after, query: "published_status:'online_store:visible'") {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
       nodes {
-        updatedAt
         handle
-        onlineStoreUrl
+        updatedAt
         title
         featuredImage {
           url
@@ -149,39 +157,37 @@ const SITEMAP_QUERY = `#graphql
         }
       }
     }
-    collections(
-      first: $urlLimits
-      query: "published_status:'online_store:visible'"
-    ) {
-      nodes {
-        updatedAt
-        handle
-        onlineStoreUrl
+  }
+`;
+
+const COLLECTIONS_QUERY = `#graphql
+  query Collections($first: Int!, $after: String) {
+    collections(first: $first, after: $after, query: "published_status:'online_store:visible'") {
+      pageInfo {
+        hasNextPage
+        endCursor
       }
-    }
-    pages(first: $urlLimits, query: "published_status:'published'") {
       nodes {
-        updatedAt
         handle
-        onlineStoreUrl
+        updatedAt
       }
     }
   }
 `;
 
-/**
- * @typedef {{
- *   url: string;
- *   lastMod?: string;
- *   changeFreq?: string;
- *   image?: {
- *     url: string;
- *     title?: string;
- *     caption?: string;
- *   };
- * }} Entry
- */
+const PAGES_QUERY = `#graphql
+  query Pages($first: Int!, $after: String) {
+    pages(first: $first, after: $after, query: "published_status:'published'") {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        handle
+        updatedAt
+      }
+    }
+  }
+`;
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
-/** @typedef {import('storefrontapi.generated').SitemapQuery} SitemapQuery */
-/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */

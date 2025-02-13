@@ -8,7 +8,7 @@ export function ProductShareButton({ product }) {
     const location = useLocation();
 
     // Construct full product URL
-    const productUrl = `https://961souq.com${location.pathname}`;
+    const productUrl = `https://macarabia.me${location.pathname}`;
 
     const handleCopyClick = () => {
         if (inputRef.current) {

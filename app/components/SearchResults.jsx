@@ -99,7 +99,7 @@ function SearchResultsProducts({term, products}) {
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const ItemsMarkup = nodes.map((product) => {
-            const productUrl = `/products/${product.handle}`;
+            const productUrl = `/products/${encodeURIComponent(product.handle)}`;
 
             return (
               <div className="search-results-item product-card" key={product.id}>

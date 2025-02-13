@@ -1,5 +1,6 @@
-import { useNonce, getShopAnalytics, Analytics } from '@shopify/hydrogen';
-import { defer } from '@shopify/remix-oxygen';
+// src/root.jsx
+import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
+import {defer} from '@shopify/remix-oxygen';
 import {
   Links,
   Meta,
@@ -9,16 +10,18 @@ import {
   useRouteLoaderData,
   ScrollRestoration,
   isRouteErrorResponse,
-  useNavigation,  // Added useNavigation for route tracking
+  useNavigation,
+  LiveReload,
 } from '@remix-run/react';
-import favicon from '~/assets/favicon.svg';
+import favicon from '~/assets/macarabia-favicon-black_32x32.jpg';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
-import { PageLayout } from '~/components/PageLayout';
-import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
-import { useEffect, useState } from 'react';
-
+import {PageLayout} from '~/components/PageLayout';
+import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import React, {Suspense, useEffect, useState} from 'react';
+import ClarityTracker from './components/ClarityTracker';
+const MetaPixel = React.lazy(() => import('./components/MetaPixel'));
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -35,14 +38,16 @@ export const shouldRevalidate = ({
   return defaultShouldRevalidate;
 };
 
+const PIXEL_ID = '321309553208857'; // Replace with your actual Pixel ID
+
 export function links() {
   return [
-    { rel: 'stylesheet', href: appStyles },
-    { rel: 'stylesheet', href: resetStyles },
-    { rel: 'stylesheet', href: tailwindCss },
-    { rel: 'preconnect', href: 'https://cdn.shopify.com' },
-    { rel: 'preconnect', href: 'https://shop.app' },
-    { rel: 'icon', type: 'image/svg+xml', href: favicon },
+    {rel: 'stylesheet', href: appStyles},
+    {rel: 'stylesheet', href: resetStyles},
+    {rel: 'stylesheet', href: tailwindCss},
+    {rel: 'preconnect', href: 'https://cdn.shopify.com'},
+    {rel: 'preconnect', href: 'https://shop.app'},
+    {rel: 'icon', type: 'image/svg+xml', href: favicon},
   ];
 }
 
@@ -50,26 +55,31 @@ export function links() {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  const deferredData = loadDeferredData(args);
-  const criticalData = await loadCriticalData(args);
-  const { storefront, env } = args.context;
+  try {
+    const deferredData = await loadDeferredData(args);
+    const criticalData = await loadCriticalData(args);
+    const {storefront, env} = args.context;
 
-  return defer({
-    ...deferredData,
-    ...criticalData,
-    publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
-    shop: getShopAnalytics({
-      storefront,
-      publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
-    }),
-    consent: {
-      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
-      storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-      withPrivacyBanner: true,
-      country: args.context.storefront.i18n.country,
-      language: args.context.storefront.i18n.language,
-    },
-  });
+    return defer({
+      ...deferredData,
+      ...criticalData,
+      publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+      shop: getShopAnalytics({
+        storefront,
+        publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
+      }),
+      consent: {
+        checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+        storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+        withPrivacyBanner: true,
+        country: args.context.storefront.i18n.country,
+        language: args.context.storefront.i18n.language,
+      },
+    });
+  } catch (error) {
+    console.error('Loader error:', error);
+    throw new Response('Failed to load data', {status: 500});
+  }
 }
 
 /**
@@ -84,13 +94,13 @@ const processMenuItems = (items) => {
   }));
 };
 
-async function loadCriticalData({ context }) {
-  const { storefront } = context;
+async function loadCriticalData({context}) {
+  const {storefront} = context;
 
   try {
     // Fetch header data using the HEADER_QUERY
     const header = await storefront.query(HEADER_QUERY, {
-      variables: { headerMenuHandle: 'new-main-menu' },
+      variables: {headerMenuHandle: 'main-menu'},
     });
 
     // Process nested menus to extract images
@@ -98,25 +108,22 @@ async function loadCriticalData({ context }) {
       header.menu.items = processMenuItems(header.menu.items);
     }
 
-    console.log('Processed Menu Items:', header.menu.items);
-
-    return { header };
+    return {header};
   } catch (error) {
-    console.error('Error fetching header data:', error);
-    return { header: null }; // Fallback in case of error
+    return {header: null}; // Fallback in case of error
   }
 }
 
 /**
  * Load data for rendering content below the fold.
  */
-function loadDeferredData({ context }) {
-  const { storefront, customerAccount, cart } = context;
+function loadDeferredData({context}) {
+  const {storefront, customerAccount, cart} = context;
 
   const footer = storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: { footerMenuHandle: 'footer' },
+      variables: {footerMenuHandle: 'footer-menu'},
     })
     .catch((error) => {
       console.error(error);
@@ -133,18 +140,19 @@ function loadDeferredData({ context }) {
 /**
  * Layout component for the application.
  */
-export function Layout({ children }) {
+export function Layout({children}) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();
   const [nprogress, setNProgress] = useState(null); // Store NProgress instance
+  const clarityId = 'pfyepst8v5'; // Replace with your Clarity project ID
 
   useEffect(() => {
     // Load NProgress once and set it in the state
     const loadNProgress = async () => {
-      const { default: NProgress } = await import('nprogress');
+      const {default: NProgress} = await import('nprogress');
       await import('nprogress/nprogress.css');
-      NProgress.configure({ showSpinner: true });
+      NProgress.configure({showSpinner: true});
       setNProgress(NProgress); // Set NProgress once it's loaded
     };
 
@@ -165,17 +173,46 @@ export function Layout({ children }) {
         nprogress.done();
       }
     };
-  }, [navigation.state, nprogress]); 
+  }, [navigation.state, nprogress]);
 
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta
+          name="google-site-verification"
+          content="tGAcrZ3TpRDtQqmjqfYOuQpdBqsLCTr5YzcG7syVPEk"
+        />
         <Meta />
         <Links />
+        <meta
+          name="facebook-domain-verification"
+          content="ca1idnp1x728fhk6zouywowcqgb2xt"
+        />
+        <script
+          nonce={nonce}
+          src="https://www.googletagmanager.com/gtag/js?id=G-3PZN80E9FJ"
+        ></script>
+
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'G-3PZN80E9FJ');
+            `,
+          }}
+        ></script>
+        <Suspense fallback={null}>
+          <MetaPixel pixelId={PIXEL_ID} />
+        </Suspense>
       </head>
       <body>
+        <ClarityTracker clarityId={clarityId} />
         {data ? (
           <Analytics.Provider
             cart={data.cart}
@@ -189,6 +226,7 @@ export function Layout({ children }) {
         )}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
+        <LiveReload nonce={nonce} />
       </body>
     </html>
   );
@@ -206,25 +244,83 @@ export default function App() {
  */
 export function ErrorBoundary() {
   const error = useRouteError();
-  let errorMessage = 'Unknown error';
+  let errorMessage = 'An unexpected error occurred.';
   let errorStatus = 500;
 
   if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
+    errorMessage = error.data?.message || 'Route error occurred.';
     errorStatus = error.status;
   } else if (error instanceof Error) {
     errorMessage = error.message;
+  } else if (error) {
+    errorMessage = String(error);
   }
 
+  console.error('ErrorBoundary caught an error:', {
+    error,
+    errorMessage,
+    errorStatus,
+  });
+
+  // Common error page styling
+  const containerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '70vh',
+    textAlign: 'center',
+    backgroundColor: '#f8f9fa',
+    color: '#333',
+    fontFamily: 'Arial, sans-serif',
+    padding: '20px',
+  };
+
+  const titleStyle = {
+    fontSize: '6rem',
+    fontWeight: 'bold',
+    margin: '0 0 10px',
+    color: '#232323',
+  };
+
+  const messageStyle = {
+    fontSize: '1.5rem',
+    marginBottom: '20px',
+  };
+
+  const linkStyle = {
+    fontSize: '1rem',
+    color: '#232323',
+    textDecoration: 'none',
+    padding: '10px 20px',
+    border: '1px solid #232323',
+    borderRadius: '30px',
+    transition: 'background-color 0.3s, color 0.3s',
+  };
+
+  const handleMouseEnter = (e) => {
+    e.target.style.backgroundColor = '#232323';
+    e.target.style.color = '#fff';
+  };
+
+  const handleMouseLeave = (e) => {
+    e.target.style.backgroundColor = '#fff';
+    e.target.style.color = '#232323';
+  };
+
+  // Render the error page with appropriate status and message
   return (
-    <div className="route-error">
-      <h1>Oops</h1>
-      <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
+    <div style={containerStyle}>
+      <h1 style={titleStyle}>{errorStatus}</h1>
+      <p style={messageStyle}>{errorMessage}</p>
+      <a
+        href="/"
+        style={linkStyle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        Go to Homepage
+      </a>
     </div>
   );
 }

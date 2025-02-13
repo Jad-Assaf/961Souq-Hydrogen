@@ -66,20 +66,26 @@ function ListItemFilter({
   }, [appliedFilters, isChecked]);
 
   const handleCheckedChange = (checked: boolean) => {
-    setChecked(checked);
-    if (checked) {
-      const link = getFilterLink(option.input as string, params, location);
+  setChecked(checked);
+
+  // Clean up 'direction' and 'cursor' parameters
+  const updatedParams = new URLSearchParams(params.toString());
+  updatedParams.delete('direction');
+  updatedParams.delete('cursor');
+
+  if (checked) {
+    const link = getFilterLink(option.input as string, updatedParams, location);
+    navigate(link);
+  } else {
+    const filter = appliedFilters.find(
+      (filter) => JSON.stringify(filter.filter) === option.input
+    );
+    if (filter) {
+      const link = getAppliedFilterLink(filter, updatedParams, location);
       navigate(link);
-    } else {
-      const filter = appliedFilters.find(
-        (filter) => JSON.stringify(filter.filter) === option.input
-      );
-      if (filter) {
-        let link = getAppliedFilterLink(filter, params, location);
-        navigate(link);
-      }
     }
-  };
+  }
+};
 
   return (
     <div className="flex gap-2">
@@ -203,7 +209,7 @@ export function FiltersDrawer({
         <Disclosure
           as="div"
           key={filter.id}
-          className="w-full pt-[20px] border-t border-[#808080]"
+          className="w-full pt-[20px] border-t border-[#d1d5db]"
         >
           {({ open }) => (
             <>
@@ -428,7 +434,7 @@ export default function SortMenu({
 
   return (
     <Menu as="div" className="relative z-10">
-      <MenuButton className="flex items-center gap-1.5 h-10 border px-4 py-2.5 rounded-full">
+      <MenuButton className="flex items-center gap-1.5 h-10 border border-gray-300 px-4 py-2.5 rounded-full">
         <span className="font-medium">
           {typeof window !== "undefined" && screenWidth > 550 ? `Sort by: ${activeItem.label}` : "Sort"}
         </span>
@@ -436,7 +442,7 @@ export default function SortMenu({
       </MenuButton>
       <MenuItems
         as="nav"
-        className="absolute right-0 top-12 flex h-fit w-40 flex-col gap-2 border border-line/75 bg-background p-[1px]"
+        className="absolute right-0 top-12 flex h-fit w-40 flex-col gap-2 border border-gray-300 border-line/75 bg-background p-[1px]"
       >
         {items.map((item) => (
           <MenuItem key={item.label}>

@@ -2,8 +2,8 @@
 .footer {
     background-color: #fff !important;
     padding-top: 2rem;
-    color: #232323;
-    border-top: 1px solid #2172af;
+    color: #000;
+    border-top: 1px solid #000;
 }
 
 .footer .container {
@@ -56,7 +56,7 @@
 }
 
 .footer-column ul li a:hover {
-    color: #2172af;
+    color: #000;
     text-decoration: underline;
 }
 
@@ -74,18 +74,18 @@
 .contact-info i {
     margin-right: 0.5rem;
     font-size: 1.1rem;
-    color: #2172af;
+    color: #000;
     /* Icon color */
 }
 
 .contact-info a {
     text-decoration: none;
-    color: #2172af;
+    color: #000;
     transition: color 0.3s ease;
 }
 
 .contact-info a:hover {
-    color: #1a5b8a;
+    color: #1c1c1c;
 }
 
 /* Social Media Links */
@@ -101,7 +101,7 @@
     align-items: center;
     width: 40px;
     height: 40px;
-    background-color: #2172af;
+    background-color: #000;
     border-radius: 50%;
     text-align: center;
     color: #fff;
@@ -114,8 +114,8 @@
 }
 
 .social-links a:hover svg {
-    color: #2172af;
-    fill: #2172af;
+    color: #1c1c1c;
+    fill: #1c1c1c;
     transform: scale(1.2);
 }
 
@@ -140,7 +140,7 @@
 li i svg {
     width: 20px;
     height: auto;
-    fill: #2172af;
+    fill: #000;
 }
 
 .fa-map-marker-alt {
@@ -153,7 +153,7 @@ li i svg {
     align-items: center;
     width: 100vw;
     height: 80px;
-    background-color: #2172af;
+    background-color: #000;
     color: #fff;
 }
 

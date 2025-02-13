@@ -1,31 +1,195 @@
-import { defer, redirect } from '@shopify/remix-oxygen';
-import { useLoaderData, Link, useSearchParams, useLocation, useNavigate } from '@remix-run/react';
+import {defer, redirect} from '@shopify/remix-oxygen';
+import {
+  useLoaderData,
+  Link,
+  useSearchParams,
+  useLocation,
+  useNavigate,
+} from '@remix-run/react';
 import {
   getPaginationVariables,
   Image,
   Money,
   Analytics,
   VariantSelector,
+  getSeoMeta,
 } from '@shopify/hydrogen';
-import { useVariantUrl } from '~/lib/variants';
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
-import { truncateText } from '~/components/CollectionDisplay';
-import { DrawerFilter } from '~/modules/drawer-filter';
-import { FILTER_URL_PREFIX } from '~/lib/const';
-import React, { useEffect, useRef, useState } from 'react';
-import { useMediaQuery } from 'react-responsive';
-import { FiltersDrawer } from '../modules/drawer-filter';
-import { getAppliedFilterLink } from '../lib/filter';
-import { AddToCartButton } from '../components/AddToCartButton';
-import { useAside } from '~/components/Aside';
-import { motion, useAnimation, useInView } from 'framer-motion';
-import '../styles/CollectionSlider.css'
+import {useVariantUrl} from '~/lib/variants';
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {DrawerFilter} from '~/modules/drawer-filter';
+import {FILTER_URL_PREFIX} from '~/lib/const';
+import React, {useEffect, useRef, useState} from 'react';
+import {useMediaQuery} from 'react-responsive';
+import {FiltersDrawer} from '../modules/drawer-filter';
+import {getAppliedFilterLink} from '../lib/filter';
+import {AddToCartButton} from '../components/AddToCartButton';
+import {useAside} from '~/components/Aside';
+import '../styles/CollectionSlider.css';
+
+function truncateText(text, maxWords) {
+  if (!text || typeof text !== 'string') {
+    return ''; // Return an empty string if text is undefined or not a string
+  }
+  const words = text.split(' ');
+  return words.length > maxWords
+    ? words.slice(0, maxWords).join(' ') + '...'
+    : text;
+}
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({ data }) => {
-  return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
+export const meta = ({data}) => {
+  const collection = data?.collection;
+
+  return getSeoMeta({
+    title: `${collection?.title || 'Collection'} | Macarabia`,
+    description: truncateText(
+      collection?.description || 'Explore our latest collection at Macarabia.',
+      20,
+    ),
+    url: `https://macarabia.me/collections/${collection?.handle || ''}`,
+    image:
+      collection?.image?.url ||
+      'https://macarabia.me/default-collection-image.jpg',
+    jsonLd: [
+      // CollectionPage Schema
+      {
+        '@context': 'http://schema.org/',
+        '@type': 'CollectionPage',
+        name: collection?.title || 'Collection',
+        url: `https://macarabia.me/collections/${collection?.handle || ''}`,
+        description: truncateText(collection?.description || '', 20),
+        image: {
+          '@type': 'ImageObject',
+          url:
+            collection?.image?.url ||
+            'https://macarabia.me/default-collection-image.jpg',
+        },
+        hasPart: collection?.products?.nodes?.slice(0, 20).map((product) => ({
+          '@type': 'Product',
+          name: truncateText(product?.title || 'Product', 10),
+          url: `https://macarabia.me/products/${encodeURIComponent(
+            product?.handle,
+          )}`,
+          sku: product?.variants?.[0]?.sku || product?.variants?.[0]?.id || '',
+          gtin12:
+            product?.variants?.[0]?.barcode?.length === 12
+              ? product?.variants?.[0]?.barcode
+              : undefined,
+          gtin13:
+            product?.variants?.[0]?.barcode?.length === 13
+              ? product?.variants?.[0]?.barcode
+              : undefined,
+          gtin14:
+            product?.variants?.[0]?.barcode?.length === 14
+              ? product?.variants?.[0]?.barcode
+              : undefined,
+          productID: product?.id,
+          brand: {
+            '@type': 'Brand',
+            name: product?.vendor || 'Macarabia',
+          },
+          description: truncateText(product?.description || '', 20),
+          image: `https://macarabia.me/products/${product?.featuredImage?.url}`,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: product?.variants?.[0]?.price?.currencyCode || 'USD',
+            price: product?.variants?.[0]?.price?.amount || '0.00',
+            itemCondition: 'http://schema.org/NewCondition',
+            availability: product?.availableForSale
+              ? 'http://schema.org/InStock'
+              : 'http://schema.org/OutOfStock',
+            url: `https://macarabia.me/products/${encodeURIComponent(
+              product?.handle,
+            )}`,
+            priceValidUntil: '2025-12-31',
+            shippingDetails: {
+              '@type': 'OfferShippingDetails',
+              shippingRate: {
+                '@type': 'MonetaryAmount',
+                value: '5.00',
+                currency: 'USD',
+              },
+              shippingDestination: {
+                '@type': 'DefinedRegion',
+                addressCountry: 'LB',
+              },
+              deliveryTime: {
+                '@type': 'ShippingDeliveryTime',
+                handlingTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 0,
+                  maxValue: 3,
+                  unitCode: 'DAY',
+                },
+                transitTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 1,
+                  maxValue: 5,
+                  unitCode: 'DAY',
+                },
+              },
+            },
+            hasMerchantReturnPolicy: {
+              '@type': 'MerchantReturnPolicy',
+              applicableCountry: 'LB',
+              returnPolicyCategory:
+                'https://schema.org/MerchantReturnFiniteReturnWindow',
+              merchantReturnDays: 5,
+              returnMethod: 'https://schema.org/ReturnByMail',
+              returnFees: 'https://schema.org/FreeReturn',
+            },
+          },
+        })),
+      },
+      // BreadcrumbList Schema
+      {
+        '@context': 'http://schema.org/',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://macarabia.me',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: collection?.title || 'Collection',
+            item: `https://macarabia.me/collections/${
+              collection?.handle || ''
+            }`,
+          },
+        ],
+      },
+      // ItemList Schema
+      {
+        '@context': 'http://schema.org/',
+        '@type': 'ItemList',
+        name: collection?.title || 'Collection',
+        description: truncateText(collection?.description || '', 20),
+        url: `https://macarabia.me/collections/${collection?.handle || ''}`,
+        itemListElement: collection?.products?.nodes
+          ?.slice(0, 20)
+          .map((product, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            url: `https://macarabia.me/products/${encodeURIComponent(
+              product?.handle,
+            )}`,
+            name: truncateText(product?.title || 'Product', 10),
+            image: {
+              '@type': 'ImageObject',
+              url:
+                product?.featuredImage?.url ||
+                'https://macarabia.me/default-product-image.jpg',
+            },
+          })),
+      },
+    ],
+  });
 };
 
 /**
@@ -34,7 +198,7 @@ export const meta = ({ data }) => {
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  return defer({ ...deferredData, ...criticalData });
+  return defer({...deferredData, ...criticalData});
 }
 
 /**
@@ -42,11 +206,11 @@ export async function loader(args) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
-export async function loadCriticalData({ context, params, request }) {
-  const { handle } = params;
-  const { storefront } = context;
+export async function loadCriticalData({context, params, request}) {
+  const {handle} = params;
+  const {storefront} = context;
   const searchParams = new URL(request.url).searchParams;
-  const paginationVariables = getPaginationVariables(request, { pageBy: 20 });
+  const paginationVariables = getPaginationVariables(request, {pageBy: 20});
 
   // Set default sort to 'newest' if no sort parameter is provided
   const sort = searchParams.get('sort') || 'newest';
@@ -80,7 +244,7 @@ export async function loadCriticalData({ context, params, request }) {
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith(FILTER_URL_PREFIX)) {
       const filterKey = key.replace(FILTER_URL_PREFIX, '');
-      filters.push({ [filterKey]: JSON.parse(value) });
+      filters.push({[filterKey]: JSON.parse(value)});
     }
   }
 
@@ -90,7 +254,7 @@ export async function loadCriticalData({ context, params, request }) {
 
   try {
     // Fetch main collection
-    const { collection } = await storefront.query(COLLECTION_QUERY, {
+    const {collection} = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         first: 20,
@@ -102,7 +266,7 @@ export async function loadCriticalData({ context, params, request }) {
     });
 
     if (!collection) {
-      throw new Response(`Collection ${handle} not found`, { status: 404 });
+      throw new Response(`Collection ${handle} not found`, {status: 404});
     }
 
     let menu = null;
@@ -110,11 +274,11 @@ export async function loadCriticalData({ context, params, request }) {
 
     try {
       const menuResult = await storefront.query(MENU_QUERY, {
-        variables: { handle },
+        variables: {handle},
       });
       menu = menuResult.menu;
     } catch (error) {
-      console.error("Error fetching menu:", error);
+      console.error('Error fetching menu:', error);
     }
 
     if (menu && menu.items && menu.items.length > 0) {
@@ -123,19 +287,27 @@ export async function loadCriticalData({ context, params, request }) {
           menu.items.map(async (item) => {
             try {
               const sanitizedHandle = sanitizeHandle(item.title);
-              const { collection } = await storefront.query(COLLECTION_BY_HANDLE_QUERY, {
-                variables: { handle: sanitizedHandle },
-              });
+              const {collection} = await storefront.query(
+                COLLECTION_BY_HANDLE_QUERY,
+                {
+                  variables: {handle: sanitizedHandle},
+                },
+              );
               return collection;
             } catch (error) {
-              console.error(`Error fetching collection for ${item.title}:`, error);
+              console.error(
+                `Error fetching collection for ${item.title}:`,
+                error,
+              );
               return null;
             }
-          })
+          }),
         );
-        sliderCollections = sliderCollections.filter(collection => collection !== null);
+        sliderCollections = sliderCollections.filter(
+          (collection) => collection !== null,
+        );
       } catch (error) {
-        console.error("Error fetching slider collections:", error);
+        console.error('Error fetching slider collections:', error);
       }
     }
 
@@ -147,25 +319,36 @@ export async function loadCriticalData({ context, params, request }) {
         const filterValue = JSON.parse(value);
         appliedFilters.push({
           label: `${value}`,
-          filter: { [filterKey]: filterValue },
+          filter: {[filterKey]: filterValue},
         });
       }
     });
 
-    return { collection, appliedFilters, sliderCollections };
+    // Extend return object with SEO and image data
+    return {
+      collection,
+      appliedFilters,
+      sliderCollections,
+      seo: {
+        title: collection?.seo?.title || `${collection.title} Collection`,
+        description:
+          collection?.seo?.description || collection.description || '',
+        image: collection?.image?.url || null,
+      },
+    };
   } catch (error) {
-    console.error("Error fetching collection:", error);
-    throw new Response("Error fetching collection", { status: 500 });
+    console.error('Error fetching collection:', error);
+    throw new Response('Error fetching collection', {status: 500});
   }
 }
 
 function sanitizeHandle(handle) {
   return handle
     .toLowerCase()
-    .replace(/"/g, '')  // Remove all quotes
-    .replace(/&/g, '')  // Remove all quotes
-    .replace(/\./g, '-')  // Replace periods with hyphens
-    .replace(/\s+/g, '-');  // Replace spaces with hyphens (keeping this from the original code)
+    .replace(/"/g, '') // Remove all quotes
+    .replace(/&/g, '') // Remove all quotes
+    .replace(/\./g, '-') // Replace periods with hyphens
+    .replace(/\s+/g, '-'); // Replace spaces with hyphens (keeping this from the original code)
 }
 
 /**
@@ -174,27 +357,27 @@ function sanitizeHandle(handle) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
-function loadDeferredData({ context }) {
+function loadDeferredData({context}) {
   return {};
 }
 
 export default function Collection() {
-  const { collection, appliedFilters, sliderCollections } = useLoaderData();
+  const {collection, appliedFilters, sliderCollections} = useLoaderData();
   const [userSelectedNumberInRow, setUserSelectedNumberInRow] = useState(null); // Tracks user selection
+
+  // *** CHANGED HERE: always return 1 if the user hasn't manually chosen a layout ***
   const calculateNumberInRow = (width, userSelection) => {
-    if (userSelection !== null) return userSelection; // Respect user selection
-    if (width >= 1500) return 5;
-    if (width >= 1200) return 4;
-    if (width >= 550) return 3;
-    return 1;
+    if (userSelection !== null) return userSelection; // user still can override
+    return 1; // always default to 1
   };
+
   const [screenWidth, setScreenWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 0
+    typeof window !== 'undefined' ? window.innerWidth : 0,
   );
   const [numberInRow, setNumberInRow] = useState(
-    typeof window !== "undefined" ? calculateNumberInRow(window.innerWidth) : 1
+    typeof window !== 'undefined' ? calculateNumberInRow(window.innerWidth) : 1,
   );
-  const isDesktop = useMediaQuery({ minWidth: 1024 });
+  const isDesktop = useMediaQuery({minWidth: 1024});
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -218,10 +401,10 @@ export default function Collection() {
 
     const debouncedUpdateLayout = debounce(updateLayout, 100);
 
-    window.addEventListener("resize", debouncedUpdateLayout);
+    window.addEventListener('resize', debouncedUpdateLayout);
 
     return () => {
-      window.removeEventListener("resize", debouncedUpdateLayout);
+      window.removeEventListener('resize', debouncedUpdateLayout);
     };
   }, [userSelectedNumberInRow]); // Add userSelectedNumberInRow as a dependency
 
@@ -231,16 +414,40 @@ export default function Collection() {
   };
 
   const handleFilterRemove = (filter) => {
-    const newUrl = getAppliedFilterLink(filter, searchParams, location);
+    const updatedParams = new URLSearchParams(searchParams.toString());
+
+    // Clean up 'direction' and 'cursor' parameters
+    updatedParams.delete('direction');
+    updatedParams.delete('cursor');
+
+    const newUrl = getAppliedFilterLink(filter, updatedParams, location);
     navigate(newUrl);
   };
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const query = url.searchParams;
+
+    // Remove 'direction' and 'cursor' if they exist
+    query.delete('direction');
+    query.delete('cursor');
+
+    const cleanUrl = `${url.origin}${url.pathname}?${query.toString()}`;
+    window.history.replaceState({}, '', cleanUrl);
+  }, []);
+
+
   const sortedProducts = React.useMemo(() => {
-    if (!collection || !collection.products || !collection.products.nodes) return [];
+    if (!collection || !collection.products || !collection.products.nodes)
+      return [];
     const products = [...collection.products.nodes];
     return products.sort((a, b) => {
-      const aInStock = a.variants.nodes.some(variant => variant.availableForSale);
-      const bInStock = b.variants.nodes.some(variant => variant.availableForSale);
+      const aInStock = a.variants.nodes.some(
+        (variant) => variant.availableForSale,
+      );
+      const bInStock = b.variants.nodes.some(
+        (variant) => variant.availableForSale,
+      );
 
       if (aInStock && !bInStock) return -1;
       if (!aInStock && bInStock) return 1;
@@ -269,25 +476,36 @@ export default function Collection() {
       {sliderCollections && sliderCollections.length > 0 && (
         <div className="slide-con">
           <div className="category-slider">
-            {sliderCollections.map((sliderCollection) => (
-              sliderCollection && (
-                <Link
-                  key={sliderCollection.id}
-                  to={`/collections/${sliderCollection.handle}`}
-                  className="category-container"
-                >
-                  {sliderCollection.image && (
-                    <img
-                      src={sliderCollection.image.url}
-                      alt={sliderCollection.image.altText || sliderCollection.title}
-                      className="category-image"
-                      width={150} height={150}
-                    />
-                  )}
-                  <div className="category-title">{sliderCollection.title}</div>
-                </Link>
-              )
-            ))}
+            {sliderCollections.map(
+              (sliderCollection) =>
+                sliderCollection && (
+                  <Link
+                    key={sliderCollection.id}
+                    to={`/collections/${sliderCollection.handle}`}
+                    className="category-container"
+                  >
+                    {sliderCollection.image && (
+                      <Image
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        srcSet={`${sliderCollection.image.url}?width=300&quality=7 300w,
+                                     ${sliderCollection.image.url}?width=600&quality=7 600w,
+                                     ${sliderCollection.image.url}?width=1200&quality=7 1200w`}
+                        alt={
+                          sliderCollection.image.altText ||
+                          sliderCollection.title
+                        }
+                        className="category-image"
+                        width={150}
+                        height={150}
+                        loading="eager"
+                      />
+                    )}
+                    <div className="category-title">
+                      {sliderCollection.title}
+                    </div>
+                  </Link>
+                ),
+            )}
           </div>
         </div>
       )}
@@ -299,72 +517,451 @@ export default function Collection() {
               filters={collection.products.filters}
               appliedFilters={appliedFilters}
               collections={[
-                { handle: "apple", title: "Apple" },
-                { handle: "gaming", title: "Gaming" },
-                { handle: "laptops", title: "Laptops" },
-                { handle: "desktops", title: "Desktops" },
-                { handle: "monitors", title: "Monitors" },
+                {handle: 'apple', title: 'Apple'},
+                {handle: 'gaming', title: 'Gaming'},
+                {handle: 'laptops', title: 'Laptops'},
+                {handle: 'desktops', title: 'Desktops'},
+                {handle: 'pc-parts', title: 'PC Parts'},
+                {handle: 'networking', title: 'Networking'},
+                {handle: 'monitors', title: 'Monitors'},
+                {handle: 'mobiles', title: 'Mobile Phones'},
+                {handle: 'tablets', title: 'Tablets'},
+                {handle: 'audio', title: 'Audio'},
+                {handle: 'accessories', title: 'Accessories'},
+                {handle: 'fitness', title: 'Fitness'},
+                {handle: 'photography', title: 'Photography'},
+                {handle: 'home-appliances', title: 'Home Appliances'},
               ]}
-
               onRemoveFilter={handleFilterRemove}
             />
           </div>
         )}
 
-        <div className="flex-1 mt-[116px]">
-          <hr className='col-hr'></hr>
+        <div className="flex-1 mt-[94px]">
+          <hr className="col-hr"></hr>
 
           <div className="view-container">
             <div className="layout-controls">
-              <span className='number-sort'>View As:</span>
+              <span className="number-sort">View As:</span>
               {screenWidth >= 300 && (
                 <button
-                  className={`layout-buttons first-btn ${numberInRow === 1 ? 'active' : ''}`}
+                  className={`layout-buttons first-btn ${
+                    numberInRow === 1 ? 'active' : ''
+                  }`}
                   onClick={() => handleLayoutChange(1)}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z" fill="#808080"></path> <path d="M2 12C2 11.4477 2.44772 11 3 11H21C21.5523 11 22 11.4477 22 12C22 12.5523 21.5523 13 21 13H3C2.44772 13 2 12.5523 2 12Z" fill="#808080"></path> <path d="M3 17C2.44772 17 2 17.4477 2 18C2 18.5523 2.44772 19 3 19H21C21.5523 19 22 18.5523 22 18C22 17.4477 21.5523 17 21 17H3Z" fill="#808080"></path> </g></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z"
+                        fill="#808080"
+                      ></path>
+                      <path
+                        d="M2 12C2 11.4477 2.44772 11 3 11H21C21.5523 11 22 11.4477 22 12C22 12.5523 21.5523 13 21 13H3C2.44772 13 2 12.5523 2 12Z"
+                        fill="#808080"
+                      ></path>
+                      <path
+                        d="M3 17C2.44772 17 2 17.4477 2 18C2 18.5523 2.44772 19 3 19H21C21.5523 19 22 18.5523 22 18C22 17.4477 21.5523 17 21 17H3Z"
+                        fill="#808080"
+                      ></path>
+                    </g>
+                  </svg>
                 </button>
               )}
               {screenWidth >= 300 && (
                 <button
-                  className={`layout-buttons ${numberInRow === 2 ? 'active' : ''}`}
+                  className={`layout-buttons ${
+                    numberInRow === 2 ? 'active' : ''
+                  }`}
                   onClick={() => handleLayoutChange(2)}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
                 </button>
               )}
               {screenWidth >= 550 && (
                 <button
-                  className={`layout-buttons ${numberInRow === 3 ? 'active' : ''}`}
+                  className={`layout-buttons ${
+                    numberInRow === 3 ? 'active' : ''
+                  }`}
                   onClick={() => handleLayoutChange(3)}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
                 </button>
               )}
               {screenWidth >= 1200 && (
                 <button
-                  className={`layout-buttons ${numberInRow === 4 ? 'active' : ''}`}
+                  className={`layout-buttons ${
+                    numberInRow === 4 ? 'active' : ''
+                  }`}
                   onClick={() => handleLayoutChange(4)}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
                 </button>
               )}
               {screenWidth >= 1500 && (
                 <button
-                  className={`layout-buttons ${numberInRow === 5 ? 'active' : ''}`}
+                  className={`layout-buttons ${
+                    numberInRow === 5 ? 'active' : ''
+                  }`}
                   onClick={() => handleLayoutChange(5)}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#808080"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Line_L"> <path id="Vector" d="M12 19V5" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
                 </button>
               )}
             </div>
@@ -386,7 +983,7 @@ export default function Collection() {
             }}
             resourcesClassName={`products-grid grid-cols-${numberInRow}`} // Dynamic class
           >
-            {({ node: product, index }) => (
+            {({node: product, index}) => (
               <ProductItem
                 key={product.id}
                 product={product}
@@ -416,52 +1013,51 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-const ProductItem = React.memo(({ product, index, numberInRow }) => {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
+const ProductItem = React.memo(({product, index, numberInRow}) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '0px 0px 50px 0px' });
-  const controls = useAnimation();
-
-  // Cap the delay to prevent excessive loading times for items lower on the page
-  const delay = Math.min(0.1 * (index % numberInRow), 0.5);
+  const [isSoldOut, setIsSoldOut] = useState(false);
 
   useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [isInView, controls]);
+    // Check if the product is sold out (no variants are available for sale)
+    const soldOut = !product.variants.nodes.some(
+      (variant) => variant.availableForSale,
+    );
+    setIsSoldOut(soldOut); // Update the state
+  }, [product]);
 
   const [selectedVariant, setSelectedVariant] = useState(() => {
-    return product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+    return product.variants.nodes[0];
   });
-  const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
 
-  const hasDiscount = product.compareAtPriceRange &&
+  const variantUrl = useVariantUrl(
+    product.handle,
+    selectedVariant.selectedOptions,
+  );
+
+  const hasDiscount =
+    product.compareAtPriceRange &&
     product.compareAtPriceRange.minVariantPrice.amount >
-    product.priceRange.minVariantPrice.amount;
+      product.priceRange.minVariantPrice.amount;
 
   return (
     <div className="product-item-collection product-card" ref={ref}>
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={controls}
-        variants={{
-          visible: {
-            opacity: 1,
-            x: 0,
-            transition: { delay, duration: 0.2 }
-          }
-        }}
-      >
+      <div>
         <div className="mobile-container">
-          <Link key={product.id} prefetch="intent" to={variantUrl} className="collection-product-link">
-            {product.featuredImage && isInView && (
-              <motion.div
-                initial={{ filter: "blur(10px)", opacity: 0 }}
-                animate={{ filter: isImageLoaded ? "blur(0px)" : "blur(10px)", opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="collection-product-image"
-              >
+          <Link
+            key={product.id}
+            prefetch="intent"
+            to={variantUrl}
+            className="collection-product-link"
+          >
+            {product.featuredImage && (
+              <div className="collection-product-image">
+                {/* Sold-out banner */}
+                <div
+                  className="sold-out-ban"
+                  style={{display: isSoldOut ? 'flex' : 'none'}} // Conditionally displayed
+                >
+                  <p>Sold Out</p>
+                </div>
                 <Image
                   srcSet={`${product.featuredImage.url}?width=300&quality=15 300w,
                            ${product.featuredImage.url}?width=600&quality=15 600w,
@@ -470,17 +1066,20 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
                   loading="lazy"
                   width="180px"
                   height="180px"
-                  onLoad={() => setIsImageLoaded(true)}
                 />
-              </motion.div>
+              </div>
             )}
           </Link>
           <div className="product-info-container">
             <Link key={product.id} prefetch="intent" to={variantUrl}>
               <h4>{truncateText(product.title, 30)}</h4>
-              <p className="product-description">{truncateText(product.description, 30)}</p> {/* Add truncated description */}
+              <p className="product-description">
+                {truncateText(product.description, 90)}
+              </p>
               <div className="price-container">
-                <small className={`product-price ${hasDiscount ? "discounted" : ""}`}>
+                <small
+                  className={`product-price ${hasDiscount ? 'discounted' : ''}`}
+                >
                   <Money data={selectedVariant.price} />
                 </small>
                 {hasDiscount && selectedVariant.compareAtPrice && (
@@ -502,7 +1101,7 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
           selectedVariant={selectedVariant}
           setSelectedVariant={setSelectedVariant}
         />
-      </motion.div>
+      </div>
     </div>
   );
 });
@@ -514,8 +1113,8 @@ const ProductItem = React.memo(({ product, index, numberInRow }) => {
  *   setSelectedVariant: (variant: ProductVariantFragment) => void;
  * }}
  */
-function ProductForm({ product, selectedVariant, setSelectedVariant }) {
-  const { open } = useAside();
+function ProductForm({product, selectedVariant, setSelectedVariant}) {
+  const {open} = useAside();
   const hasVariants = product.variants.nodes.length > 1;
 
   return (
@@ -525,7 +1124,9 @@ function ProductForm({ product, selectedVariant, setSelectedVariant }) {
         onClick={() => {
           if (hasVariants) {
             // Navigate to product page
-            window.location.href = `/products/${product.handle}`;
+            window.location.href = `/products/${encodeURIComponent(
+              product.handle,
+            )}`;
           } else {
             open('cart');
           }
@@ -533,64 +1134,29 @@ function ProductForm({ product, selectedVariant, setSelectedVariant }) {
         lines={
           selectedVariant && !hasVariants
             ? [
-              {
-                merchandiseId: selectedVariant.id,
-                quantity: 1,
-                attributes: [],
-                product: {
-                  ...product,
-                  selectedVariant,
-                  handle: product.handle,
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                  attributes: [],
+                  product: {
+                    ...product,
+                    selectedVariant,
+                    handle: product.handle,
+                  },
                 },
-              },
-            ]
+              ]
             : []
         }
       >
         {!selectedVariant?.availableForSale
           ? 'Sold out'
           : hasVariants
-            ? 'Select Options'
-            : 'Add to cart'}
+          ? 'Select Options'
+          : 'Add to cart'}
       </AddToCartButton>
     </div>
   );
 }
-
-// /**
-//  * @param {{ option: VariantOption }}
-//  */
-// function ProductOptions({ option }) {
-//   return (
-//     <div className="product-options" key={option.name}>
-//       <h5>{option.name}</h5>
-//       <div className="product-options-grid">
-//         {option.values.map(({ value, isAvailable, isActive, to }) => {
-//           return (
-//             <Link
-//               className="product-options-item"
-//               key={option.name + value}
-//               prefetch="intent"
-//               preventScrollReset
-//               replace
-//               to={to}
-//               onClick={(e) => {
-//                 e.preventDefault(); // Add this line
-//                 // Handle variant selection here if needed
-//               }}
-//               style={{
-//                 border: isActive ? '1px solid black' : '1px solid transparent',
-//                 opacity: isAvailable ? 1 : 0.3,
-//               }}
-//             >
-//               {value}
-//             </Link>
-//           );
-//         })}
-//       </div>
-//     </div>
-//   );
-// }
 
 const MENU_QUERY = `#graphql
   query GetMenu($handle: String!) {
@@ -627,7 +1193,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     id
     handle
     title
-    description # Add description field here
+    description
     featuredImage {
       id
       altText
@@ -705,6 +1271,15 @@ const COLLECTION_QUERY = `#graphql
       id
       handle
       title
+      description
+      seo {
+        title
+        description
+      }
+      image {
+        url
+        altText
+      }
       products(
         first: $first,
         last: $last,

@@ -3,7 +3,7 @@
     max-width: 1000px;
     margin: 50px auto;
     padding: 20px 50px;
-    border: 1px solid #2172af;
+    border: 1px solid #000;
     border-radius: 30px;
     background-color: #f9f9f9;
 }
@@ -38,7 +38,7 @@
 
 .contact-form button {
     padding: 5px 20px;
-    background-color: #2172af;
+    background-color: #000;
     color: #fff;
     border: none;
     border-radius: 25px;

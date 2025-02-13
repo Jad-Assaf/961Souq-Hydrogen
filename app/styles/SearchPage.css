@@ -4,7 +4,7 @@
     justify-content: center;
     align-items: center;
     max-width: 1500px;
-    margin: 50px auto;
+    margin: 50px auto 100px;
 }
 
 .filter-sort-container {
@@ -12,14 +12,27 @@
     margin: 75px;
 }
 
+.filters fieldset div {
+    max-height: 200px;
+    overflow: auto;
+}
+
 .collection-product-link {
     width: 100% !important;
+}
+
+.search-filters-container {
+    width: 95%;
+}
+
+.filters {
+    width: 14%;
 }
 
 .search-filters-container fieldset {
     padding: 0;
     margin: 0;
-    width: 200px;
+    width: 100%;
 }
 
 .filter-option {
@@ -29,29 +42,31 @@
 
 .price-filter-btn {
     padding: 3px 5px;
-    border: 1px solid #2172af;
+    border: 1px solid #000;
     border-radius: 5px;
 }
 
 .price-filter-apply {
-    border: 1px solid #2172af;
+    border: 1px solid #000;
     padding: 5px 10px;
     border-radius: 5px;
 }
 
 .search-results {
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
+    width: 86%;
 }
 
 .search-results-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    row-gap: 30px;
+    gap: 30px;
 }
 
 select#sort-select {
-    border-radius: 7px;
+    border: 1px solid #d1d5db;
+    border-radius: 35px;
     padding: 5px 10px;
     margin-left: 5px;
     font-size: 14px;
@@ -86,7 +101,7 @@ select#sort-select {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #2172af;
+    background-color: #000;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -100,13 +115,26 @@ select#sort-select {
         display: block;
     }
 
+    .search-results {
+        width: 100%;
+    }
+
     .filters {
         display: none;
-        /* Hide desktop filters */
+    }
+
+    .search-filters-container {
+        width: 100vw;
     }
 
     .search-results-grid {
-        justify-content: space-around;
+        justify-content: space-evenly;
+        gap: 5px;
+        row-gap: 15px;
+    }
+
+    .search-results-grid .product-card {
+        width: 45vw !important;
     }
 }
 
@@ -177,8 +205,9 @@ select#sort-select {
 }
 
 .search-results-grid .product-card {
-    width: 45%;
-    max-width: 200px;
+    width: 42%;
+    min-width: unset !important;
+    max-width: 210px !important;
 }
 
 @keyframes slideDown {
@@ -243,7 +272,7 @@ select#sort-select {
 }
 
 .mobile-price-filter-container button {
-    border: 1px solid #2172af;
+    border: 1px solid #000;
     width: auto;
     height: auto;
     text-align: center;

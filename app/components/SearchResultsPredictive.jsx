@@ -179,7 +179,7 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
       <h5>Products</h5>
       <ul>
         {products.map((product) => {
-          const productUrl = `/products/${product.handle}`;
+          const productUrl = `/products/${encodeURIComponent(product.handle)}`;
 
           const image = product?.variants?.nodes?.[0].image;
           return (

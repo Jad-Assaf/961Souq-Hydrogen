@@ -1,6 +1,5 @@
-import { CartForm } from '@shopify/hydrogen';
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import {CartForm} from '@shopify/hydrogen';
+import React, {useState} from 'react';
 
 /**
  * @param {{
@@ -26,8 +25,13 @@ export function AddToCartButton({
     setTimeout(() => setIsAnimating(false), 300); // Reset animation after 300ms
   };
 
+  const buttonStyles = {
+    transition: 'transform 0.3s ease', // Smooth transition for scaling
+    transform: isAnimating ? 'scale(1.1)' : 'scale(1)', // Scale up when animating
+  };
+
   return (
-    <CartForm route="/cart" inputs={{ lines }} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher) => (
         <>
           <input
@@ -35,16 +39,17 @@ export function AddToCartButton({
             type="hidden"
             value={JSON.stringify(analytics)}
           />
-          <motion.button
+          <button
             type="submit"
             onClick={handleAnimation}
             disabled={disabled ?? fetcher.state !== 'idle'}
-            className={`add-to-cart-button ${disabled ? 'disabled' : ''} ${fetcher.state !== 'idle' ? 'loading' : ''}`}
-            animate={isAnimating ? { scale: 1.1 } : { scale: 1 }}
-            transition={{ duration: 1 }}
+            className={`add-to-cart-button ${disabled ? 'disabled' : ''} ${
+              fetcher.state !== 'idle' ? 'loading' : ''
+            }`}
+            style={buttonStyles} // Apply inline styles for animation
           >
             {children}
-          </motion.button>
+          </button>
         </>
       )}
     </CartForm>

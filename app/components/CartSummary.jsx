@@ -1,5 +1,6 @@
 import {CartForm, Money} from '@shopify/hydrogen';
-import {useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
+import {trackInitiateCheckout} from '~/lib/metaPixelEvents'; // **Added Import**
 
 /**
  * @param {CartSummaryProps}
@@ -8,37 +9,98 @@ export function CartSummary({cart, layout}) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
 
+  const subtotal = parseFloat(cart?.cost?.subtotalAmount?.amount ?? '0');
+
   return (
     <div aria-labelledby="cart-summary" className={className}>
-      <h4><strong>Subtotal</strong></h4>
+      <h4>
+        <strong>Subtotal</strong>
+      </h4>
       <dl className="cart-subtotal">
-        {/* <dt>Subtotal</dt> */}
         <dd>
           {cart.cost?.subtotalAmount?.amount ? (
-            <Money data={cart.cost?.subtotalAmount} style={{fontWeight: '500'}}/>
+            <Money
+              data={cart.cost.subtotalAmount}
+              style={{fontWeight: '500'}}
+            />
           ) : (
             '-'
           )}
         </dd>
       </dl>
-      {/* <CartDiscounts discountCodes={cart.discountCodes} /> */}
-      {/* <CartGiftCard giftCardCodes={cart.appliedGiftCards} /> */}
-      <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
+
+      {/* **Added `cart` Prop Here** */}
+      <CartCheckoutActions
+        checkoutUrl={cart.checkoutUrl}
+        cartTotal={subtotal}
+        cart={cart} // **Added Prop**
+      />
     </div>
   );
 }
+
 /**
- * @param {{checkoutUrl?: string}}
+ * @param {{checkoutUrl?: string, cartTotal?: number, cart: CartApiQueryFragment}} // **Updated Prop Types**
  */
-function CartCheckoutActions({checkoutUrl}) {
+export default function CartCheckoutActions({
+  checkoutUrl,
+  cartTotal = 0,
+  cart,
+}) {
+  // **Added `cart` Parameter**
+  const [showAlert, setShowAlert] = useState(false);
+
+  // Hide the alert if the subtotal drops below $5000
+  useEffect(() => {
+    if (cartTotal < 5000 && showAlert) {
+      setShowAlert(false);
+    }
+  }, [cartTotal, showAlert]);
+
+  const handleButtonClick = () => {
+    if (cartTotal > 5000) {
+      // Prevent navigation, show alert
+      setShowAlert(true);
+    } else {
+      // **Added: Track Initiate Checkout Event**
+      trackInitiateCheckout(cart); // **Added Line**
+
+      // Navigate to checkout
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        console.error('Checkout URL is undefined.');
+      }
+    }
+  };
+
   if (!checkoutUrl) return null;
 
   return (
-    <div className='cart-checkout-container'>
-      <a href={checkoutUrl} target="_self" className='cart-checkout-button'>
-        <p>Continue to Checkout &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rarr;</p>
-      </a>
-      <br />
+    <div className="cart-checkout-container">
+      <button
+        type="button"
+        className={`cart-checkout-button ${
+          cartTotal > 5000 ? 'disabled-look' : ''
+        }`}
+        onClick={handleButtonClick}
+        aria-label="Continue to Checkout" // **Optional: Added aria-label for accessibility**
+      >
+        Continue to Checkout &nbsp; &rarr;
+      </button>
+
+      {showAlert && (
+        <div className="alert-box">
+          <span className="alert-icon">&times;</span>
+          <span className="alert-message">
+            We apologize for any inconvenience! Your order is above $5000.
+            Please contact sales to proceed.{' '}
+            <a className="cart-err-msg-link" href="https://wa.me/9613020030">
+              +961 3 020 030
+            </a>
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -135,7 +197,8 @@ function CartGiftCard({giftCardCodes}) {
             <div className="cart-discount">
               <code>{codes?.join(', ')}</code>
               &nbsp;
-              <button onSubmit={() => removeAppliedCode}>Remove</button>
+              {/* **Changed `onSubmit` to `onClick`** */}
+              <button onClick={removeAppliedCode}>Remove</button>
             </div>
           </UpdateGiftCardForm>
         </div>
