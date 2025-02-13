@@ -59,9 +59,9 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                   <a
                     href="https://maps.app.goo.gl/iW7qXAw4j5fZFGxK8"
                     target="_blank"
-                    title="Macarabia Store Location"
+                    title="961 Souq Store Location"
                   >
-                    Macarabia - Zalka High Way Facing white Tower hotel Ground
+                    961 Souq - Zalka High Way Facing white Tower hotel Ground
                     Floor, Zalka, Lebanon.
                   </a>
                 </li>
@@ -113,14 +113,14 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                       ></path>
                     </svg>
                   </i>{' '}
-                  <a href="mailto:admin@macarabia.me" target="_blank">
-                    admin@macarabia.me
+                  <a href="mailto:admin@961souq.com" target="_blank">
+                    admin@961souq.com
                   </a>
                 </li>
               </ul>
               {/* Social Media Links */}
               <div className="social-links">
-                <a href="https://www.facebook.com/971Souqme" target="_blank">
+                <a href="https://www.facebook.com/961souq" target="_blank">
                   <svg
                     aria-hidden="true"
                     focusable="false"
@@ -131,7 +131,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"></path>
                   </svg>
                 </a>
-                <a href="https://instagram.com/macarabia.me" target="_blank">
+                <a href="https://instagram.com/961Souq" target="_blank">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -151,7 +151,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
           </div>
         </div>
         <div className="copyright">
-          <p>© 2025, macarabia.me All rights reserved.</p>
+          <p>© 2025, 961Souq All rights reserved.</p>
           <div>
             <svg
               className="icon icon--full-color"

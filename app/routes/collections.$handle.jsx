@@ -43,33 +43,33 @@ export const meta = ({data}) => {
   const collection = data?.collection;
 
   return getSeoMeta({
-    title: `${collection?.title || 'Collection'} | Macarabia`,
+    title: `${collection?.title || 'Collection'} | 961Souq`,
     description: truncateText(
-      collection?.description || 'Explore our latest collection at Macarabia.',
+      collection?.description || 'Explore our latest collection at 961Souq.',
       20,
     ),
-    url: `https://macarabia.me/collections/${collection?.handle || ''}`,
+    url: `https://961souq.com/collections/${collection?.handle || ''}`,
     image:
       collection?.image?.url ||
-      'https://macarabia.me/default-collection-image.jpg',
+      'https://961souq.com/default-collection-image.jpg',
     jsonLd: [
       // CollectionPage Schema
       {
         '@context': 'http://schema.org/',
         '@type': 'CollectionPage',
         name: collection?.title || 'Collection',
-        url: `https://macarabia.me/collections/${collection?.handle || ''}`,
+        url: `https://961souq.com/collections/${collection?.handle || ''}`,
         description: truncateText(collection?.description || '', 20),
         image: {
           '@type': 'ImageObject',
           url:
             collection?.image?.url ||
-            'https://macarabia.me/default-collection-image.jpg',
+            'https://961souq.com/default-collection-image.jpg',
         },
         hasPart: collection?.products?.nodes?.slice(0, 20).map((product) => ({
           '@type': 'Product',
           name: truncateText(product?.title || 'Product', 10),
-          url: `https://macarabia.me/products/${encodeURIComponent(
+          url: `https://961souq.com/products/${encodeURIComponent(
             product?.handle,
           )}`,
           sku: product?.variants?.[0]?.sku || product?.variants?.[0]?.id || '',
@@ -88,10 +88,10 @@ export const meta = ({data}) => {
           productID: product?.id,
           brand: {
             '@type': 'Brand',
-            name: product?.vendor || 'Macarabia',
+            name: product?.vendor || '961Souq',
           },
           description: truncateText(product?.description || '', 20),
-          image: `https://macarabia.me/products/${product?.featuredImage?.url}`,
+          image: `https://961souq.com/products/${product?.featuredImage?.url}`,
           offers: {
             '@type': 'Offer',
             priceCurrency: product?.variants?.[0]?.price?.currencyCode || 'USD',
@@ -100,7 +100,7 @@ export const meta = ({data}) => {
             availability: product?.availableForSale
               ? 'http://schema.org/InStock'
               : 'http://schema.org/OutOfStock',
-            url: `https://macarabia.me/products/${encodeURIComponent(
+            url: `https://961souq.com/products/${encodeURIComponent(
               product?.handle,
             )}`,
             priceValidUntil: '2025-12-31',
@@ -152,15 +152,13 @@ export const meta = ({data}) => {
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: 'https://macarabia.me',
+            item: 'https://961souq.com',
           },
           {
             '@type': 'ListItem',
             position: 2,
             name: collection?.title || 'Collection',
-            item: `https://macarabia.me/collections/${
-              collection?.handle || ''
-            }`,
+            item: `https://961souq.com/collections/${collection?.handle || ''}`,
           },
         ],
       },
@@ -170,13 +168,13 @@ export const meta = ({data}) => {
         '@type': 'ItemList',
         name: collection?.title || 'Collection',
         description: truncateText(collection?.description || '', 20),
-        url: `https://macarabia.me/collections/${collection?.handle || ''}`,
+        url: `https://961souq.com/collections/${collection?.handle || ''}`,
         itemListElement: collection?.products?.nodes
           ?.slice(0, 20)
           .map((product, index) => ({
             '@type': 'ListItem',
             position: index + 1,
-            url: `https://macarabia.me/products/${encodeURIComponent(
+            url: `https://961souq.com/products/${encodeURIComponent(
               product?.handle,
             )}`,
             name: truncateText(product?.title || 'Product', 10),
@@ -184,7 +182,7 @@ export const meta = ({data}) => {
               '@type': 'ImageObject',
               url:
                 product?.featuredImage?.url ||
-                'https://macarabia.me/default-product-image.jpg',
+                'https://961souq.com/default-product-image.jpg',
             },
           })),
       },
