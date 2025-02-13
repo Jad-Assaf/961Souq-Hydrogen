@@ -38,7 +38,7 @@ export const shouldRevalidate = ({
   return defaultShouldRevalidate;
 };
 
-const PIXEL_ID = '321309553208857'; // Replace with your actual Pixel ID
+const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 
 export function links() {
   return [
