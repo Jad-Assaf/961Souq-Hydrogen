@@ -39,7 +39,7 @@ export const meta = ({data}) => {
 
   return getSeoMeta({
     title: truncate(
-      product?.seoTitle || product?.title || 'Macarabia Product',
+      product?.seoTitle || product?.title || '961Souq Product',
       140,
     ),
     description: truncate(
@@ -48,7 +48,7 @@ export const meta = ({data}) => {
         'Discover this product.',
       150,
     ),
-    url: `https://macarabia.me/products/${encodeURIComponent(product?.handle)}`,
+    url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
     'og:image': image,
     'twitter:image': image,
     jsonLd: [
@@ -56,19 +56,19 @@ export const meta = ({data}) => {
         '@context': 'http://schema.org/',
         '@type': 'Product',
         name: truncate(product?.title, 140),
-        url: `https://macarabia.me/products/${encodeURIComponent(
+        url: `https://961souq.com/products/${encodeURIComponent(
           product?.handle,
         )}`,
         sku: currentVariant?.sku || product?.id,
         productID: product?.id,
         brand: {
           '@type': 'Brand',
-          name: product?.vendor || 'Macarabia',
+          name: product?.vendor || '961Souq',
         },
         description: truncate(product?.description || '', 150),
         image:
           product?.firstImage ||
-          'https://cdn.shopify.com/s/files/1/0858/6821/6639/files/macarabialogo01_303ae373-185d-40f3-8271-df151d977a10.png?v=1706447237',
+          'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912',
         offers: variants.map((variant) => ({
           '@type': 'Offer',
           priceCurrency:
@@ -78,7 +78,7 @@ export const meta = ({data}) => {
           availability: variant?.availableForSale
             ? 'http://schema.org/InStock'
             : 'http://schema.org/OutOfStock',
-          url: `https://macarabia.me/products/${encodeURIComponent(
+          url: `https://961souq.com/products/${encodeURIComponent(
             product?.handle,
           )}?variant=${variant?.id}`,
           image: variant?.image?.url || product?.firstImage || '',
@@ -155,13 +155,13 @@ export const meta = ({data}) => {
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: 'https://macarabia.me',
+            item: 'https://961souq.com',
           },
           {
             '@type': 'ListItem',
             position: 2,
             name: truncate(product?.title || 'Product', 140),
-            item: `https://macarabia.me/products/${encodeURIComponent(
+            item: `https://961souq.com/products/${encodeURIComponent(
               product?.handle,
             )}`,
           },
@@ -449,7 +449,7 @@ export function ProductForm({
   // Possibly build a WhatsApp link
   const isProductPage = location.pathname.includes('/products/');
   const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613020030&text=${encodeURIComponent(
-    `Hi, I'd like to buy ${product.title} https://macarabia.me${location.pathname}`,
+    `Hi, I'd like to buy ${product.title} https://961souq.com${location.pathname}`,
   )}`;
 
   // WhatsApp SVG icon
@@ -764,7 +764,7 @@ export default function Product() {
               or proof of purchase.
             </p>
             <p>
-              To initiate an exchange, please contact us at admin@macarabia.me.
+              To initiate an exchange, please contact us at admin@961souq.com.
               Upon approval of your exchange request, we will furnish you with
               an exchange shipping label along with comprehensive instructions
               for package return. Please note that exchanges initiated without
@@ -783,13 +783,13 @@ export default function Product() {
             <h3>Operational Warranty Terms and Conditions</h3>
             <h3>Warranty Coverage</h3>
             <p>
-              This warranty applies to All Products, purchased from Macarabia.
+              This warranty applies to All Products, purchased from 961Souq.
               The warranty covers defects in materials and workmanship under
               normal use for the period specified at the time of purchase.
             </p>
             <h3>What is Covered</h3>
             <p>
-              During the warranty period, Macarabia will repair or replace, at
+              During the warranty period, 961Souq will repair or replace, at
               no charge, any parts that are found to be defective due to faulty
               materials or poor workmanship. This warranty is valid only for the
               original purchaser and is non-transferable.
@@ -816,17 +816,17 @@ export default function Product() {
             <p>To make a claim under this warranty:</p>
             <ol>
               <li>
-                Contact admin@macarabia.me with proof of purchase and a detailed
+                Contact admin@961souq.com with proof of purchase and a detailed
                 description of the issue.
               </li>
               <li>
-                Macarabia will assess the product and, if deemed defective,
+                961Souq will assess the product and, if deemed defective,
                 repair or replace the item at no cost.
               </li>
             </ol>
             <h3>Limitations and Exclusions</h3>
             <p>
-              This warranty is limited to repair or replacement. Macarabia will
+              This warranty is limited to repair or replacement. 961Souq will
               not be liable for any indirect, consequential, or incidental
               damages, including loss of data or loss of profits.
             </p>

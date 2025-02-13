@@ -574,9 +574,9 @@ export default function Homepage() {
       {topProducts['cameras'] && (
         <TopProductSections collection={topProducts['cameras']} />
       )}
-      {topProducts['drones'] && (
+      {/* {topProducts['drones'] && (
         <TopProductSections collection={topProducts['drones']} />
-      )}
+      )} */}
 
       <CollectionCircles collections={homeAppliancesMenu} />
       {topProducts['kitchen-appliances'] && (
