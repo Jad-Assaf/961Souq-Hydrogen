@@ -87,7 +87,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 {' '}
                 <path
                   d="M5 6H12H19M5 12H19M5 18H19"
-                  stroke="#fff"
+                  stroke="#2172af"
                   strokeWidth="2"
                   strokeLinecap="round"
                 ></path>{' '}
@@ -100,8 +100,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912"
               alt={`${shop.name} Logo`}
               className="header-logo"
-              width="150px"
-              height="79px"
+              width="100px"
+              height="50px"
             />
           </NavLink>
 
