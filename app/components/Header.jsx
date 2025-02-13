@@ -207,7 +207,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           aria-label="Clear search" // Optional: Added aria-label for accessibility
                         >
                           <svg
-                            fill="#000"
+                            fill="#2172af"
                             height="12px"
                             width="12px"
                             version="1.1"

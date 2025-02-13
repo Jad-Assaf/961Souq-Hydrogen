@@ -1163,8 +1163,8 @@ button.reset:hover:not(:has(> *)) {
   cursor: pointer;
   width: 30px;
   height: 30px;
-  color: #fff;
-  fill: #fff;
+  color: #2172af;
+  fill: #2172af;
 }
 
 .main-search {
@@ -1223,7 +1223,7 @@ button.reset:hover:not(:has(> *)) {
   margin: 0;
   border: 1px solid #c2c2c2;
   border-radius: 30px;
-  color: #000 !important;
+  color: #2172af !important;
   padding: 10px 15px;
   border-right: none;
   border-top-right-radius: 0;
