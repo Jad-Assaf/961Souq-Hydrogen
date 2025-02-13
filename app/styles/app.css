@@ -1107,7 +1107,7 @@ button.reset:hover:not(:has(> *)) {
   text-decoration: none;
 }
 .menu-item-level-2 a{
-  color: #2172af !important;
+  color: #000 !important;
 }
 .menu-item-level-1 a::after,
 .menu-item-level-2 a::after,
