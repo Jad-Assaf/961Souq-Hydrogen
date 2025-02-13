@@ -145,7 +145,7 @@ export function Layout({children}) {
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();
   const [nprogress, setNProgress] = useState(null); // Store NProgress instance
-  const clarityId = 'pfyepst8v5'; // Replace with your Clarity project ID
+  const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
   useEffect(() => {
     // Load NProgress once and set it in the state
