@@ -8,6 +8,10 @@ html {
 
 body {
   background-color: #fff;
+
+  *{
+    scrollbar-width: none !important;
+  }
 }
 
 :root {
