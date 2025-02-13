@@ -1055,7 +1055,7 @@ button.reset:hover:not(:has(> *)) {
   top: 100%;
   left: 0;
   width: 100vw;
-  background-color: #232323;
+  background-color: #fff;
   z-index: 1000;
   padding: 30px 50px;
   border-radius: 0;
@@ -1082,7 +1082,7 @@ button.reset:hover:not(:has(> *)) {
 
 /* Styling for nested submenu links */
 .submenu-level-2 a {
-  color: #fff;
+  color: #2172af;
   font-size: 0.9rem;
 }
 
@@ -1106,7 +1106,9 @@ button.reset:hover:not(:has(> *)) {
   display: inline-block;
   text-decoration: none;
 }
-
+.menu-item-level-2 a{
+  color: #2172af !important;
+}
 .menu-item-level-1 a::after,
 .menu-item-level-2 a::after,
 .menu-item-level-3 a::after {
