@@ -180,19 +180,11 @@ export function Layout({children}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <meta
-          name="google-site-verification"
-          content="tGAcrZ3TpRDtQqmjqfYOuQpdBqsLCTr5YzcG7syVPEk"
-        />
         <Meta />
         <Links />
-        <meta
-          name="facebook-domain-verification"
-          content="ca1idnp1x728fhk6zouywowcqgb2xt"
-        />
         <script
           nonce={nonce}
-          src="https://www.googletagmanager.com/gtag/js?id=G-3PZN80E9FJ"
+          src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
         ></script>
 
         <script
@@ -203,7 +195,7 @@ export function Layout({children}) {
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
 
-              gtag('config', 'G-3PZN80E9FJ');
+              gtag('config', 'G-CB623RXLSE');
             `,
           }}
         ></script>
