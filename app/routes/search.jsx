@@ -1,15 +1,16 @@
-import { json } from '@shopify/remix-oxygen';
+import {json} from '@shopify/remix-oxygen';
 import {
   useLoaderData,
   useSearchParams,
   useNavigate,
   Link,
 } from '@remix-run/react';
-import { useState, useEffect } from 'react';
-import { ProductItem } from '~/components/CollectionDisplay';
-import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { trackSearch } from '~/lib/metaPixelEvents'; // Import the trackSearch function
+import {useState, useEffect} from 'react';
+import {ProductItem} from '~/components/CollectionDisplay';
+import {getEmptyPredictiveSearchResult} from '~/lib/search';
+import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
 import '../styles/SearchPage.css';
+import Fuse from 'fuse.js';
 
 /**
  * @type {import('@remix-run/react').MetaFunction}
@@ -21,7 +22,7 @@ export const meta = () => {
 /**
  * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
  */
-export async function loader({ request, context }) {
+export async function loader({request, context}) {
   const {storefront} = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
@@ -304,6 +305,23 @@ export default function SearchPage() {
     );
   }
 
+  // ******************** FUSE INTEGRATION START ********************
+  // Build a Fuse index on the products from the current page.
+  // NOTE: Each edge has a "node" property; we search within the node.
+  const products = edges.map((edge) => edge.node);
+  const fuseOptions = {
+    keys: ['title', 'description', 'variants.nodes.sku'],
+    threshold: 0.3,
+  };
+  const Fuse = require('fuse.js');
+  const fuse = new Fuse(products, fuseOptions);
+  // Use the 'q' parameter from the URL as the client-side search query.
+  const queryParam = searchParams.get('q') || '';
+  const fuseResults = queryParam
+    ? fuse.search(queryParam).map((result) => result.item)
+    : products;
+  // ******************** FUSE INTEGRATION END ********************
+
   // Grab pageInfo so we know if there's a next / prev page
   const pageInfo = result?.products?.pageInfo || {};
   const hasNextPage = pageInfo.hasNextPage;
@@ -331,7 +349,7 @@ export default function SearchPage() {
     <div className="search">
       <h1>Search Results</h1>
 
-      <div className="search-filters-container" style={{ display: 'flex' }}>
+      <div className="search-filters-container" style={{display: 'flex'}}>
         {/* Sidebar (Desktop) */}
         <div className="filters">
           <fieldset>
@@ -480,9 +498,9 @@ export default function SearchPage() {
             </select>
           </div>
 
-          {/* Product Grid */}
+          {/* Product Grid - using Fuse results */}
           <div className="search-results-grid">
-            {edges.map(({ node: product }, idx) => (
+            {fuseResults.map((product, idx) => (
               <ProductItem product={product} index={idx} key={product.id} />
             ))}
           </div>
@@ -785,7 +803,7 @@ async function regularSearch({
   after = null,
   before = null,
 }) {
-  const { storefront } = context;
+  const {storefront} = context;
 
   let first = null;
   let last = null;
@@ -809,7 +827,7 @@ async function regularSearch({
   };
 
   try {
-    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+    const {products} = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
@@ -817,14 +835,14 @@ async function regularSearch({
       return {
         type: 'regular',
         term: filterQuery,
-        result: { products: { edges: [] } },
+        result: {products: {edges: []}},
       };
     }
 
     return {
       type: 'regular',
       term: filterQuery,
-      result: { products },
+      result: {products},
     };
   } catch (error) {
     console.error('Regular search error:', error);
@@ -957,15 +975,15 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
   ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
   ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
-async function predictiveSearch({ request, context }) {
-  const { storefront } = context;
+async function predictiveSearch({request, context}) {
+  const {storefront} = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
   if (!term) {
-    return { type, term, result: getEmptyPredictiveSearchResult() };
+    return {type, term, result: getEmptyPredictiveSearchResult()};
   }
 
   const terms = term
@@ -979,7 +997,7 @@ async function predictiveSearch({ request, context }) {
     )
     .join(' AND ');
 
-  const { predictiveSearch: items, errors } = await storefront.query(
+  const {predictiveSearch: items, errors} = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
@@ -992,7 +1010,7 @@ async function predictiveSearch({ request, context }) {
 
   if (errors) {
     throw new Error(
-      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
+      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
     );
   }
   if (!items) {
@@ -1000,7 +1018,7 @@ async function predictiveSearch({ request, context }) {
   }
 
   const total = Object.values(items).reduce((acc, arr) => acc + arr.length, 0);
-  return { type, term, result: { items, total } };
+  return {type, term, result: {items, total}};
 }
 
 /**

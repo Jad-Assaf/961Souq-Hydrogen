@@ -29,6 +29,7 @@
     "@weaverse/hydrogen": "^3.4.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "fuse.js": "^7.1.0",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
     "graphql-tag": "^2.12.6",
