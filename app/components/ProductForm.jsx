@@ -140,7 +140,7 @@ export function ProductForm({
   );
 
   // Construct WhatsApp share URL
-  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613963961&text=Hi, I would like to buy ${product.title} https://macarabia.me${location.pathname}`;
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613963961&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
   const handleAddToCart = () => {
     // Track the AddToCart event
     trackAddToCart(product);
