@@ -2237,11 +2237,11 @@ button.layout-buttons.first-btn svg {
   top: 50%;
   transform: translateY(-50%);
   background: #fff;
-  border: none;
   cursor: pointer;
   z-index: 2;
   border-radius: 50%;
   padding: 5px;
+  border: 1px solid #2172af;
 }
 
 .home-prev-button {
