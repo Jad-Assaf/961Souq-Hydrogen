@@ -2236,7 +2236,7 @@ button.layout-buttons.first-btn svg {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: #232323;
+  background: #fff;
   border: none;
   cursor: pointer;
   z-index: 2;
@@ -2256,7 +2256,7 @@ button.layout-buttons.first-btn svg {
 .home-next-button svg {
   width: 24px;
   height: 24px;
-  stroke: #fff;
+  stroke: #2172af;
 }
 
 .drawer {
