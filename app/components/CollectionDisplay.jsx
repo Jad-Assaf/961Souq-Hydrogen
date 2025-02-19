@@ -233,7 +233,13 @@ export function ProductItem({product, index}) {
         )}
         <h4 className="product-title">{product.title}</h4>
         <div className="product-price">
-          {selectedVariant?.price && <Money data={selectedVariant.price} />}
+          {selectedVariant?.price ? (
+            Number(selectedVariant.price.amount) === 0 ? (
+              <span>Call For Price</span>
+            ) : (
+              <Money data={selectedVariant.price} />
+            )
+          ) : null}
           {hasDiscount && (
             <small className="discountedPrice">
               <Money data={selectedVariant.compareAtPrice} />
