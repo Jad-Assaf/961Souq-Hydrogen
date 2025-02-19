@@ -158,7 +158,7 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin-mobile-banner.jpg?v=1726321601',
-      link: '/products/garmin-fenix®-8-47-mm-amoled-sapphire-premium-multisport-gps-watch',
+      link: '/products/garmin-fenix-8-47-mm-amoled-sapphire-premium-multisport-gps-watch',
     },
     {
       desktopImageUrl:
