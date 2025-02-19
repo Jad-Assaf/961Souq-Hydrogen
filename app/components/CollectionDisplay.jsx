@@ -195,7 +195,6 @@ export function ProductItem({product, index}) {
               loading="lazy"
               style={styles.image}
               className="product-slideshow-image"
-              onClick={handleImageClick} // Click to switch images
             />
             <div
               className="product-slideshow-progress-bar"
