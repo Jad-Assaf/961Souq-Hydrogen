@@ -340,9 +340,10 @@
 }
 
 .tab-button.active {
-    border-bottom: 3px solid #00172f;
+    border-bottom: 3px solid #2172af;
     /* Change to your active color */
     font-weight: bold;
+    color: #2172af;
 }
 
 .product-section {

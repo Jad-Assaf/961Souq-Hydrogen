@@ -102,8 +102,7 @@ function RelatedProductItem({product, index}) {
           />
           <div className="product-title">{product.title}</div>
           <div className="product-price">
-            {product.priceRange.minVariantPrice.currencyCode}&nbsp;
-            {product.priceRange.minVariantPrice.amount}{' '}
+            ${product.priceRange.minVariantPrice.amount}0
           </div>
         </Link>
       </div>
