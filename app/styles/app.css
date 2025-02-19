@@ -224,10 +224,10 @@ body {
 
 .circle-prev-button,
 .circle-next-button {
-  background-color: #232323;
+  background-color: #fff;
   /* Semi-transparent black */
-  border: none;
-  color: white;
+  border: 1px solid #2172af;
+  color: #2172af;
   border-radius: 50%;
   width: 34px;
   height: 34px;
