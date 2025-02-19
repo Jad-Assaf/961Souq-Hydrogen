@@ -524,7 +524,11 @@ export function ProductForm({
               : []
           }
         >
-          {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+          {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
+            ? 'Call For Price'
+            : selectedVariant?.availableForSale
+            ? 'Add to cart'
+            : 'Sold out'}
         </AddToCartButton>
 
         {isProductPage && (
@@ -619,7 +623,12 @@ export default function Product() {
             <small
               className={`product-price ${hasDiscount ? 'discounted' : ''}`}
             >
-              <Money data={selectedVariant?.price} />
+              {selectedVariant?.price &&
+              Number(selectedVariant.price.amount) === 0 ? (
+                <span>Call For Price</span>
+              ) : (
+                <Money data={selectedVariant.price} />
+              )}
             </small>
             {hasDiscount && selectedVariant?.compareAtPrice && (
               <small className="discountedPrice">
@@ -627,6 +636,7 @@ export default function Product() {
               </small>
             )}
           </div>
+
           <div className="quantity-selector">
             <p>Quantity</p>
             <button onClick={decrementQuantity} className="quantity-btn">
