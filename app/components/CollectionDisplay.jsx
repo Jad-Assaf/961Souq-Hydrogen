@@ -178,7 +178,12 @@ export function ProductItem({product, index}) {
             {/* Sold-out banner */}
             <div
               className="sold-out-ban"
-              style={{display: isSoldOut ? 'flex' : 'none'}} // Conditional display
+              style={{
+                display:
+                  isSoldOut && Number(selectedVariant?.price.amount) !== 0
+                    ? 'flex'
+                    : 'none',
+              }}
             >
               <p>Sold Out</p>
             </div>

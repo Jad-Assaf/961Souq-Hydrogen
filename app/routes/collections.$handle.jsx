@@ -1078,9 +1078,14 @@ const ProductItem = React.memo(({product, index, numberInRow}) => {
                 <small
                   className={`product-price ${hasDiscount ? 'discounted' : ''}`}
                 >
-                  <Money data={selectedVariant.price} />
+                  {selectedVariant?.price &&
+                  Number(selectedVariant.price.amount) === 0 ? (
+                    <span>Call For Price</span>
+                  ) : (
+                    <Money data={selectedVariant.price} />
+                  )}
                 </small>
-                {hasDiscount && selectedVariant.compareAtPrice && (
+                {hasDiscount && selectedVariant?.compareAtPrice && (
                   <small className="discountedPrice">
                     <Money data={selectedVariant.compareAtPrice} />
                   </small>
@@ -1118,10 +1123,14 @@ function ProductForm({product, selectedVariant, setSelectedVariant}) {
   return (
     <div className="product-form">
       <AddToCartButton
-        disabled={!selectedVariant || !selectedVariant.availableForSale}
+        disabled={
+          !selectedVariant ||
+          !selectedVariant.availableForSale ||
+          (selectedVariant?.price && Number(selectedVariant.price.amount) === 0)
+        }
         onClick={() => {
           if (hasVariants) {
-            // Navigate to product page
+            // If multiple variants, navigate to product page
             window.location.href = `/products/${encodeURIComponent(
               product.handle,
             )}`;
@@ -1146,7 +1155,9 @@ function ProductForm({product, selectedVariant, setSelectedVariant}) {
             : []
         }
       >
-        {!selectedVariant?.availableForSale
+        {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
+          ? 'Call For Price'
+          : !selectedVariant?.availableForSale
           ? 'Sold out'
           : hasVariants
           ? 'Select Options'
