@@ -198,6 +198,12 @@ export function ProductImages({media, selectedVariantImage}) {
     return {src: ''};
   });
 
+  // Determine if the currently selected media is a video
+  const isVideoMedia =
+    selectedMedia &&
+    (selectedMedia.__typename === 'ExternalVideo' ||
+      selectedMedia.__typename === 'Video');
+
   return (
     <div className="product-images-container">
       {/* Thumbnails */}
@@ -307,33 +313,35 @@ export function ProductImages({media, selectedVariantImage}) {
           </div>
         )}
 
-        {/* The arrow keys usage indicator (only in main carousel mode) */}
-        <div className="ImageArrows">
-          {showKeyIndicator && (
-            <div className="key-indicator">
-              <div className="arrow-icons">
-                <span>⇦</span>
-                <span>⇨</span>
+        {/* Conditionally render the arrow keys usage indicator if not a video */}
+        {!isVideoMedia && (
+          <div className="ImageArrows">
+            {showKeyIndicator && (
+              <div className="key-indicator">
+                <div className="arrow-icons">
+                  <span>⇦</span>
+                  <span>⇨</span>
+                </div>
+                <p>Use arrow keys</p>
               </div>
-              <p>Use arrow keys</p>
-            </div>
-          )}
+            )}
 
-          <button
-            className="prev-button"
-            onMouseEnter={() => setShowKeyIndicator(true)}
-            onClick={(e) => handleArrowButtonClick(doPrevImage, e)}
-          >
-            <LeftArrowIcon />
-          </button>
-          <button
-            className="next-button"
-            onMouseEnter={() => setShowKeyIndicator(true)}
-            onClick={(e) => handleArrowButtonClick(doNextImage, e)}
-          >
-            <RightArrowIcon />
-          </button>
-        </div>
+            <button
+              className="prev-button"
+              onMouseEnter={() => setShowKeyIndicator(true)}
+              onClick={(e) => handleArrowButtonClick(doPrevImage, e)}
+            >
+              <LeftArrowIcon />
+            </button>
+            <button
+              className="next-button"
+              onMouseEnter={() => setShowKeyIndicator(true)}
+              onClick={(e) => handleArrowButtonClick(doNextImage, e)}
+            >
+              <RightArrowIcon />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Lightbox for bigger view. 
