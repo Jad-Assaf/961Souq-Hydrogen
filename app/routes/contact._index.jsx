@@ -23,7 +23,7 @@ export default function ContactUs() {
           </p>
           <p>
             <strong>Whatsapp:</strong>{' '}
-            <a href="https://wa.me/9613020030">+961 3 020 030</a>
+            <a href="https://wa.me/9613963961">+961 3 963 961</a>
           </p>
           <p>
             <strong>Address:</strong>{' '}
