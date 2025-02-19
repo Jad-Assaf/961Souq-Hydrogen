@@ -66,10 +66,10 @@ export function ProductImages({media, selectedVariantImage}) {
   useEffect(() => {
     if (selectedVariantImage) {
       const variantImageIndex = media.findIndex(({node}) => {
-        // Check if it's a MediaImage with a matching ID
+        // Compare based on URL instead of ID
         return (
           node.__typename === 'MediaImage' &&
-          node.image?.id === selectedVariantImage.id
+          node.image?.url === selectedVariantImage.url
         );
       });
       if (variantImageIndex >= 0 && !isVariantSelected) {
