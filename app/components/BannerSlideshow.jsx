@@ -189,7 +189,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
             className={`dot ${index === currentIndex ? 'active' : ''}`}
             style={{
               ...styles.dot,
-              backgroundColor: index === currentIndex ? '#fff' : '#484848',
+              backgroundColor: index === currentIndex ? '#fff' : '#2172af',
             }}
             onClick={() => setCurrentIndex(index)}
           ></div>
@@ -234,7 +234,7 @@ const styles = {
     left: '45%',
     width: '10%',
     height: '3px',
-    backgroundColor: '#484848',
+    backgroundColor: '#2172af',
     borderRadius: '40px',
   },
   progress: {
