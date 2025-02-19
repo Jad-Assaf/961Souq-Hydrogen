@@ -592,6 +592,16 @@ export default function Product() {
     // trackAddToCart(prod);
   };
 
+  const mediaItems =
+    product.media?.edges && product.media.edges.length > 0
+      ? product.media.edges
+      : product.images?.edges?.map((edge) => ({
+          node: {
+            __typename: 'MediaImage',
+            image: edge.node, // edge.node already has {id, url, altText, ...}
+          },
+        })) || [];
+
   return (
     <div className="product">
       <div className="ProductPageTop">
@@ -600,7 +610,7 @@ export default function Product() {
           and rely on selectedVariantImage to update when variant changes.
         */}
         <ProductImages
-          media={product.images?.edges || []}
+          media={mediaItems}
           selectedVariantImage={selectedVariant?.image}
         />
         <div className="product-main">
