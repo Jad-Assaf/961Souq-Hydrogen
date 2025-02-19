@@ -1,902 +1,1217 @@
-import { json } from '@shopify/remix-oxygen';
+import {defer, redirect} from '@shopify/remix-oxygen';
 import {
   useLoaderData,
-  useSearchParams,
-  useNavigate,
   Link,
+  useSearchParams,
+  useLocation,
+  useNavigate,
 } from '@remix-run/react';
-import { useState, useEffect } from 'react';
-import { ProductItem } from '~/components/CollectionDisplay';
-import { getEmptyPredictiveSearchResult } from '~/lib/search';
-import { trackSearch } from '~/lib/metaPixelEvents'; // Import the trackSearch function
-import '../styles/SearchPage.css';
+import {
+  Image,
+  Money,
+  Analytics,
+  VariantSelector,
+  getSeoMeta,
+} from '@shopify/hydrogen';
+import {useVariantUrl} from '~/lib/variants';
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {DrawerFilter} from '~/modules/drawer-filter';
+import {FILTER_URL_PREFIX} from '~/lib/const';
+import React, {useEffect, useRef, useState} from 'react';
+import {useMediaQuery} from 'react-responsive';
+import {FiltersDrawer} from '../modules/drawer-filter';
+import {getAppliedFilterLink} from '../lib/filter';
+import {AddToCartButton} from '../components/AddToCartButton';
+import {useAside} from '~/components/Aside';
+import '../styles/CollectionSlider.css';
+
+function truncateText(text, maxWords) {
+  if (!text || typeof text !== 'string') {
+    return ''; // Return an empty string if text is undefined or not a string
+  }
+  const words = text.split(' ');
+  return words.length > maxWords
+    ? words.slice(0, maxWords).join(' ') + '...'
+    : text;
+}
 
 /**
- * @type {import('@remix-run/react').MetaFunction}
+ * @type {MetaFunction<typeof loader>}
  */
-export const meta = () => {
-  return [{title: `961Souq | Search`}];
+export const meta = ({data}) => {
+  const collection = data?.collection;
+
+  return getSeoMeta({
+    title: `${collection?.title || 'Collection'} | 961Souq`,
+    description: truncateText(
+      collection?.description || 'Explore our latest collection at 961Souq.',
+      20,
+    ),
+    url: `https://961souq.com/collections/${collection?.handle || ''}`,
+    image:
+      collection?.image?.url ||
+      'https://961souq.com/default-collection-image.jpg',
+    jsonLd: [
+      // CollectionPage Schema
+      {
+        '@context': 'http://schema.org/',
+        '@type': 'CollectionPage',
+        name: collection?.title || 'Collection',
+        url: `https://961souq.com/collections/${collection?.handle || ''}`,
+        description: truncateText(collection?.description || '', 20),
+        image: {
+          '@type': 'ImageObject',
+          url:
+            collection?.image?.url ||
+            'https://961souq.com/default-collection-image.jpg',
+        },
+        hasPart: collection?.products?.nodes?.slice(0, 20).map((product) => ({
+          '@type': 'Product',
+          name: truncateText(product?.title || 'Product', 10),
+          url: `https://961souq.com/products/${encodeURIComponent(
+            product?.handle,
+          )}`,
+          sku: product?.variants?.[0]?.sku || product?.variants?.[0]?.id || '',
+          gtin12:
+            product?.variants?.[0]?.barcode?.length === 12
+              ? product?.variants?.[0]?.barcode
+              : undefined,
+          gtin13:
+            product?.variants?.[0]?.barcode?.length === 13
+              ? product?.variants?.[0]?.barcode
+              : undefined,
+          gtin14:
+            product?.variants?.[0]?.barcode?.length === 14
+              ? product?.variants?.[0]?.barcode
+              : undefined,
+          productID: product?.id,
+          brand: {
+            '@type': 'Brand',
+            name: product?.vendor || '961Souq',
+          },
+          description: truncateText(product?.description || '', 20),
+          image: `https://961souq.com/products/${product?.featuredImage?.url}`,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: product?.variants?.[0]?.price?.currencyCode || 'USD',
+            price: product?.variants?.[0]?.price?.amount || '0.00',
+            itemCondition: 'http://schema.org/NewCondition',
+            availability: product?.availableForSale
+              ? 'http://schema.org/InStock'
+              : 'http://schema.org/OutOfStock',
+            url: `https://961souq.com/products/${encodeURIComponent(
+              product?.handle,
+            )}`,
+            priceValidUntil: '2025-12-31',
+            shippingDetails: {
+              '@type': 'OfferShippingDetails',
+              shippingRate: {
+                '@type': 'MonetaryAmount',
+                value: '5.00',
+                currency: 'USD',
+              },
+              shippingDestination: {
+                '@type': 'DefinedRegion',
+                addressCountry: 'LB',
+              },
+              deliveryTime: {
+                '@type': 'ShippingDeliveryTime',
+                handlingTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 0,
+                  maxValue: 3,
+                  unitCode: 'DAY',
+                },
+                transitTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 1,
+                  maxValue: 5,
+                  unitCode: 'DAY',
+                },
+              },
+            },
+            hasMerchantReturnPolicy: {
+              '@type': 'MerchantReturnPolicy',
+              applicableCountry: 'LB',
+              returnPolicyCategory:
+                'https://schema.org/MerchantReturnFiniteReturnWindow',
+              merchantReturnDays: 5,
+              returnMethod: 'https://schema.org/ReturnByMail',
+              returnFees: 'https://schema.org/FreeReturn',
+            },
+          },
+        })),
+      },
+      // BreadcrumbList Schema
+      {
+        '@context': 'http://schema.org/',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://961souq.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: collection?.title || 'Collection',
+            item: `https://961souq.com/collections/${collection?.handle || ''}`,
+          },
+        ],
+      },
+      // ItemList Schema
+      {
+        '@context': 'http://schema.org/',
+        '@type': 'ItemList',
+        name: collection?.title || 'Collection',
+        description: truncateText(collection?.description || '', 20),
+        url: `https://961souq.com/collections/${collection?.handle || ''}`,
+        itemListElement: collection?.products?.nodes
+          ?.slice(0, 20)
+          .map((product, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            url: `https://961souq.com/products/${encodeURIComponent(
+              product?.handle,
+            )}`,
+            name: truncateText(product?.title || 'Product', 10),
+            image: {
+              '@type': 'ImageObject',
+              url:
+                product?.featuredImage?.url ||
+                'https://961souq.com/default-product-image.jpg',
+            },
+          })),
+      },
+    ],
+  });
 };
 
 /**
- * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
+ * @param {LoaderFunctionArgs} args
  */
-export async function loader({ request, context }) {
+export async function loader(args) {
+  // Use deferred and critical data as before
+  const deferredData = loadDeferredData(args);
+  const criticalData = await loadCriticalData(args);
+  return defer({...deferredData, ...criticalData});
+}
+
+/**
+ * Load data necessary for rendering content above the fold.
+ * @param {LoaderFunctionArgs}
+ */
+export async function loadCriticalData({context, params, request}) {
+  const {handle} = params;
   const {storefront} = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
+  const pageBy = 20;
+  const page = parseInt(searchParams.get('page') || '1', 10);
 
-  // -----------------------------------------
-  // Check if predictive search
-  // -----------------------------------------
-  const isPredictive = searchParams.has('predictive');
-  if (isPredictive) {
-    // Immediately do predictive
-    const result = await predictiveSearch({request, context}).catch((error) => {
-      console.error('Predictive Search Error:', error);
-      return {type: 'predictive', term: '', result: null, error: error.message};
-    });
-    return json({
-      ...result,
-      vendors: [],
-      productTypes: [],
-      // No pagination needed for predictive results
-      pageInfo: {},
-    });
+  // Set default sort to 'newest' if no sort parameter is provided
+  const sort = searchParams.get('sort') || 'newest';
+  let sortKey;
+  let reverse = false;
+  switch (sort) {
+    case 'price-low-high':
+      sortKey = 'PRICE';
+      break;
+    case 'price-high-low':
+      sortKey = 'PRICE';
+      reverse = true;
+      break;
+    case 'best-selling':
+      sortKey = 'BEST_SELLING';
+      break;
+    case 'newest':
+      sortKey = 'CREATED';
+      reverse = true;
+      break;
+    case 'featured':
+    default:
+      sortKey = 'CREATED';
+      break;
   }
 
-  // -----------------------------------------
-  // Parse after/before for cursor-based pagination
-  // -----------------------------------------
-  const after = searchParams.get('after') || null;
-  const before = searchParams.get('before') || null;
-
-  // -----------------------------------------
-  // Build filters with OR for multiple values on the same key,
-  // and map `productType` => `product_type`.
-  // -----------------------------------------
-  const shopifyKeyMap = {
-    vendor: 'vendor',
-    productType: 'product_type', // important for Shopify's textual query
-  };
-
-  // Collect all filter values in a map:
-  //   filter_vendor=Nike, filter_vendor=Adidas => [Nike, Adidas]
-  //   filter_productType=Shirt => [Shirt]
-  const filterMap = new Map();
+  // Extract filters from URL
+  const filters = [];
   for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith('filter_')) {
-      const rawKey = key.replace('filter_', ''); // e.g. vendor, productType
-      if (!filterMap.has(rawKey)) {
-        filterMap.set(rawKey, []);
+    if (key.startsWith(FILTER_URL_PREFIX)) {
+      const filterKey = key.replace(FILTER_URL_PREFIX, '');
+      filters.push({[filterKey]: JSON.parse(value)});
+    }
+  }
+
+  if (!handle) {
+    throw redirect('/collections');
+  }
+
+  let paginationVariables = {};
+  if (page > 1) {
+    // To jump to a given page, fetch the cursor for offset (page-1)*pageBy
+    const offsetCount = (page - 1) * pageBy;
+    const cursorResult = await storefront.query(COLLECTION_CURSOR_QUERY, {
+      variables: {handle, first: offsetCount},
+    });
+    const edges = cursorResult?.collection?.products?.edges || [];
+    const afterCursor =
+      edges.length > 0 ? edges[edges.length - 1].cursor : null;
+    paginationVariables = {first: pageBy, after: afterCursor};
+  } else {
+    paginationVariables = {first: pageBy};
+  }
+
+  try {
+    // Fetch main collection with page-based pagination and totalCount
+    const {collection} = await storefront.query(COLLECTION_QUERY, {
+      variables: {
+        handle,
+        first: pageBy,
+        filters: filters.length ? filters : undefined,
+        sortKey,
+        reverse,
+        ...paginationVariables,
+      },
+    });
+
+    if (!collection) {
+      throw new Response(`Collection ${handle} not found`, {status: 404});
+    }
+
+    let menu = null;
+    let sliderCollections = [];
+
+    try {
+      const menuResult = await storefront.query(MENU_QUERY, {
+        variables: {handle},
+      });
+      menu = menuResult.menu;
+    } catch (error) {
+      console.error('Error fetching menu:', error);
+    }
+
+    if (menu && menu.items && menu.items.length > 0) {
+      try {
+        sliderCollections = await Promise.all(
+          menu.items.map(async (item) => {
+            try {
+              const sanitizedHandle = sanitizeHandle(item.title);
+              const {collection} = await storefront.query(
+                COLLECTION_BY_HANDLE_QUERY,
+                {
+                  variables: {handle: sanitizedHandle},
+                },
+              );
+              return collection;
+            } catch (error) {
+              console.error(
+                `Error fetching collection for ${item.title}:`,
+                error,
+              );
+              return null;
+            }
+          }),
+        );
+        sliderCollections = sliderCollections.filter(
+          (collection) => collection !== null,
+        );
+      } catch (error) {
+        console.error('Error fetching slider collections:', error);
       }
-      filterMap.get(rawKey).push(value);
     }
+
+    // Process applied filters
+    const appliedFilters = [];
+    searchParams.forEach((value, key) => {
+      if (key.startsWith(FILTER_URL_PREFIX)) {
+        const filterKey = key.replace(FILTER_URL_PREFIX, '');
+        const filterValue = JSON.parse(value);
+        appliedFilters.push({
+          label: `${value}`,
+          filter: {[filterKey]: filterValue},
+        });
+      }
+    });
+
+    return {
+      collection,
+      appliedFilters,
+      sliderCollections,
+    };
+  } catch (error) {
+    console.error('Error fetching collection:', error);
+    throw new Response('Error fetching collection', {status: 500});
   }
-
-  // Build the OR groups for each filter key
-  const filterQueryParts = [];
-  for (const [rawKey, values] of filterMap.entries()) {
-    // e.g. shopifyKey = product_type or vendor
-    const shopifyKey = shopifyKeyMap[rawKey] || rawKey;
-    if (values.length === 1) {
-      // single value => vendor:"Nike"
-      filterQueryParts.push(`${shopifyKey}:"${values[0]}"`);
-    } else {
-      // multiple => (vendor:"Nike" OR vendor:"Adidas")
-      const orGroup = values.map((v) => `${shopifyKey}:"${v}"`).join(' OR ');
-      filterQueryParts.push(`(${orGroup})`);
-    }
-  }
-
-  // -----------------------------------------
-  // Price range & text search
-  // -----------------------------------------
-  const rawTerm = searchParams.get('q') || '';
-  const minPrice = searchParams.get('minPrice');
-  const maxPrice = searchParams.get('maxPrice');
-
-  // Original version:
-  // const terms = rawTerm
-  //   .split(/\s+/)
-  //   .map((word) => word.trim())
-  //   .filter(Boolean)
-  //   .map((word) => `*${word}*`); // Add wildcards to each term
-
-  // Improved version: insert wildcards between each letter and also at start and end
-  const terms = rawTerm
-    .split(/\s+/)
-    .map((word) => word.trim())
-    .filter(Boolean)
-    .map((word) => `*${word.split('').join('*')}*`);
-  // Add wildcards to each term
-
-  // **Step 1:** Start by searching only within the title
-  const fieldSpecificTerms = terms
-    .map(
-      (term) =>
-        `(title:${term} OR description:${term} OR variants.sku:${term})`,
-    )
-    .join(' AND ');
- // Use OR for field-specific terms
-
-  // **Step 2 (Optional):** Include description and variants.sku if needed
-  // Uncomment the following lines to include additional fields after verifying titles work
-  /*
-  const fieldSpecificTerms = terms
-    .map(
-      (word) =>
-        `(title:${word} OR description:${word} OR variants.sku:${word})`,
-    )
-    .join(' AND '); // Combine with AND for multiple terms
-  */
-
-  // Now, use 'fieldSpecificTerms' instead of 'termWithWildcards' in the filterQuery
-  let filterQuery = fieldSpecificTerms;
-
-  if (filterQueryParts.length > 0) {
-    if (filterQuery) {
-      // e.g. "title:*XM5* AND (vendor:"Sony" OR vendor:"Adidas")"
-      filterQuery += ' AND ' + filterQueryParts.join(' AND ');
-    } else {
-      filterQuery = filterQueryParts.join(' AND ');
-    }
-  }
-
-  // **Debugging Step:** Log the constructed filterQuery
-  console.log('Filter Query:', filterQuery);
-
-  // -----------------------------------------
-  // Sort
-  // -----------------------------------------
-  const sortKeyMapping = {
-    featured: 'RELEVANCE',
-    'price-low-high': 'PRICE',
-    'price-high-low': 'PRICE',
-    'best-selling': 'BEST_SELLING',
-    newest: 'CREATED_AT',
-  };
-  const reverseMapping = {
-    'price-high-low': true,
-  };
-  const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
-  const reverse = reverseMapping[searchParams.get('sort')] || false;
-
-  // -----------------------------------------
-  // Perform the regular search with cursors
-  // -----------------------------------------
-  const result = await regularSearch({
-    request,
-    context,
-    filterQuery,
-    sortKey,
-    reverse,
-    after,
-    before,
-  }).catch((error) => {
-    console.error('Search Error:', error);
-    return {term: '', result: null, error: error.message};
-  });
-
-  // -----------------------------------------
-  // Extract vendor / productType from *these* results
-  // -----------------------------------------
-  const filteredVendors = [
-    ...new Set(result?.result?.products?.edges.map(({node}) => node.vendor)),
-  ].sort();
-  const filteredProductTypes = [
-    ...new Set(
-      result?.result?.products?.edges.map(({node}) => node.productType),
-    ),
-  ].sort();
-
-  return json({
-    ...result,
-    vendors: filteredVendors,
-    productTypes: filteredProductTypes,
-  });
 }
 
-/* ------------------------------------------------------------------
-   REACT COMPONENT
-------------------------------------------------------------------- */
-export default function SearchPage() {
-  const {
-    type,
-    term,
-    result,
-    vendors = [],
-    productTypes = [],
-    error,
-  } = useLoaderData();
+function sanitizeHandle(handle) {
+  return handle
+    .toLowerCase()
+    .replace(/"/g, '')
+    .replace(/&/g, '')
+    .replace(/\./g, '-')
+    .replace(/\s+/g, '-');
+}
 
+/**
+ * Load data for rendering content below the fold.
+ * @param {LoaderFunctionArgs}
+ */
+function loadDeferredData({context}) {
+  return {};
+}
+
+export default function Collection() {
+  const {collection, appliedFilters, sliderCollections} = useLoaderData();
+  const [userSelectedNumberInRow, setUserSelectedNumberInRow] = useState(null);
+  const calculateNumberInRow = (width, userSelection) => {
+    if (userSelection !== null) return userSelection;
+    return 1;
+  };
+  const [screenWidth, setScreenWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 0,
+  );
+  const [numberInRow, setNumberInRow] = useState(
+    typeof window !== 'undefined' ? calculateNumberInRow(window.innerWidth) : 1,
+  );
+  const isDesktop = useMediaQuery({minWidth: 1024});
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  // Price range local states
-  const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
-
-  // Desktop filter toggles
-  const [showVendors, setShowVendors] = useState(false);
-  const [showProductTypes, setShowProductTypes] = useState(false);
-  const [showPriceRange, setShowPriceRange] = useState(false);
-
-  // Mobile filters
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  const [mobileShowVendors, setMobileShowVendors] = useState(false);
-  const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
-  const [mobileShowPriceRange, setMobileShowPriceRange] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-
-  const closeMobileFilters = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsMobileFiltersOpen(false);
-      setIsClosing(false);
-    }, 300);
-  };
-
-  // Filter changes (already supports multiple filters)
-  const handleFilterChange = (filterKey, value, checked) => {
-    const params = new URLSearchParams(searchParams);
-
-    if (checked) {
-      params.append(`filter_${filterKey}`, value);
-    } else {
-      const currentFilters = params.getAll(`filter_${filterKey}`);
-      const updatedFilters = currentFilters.filter((item) => item !== value);
-      params.delete(`filter_${filterKey}`);
-      updatedFilters.forEach((item) =>
-        params.append(`filter_${filterKey}`, item),
-      );
-    }
-
-    // Reset cursors
-    params.delete('after');
-    params.delete('before');
-    navigate(`/search?${params.toString()}`);
-  };
-
-  // Sorting
-  const handleSortChange = (e) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('sort', e.target.value);
-    // Reset cursors
-    params.delete('after');
-    params.delete('before');
-    navigate(`/search?${params.toString()}`);
-  };
-
-  // Price filter
-  const applyPriceFilter = () => {
-    const params = new URLSearchParams(searchParams);
-    if (minPrice) {
-      params.set('minPrice', minPrice);
-    } else {
-      params.delete('minPrice');
-    }
-    if (maxPrice) {
-      params.set('maxPrice', maxPrice);
-    } else {
-      params.delete('maxPrice');
-    }
-    // Reset cursors
-    params.delete('after');
-    params.delete('before');
-    navigate(`/search?${params.toString()}`);
-  };
-
-  // Track Search event
   useEffect(() => {
-    if (term) {
-      trackSearch(term);
-    }
-  }, [term]);
+    const updateLayout = () => {
+      const width = window.innerWidth;
+      setScreenWidth(width);
+      setNumberInRow(calculateNumberInRow(width, userSelectedNumberInRow));
+    };
 
-  // If we have no products, show "no results"
-  const edges = result?.products?.edges || [];
-  if (!edges.length) {
-    return (
-      <div className="search">
-        <h1>Search Results</h1>
-        <p>No results found</p>
-      </div>
-    );
+    updateLayout();
+
+    const debounce = (fn, delay) => {
+      let timeoutId;
+      return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+      };
+    };
+
+    const debouncedUpdateLayout = debounce(updateLayout, 100);
+    window.addEventListener('resize', debouncedUpdateLayout);
+    return () => {
+      window.removeEventListener('resize', debouncedUpdateLayout);
+    };
+  }, [userSelectedNumberInRow]);
+
+  const handleLayoutChange = (number) => {
+    setUserSelectedNumberInRow(number);
+    setNumberInRow(number);
+  };
+
+  const handleFilterRemove = (filter) => {
+    const updatedParams = new URLSearchParams(searchParams.toString());
+    updatedParams.delete('page');
+    const newUrl = getAppliedFilterLink(filter, updatedParams, location);
+    navigate(newUrl);
+  };
+
+  // Build links using only the "page" parameter.
+  const buildPaginationLink = (pageNum) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', pageNum);
+    return `${location.pathname}?${params.toString()}`;
+  };
+
+  const sortedProducts = React.useMemo(() => {
+    if (!collection || !collection.products || !collection.products.nodes)
+      return [];
+    const products = [...collection.products.nodes];
+    return products.sort((a, b) => {
+      const aInStock = a.variants.nodes.some(
+        (variant) => variant.availableForSale,
+      );
+      const bInStock = b.variants.nodes.some(
+        (variant) => variant.availableForSale,
+      );
+      if (aInStock && !bInStock) return -1;
+      if (!aInStock && bInStock) return 1;
+      return 0;
+    });
+  }, [collection?.products?.nodes]);
+
+  // Compute current page and total pages (using totalCount from loader)
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const totalCount = collection.products.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / 20);
+
+  // Compute page number links (show max of 3 pages at a time)
+  let startPage = Math.max(1, currentPage - 1);
+  let endPage = Math.min(totalPages, startPage + 2);
+  if (endPage - startPage < 2) {
+    startPage = Math.max(1, endPage - 2);
+  }
+  const pageNumbers = [];
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
   }
 
-  // Grab pageInfo so we know if there's a next / prev page
-  const pageInfo = result?.products?.pageInfo || {};
-  const hasNextPage = pageInfo.hasNextPage;
-  const hasPreviousPage = pageInfo.hasPreviousPage;
-
-  // Handler: next => set after = pageInfo.endCursor
-  const goNext = () => {
-    if (!hasNextPage) return;
-    const params = new URLSearchParams(searchParams);
-    params.set('after', pageInfo.endCursor);
-    params.delete('before');
-    navigate(`/search?${params.toString()}`);
-  };
-
-  // Handler: prev => set before = pageInfo.startCursor
-  const goPrev = () => {
-    if (!hasPreviousPage) return;
-    const params = new URLSearchParams(searchParams);
-    params.set('before', pageInfo.startCursor);
-    params.delete('after');
-    navigate(`/search?${params.toString()}`);
-  };
-
   return (
-    <div className="search">
-      <h1>Search Results</h1>
-
-      <div className="search-filters-container" style={{ display: 'flex' }}>
-        {/* Sidebar (Desktop) */}
-        <div className="filters">
-          <fieldset>
-            <button
-              type="button"
-              onClick={() => setShowVendors(!showVendors)}
-              className="filter-toggle"
-              aria-expanded={showVendors}
-            >
-              Vendors <span>{showVendors ? '-' : '+'}</span>
-            </button>
-            {showVendors && (
-              <div>
-                {vendors.map((vendor) => {
-                  const isChecked = searchParams
-                    .getAll('filter_vendor')
-                    .includes(vendor);
-                  return (
-                    <div key={vendor} className="filter-option">
-                      <input
-                        type="checkbox"
-                        id={`vendor-${vendor}`}
-                        value={vendor}
-                        checked={isChecked}
-                        onChange={(e) =>
-                          handleFilterChange('vendor', vendor, e.target.checked)
+    <div className="collection">
+      <h1>{collection.title}</h1>
+      {sliderCollections && sliderCollections.length > 0 && (
+        <div className="slide-con">
+          <div className="category-slider">
+            {sliderCollections.map(
+              (sliderCollection) =>
+                sliderCollection && (
+                  <Link
+                    key={sliderCollection.id}
+                    to={`/collections/${sliderCollection.handle}`}
+                    className="category-container"
+                  >
+                    {sliderCollection.image && (
+                      <Image
+                        sizes="(min-width: 45em) 20vw, 40vw"
+                        srcSet={`${sliderCollection.image.url}?width=300&quality=7 300w,
+                                     ${sliderCollection.image.url}?width=600&quality=7 600w,
+                                     ${sliderCollection.image.url}?width=1200&quality=7 1200w`}
+                        alt={
+                          sliderCollection.image.altText ||
+                          sliderCollection.title
                         }
+                        className="category-image"
+                        width={150}
+                        height={150}
+                        loading="eager"
                       />
-                      <label
-                        className="filter-label"
-                        htmlFor={`vendor-${vendor}`}
-                      >
-                        {vendor}
-                      </label>
+                    )}
+                    <div className="category-title">
+                      {sliderCollection.title}
                     </div>
-                  );
-                })}
-              </div>
+                  </Link>
+                ),
             )}
-          </fieldset>
-
-          <fieldset>
-            <button
-              type="button"
-              onClick={() => setShowProductTypes(!showProductTypes)}
-              className="filter-toggle"
-              aria-expanded={showProductTypes}
-            >
-              Product Types <span>{showProductTypes ? '-' : '+'}</span>
-            </button>
-            {showProductTypes && (
-              <div>
-                {productTypes.map((ptype) => {
-                  const isChecked = searchParams
-                    .getAll('filter_productType')
-                    .includes(ptype);
-                  return (
-                    <div key={ptype} className="filter-option">
-                      <input
-                        type="checkbox"
-                        id={`productType-${ptype}`}
-                        value={ptype}
-                        checked={isChecked}
-                        onChange={(e) =>
-                          handleFilterChange(
-                            'productType',
-                            ptype,
-                            e.target.checked,
-                          )
-                        }
-                      />
-                      <label
-                        className="filter-label"
-                        htmlFor={`productType-${ptype}`}
-                      >
-                        {ptype}
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </fieldset>
-
-          <fieldset>
-            <button
-              type="button"
-              onClick={() => setShowPriceRange(!showPriceRange)}
-              className="filter-toggle"
-              aria-expanded={showPriceRange}
-            >
-              Price Range <span>{showPriceRange ? '-' : '+'}</span>
-            </button>
-            {showPriceRange && (
-              <div>
-                <div>
-                  <label>
-                    Min Price:
-                    <input
-                      type="number"
-                      name="minPrice"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
-                      className="price-filter-btn"
-                    />
-                  </label>
-                </div>
-                <div>
-                  <label>
-                    Max Price:
-                    <input
-                      type="number"
-                      name="maxPrice"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
-                      className="price-filter-btn"
-                    />
-                  </label>
-                </div>
-                <button
-                  className="price-filter-apply"
-                  onClick={applyPriceFilter}
-                >
-                  Apply
-                </button>
-              </div>
-            )}
-          </fieldset>
-        </div>
-
-        {/* Main Search Results */}
-        <div className="search-results">
-          {/* Sorting */}
-          <div>
-            <label htmlFor="sort-select">Sort by:</label>
-            <select
-              id="sort-select"
-              onChange={handleSortChange}
-              value={searchParams.get('sort') || 'featured'}
-            >
-              <option value="featured">Featured</option>
-              <option value="price-low-high">Price: Low - High</option>
-              <option value="price-high-low">Price: High - Low</option>
-              <option value="best-selling">Best Selling</option>
-              <option value="newest">Newest</option>
-            </select>
-          </div>
-
-          {/* Product Grid */}
-          <div className="search-results-grid">
-            {edges.map(({ node: product }, idx) => (
-              <ProductItem product={product} index={idx} key={product.id} />
-            ))}
-          </div>
-
-          {/* Prev / Next Buttons */}
-          <div
-            style={{
-              marginTop: '1rem',
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '50px',
-            }}
-          >
-            {pageInfo.hasPreviousPage && (
-              <button
-                onClick={goPrev}
-                style={{
-                  backgroundColor: '#fff',
-                  cursor: 'pointer',
-                  padding: '5px 10px',
-                  border: '1px solid #d1d7db',
-                  borderRadius: '30px',
-                }}
-              >
-                ← Previous Page
-              </button>
-            )}
-            {pageInfo.hasNextPage && (
-              <button
-                onClick={goNext}
-                style={{
-                  backgroundColor: '#fff',
-                  cursor: 'pointer',
-                  padding: '5px 10px',
-                  border: '1px solid #d1d7db',
-                  borderRadius: '30px',
-                }}
-              >
-                Next Page →
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Filters */}
-      <button
-        className="mobile-filters-toggle"
-        onClick={() => setIsMobileFiltersOpen(true)}
-      >
-        Filter
-      </button>
-
-      {isMobileFiltersOpen && (
-        <div className="mobile-filters-overlay">
-          <div className={`mobile-filters-panel ${isClosing ? 'closing' : ''}`}>
-            <hr className="mobile-filters-hr" />
-            <button
-              className="close-mobile-filters"
-              onClick={closeMobileFilters}
-            >
-              <svg
-                fill="#000"
-                height="30px"
-                width="30px"
-                viewBox="0 0 460.775 460.775"
-              >
-                <g>
-                  <path
-                    d="M285.08,230.397L456.218,59.27
-                    c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
-                    c-4.127,0-8.08,1.639-10.993,4.55L285.08,171.705L59.25,4.565
-                    c-2.913-2.911-6.866-4.55-10.993-4.55
-                    c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284
-                    c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128
-                    L4.575,401.505c-6.074,6.077-6.074,15.911,0,21.986
-                    l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55
-                    c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12
-                    l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55
-                    c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
-                    c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
-                  />
-                </g>
-              </svg>
-            </button>
-
-            <fieldset>
-              <button
-                type="button"
-                onClick={() => setMobileShowVendors(!mobileShowVendors)}
-              >
-                Vendors <span>{mobileShowVendors ? '-' : '+'}</span>
-              </button>
-              {mobileShowVendors && (
-                <div className="filter-options-container">
-                  {vendors.map((vendor) => {
-                    const isChecked = searchParams
-                      .getAll('filter_vendor')
-                      .includes(vendor);
-                    return (
-                      <div key={vendor} className="filter-option">
-                        <input
-                          type="checkbox"
-                          id={`mobile-vendor-${vendor}`}
-                          value={vendor}
-                          checked={isChecked}
-                          onChange={(e) =>
-                            handleFilterChange(
-                              'vendor',
-                              vendor,
-                              e.target.checked,
-                            )
-                          }
-                        />
-                        <label htmlFor={`mobile-vendor-${vendor}`}>
-                          {vendor}
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </fieldset>
-
-            <fieldset>
-              <button
-                type="button"
-                onClick={() =>
-                  setMobileShowProductTypes(!mobileShowProductTypes)
-                }
-              >
-                Product Types <span>{mobileShowProductTypes ? '-' : '+'}</span>
-              </button>
-              {mobileShowProductTypes && (
-                <div className="filter-options-container">
-                  {productTypes.map((type) => {
-                    const isChecked = searchParams
-                      .getAll('filter_productType')
-                      .includes(type);
-                    return (
-                      <div key={type} className="filter-option">
-                        <input
-                          type="checkbox"
-                          id={`mobile-productType-${type}`}
-                          value={type}
-                          checked={isChecked}
-                          onChange={(e) =>
-                            handleFilterChange(
-                              'productType',
-                              type,
-                              e.target.checked,
-                            )
-                          }
-                        />
-                        <label htmlFor={`mobile-productType-${type}`}>
-                          {type}
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </fieldset>
-
-            <fieldset>
-              <button
-                type="button"
-                onClick={() => setMobileShowPriceRange(!mobileShowPriceRange)}
-              >
-                Price Range <span>{mobileShowPriceRange ? '-' : '+'}</span>
-              </button>
-              {mobileShowPriceRange && (
-                <div className="mobile-price-filter-container">
-                  <div className="mobile-min-price-filter">
-                    <label>
-                      Min Price:
-                      <input
-                        type="number"
-                        name="minPrice"
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
-                      />
-                    </label>
-                  </div>
-                  <div className="mobile-max-price-filter">
-                    <label>
-                      Max Price:
-                      <input
-                        type="number"
-                        name="maxPrice"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                      />
-                    </label>
-                  </div>
-                  <button onClick={applyPriceFilter}>Apply</button>
-                </div>
-              )}
-            </fieldset>
           </div>
         </div>
       )}
+      <div className="flex flex-col lg:flex-row w-[100%]">
+        {isDesktop && (
+          <div className="w-[220px]">
+            <FiltersDrawer
+              filters={collection.products.filters}
+              appliedFilters={appliedFilters}
+              collections={[
+                {handle: 'apple', title: 'Apple'},
+                {handle: 'gaming', title: 'Gaming'},
+                {handle: 'laptops', title: 'Laptops'},
+                {handle: 'desktops', title: 'Desktops'},
+                {handle: 'pc-parts', title: 'PC Parts'},
+                {handle: 'networking', title: 'Networking'},
+                {handle: 'monitors', title: 'Monitors'},
+                {handle: 'mobiles', title: 'Mobile Phones'},
+                {handle: 'tablets', title: 'Tablets'},
+                {handle: 'audio', title: 'Audio'},
+                {handle: 'accessories', title: 'Accessories'},
+                {handle: 'fitness', title: 'Fitness'},
+                {handle: 'photography', title: 'Photography'},
+                {handle: 'home-appliances', title: 'Home Appliances'},
+              ]}
+              onRemoveFilter={handleFilterRemove}
+            />
+          </div>
+        )}
+        <div className="flex-1 mt-[94px]">
+          <hr className="col-hr"></hr>
+          <div className="view-container">
+            <div className="layout-controls">
+              <span className="number-sort">View As:</span>
+              {screenWidth >= 300 && (
+                <button
+                  className={`layout-buttons first-btn ${
+                    numberInRow === 1 ? 'active' : ''
+                  }`}
+                  onClick={() => handleLayoutChange(1)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z"
+                        fill="#808080"
+                      ></path>
+                      <path
+                        d="M2 12C2 11.4477 2.44772 11 3 11H21C21.5523 11 22 11.4477 22 12C22 12.5523 21.5523 13 21 13H3C2.44772 13 2 12.5523 2 12Z"
+                        fill="#808080"
+                      ></path>
+                      <path
+                        d="M3 17C2.44772 17 2 17.4477 2 18C2 18.5523 2.44772 19 3 19H21C21.5523 19 22 18.5523 22 18C22 17.4477 21.5523 17 21 17H3Z"
+                        fill="#808080"
+                      ></path>
+                    </g>
+                  </svg>
+                </button>
+              )}
+              {screenWidth >= 300 && (
+                <button
+                  className={`layout-buttons ${
+                    numberInRow === 2 ? 'active' : ''
+                  }`}
+                  onClick={() => handleLayoutChange(2)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                </button>
+              )}
+              {screenWidth >= 550 && (
+                <button
+                  className={`layout-buttons ${
+                    numberInRow === 3 ? 'active' : ''
+                  }`}
+                  onClick={() => handleLayoutChange(3)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                </button>
+              )}
+              {screenWidth >= 1200 && (
+                <button
+                  className={`layout-buttons ${
+                    numberInRow === 4 ? 'active' : ''
+                  }`}
+                  onClick={() => handleLayoutChange(4)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                </button>
+              )}
+              {screenWidth >= 1500 && (
+                <button
+                  className={`layout-buttons ${
+                    numberInRow === 5 ? 'active' : ''
+                  }`}
+                  onClick={() => handleLayoutChange(5)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
+                </button>
+              )}
+            </div>
+            <DrawerFilter
+              filters={collection.products.filters}
+              appliedFilters={appliedFilters}
+              numberInRow={numberInRow}
+              onLayoutChange={handleLayoutChange}
+              productNumber={collection.products.nodes.length}
+              isDesktop={isDesktop}
+            />
+          </div>
+
+          <PaginatedResourceSection
+            key={`products-grid-${numberInRow}`}
+            connection={{
+              ...collection.products,
+              nodes: sortedProducts,
+            }}
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
+            infiniteScroll={false} // Disable automatic loading
+          >
+            {({node: product, index}) => (
+              <ProductItem
+                key={product.id}
+                product={product}
+                index={index}
+                numberInRow={numberInRow}
+              />
+            )}
+          </PaginatedResourceSection>
+
+          <div className="pagination-controls">
+            {currentPage > 1 && (
+              <Link
+                to={buildPaginationLink(currentPage - 1)}
+                className="pagination-button prev-button"
+              >
+                Previous Page
+              </Link>
+            )}
+            {pageNumbers.map((pageNum) => (
+              <Link
+                key={pageNum}
+                to={buildPaginationLink(pageNum)}
+                className={`pagination-button page-number ${
+                  pageNum === currentPage ? 'active' : ''
+                }`}
+              >
+                {pageNum}
+              </Link>
+            ))}
+            {currentPage < totalPages && (
+              <Link
+                to={buildPaginationLink(currentPage + 1)}
+                className="pagination-button next-button"
+              >
+                Next Page
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+      <Analytics.CollectionView
+        data={{
+          collection: {
+            id: collection.id,
+            handle: collection.handle,
+          },
+        }}
+      />
     </div>
   );
 }
 
-/* ------------------------------------------------------------------
-   GRAPHQL + REGULAR SEARCH
-------------------------------------------------------------------- */
+/**
+ * @param {{
+ *   product: ProductItemFragment;
+ *   loading?: 'eager' | 'lazy';
+ * }}
+ */
+const ProductItem = React.memo(({product, index, numberInRow}) => {
+  const ref = useRef(null);
+  const [isSoldOut, setIsSoldOut] = useState(false);
+  useEffect(() => {
+    const soldOut = !product.variants.nodes.some(
+      (variant) => variant.availableForSale,
+    );
+    setIsSoldOut(soldOut);
+  }, [product]);
+  const [selectedVariant, setSelectedVariant] = useState(() => {
+    return product.variants.nodes[0];
+  });
+  const variantUrl = useVariantUrl(
+    product.handle,
+    selectedVariant.selectedOptions,
+  );
+  const hasDiscount =
+    product.compareAtPriceRange &&
+    product.compareAtPriceRange.minVariantPrice.amount >
+      product.priceRange.minVariantPrice.amount;
+  return (
+    <div className="product-item-collection product-card" ref={ref}>
+      <div>
+        <div className="mobile-container">
+          <Link
+            key={product.id}
+            prefetch="intent"
+            to={variantUrl}
+            className="collection-product-link"
+          >
+            {product.featuredImage && (
+              <div className="collection-product-image">
+                <div
+                  className="sold-out-ban"
+                  style={{display: isSoldOut ? 'flex' : 'none'}}
+                >
+                  <p>Sold Out</p>
+                </div>
+                <Image
+                  srcSet={`${product.featuredImage.url}?width=300&quality=15 300w,
+                           ${product.featuredImage.url}?width=600&quality=15 600w,
+                           ${product.featuredImage.url}?width=1200&quality=15 1200w`}
+                  alt={product.featuredImage.altText || product.title}
+                  loading="lazy"
+                  width="180px"
+                  height="180px"
+                />
+              </div>
+            )}
+          </Link>
+          <div className="product-info-container">
+            <Link key={product.id} prefetch="intent" to={variantUrl}>
+              <h4>{truncateText(product.title, 30)}</h4>
+              <p className="product-description">
+                {truncateText(product.description, 90)}
+              </p>
+              <div className="price-container">
+                <small
+                  className={`product-price ${hasDiscount ? 'discounted' : ''}`}
+                >
+                  <Money data={selectedVariant.price} />
+                </small>
+                {hasDiscount && selectedVariant.compareAtPrice && (
+                  <small className="discountedPrice">
+                    <Money data={selectedVariant.compareAtPrice} />
+                  </small>
+                )}
+              </div>
+            </Link>
+            <ProductForm
+              product={product}
+              selectedVariant={selectedVariant}
+              setSelectedVariant={setSelectedVariant}
+            />
+          </div>
+        </div>
+        <ProductForm
+          product={product}
+          selectedVariant={selectedVariant}
+          setSelectedVariant={setSelectedVariant}
+        />
+      </div>
+    </div>
+  );
+});
 
 /**
- * Query for the subset with cursors
+ * @param {{
+ *   product: ProductFragment;
+ *   selectedVariant: ProductVariantFragment;
+ *   setSelectedVariant: (variant: ProductVariantFragment) => void;
+ * }}
  */
-const FILTERED_PRODUCTS_QUERY = `#graphql
-  query FilteredProducts(
-    $filterQuery: String,
-    $sortKey: ProductSortKeys,
-    $reverse: Boolean,
-    $after: String,
-    $before: String,
-    $first: Int,
-    $last: Int
-  ) {
-    products(
-      query: $filterQuery,
-      sortKey: $sortKey,
-      reverse: $reverse,
-      after: $after,
-      before: $before,
-      first: $first,
-      last: $last
-    ) {
-      edges {
-        node {
-          vendor
-          id
-          title
-          handle
-          productType
-          description
-          images(first: 3) {
-            nodes {
-              url
-              altText
-            }
+function ProductForm({product, selectedVariant, setSelectedVariant}) {
+  const {open} = useAside();
+  const hasVariants = product.variants.nodes.length > 1;
+  return (
+    <div className="product-form">
+      <AddToCartButton
+        disabled={!selectedVariant || !selectedVariant.availableForSale}
+        onClick={() => {
+          if (hasVariants) {
+            window.location.href = `/products/${encodeURIComponent(
+              product.handle,
+            )}`;
+          } else {
+            open('cart');
           }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          variants(first: 1) {
-            nodes {
-              id
-              sku
-              price {
-                amount
-                currencyCode
-              }
-              image {
-                url
-                altText
-              }
-              availableForSale
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              selectedOptions {
-                name
-                value
-              }
-            }
-          }
+        }}
+        lines={
+          selectedVariant && !hasVariants
+            ? [
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                  attributes: [],
+                  product: {
+                    ...product,
+                    selectedVariant,
+                    handle: product.handle,
+                  },
+                },
+              ]
+            : []
         }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-`;
-
-/**
- * Regular search fetcher using cursors
- * If `after` is present, we use `first=50`.
- * If `before` is present, we use `last=50`.
- * If neither is present, we do first=50 from the start.
- */
-async function regularSearch({
-  request,
-  context,
-  filterQuery,
-  sortKey,
-  reverse,
-  after = null,
-  before = null,
-}) {
-  const { storefront } = context;
-
-  let first = null;
-  let last = null;
-  if (after) {
-    first = 50; // going forward
-  } else if (before) {
-    last = 50; // going backward
-  } else {
-    // default: first page
-    first = 50;
-  }
-
-  const variables = {
-    filterQuery,
-    sortKey,
-    reverse,
-    after,
-    before,
-    first,
-    last,
-  };
-
-  try {
-    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
-      variables,
-    });
-
-    if (!products?.edges) {
-      return {
-        type: 'regular',
-        term: filterQuery,
-        result: { products: { edges: [] } },
-      };
-    }
-
-    return {
-      type: 'regular',
-      term: filterQuery,
-      result: { products },
-    };
-  } catch (error) {
-    console.error('Regular search error:', error);
-    return {
-      type: 'regular',
-      term: filterQuery,
-      result: null,
-      error: error.message,
-    };
-  }
+      >
+        {!selectedVariant?.availableForSale
+          ? 'Sold out'
+          : hasVariants
+          ? 'Select Options'
+          : 'Add to cart'}
+      </AddToCartButton>
+    </div>
+  );
 }
 
-/* ------------------------------------------------------------------
-   PREDICTIVE SEARCH (unchanged)
-------------------------------------------------------------------- */
-const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment PredictiveArticle on Article {
-    __typename
-    id
-    title
-    handle
-    blog {
+const MENU_QUERY = `#graphql
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      items {
+        title
+        url
+      }
+    }
+  }
+`;
+
+const COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collection(handle: $handle) {
+      id
+      title
+      description
       handle
+      image {
+        url
+        altText
+      }
     }
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
   }
 `;
-const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
-  fragment PredictiveCollection on Collection {
-    __typename
+
+const PRODUCT_ITEM_FRAGMENT = `#graphql
+  fragment MoneyProductItem on MoneyV2 {
+    amount
+    currencyCode
+  }
+  fragment ProductItem on Product {
     id
-    title
     handle
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-`;
-const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment PredictivePage on Page {
-    __typename
-    id
     title
-    handle
-    trackingParameters
-  }
-`;
-const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
-  fragment PredictiveProduct on Product {
-    __typename
-    id
-    title
-    vendor
     description
-    handle
-    trackingParameters
-    variants(first: 1) {
+    featuredImage {
+      id
+      altText
+      url
+      width
+      height
+    }
+    options {
+      name
+      values
+    }
+    priceRange {
+      minVariantPrice {
+        ...MoneyProductItem
+      }
+      maxVariantPrice {
+        ...MoneyProductItem
+      }
+    }
+    compareAtPriceRange {
+      minVariantPrice {
+        ...MoneyProductItem
+      }
+      maxVariantPrice {
+        ...MoneyProductItem
+      }
+    }
+    variants(first: 25) {
       nodes {
         id
-        sku
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
         image {
+          id
           url
           altText
           width
@@ -910,105 +1225,91 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
           amount
           currencyCode
         }
+        sku
+        title
+        unitPrice {
+          amount
+          currencyCode
+        }
       }
     }
   }
 `;
-const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
-  fragment PredictiveQuery on SearchQuerySuggestion {
-    __typename
-    text
-    styledText
-    trackingParameters
-  }
-`;
-const PREDICTIVE_SEARCH_QUERY = `#graphql
-  query PredictiveSearch(
-    $country: CountryCode
-    $language: LanguageCode
-    $limitScope: PredictiveSearchLimitScope!
-    $term: String!
-    $types: [PredictiveSearchType!]
-  ) @inContext(country: $country, language: $language) {
-    predictiveSearch(
-      limitScope: $limitScope,
-      query: $term,
-      types: $types
-    ) {
-      articles {
-        ...PredictiveArticle
+
+const COLLECTION_QUERY = `#graphql
+  ${PRODUCT_ITEM_FRAGMENT}
+  query Collection(
+    $handle: String!
+    $filters: [ProductFilter!]
+    $sortKey: ProductCollectionSortKeys
+    $reverse: Boolean
+    $first: Int
+    $last: Int
+    $startCursor: String
+    $endCursor: String
+  ) {
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      description
+      seo {
+        title
+        description
       }
-      collections {
-        ...PredictiveCollection
+      image {
+        url
+        altText
       }
-      pages {
-        ...PredictivePage
-      }
-      products {
-        ...PredictiveProduct
-      }
-      queries {
-        ...PredictiveQuery
+      products(
+        first: $first,
+        last: $last,
+        before: $startCursor,
+        after: $endCursor,
+        filters: $filters,
+        sortKey: $sortKey,
+        reverse: $reverse
+      ) {
+        filters {
+          id
+          label
+          type
+          values {
+            id
+            label
+            count
+            input
+          }
+        }
+        nodes {
+          ...ProductItem
+          availableForSale
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
+        }
+        totalCount
       }
     }
   }
-  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
-  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
-async function predictiveSearch({ request, context }) {
-  const { storefront } = context;
-  const url = new URL(request.url);
-  const term = String(url.searchParams.get('q') || '').trim();
-  const limit = Number(url.searchParams.get('limit') || 10000);
-  const type = 'predictive';
 
-  if (!term) {
-    return { type, term, result: getEmptyPredictiveSearchResult() };
+const COLLECTION_CURSOR_QUERY = `#graphql
+  query CollectionCursor($handle: String!, $first: Int!) {
+    collection(handle: $handle) {
+      products(first: $first) {
+        edges {
+          cursor
+        }
+      }
+    }
   }
+`;
 
-  const terms = term
-    .split(/\s+/)
-    .map((w) => w.trim())
-    .filter(Boolean);
-  const queryTerm = terms
-    .map(
-      (word) =>
-        `(variants.sku:*${word}* OR title:*${word}* OR description:*${word}*)`,
-    )
-    .join(' AND ');
-
-  const { predictiveSearch: items, errors } = await storefront.query(
-    PREDICTIVE_SEARCH_QUERY,
-    {
-      variables: {
-        limit,
-        limitScope: 'EACH',
-        term: queryTerm,
-      },
-    },
-  );
-
-  if (errors) {
-    throw new Error(
-      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
-    );
-  }
-  if (!items) {
-    throw new Error('No predictive search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce((acc, arr) => acc + arr.length, 0);
-  return { type, term, result: { items, total } };
-}
-
-/**
- * @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs
- * @typedef {import('@shopify/remix-oxygen').ActionFunctionArgs} ActionFunctionArgs
- * @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction
- * @typedef {import('~/lib/search').RegularSearchReturn} RegularSearchReturn
- * @typedef {import('~/lib/search').PredictiveSearchReturn} PredictiveSearchReturn
- * @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData
- */
+/** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
+/** @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction */
+/** @typedef {import('storefrontapi.generated').ProductItemFragment} ProductItemFragment */
+/** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
