@@ -223,7 +223,7 @@ export function ProductItem({product, index}) {
                   style={{
                     ...styles.dot,
                     backgroundColor:
-                      currentImageIndex === index ? '#000' : '#e0e0e0',
+                      currentImageIndex === index ? '#2172af' : '#e0e0e0',
                   }}
                   onClick={() => setCurrentImageIndex(index)}
                 ></div>
@@ -301,7 +301,7 @@ const styles = {
   },
   progress: {
     height: '100%',
-    backgroundColor: '#000',
+    backgroundColor: '#2172af',
     transition: 'width 0.1s linear',
     borderRadius: '30px',
   },
