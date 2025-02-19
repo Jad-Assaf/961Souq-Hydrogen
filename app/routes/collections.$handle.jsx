@@ -422,18 +422,13 @@ export default function Collection() {
     navigate(newUrl);
   };
 
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    const query = url.searchParams;
-
-    // Remove 'direction' and 'cursor' if they exist
-    query.delete('direction');
-    query.delete('cursor');
-
-    const cleanUrl = `${url.origin}${url.pathname}?${query.toString()}`;
-    window.history.replaceState({}, '', cleanUrl);
-  }, []);
-
+  // Helper function to build pagination links based on current search params
+  const buildPaginationLink = (cursor, direction) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('cursor', cursor);
+    params.set('direction', direction);
+    return `${location.pathname}?${params.toString()}`;
+  };
 
   const sortedProducts = React.useMemo(() => {
     if (!collection || !collection.products || !collection.products.nodes)
@@ -452,20 +447,6 @@ export default function Collection() {
       return 0;
     });
   }, [collection?.products?.nodes]);
-
-  useEffect(() => {
-    const url = new URL(window.location.href); // Get the current URL
-    const query = url.search; // Get the query string
-
-    // Check if 'direction' exists in the query string
-    if (query.includes('?direction')) {
-      // Retain everything before '?direction'
-      const cleanUrl = url.origin + url.pathname;
-
-      // Update the URL without reloading the page
-      window.history.replaceState({}, '', cleanUrl);
-    }
-  }, []);
 
   return (
     <div className="collection">
@@ -935,31 +916,6 @@ export default function Collection() {
                       </g>
                     </g>
                   </svg>
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    stroke="#808080"
-                  >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <g id="Interface / Line_L">
-                        <path
-                          id="Vector"
-                          d="M12 19V5"
-                          stroke="#808080"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        ></path>
-                      </g>
-                    </g>
-                  </svg>
                 </button>
               )}
             </div>
@@ -980,6 +936,7 @@ export default function Collection() {
               nodes: sortedProducts,
             }}
             resourcesClassName={`products-grid grid-cols-${numberInRow}`} // Dynamic class
+            infiniteScroll={false} // Disable endless scrolling
           >
             {({node: product, index}) => (
               <ProductItem
@@ -990,6 +947,31 @@ export default function Collection() {
               />
             )}
           </PaginatedResourceSection>
+
+          <div className="pagination-controls">
+            {collection.products.pageInfo.hasPreviousPage && (
+              <Link
+                to={buildPaginationLink(
+                  collection.products.pageInfo.startCursor,
+                  'prev',
+                )}
+                className="pagination-button prev-button"
+              >
+                Previous Page
+              </Link>
+            )}
+            {collection.products.pageInfo.hasNextPage && (
+              <Link
+                to={buildPaginationLink(
+                  collection.products.pageInfo.endCursor,
+                  'next',
+                )}
+                className="pagination-button next-button"
+              >
+                Next Page
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
