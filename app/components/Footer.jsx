@@ -57,7 +57,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     </svg>
                   </i>{' '}
                   <a
-                    href="https://maps.app.goo.gl/iW7qXAw4j5fZFGxK8"
+                    href="https://maps.app.goo.gl/wKNzrfSVrLm7srkB7"
                     target="_blank"
                     title="961 Souq Store Location"
                   >
