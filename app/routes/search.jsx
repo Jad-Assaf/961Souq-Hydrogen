@@ -1,16 +1,15 @@
-import {json} from '@shopify/remix-oxygen';
+import { json } from '@shopify/remix-oxygen';
 import {
   useLoaderData,
   useSearchParams,
   useNavigate,
   Link,
 } from '@remix-run/react';
-import {useState, useEffect} from 'react';
-import {ProductItem} from '~/components/CollectionDisplay';
-import {getEmptyPredictiveSearchResult} from '~/lib/search';
-import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
+import { useState, useEffect } from 'react';
+import { ProductItem } from '~/components/CollectionDisplay';
+import { getEmptyPredictiveSearchResult } from '~/lib/search';
+import { trackSearch } from '~/lib/metaPixelEvents'; // Import the trackSearch function
 import '../styles/SearchPage.css';
-import FlexSearch from 'flexsearch';
 
 /**
  * @type {import('@remix-run/react').MetaFunction}
@@ -22,7 +21,7 @@ export const meta = () => {
 /**
  * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
  */
-export async function loader({request, context}) {
+export async function loader({ request, context }) {
   const {storefront} = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
@@ -118,7 +117,8 @@ export async function loader({request, context}) {
       (term) =>
         `(title:${term} OR description:${term} OR variants.sku:${term})`,
     )
-    .join(' AND '); // Use OR for field-specific terms
+    .join(' AND ');
+ // Use OR for field-specific terms
 
   // **Step 2 (Optional):** Include description and variants.sku if needed
   // Uncomment the following lines to include additional fields after verifying titles work
@@ -126,7 +126,7 @@ export async function loader({request, context}) {
   const fieldSpecificTerms = terms
     .map(
       (word) =>
-        `(title:${word} OR description:${word} OR variants.sku:${word})`
+        `(title:${word} OR description:${word} OR variants.sku:${word})`,
     )
     .join(' AND '); // Combine with AND for multiple terms
   */
@@ -305,37 +305,6 @@ export default function SearchPage() {
     );
   }
 
-  // ******************** FLEXSEARCH INTEGRATION START ********************
-  // Build a FlexSearch index on the products from the current page.
-  // NOTE: Each edge has a "node" property; we search within the node.
-  const products = edges.map((edge) => edge.node);
-  // Preprocess products to add a top-level "sku" field from the first variant.
-  const processedProducts = products.map((p) => ({
-    ...p,
-    sku: p.variants?.nodes?.[0]?.sku || '',
-  }));
-  // Create a FlexSearch index in document mode.
-  const flexIndex = FlexSearch.create({
-    encode: 'icase',
-    tokenize: 'forward',
-    threshold: 0,
-    resolution: 9,
-    depth: 3,
-    cache: true,
-    doc: {
-      id: 'id',
-      field: ['title', 'description', 'sku'],
-    },
-  });
-  // Add all processed products to the index.
-  flexIndex.add(processedProducts);
-  // Use the 'q' parameter from the URL as the client-side search query.
-  const queryParam = searchParams.get('q') || '';
-  const flexResults = queryParam
-    ? flexIndex.search(queryParam)
-    : processedProducts;
-  // ******************** FLEXSEARCH INTEGRATION END ********************
-
   // Grab pageInfo so we know if there's a next / prev page
   const pageInfo = result?.products?.pageInfo || {};
   const hasNextPage = pageInfo.hasNextPage;
@@ -363,7 +332,7 @@ export default function SearchPage() {
     <div className="search">
       <h1>Search Results</h1>
 
-      <div className="search-filters-container" style={{display: 'flex'}}>
+      <div className="search-filters-container" style={{ display: 'flex' }}>
         {/* Sidebar (Desktop) */}
         <div className="filters">
           <fieldset>
@@ -512,9 +481,9 @@ export default function SearchPage() {
             </select>
           </div>
 
-          {/* Product Grid - using FlexSearch results */}
+          {/* Product Grid */}
           <div className="search-results-grid">
-            {flexResults.map((product, idx) => (
+            {edges.map(({ node: product }, idx) => (
               <ProductItem product={product} index={idx} key={product.id} />
             ))}
           </div>
@@ -817,7 +786,7 @@ async function regularSearch({
   after = null,
   before = null,
 }) {
-  const {storefront} = context;
+  const { storefront } = context;
 
   let first = null;
   let last = null;
@@ -841,7 +810,7 @@ async function regularSearch({
   };
 
   try {
-    const {products} = await storefront.query(FILTERED_PRODUCTS_QUERY, {
+    const { products } = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
 
@@ -849,14 +818,14 @@ async function regularSearch({
       return {
         type: 'regular',
         term: filterQuery,
-        result: {products: {edges: []}},
+        result: { products: { edges: [] } },
       };
     }
 
     return {
       type: 'regular',
       term: filterQuery,
-      result: {products},
+      result: { products },
     };
   } catch (error) {
     console.error('Regular search error:', error);
@@ -989,15 +958,15 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
   ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
   ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
-async function predictiveSearch({request, context}) {
-  const {storefront} = context;
+async function predictiveSearch({ request, context }) {
+  const { storefront } = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
   if (!term) {
-    return {type, term, result: getEmptyPredictiveSearchResult()};
+    return { type, term, result: getEmptyPredictiveSearchResult() };
   }
 
   const terms = term
@@ -1011,7 +980,7 @@ async function predictiveSearch({request, context}) {
     )
     .join(' AND ');
 
-  const {predictiveSearch: items, errors} = await storefront.query(
+  const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
@@ -1024,7 +993,7 @@ async function predictiveSearch({request, context}) {
 
   if (errors) {
     throw new Error(
-      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
+      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`,
     );
   }
   if (!items) {
@@ -1032,7 +1001,7 @@ async function predictiveSearch({request, context}) {
   }
 
   const total = Object.values(items).reduce((acc, arr) => acc + arr.length, 0);
-  return {type, term, result: {items, total}};
+  return { type, term, result: { items, total } };
 }
 
 /**
