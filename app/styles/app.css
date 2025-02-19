@@ -361,7 +361,7 @@ button {
 .collection-section {
   position: relative;
   max-width: 1500px;
-  margin: 0 auto;
+  margin: 50px auto;
 }
 
 .collection-section h3 {
@@ -594,6 +594,10 @@ button {
 
 .recently-viewed-container {
   width: 100%;
+}
+
+.recently-viewed-container .collection-section{
+  margin: 0 auto;
 }
 
 .recently-viewed-container .product-item {
