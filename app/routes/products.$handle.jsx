@@ -600,7 +600,7 @@ export default function Product() {
           and rely on selectedVariantImage to update when variant changes.
         */}
         <ProductImages
-          media={product.media?.edges || []}
+          media={product.images?.edges || []}
           selectedVariantImage={selectedVariant?.image}
         />
         <div className="product-main">

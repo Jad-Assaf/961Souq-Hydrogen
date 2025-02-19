@@ -55,7 +55,7 @@ export async function action({request}) {
     // 6. Send to Meta
     const pixelId = '459846537541051';
     const accessToken =
-      'EAAbtKZAEu758BOZCpvs6XBxvEDH2k6347fSMxt7aYdlBV5zUwZAOXbFTL9WEX2TjZChGAOKaqw08qoihZCdYHCyOftlaieOT4Bgite7zRcCVnwfeojeZAZCCnRUpk0V1QZBwERiM3V5X6ZABWGZBfFqRjeV8WxH5TxMDSayZAgaGZBSNLSrMP1xAmSkaMH7gEZCbaJAt5cgZDZD';
+      'EAACmPF8Xc9QBOxNkG4nVGty6DxVMsh7n4gu6IOxgNvsfhZBOSCFWCMGPrjiARtaljXFEMPowE1qLogpD8vJ8k3RoR9YlrtWfWEPG5YfgZB6plbvaauMuh5fjAuzuno1P50mzeSIKqHh4DlkGCpbxdN2ZAQN6m41OEewtR9sZAB14I2kHPEjUjFzaGh3QpnKSUAZDZD';
 
     const metaResponse = await fetch(
       `https://graph.facebook.com/v12.0/${pixelId}/events?access_token=${accessToken}`,
