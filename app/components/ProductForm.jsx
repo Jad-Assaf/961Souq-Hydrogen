@@ -3,6 +3,8 @@ import {CartForm, VariantSelector} from '@shopify/hydrogen';
 import React, {useEffect, useState} from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
+import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
+import {trackAddToCart} from '~/lib/metaPixelEvents';
 
 /**
  * @param {{
@@ -138,7 +140,12 @@ export function ProductForm({
   );
 
   // Construct WhatsApp share URL
-  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613020030&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613020030&text=Hi, I would like to buy ${product.title} https://macarabia.me${location.pathname}`;
+  const handleAddToCart = () => {
+    // Track the AddToCart event
+    trackAddToCart(product);
+    trackAddToCartGA(product);
+  };
 
   return (
     <>
@@ -165,7 +172,10 @@ export function ProductForm({
       <div className="product-form">
         <AddToCartButton
           disabled={!updatedVariant || !updatedVariant.availableForSale}
-          onClick={() => open('cart')}
+          onClick={() => {
+            handleAddToCart();
+            open('cart');
+          }}
           lines={
             updatedVariant
               ? [{merchandiseId: updatedVariant.id, quantity: safeQuantity}]

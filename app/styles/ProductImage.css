@@ -1,5 +1,5 @@
-@media (max-width: 1024px){
-    .ImageArrows{
+@media (max-width: 1024px) {
+    .ImageArrows {
         width: 95vw !important;
         transform: translateX(-12.5%);
     }
@@ -63,7 +63,8 @@
 .main-image:hover {
     transform: scale(1.01);
 }
-.main-image iframe{
+
+.main-image iframe {
     aspect-ratio: 1028/1028;
 }
 
@@ -149,7 +150,7 @@
     backdrop-filter: blur(15px) !important;
 }
 
-.ImageArrows{
+.ImageArrows {
     width: 100%;
     display: flex;
     justify-content: space-between;

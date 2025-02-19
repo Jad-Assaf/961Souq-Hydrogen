@@ -92,11 +92,22 @@ export async function loader(args) {
   // Check if data is in cache
   const cachedData = cache.get(cacheKey);
   if (cachedData && cachedData.expiry > now) {
-    return defer(cachedData.value, {
-      headers: {
-        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
+    const newArrivals = await fetchCollectionByHandle(
+      args.context,
+      'new-arrivals',
+    );
+
+    return defer(
+      {
+        ...cachedData.value,
+        newArrivals, // Attach the fresh new-arrivals
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
+        },
+      },
+    );
   }
 
   const banners = [
@@ -200,7 +211,7 @@ export async function loader(args) {
     'action-cameras',
     'action-cameras-accessories',
     'cameras',
-    'drones',
+    // 'drones',
     'kitchen-appliances',
     'cleaning-devices',
     'lighting',
@@ -211,6 +222,11 @@ export async function loader(args) {
     TOP_PRODUCT_HANDLES.map((handle) =>
       fetchCollectionByHandle(args.context, handle),
     ),
+  );
+
+  const newArrivals = await fetchCollectionByHandle(
+    args.context,
+    'new-arrivals',
   );
 
   // Organize TopProductSections collections into an object with keys corresponding to their handles
@@ -231,11 +247,21 @@ export async function loader(args) {
   // Cache the new data
   cache.set(cacheKey, {value: newData, expiry: now + cacheTTL});
 
-  return defer(newData, {
-    headers: {
-      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
+  return defer(
+    {
+      ...newData,
+      newArrivals, // This is always fresh
     },
-  });
+    {
+      headers: {
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
+      },
+    },
+  );
+}
+
+export function shouldRevalidate() {
+  return true;
 }
 
 async function loadCriticalData({context}) {
@@ -424,7 +450,7 @@ const brandsData = [
 ];
 
 export default function Homepage() {
-  const {banners, sliderCollections, topProducts} =
+  const {banners, sliderCollections, topProducts, newArrivals} =
     useLoaderData();
 
 
@@ -432,9 +458,7 @@ export default function Homepage() {
     <div className="home">
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
-      {topProducts['new-arrivals'] && (
-        <TopProductSections collection={topProducts['new-arrivals']} />
-      )}
+      {newArrivals && <TopProductSections collection={newArrivals} />}
 
       <CollectionCircles collections={appleMenu} />
       {topProducts['apple-accessories'] && (

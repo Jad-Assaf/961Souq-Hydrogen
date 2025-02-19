@@ -22,6 +22,7 @@ import RelatedProductsRow from '~/components/RelatedProducts';
 import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
+import { trackAddToCartGA } from '~/lib/googleAnalyticsEvents';
 
 // ---------------- SEO & Meta
 export const meta = ({data}) => {
@@ -39,7 +40,7 @@ export const meta = ({data}) => {
 
   return getSeoMeta({
     title: truncate(
-      product?.seoTitle || product?.title || '961Souq Product',
+      product?.seoTitle || product?.title || '961 Souq Product',
       140,
     ),
     description: truncate(
@@ -63,7 +64,7 @@ export const meta = ({data}) => {
         productID: product?.id,
         brand: {
           '@type': 'Brand',
-          name: product?.vendor || '961Souq',
+          name: product?.vendor || '961 Souq',
         },
         description: truncate(product?.description || '', 150),
         image:
@@ -335,6 +336,7 @@ export function ProductForm({
   const handleAddToCart = () => {
     // Track the AddToCart event
     trackAddToCart(product);
+    trackAddToCartGA(product);
     onAddToCart(product);
   };
 
@@ -587,7 +589,7 @@ export default function Product() {
     selectedVariant?.price?.amount !== selectedVariant?.compareAtPrice?.amount;
 
   const onAddToCart = (prod) => {
-    trackAddToCart(prod);
+    // trackAddToCart(prod);
   };
 
   return (
@@ -598,10 +600,9 @@ export default function Product() {
           and rely on selectedVariantImage to update when variant changes.
         */}
         <ProductImages
-          images={product.images?.edges || []} // <-- Safely handle missing images
+          media={product.media?.edges || []}
           selectedVariantImage={selectedVariant?.image}
         />
-
         <div className="product-main">
           <h1>{title}</h1>
           <div className="price-container">
@@ -783,14 +784,14 @@ export default function Product() {
             <h3>Operational Warranty Terms and Conditions</h3>
             <h3>Warranty Coverage</h3>
             <p>
-              This warranty applies to All Products, purchased from 961Souq.
+              This warranty applies to All Products, purchased from 961 Souq.
               The warranty covers defects in materials and workmanship under
               normal use for the period specified at the time of purchase.
             </p>
             <h3>What is Covered</h3>
             <p>
-              During the warranty period, 961Souq will repair or replace, at
-              no charge, any parts that are found to be defective due to faulty
+              During the warranty period, 961 Souq will repair or replace, at no
+              charge, any parts that are found to be defective due to faulty
               materials or poor workmanship. This warranty is valid only for the
               original purchaser and is non-transferable.
             </p>
@@ -820,13 +821,13 @@ export default function Product() {
                 description of the issue.
               </li>
               <li>
-                961Souq will assess the product and, if deemed defective,
+                961 Souq will assess the product and, if deemed defective,
                 repair or replace the item at no cost.
               </li>
             </ol>
             <h3>Limitations and Exclusions</h3>
             <p>
-              This warranty is limited to repair or replacement. 961Souq will
+              This warranty is limited to repair or replacement. 961 Souq will
               not be liable for any indirect, consequential, or incidental
               damages, including loss of data or loss of profits.
             </p>
