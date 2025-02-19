@@ -361,7 +361,7 @@ button {
 .collection-section {
   position: relative;
   max-width: 1500px;
-  margin: 10px auto;
+  margin: 0 auto;
 }
 
 .collection-section h3 {
@@ -373,6 +373,7 @@ button {
 .collection-products-row {
   display: flex;
   gap: 16px;
+  padding: 10px 0;
   overflow-x: auto;
   scroll-behavior: smooth;
   cursor: grab;
@@ -557,7 +558,7 @@ button {
 }
 
 .add-to-cart-button.bordered:hover {
-  background-color: #000;
+  background-color: #2172af;
   color: white;
 }
 
