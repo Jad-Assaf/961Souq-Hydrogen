@@ -311,14 +311,22 @@ export default function SearchPage() {
   const products = edges.map((edge) => edge.node);
   const fuseOptions = {
     keys: ['title', 'description', 'variants.nodes.sku'],
-    threshold: 0.3,
+    useExtendedSearch: true,
+    threshold: 0, // Set to 0 to force exact substring matching using extended search
   };
-  const Fuse = require('fuse.js');
   const fuse = new Fuse(products, fuseOptions);
   // Use the 'q' parameter from the URL as the client-side search query.
   const queryParam = searchParams.get('q') || '';
   const fuseResults = queryParam
-    ? fuse.search(queryParam).map((result) => result.item)
+    ? fuse
+        .search({
+          $or: [
+            {title: {$contains: queryParam}},
+            {description: {$contains: queryParam}},
+            {'variants.nodes.sku': {$contains: queryParam}},
+          ],
+        })
+        .map((result) => result.item)
     : products;
   // ******************** FUSE INTEGRATION END ********************
 
