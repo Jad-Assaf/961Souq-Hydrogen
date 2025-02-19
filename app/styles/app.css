@@ -9,7 +9,7 @@ html {
 body {
   background-color: #fff;
 
-  *{
+  * {
     scrollbar-width: none !important;
   }
 }
@@ -305,6 +305,13 @@ button {
   .product-slideshow-progress-bar {
     display: none;
   }
+
+  .home-prev-button,
+  .home-next-button,
+  .circle-next-button,
+  .circle-prev-button {
+    display: none;
+  }
 }
 
 /* Hide the scrollbar for a cleaner look */
@@ -399,7 +406,7 @@ button {
   text-decoration: underline;
 }
 
-.view-all-link:hover{
+.view-all-link:hover {
   color: #2172af;
   transition: all 0.2s linear;
 }
@@ -596,7 +603,7 @@ button {
   width: 100%;
 }
 
-.recently-viewed-container .collection-section{
+.recently-viewed-container .collection-section {
   margin: 0 auto;
 }
 
@@ -1121,9 +1128,11 @@ button.reset:hover:not(:has(> *)) {
   display: inline-block;
   text-decoration: none;
 }
-.menu-item-level-2 a{
+
+.menu-item-level-2 a {
   color: #000 !important;
 }
+
 .menu-item-level-1 a::after,
 .menu-item-level-2 a::after,
 .menu-item-level-3 a::after {
