@@ -22,7 +22,7 @@ export const meta = () => {
  * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
  */
 export async function loader({ request, context }) {
-  const { storefront } = context;
+  const {storefront} = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
 
@@ -32,9 +32,9 @@ export async function loader({ request, context }) {
   const isPredictive = searchParams.has('predictive');
   if (isPredictive) {
     // Immediately do predictive
-    const result = await predictiveSearch({ request, context }).catch((error) => {
+    const result = await predictiveSearch({request, context}).catch((error) => {
       console.error('Predictive Search Error:', error);
-      return { type: 'predictive', term: '', result: null, error: error.message };
+      return {type: 'predictive', term: '', result: null, error: error.message};
     });
     return json({
       ...result,
@@ -96,15 +96,28 @@ export async function loader({ request, context }) {
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
-  // Process the search term to include wildcards and specify fields
+  // Original version:
+  // const terms = rawTerm
+  //   .split(/\s+/)
+  //   .map((word) => word.trim())
+  //   .filter(Boolean)
+  //   .map((word) => `*${word}*`); // Add wildcards to each term
+
+  // Improved version: insert wildcards between each letter and also at start and end
   const terms = rawTerm
     .split(/\s+/)
     .map((word) => word.trim())
     .filter(Boolean)
-    .map((word) => `*${word}*`); // Add wildcards to each term
+    .map((word) => `*${word.split('').join('*')}*`);
+  // Add wildcards to each term
 
   // **Step 1:** Start by searching only within the title
-  const fieldSpecificTerms = terms.map((word) => `title:${word}`).join(' OR '); // Use OR for field-specific terms
+  const fieldSpecificTerms = terms
+    .map(
+      (term) =>
+        `(title:${term} OR description:${term} OR variants.sku:${term})`,
+    )
+    .join(' AND '); // Use OR for field-specific terms
 
   // **Step 2 (Optional):** Include description and variants.sku if needed
   // Uncomment the following lines to include additional fields after verifying titles work
@@ -161,18 +174,18 @@ export async function loader({ request, context }) {
     before,
   }).catch((error) => {
     console.error('Search Error:', error);
-    return { term: '', result: null, error: error.message };
+    return {term: '', result: null, error: error.message};
   });
 
   // -----------------------------------------
   // Extract vendor / productType from *these* results
   // -----------------------------------------
   const filteredVendors = [
-    ...new Set(result?.result?.products?.edges.map(({ node }) => node.vendor)),
+    ...new Set(result?.result?.products?.edges.map(({node}) => node.vendor)),
   ].sort();
   const filteredProductTypes = [
     ...new Set(
-      result?.result?.products?.edges.map(({ node }) => node.productType),
+      result?.result?.products?.edges.map(({node}) => node.productType),
     ),
   ].sort();
 
