@@ -399,6 +399,11 @@ button {
   text-decoration: underline;
 }
 
+.view-all-link:hover{
+  color: #2172af;
+  transition: all 0.2s linear;
+}
+
 /* Product Item Styling */
 .product-item {
   min-width: 200px;
