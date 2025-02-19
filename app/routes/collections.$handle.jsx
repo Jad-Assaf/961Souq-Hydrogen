@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from '@remix-run/react';
 import {
+  getPaginationVariables,
   Image,
   Money,
   Analytics,
@@ -193,28 +194,28 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  // Use deferred and critical data as before
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
   return defer({...deferredData, ...criticalData});
 }
 
 /**
- * Load data necessary for rendering content above the fold.
+ * Load data necessary for rendering content above the fold. This is the critical data
+ * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  * @param {LoaderFunctionArgs}
  */
 export async function loadCriticalData({context, params, request}) {
   const {handle} = params;
   const {storefront} = context;
-  const url = new URL(request.url);
-  const searchParams = url.searchParams;
-  const pageBy = 20;
-  const page = parseInt(searchParams.get('page') || '1', 10);
+  const searchParams = new URL(request.url).searchParams;
+  const paginationVariables = getPaginationVariables(request, {pageBy: 20});
 
   // Set default sort to 'newest' if no sort parameter is provided
   const sort = searchParams.get('sort') || 'newest';
   let sortKey;
   let reverse = false;
+
+  // Map sort values to Shopify's sortKey and reverse
   switch (sort) {
     case 'price-low-high':
       sortKey = 'PRICE';
@@ -249,27 +250,12 @@ export async function loadCriticalData({context, params, request}) {
     throw redirect('/collections');
   }
 
-  let paginationVariables = {};
-  if (page > 1) {
-    // To jump to a given page, fetch the cursor for offset (page-1)*pageBy
-    const offsetCount = (page - 1) * pageBy;
-    const cursorResult = await storefront.query(COLLECTION_CURSOR_QUERY, {
-      variables: {handle, first: offsetCount},
-    });
-    const edges = cursorResult?.collection?.products?.edges || [];
-    const afterCursor =
-      edges.length > 0 ? edges[edges.length - 1].cursor : null;
-    paginationVariables = {first: pageBy, after: afterCursor};
-  } else {
-    paginationVariables = {first: pageBy};
-  }
-
   try {
-    // Fetch main collection with page-based pagination and totalCount
+    // Fetch main collection
     const {collection} = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
-        first: pageBy,
+        first: 20,
         filters: filters.length ? filters : undefined,
         sortKey,
         reverse,
@@ -336,10 +322,17 @@ export async function loadCriticalData({context, params, request}) {
       }
     });
 
+    // Extend return object with SEO and image data
     return {
       collection,
       appliedFilters,
       sliderCollections,
+      seo: {
+        title: collection?.seo?.title || `${collection.title} Collection`,
+        description:
+          collection?.seo?.description || collection.description || '',
+        image: collection?.image?.url || null,
+      },
     };
   } catch (error) {
     console.error('Error fetching collection:', error);
@@ -350,14 +343,16 @@ export async function loadCriticalData({context, params, request}) {
 function sanitizeHandle(handle) {
   return handle
     .toLowerCase()
-    .replace(/"/g, '')
-    .replace(/&/g, '')
-    .replace(/\./g, '-')
-    .replace(/\s+/g, '-');
+    .replace(/"/g, '') // Remove all quotes
+    .replace(/&/g, '') // Remove all quotes
+    .replace(/\./g, '-') // Replace periods with hyphens
+    .replace(/\s+/g, '-'); // Replace spaces with hyphens (keeping this from the original code)
 }
 
 /**
- * Load data for rendering content below the fold.
+ * Load data for rendering content below the fold. This data is deferred and will be
+ * fetched after the initial page load. If it's unavailable, the page should still 200.
+ * Make sure to not throw any errors here, as it will cause the page to 500.
  * @param {LoaderFunctionArgs}
  */
 function loadDeferredData({context}) {
@@ -366,11 +361,14 @@ function loadDeferredData({context}) {
 
 export default function Collection() {
   const {collection, appliedFilters, sliderCollections} = useLoaderData();
-  const [userSelectedNumberInRow, setUserSelectedNumberInRow] = useState(null);
+  const [userSelectedNumberInRow, setUserSelectedNumberInRow] = useState(null); // Tracks user selection
+
+  // *** CHANGED HERE: always return 1 if the user hasn't manually chosen a layout ***
   const calculateNumberInRow = (width, userSelection) => {
-    if (userSelection !== null) return userSelection;
-    return 1;
+    if (userSelection !== null) return userSelection; // user still can override
+    return 1; // always default to 1
   };
+
   const [screenWidth, setScreenWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 0,
   );
@@ -389,7 +387,7 @@ export default function Collection() {
       setNumberInRow(calculateNumberInRow(width, userSelectedNumberInRow));
     };
 
-    updateLayout();
+    updateLayout(); // Set layout on initial render
 
     const debounce = (fn, delay) => {
       let timeoutId;
@@ -400,30 +398,42 @@ export default function Collection() {
     };
 
     const debouncedUpdateLayout = debounce(updateLayout, 100);
+
     window.addEventListener('resize', debouncedUpdateLayout);
+
     return () => {
       window.removeEventListener('resize', debouncedUpdateLayout);
     };
-  }, [userSelectedNumberInRow]);
+  }, [userSelectedNumberInRow]); // Add userSelectedNumberInRow as a dependency
 
   const handleLayoutChange = (number) => {
-    setUserSelectedNumberInRow(number);
-    setNumberInRow(number);
+    setUserSelectedNumberInRow(number); // Save user preference
+    setNumberInRow(number); // Immediately update the layout
   };
 
   const handleFilterRemove = (filter) => {
     const updatedParams = new URLSearchParams(searchParams.toString());
-    updatedParams.delete('page');
+
+    // Clean up 'direction' and 'cursor' parameters
+    updatedParams.delete('direction');
+    updatedParams.delete('cursor');
+
     const newUrl = getAppliedFilterLink(filter, updatedParams, location);
     navigate(newUrl);
   };
 
-  // Build links using only the "page" parameter.
-  const buildPaginationLink = (pageNum) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('page', pageNum);
-    return `${location.pathname}?${params.toString()}`;
-  };
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const query = url.searchParams;
+
+    // Remove 'direction' and 'cursor' if they exist
+    query.delete('direction');
+    query.delete('cursor');
+
+    const cleanUrl = `${url.origin}${url.pathname}?${query.toString()}`;
+    window.history.replaceState({}, '', cleanUrl);
+  }, []);
+
 
   const sortedProducts = React.useMemo(() => {
     if (!collection || !collection.products || !collection.products.nodes)
@@ -436,31 +446,31 @@ export default function Collection() {
       const bInStock = b.variants.nodes.some(
         (variant) => variant.availableForSale,
       );
+
       if (aInStock && !bInStock) return -1;
       if (!aInStock && bInStock) return 1;
       return 0;
     });
   }, [collection?.products?.nodes]);
 
-  // Compute current page and total pages (using totalCount from loader)
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const totalCount = collection.products.totalCount || 0;
-  const totalPages = Math.ceil(totalCount / 20);
+  useEffect(() => {
+    const url = new URL(window.location.href); // Get the current URL
+    const query = url.search; // Get the query string
 
-  // Compute page number links (show max of 3 pages at a time)
-  let startPage = Math.max(1, currentPage - 1);
-  let endPage = Math.min(totalPages, startPage + 2);
-  if (endPage - startPage < 2) {
-    startPage = Math.max(1, endPage - 2);
-  }
-  const pageNumbers = [];
-  for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
-  }
+    // Check if 'direction' exists in the query string
+    if (query.includes('?direction')) {
+      // Retain everything before '?direction'
+      const cleanUrl = url.origin + url.pathname;
+
+      // Update the URL without reloading the page
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }, []);
 
   return (
     <div className="collection">
       <h1>{collection.title}</h1>
+
       {sliderCollections && sliderCollections.length > 0 && (
         <div className="slide-con">
           <div className="category-slider">
@@ -497,6 +507,7 @@ export default function Collection() {
           </div>
         </div>
       )}
+
       <div className="flex flex-col lg:flex-row w-[100%]">
         {isDesktop && (
           <div className="w-[220px]">
@@ -523,8 +534,10 @@ export default function Collection() {
             />
           </div>
         )}
+
         <div className="flex-1 mt-[94px]">
           <hr className="col-hr"></hr>
+
           <div className="view-container">
             <div className="layout-controls">
               <span className="number-sort">View As:</span>
@@ -922,6 +935,31 @@ export default function Collection() {
                       </g>
                     </g>
                   </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#808080"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <g id="Interface / Line_L">
+                        <path
+                          id="Vector"
+                          d="M12 19V5"
+                          stroke="#808080"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </g>
+                    </g>
+                  </svg>
                 </button>
               )}
             </div>
@@ -936,13 +974,12 @@ export default function Collection() {
           </div>
 
           <PaginatedResourceSection
-            key={`products-grid-${numberInRow}`}
+            key={`products-grid-${numberInRow}`} // Forces re-render on change
             connection={{
               ...collection.products,
               nodes: sortedProducts,
             }}
-            resourcesClassName={`products-grid grid-cols-${numberInRow}`}
-            infiniteScroll={false} // Disable automatic loading
+            resourcesClassName={`products-grid grid-cols-${numberInRow}`} // Dynamic class
           >
             {({node: product, index}) => (
               <ProductItem
@@ -953,38 +990,9 @@ export default function Collection() {
               />
             )}
           </PaginatedResourceSection>
-
-          <div className="pagination-controls">
-            {currentPage > 1 && (
-              <Link
-                to={buildPaginationLink(currentPage - 1)}
-                className="pagination-button prev-button"
-              >
-                Previous Page
-              </Link>
-            )}
-            {pageNumbers.map((pageNum) => (
-              <Link
-                key={pageNum}
-                to={buildPaginationLink(pageNum)}
-                className={`pagination-button page-number ${
-                  pageNum === currentPage ? 'active' : ''
-                }`}
-              >
-                {pageNum}
-              </Link>
-            ))}
-            {currentPage < totalPages && (
-              <Link
-                to={buildPaginationLink(currentPage + 1)}
-                className="pagination-button next-button"
-              >
-                Next Page
-              </Link>
-            )}
-          </div>
         </div>
       </div>
+
       <Analytics.CollectionView
         data={{
           collection: {
@@ -1006,23 +1014,29 @@ export default function Collection() {
 const ProductItem = React.memo(({product, index, numberInRow}) => {
   const ref = useRef(null);
   const [isSoldOut, setIsSoldOut] = useState(false);
+
   useEffect(() => {
+    // Check if the product is sold out (no variants are available for sale)
     const soldOut = !product.variants.nodes.some(
       (variant) => variant.availableForSale,
     );
-    setIsSoldOut(soldOut);
+    setIsSoldOut(soldOut); // Update the state
   }, [product]);
+
   const [selectedVariant, setSelectedVariant] = useState(() => {
     return product.variants.nodes[0];
   });
+
   const variantUrl = useVariantUrl(
     product.handle,
     selectedVariant.selectedOptions,
   );
+
   const hasDiscount =
     product.compareAtPriceRange &&
     product.compareAtPriceRange.minVariantPrice.amount >
       product.priceRange.minVariantPrice.amount;
+
   return (
     <div className="product-item-collection product-card" ref={ref}>
       <div>
@@ -1035,9 +1049,10 @@ const ProductItem = React.memo(({product, index, numberInRow}) => {
           >
             {product.featuredImage && (
               <div className="collection-product-image">
+                {/* Sold-out banner */}
                 <div
                   className="sold-out-ban"
-                  style={{display: isSoldOut ? 'flex' : 'none'}}
+                  style={{display: isSoldOut ? 'flex' : 'none'}} // Conditionally displayed
                 >
                   <p>Sold Out</p>
                 </div>
@@ -1099,12 +1114,14 @@ const ProductItem = React.memo(({product, index, numberInRow}) => {
 function ProductForm({product, selectedVariant, setSelectedVariant}) {
   const {open} = useAside();
   const hasVariants = product.variants.nodes.length > 1;
+
   return (
     <div className="product-form">
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
           if (hasVariants) {
+            // Navigate to product page
             window.location.href = `/products/${encodeURIComponent(
               product.handle,
             )}`;
@@ -1290,19 +1307,6 @@ const COLLECTION_QUERY = `#graphql
           hasNextPage
           endCursor
           startCursor
-        }
-        totalCount
-      }
-    }
-  }
-`;
-
-const COLLECTION_CURSOR_QUERY = `#graphql
-  query CollectionCursor($handle: String!, $first: Int!) {
-    collection(handle: $handle) {
-      products(first: $first) {
-        edges {
-          cursor
         }
       }
     }
