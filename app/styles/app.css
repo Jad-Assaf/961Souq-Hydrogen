@@ -1731,6 +1731,7 @@ input.search-bar:focus-visible {
 @media (max-width: 768px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 5px !important;
   }
 
   button#headlessui-menu-button-\:R3lab5\: span {
@@ -1770,7 +1771,7 @@ button#headlessui-menu-button-\:R3lab5\: {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 10px;
   max-width: 1200px;
   margin: 20px auto auto auto;
   row-gap: 30px;
