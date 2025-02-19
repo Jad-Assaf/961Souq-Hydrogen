@@ -951,7 +951,7 @@ const PRODUCT_FRAGMENT = `#graphql
     }
 
     # Add media for images / video (YouTube) / 3D, etc.
-    media(first: 10) {
+    media(first: 30) {
       edges {
         node {
           __typename
