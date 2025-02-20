@@ -113,6 +113,13 @@ export async function loader(args) {
   const banners = [
     {
       desktopImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-banner_895451dd-e1a6-41ac-ae3d-0aad653a89d3.jpg?v=1740045077',
+      mobileImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-mobile-banner-2.jpg?v=1740045077',
+      link: '/collections/jbl-collection',
+    },
+    {
+      desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-pro-m4-banner_756f37f6-cf6d-4484-80ed-8b510a64db28.jpg?v=1731332730',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-pro-m4-mobilebanner.jpg?v=1731333133',
