@@ -228,7 +228,7 @@ export function ProductImages({media, selectedVariantImage}) {
               >
                 {thumbSrc ? (
                   <img
-                    src={thumbSrc}
+                    src={`${thumbSrc}?width=300&quality=10`}
                     alt={altText}
                     width={80}
                     height={80}
@@ -253,8 +253,8 @@ export function ProductImages({media, selectedVariantImage}) {
         {selectedMedia && (
           <div
             style={{
-              filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)',
-              transition: 'filter 0.3s ease',
+              filter: isImageLoaded ? 'blur(0px)' : 'blur(5px)',
+              transition: 'filter 0.1s ease',
             }}
           >
             {/* If the media is a Shopify Image */}
