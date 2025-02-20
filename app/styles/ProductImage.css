@@ -53,7 +53,7 @@
     position: relative;
     width: 75%;
     cursor: grab;
-    transition: transform 0.3s ease;
+    transition: transform 0.1s ease;
 }
 
 .main-image:active {

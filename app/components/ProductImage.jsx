@@ -34,39 +34,52 @@ const RightArrowIcon = () => (
   </svg>
 );
 
-/**
- * A comprehensive ProductImages component that handles:
- * - Images
- * - External Videos (YouTube, Vimeo, etc.)
- * - Hosted Shopify Videos
- * - 3D Models
- * - Thumbnails (with fallback icons for videos)
- * - Swipe & Keyboard navigation
- * - Lightbox
- * - Animated "Use Arrow Keys" indicator
- */
 export function ProductImages({media, selectedVariantImage}) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [imageKey, setImageKey] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isVariantSelected, setIsVariantSelected] = useState(false);
-
-  // "Use Arrow Keys" indicator
   const [showKeyIndicator, setShowKeyIndicator] = useState(false);
-
-  // Refs for thumbnails so we can scroll the active one into view
   const thumbnailRefs = useRef([]);
   thumbnailRefs.current = [];
+  const imageRef = useRef(null);
 
-  /**
-   * 1) If a specific variant image is chosen, find its matching index in media
-   *    so we can show that item in the main preview.
-   */
+  // Preload an image given its URL
+  const preloadImage = (url) => {
+    if (!url) return;
+    const img = new window.Image();
+    img.src = url;
+  };
+
+  // Preload ALL images on mount (if they are MediaImage type)
+  useEffect(() => {
+    media.forEach(({node}) => {
+      if (node.__typename === 'MediaImage' && node.image?.url) {
+        preloadImage(node.image.url);
+      }
+    });
+  }, [media]);
+
+  // (Optional) Preload adjacent images as well
+  useEffect(() => {
+    const total = media.length;
+    if (total === 0) return;
+    const nextIndex = (selectedIndex + 1) % total;
+    const prevIndex = (selectedIndex - 1 + total) % total;
+    const preloadURLs = [];
+    if (media[nextIndex]?.node?.__typename === 'MediaImage') {
+      preloadURLs.push(media[nextIndex].node.image.url);
+    }
+    if (media[prevIndex]?.node?.__typename === 'MediaImage') {
+      preloadURLs.push(media[prevIndex].node.image.url);
+    }
+    preloadURLs.forEach((url) => preloadImage(url));
+  }, [selectedIndex, media]);
+
+  // Update selected index if variant image is selected
   useEffect(() => {
     if (selectedVariantImage) {
       const variantImageIndex = media.findIndex(({node}) => {
-        // Compare based on URL instead of ID
         return (
           node.__typename === 'MediaImage' &&
           node.image?.url === selectedVariantImage.url
@@ -79,19 +92,24 @@ export function ProductImages({media, selectedVariantImage}) {
     }
   }, [selectedVariantImage, media, isVariantSelected]);
 
-  // Reset the “variant selected” flag if selectedVariantImage changes
+  // Reset the “variant selected” flag when variant changes
   useEffect(() => {
     setIsVariantSelected(false);
   }, [selectedVariantImage]);
 
-  // Whenever the selectedIndex changes, we "invalidate" the imageKey so <Image> re-renders
-  const selectedMedia = media[selectedIndex]?.node;
+  // Mark image as not loaded whenever selected index changes
   useEffect(() => {
-    setImageKey((prevKey) => prevKey + 1);
     setIsImageLoaded(false);
   }, [selectedIndex]);
 
-  // Scroll the thumbnails so the new item is visible
+  // Check if image is already loaded (from cache) on mount/update
+  useEffect(() => {
+    if (imageRef.current && imageRef.current.complete) {
+      setIsImageLoaded(true);
+    }
+  }, [selectedIndex]);
+
+  // Scroll the active thumbnail into view
   useEffect(() => {
     if (thumbnailRefs.current[selectedIndex]) {
       thumbnailRefs.current[selectedIndex].scrollIntoView({
@@ -102,15 +120,10 @@ export function ProductImages({media, selectedVariantImage}) {
     }
   }, [selectedIndex]);
 
-  /**
-   * 2) Keyboard navigation:
-   *    Only handle arrow keys if the lightbox is NOT open.
-   *    Otherwise we’d “double-skip” images due to the lightbox’s arrow logic.
-   */
+  // Keyboard navigation
   useEffect(() => {
     function handleKeyDown(e) {
-      if (isLightboxOpen) return; // Don’t conflict with lightbox’s arrow keys
-
+      if (isLightboxOpen) return;
       if (e.key === 'ArrowLeft') {
         doPrevImage();
         setShowKeyIndicator(false);
@@ -119,12 +132,10 @@ export function ProductImages({media, selectedVariantImage}) {
         setShowKeyIndicator(false);
       }
     }
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [media, isLightboxOpen]);
 
-  // Handle Prev/Next
   const doPrevImage = () => {
     setSelectedIndex((prevIndex) =>
       prevIndex === 0 ? media.length - 1 : prevIndex - 1,
@@ -139,36 +150,26 @@ export function ProductImages({media, selectedVariantImage}) {
     setIsVariantSelected(false);
   };
 
-  // Clicking arrow buttons => hide the “Use Arrow Keys” indicator
   const handleArrowButtonClick = (callback, e) => {
     e.stopPropagation();
     callback();
     setShowKeyIndicator(false);
   };
 
-  // Mouse enters an arrow => show the arrow-keys indicator
-  const handleArrowMouseEnter = () => {
-    setShowKeyIndicator(true);
-  };
-
-  // SWIPE / Drag handlers
   const swipeHandlers = useSwipeable({
     onSwipedLeft: doNextImage,
     onSwipedRight: doPrevImage,
-    trackMouse: true, // also allow mouse-drag for desktop
+    trackMouse: true,
   });
 
-  // Build “thumbnail” data for each media item
   const getThumbnailInfo = (node) => {
     let thumbSrc = '';
     let altText = node.alt || 'Thumbnail';
     let isVideo = false;
-
     if (node.__typename === 'MediaImage') {
       thumbSrc = node.image?.url;
       altText = node.image?.altText || altText;
     } else if (node.__typename === 'ExternalVideo') {
-      // Fallback icon for e.g. YouTube
       thumbSrc = 'https://img.icons8.com/color/480/youtube-play.png';
       isVideo = true;
     } else if (node.__typename === 'Video') {
@@ -178,16 +179,13 @@ export function ProductImages({media, selectedVariantImage}) {
       thumbSrc = 'https://img.icons8.com/3d-fluency/94/3d-rotate.png';
       isVideo = true;
     }
-
     return {thumbSrc, altText, isVideo};
   };
 
-  // Generate slides for lightbox usage
   const lightboxSlides = media.map(({node}) => {
     if (node.__typename === 'MediaImage') {
       return {src: node.image.url};
     } else if (node.__typename === 'ExternalVideo') {
-      // Lightbox expects a "src", but we can embed a link or fallback image
       return {src: node.embedUrl};
     } else if (node.__typename === 'Video') {
       const vidSource = node.sources?.[0]?.url;
@@ -198,7 +196,7 @@ export function ProductImages({media, selectedVariantImage}) {
     return {src: ''};
   });
 
-  // Determine if the currently selected media is a video
+  const selectedMedia = media[selectedIndex]?.node;
   const isVideoMedia =
     selectedMedia &&
     (selectedMedia.__typename === 'ExternalVideo' ||
@@ -212,12 +210,9 @@ export function ProductImages({media, selectedVariantImage}) {
           {media.map(({node}, index) => {
             const {thumbSrc, altText, isVideo} = getThumbnailInfo(node);
             const isActive = index === selectedIndex;
-
-            // Maybe style video thumbs differently
             const thumbnailStyle = isVideo
               ? {background: '#232323', padding: '14px'}
               : {};
-
             return (
               <div
                 key={node.id || index}
@@ -253,14 +248,13 @@ export function ProductImages({media, selectedVariantImage}) {
         {selectedMedia && (
           <div
             style={{
-              filter: isImageLoaded ? 'blur(0px)' : 'blur(5px)',
-              transition: 'filter 0.1s ease',
+              filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)',
+              transition: 'filter 0.3s ease',
             }}
           >
-            {/* If the media is a Shopify Image */}
             {selectedMedia.__typename === 'MediaImage' && (
               <Image
-                key={imageKey}
+                ref={imageRef}
                 data={selectedMedia.image}
                 alt={selectedMedia.image.altText || 'Product Image'}
                 sizes="(min-width: 45em) 50vw, 100vw"
@@ -271,10 +265,8 @@ export function ProductImages({media, selectedVariantImage}) {
               />
             )}
 
-            {/* If the media is an ExternalVideo (YouTube, Vimeo, etc.) */}
             {selectedMedia.__typename === 'ExternalVideo' && (
               <iframe
-                key={imageKey}
                 width="100%"
                 height="auto"
                 src={selectedMedia.embedUrl}
@@ -286,11 +278,9 @@ export function ProductImages({media, selectedVariantImage}) {
               />
             )}
 
-            {/* If the media is a Shopify Video */}
             {selectedMedia.__typename === 'Video' &&
               selectedMedia.sources?.[0] && (
                 <video
-                  key={imageKey}
                   width="100%"
                   height="auto"
                   controls
@@ -304,7 +294,6 @@ export function ProductImages({media, selectedVariantImage}) {
                 </video>
               )}
 
-            {/* If it's a 3D model */}
             {selectedMedia.__typename === 'Model3d' && (
               <div style={{textAlign: 'center'}}>
                 <p>3D Model preview not implemented</p>
@@ -313,7 +302,6 @@ export function ProductImages({media, selectedVariantImage}) {
           </div>
         )}
 
-        {/* Conditionally render the arrow keys usage indicator if not a video */}
         {!isVideoMedia && (
           <div className="ImageArrows">
             {showKeyIndicator && (
@@ -325,7 +313,6 @@ export function ProductImages({media, selectedVariantImage}) {
                 <p>Use arrow keys</p>
               </div>
             )}
-
             <button
               className="prev-button"
               onMouseEnter={() => setShowKeyIndicator(true)}
@@ -344,8 +331,7 @@ export function ProductImages({media, selectedVariantImage}) {
         )}
       </div>
 
-      {/* Lightbox for bigger view. 
-          Slides come from the 'lightboxSlides' array we built. */}
+      {/* Lightbox */}
       {isLightboxOpen && (
         <Lightbox
           open={isLightboxOpen}
