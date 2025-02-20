@@ -86,7 +86,7 @@ export const meta = ({data}) => {
  */
 export async function loader(args) {
   const cacheKey = 'homepage-data';
-  const cacheTTL = 86400 * 1000; // 24 hours in milliseconds
+  const cacheTTL = 1 * 1000; // 24 hours in milliseconds
   const now = Date.now();
 
   // Check if data is in cache
