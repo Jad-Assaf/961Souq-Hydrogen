@@ -1,5 +1,4 @@
 import {useEffect, useState, useRef} from 'react';
-import {Image} from '@shopify/hydrogen';
 import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import 'yet-another-react-lightbox/styles.css';
@@ -253,15 +252,15 @@ export function ProductImages({media, selectedVariantImage}) {
             }}
           >
             {selectedMedia.__typename === 'MediaImage' && (
-              <Image
+              <img
                 ref={imageRef}
-                data={selectedMedia.image}
+                src={selectedMedia.image.url}
                 alt={selectedMedia.image.altText || 'Product Image'}
-                sizes="(min-width: 45em) 50vw, 100vw"
                 loading="eager"
                 decoding="async"
                 onLoad={() => setIsImageLoaded(true)}
-                loaderOptions={{scale: 2}}
+                width="562.5px"
+                height="562.5px"
               />
             )}
 
