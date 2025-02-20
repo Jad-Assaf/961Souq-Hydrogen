@@ -129,6 +129,7 @@ function renderProductVariantItem(product, variant, baseUrl) {
   return `
     <item>
       <g:id>${xmlEncode(combinedId)}</g:id>
+      <!-- Updated <g:title> to reflect combined title -->
       <g:title>${xmlEncode(combinedTitle)}</g:title>
       <g:description>${xmlEncode(cleanDescription)}</g:description>
       <g:link>${baseUrl}/products/${xmlEncode(product.handle)}</g:link>
