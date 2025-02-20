@@ -113,6 +113,13 @@ export async function loader(args) {
   const banners = [
     {
       desktopImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/rayban-banner-F1_98212271-ea73-4c38-b498-ba25125ddd74.jpg?v=1740054162',
+      mobileImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/rayban-mobile-banner.jpg?v=1740053906',
+      link: '/collections/ray-ban-smart-glasses',
+    },
+    {
+      desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-banner_895451dd-e1a6-41ac-ae3d-0aad653a89d3.jpg?v=1740045077',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-mobile-banner-2.jpg?v=1740045077',
@@ -139,13 +146,13 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-mobile-banner-1.jpg?v=1729678484',
       link: '/collections/remarkable-tablets',
     },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold-6.jpg?v=1727957859',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold6.jpg?v=1727957858',
-      link: '/collections/samsung-mobile-phones',
-    },
+    // {
+    //   desktopImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold-6.jpg?v=1727957859',
+    //   mobileImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold6.jpg?v=1727957858',
+    //   link: '/collections/samsung-mobile-phones',
+    // },
     {
       desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-banner.jpg?v=1726322159',
@@ -167,13 +174,13 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin-mobile-banner.jpg?v=1726321601',
       link: '/products/garmin-fenix-8-47-mm-amoled-sapphire-premium-multisport-gps-watch',
     },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-banner-2_a2c3f993-278f-48c1-82de-ac42ceb6f3fc.jpg?v=1716031887',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad_3a178a79-4428-4aac-b5bd-41ad3f04e33a.jpg?v=1716031354',
-      link: '/collections/apple-ipad',
-    },
+    // {
+    //   desktopImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-banner-2_a2c3f993-278f-48c1-82de-ac42ceb6f3fc.jpg?v=1716031887',
+    //   mobileImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad_3a178a79-4428-4aac-b5bd-41ad3f04e33a.jpg?v=1716031354',
+    //   link: '/collections/apple-ipad',
+    // },
   ];
 
   const criticalData = await loadCriticalData(args);
