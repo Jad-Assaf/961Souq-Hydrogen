@@ -23,6 +23,7 @@ export async function action({request}) {
       request.headers.get('x-forwarded-for') ||
       request.headers.get('client-ip') ||
       request.headers.get('cf-connecting-ip') ||
+      request.socket?.remoteAddress ||
       '';
     const userAgentHeader = request.headers.get('user-agent') || '';
 
@@ -49,6 +50,18 @@ export async function action({request}) {
       // Keep or remove the line below for test events:
       test_event_code: 'TEST31560',
     };
+
+    console.log(
+      '[Server] x-forwarded-for:',
+      request.headers.get('x-forwarded-for'),
+    );
+    console.log('[Server] client-ip:', request.headers.get('client-ip'));
+    console.log(
+      '[Server] cf-connecting-ip:',
+      request.headers.get('cf-connecting-ip'),
+    );
+    console.log('[Server] remoteAddress:', request.socket?.remoteAddress);
+
 
     console.log(
       '[Server] Final payload to Meta CAPI:',
