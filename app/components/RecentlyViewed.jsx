@@ -188,7 +188,7 @@ function RecentlyViewedProductItem({product, index}) {
         }}
       >
         <Link to={`/products/${encodeURIComponent(product.handle)}`}>
-          <Image
+          <img
             data={product.featuredImage}
             aspectratio="1/1"
             sizes="(min-width: 45em) 20vw, 40vw"
@@ -198,6 +198,7 @@ function RecentlyViewedProductItem({product, index}) {
             alt={product.featuredImage.altText || product.title}
             width="150px"
             height="150px"
+            loading='lazy'
           />
           <div className="product-title">{product.title}</div>
           <div className="product-price">

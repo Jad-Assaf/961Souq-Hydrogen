@@ -352,9 +352,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                       >
                         <img
                           sizes="(min-width: 45em) 20vw, 40vw"
-                          srcSet={`${item.imageUrl}?width=300&quality=10 300w,
-                                   ${item.imageUrl}?width=600&quality=10 600w,
-                                   ${item.imageUrl}?width=1200&quality=10 1200w`}
+                          srcSet={`${item.imageUrl}?width=300&quality=5 300w,
+                                   ${item.imageUrl}?width=600&quality=5 600w,
+                                   ${item.imageUrl}?width=1200&quality=5 1200w`}
                           alt={item.altText || item.title}
                           width="50px"
                           height="50px"
@@ -452,9 +452,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           >
                             <img
                               sizes="(min-width: 45em) 20vw, 40vw"
-                              srcSet={`${subItem.imageUrl}?width=300&quality=10 300w,
-                                 ${subItem.imageUrl}?width=600&quality=10 600w,
-                                 ${subItem.imageUrl}?width=1200&quality=10 1200w`}
+                              srcSet={`${subItem.imageUrl}?width=300&quality=5 300w,
+                                 ${subItem.imageUrl}?width=600&quality=5 600w,
+                                 ${subItem.imageUrl}?width=1200&quality=5 1200w`}
                               alt={subItem.altText || subItem.title}
                               className="submenu-item-image"
                               width="50px"

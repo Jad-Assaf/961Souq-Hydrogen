@@ -89,7 +89,7 @@ function RelatedProductItem({product, index}) {
         }}
       >
         <Link to={`/products/${encodeURIComponent(product.handle)}`}>
-          <Image
+          <img
             data={product.images.edges[0]?.node}
             aspectratio="1/1"
             sizes="(min-width: 45em) 20vw, 40vw"
@@ -99,6 +99,7 @@ function RelatedProductItem({product, index}) {
             alt={product.images.edges[0]?.node.altText || product.title}
             width="150px"
             height="150px"
+            loading='lazy'
           />
           <div className="product-title">{product.title}</div>
           <div className="product-price">
