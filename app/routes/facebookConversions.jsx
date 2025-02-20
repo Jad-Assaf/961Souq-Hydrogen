@@ -1,7 +1,7 @@
 import {json} from '@shopify/remix-oxygen';
 import {sha256} from 'js-sha256';
 
-// Minimal helper to lowercase/trim before hashing
+// Helper to trim/lowercase before hashing
 function sha256Hash(value) {
   if (!value) return '';
   const cleaned = value.trim().toLowerCase();
@@ -46,19 +46,24 @@ export async function action({request}) {
     // 5. Final payload for Meta
     const payload = {
       data: [eventData],
-      // You can remove or replace this test code in production
+      // Keep or remove the line below for test events:
       test_event_code: 'TEST31560',
     };
 
-    console.log('[Server] Final payload to Meta CAPI:', payload);
+    console.log(
+      '[Server] Final payload to Meta CAPI:',
+      JSON.stringify(payload, null, 2),
+    );
 
     // 6. Send to Meta
+    //    Update pixelId and accessToken accordingly (never commit real tokens to public repos)
     const pixelId = '459846537541051';
     const accessToken =
       'EAACmPF8Xc9QBOxNkG4nVGty6DxVMsh7n4gu6IOxgNvsfhZBOSCFWCMGPrjiARtaljXFEMPowE1qLogpD8vJ8k3RoR9YlrtWfWEPG5YfgZB6plbvaauMuh5fjAuzuno1P50mzeSIKqHh4DlkGCpbxdN2ZAQN6m41OEewtR9sZAB14I2kHPEjUjFzaGh3QpnKSUAZDZD';
 
+    // Update the Graph API version if needed:
     const metaResponse = await fetch(
-      `https://graph.facebook.com/v12.0/${pixelId}/events?access_token=${accessToken}`,
+      `https://graph.facebook.com/v22.0/${pixelId}/events?access_token=${accessToken}`,
       {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},

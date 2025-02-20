@@ -128,6 +128,7 @@ export const trackViewContent = (product, customerData = {}) => {
   const content_name = product.title || '';
   const content_category = product.productType || '';
 
+  // Meta Pixel call
   if (typeof fbq === 'function') {
     fbq(
       'track',
@@ -152,12 +153,15 @@ export const trackViewContent = (product, customerData = {}) => {
     );
   }
 
+  // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'ViewContent',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
+      // client_user_agent will be overwritten by the server,
+      // but leaving it here is harmless
       client_user_agent: navigator.userAgent,
       fbp,
       fbc,
@@ -202,6 +206,7 @@ export const trackAddToCart = (product, customerData = {}) => {
   const content_category = product.productType || '';
   const num_items = product.quantity || 1;
 
+  // Meta Pixel call
   if (typeof fbq === 'function') {
     fbq(
       'track',
@@ -227,6 +232,7 @@ export const trackAddToCart = (product, customerData = {}) => {
     );
   }
 
+  // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'AddToCart',
@@ -270,27 +276,34 @@ export const trackPurchase = (order, customerData = {}) => {
   const { email = '', phone = '', fb_login_id = '' } = customerData;
   const external_id = getExternalId(customerData);
 
+  // Meta Pixel call
   if (typeof fbq === 'function') {
-    fbq('track', 'Purchase', {
-      content_ids: order.items.map((item) => parseGid(item.variantId)),
-      content_type: 'product_variant',
-      currency: 'USD',
-      value: order.total,
-      num_items: order.items.length,
-      contents: order.items.map((item) => ({
-        id: parseGid(item.variantId),
-        quantity: item.quantity,
-        item_price: item.price,
-      })),
-      fbp,
-      fbc,
-      external_id,
-      email,
-      phone,
-      fb_login_id,
-    }, { eventID: eventId });
+    fbq(
+      'track',
+      'Purchase',
+      {
+        content_ids: order.items.map((item) => parseGid(item.variantId)),
+        content_type: 'product_variant',
+        currency: 'USD',
+        value: order.total,
+        num_items: order.items.length,
+        contents: order.items.map((item) => ({
+          id: parseGid(item.variantId),
+          quantity: item.quantity,
+          item_price: item.price,
+        })),
+        fbp,
+        fbc,
+        external_id,
+        email,
+        phone,
+        fb_login_id,
+      },
+      { eventID: eventId }
+    );
   }
 
+  // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'Purchase',
@@ -335,18 +348,25 @@ export const trackSearch = (query, customerData = {}) => {
   const { email = '', fb_login_id = '' } = customerData;
   const external_id = getExternalId(customerData);
 
+  // Meta Pixel call
   if (typeof fbq === 'function') {
-    fbq('track', 'Search', {
-      search_string: query,
-      content_category: 'Search',
-      fbp,
-      fbc,
-      external_id,
-      email,
-      fb_login_id,
-    }, { eventID: eventId });
+    fbq(
+      'track',
+      'Search',
+      {
+        search_string: query,
+        content_category: 'Search',
+        fbp,
+        fbc,
+        external_id,
+        email,
+        fb_login_id,
+      },
+      { eventID: eventId }
+    );
   }
 
+  // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'Search',
@@ -387,6 +407,7 @@ export const trackInitiateCheckout = (cart, customerData = {}) => {
   const { email = '', fb_login_id = '' } = customerData;
   const external_id = getExternalId(customerData);
 
+  // Meta Pixel call
   if (typeof fbq === 'function') {
     try {
       fbq(
@@ -411,6 +432,7 @@ export const trackInitiateCheckout = (cart, customerData = {}) => {
     } catch (error) {}
   }
 
+  // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'InitiateCheckout',
@@ -452,18 +474,25 @@ export const trackAddPaymentInfo = (order, customerData = {}) => {
   const { email = '', fb_login_id = '' } = customerData;
   const external_id = getExternalId(customerData);
 
+  // Meta Pixel call
   if (typeof fbq === 'function') {
-    fbq('track', 'AddPaymentInfo', {
-      currency: 'USD',
-      value: order.total,
-      fbp,
-      fbc,
-      external_id,
-      email,
-      fb_login_id,
-    }, { eventID: eventId });
+    fbq(
+      'track',
+      'AddPaymentInfo',
+      {
+        currency: 'USD',
+        value: order.total,
+        fbp,
+        fbc,
+        external_id,
+        email,
+        fb_login_id,
+      },
+      { eventID: eventId }
+    );
   }
 
+  // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'AddPaymentInfo',
