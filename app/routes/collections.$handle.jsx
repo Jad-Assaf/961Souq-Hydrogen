@@ -483,7 +483,7 @@ export default function Collection() {
                     className="category-container"
                   >
                     {sliderCollection.image && (
-                      <Image
+                      <img
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`${sliderCollection.image.url}?width=300&quality=7 300w,
                                      ${sliderCollection.image.url}?width=600&quality=7 600w,
@@ -493,8 +493,8 @@ export default function Collection() {
                           sliderCollection.title
                         }
                         className="category-image"
-                        width={150}
-                        height={150}
+                        width='150'
+                        height='150'
                         loading="eager"
                       />
                     )}
@@ -1056,7 +1056,7 @@ const ProductItem = React.memo(({product, index, numberInRow}) => {
                 >
                   <p>Sold Out</p>
                 </div>
-                <Image
+                <img
                   srcSet={`${product.featuredImage.url}?width=300&quality=15 300w,
                            ${product.featuredImage.url}?width=600&quality=15 600w,
                            ${product.featuredImage.url}?width=1200&quality=15 1200w`}
