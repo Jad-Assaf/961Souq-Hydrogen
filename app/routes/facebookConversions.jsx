@@ -1,5 +1,5 @@
-import {json} from '@shopify/remix-oxygen';
-import {sha256} from 'js-sha256';
+import { json } from '@shopify/remix-oxygen';
+import { sha256 } from 'js-sha256';
 
 // Helper to trim/lowercase before hashing
 function sha256Hash(value) {
@@ -8,9 +8,9 @@ function sha256Hash(value) {
   return sha256(cleaned);
 }
 
-export async function action({request}) {
+export async function action({ request }) {
   if (request.method !== 'POST') {
-    return json({error: 'Method Not Allowed'}, {status: 405});
+    return json({ error: 'Method Not Allowed' }, { status: 405 });
   }
 
   try {
@@ -31,14 +31,14 @@ export async function action({request}) {
     const userData = eventData.user_data || {};
     if (userData.email) {
       userData.em = sha256Hash(userData.email);
-      delete userData.email; // remove plain text
+      delete userData.email;
     }
     if (userData.phone) {
       userData.ph = sha256Hash(userData.phone);
-      delete userData.phone; // remove plain text
+      delete userData.phone;
     }
 
-    // 4. Override IP/UA with server readings (recommended for best matching)
+    // 4. Override IP/UA with server readings (if available)
     userData.client_ip_address = ipHeader || userData.client_ip_address;
     userData.client_user_agent = userAgentHeader || userData.client_user_agent;
 
@@ -47,29 +47,16 @@ export async function action({request}) {
     // 5. Final payload for Meta
     const payload = {
       data: [eventData],
-      // Keep or remove the line below for test events:
       test_event_code: 'TEST31560',
     };
 
-    console.log(
-      '[Server] x-forwarded-for:',
-      request.headers.get('x-forwarded-for'),
-    );
+    console.log('[Server] x-forwarded-for:', request.headers.get('x-forwarded-for'));
     console.log('[Server] client-ip:', request.headers.get('client-ip'));
-    console.log(
-      '[Server] cf-connecting-ip:',
-      request.headers.get('cf-connecting-ip'),
-    );
+    console.log('[Server] cf-connecting-ip:', request.headers.get('cf-connecting-ip'));
     console.log('[Server] remoteAddress:', request.socket?.remoteAddress);
-
-
-    console.log(
-      '[Server] Final payload to Meta CAPI:',
-      JSON.stringify(payload, null, 2),
-    );
+    console.log('[Server] Final payload to Meta CAPI:', JSON.stringify(payload, null, 2));
 
     // 6. Send to Meta
-    //    Update pixelId and accessToken accordingly (never commit real tokens to public repos)
     const pixelId = '459846537541051';
     const accessToken =
       'EAACmPF8Xc9QBOxNkG4nVGty6DxVMsh7n4gu6IOxgNvsfhZBOSCFWCMGPrjiARtaljXFEMPowE1qLogpD8vJ8k3RoR9YlrtWfWEPG5YfgZB6plbvaauMuh5fjAuzuno1P50mzeSIKqHh4DlkGCpbxdN2ZAQN6m41OEewtR9sZAB14I2kHPEjUjFzaGh3QpnKSUAZDZD';
@@ -79,18 +66,18 @@ export async function action({request}) {
       `https://graph.facebook.com/v22.0/${pixelId}/events?access_token=${accessToken}`,
       {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      },
+      }
     );
 
     const metaResult = await metaResponse.json();
     console.log('[Server] Meta response:', metaResult);
 
     // 7. Respond to client
-    return json({success: true, result: metaResult});
+    return json({ success: true, result: metaResult });
   } catch (err) {
     console.error('[Server] Error:', err);
-    return json({success: false, error: err.message}, {status: 500});
+    return json({ success: false, error: err.message }, { status: 500 });
   }
 }

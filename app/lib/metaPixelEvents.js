@@ -1,3 +1,17 @@
+// metaPixelEvents.js
+
+// --- Helper to fetch the Client IP from a public API (ipify) ---
+export const getClientIP = async () => {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    return data.ip; // e.g. "123.45.67.89"
+  } catch (error) {
+    console.error('Error fetching client IP:', error);
+    return '';
+  }
+};
+
 // --- Added Helpers for Customer Data ---
 
 const CUSTOMER_QUERY = `
@@ -104,7 +118,7 @@ const sendToServerCapi = async (eventData) => {
  * @param {Object} product - The product details.
  * @param {Object} customerData - (Optional) Customer data with fields such as id, email, fb_login_id, etc.
  */
-export const trackViewContent = (product, customerData = {}) => {
+export const trackViewContent = async (product, customerData = {}) => {
   if (window.__viewContentTracked) return;
   window.__viewContentTracked = true;
 
@@ -128,7 +142,7 @@ export const trackViewContent = (product, customerData = {}) => {
   const content_name = product.title || '';
   const content_category = product.productType || '';
 
-  // Meta Pixel call
+  // Meta Pixel call (client-side)
   if (typeof fbq === 'function') {
     fbq(
       'track',
@@ -153,16 +167,16 @@ export const trackViewContent = (product, customerData = {}) => {
     );
   }
 
-  // Server-to-Server CAPI
+  // Fetch the client IP and then send to the server-side endpoint
+  const clientIP = await getClientIP();
   sendToServerCapi({
     action_source: 'website',
     event_name: 'ViewContent',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
-      // client_user_agent will be overwritten by the server,
-      // but leaving it here is harmless
       client_user_agent: navigator.userAgent,
+      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
@@ -185,7 +199,7 @@ export const trackViewContent = (product, customerData = {}) => {
  * @param {Object} product - The product details.
  * @param {Object} customerData - (Optional) Customer data.
  */
-export const trackAddToCart = (product, customerData = {}) => {
+export const trackAddToCart = async (product, customerData = {}) => {
   const variantId = parseGid(product.selectedVariant?.id);
   const price = product.selectedVariant?.price?.amount || product.price?.amount || 0;
   const currency = product.price?.currencyCode || 'USD';
@@ -232,6 +246,7 @@ export const trackAddToCart = (product, customerData = {}) => {
     );
   }
 
+  const clientIP = await getClientIP();
   // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
@@ -240,6 +255,7 @@ export const trackAddToCart = (product, customerData = {}) => {
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
       client_user_agent: navigator.userAgent,
+      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
@@ -263,7 +279,7 @@ export const trackAddToCart = (product, customerData = {}) => {
  * @param {Object} order - The order details.
  * @param {Object} customerData - (Optional) Customer data.
  */
-export const trackPurchase = (order, customerData = {}) => {
+export const trackPurchase = async (order, customerData = {}) => {
   const eventId = generateEventId();
 
   const getCookie = (name) => {
@@ -303,6 +319,7 @@ export const trackPurchase = (order, customerData = {}) => {
     );
   }
 
+  const clientIP = await getClientIP();
   // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
@@ -311,6 +328,7 @@ export const trackPurchase = (order, customerData = {}) => {
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
       client_user_agent: navigator.userAgent,
+      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
@@ -335,7 +353,7 @@ export const trackPurchase = (order, customerData = {}) => {
  * @param {string} query - The search query.
  * @param {Object} customerData - (Optional) Customer data.
  */
-export const trackSearch = (query, customerData = {}) => {
+export const trackSearch = async (query, customerData = {}) => {
   const eventId = generateEventId();
 
   const getCookie = (name) => {
@@ -366,6 +384,7 @@ export const trackSearch = (query, customerData = {}) => {
     );
   }
 
+  const clientIP = await getClientIP();
   // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
@@ -374,6 +393,7 @@ export const trackSearch = (query, customerData = {}) => {
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
       client_user_agent: navigator.userAgent,
+      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
@@ -389,7 +409,7 @@ export const trackSearch = (query, customerData = {}) => {
  * @param {Object} cart - The cart details.
  * @param {Object} customerData - (Optional) Customer data.
  */
-export const trackInitiateCheckout = (cart, customerData = {}) => {
+export const trackInitiateCheckout = async (cart, customerData = {}) => {
   const eventId = generateEventId();
   const variantIds = cart.items?.map((item) => parseGid(item.variantId)) || [];
   const value = parseFloat(cart.cost?.totalAmount?.amount) || 0;
@@ -432,6 +452,7 @@ export const trackInitiateCheckout = (cart, customerData = {}) => {
     } catch (error) {}
   }
 
+  const clientIP = await getClientIP();
   // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
@@ -440,6 +461,7 @@ export const trackInitiateCheckout = (cart, customerData = {}) => {
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
       client_user_agent: navigator.userAgent,
+      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
@@ -461,7 +483,7 @@ export const trackInitiateCheckout = (cart, customerData = {}) => {
  * @param {Object} order - The order details.
  * @param {Object} customerData - (Optional) Customer data.
  */
-export const trackAddPaymentInfo = (order, customerData = {}) => {
+export const trackAddPaymentInfo = async (order, customerData = {}) => {
   const eventId = generateEventId();
 
   const getCookie = (name) => {
@@ -492,6 +514,7 @@ export const trackAddPaymentInfo = (order, customerData = {}) => {
     );
   }
 
+  const clientIP = await getClientIP();
   // Server-to-Server CAPI
   sendToServerCapi({
     action_source: 'website',
@@ -500,6 +523,7 @@ export const trackAddPaymentInfo = (order, customerData = {}) => {
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
       client_user_agent: navigator.userAgent,
+      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
