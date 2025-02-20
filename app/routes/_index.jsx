@@ -267,8 +267,8 @@ export async function loader(args) {
   );
 }
 
-export function shouldRevalidate() {
-  return true;
+export function shouldRevalidate({currentUrl, nextUrl}) {
+  return currentUrl.pathname !== nextUrl.pathname;
 }
 
 async function loadCriticalData({context}) {
