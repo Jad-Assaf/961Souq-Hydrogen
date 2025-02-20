@@ -347,10 +347,10 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           // inline fade/blur effect (optional)
                           filter: 'blur(0px)',
                           opacity: 1,
-                          transition: 'filter 1s, opacity 1s',
+                          transition: 'filter 0.3s, opacity 0.3s',
                         }}
                       >
-                        <Image
+                        <img
                           sizes="(min-width: 45em) 20vw, 40vw"
                           srcSet={`${item.imageUrl}?width=300&quality=10 300w,
                                    ${item.imageUrl}?width=600&quality=10 600w,
@@ -447,10 +447,10 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                               height: '50px',
                               filter: 'blur(0px)',
                               opacity: 1,
-                              transition: 'filter 1s, opacity 1s',
+                              transition: 'filter 0.3s, opacity 0.3s',
                             }}
                           >
-                            <Image
+                            <img
                               sizes="(min-width: 45em) 20vw, 40vw"
                               srcSet={`${subItem.imageUrl}?width=300&quality=10 300w,
                                  ${subItem.imageUrl}?width=600&quality=10 600w,
