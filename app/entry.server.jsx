@@ -57,6 +57,7 @@ export default async function handleRequest(
       'https://td.doubleclick.net/',
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
+      'https://api.ipify.org/',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -81,6 +82,7 @@ export default async function handleRequest(
       'https://td.doubleclick.net/',
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
+      'https://api.ipify.org/',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -107,6 +109,7 @@ export default async function handleRequest(
       'https://td.doubleclick.net/',
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
+      'https://api.ipify.org/',
     ],
     imgSrc: [
       "'self'", // Allow images from the same origin
@@ -133,6 +136,7 @@ export default async function handleRequest(
       'https://td.doubleclick.net/',
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
+      'https://api.ipify.org/',
     ],
     mediaSrc: [
       "'self'",
@@ -145,6 +149,7 @@ export default async function handleRequest(
       'https://img.icons8.com',
       'https://youtube.com',
       'https://youtu.be',
+      'https://api.ipify.org/',
       // Add other media sources as needed
     ],
   });
