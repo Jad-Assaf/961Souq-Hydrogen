@@ -75,6 +75,7 @@
     font-size: 30px;
     cursor: pointer;
     color: black;
+    z-index: 999;
 }
 
 /* Animation Settings */
@@ -166,5 +167,4 @@
     border-radius: 5px;
     border: none;
     box-shadow: -2px 3px 3px 0px #dadada;
-    z-index: 999;
 }
