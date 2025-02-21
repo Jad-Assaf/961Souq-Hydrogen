@@ -1,163 +1,151 @@
-@media (max-width: 768px) {
-    .appPopupContainer {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        position: absolute;
-        width: 100%;
+/* Popup container, overlay, and popup styles applied regardless of viewport */
+.appPopupContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    position: absolute;
+    width: 100%;
+}
+
+#app-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2147483645;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+#app-popup {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 2147483647;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 10px;
+}
+
+#popup-content {
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#popup-content img {
+    width: 75px;
+    height: 75px;
+    margin-bottom: 20px;
+    border: 1px solid #8080802b;
+    border-radius: 20px;
+    padding: 5px;
+    box-shadow: -2px 3px 3px 0px #dadada;
+}
+
+#close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: black;
+}
+
+/* Animation settings */
+#app-popup-overlay,
+#app-popup {
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+}
+
+#app-popup-overlay.show,
+#app-popup.show {
+    animation-name: fade_in;
+    display: block;
+}
+
+#app-popup-overlay.hide,
+#app-popup.hide {
+    animation-name: fade_out;
+}
+
+@keyframes scale_down {
+    from {
+        transform: scale(1);
     }
 
-    #app-popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 2147483645;
-        display: none;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-    }
-
-    #app-popup {
-        position: fixed;
-        width: 300px;
-        height: 300px;
-        background-color: white;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        z-index: 2147483647;
-        display: none;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        border-radius: 10px;
-    }
-
-    #popup-content {
-        text-align: center;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #popup-content img {
-        width: 75px;
-        height: 75px;
-        margin-bottom: 20px;
-        border: 1px solid #8080802b;
-        border-radius: 20px;
-        padding: 5px;
-        box-shadow: -2px 3px 3px 0px #dadada;
-    }
-
-    #close-popup {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: none;
-        border: none;
-        font-size: 30px;
-        cursor: pointer;
-        color: black;
-    }
-
-    #app-popup-overlay,
-    #app-popup {
-        animation-duration: 0.5s;
-        animation-fill-mode: forwards;
-    }
-
-    #app-popup-overlay.show,
-    #app-popup.show {
-        animation-name: fade_in;
-        display: block;
-    }
-
-    #app-popup-overlay.hide,
-    #app-popup.hide {
-        animation-name: fade_out;
-    }
-
-    @keyframes scale_down {
-        from {
-            transform: scale(1);
-        }
-
-        to {
-            transform: scale(0);
-        }
-    }
-
-    @keyframes scale_up {
-        from {
-            transform: scale(0);
-        }
-
-        to {
-            transform: scale(1);
-        }
-    }
-
-    @keyframes fade_in {
-        from {
-            opacity: 0;
-            visibility: hidden;
-            display: none;
-        }
-
-        to {
-            opacity: 1;
-            visibility: visible;
-        }
-    }
-
-    @keyframes fade_out {
-        from {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        to {
-            opacity: 0;
-            visibility: hidden;
-            display: none;
-        }
-    }
-
-    #app-popup-overlay.show {
-        animation-name: fade_in;
-        display: block;
-    }
-
-    #app-popup-overlay.hide {
-        animation-name: fade_out;
-    }
-
-    #app-popup.show {
-        animation-name: fade_in, scale_up;
-    }
-
-    #app-popup.hide {
-        animation-name: fade_out, scale_down;
+    to {
+        transform: scale(0);
     }
 }
 
-@media (min-width: 1024px) {
-    .header__inline-menu {
-        display: none !important;
+@keyframes scale_up {
+    from {
+        transform: scale(0);
+    }
+
+    to {
+        transform: scale(1);
     }
 }
 
-@media (max-width: 1024px) {
-    .site-nav {
-        display: none !important;
+@keyframes fade_in {
+    from {
+        opacity: 0;
+        visibility: hidden;
+        display: none;
     }
+
+    to {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+@keyframes fade_out {
+    from {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    to {
+        opacity: 0;
+        visibility: hidden;
+        display: none;
+    }
+}
+
+#app-popup-overlay.show {
+    animation-name: fade_in;
+    display: block;
+}
+
+#app-popup-overlay.hide {
+    animation-name: fade_out;
+}
+
+#app-popup.show {
+    animation-name: fade_in, scale_up;
+}
+
+#app-popup.hide {
+    animation-name: fade_out, scale_down;
 }
