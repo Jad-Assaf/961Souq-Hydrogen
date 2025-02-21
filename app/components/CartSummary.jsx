@@ -52,13 +52,13 @@ export default function CartCheckoutActions({
 
   // Hide the alert if the subtotal drops below $5000
   useEffect(() => {
-    if (cartTotal < 5000 && showAlert) {
+    if (cartTotal < 10000 && showAlert) {
       setShowAlert(false);
     }
   }, [cartTotal, showAlert]);
 
   const handleButtonClick = () => {
-    if (cartTotal > 5000) {
+    if (cartTotal > 10000) {
       // Prevent navigation, show alert
       setShowAlert(true);
     } else {
@@ -81,7 +81,7 @@ export default function CartCheckoutActions({
       <button
         type="button"
         className={`cart-checkout-button ${
-          cartTotal > 5000 ? 'disabled-look' : ''
+          cartTotal > 10000 ? 'disabled-look' : ''
         }`}
         onClick={handleButtonClick}
         aria-label="Continue to Checkout" // **Optional: Added aria-label for accessibility**
@@ -93,7 +93,7 @@ export default function CartCheckoutActions({
         <div className="alert-box">
           <span className="alert-icon">&times;</span>
           <span className="alert-message">
-            We apologize for any inconvenience! Your order is above $5000.
+            We apologize for any inconvenience! Your order is above $10000.
             Please contact sales to proceed.{' '}
             <a className="cart-err-msg-link" href="https://wa.me/9613963961">
               +961 3 963 961
