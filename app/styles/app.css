@@ -92,6 +92,10 @@ body {
   padding: 0 !important;
 }
 
+html:has(.overlay.expanded) {
+  overflow: hidden;
+}
+
 .whatsapp-float {
   position: fixed;
   width: 45px;
@@ -1433,6 +1437,8 @@ aside p{
 .cart-summary-aside {
   background: white;
   border-top: 1px solid #2172af;
+  width: 90%;
+  margin: auto;
 }
 
 .cart-line-quantity {
