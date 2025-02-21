@@ -222,8 +222,10 @@ body {
   text-decoration: underline;
 }
 
-.cart-lines ul{
-  height: 100%;
+.cart-details {
+  height: 90%;
+  display: flex;
+  flex-direction: column;
 }
 
 .circle-prev-button,
@@ -1368,7 +1370,7 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .cart-main {
-  height: 67vh;
+  height: 100vh;
   overflow-y: auto;
   width: auto;
 }
@@ -1399,11 +1401,7 @@ button.reset:hover:not(:has(> *)) {
 
 .cart-summary-aside {
   background: white;
-  border-top: 1px solid var(--color-dark);
-  bottom: 50px;
-  padding-top: 0.75rem;
-  position: absolute;
-  width: 90%;
+  border-top: 1px solid #2172af;
 }
 
 .cart-line-quantity {

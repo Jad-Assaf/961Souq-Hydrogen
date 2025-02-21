@@ -46,7 +46,7 @@ export function CartMain({ layout, cart: originalCart }) {
 
       <CartEmpty hidden={linesCount} layout={layout} />
       <div className="cart-details">
-        <div aria-labelledby="cart-lines">
+        <div className="cart-lines" aria-labelledby="cart-lines">
           <ul>
             {(cart?.lines?.nodes ?? []).map((line) => (
               <CartLineItem key={line.id} line={line} layout={layout} />
