@@ -78,7 +78,7 @@ const MobileAppPopup = () => {
               alt="App Image"
             />
             <hr style={{border: '1px solid #2172af', width: '75%'}} />
-            <p style={{fontSize: '16px', fontWeight: '300'}}>
+            <p style={{fontSize: '16px', fontWeight: '500'}}>
               Try our New and Updated <br /> Mobile APP!
             </p>
             <button id="download-button" onClick={handleDownloadClick}>
