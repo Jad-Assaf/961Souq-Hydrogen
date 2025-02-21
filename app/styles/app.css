@@ -222,6 +222,10 @@ body {
   text-decoration: underline;
 }
 
+.cart-lines ul{
+  height: 100%;
+}
+
 .circle-prev-button,
 .circle-next-button {
   background-color: #fff;
