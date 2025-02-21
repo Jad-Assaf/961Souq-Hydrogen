@@ -1419,7 +1419,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 li.cart-line div{
-  width: 60%;
+  width: 65%;
 }
 
 aside p{
