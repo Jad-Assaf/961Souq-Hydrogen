@@ -223,9 +223,10 @@ body {
 }
 
 .cart-details {
-  height: 90%;
+  height: 75%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .circle-prev-button,
@@ -1370,8 +1371,7 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .cart-main {
-  height: 100vh;
-  overflow-y: auto;
+  height: 92vh;
   width: auto;
 }
 
