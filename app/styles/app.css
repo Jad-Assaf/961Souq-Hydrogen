@@ -108,7 +108,7 @@ html:has(.overlay.expanded) {
   text-align: center;
   font-size: 30px;
   box-shadow: 2px 2px 3px #999;
-  z-index: 1000;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
