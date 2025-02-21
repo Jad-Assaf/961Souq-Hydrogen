@@ -60,7 +60,11 @@ const MobileAppPopup = () => {
         onClick={closePopup}
       ></div>
       <div className="appPopupContainer">
-        <div id="app-popup" className={popupClass}>
+        <div
+          id="app-popup"
+          className={popupClass}
+          onClick={(e) => e.stopPropagation()} // Prevent click events from bubbling to overlay
+        >
           <button
             id="close-popup"
             onClick={closePopup}
@@ -73,8 +77,8 @@ const MobileAppPopup = () => {
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png?v=1719486376"
               alt="App Image"
             />
-            <hr style={{border: '1px solid grey', width: '75%'}} />
-            <p style={{fontSize: '14px', fontWeight: '500'}}>
+            <hr style={{border: '1px solid #2172af', width: '75%'}} />
+            <p style={{fontSize: '16px', fontWeight: '300'}}>
               Try our New and Updated <br /> Mobile APP!
             </p>
             <button id="download-button" onClick={handleDownloadClick}>
