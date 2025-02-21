@@ -478,7 +478,7 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      {/* <MobileAppPopup/> */}
+      <MobileAppPopup/>
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
