@@ -1,4 +1,4 @@
-/* Popup container, overlay, and popup styles applied regardless of viewport */
+/* Popup Container */
 .appPopupContainer {
     display: flex;
     justify-content: center;
@@ -8,6 +8,7 @@
     width: 100%;
 }
 
+/* Popup Overlay */
 #app-popup-overlay {
     position: fixed;
     top: 0;
@@ -23,6 +24,7 @@
     -webkit-backdrop-filter: blur(15px);
 }
 
+/* Popup Box */
 #app-popup {
     position: fixed;
     width: 300px;
@@ -39,15 +41,19 @@
     border-radius: 10px;
 }
 
+/* Popup Content */
 #popup-content {
     text-align: center;
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
+    width: 100%;
+    height: 300px;
 }
 
+/* Popup Image */
 #popup-content img {
     width: 75px;
     height: 75px;
@@ -58,6 +64,7 @@
     box-shadow: -2px 3px 3px 0px #dadada;
 }
 
+/* Close Button */
 #close-popup {
     position: absolute;
     top: 10px;
@@ -69,7 +76,7 @@
     color: black;
 }
 
-/* Animation settings */
+/* Animation Settings */
 #app-popup-overlay,
 #app-popup {
     animation-duration: 0.5s;
@@ -87,6 +94,7 @@
     animation-name: fade_out;
 }
 
+/* Keyframes */
 @keyframes scale_down {
     from {
         transform: scale(1);
@@ -148,4 +156,13 @@
 
 #app-popup.hide {
     animation-name: fade_out, scale_down;
+}
+
+#download-button {
+    padding: 12px 25px;
+    background-color: #2172af;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    box-shadow: -2px 3px 3px 0px #dadada;
 }
