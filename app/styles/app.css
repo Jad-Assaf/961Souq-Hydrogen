@@ -692,7 +692,7 @@ aside header h2 {
 }
 
 aside main {
-  margin: 1rem;
+  margin: 1rem 0;
 }
 
 aside p {
@@ -1405,14 +1405,14 @@ button.reset:hover:not(:has(> *)) {
 .cart-line {
   display: flex;
   padding: .75rem 0;
-  flex-direction: column;
+  /* flex-direction: column; */
   justify-content: center;
   align-items: start;
-  max-width: 300px;
+  width: 100%;
 }
 
 .cart-line img {
-  width: 150px;
+  width: 100px;
   height: auto;
   display: block;
   margin-right: 0.75rem;
