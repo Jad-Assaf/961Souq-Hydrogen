@@ -92,6 +92,29 @@ body {
   padding: 0 !important;
 }
 
+.whatsapp-float {
+  position: fixed;
+  width: 45px;
+  height: 45px;
+  bottom: 40px;
+  right: 20px;
+  background-color: #25d366;
+  color: #fff;
+  border-radius: 50px;
+  text-align: center;
+  font-size: 30px;
+  box-shadow: 2px 2px 3px #999;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.whatsapp-float svg {
+  max-width: 80%;
+}
+
 .header-search svg {
   width: 30px;
   height: 30px;
