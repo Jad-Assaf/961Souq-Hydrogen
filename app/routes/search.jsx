@@ -1,14 +1,9 @@
 import {json} from '@shopify/remix-oxygen';
-import {
-  useLoaderData,
-  useSearchParams,
-  useNavigate,
-  Link,
-} from '@remix-run/react';
+import {useLoaderData, useSearchParams, useNavigate} from '@remix-run/react';
 import {useState, useEffect} from 'react';
 import {ProductItem} from '~/components/CollectionDisplay';
 import {getEmptyPredictiveSearchResult} from '~/lib/search';
-import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
+import {trackSearch} from '~/lib/metaPixelEvents';
 import '../styles/SearchPage.css';
 
 /**
@@ -18,21 +13,63 @@ export const meta = () => {
   return [{title: `961Souq | Search`}];
 };
 
-/**
- * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
- */
+/* ------------------------------------------------------------------
+   TWO-WAY DICTIONARY
+------------------------------------------------------------------- */
+const originalDictionary = {
+  apple: ['appel', 'aple', 'apl'],
+  iphone: ['iphone 16 pro max', 'iphon', 'iphne'],
+  airpods: ['earpods', 'airpod'],
+  pro: ['prof', 'pro.'],
+  '2nd': ['2', '2th', '2nd.'],
+  hp: ['HP', 'horsepower', 'H.P.'],
+  tv: ['Television', 'smart-tv'],
+  bag: ['bags', 'handbag', 'handbags'],
+  'WH-1000XM5': ['xm5', '1000xm5'],
+};
+
+function buildSynonymMap(originalDict) {
+  const map = {};
+  for (const [key, synonyms] of Object.entries(originalDict)) {
+    const allForms = new Set([
+      key.toLowerCase(),
+      ...synonyms.map((s) => s.toLowerCase()),
+    ]);
+    const uniqueGroup = Array.from(new Set([key, ...synonyms]));
+    for (const form of allForms) {
+      map[form] = uniqueGroup;
+    }
+  }
+  return map;
+}
+
+const dictionaryMap = buildSynonymMap(originalDictionary);
+
+function expandSearchTerms(terms) {
+  const expanded = [];
+  for (const t of terms) {
+    const lower = t.toLowerCase();
+    if (dictionaryMap[lower]) {
+      expanded.push(...dictionaryMap[lower]);
+    } else {
+      expanded.push(t);
+    }
+  }
+  // Remove duplicates
+  return [...new Set(expanded)];
+}
+
+/* ------------------------------------------------------------------
+   LOADER
+------------------------------------------------------------------- */
 export async function loader({request, context}) {
-  const {storefront} = context;
   const url = new URL(request.url);
   const searchParams = url.searchParams;
   const usePrefix = searchParams.get('prefix') === 'true';
 
-  // -----------------------------------------
-  // Check if predictive search
-  // -----------------------------------------
+  // Predictive search check
   const isPredictive = searchParams.has('predictive');
   if (isPredictive) {
-    // Immediately do predictive
     const result = await predictiveSearch({request, context, usePrefix}).catch(
       (error) => {
         console.error('Predictive Search Error:', error);
@@ -48,33 +85,24 @@ export async function loader({request, context}) {
       ...result,
       vendors: [],
       productTypes: [],
-      // No pagination needed for predictive results
       pageInfo: {},
     });
   }
 
-  // -----------------------------------------
-  // Parse after/before for cursor-based pagination
-  // -----------------------------------------
+  // Cursor-based pagination
   const after = searchParams.get('after') || null;
   const before = searchParams.get('before') || null;
 
-  // -----------------------------------------
-  // Build filters with OR for multiple values on the same key,
-  // and map `productType` => `product_type`.
-  // -----------------------------------------
+  // Filter building
   const shopifyKeyMap = {
     vendor: 'vendor',
-    productType: 'product_type', // important for Shopify's textual query
+    productType: 'product_type',
   };
 
-  // Collect all filter values in a map:
-  //   filter_vendor=Nike, filter_vendor=Adidas => [Nike, Adidas]
-  //   filter_productType=Shirt => [Shirt]
   const filterMap = new Map();
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
-      const rawKey = key.replace('filter_', ''); // e.g. vendor, productType
+      const rawKey = key.replace('filter_', '');
       if (!filterMap.has(rawKey)) {
         filterMap.set(rawKey, []);
       }
@@ -82,67 +110,57 @@ export async function loader({request, context}) {
     }
   }
 
-  // Build the OR groups for each filter key
   const filterQueryParts = [];
   for (const [rawKey, values] of filterMap.entries()) {
-    // e.g. shopifyKey = product_type or vendor
     const shopifyKey = shopifyKeyMap[rawKey] || rawKey;
     if (values.length === 1) {
-      // single value => vendor:"Nike"
       filterQueryParts.push(`${shopifyKey}:"${values[0]}"`);
     } else {
-      // multiple => (vendor:"Nike" OR vendor:"Adidas")
       const orGroup = values.map((v) => `${shopifyKey}:"${v}"`).join(' OR ');
       filterQueryParts.push(`(${orGroup})`);
     }
   }
 
-  // -----------------------------------------
   // Price range & text search
-  // -----------------------------------------
   const rawTerm = searchParams.get('q') || '';
   const normalizedTerm = rawTerm.replace(/-/g, ' ');
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
-  // Process the search term to include wildcards and specify fields
-  const terms = normalizedTerm
+  // Expand synonyms for normal search
+  const baseTerms = normalizedTerm
     .split(/\s+/)
-    .map((word) => word.trim())
-    .filter(Boolean)
-    .map((word) => (usePrefix ? `${word}*` : `*${word}*`));
+    .map((w) => w.trim())
+    .filter(Boolean);
 
-  const fieldSpecificTerms = terms.map((word) => `title:${word}`).join(' OR ');
+  const synonymsExpanded = expandSearchTerms(baseTerms);
 
-  // **Step 2 (Optional):** Include description and variants.sku if needed
-  // Uncomment the following lines to include additional fields after verifying titles work
+  // If user chose prefix => "word*" else => "*word*"
+  const terms = synonymsExpanded.map((word) =>
+    usePrefix ? `${word}*` : `*${word}*`,
+  );
+
+  // Field-specific (title by default)
+  let fieldSpecificTerms = terms.map((word) => `title:${word}`).join(' OR ');
   /*
-  const fieldSpecificTerms = terms
-    .map(
-      (word) =>
-        `(title:${word} OR description:${word} OR variants.sku:${word})`,
-    )
-    .join(' AND '); // Combine with AND for multiple terms
+  // If you want multiple fields:
+  // fieldSpecificTerms = terms
+  //   .map((w) => `(title:${w} OR description:${w} OR variants.sku:${w})`)
+  //   .join(' AND ');
   */
 
-  // Now, use 'fieldSpecificTerms' instead of 'termWithWildcards' in the filterQuery
   let filterQuery = fieldSpecificTerms;
-
   if (filterQueryParts.length > 0) {
     if (filterQuery) {
-      // e.g. "title:*XM5* AND (vendor:"Sony" OR vendor:"Adidas")"
       filterQuery += ' AND ' + filterQueryParts.join(' AND ');
     } else {
       filterQuery = filterQueryParts.join(' AND ');
     }
   }
 
-  // **Debugging Step:** Log the constructed filterQuery
   console.log('Filter Query:', filterQuery);
 
-  // -----------------------------------------
-  // Sort
-  // -----------------------------------------
+  // Sorting
   const sortKeyMapping = {
     featured: 'RELEVANCE',
     'price-low-high': 'PRICE',
@@ -156,9 +174,7 @@ export async function loader({request, context}) {
   const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
   const reverse = reverseMapping[searchParams.get('sort')] || false;
 
-  // -----------------------------------------
-  // Perform the regular search with cursors
-  // -----------------------------------------
+  // Perform search
   const result = await regularSearch({
     request,
     context,
@@ -172,9 +188,7 @@ export async function loader({request, context}) {
     return {term: '', result: null, error: error.message};
   });
 
-  // -----------------------------------------
-  // Extract vendor / productType from *these* results
-  // -----------------------------------------
+  // Vendors & productTypes for filters
   const filteredVendors = [
     ...new Set(result?.result?.products?.edges.map(({node}) => node.vendor)),
   ].sort();
@@ -207,16 +221,13 @@ export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Price range local states
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
 
-  // Desktop filter toggles
   const [showVendors, setShowVendors] = useState(false);
   const [showProductTypes, setShowProductTypes] = useState(false);
   const [showPriceRange, setShowPriceRange] = useState(false);
 
-  // Mobile filters
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mobileShowVendors, setMobileShowVendors] = useState(false);
   const [mobileShowProductTypes, setMobileShowProductTypes] = useState(false);
@@ -231,7 +242,6 @@ export default function SearchPage() {
     }, 300);
   };
 
-  // Filter changes (already supports multiple filters)
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
 
@@ -246,23 +256,19 @@ export default function SearchPage() {
       );
     }
 
-    // Reset cursors
     params.delete('after');
     params.delete('before');
     navigate(`/search?${params.toString()}`);
   };
 
-  // Sorting
   const handleSortChange = (e) => {
     const params = new URLSearchParams(searchParams);
     params.set('sort', e.target.value);
-    // Reset cursors
     params.delete('after');
     params.delete('before');
     navigate(`/search?${params.toString()}`);
   };
 
-  // Price filter
   const applyPriceFilter = () => {
     const params = new URLSearchParams(searchParams);
     if (minPrice) {
@@ -275,20 +281,17 @@ export default function SearchPage() {
     } else {
       params.delete('maxPrice');
     }
-    // Reset cursors
     params.delete('after');
     params.delete('before');
     navigate(`/search?${params.toString()}`);
   };
 
-  // Track Search event
   useEffect(() => {
     if (term) {
       trackSearch(term);
     }
   }, [term]);
 
-  // If we have no products, show "no results"
   const edges = result?.products?.edges || [];
   if (!edges.length) {
     return (
@@ -299,12 +302,10 @@ export default function SearchPage() {
     );
   }
 
-  // Grab pageInfo so we know if there's a next / prev page
   const pageInfo = result?.products?.pageInfo || {};
   const hasNextPage = pageInfo.hasNextPage;
   const hasPreviousPage = pageInfo.hasPreviousPage;
 
-  // Handler: next => set after = pageInfo.endCursor
   const goNext = () => {
     if (!hasNextPage) return;
     const params = new URLSearchParams(searchParams);
@@ -313,7 +314,6 @@ export default function SearchPage() {
     navigate(`/search?${params.toString()}`);
   };
 
-  // Handler: prev => set before = pageInfo.startCursor
   const goPrev = () => {
     if (!hasPreviousPage) return;
     const params = new URLSearchParams(searchParams);
@@ -482,7 +482,7 @@ export default function SearchPage() {
             ))}
           </div>
 
-          {/* Prev / Next Buttons */}
+          {/* Pagination */}
           <div
             style={{
               marginTop: '1rem',
@@ -548,17 +548,18 @@ export default function SearchPage() {
                 <g>
                   <path
                     d="M285.08,230.397L456.218,59.27
-                    c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
-                    c-4.127,0-8.08,1.639-10.993,4.55L285.08,171.705L59.25,4.565
-                    c-2.913-2.911-6.866-4.55-10.993-4.55
-                    c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284
-                    c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128
-                    L4.575,401.505c-6.074,6.077-6.074,15.911,0,21.986
-                    l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55
-                    c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12
-                    l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55
-                    c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
-                    c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
+                      c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565
+                      c-2.913-2.911-6.866-4.55-10.992-4.55
+                      c-4.127,0-8.08,1.639-10.993,4.55L285.08,171.705
+                      L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55
+                      c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284
+                      c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128
+                      L4.575,401.505c-6.074,6.077-6.074,15.911,0,21.986
+                      l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55
+                      c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12
+                      l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55
+                      c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
+                      c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
                   />
                 </g>
               </svg>
@@ -687,10 +688,6 @@ export default function SearchPage() {
 /* ------------------------------------------------------------------
    GRAPHQL + REGULAR SEARCH
 ------------------------------------------------------------------- */
-
-/**
- * Query for the subset with cursors
- */
 const FILTERED_PRODUCTS_QUERY = `#graphql
   query FilteredProducts(
     $filterQuery: String,
@@ -765,12 +762,6 @@ const FILTERED_PRODUCTS_QUERY = `#graphql
   }
 `;
 
-/**
- * Regular search fetcher using cursors
- * If `after` is present, we use `first=50`.
- * If `before` is present, we use `last=50`.
- * If neither is present, we do first=50 from the start.
- */
 async function regularSearch({
   request,
   context,
@@ -789,7 +780,6 @@ async function regularSearch({
   } else if (before) {
     last = 50; // going backward
   } else {
-    // default: first page
     first = 50;
   }
 
@@ -833,7 +823,7 @@ async function regularSearch({
 }
 
 /* ------------------------------------------------------------------
-   PREDICTIVE SEARCH (unchanged)
+   PREDICTIVE SEARCH (Important: OR synonyms within each word, AND across words)
 ------------------------------------------------------------------- */
 const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
   fragment PredictiveArticle on Article {
@@ -952,34 +942,52 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
   ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
   ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
-async function predictiveSearch({ request, context, usePrefix }) {
-  const { storefront } = context;
+
+/**
+ * For each typed word:
+ *   1) Expand synonyms => [syn1, syn2, ...]
+ *   2) OR them all together for that single word
+ * Then AND across multiple typed words.
+ */
+async function predictiveSearch({request, context, usePrefix}) {
+  const {storefront} = context;
   const url = new URL(request.url);
   const rawTerm = String(url.searchParams.get('q') || '').trim();
-  // Normalize by replacing hyphens with spaces
+
   const normalizedTerm = rawTerm.replace(/-/g, ' ');
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
   if (!normalizedTerm) {
-    return { type, term: '', result: getEmptyPredictiveSearchResult() };
+    return {type, term: '', result: getEmptyPredictiveSearchResult()};
   }
 
-  const terms = normalizedTerm
+  // Split the input into separate words
+  const typedWords = normalizedTerm
     .split(/\s+/)
     .map((w) => w.trim())
     .filter(Boolean);
 
-  const queryTerm = terms
-    .map(
-      (word) =>
-        `(variants.sku:${usePrefix ? word : `*${word}*`} OR title:${
-          usePrefix ? word : `*${word}*`
-        } OR description:${usePrefix ? word : `*${word}*`})`
-    )
-    .join(' AND ');
+  // For each typed word, build an OR group of synonyms
+  const wordGroups = typedWords.map((baseWord) => {
+    // Expand synonyms for THIS typed word
+    const synonyms = expandSearchTerms([baseWord]);
+    // For each synonym, build the triple check (variants.sku / title / description)
+    // then OR them together
+    const orSynonyms = synonyms.map((syn) => {
+      const termWithWildcard = usePrefix ? `${syn}*` : `*${syn}*`;
+      return `(variants.sku:${termWithWildcard} OR title:${termWithWildcard} OR description:${termWithWildcard})`;
+    });
+    // Wrap this single word's synonyms in parentheses and join with OR
+    return `(${orSynonyms.join(' OR ')})`;
+  });
 
-  const { predictiveSearch: items, errors } = await storefront.query(
+  // Now AND across multiple typed words
+  // e.g. if user typed "horsepower car" => (all synonyms for "horsepower") AND (all synonyms for "car")
+  const queryTerm = wordGroups.join(' AND ');
+
+  // Query the Shopify predictiveSearch API
+  const {predictiveSearch: items, errors} = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
@@ -987,12 +995,12 @@ async function predictiveSearch({ request, context, usePrefix }) {
         limitScope: 'EACH',
         term: queryTerm,
       },
-    }
+    },
   );
 
   if (errors) {
     throw new Error(
-      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`
+      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
     );
   }
   if (!items) {
@@ -1000,7 +1008,7 @@ async function predictiveSearch({ request, context, usePrefix }) {
   }
 
   const total = Object.values(items).reduce((acc, arr) => acc + arr.length, 0);
-  return { type, term: normalizedTerm, result: { items, total } };
+  return {type, term: normalizedTerm, result: {items, total}};
 }
 
 /**
