@@ -142,10 +142,10 @@ export async function loader(args) {
     },
     {
       desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-pro-m4-banner_756f37f6-cf6d-4484-80ed-8b510a64db28.jpg?v=1731332730',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-banner.jpg?v=1740220887',
       mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-pro-m4-mobilebanner.jpg?v=1731333133',
-      link: '/collections/apple-macbook',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-mobile-banner.jpg?v=1740220886',
+      link: '/collections/apple-products',
     },
     {
       desktopImageUrl:
