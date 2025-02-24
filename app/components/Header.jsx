@@ -4,7 +4,7 @@ import {useAside} from '~/components/Aside';
 import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import { trackSearch } from '~/lib/metaPixelEvents'; // Import the trackSearch function
+import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
 
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
@@ -36,7 +36,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   };
 
   const closeSubmenu = () => {
-    const activeDrawer = document.querySelector('.mobile-submenu-drawer.active');
+    const activeDrawer = document.querySelector(
+      '.mobile-submenu-drawer.active',
+    );
     if (activeDrawer) {
       activeDrawer.classList.remove('active');
       setTimeout(() => setActiveSubmenu(null), 300); // Wait for animation
@@ -56,8 +58,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () =>
-      document.removeEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -110,7 +111,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
           <SearchFormPredictive className="header-search">
             {({inputRef, fetchResults, goToSearch, fetcher}) => {
-              useFocusOnCmdK(inputRef);
+              // Use the updated hook to focus the search on "/" press instead of cmd+k
+              useFocusOnSlash(inputRef);
 
               const handleFocus = () => {
                 if (window.innerWidth < 1024) {
@@ -124,7 +126,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
                   if (!inputValue) {
-                    searchContainerRef.current?.classList.remove('fixed-search');
+                    searchContainerRef.current?.classList.remove(
+                      'fixed-search',
+                    );
                     setOverlayVisible(false);
                   }
                 }
@@ -189,6 +193,12 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
+                        // When hovering over the search bar, change the cursor to a custom image that reads "Press /"
+                        onMouseEnter={(e) =>
+                          (e.target.style.cursor =
+                            'url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIzMiI+PHRleHQgeD0iMCIgeT0iMjAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9ImJsYWNrIj5QcmVzcyAvPC90ZXh0Pjwvc3ZnPg==) 16 16, text')
+                        }
+                        onMouseLeave={(e) => (e.target.style.cursor = 'text')}
                         className="search-bar"
                       />
                       {inputRef.current?.value && (
@@ -302,10 +312,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
       <>
         {isMobileMenuOpen && (
-          <div
-            className="mobile-menu-backdrop"
-            onClick={closeMobileMenu}
-          ></div>
+          <div className="mobile-menu-backdrop" onClick={closeMobileMenu}></div>
         )}
 
         {isMobileMenuOpen && (
@@ -609,7 +616,7 @@ function CartIcon() {
       ></path>
       <path
         className="path3"
-        d="M898.021 228.688C885.162 213.507 865.763 204.8 844.8 204.8H217.954l-5.085-30.506C206.149 133.979 168.871 102.4 128 102.4H76.8c-14.138 0-25.6 11.462-25.6 25.6s11.462 25.6 25.6 25.6H128c15.722 0 31.781 13.603 34.366 29.112l85.566 513.395C254.65 736.421 291.929 768 332.799 768h512c14.139 0 25.6-11.462 25.6-25.6s-11.461-25.6-25.6-25.6h-512c-15.722 0-31.781-13.603-34.366-29.11l-12.63-75.784 510.206-44.366c39.69-3.451 75.907-36.938 82.458-76.234l34.366-206.194c3.448-20.677-1.952-41.243-14.813-56.424zm-35.69 48.006l-34.366 206.194c-2.699 16.186-20.043 32.221-36.39 33.645l-514.214 44.714-50.874-305.246h618.314c5.968 0 10.995 2.054 14.155 5.782 3.157 3.73 4.357 9.024 3.376 14.912z"
+        d="M898.021 228.688C885.162 213.507 865.763 204.8 844.8 204.8H217.954l-5.085-30.506C206.149 133.979 168.871 102.4 128 102.4H76.8c-14.138 0-25.6 11.462-25.6 25.6s11.462 25.6 25.6 25.6H128c15.722 0 31.781 13.603 34.366 29.112l85.566 513.395C254.65 736.421 291.929 768 332.799 768h512c14.139 0 25.6-11.461 25.6-25.6s-11.461-25.6-25.6-25.6h-512c-15.722 0-31.781-13.603-34.366-29.11l-12.63-75.784 510.206-44.366c39.69-3.451 75.907-36.938 82.458-76.234l34.366-206.194c3.448-20.677-1.952-41.243-14.813-56.424zm-35.69 48.006l-34.366 206.194c-2.699 16.186-20.043 32.221-36.39 33.645l-514.214 44.714-50.874-305.246h618.314c5.968 0 10.995 2.054 14.155 5.782 3.157 3.73 4.357 9.024 3.376 14.912z"
       ></path>
     </svg>
   );
@@ -622,11 +629,11 @@ function activeLinkStyle({isActive, isPending}) {
   };
 }
 
-export function useFocusOnCmdK(inputRef) {
-  // focus the input when cmd+k is pressed
+// Update the hook to focus the search input when "/" is pressed instead of cmd+k
+export function useFocusOnSlash(inputRef) {
   useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key === 'k' && event.metaKey) {
+      if (event.key === '/') {
         event.preventDefault();
         inputRef.current?.focus();
       }
