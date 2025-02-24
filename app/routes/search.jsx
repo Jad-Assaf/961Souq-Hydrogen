@@ -5,6 +5,7 @@ import {ProductItem} from '~/components/CollectionDisplay';
 import {getEmptyPredictiveSearchResult} from '~/lib/search';
 import {trackSearch} from '~/lib/metaPixelEvents';
 import '../styles/SearchPage.css';
+import customDictionary from '~/lib/customDictionary.json';
 
 /**
  * @type {import('@remix-run/react').MetaFunction}
@@ -16,21 +17,9 @@ export const meta = () => {
 /* ------------------------------------------------------------------
    TWO-WAY DICTIONARY
 ------------------------------------------------------------------- */
-const originalDictionary = {
-  apple: ['appel', 'aple', 'apl'],
-  iphone: ['iphone 16 pro max', 'iphon', 'iphne'],
-  airpods: ['earpods', 'airpod'],
-  pro: ['prof', 'pro.'],
-  '2nd': ['2', '2th', '2nd.'],
-  hp: ['HP', 'horsepower', 'H.P.'],
-  tv: ['Television', 'smart-tv'],
-  bag: ['bags', 'handbag', 'handbags'],
-  'WH-1000XM5': ['xm5', '1000xm5'],
-};
-
-function buildSynonymMap(originalDict) {
+function buildSynonymMap(dictionary) {
   const map = {};
-  for (const [key, synonyms] of Object.entries(originalDict)) {
+  for (const [key, synonyms] of Object.entries(dictionary)) {
     const allForms = new Set([
       key.toLowerCase(),
       ...synonyms.map((s) => s.toLowerCase()),
@@ -43,7 +32,7 @@ function buildSynonymMap(originalDict) {
   return map;
 }
 
-const dictionaryMap = buildSynonymMap(originalDictionary);
+const dictionaryMap = buildSynonymMap(customDictionary);
 
 function expandSearchTerms(terms) {
   const expanded = [];
