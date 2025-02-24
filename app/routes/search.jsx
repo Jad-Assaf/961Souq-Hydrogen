@@ -130,7 +130,13 @@ export async function loader({request, context}) {
   );
 
   // Field-specific (title by default)
-  let fieldSpecificTerms = terms.map((word) => `title:${word}`).join(' OR ');
+  let fieldSpecificTerms = terms
+    .map(
+      (word) =>
+        `(title:${word} OR product_type:${word} OR description:${word} OR variants.sku:${word})`,
+    )
+    .join(' OR ');
+
   /*
   // If you want multiple fields:
   // fieldSpecificTerms = terms
@@ -863,6 +869,8 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
     title
     vendor
     description
+    productType
+    tags
     handle
     trackingParameters
     variants(first: 1) {
@@ -965,7 +973,7 @@ async function predictiveSearch({request, context, usePrefix}) {
     // then OR them together
     const orSynonyms = synonyms.map((syn) => {
       const termWithWildcard = usePrefix ? `${syn}*` : `*${syn}*`;
-      return `(variants.sku:${termWithWildcard} OR title:${termWithWildcard} OR description:${termWithWildcard})`;
+      return `(variants.sku:${termWithWildcard} OR title:${termWithWildcard} OR description:${termWithWildcard} OR product_type:${termWithWildcard} OR tag:${termWithWildcard})`;
     });
     // Wrap this single word's synonyms in parentheses and join with OR
     return `(${orSynonyms.join(' OR ')})`;
