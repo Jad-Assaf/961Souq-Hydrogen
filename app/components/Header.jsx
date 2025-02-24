@@ -193,10 +193,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
-                        // When hovering over the search bar, change the cursor to a custom image that reads "Press /"
                         onMouseEnter={(e) =>
                           (e.target.style.cursor =
-                            'url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIzMiI+PHRleHQgeD0iMCIgeT0iMjAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9ImJsYWNrIj5QcmVzcyAvPC90ZXh0Pjwvc3ZnPg==) 16 16, text')
+                            "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIzMiI+PHRleHQgeD0iMCIgeT0iMjAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9ImJsYWNrIj5QcmVzcyAvPC90ZXh0Pjwvc3ZnPg==') 16 16, auto")
                         }
                         onMouseLeave={(e) => (e.target.style.cursor = 'text')}
                         className="search-bar"
