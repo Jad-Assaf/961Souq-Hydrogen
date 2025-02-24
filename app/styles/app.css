@@ -60,6 +60,28 @@ body {
   }
 }
 
+@keyframes shimmerSearch {
+  0% {
+    background-position: 200% center;
+  }
+
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.search-bar::placeholder {
+  background: linear-gradient(90deg,
+      #f6f7f8 0%,
+      #edeef1 20%,
+      #f6f7f8 40%,
+      #f6f7f8 100%);
+  background-size: 200% auto;
+  animation: shimmerSearch 2s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* .animated-menu-item {
   opacity: 1;
   transform: translateY(0), translate3d(0, 0, 0);

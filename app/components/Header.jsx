@@ -131,11 +131,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     };
 
     // Start the animation (always run on desktop; on mobile you could set a static text)
-    if (window.innerWidth > 1024) {
-      timeoutId = setTimeout(updatePlaceholder, 2000); // Initial delay
-    } else {
-      setPlaceholder('Search products');
-    }
+    timeoutId = setTimeout(updatePlaceholder, 2000); // Initial delay
 
     return () => clearTimeout(timeoutId);
   }, []);
