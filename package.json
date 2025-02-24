@@ -43,6 +43,7 @@
     "react-intersection-observer": "^9.13.1",
     "react-lazy-load-image-component": "^1.6.2",
     "react-microsoft-clarity": "^2.0.0",
+    "react-placeholder-typing": "^1.0.11",
     "react-responsive": "^10.0.0",
     "react-swipeable": "^7.0.2",
     "react-transition-group": "^4.4.5",

@@ -5,6 +5,7 @@ import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
+import ReactPlaceholderTyping from 'react-placeholder-typing';
 
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
@@ -13,7 +14,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   // Lift the search state to control both search results and overlay visibility
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
-  const [placeholder, setPlaceholder] = useState('Search products');
+  const [inputValue, setInputValue] = useState('');
   const searchContainerRef = useRef(null);
 
   const toggleMobileMenu = () => {
@@ -69,45 +70,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
       document.documentElement.classList.remove('no-scroll');
     }
   }, [isMobileMenuOpen]);
-
-  useEffect(() => {
-    const originalText = 'Press /';
-    const defaultText = 'Search products';
-    let currentText = originalText;
-    let deleting = true;
-    let charIndex = originalText.length;
-    let timeoutId;
-
-    const updatePlaceholder = () => {
-      if (deleting) {
-        if (charIndex > 0) {
-          charIndex--;
-          setPlaceholder(currentText.substring(0, charIndex));
-          timeoutId = setTimeout(updatePlaceholder, 100);
-        } else {
-          deleting = false;
-          currentText =
-            currentText === originalText ? defaultText : originalText;
-          timeoutId = setTimeout(updatePlaceholder, 2000); // Pause before typing
-        }
-      } else {
-        if (charIndex < currentText.length) {
-          charIndex++;
-          setPlaceholder(currentText.substring(0, charIndex));
-          timeoutId = setTimeout(updatePlaceholder, 100);
-        } else {
-          deleting = true;
-          timeoutId = setTimeout(updatePlaceholder, 2000); // Pause before deleting
-        }
-      }
-    };
-
-    if (window.innerWidth > 1024) {
-      timeoutId = setTimeout(updatePlaceholder, 2000); // Initial delay before starting
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   return (
     <>
@@ -222,18 +184,22 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                   {/* Main Search Form */}
                   <div ref={searchContainerRef} className="main-search">
                     <div className="search-container">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder={placeholder}
-                        onChange={(e) => {
-                          fetchResults(e);
+                      <ReactPlaceholderTyping
+                        placeholders={['Press /', 'Search products']}
+                        value={inputValue}
+                        onChange={(newValue) => {
+                          setInputValue(newValue);
+                          // Mimic your fetchResults call (ensure your fetchResults accepts an event-like object)
+                          fetchResults({target: {value: newValue}});
                           setSearchResultsVisible(true);
                         }}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
                         className="search-bar"
+                        fontFamily="Arial" // or whichever font you'd like
+                        // Forward the ref to the underlying input element
+                        ref={inputRef}
                       />
                       {inputRef.current?.value && (
                         <button
