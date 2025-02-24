@@ -208,26 +208,28 @@ export async function loader(args) {
     'apple-imac',
     'gaming-laptops',
     'gaming-desktops',
+    'gaming-accessories',
     'console-games',
-    'hp',
-    'lenovo',
-    'microsoft-surface-accessories',
-    'motherboards',
-    'cpus',
-    'cpu-coolers',
-    'gpu',
-    'wifi-routers',
-    'wifi-range-extenders',
-    'switches',
+    'laptops',
+    'computer-accessories',
+    // 'microsoft-surface-accessories',
+    // 'motherboards',
+    // 'cpus',
+    // 'cpu-coolers',
+    // 'gpu',
+    // 'wifi-routers',
+    // 'wifi-range-extenders',
+    // 'switches',
+    'samsung-monitors',
     'msi-monitors',
-    'aoc-monitors',
-    'asus-monitors',
-    'mobile-accessories',
+    'dell-monitors',
     'apple-iphone',
     'samsung-mobile-phones',
-    'tablet-accessories',
-    'digital-text',
+    'mobile-accessories',
+    'apple-ipad',
     'samsung-tablets',
+    'kindle-tablets',
+    'tablet-accessories',
     'earbuds',
     'headphones',
     'speakers',
@@ -236,11 +238,12 @@ export async function loader(args) {
     'car-accessories',
     'fitness-bands',
     'samsung-watches',
-    'amazfit-watches',
+    'apple-watch',
     'action-cameras',
     'action-cameras-accessories',
     'cameras',
     // 'drones',
+    'dyson-products',
     'kitchen-appliances',
     'cleaning-devices',
     'lighting',
@@ -482,23 +485,22 @@ export default function Homepage() {
   const {banners, sliderCollections, topProducts, newArrivals} =
     useLoaderData();
 
-
   return (
     <div className="home">
-      <MobileAppPopup/>
+      <MobileAppPopup />
       <BannerSlideshow banners={banners} />
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
       <CollectionCircles collections={appleMenu} />
-      {topProducts['apple-accessories'] && (
-        <TopProductSections collection={topProducts['apple-accessories']} />
-      )}
       {topProducts['apple-macbook'] && (
         <TopProductSections collection={topProducts['apple-macbook']} />
       )}
       {topProducts['apple-imac'] && (
         <TopProductSections collection={topProducts['apple-imac']} />
+      )}
+      {topProducts['apple-accessories'] && (
+        <TopProductSections collection={topProducts['apple-accessories']} />
       )}
 
       <CollectionCircles collections={gamingMenu} />
@@ -508,21 +510,19 @@ export default function Homepage() {
       {topProducts['gaming-desktops'] && (
         <TopProductSections collection={topProducts['gaming-desktops']} />
       )}
+      {topProducts['gaming-accessories'] && (
+        <TopProductSections collection={topProducts['gaming-accessories']} />
+      )}
       {topProducts['console-games'] && (
         <TopProductSections collection={topProducts['console-games']} />
       )}
 
       <CollectionCircles collections={laptopsMenu} />
-      {topProducts['hp'] && (
-        <TopProductSections collection={topProducts['hp']} />
+      {topProducts['laptops'] && (
+        <TopProductSections collection={topProducts['laptops']} />
       )}
-      {topProducts['lenovo'] && (
-        <TopProductSections collection={topProducts['lenovo']} />
-      )}
-      {topProducts['microsoft-surface-accessories'] && (
-        <TopProductSections
-          collection={topProducts['microsoft-surface-accessories']}
-        />
+      {topProducts['computer-accessories'] && (
+        <TopProductSections collection={topProducts['computer-accessories']} />
       )}
 
       {/* <CollectionCircles collections={partsMenu} />
@@ -551,44 +551,47 @@ export default function Homepage() {
       )} */}
 
       <CollectionCircles collections={monitorsMenu} />
+      {topProducts['samsung-monitors'] && (
+        <TopProductSections collection={topProducts['samsung-monitors']} />
+      )}
       {topProducts['msi-monitors'] && (
         <TopProductSections collection={topProducts['msi-monitors']} />
       )}
-      {topProducts['aoc-monitors'] && (
-        <TopProductSections collection={topProducts['aoc-monitors']} />
-      )}
-      {topProducts['asus-monitors'] && (
-        <TopProductSections collection={topProducts['asus-monitors']} />
+      {topProducts['dell-monitors'] && (
+        <TopProductSections collection={topProducts['dell-monitors']} />
       )}
 
       <CollectionCircles collections={mobilesMenu} />
-      {topProducts['mobile-accessories'] && (
-        <TopProductSections collection={topProducts['mobile-accessories']} />
-      )}
       {topProducts['apple-iphone'] && (
         <TopProductSections collection={topProducts['apple-iphone']} />
       )}
       {topProducts['samsung-mobile-phones'] && (
         <TopProductSections collection={topProducts['samsung-mobile-phones']} />
       )}
+      {topProducts['mobile-accessories'] && (
+        <TopProductSections collection={topProducts['mobile-accessories']} />
+      )}
 
       <CollectionCircles collections={tabletsMenu} />
-      {topProducts['tablet-accessories'] && (
-        <TopProductSections collection={topProducts['tablet-accessories']} />
-      )}
-      {topProducts['digital-text'] && (
-        <TopProductSections collection={topProducts['digital-text']} />
+      {topProducts['apple-ipad'] && (
+        <TopProductSections collection={topProducts['apple-ipad']} />
       )}
       {topProducts['samsung-tablets'] && (
         <TopProductSections collection={topProducts['samsung-tablets']} />
       )}
+      {topProducts['kindle-tablets'] && (
+        <TopProductSections collection={topProducts['kindle-tablets']} />
+      )}
+      {topProducts['tablet-accessories'] && (
+        <TopProductSections collection={topProducts['tablet-accessories']} />
+      )}
 
       <CollectionCircles collections={audioMenu} />
-      {topProducts['earbuds'] && (
-        <TopProductSections collection={topProducts['earbuds']} />
-      )}
       {topProducts['headphones'] && (
         <TopProductSections collection={topProducts['headphones']} />
+      )}
+      {topProducts['earbuds'] && (
+        <TopProductSections collection={topProducts['earbuds']} />
       )}
       {topProducts['speakers'] && (
         <TopProductSections collection={topProducts['speakers']} />
@@ -606,14 +609,14 @@ export default function Homepage() {
       )} */}
 
       <CollectionCircles collections={fitnessMenu} />
-      {topProducts['fitness-bands'] && (
-        <TopProductSections collection={topProducts['fitness-bands']} />
+      {topProducts['apple-watch'] && (
+        <TopProductSections collection={topProducts['apple-watch']} />
       )}
       {topProducts['samsung-watches'] && (
         <TopProductSections collection={topProducts['samsung-watches']} />
       )}
-      {topProducts['amazfit-watches'] && (
-        <TopProductSections collection={topProducts['amazfit-watches']} />
+      {topProducts['fitness-bands'] && (
+        <TopProductSections collection={topProducts['fitness-bands']} />
       )}
 
       <CollectionCircles collections={camerasMenu} />
@@ -633,6 +636,9 @@ export default function Homepage() {
       )} */}
 
       <CollectionCircles collections={homeAppliancesMenu} />
+      {topProducts['dyson-products'] && (
+        <TopProductSections collection={topProducts['dyson-products']} />
+      )}
       {topProducts['kitchen-appliances'] && (
         <TopProductSections collection={topProducts['kitchen-appliances']} />
       )}

@@ -60,26 +60,39 @@ body {
   }
 }
 
-@keyframes shimmerSearch {
+@keyframes placeholderShimmer {
   0% {
-    background-position: 200% center;
+    text-shadow: 0 0 0 #444;
+  }
+
+  50% {
+    text-shadow: 0 0 8px #222;
   }
 
   100% {
-    background-position: -200% center;
+    text-shadow: 0 0 0 #444;
   }
 }
 
+/* Apply for various browsers */
+.search-bar::-webkit-input-placeholder {
+  color: #444;
+  animation: placeholderShimmer 2s linear infinite;
+}
+
+.search-bar::-moz-placeholder {
+  color: #444;
+  animation: placeholderShimmer 2s linear infinite;
+}
+
+.search-bar:-ms-input-placeholder {
+  color: #444;
+  animation: placeholderShimmer 2s linear infinite;
+}
+
 .search-bar::placeholder {
-  background: linear-gradient(90deg,
-      #f6f7f8 0%,
-      #edeef1 20%,
-      #f6f7f8 40%,
-      #f6f7f8 100%);
-  background-size: 200% auto;
-  animation: shimmerSearch 2s linear infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #444;
+  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* .animated-menu-item {
