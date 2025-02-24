@@ -60,39 +60,50 @@ body {
   }
 }
 
-@keyframes placeholderShimmer {
+@keyframes shimmer {
   0% {
-    text-shadow: 0 0 0 #444;
-  }
-
-  50% {
-    text-shadow: 0 0 8px #222;
+    background-position: 100% 0;
   }
 
   100% {
-    text-shadow: 0 0 0 #444;
+    background-position: -100% 0;
   }
 }
 
-/* Apply for various browsers */
+/* For Chrome, Safari */
 .search-bar::-webkit-input-placeholder {
-  color: #444;
-  animation: placeholderShimmer 2s linear infinite;
+  color: transparent;
+  background: linear-gradient(90deg, #bbb, #ddd, #bbb);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  animation: shimmer 2s linear infinite;
 }
 
+/* For Firefox */
 .search-bar::-moz-placeholder {
-  color: #444;
-  animation: placeholderShimmer 2s linear infinite;
+  color: transparent;
+  background: linear-gradient(90deg, #bbb, #ddd, #bbb);
+  background-size: 200% auto;
+  -moz-background-clip: text;
+  animation: shimmer 2s linear infinite;
 }
 
+/* For Internet Explorer 10+ */
 .search-bar:-ms-input-placeholder {
-  color: #444;
-  animation: placeholderShimmer 2s linear infinite;
+  color: transparent;
+  background: linear-gradient(90deg, #bbb, #ddd, #bbb);
+  background-size: 200% auto;
+  -ms-background-clip: text;
+  animation: shimmer 2s linear infinite;
 }
 
+/* Standard syntax */
 .search-bar::placeholder {
-  color: #444;
-  animation: placeholderShimmer 2s linear infinite;
+  color: transparent;
+  background: linear-gradient(90deg, #bbb, #ddd, #bbb);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  animation: shimmer 2s linear infinite;
 }
 
 /* .animated-menu-item {
