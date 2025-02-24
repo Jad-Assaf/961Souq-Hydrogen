@@ -202,7 +202,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                             y: e.clientY,
                           });
                           e.target.style.cursor =
-                            "url('https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cursor.svg?v=1740400490') 16 16, auto";
+                            "url('https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cursor.svg?v=1740400490') 32 32, auto";
                         }}
                         onMouseMove={(e) => {
                           setTooltip({
