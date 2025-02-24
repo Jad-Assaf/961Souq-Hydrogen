@@ -60,7 +60,7 @@ body {
   }
 }
 
-@keyframes shimmer {
+@keyframes placeholderShimmer {
   0% {
     background-position: 100% 0;
   }
@@ -76,7 +76,7 @@ body {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -webkit-background-clip: text;
-  animation: shimmer 2s linear infinite;
+  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* For Firefox */
@@ -85,7 +85,7 @@ body {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -moz-background-clip: text;
-  animation: shimmer 2s linear infinite;
+  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* For Internet Explorer 10+ */
@@ -94,7 +94,7 @@ body {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -ms-background-clip: text;
-  animation: shimmer 2s linear infinite;
+  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* Standard syntax */
@@ -103,7 +103,7 @@ body {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -webkit-background-clip: text;
-  animation: shimmer 2s linear infinite;
+  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* .animated-menu-item {
