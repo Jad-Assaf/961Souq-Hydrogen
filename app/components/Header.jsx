@@ -206,7 +206,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     setOverlayVisible(false);
                   }
                 }
-                // Reset placeholder so the animation can restart
+                // Restart the animation from the beginning.
                 setPlaceholder('Search products');
               };
 
