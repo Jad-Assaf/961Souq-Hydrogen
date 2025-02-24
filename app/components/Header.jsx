@@ -17,6 +17,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const [placeholder, setPlaceholder] = useState('Search products');
   const searchContainerRef = useRef(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const timeoutRef = useRef(null);
+  const blinkIntervalRef = useRef(null);
+
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -73,12 +76,15 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
+    // Only run animation when input is not focused.
     if (isInputFocused) {
-      // If input is focused, do not run the animation.
+      // If focused, clear any timers.
+      clearTimeout(timeoutRef.current);
+      clearInterval(blinkIntervalRef.current);
       return;
     }
+
     // Define the texts to cycle through.
-    // On mobile (width ≤ 1024px), we omit "Press /".
     const texts =
       window.innerWidth > 1024
         ? ['Press /', 'Search products', 'Find items', 'Type something']
@@ -88,57 +94,49 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     let currentText = texts[textIndex];
     let charIndex = 0;
     let deleting = false;
-    let showCursor = true; // for blinking effect
-    let timeoutId;
+    let showCursor = true;
 
-    // Function to toggle the cursor (simulate blinking)
     const blinkCursor = () => {
       showCursor = !showCursor;
-      // Only update display if fully typed
       if (!deleting && charIndex === currentText.length) {
         setPlaceholder(currentText + (showCursor ? '|' : ''));
       }
     };
 
-    // Main update function
     const updatePlaceholder = () => {
-      // If deleting, remove one character at a time
       if (deleting) {
         if (charIndex > 0) {
           charIndex--;
           setPlaceholder(currentText.substring(0, charIndex) + '|');
-          timeoutId = setTimeout(updatePlaceholder, 100);
+          timeoutRef.current = setTimeout(updatePlaceholder, 100);
         } else {
-          // When fully deleted, switch to next text and start typing
           deleting = false;
           textIndex = (textIndex + 1) % texts.length;
           currentText = texts[textIndex];
-          timeoutId = setTimeout(updatePlaceholder, 500);
+          timeoutRef.current = setTimeout(updatePlaceholder, 500);
         }
       } else {
-        // Typing phase: add one character at a time
         if (charIndex < currentText.length) {
           charIndex++;
           setPlaceholder(currentText.substring(0, charIndex) + '|');
-          timeoutId = setTimeout(updatePlaceholder, 100);
+          timeoutRef.current = setTimeout(updatePlaceholder, 100);
         } else {
-          // When fully typed, pause to show the complete text with a blinking cursor
-          // We'll start a separate blinking timer
-          const blinkInterval = setInterval(blinkCursor, 500);
-          // After a pause, start deleting and clear the blinking interval
-          timeoutId = setTimeout(() => {
-            clearInterval(blinkInterval);
+          // Fully typed: start blinking then delete after a pause.
+          blinkIntervalRef.current = setInterval(blinkCursor, 500);
+          timeoutRef.current = setTimeout(() => {
+            clearInterval(blinkIntervalRef.current);
             deleting = true;
-            timeoutId = setTimeout(updatePlaceholder, 500);
+            timeoutRef.current = setTimeout(updatePlaceholder, 500);
           }, 2000);
         }
       }
     };
 
-    // Start the animation (always run on desktop; on mobile you could set a static text)
-    timeoutId = setTimeout(updatePlaceholder, 2000); // Initial delay
-
-    return () => clearTimeout(timeoutId);
+    timeoutRef.current = setTimeout(updatePlaceholder, 2000); // Initial delay
+    return () => {
+      clearTimeout(timeoutRef.current);
+      clearInterval(blinkIntervalRef.current);
+    };
   }, [isInputFocused]);
 
   return (
@@ -191,6 +189,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                   searchContainerRef.current?.classList.add('fixed-search');
                   setOverlayVisible(true);
                 }
+                clearTimeout(timeoutRef.current);
+                clearInterval(blinkIntervalRef.current);
                 setIsInputFocused(true);
                 setSearchResultsVisible(true);
               };
@@ -206,7 +206,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     setOverlayVisible(false);
                   }
                 }
-                // Restart the animation from the beginning.
+                // Reset placeholder so the animation will restart
                 setPlaceholder('Search products');
               };
 
