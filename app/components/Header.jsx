@@ -13,6 +13,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   // Lift the search state to control both search results and overlay visibility
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
+  const [placeholder, setPlaceholder] = useState('Search products');
   const searchContainerRef = useRef(null);
 
   const toggleMobileMenu = () => {
@@ -45,8 +46,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     }
   };
 
-  const [tooltip, setTooltip] = useState({visible: false, x: 0, y: 0});
-
   // Close search if clicking outside the search container
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -70,6 +69,45 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
       document.documentElement.classList.remove('no-scroll');
     }
   }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    const originalText = 'Press /';
+    const defaultText = 'Search products';
+    let currentText = originalText;
+    let deleting = true;
+    let charIndex = originalText.length;
+    let timeoutId;
+
+    const updatePlaceholder = () => {
+      if (deleting) {
+        if (charIndex > 0) {
+          charIndex--;
+          setPlaceholder(currentText.substring(0, charIndex));
+          timeoutId = setTimeout(updatePlaceholder, 100);
+        } else {
+          deleting = false;
+          currentText =
+            currentText === originalText ? defaultText : originalText;
+          timeoutId = setTimeout(updatePlaceholder, 2000); // Pause before typing
+        }
+      } else {
+        if (charIndex < currentText.length) {
+          charIndex++;
+          setPlaceholder(currentText.substring(0, charIndex));
+          timeoutId = setTimeout(updatePlaceholder, 100);
+        } else {
+          deleting = true;
+          timeoutId = setTimeout(updatePlaceholder, 2000); // Pause before deleting
+        }
+      }
+    };
+
+    if (window.innerWidth > 1024) {
+      timeoutId = setTimeout(updatePlaceholder, 2000); // Initial delay before starting
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   return (
     <>
@@ -187,7 +225,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                       <input
                         ref={inputRef}
                         type="text"
-                        placeholder="Search products"
+                        placeholder={placeholder}
                         onChange={(e) => {
                           fetchResults(e);
                           setSearchResultsVisible(true);
@@ -195,26 +233,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
-                        onMouseEnter={(e) => {
-                          setTooltip({
-                            visible: true,
-                            x: e.clientX,
-                            y: e.clientY,
-                          });
-                          e.target.style.cursor =
-                            "url('https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cursor_b748cd13-ac4b-4f4e-894d-3ba58054d4b0.svg?v=1740402217') 16 16, auto";
-                        }}
-                        onMouseMove={(e) => {
-                          setTooltip({
-                            visible: true,
-                            x: e.clientX,
-                            y: e.clientY,
-                          });
-                        }}
-                        onMouseLeave={(e) => {
-                          setTooltip((prev) => ({...prev, visible: false}));
-                          e.target.style.cursor = 'text';
-                        }}
                         className="search-bar"
                       />
                       {inputRef.current?.value && (
