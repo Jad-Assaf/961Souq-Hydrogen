@@ -4,13 +4,15 @@ import {useAside} from '~/components/Aside';
 import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import { trackSearch } from '~/lib/metaPixelEvents'; // Added: Import the trackSearch function
+import { trackSearch } from '~/lib/metaPixelEvents'; // Import the trackSearch function
 
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
+  // Lift the search state to control both search results and overlay visibility
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
+  const [isOverlayVisible, setOverlayVisible] = useState(false);
   const searchContainerRef = useRef(null);
 
   const toggleMobileMenu = () => {
@@ -34,15 +36,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   };
 
   const closeSubmenu = () => {
-    const activeDrawer = document.querySelector(
-      '.mobile-submenu-drawer.active',
-    );
+    const activeDrawer = document.querySelector('.mobile-submenu-drawer.active');
     if (activeDrawer) {
       activeDrawer.classList.remove('active');
       setTimeout(() => setActiveSubmenu(null), 300); // Wait for animation
     }
   };
 
+  // Close search if clicking outside the search container
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -50,10 +51,13 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
         !searchContainerRef.current.contains(event.target)
       ) {
         setSearchResultsVisible(false);
+        setOverlayVisible(false);
+        searchContainerRef.current?.classList.remove('fixed-search');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () =>
+      document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -84,13 +88,12 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 strokeLinejoin="round"
               ></g>
               <g id="SVGRepo_iconCarrier">
-                {' '}
                 <path
                   d="M5 6H12H19M5 12H19M5 18H19"
                   stroke="#2172af"
                   strokeWidth="2"
                   strokeLinecap="round"
-                ></path>{' '}
+                ></path>
               </g>
             </svg>
           </button>
@@ -109,10 +112,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             {({inputRef, fetchResults, goToSearch, fetcher}) => {
               useFocusOnCmdK(inputRef);
 
-              const [isOverlayVisible, setOverlayVisible] = useState(false);
-              const [isSearchResultsVisible, setSearchResultsVisible] =
-                useState(false);
-
               const handleFocus = () => {
                 if (window.innerWidth < 1024) {
                   searchContainerRef.current?.classList.add('fixed-search');
@@ -125,9 +124,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
                   if (!inputValue) {
-                    searchContainerRef.current?.classList.remove(
-                      'fixed-search',
-                    );
+                    searchContainerRef.current?.classList.remove('fixed-search');
                     setOverlayVisible(false);
                   }
                 }
@@ -148,25 +145,23 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
               const handleSearch = () => {
                 if (inputRef.current) {
-                  const rawTerm = inputRef.current.value.trim(); // Added: Get the raw search term
-                  const term = rawTerm.replace(/\s+/g, '-'); // Existing
+                  const rawTerm = inputRef.current.value.trim(); // Get the raw search term
+                  const term = rawTerm.replace(/\s+/g, '-');
                   if (rawTerm) {
-                    trackSearch(rawTerm); // Added: Track the search event
-                    window.location.href = `${SEARCH_ENDPOINT}?q=${term}`; // Existing
+                    trackSearch(rawTerm);
+                    window.location.href = `${SEARCH_ENDPOINT}?q=${term}`;
                   }
                 }
               };
 
-              // Manage scroll-lock when overlay is visible
               useEffect(() => {
                 if (isOverlayVisible) {
                   document.body.style.overflow = 'hidden';
                 } else {
                   document.body.style.overflow = '';
                 }
-
                 return () => {
-                  document.body.style.overflow = ''; // Ensure cleanup
+                  document.body.style.overflow = '';
                 };
               }, [isOverlayVisible]);
 
@@ -202,9 +197,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           onClick={() => {
                             inputRef.current.value = '';
                             setSearchResultsVisible(false);
-                            fetchResults({target: {value: ''}}); // Reset search results
+                            fetchResults({target: {value: ''}});
                           }}
-                          aria-label="Clear search" // Optional: Added aria-label for accessibility
+                          aria-label="Clear search"
                         >
                           <svg
                             fill="#2172af"
@@ -221,7 +216,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                       <button
                         onClick={handleSearch}
                         className="search-bar-submit"
-                        aria-label="Search" // Optional: Added aria-label for accessibility
+                        aria-label="Search"
                       >
                         <SearchIcon />
                       </button>
@@ -283,7 +278,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               prefetch="intent"
               to="/account"
               className="sign-in-link mobile-user-icon"
-              aria-label="Account" // Optional: Added aria-label for accessibility
+              aria-label="Account"
             >
               <Suspense fallback={<UserIcon />}>
                 <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
@@ -291,7 +286,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 </Await>
               </Suspense>
             </NavLink>
-            {/* <SearchToggle /> */}
             <CartToggle cart={cart} />
           </div>
         </div>
@@ -307,15 +301,13 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
       </header>
 
       <>
-        {/* Background overlay */}
         {isMobileMenuOpen && (
           <div
             className="mobile-menu-backdrop"
-            onClick={closeMobileMenu} // Close menu when backdrop is clicked
+            onClick={closeMobileMenu}
           ></div>
         )}
 
-        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="mobile-menu-overlay">
             <button className="mobile-menu-close" onClick={closeMobileMenu}>
@@ -327,7 +319,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 460.775 460.775"
               >
-                <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55 l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path>
+                <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path>
               </svg>
             </button>
             <h3>Menu</h3>
@@ -337,14 +329,11 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               {menu.items.map((item) => (
                 <div key={item.id} className="mobile-menu-item">
                   <button onClick={() => openSubmenu(item.id)}>
-                    {/* Display the image */}
                     {item.imageUrl && (
                       <div
-                        // replaced motion.div with plain div
                         style={{
                           width: '50px',
                           height: '50px',
-                          // inline fade/blur effect (optional)
                           filter: 'blur(0px)',
                           opacity: 1,
                           transition: 'filter 0.3s, opacity 0.3s',
@@ -361,7 +350,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                         />
                       </div>
                     )}
-                    {/* Title */}
                     {item.title}
                     <span className="mobile-menu-arrow">
                       <svg
@@ -441,7 +429,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                       >
                         {subItem.imageUrl && (
                           <div
-                            // replaced motion.div with plain div
                             style={{
                               width: '50px',
                               height: '50px',
@@ -622,7 +609,7 @@ function CartIcon() {
       ></path>
       <path
         className="path3"
-        d="M898.021 228.688C885.162 213.507 865.763 204.8 844.8 204.8H217.954l-5.085-30.506C206.149 133.979 168.871 102.4 128 102.4H76.8c-14.138 0-25.6 11.462-25.6 25.6s11.462 25.6 25.6 25.6H128c15.722 0 31.781 13.603 34.366 29.112l85.566 513.395C254.65 736.421 291.929 768 332.799 768h512c14.139 0 25.6-11.461 25.6-25.6s-11.461-25.6-25.6-25.6h-512c-15.722 0-31.781-13.603-34.366-29.11l-12.63-75.784 510.206-44.366c39.69-3.451 75.907-36.938 82.458-76.234l34.366-206.194c3.448-20.677-1.952-41.243-14.813-56.424zm-35.69 48.006l-34.366 206.194c-2.699 16.186-20.043 32.221-36.39 33.645l-514.214 44.714-50.874-305.246h618.314c5.968 0 10.995 2.054 14.155 5.782 3.157 3.73 4.357 9.024 3.376 14.912z"
+        d="M898.021 228.688C885.162 213.507 865.763 204.8 844.8 204.8H217.954l-5.085-30.506C206.149 133.979 168.871 102.4 128 102.4H76.8c-14.138 0-25.6 11.462-25.6 25.6s11.462 25.6 25.6 25.6H128c15.722 0 31.781 13.603 34.366 29.112l85.566 513.395C254.65 736.421 291.929 768 332.799 768h512c14.139 0 25.6-11.462 25.6-25.6s-11.461-25.6-25.6-25.6h-512c-15.722 0-31.781-13.603-34.366-29.11l-12.63-75.784 510.206-44.366c39.69-3.451 75.907-36.938 82.458-76.234l34.366-206.194c3.448-20.677-1.952-41.243-14.813-56.424zm-35.69 48.006l-34.366 206.194c-2.699 16.186-20.043 32.221-36.39 33.645l-514.214 44.714-50.874-305.246h618.314c5.968 0 10.995 2.054 14.155 5.782 3.157 3.73 4.357 9.024 3.376 14.912z"
       ></path>
     </svg>
   );

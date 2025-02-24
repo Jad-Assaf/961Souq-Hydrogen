@@ -1572,7 +1572,7 @@ li.cart-line .product-price {
 /* Ensure visibility on all devices */
 .clear-search-button {
   position: absolute;
-  right: 10%;
+  right: 15%;
   background: none;
   border: none;
   font-size: 16px;
