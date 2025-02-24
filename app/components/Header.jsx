@@ -185,7 +185,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                   <div ref={searchContainerRef} className="main-search">
                     <div className="search-container">
                       <ReactPlaceholderTyping
-                        placeholders={['Press /', 'Search products']}
+                        placeholders={['Press /', 'Search products', 'Find You Favorite Products']}
                         value={inputValue}
                         onChange={(newValue) => {
                           setInputValue(newValue);
