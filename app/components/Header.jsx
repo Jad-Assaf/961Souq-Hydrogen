@@ -45,6 +45,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     }
   };
 
+  const [tooltip, setTooltip] = useState({visible: false, x: 0, y: 0});
+
   // Close search if clicking outside the search container
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -193,13 +195,48 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
-                        onMouseEnter={(e) =>
-                          (e.target.style.cursor =
-                            "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIzMiI+PHRleHQgeD0iMCIgeT0iMjAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9ImJsYWNrIj5QcmVzcyAvPC90ZXh0Pjwvc3ZnPg==') 16 16, auto")
-                        }
-                        onMouseLeave={(e) => (e.target.style.cursor = 'text')}
+                        onMouseEnter={(e) => {
+                          setTooltip({
+                            visible: true,
+                            x: e.clientX,
+                            y: e.clientY,
+                          });
+                          e.target.style.cursor =
+                            "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSIzMiI+PHRleHQgeD0iMCIgeT0iMjAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9ImJsYWNrIj5QcmVzcyAvPC90ZXh0Pjwvc3ZnPg==') 16 16, auto";
+                        }}
+                        onMouseMove={(e) => {
+                          setTooltip({
+                            visible: true,
+                            x: e.clientX,
+                            y: e.clientY,
+                          });
+                        }}
+                        onMouseLeave={(e) => {
+                          setTooltip((prev) => ({...prev, visible: false}));
+                          e.target.style.cursor = 'text';
+                        }}
                         className="search-bar"
                       />
+                      {tooltip.visible && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            left: tooltip.x,
+                            top: tooltip.y + 20, // 20px below the cursor
+                            background: 'rgba(0, 0, 0, 0.8)',
+                            color: '#fff',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            pointerEvents: 'none',
+                            whiteSpace: 'nowrap',
+                            transform: 'translate(-50%, 0)',
+                            zIndex: 1000,
+                          }}
+                        >
+                          Press /
+                        </div>
+                      )}
                       {inputRef.current?.value && (
                         <button
                           className="clear-search-button"

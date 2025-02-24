@@ -1424,11 +1424,11 @@ button.reset:hover:not(:has(> *)) {
   margin-right: 0.75rem;
 }
 
-li.cart-line div{
+li.cart-line div {
   width: 65%;
 }
 
-aside p{
+aside p {
   font-size: 14px;
 }
 
@@ -1572,7 +1572,7 @@ li.cart-line .product-price {
 /* Ensure visibility on all devices */
 .clear-search-button {
   position: absolute;
-  right: 15%;
+  right: 10%;
   background: none;
   border: none;
   font-size: 16px;
@@ -1628,6 +1628,10 @@ input.search-bar::-webkit-clear-button {
   .clear-search-button {
     display: block;
     /* Force visibility */
+  }
+
+  .clear-search-button {
+    right: 15% !important;
   }
 }
 
