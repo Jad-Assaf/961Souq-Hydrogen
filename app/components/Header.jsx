@@ -16,6 +16,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [placeholder, setPlaceholder] = useState('Search products');
   const searchContainerRef = useRef(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -72,6 +73,10 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
+    if (isInputFocused) {
+      // If input is focused, do not run the animation.
+      return;
+    }
     // Define the texts to cycle through.
     // On mobile (width ≤ 1024px), we omit "Press /".
     const texts =
@@ -134,7 +139,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     timeoutId = setTimeout(updatePlaceholder, 2000); // Initial delay
 
     return () => clearTimeout(timeoutId);
-  }, []);
+  }, [isInputFocused]);
 
   return (
     <>
@@ -186,12 +191,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                   searchContainerRef.current?.classList.add('fixed-search');
                   setOverlayVisible(true);
                 }
+                setIsInputFocused(true);
                 setSearchResultsVisible(true);
               };
 
               const handleBlur = () => {
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
+                  setIsInputFocused(false);
                   if (!inputValue) {
                     searchContainerRef.current?.classList.remove(
                       'fixed-search',
@@ -252,7 +259,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                       <input
                         ref={inputRef}
                         type="text"
-                        placeholder={placeholder}
+                        placeholder={isInputFocused ? '' : placeholder}
                         onChange={(e) => {
                           fetchResults(e);
                           setSearchResultsVisible(true);
