@@ -196,9 +196,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               };
 
               const handleBlur = () => {
+                setIsInputFocused(false);
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
-                  setIsInputFocused(false);
                   if (!inputValue) {
                     searchContainerRef.current?.classList.remove(
                       'fixed-search',
@@ -206,6 +206,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     setOverlayVisible(false);
                   }
                 }
+                // Reset placeholder so the animation can restart
+                setPlaceholder('Search products');
               };
 
               const handleCloseSearch = () => {
