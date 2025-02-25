@@ -2226,6 +2226,12 @@ button.layout-buttons.first-btn svg {
 * routes/products.$handle.tsx
 * --------------------------------------------------
 */
+@media (max-width: 1024px) {
+  .product {
+    margin: 0 auto !important;
+  }
+}
+
 .product {
   display: flex;
   flex-direction: column;

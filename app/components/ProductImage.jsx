@@ -247,6 +247,8 @@ export function ProductImages({media, selectedVariantImage}) {
         {selectedMedia && (
           <div
             style={{
+              display: 'flex',
+              justifyContent: 'center',
               filter: isImageLoaded ? 'blur(0px)' : 'blur(10px)',
               transition: 'filter 0.3s ease',
             }}
