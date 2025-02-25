@@ -237,6 +237,7 @@ export async function loader(args) {
     'electric-screwdrivers',
     'car-accessories',
     'fitness-bands',
+    'garmin-smart-watch',
     'samsung-watches',
     'apple-watch',
     'action-cameras',
@@ -611,6 +612,9 @@ export default function Homepage() {
       <CollectionCircles collections={fitnessMenu} />
       {topProducts['apple-watch'] && (
         <TopProductSections collection={topProducts['apple-watch']} />
+      )}
+      {topProducts['garmin-smart-watch'] && (
+        <TopProductSections collection={topProducts['garmin-smart-watch']} />
       )}
       {topProducts['samsung-watches'] && (
         <TopProductSections collection={topProducts['samsung-watches']} />
