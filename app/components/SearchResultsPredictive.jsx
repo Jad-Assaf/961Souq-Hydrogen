@@ -179,14 +179,8 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
       <ul>
         {products.map((product) => {
           const productUrl = `/products/${encodeURIComponent(product.handle)}`;
-          const image = product?.variants?.nodes?.[0].image;
-          const priceStr = product?.variants?.nodes?.[0]?.price;
-          // Remove non-numeric characters (e.g., a leading "$")
-          const cleanPriceStr = priceStr
-            ? priceStr.replace(/[^0-9.]/g, '')
-            : '';
-          const priceValue = cleanPriceStr ? parseFloat(cleanPriceStr) : 0;
 
+          const image = product?.variants?.nodes?.[0].image;
           return (
             <li className="predictive-search-result-item" key={product.id}>
               <Link to={productUrl} onClick={closeSearch}>
@@ -211,11 +205,11 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                     </p>
                   </div>
                   <small className="search-result-price">
-                    {!priceStr || priceValue === 0 ? (
+                    {parseFloat(product?.variants?.nodes?.[0].price) === 0.00 ? (
                       'Call for Price!'
                     ) : (
                       <>
-                        <Money data={priceStr} />
+                        <Money data={product.variants.nodes[0].price} />
                         {product.variants.nodes[0].compareAtPrice && (
                           <span className="search-result-compare-price">
                             <Money
