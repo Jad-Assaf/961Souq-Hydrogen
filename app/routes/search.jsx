@@ -112,7 +112,7 @@ export async function loader({request, context}) {
 
   // Price range & text search
   const rawTerm = searchParams.get('q') || '';
-  const normalizedTerm = rawTerm.replace(/-/g, ' ');
+  const normalizedTerm = rawTerm;
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
