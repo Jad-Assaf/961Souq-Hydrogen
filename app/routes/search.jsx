@@ -951,7 +951,7 @@ async function predictiveSearch({request, context, usePrefix}) {
   const url = new URL(request.url);
   const rawTerm = String(url.searchParams.get('q') || '').trim();
 
-  const normalizedTerm = rawTerm.replace(/-/g, ' ');
+  const normalizedTerm = rawTerm;
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
@@ -973,7 +973,7 @@ async function predictiveSearch({request, context, usePrefix}) {
     // then OR them together
     const orSynonyms = synonyms.map((syn) => {
       const termWithWildcard = usePrefix ? `${syn}*` : `*${syn}*`;
-      return `(variants.sku:${termWithWildcard} OR title:${termWithWildcard} OR description:${termWithWildcard} OR product_type:${termWithWildcard} OR tag:${termWithWildcard})`;
+      return `(title:${termWithWildcard} OR variants.sku:${termWithWildcard} OR description:${termWithWildcard} OR product_type:${termWithWildcard} OR tag:${termWithWildcard})`;
     });
     // Wrap this single word's synonyms in parentheses and join with OR
     return `(${orSynonyms.join(' OR ')})`;
