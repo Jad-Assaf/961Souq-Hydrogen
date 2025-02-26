@@ -16,25 +16,24 @@ export function SearchResultsPredictive({children}) {
   const aside = useAside();
   const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
 
-  
   /*
-  * Utility that resets the search input
-  */
- function resetInput() {
-   if (inputRef.current) {
-     inputRef.current.blur();
-     inputRef.current.value = '';
+   * Utility that resets the search input
+   */
+  function resetInput() {
+    if (inputRef.current) {
+      inputRef.current.blur();
+      inputRef.current.value = '';
     }
   }
-  
+
   /**
    * Utility that resets the search input and closes the search aside
-  */
- function closeSearch() {
-   resetInput();
-   aside.close();
+   */
+  function closeSearch() {
+    resetInput();
+    aside.close();
   }
-  
+
   return children({
     items,
     closeSearch,
@@ -193,20 +192,30 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                     height={50}
                   />
                 )}
-                <div className='search-result-txt'>
+                <div className="search-result-txt">
                   <div className="search-result-titDesc">
-                    <p className='search-result-title'>{truncateText(product.title, 75)}</p>
-                    <p className='search-result-description'>{truncateText(product.description, 100)}</p>
-                    <p className='search-result-description'>SKU: {product.variants.nodes[0].sku}</p>
+                    <p className="search-result-title">
+                      {truncateText(product.title, 75)}
+                    </p>
+                    <p className="search-result-description">
+                      {truncateText(product.description, 100)}
+                    </p>
+                    <p className="search-result-description">
+                      SKU: {product.variants.nodes[0].sku}
+                    </p>
                   </div>
-                  <small className='search-result-price'>
-                    {product?.variants?.nodes?.[0].price && (
+                  <small className="search-result-price">
+                    {parseFloat(product?.variants?.nodes?.[0].price) === 0 ? (
+                      'Call for Price!'
+                    ) : (
                       <>
                         <Money data={product.variants.nodes[0].price} />
                         {product.variants.nodes[0].compareAtPrice && (
-                            <span className="search-result-compare-price">
-                              <Money data={product.variants.nodes[0].compareAtPrice} />
-                            </span>
+                          <span className="search-result-compare-price">
+                            <Money
+                              data={product.variants.nodes[0].compareAtPrice}
+                            />
+                          </span>
                         )}
                       </>
                     )}
@@ -251,7 +260,7 @@ function SearchResultsPredictiveEmpty({term}) {
   }
 
   return (
-    <p className='no-results'>
+    <p className="no-results">
       No results found for <q>{term.current}</q>
     </p>
   );
