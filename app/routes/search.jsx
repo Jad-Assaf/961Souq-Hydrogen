@@ -133,7 +133,7 @@ export async function loader({request, context}) {
   let fieldSpecificTerms = terms
     .map(
       (word) =>
-        `(title:${word} OR product_type:${word} OR description:${word} OR variants.sku:${word})`,
+        `(title:${word} OR variants.sku:${word} OR description:${word} OR product_type:${word} OR tag:${word})`,
     )
     .join(' OR ');
 
