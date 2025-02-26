@@ -1,6 +1,10 @@
 {
-    "WH-1000XM5": [
-        "WH-1000XM5",
+    "1000XM4": [
+        "1000XM4",
+        "XM4"
+    ],
+    "1000XM5": [
+        "1000XM5",
         "XM5"
     ],
     "samsung watch7": [
@@ -863,7 +867,6 @@
         "powdr",
         "powre"
     ],
-    
     "cable": [
         "cablr",
         "vable",
