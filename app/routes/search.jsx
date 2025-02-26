@@ -7,6 +7,9 @@ import {trackSearch} from '~/lib/metaPixelEvents';
 import '../styles/SearchPage.css';
 import customDictionary from '~/lib/customDictionary.json';
 
+/**
+ * @type {import('@remix-run/react').MetaFunction}
+ */
 export const meta = () => {
   return [{title: `961Souq | Search`}];
 };
@@ -79,7 +82,7 @@ export async function loader({request, context}) {
   const after = searchParams.get('after') || null;
   const before = searchParams.get('before') || null;
 
-  // Build filters
+  // Filter building
   const shopifyKeyMap = {
     vendor: 'vendor',
     productType: 'product_type',
@@ -113,7 +116,7 @@ export async function loader({request, context}) {
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
-  // Expand synonyms
+  // Expand synonyms for normal search
   const baseTerms = normalizedTerm
     .split(/\s+/)
     .map((w) => w.trim())
@@ -126,13 +129,20 @@ export async function loader({request, context}) {
     usePrefix ? `${word}*` : `*${word}*`,
   );
 
-  // Field-specific terms
+  // Field-specific (title by default)
   let fieldSpecificTerms = terms
     .map(
       (word) =>
         `(title:${word} OR product_type:${word} OR description:${word} OR variants.sku:${word})`,
     )
     .join(' OR ');
+
+  /*
+  // If you want multiple fields:
+  // fieldSpecificTerms = terms
+  //   .map((w) => `(title:${w} OR description:${w} OR variants.sku:${w})`)
+  //   .join(' AND ');
+  */
 
   let filterQuery = fieldSpecificTerms;
   if (filterQueryParts.length > 0) {
@@ -145,9 +155,19 @@ export async function loader({request, context}) {
 
   console.log('Filter Query:', filterQuery);
 
-  // Force BEST_SELLING sort:
-  const sortKey = 'BEST_SELLING';
-  const reverse = false;
+  // Sorting
+  const sortKeyMapping = {
+    featured: 'RELEVANCE',
+    'price-low-high': 'PRICE',
+    'price-high-low': 'PRICE',
+    'best-selling': 'BEST_SELLING',
+    newest: 'CREATED_AT',
+  };
+  const reverseMapping = {
+    'price-high-low': true,
+  };
+  const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
+  const reverse = reverseMapping[searchParams.get('sort')] || false;
 
   // Perform search
   const result = await regularSearch({
@@ -163,7 +183,7 @@ export async function loader({request, context}) {
     return {term: '', result: null, error: error.message};
   });
 
-  // Vendors & productTypes
+  // Vendors & productTypes for filters
   const filteredVendors = [
     ...new Set(result?.result?.products?.edges.map(({node}) => node.vendor)),
   ].sort();
@@ -236,10 +256,13 @@ export default function SearchPage() {
     navigate(`/search?${params.toString()}`);
   };
 
-  // (Optional) If you previously had a "Sort by" dropdown, you can remove it entirely or disable it:
-  // const handleSortChange = (e) => {
-  //   // In the updated version, we ignore user sorting because we force BEST_SELLING.
-  // };
+  const handleSortChange = (e) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('sort', e.target.value);
+    params.delete('after');
+    params.delete('before');
+    navigate(`/search?${params.toString()}`);
+  };
 
   const applyPriceFilter = () => {
     const params = new URLSearchParams(searchParams);
@@ -431,8 +454,7 @@ export default function SearchPage() {
 
         {/* Main Search Results */}
         <div className="search-results">
-          {/* Example: We removed the "Sort by" UI, because we force BEST_SELLING */}
-          {/*
+          {/* Sorting */}
           <div>
             <label htmlFor="sort-select">Sort by:</label>
             <select
@@ -447,7 +469,8 @@ export default function SearchPage() {
               <option value="newest">Newest</option>
             </select>
           </div>
-          */}
+
+          {/* Product Grid */}
           <div className="search-results-grid">
             {edges.map(({node: product}, idx) => (
               <ProductItem product={product} index={idx} key={product.id} />
@@ -795,7 +818,7 @@ async function regularSearch({
 }
 
 /* ------------------------------------------------------------------
-   PREDICTIVE SEARCH 
+   PREDICTIVE SEARCH (Important: OR synonyms within each word, AND across words)
 ------------------------------------------------------------------- */
 const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
   fragment PredictiveArticle on Article {
@@ -917,6 +940,12 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
   ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
 `;
 
+/**
+ * For each typed word:
+ *   1) Expand synonyms => [syn1, syn2, ...]
+ *   2) OR them all together for that single word
+ * Then AND across multiple typed words.
+ */
 async function predictiveSearch({request, context, usePrefix}) {
   const {storefront} = context;
   const url = new URL(request.url);
@@ -930,22 +959,31 @@ async function predictiveSearch({request, context, usePrefix}) {
     return {type, term: '', result: getEmptyPredictiveSearchResult()};
   }
 
+  // Split the input into separate words
   const typedWords = normalizedTerm
     .split(/\s+/)
     .map((w) => w.trim())
     .filter(Boolean);
 
+  // For each typed word, build an OR group of synonyms
   const wordGroups = typedWords.map((baseWord) => {
+    // Expand synonyms for THIS typed word
     const synonyms = expandSearchTerms([baseWord]);
+    // For each synonym, build the triple check (variants.sku / title / description)
+    // then OR them together
     const orSynonyms = synonyms.map((syn) => {
       const termWithWildcard = usePrefix ? `${syn}*` : `*${syn}*`;
-      return `(variants.sku:${termWithWildcard} OR title:${termWithWildcard} OR description:${termWithWildcard} OR product_type:${termWithWildcard} OR tag:${termWithWildcard})`;
+      return `(variants.sku:${termWithWildcard} OR title:${termWithWildcard} OR tag:${termWithWildcard})`;
     });
+    // Wrap this single word's synonyms in parentheses and join with OR
     return `(${orSynonyms.join(' OR ')})`;
   });
 
+  // Now AND across multiple typed words
+  // e.g. if user typed "horsepower car" => (all synonyms for "horsepower") AND (all synonyms for "car")
   const queryTerm = wordGroups.join(' AND ');
 
+  // Query the Shopify predictiveSearch API
   const {predictiveSearch: items, errors} = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
