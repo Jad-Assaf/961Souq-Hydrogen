@@ -1405,7 +1405,7 @@ button.reset:hover:not(:has(> *)) {
   }
 
   .search-result-price {
-    color: #1c1c1c;
+    color: #ff4f4f;
   }
 }
 
