@@ -112,7 +112,7 @@ export async function loader({request, context}) {
 
   // Price range & text search
   const rawTerm = searchParams.get('q') || '';
-  const normalizedTerm = rawTerm;
+  const normalizedTerm = rawTerm.replace(/-/g, ' ');
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
 
@@ -951,7 +951,7 @@ async function predictiveSearch({request, context, usePrefix}) {
   const url = new URL(request.url);
   const rawTerm = String(url.searchParams.get('q') || '').trim();
 
-  const normalizedTerm = rawTerm;
+  const normalizedTerm = rawTerm.replace(/-/g, ' ');
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
 
