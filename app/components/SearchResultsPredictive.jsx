@@ -179,8 +179,9 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
       <ul>
         {products.map((product) => {
           const productUrl = `/products/${encodeURIComponent(product.handle)}`;
+          const variant = product?.variants?.nodes?.[0] || {};
+          const image = variant.image;
 
-          const image = product?.variants?.nodes?.[0].image;
           return (
             <li className="predictive-search-result-item" key={product.id}>
               <Link to={productUrl} onClick={closeSearch}>
@@ -201,20 +202,18 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                       {truncateText(product.description, 100)}
                     </p>
                     <p className="search-result-description">
-                      SKU: {product.variants.nodes[0].sku}
+                      SKU: {variant.sku}
                     </p>
                   </div>
                   <small className="search-result-price">
-                    {parseFloat(product?.variants?.nodes?.[0].price) === 0.00 ? (
+                    {variant.price && Number(variant.price.amount) === 0 ? (
                       'Call for Price!'
                     ) : (
                       <>
-                        <Money data={product.variants.nodes[0].price} />
-                        {product.variants.nodes[0].compareAtPrice && (
+                        <Money data={variant.price} />
+                        {variant.compareAtPrice && (
                           <span className="search-result-compare-price">
-                            <Money
-                              data={product.variants.nodes[0].compareAtPrice}
-                            />
+                            <Money data={variant.compareAtPrice} />
                           </span>
                         )}
                       </>
