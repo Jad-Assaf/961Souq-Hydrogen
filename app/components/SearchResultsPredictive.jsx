@@ -180,10 +180,12 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
         {products.map((product) => {
           const productUrl = `/products/${encodeURIComponent(product.handle)}`;
           const image = product?.variants?.nodes?.[0].image;
-          // Get the price string from the product variant
           const priceStr = product?.variants?.nodes?.[0]?.price;
-          // Parse the price; if no price is provided, default to 0
-          const priceValue = priceStr ? parseFloat(priceStr) : 0;
+          // Remove non-numeric characters (e.g., a leading "$")
+          const cleanPriceStr = priceStr
+            ? priceStr.replace(/[^0-9.]/g, '')
+            : '';
+          const priceValue = cleanPriceStr ? parseFloat(cleanPriceStr) : 0;
 
           return (
             <li className="predictive-search-result-item" key={product.id}>
