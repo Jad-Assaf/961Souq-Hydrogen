@@ -169,7 +169,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             </svg>
           </button>
 
-          <NavLink reloadDocument prefetch="intent" to="/" className="logo-link" end>
+          <NavLink prefetch="intent" to="/" className="logo-link" end>
             <img
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912"
               alt={`${shop.name} Logo`}
