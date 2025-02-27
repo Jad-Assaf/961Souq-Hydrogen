@@ -201,24 +201,23 @@ export function ProductImages({ media, selectedVariantImage }) {
     (selectedMedia.__typename === 'ExternalVideo' ||
       selectedMedia.__typename === 'Video');
 
-  // Close lightbox on backdrop click
+  // Close lightbox when clicking outside the lightbox container
   useEffect(() => {
     if (!isLightboxOpen) return;
 
-    // Adjust the selector if the overlay element has a different class name.
-    const overlay = document.querySelector('.yarl__outer');
-    if (!overlay) return;
+    // Query for the lightbox container that holds the carousel and toolbar.
+    const container = document.querySelector('.yarl__container.yarl__flex_center');
+    if (!container) return;
 
-    const handleBackdropClick = (e) => {
-      // Only close if the click is directly on the overlay
-      if (e.target === overlay) {
+    const handleClickOutside = (e) => {
+      if (!container.contains(e.target)) {
         setIsLightboxOpen(false);
       }
     };
 
-    overlay.addEventListener('click', handleBackdropClick);
+    document.addEventListener('click', handleClickOutside);
     return () => {
-      overlay.removeEventListener('click', handleBackdropClick);
+      document.removeEventListener('click', handleClickOutside);
     };
   }, [isLightboxOpen]);
 
