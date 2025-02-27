@@ -137,14 +137,14 @@ export function ProductImages({ media, selectedVariantImage }) {
 
   const doPrevImage = () => {
     setSelectedIndex((prevIndex) =>
-      prevIndex === 0 ? media.length - 1 : prevIndex - 1,
+      prevIndex === 0 ? media.length - 1 : prevIndex - 1
     );
     setIsVariantSelected(false);
   };
 
   const doNextImage = () => {
     setSelectedIndex((prevIndex) =>
-      prevIndex === media.length - 1 ? 0 : prevIndex + 1,
+      prevIndex === media.length - 1 ? 0 : prevIndex + 1
     );
     setIsVariantSelected(false);
   };
@@ -200,26 +200,6 @@ export function ProductImages({ media, selectedVariantImage }) {
     selectedMedia &&
     (selectedMedia.__typename === 'ExternalVideo' ||
       selectedMedia.__typename === 'Video');
-
-  // Close lightbox when clicking outside the lightbox container
-  useEffect(() => {
-    if (!isLightboxOpen) return;
-
-    // Query for the lightbox container that holds the carousel and toolbar.
-    const container = document.querySelector('.yarl__container.yarl__flex_center');
-    if (!container) return;
-
-    const handleClickOutside = (e) => {
-      if (!container.contains(e.target)) {
-        setIsLightboxOpen(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isLightboxOpen]);
 
   return (
     <div className="product-images-container">
@@ -361,6 +341,9 @@ export function ProductImages({ media, selectedVariantImage }) {
           slides={lightboxSlides}
           onIndexChange={setSelectedIndex}
           plugins={[Fullscreen]}
+          controller={{
+            closeOnBackdropClick: true,
+          }}
         />
       )}
     </div>
