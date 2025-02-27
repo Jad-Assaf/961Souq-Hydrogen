@@ -1,9 +1,9 @@
-import {useEffect, useState, useRef} from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import 'yet-another-react-lightbox/styles.css';
 import '../styles/ProductImage.css';
-import {useSwipeable} from 'react-swipeable';
+import { useSwipeable } from 'react-swipeable';
 
 const LeftArrowIcon = () => (
   <svg
@@ -33,7 +33,7 @@ const RightArrowIcon = () => (
   </svg>
 );
 
-export function ProductImages({media, selectedVariantImage}) {
+export function ProductImages({ media, selectedVariantImage }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -52,7 +52,7 @@ export function ProductImages({media, selectedVariantImage}) {
 
   // Preload ALL images on mount (if they are MediaImage type)
   useEffect(() => {
-    media.forEach(({node}) => {
+    media.forEach(({ node }) => {
       if (node.__typename === 'MediaImage' && node.image?.url) {
         preloadImage(node.image.url);
       }
@@ -78,7 +78,7 @@ export function ProductImages({media, selectedVariantImage}) {
   // Update selected index if variant image is selected
   useEffect(() => {
     if (selectedVariantImage) {
-      const variantImageIndex = media.findIndex(({node}) => {
+      const variantImageIndex = media.findIndex(({ node }) => {
         return (
           node.__typename === 'MediaImage' &&
           node.image?.url === selectedVariantImage.url
@@ -178,21 +178,21 @@ export function ProductImages({media, selectedVariantImage}) {
       thumbSrc = 'https://img.icons8.com/3d-fluency/94/3d-rotate.png';
       isVideo = true;
     }
-    return {thumbSrc, altText, isVideo};
+    return { thumbSrc, altText, isVideo };
   };
 
-  const lightboxSlides = media.map(({node}) => {
+  const lightboxSlides = media.map(({ node }) => {
     if (node.__typename === 'MediaImage') {
-      return {src: node.image.url};
+      return { src: node.image.url };
     } else if (node.__typename === 'ExternalVideo') {
-      return {src: node.embedUrl};
+      return { src: node.embedUrl };
     } else if (node.__typename === 'Video') {
       const vidSource = node.sources?.[0]?.url;
-      return {src: vidSource || ''};
+      return { src: vidSource || '' };
     } else if (node.__typename === 'Model3d') {
-      return {src: ''};
+      return { src: '' };
     }
-    return {src: ''};
+    return { src: '' };
   });
 
   const selectedMedia = media[selectedIndex]?.node;
@@ -201,16 +201,37 @@ export function ProductImages({media, selectedVariantImage}) {
     (selectedMedia.__typename === 'ExternalVideo' ||
       selectedMedia.__typename === 'Video');
 
+  // Close lightbox on backdrop click
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+
+    // Adjust the selector if the overlay element has a different class name.
+    const overlay = document.querySelector('.yarl__outer');
+    if (!overlay) return;
+
+    const handleBackdropClick = (e) => {
+      // Only close if the click is directly on the overlay
+      if (e.target === overlay) {
+        setIsLightboxOpen(false);
+      }
+    };
+
+    overlay.addEventListener('click', handleBackdropClick);
+    return () => {
+      overlay.removeEventListener('click', handleBackdropClick);
+    };
+  }, [isLightboxOpen]);
+
   return (
     <div className="product-images-container">
       {/* Thumbnails */}
       <div className="thumbContainer">
         <div className="thumbnails">
-          {media.map(({node}, index) => {
-            const {thumbSrc, altText, isVideo} = getThumbnailInfo(node);
+          {media.map(({ node }, index) => {
+            const { thumbSrc, altText, isVideo } = getThumbnailInfo(node);
             const isActive = index === selectedIndex;
             const thumbnailStyle = isVideo
-              ? {background: '#232323', padding: '14px'}
+              ? { background: '#232323', padding: '14px' }
               : {};
             return (
               <div
@@ -241,7 +262,7 @@ export function ProductImages({media, selectedVariantImage}) {
       <div
         className="main-image"
         onClick={() => setIsLightboxOpen(true)}
-        style={{cursor: 'grab'}}
+        style={{ cursor: 'grab' }}
         {...swipeHandlers}
       >
         {selectedMedia && (
@@ -296,7 +317,7 @@ export function ProductImages({media, selectedVariantImage}) {
               )}
 
             {selectedMedia.__typename === 'Model3d' && (
-              <div style={{textAlign: 'center'}}>
+              <div style={{ textAlign: 'center' }}>
                 <p>3D Model preview not implemented</p>
               </div>
             )}
