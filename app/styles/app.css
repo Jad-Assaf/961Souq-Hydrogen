@@ -2228,7 +2228,7 @@ button.layout-buttons.first-btn svg {
 */
 @media (max-width: 1024px) {
   .product {
-    margin: 2vw auto !important;
+    margin: 30px auto !important;
   }
 }
 
