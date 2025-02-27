@@ -72,6 +72,10 @@ Crawl-delay: 1
  */
 function generalDisallowRules({shopId, sitemapUrl}) {
   return `Disallow: /admin
+Disallow: /facebookConversions
+Disallow: /collections/*/*.json
+Disallow: /collections?direction=*
+Disallow: /cdn/fonts
 Disallow: /cart
 Disallow: /orders
 Disallow: /checkouts/
