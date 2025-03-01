@@ -1,7 +1,7 @@
-import React, {useState, useEffect, useMemo} from 'react';
-import {Image} from '@shopify/hydrogen';
+import React, { useState, useEffect } from 'react';
+import { Image } from '@shopify/hydrogen';
 
-export function BannerSlideshow({banners, interval = 10000}) {
+export function BannerSlideshow({ banners, interval = 10000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [animationStyle, setAnimationStyle] = useState({});
@@ -70,87 +70,83 @@ export function BannerSlideshow({banners, interval = 10000}) {
     }
   };
 
-  const renderedDesktopBanners = useMemo(() => {
-    return banners.map((banner, index) => (
-      <div
-        key={index}
-        className={`banner-slide ${
-          index === currentIndex ? 'active' : 'inactive'
-        }`}
-        style={{
-          ...styles.bannerSlide,
-          ...animationStyle,
-          opacity: index === currentIndex ? 1 : 0,
-          transform:
-            index === currentIndex
-              ? 'translateX(0)'
-              : index > currentIndex
-              ? 'translateX(50px)'
-              : 'translateX(-50px)',
-        }}
+  const renderedDesktopBanners = banners.map((banner, index) => (
+    <div
+      key={index}
+      className={`banner-slide ${
+        index === currentIndex ? 'active' : 'inactive'
+      }`}
+      style={{
+        ...styles.bannerSlide,
+        ...animationStyle,
+        opacity: index === currentIndex ? 1 : 0,
+        transform:
+          index === currentIndex
+            ? 'translateX(0)'
+            : index > currentIndex
+            ? 'translateX(50px)'
+            : 'translateX(-50px)',
+      }}
+    >
+      <a
+        href={banner.link}
+        target="_self"
+        rel="noopener noreferrer"
+        style={styles.link}
       >
-        <a
-          href={banner.link}
-          target="_self"
-          rel="noopener noreferrer"
-          style={styles.link}
-        >
-          <img
-            src={banner.desktopImageUrl}
-            srcSet={`${banner.desktopImageUrl}?width=300&quality=85 300w,
+        <img
+          src={banner.desktopImageUrl}
+          srcSet={`${banner.desktopImageUrl}?width=300&quality=85 300w,
                    ${banner.desktopImageUrl}?width=600&quality=85 600w,
                    ${banner.desktopImageUrl}?width=1200&quality=85 1200w`}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            alt={`Banner ${index + 1}`}
-            style={styles.bannerImage}
-            loading="eager"
-            decoding="sync"
-          />
-        </a>
-      </div>
-    ));
-  }, [banners, currentIndex, animationStyle]);
+          sizes="(max-width: 768px) 100vw, 50vw"
+          alt={`Banner ${index + 1}`}
+          style={styles.bannerImage}
+          loading="eager"
+          decoding="sync"
+        />
+      </a>
+    </div>
+  ));
 
-  const renderedMobileBanners = useMemo(() => {
-    return banners.map((banner, index) => (
-      <div
-        key={index}
-        className={`banner-slide ${
-          index === currentIndex ? 'active' : 'inactive'
-        }`}
-        style={{
-          ...styles.bannerSlide,
-          ...animationStyle,
-          opacity: index === currentIndex ? 1 : 0,
-          transform:
-            index === currentIndex
-              ? 'translateX(0)'
-              : index > currentIndex
-              ? 'translateX(50px)'
-              : 'translateX(-50px)',
-        }}
+  const renderedMobileBanners = banners.map((banner, index) => (
+    <div
+      key={index}
+      className={`banner-slide ${
+        index === currentIndex ? 'active' : 'inactive'
+      }`}
+      style={{
+        ...styles.bannerSlide,
+        ...animationStyle,
+        opacity: index === currentIndex ? 1 : 0,
+        transform:
+          index === currentIndex
+            ? 'translateX(0)'
+            : index > currentIndex
+            ? 'translateX(50px)'
+            : 'translateX(-50px)',
+      }}
+    >
+      <a
+        href={banner.link}
+        target="_self"
+        rel="noopener noreferrer"
+        style={styles.link}
       >
-        <a
-          href={banner.link}
-          target="_self"
-          rel="noopener noreferrer"
-          style={styles.link}
-        >
-          <img
-            src={banner.mobileImageUrl}
-            srcSet={`${banner.mobileImageUrl}?width=300&quality=85 300w,
+        <img
+          src={banner.mobileImageUrl}
+          srcSet={`${banner.mobileImageUrl}?width=300&quality=85 300w,
                    ${banner.mobileImageUrl}?width=600&quality=85 600w,
                    ${banner.mobileImageUrl}?width=1200&quality=85 1200w`}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            alt={`Banner ${index + 1}`}
-            style={styles.bannerImage}
-            loading="eager"
-            decoding="sync"
-          />
-        </a>
-      </div>
-    ));
-  }, [banners, currentIndex, animationStyle]);
+          sizes="(max-width: 768px) 100vw, 50vw"
+          alt={`Banner ${index + 1}`}
+          style={styles.bannerImage}
+          loading="eager"
+          decoding="sync"
+        />
+      </a>
+    </div>
+  ));
 
   return (
     <div
@@ -220,7 +216,6 @@ const styles = {
     height: '100%',
     objectFit: 'contain',
     maxWidth: '1500px',
-    margin: 'auto',
     borderRadius: '20px',
   },
   link: {
