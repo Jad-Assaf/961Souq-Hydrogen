@@ -22,14 +22,13 @@ import type {
 import clsx from "clsx";
 import type { SyntheticEvent } from "react";
 import React, { useState, useEffect, useCallback } from "react";
-import Button from "../components/button";
-import { Checkbox } from "../components/checkbox";
-import { IconCaretDown, IconCaretRight } from "../components/icons";
+import Button from "./button";
+import { Checkbox } from "./checkbox";
+import { IconCaretDown, IconCaretRight } from "./icons";
 import { FILTER_URL_PREFIX } from "../lib/const";
 import type { AppliedFilter, SortParam } from "../lib/filter";
 import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
 import { Drawer, useDrawer } from "./drawer";
-import { IconFourGrid, IconOneGrid, IconThreeGrid, IconTwoGrid } from "./icon";
 import { Input } from "./input";
 
 type DrawerFilterProps = {

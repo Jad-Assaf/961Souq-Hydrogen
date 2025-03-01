@@ -16,11 +16,11 @@ import {
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {DrawerFilter} from '~/modules/drawer-filter';
+import {DrawerFilter} from '~/components/drawer-filter';
 import {FILTER_URL_PREFIX} from '~/lib/const';
 import React, {useEffect, useRef, useState} from 'react';
 import {useMediaQuery} from 'react-responsive';
-import {FiltersDrawer} from '../modules/drawer-filter';
+import {FiltersDrawer} from '../components/drawer-filter';
 import {getAppliedFilterLink} from '../lib/filter';
 import {AddToCartButton} from '../components/AddToCartButton';
 import {useAside} from '~/components/Aside';
