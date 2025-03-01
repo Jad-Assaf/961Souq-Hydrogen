@@ -3,7 +3,6 @@ import {useLoaderData, Link} from '@remix-run/react';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import { AnimatedImage } from '~/components/AnimatedImage';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -96,7 +95,7 @@ function ProductItem({ product, loading }) {
       to={variantUrl}
     >
       {product.featuredImage && (
-        <AnimatedImage
+        <Image
           src={product.featuredImage.url} // Ensure src is passed correctly
           alt={product.featuredImage.altText || product.title}
           loading={loading}

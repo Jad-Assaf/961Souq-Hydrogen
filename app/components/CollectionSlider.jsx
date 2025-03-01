@@ -1,5 +1,4 @@
 import {Link} from '@remix-run/react';
-import {Image} from '@shopify/hydrogen-react';
 import React from 'react';
 import '../styles/HomeSlider.css';
 

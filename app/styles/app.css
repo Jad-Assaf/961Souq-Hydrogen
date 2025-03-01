@@ -61,23 +61,12 @@ body {
   }
 }
 
-@keyframes placeholderShimmer {
-  0% {
-    background-position: 100% 0;
-  }
-
-  100% {
-    background-position: -100% 0;
-  }
-}
-
 /* For Chrome, Safari */
 .search-bar::-webkit-input-placeholder {
   color: transparent;
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -webkit-background-clip: text;
-  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* For Firefox */
@@ -86,7 +75,6 @@ body {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -moz-background-clip: text;
-  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* For Internet Explorer 10+ */
@@ -95,7 +83,6 @@ body {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -ms-background-clip: text;
-  animation: placeholderShimmer 2s linear infinite;
 }
 
 /* Standard syntax */
@@ -104,7 +91,6 @@ body {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -webkit-background-clip: text;
-  animation: placeholderShimmer 2s linear infinite;
 }
 
 .dot {
@@ -116,38 +102,10 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .product-slideshow-dots{
+  .product-slideshow-dots {
     display: none;
   }
 }
-
-/* .animated-menu-item {
-  opacity: 1;
-  transform: translateY(0), translate3d(0, 0, 0);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  will-change: transform, opacity;
-}
-
-.category-container {
-  opacity: 0;
-  transform: translateX(-30px), translate3d(0, 0, 0);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  will-change: transform, opacity;
-}
-
-.category-container.in-view {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.category-svg-wrapper {
-  transition: opacity 0.5s ease;
-  opacity: 0;
-}
-
-.category-container.in-view .category-svg-wrapper {
-  opacity: 1;
-} */
 
 .pb0 {
   padding: 0 !important;
@@ -222,63 +180,6 @@ html:has(.overlay.expanded) {
   height: 150px;
 }
 
-.menu-item-shimmer-effect {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right,
-      #f0f0f0 0%,
-      #e0e0e0 20%,
-      #f0f0f0 40%,
-      #f0f0f0 100%);
-  background-size: 200% 100%;
-  animation: menu-item-shimmer 3s infinite;
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 50%;
-}
-
-@keyframes menu-item-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-/* .menu-item-image {
-  transition: opacity 0.3s ease;
-  opacity: 0;
-}
-
-.menu-item-image-loaded {
-  opacity: 1;
-} */
-
-/* Shimmer Effect Container */
-.product-shimmer-effect {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right,
-      #f0f0f0 0%,
-      #e0e0e0 20%,
-      #f0f0f0 40%,
-      #f0f0f0 100%);
-  background-size: 200% 100%;
-  animation: menu-item-shimmer 3s infinite;
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 5px;
-}
-
-/* Hide Shimmer When Image is Loaded */
-.product-slideshow-image.image-loaded+.product-shimmer-effect {
-  display: none;
-}
-
 /* Dim/disable look (no actual 'disabled' attr so click can fire) */
 .disabled-look {
   opacity: 0.6;
@@ -322,7 +223,6 @@ html:has(.overlay.expanded) {
 .circle-prev-button,
 .circle-next-button {
   background-color: #fff;
-  /* Semi-transparent black */
   border: 1px solid #2172af;
   color: #2172af;
   border-radius: 50%;
@@ -411,7 +311,6 @@ button {
   }
 }
 
-/* Hide the scrollbar for a cleaner look */
 .collection-products-row::-webkit-scrollbar {
   display: none;
 }
@@ -461,7 +360,6 @@ button {
   max-height: 290px;
 }
 
-/* Collection Section Styling */
 .collection-section {
   position: relative;
   max-width: 1500px;
@@ -473,7 +371,6 @@ button {
   font-weight: bold;
 }
 
-/* Product Row Styling */
 .collection-products-row {
   display: flex;
   gap: 16px;
@@ -503,7 +400,6 @@ button {
   transition: all 0.2s linear;
 }
 
-/* Product Item Styling */
 .product-item {
   min-width: 200px;
   width: 300px;
@@ -512,7 +408,6 @@ button {
   margin-left: 5px;
 }
 
-/* Product Card Styling */
 .product-card {
   background-color: #f9f9f9;
   border-radius: 10px;
@@ -537,7 +432,6 @@ button {
 .grid-cols-3 .product-card,
 .grid-cols-4 .product-card,
 .grid-cols-5 .product-card {
-  /* min-height: 410px; */
   max-width: unset;
 }
 
@@ -567,7 +461,6 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Product Title Styling */
 .product-title {
   font-size: 14px;
   font-weight: 500;
@@ -585,7 +478,6 @@ button {
   min-height: 45px;
 }
 
-/* Product Price Styling */
 .product-price {
   font-size: 1rem;
   font-weight: 600;
@@ -608,7 +500,6 @@ button {
   border-radius: 30px;
   font-weight: 500;
   font-size: 12px;
-  transition: all .3s ease;
   text-transform: uppercase;
   letter-spacing: .5px;
   position: relative;
@@ -640,7 +531,6 @@ button {
   cursor: wait;
 }
 
-/* Optional: Add a loading animation */
 .add-to-cart-button.loading::after {
   content: '';
   position: absolute;
@@ -660,7 +550,6 @@ button {
   }
 }
 
-/* Alternative style with border */
 .add-to-cart-button.bordered {
   background-color: transparent;
   color: #000;
@@ -672,12 +561,10 @@ button {
   color: white;
 }
 
-/* Success state */
 .add-to-cart-button.success {
   background-color: #4CAF50;
 }
 
-/* For smaller screens */
 @media (max-width: 768px) {
   .add-to-cart-button {
     padding: 10px 0px;
@@ -852,7 +739,6 @@ button.reset:hover:not(:has(> *)) {
 * components/Header
 * --------------------------------------------------
 */
-/* Header Container */
 .header {
   background: #fff;
   z-index: 5;
@@ -867,7 +753,6 @@ button.reset:hover:not(:has(> *)) {
   padding: 15px;
 }
 
-/* Header Top Section */
 .header-top {
   display: flex;
   align-items: center;
@@ -878,38 +763,31 @@ button.reset:hover:not(:has(> *)) {
   margin: 20px auto;
 }
 
-/* Desktop Header Layout */
 @media (min-width: 1024px) {
   .header-top {
     justify-content: space-between;
-    /* Align logo to the left */
   }
 
-  /* Desktop Logo Alignment */
   .header-logo {
     margin-right: auto;
     width: 120px;
     height: auto;
   }
 
-  /* Hide Mobile Menu Toggle on Desktop */
   .mobile-menu-toggle {
     display: none;
   }
 
-  /* Display Desktop CTA Icons */
   .header-ctas {
     display: flex;
     gap: 1rem;
   }
 
-  /* Mobile-only elements hidden */
   .mobile-menu-overlay {
     display: none !important;
   }
 }
 
-/* Mobile Header Layout */
 @media (max-width: 1024px) {
   .header-top {
     justify-content: center;
@@ -917,12 +795,10 @@ button.reset:hover:not(:has(> *)) {
     width: 95vw !important;
   }
 
-  /* Hide User Icon in Header on Mobile */
   .user-icon-header {
     display: none;
   }
 
-  /* Mobile Menu Toggle Button */
   .mobile-menu-toggle {
     position: absolute;
     left: 10px;
@@ -933,13 +809,11 @@ button.reset:hover:not(:has(> *)) {
     cursor: pointer;
   }
 
-  /* Centered Logo on Mobile */
   .header-logo {
     max-width: 200px;
     height: auto;
   }
 
-  /* CTA Icons on the Right for Mobile */
   .header-ctas {
     position: absolute;
     right: 10px;
@@ -957,7 +831,6 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
-/* Header Bottom Section */
 .header-bottom {
   width: 100vw;
   padding: 0 1rem;
@@ -968,7 +841,6 @@ button.reset:hover:not(:has(> *)) {
   box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 3px 0px;
 }
 
-/* Mobile Menu Overlay */
 .mobile-menu-overlay {
   position: fixed;
   top: 0;
@@ -995,17 +867,14 @@ button.reset:hover:not(:has(> *)) {
   z-index: 9998;
 }
 
-/* Disable Page Scrolling When Menu is Open */
 .no-scroll {
   overflow: hidden;
 }
 
-/* Hide Menu Content When Submenu is Active */
 .mobile-menu-content.hidden {
   display: none;
 }
 
-/* Submenu Drawer */
 .mobile-submenu-drawer {
   position: absolute;
   top: 0;
@@ -1020,7 +889,6 @@ button.reset:hover:not(:has(> *)) {
   overflow-y: auto;
 }
 
-/* Active Submenu Drawer - Slides into View */
 .mobile-submenu-drawer.active {
   transform: translateX(-15px);
 }
@@ -1035,7 +903,6 @@ button.reset:hover:not(:has(> *)) {
   width: 75%;
 }
 
-/* Back Button for Submenu */
 .back-button {
   display: flex;
   align-items: center;
@@ -1049,7 +916,6 @@ button.reset:hover:not(:has(> *)) {
   gap: 10px;
 }
 
-/* Submenu List */
 .submenu-list {
   display: flex;
   flex-direction: column;
@@ -1057,7 +923,6 @@ button.reset:hover:not(:has(> *)) {
   width: 100%;
 }
 
-/* Mobile Menu Item */
 .mobile-menu-item {
   display: flex;
   align-items: center;
@@ -1074,7 +939,6 @@ button.reset:hover:not(:has(> *)) {
   gap: 10px;
 }
 
-/* Menu Item Arrow */
 .mobile-menu-arrow {
   font-size: 18px;
   color: #232323;
@@ -1082,7 +946,6 @@ button.reset:hover:not(:has(> *)) {
   right: 30px;
 }
 
-/* Mobile Menu Close Button */
 .mobile-menu-close {
   position: absolute;
   top: 20px;
@@ -1098,7 +961,6 @@ button.reset:hover:not(:has(> *)) {
   font-weight: 500;
 }
 
-/* Menu Content */
 .mobile-menu-content {
   display: flex;
   flex-direction: column;
@@ -1107,7 +969,6 @@ button.reset:hover:not(:has(> *)) {
   margin-top: 20px;
 }
 
-/* Mobile Menu Footer */
 .mobile-menu-footer {
   display: flex;
   flex-direction: column;
@@ -1190,8 +1051,6 @@ button.reset:hover:not(:has(> *)) {
   color: #fff;
 }
 
-
-/* Specific styles for nested submenus (.submenu .submenu) */
 .submenu-level-2 {
   position: relative;
   flex-direction: column;
@@ -1205,7 +1064,6 @@ button.reset:hover:not(:has(> *)) {
   z-index: 2000;
 }
 
-/* Styling for nested submenu links */
 .submenu-level-2 a {
   color: #2172af;
   font-size: 0.9rem;
@@ -1254,7 +1112,6 @@ button.reset:hover:not(:has(> *)) {
 .menu-item-level-2:hover>a::after,
 .menu-item-level-3:hover>a::after {
   width: 100%;
-  /* Expands the underline on hover */
 }
 
 @media (max-width: 1500px) {
@@ -1314,11 +1171,8 @@ button.reset:hover:not(:has(> *)) {
   top: 0;
   transform: translateY(0);
   background-color: #fff;
-  /* Ensures it has a background */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  /* Optional shadow */
   z-index: 1002;
-  /* Above the overlay */
 }
 
 .search-container {
@@ -1478,7 +1332,6 @@ button.reset:hover:not(:has(> *)) {
 .cart-line {
   display: flex;
   padding: .75rem 0;
-  /* flex-direction: column; */
   justify-content: center;
   align-items: start;
   width: 100%;
@@ -1636,7 +1489,6 @@ li.cart-line .product-price {
   }
 }
 
-/* Ensure visibility on all devices */
 .clear-search-button {
   position: absolute;
   right: 10%;
@@ -1681,20 +1533,16 @@ li.cart-line .product-price {
 
 .clear-search-button:hover {
   color: #333;
-  /* Hover state */
 }
 
-/* Disable Safari's default clear button */
 input.search-bar::-webkit-clear-button {
   -webkit-appearance: none;
   display: none;
 }
 
-/* Ensure it is visible on iOS */
 @media (max-width: 1024px) {
   .clear-search-button {
     display: block;
-    /* Force visibility */
   }
 
   .clear-search-button {
@@ -1879,7 +1727,6 @@ button#headlessui-menu-button-\:R3lab5\: {
 * routes/collections.$handle.tsx
 * --------------------------------------------------
 */
-/* Base Grid Styling */
 .products-grid {
   display: grid;
   justify-content: center;
@@ -1895,7 +1742,6 @@ button#headlessui-menu-button-\:R3lab5\: {
   border-color: #d1d5db;
 }
 
-/* Dynamic Column Classes */
 .grid-cols-1 {
   grid-template-columns: repeat(1, 1fr);
 }
@@ -1916,13 +1762,11 @@ button#headlessui-menu-button-\:R3lab5\: {
   grid-template-columns: repeat(5, 1fr);
 }
 
-/* Product Item Sizing Based on Grid Columns */
 .grid-cols-1 .product-item-collection {
   min-width: 95%;
   margin: auto;
 }
 
-/* Keep Product Card Height Consistent */
 .product-item-collection img,
 .product-item img {
   width: 100%;
@@ -2104,7 +1948,6 @@ button.layout-buttons.first-btn svg {
   text-decoration: none;
 }
 
-/* Collection Title Styling */
 .collection h4 {
   max-height: 80px;
   font-size: 13px;
@@ -2114,7 +1957,6 @@ button.layout-buttons.first-btn svg {
   scroll-behavior: smooth;
 }
 
-/* Centering the Image Wrapper */
 .image-wrapper {
   display: flex;
   justify-content: center;
@@ -2132,7 +1974,6 @@ button.layout-buttons.first-btn svg {
   cursor: pointer;
 }
 
-/* Input styles */
 .price-filter-input {
   border: 2px solid #d1d5db;
   border-radius: .375rem;
@@ -2146,8 +1987,6 @@ button.layout-buttons.first-btn svg {
   border-color: #3b82f6;
   outline: none;
 }
-
-/* Button styles */
 
 .price-filter-container {
   display: flex;
@@ -2169,7 +2008,6 @@ button.layout-buttons.first-btn svg {
 
 .price-filter-buttons {
   display: flex;
-  /* gap: 0.5rem; */
   justify-content: flex-start;
   margin-left: 12px;
   gap: 1.3rem;
@@ -2209,7 +2047,6 @@ button.layout-buttons.first-btn svg {
   max-height: 350px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  /* margin-top: 20px !important; */
 }
 
 .transition-all {
@@ -2332,32 +2169,6 @@ button.layout-buttons.first-btn svg {
 * --------------------------------------------------
 */
 
-.shimmer {
-  position: relative;
-  overflow: hidden;
-  background-color: #f6f7f8;
-}
-
-.shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -150%;
-  width: 250%;
-  height: 100%;
-  background: linear-gradient(90deg,
-      rgba(173, 173, 173, 0) 0%,
-      rgba(173, 173, 173, 0.4) 50%,
-      rgba(173, 173, 173, 0) 100%);
-  animation: shimmer 1.6s alternate-reverse infinite linear;
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
 .home-prev-button,
 .home-next-button {
   position: absolute;
@@ -2388,9 +2199,7 @@ button.layout-buttons.first-btn svg {
 
 .drawer {
   max-height: 80vh;
-  /* Limit drawer height */
   overflow-y: auto;
-  /* Allow scrolling for overflowing content */
   position: fixed;
   bottom: 0;
   left: 0;
