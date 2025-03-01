@@ -1186,7 +1186,7 @@ button.reset:hover:not(:has(> *)) {
   left: 0;
   width: 100vw;
   background-color: #fff;
-  z-index: 1000;
+  z-index: -1;
   padding: 30px 50px;
   border-radius: 0;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
