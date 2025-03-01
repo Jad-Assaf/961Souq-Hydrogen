@@ -183,7 +183,7 @@ export function ProductItem({product, index}) {
             >
               <p>Sold Out</p>
             </div>
-            <img
+            <Image
               src={images[currentImageIndex]?.url}
               alt={images[currentImageIndex]?.altText || 'Product Image'}
               aspectRatio="1/1"
