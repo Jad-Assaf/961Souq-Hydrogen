@@ -119,13 +119,6 @@ export function ProductItem({product, index}) {
     setIsSoldOut(soldOut); // Update the state
   }, [product]);
 
-  const handleImageClick = (e) => {
-    e.preventDefault(); // Prevent the link from being triggered
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1,
-    );
-  };
-
   useEffect(() => {
     let imageTimer, progressTimer;
 
@@ -196,7 +189,6 @@ export function ProductItem({product, index}) {
               loading="lazy"
               style={styles.image}
               className="product-slideshow-image"
-              onClick={handleImageClick} // Click to switch images
             />
             <div
               className="product-slideshow-progress-bar"
