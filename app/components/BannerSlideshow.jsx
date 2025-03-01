@@ -246,12 +246,11 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '15px',
+    gap: '12px',
   },
   dot: {
-    width: '5px',
-    height: '5px',
     borderRadius: '50%',
     cursor: 'pointer',
+    padding: '3px',
   },
 };

@@ -107,7 +107,11 @@ body {
   animation: placeholderShimmer 2s linear infinite;
 }
 
-.dot:hover{
+.dot {
+  transition: all 0.2s linear;
+}
+
+.dot:hover {
   scale: 3;
 }
 
