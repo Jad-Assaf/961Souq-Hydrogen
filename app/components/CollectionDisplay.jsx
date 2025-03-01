@@ -107,7 +107,7 @@ export function ProductItem({product, index}) {
   const [progress, setProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isSoldOut, setIsSoldOut] = useState(false); // State to track sold-out status
-  const slideshowInterval = 3000; // Time for each slide
+  const slideshowInterval = 1500; // Time for each slide
 
   const images = product.images?.nodes || [];
 

@@ -532,6 +532,10 @@ button {
   max-width: unset;
 }
 
+.grid-cols-2 .product-form {
+  margin: auto;
+}
+
 @media (max-width: 510px) {
 
   .grid-cols-2 .product-card,
@@ -586,7 +590,7 @@ button {
 }
 
 .add-to-cart-button {
-  width: 100%;
+  width: 70%;
   max-width: 350px;
   background-color: #2172af;
   color: #f5f5f5;
