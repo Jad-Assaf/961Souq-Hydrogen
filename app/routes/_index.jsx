@@ -526,31 +526,6 @@ export default function Homepage() {
         <TopProductSections collection={topProducts['computer-accessories']} />
       )}
 
-      {/* <CollectionCircles collections={partsMenu} />
-      {topProducts['motherboards'] && (
-        <TopProductSections collection={topProducts['motherboards']} />
-      )}
-      {topProducts['cpus'] && (
-        <TopProductSections collection={topProducts['cpus']} />
-      )}
-      {topProducts['cpu-coolers'] && (
-        <TopProductSections collection={topProducts['cpu-coolers']} />
-      )}
-      {topProducts['gpu'] && (
-        <TopProductSections collection={topProducts['gpu']} />
-      )} */}
-
-      {/* <CollectionCircles collections={networkingMenu} />
-      {topProducts['wifi-routers'] && (
-        <TopProductSections collection={topProducts['wifi-routers']} />
-      )}
-      {topProducts['wifi-range-extenders'] && (
-        <TopProductSections collection={topProducts['wifi-range-extenders']} />
-      )}
-      {topProducts['switches'] && (
-        <TopProductSections collection={topProducts['switches']} />
-      )} */}
-
       <CollectionCircles collections={monitorsMenu} />
       {topProducts['samsung-monitors'] && (
         <TopProductSections collection={topProducts['samsung-monitors']} />
@@ -598,17 +573,6 @@ export default function Homepage() {
         <TopProductSections collection={topProducts['speakers']} />
       )}
 
-      {/* <CollectionCircles collections={accessoriesMenu} />
-      {topProducts['computer-accessories'] && (
-        <TopProductSections collection={topProducts['computer-accessories']} />
-      )}
-      {topProducts['electric-screwdrivers'] && (
-        <TopProductSections collection={topProducts['electric-screwdrivers']} />
-      )}
-      {topProducts['car-accessories'] && (
-        <TopProductSections collection={topProducts['car-accessories']} />
-      )} */}
-
       <CollectionCircles collections={fitnessMenu} />
       {topProducts['apple-watch'] && (
         <TopProductSections collection={topProducts['apple-watch']} />
@@ -635,9 +599,6 @@ export default function Homepage() {
       {topProducts['cameras'] && (
         <TopProductSections collection={topProducts['cameras']} />
       )}
-      {/* {topProducts['drones'] && (
-        <TopProductSections collection={topProducts['drones']} />
-      )} */}
 
       <CollectionCircles collections={homeAppliancesMenu} />
       {topProducts['dyson-products'] && (
@@ -710,18 +671,6 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
             }
           }
         }
-      }
-    }
-  }
-`;
-
-export const GET_MENU_QUERY = `#graphql
-  query GetMenu($handle: String!) {
-    menu(handle: $handle) {
-      items {
-        id
-        title
-        url
       }
     }
   }

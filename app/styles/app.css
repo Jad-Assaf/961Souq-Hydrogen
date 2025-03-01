@@ -480,13 +480,8 @@ button {
   padding: 10px 0;
   overflow-x: auto;
   scroll-behavior: smooth;
-  cursor: grab;
   position: relative;
   scrollbar-width: none;
-}
-
-.collection-products-row:active {
-  cursor: grabbing;
 }
 
 .collection-header {
