@@ -27,48 +27,25 @@ export const CollectionDisplay = React.memo(({menuCollections}) => {
 
 export function ProductRow({products}) {
   const rowRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartX(e.pageX - rowRef.current.offsetLeft);
-    setScrollLeft(rowRef.current.scrollLeft);
-  };
-
-  const handleMouseLeave = () => setIsDragging(false);
-  const handleMouseUp = () => setIsDragging(false);
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - rowRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    rowRef.current.scrollLeft = scrollLeft - walk;
-  };
 
   const scrollRow = (distance) => {
     rowRef.current.scrollBy({left: distance, behavior: 'smooth'});
   };
 
   return (
-      <><button className="home-prev-button" onClick={() => scrollRow(-600)}>
-          <LeftArrowIcon />
-      </button><div
-          className="collection-products-row"
-          ref={rowRef}
-          onMouseDown={handleMouseDown}
-          onMouseLeave={handleMouseLeave}
-          onMouseUp={handleMouseUp}
-          onMouseMove={handleMouseMove}
-      >
-              {products.map((product, index) => (
-                  <ProductItem key={product.id} product={product} index={index} />
-              ))}
-          </div><button className="home-next-button" onClick={() => scrollRow(600)}>
-              <RightArrowIcon />
-          </button></>
+    <>
+      <button className="home-prev-button" onClick={() => scrollRow(-600)}>
+        <LeftArrowIcon />
+      </button>
+      <div className="collection-products-row" ref={rowRef}>
+        {products.map((product, index) => (
+          <ProductItem key={product.id} product={product} index={index} />
+        ))}
+      </div>
+      <button className="home-next-button" onClick={() => scrollRow(600)}>
+        <RightArrowIcon />
+      </button>
+    </>
   );
 }
 
