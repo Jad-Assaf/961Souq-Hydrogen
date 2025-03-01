@@ -107,6 +107,10 @@ body {
   animation: placeholderShimmer 2s linear infinite;
 }
 
+.dot:hover{
+  scale: 3;
+}
+
 /* .animated-menu-item {
   opacity: 1;
   transform: translateY(0), translate3d(0, 0, 0);

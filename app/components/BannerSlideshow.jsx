@@ -226,7 +226,7 @@ const styles = {
   },
   progressBar: {
     position: 'absolute',
-    bottom: '12px',
+    bottom: '18px',
     left: '45%',
     width: '10%',
     height: '3px',
@@ -242,11 +242,11 @@ const styles = {
   indicatorDots: {
     position: 'absolute',
     width: '100%',
-    bottom: '2px',
+    bottom: '5px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '10px',
+    gap: '15px',
   },
   dot: {
     width: '5px',
