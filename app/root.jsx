@@ -202,7 +202,7 @@ export function Layout({children}) {
         <MetaPixel pixelId={PIXEL_ID} />
       </head>
       <body>
-        <ClarityTracker clarityId={clarityId} />
+        {/* <ClarityTracker clarityId={clarityId} /> */}
         {data ? (
           <Analytics.Provider
             cart={data.cart}
