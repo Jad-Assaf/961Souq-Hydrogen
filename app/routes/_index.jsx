@@ -170,10 +170,10 @@ export async function loader(args) {
     // },
     {
       desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-banner.jpg?v=1726322159',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenovo-legion-pro-7-banner-2.jpg?v=1740491546',
       mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-Mobile.jpg?v=1726321600',
-      link: '/collections/apple-iphone',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenovo-legion-pro-7-mobile-banner.jpg?v=1740491546',
+      link: '/products/lenovo-legion-pro-7-83de0079in-16-core-i9-14900hx-32gb-ram-1tb-ssd-rtx-4090-16gb',
     },
     {
       desktopImageUrl:

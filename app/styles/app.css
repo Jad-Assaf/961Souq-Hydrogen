@@ -112,7 +112,13 @@ body {
 }
 
 .dot:hover {
-  scale: 3;
+  scale: 2.5;
+}
+
+@media (max-width: 1024px) {
+  .product-slideshow-dots{
+    display: none;
+  }
 }
 
 /* .animated-menu-item {
