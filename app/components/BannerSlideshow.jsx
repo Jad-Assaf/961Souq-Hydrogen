@@ -214,6 +214,7 @@ const styles = {
   bannerImage: {
     width: '100vw',
     height: '100%',
+    margin: 'auto',
     objectFit: 'contain',
     maxWidth: '1500px',
     borderRadius: '20px',

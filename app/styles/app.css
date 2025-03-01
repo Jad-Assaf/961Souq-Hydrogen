@@ -24,10 +24,6 @@ body {
   --color-light: #fff;
 }
 
-main{
-  max-width: 1500px;
-  margin: auto;
-}
 
 /* nprogress.css */
 #nprogress .bar {
