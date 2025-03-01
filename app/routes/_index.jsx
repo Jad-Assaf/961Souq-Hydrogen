@@ -8,7 +8,6 @@ import BrandSection from '~/components/BrandsSection';
 import {getSeoMeta} from '@shopify/hydrogen';
 import {
   CollectionCircles,
-  accessoriesMenu,
   appleMenu,
   audioMenu,
   camerasMenu,
@@ -18,8 +17,6 @@ import {
   laptopsMenu,
   mobilesMenu,
   monitorsMenu,
-  networkingMenu,
-  partsMenu,
   tabletsMenu,
 } from '~/components/CollectionCircles';
 import MobileAppPopup from '~/components/MobileAppPopup';
@@ -37,6 +34,7 @@ const MANUAL_MENU_HANDLES = [
   'mobiles',
   'tablets',
   'audio',
+  'pioneer-equipment',
   'accessories',
   'fitness',
   'photography',
@@ -161,13 +159,6 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-mobile-banner-1.jpg?v=1729678484',
       link: '/collections/remarkable-tablets',
     },
-    // {
-    //   desktopImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold-6.jpg?v=1727957859',
-    //   mobileImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-fold6.jpg?v=1727957858',
-    //   link: '/collections/samsung-mobile-phones',
-    // },
     {
       desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenovo-legion-pro-7-banner-2.jpg?v=1740491546',
@@ -189,20 +180,12 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin-mobile-banner.jpg?v=1726321601',
       link: '/products/garmin-fenix-8-47-mm-amoled-sapphire-premium-multisport-gps-watch',
     },
-    // {
-    //   desktopImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-banner-2_a2c3f993-278f-48c1-82de-ac42ceb6f3fc.jpg?v=1716031887',
-    //   mobileImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad_3a178a79-4428-4aac-b5bd-41ad3f04e33a.jpg?v=1716031354',
-    //   link: '/collections/apple-ipad',
-    // },
   ];
 
   const criticalData = await loadCriticalData(args);
 
-  // Define all collection handles you want to display using TopProductSections
   const TOP_PRODUCT_HANDLES = [
-    'new-arrivals',
+    // 'new-arrivals',
     'apple-accessories',
     'apple-macbook',
     'apple-imac',
@@ -212,14 +195,6 @@ export async function loader(args) {
     'console-games',
     'laptops',
     'computer-accessories',
-    // 'microsoft-surface-accessories',
-    // 'motherboards',
-    // 'cpus',
-    // 'cpu-coolers',
-    // 'gpu',
-    // 'wifi-routers',
-    // 'wifi-range-extenders',
-    // 'switches',
     'samsung-monitors',
     'msi-monitors',
     'dell-monitors',
@@ -243,14 +218,12 @@ export async function loader(args) {
     'action-cameras',
     'action-cameras-accessories',
     'cameras',
-    // 'drones',
     'dyson-products',
     'kitchen-appliances',
     'cleaning-devices',
     'lighting',
   ];
 
-  // Fetch all TopProductSections collections based on TOP_PRODUCT_HANDLES
   const fetchedTopProducts = await Promise.all(
     TOP_PRODUCT_HANDLES.map((handle) =>
       fetchCollectionByHandle(args.context, handle),
@@ -262,7 +235,6 @@ export async function loader(args) {
     'new-arrivals',
   );
 
-  // Organize TopProductSections collections into an object with keys corresponding to their handles
   const topProductsByHandle = {};
   TOP_PRODUCT_HANDLES.forEach((handle, index) => {
     topProductsByHandle[handle] = fetchedTopProducts[index];
@@ -274,16 +246,15 @@ export async function loader(args) {
     description: criticalData.description,
     url: criticalData.url,
     sliderCollections: criticalData.sliderCollections,
-    topProducts: topProductsByHandle, // Add fetched TopProductSections collections here
+    topProducts: topProductsByHandle,
   };
 
-  // Cache the new data
   cache.set(cacheKey, {value: newData, expiry: now + cacheTTL});
 
   return defer(
     {
       ...newData,
-      newArrivals, // This is always fresh
+      newArrivals,
     },
     {
       headers: {
@@ -325,7 +296,6 @@ async function loadCriticalData({context}) {
   };
 }
 
-// Fetch a single collection by handle
 async function fetchCollectionByHandle(context, handle) {
   const {collectionByHandle} = await context.storefront.query(
     GET_COLLECTION_BY_HANDLE_QUERY,
@@ -334,12 +304,6 @@ async function fetchCollectionByHandle(context, handle) {
   return collectionByHandle || null;
 }
 
-// REMOVED: The entire fetchMenuCollections function
-// async function fetchMenuCollections(context, menuHandles) {
-//   ...
-// }
-
-// Fetch collections by handles for sliders
 async function fetchCollectionsByHandles(context, handles) {
   const collectionPromises = handles.map(async (handle) => {
     const {collectionByHandle} = await context.storefront.query(
