@@ -102,6 +102,7 @@ const RightArrowIcon = () => (
 
 export function ProductItem({product, index}) {
   const ref = useRef(null);
+  const {open} = useAside();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -178,12 +179,7 @@ export function ProductItem({product, index}) {
             {/* Sold-out banner */}
             <div
               className="sold-out-ban"
-              style={{
-                display:
-                  isSoldOut && Number(selectedVariant?.price.amount) !== 0
-                    ? 'flex'
-                    : 'none',
-              }}
+              style={{display: isSoldOut ? 'flex' : 'none'}} // Conditional display
             >
               <p>Sold Out</p>
             </div>
@@ -200,6 +196,7 @@ export function ProductItem({product, index}) {
               loading="lazy"
               style={styles.image}
               className="product-slideshow-image"
+              onClick={handleImageClick} // Click to switch images
             />
             <div
               className="product-slideshow-progress-bar"
@@ -227,7 +224,7 @@ export function ProductItem({product, index}) {
                   style={{
                     ...styles.dot,
                     backgroundColor:
-                      currentImageIndex === index ? '#2172af' : '#e0e0e0',
+                      currentImageIndex === index ? '#000' : '#e0e0e0',
                   }}
                   onClick={() => setCurrentImageIndex(index)}
                 ></div>
@@ -237,13 +234,7 @@ export function ProductItem({product, index}) {
         )}
         <h4 className="product-title">{product.title}</h4>
         <div className="product-price">
-          {selectedVariant?.price ? (
-            Number(selectedVariant.price.amount) === 0 ? (
-              <span>Call For Price</span>
-            ) : (
-              <Money data={selectedVariant.price} />
-            )
-          ) : null}
+          {selectedVariant?.price && <Money data={selectedVariant.price} />}
           {hasDiscount && (
             <small className="discountedPrice">
               <Money data={selectedVariant.compareAtPrice} />
@@ -253,13 +244,13 @@ export function ProductItem({product, index}) {
       </Link>
 
       {/* Add to Cart Button */}
-      {/* <AddToCartButton
+      <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
           if (product.variants?.nodes?.length > 1) {
             window.location.href = `/products/${product.handle}`;
           } else {
-            // Trigger cart logic
+            open('cart');
           }
         }}
         lines={
@@ -283,7 +274,7 @@ export function ProductItem({product, index}) {
           : product.variants?.nodes?.length > 1
           ? 'Select Options'
           : 'Add to cart'}
-      </AddToCartButton> */}
+      </AddToCartButton>
     </div>
   );
 }
@@ -311,7 +302,7 @@ const styles = {
   },
   progress: {
     height: '100%',
-    backgroundColor: '#2172af',
+    backgroundColor: '#000',
     transition: 'width 0.1s linear',
     borderRadius: '30px',
   },
