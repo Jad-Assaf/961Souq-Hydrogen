@@ -538,7 +538,7 @@ button {
   .grid-cols-4 .product-card,
   .grid-cols-5 .product-card {
     min-height: unset;
-    min-width: 180px;
+    min-width: 50%;
   }
 }
 
@@ -1830,7 +1830,7 @@ input.search-bar:focus-visible {
 @media (max-width: 768px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 5px !important;
+
   }
 
   button#headlessui-menu-button-\:R3lab5\: span {
