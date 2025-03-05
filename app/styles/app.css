@@ -822,12 +822,8 @@ button.reset:hover:not(:has(> *)) {
   }
 
   .header-ctas svg {
-    width: 25px;
-    height: 25px;
-  }
-
-  .header-ctas .sign-in-link {
-    display: none;
+    width: 25px !important;
+    height: 25px !important;
   }
 }
 
