@@ -178,7 +178,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             />
           </NavLink>
           <SearchFormPredictive className="header-search">
-            {({inputRef, fetchResults, goToSearch, fetcher}) => {
+            {({ inputRef, fetchResults, goToSearch, fetcher }) => {
               // Use the updated hook to focus the search on "/" press instead of cmd+k
               useFocusOnSlash(inputRef);
 
@@ -198,9 +198,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
                   if (!inputValue) {
-                    searchContainerRef.current?.classList.remove(
-                      'fixed-search',
-                    );
+                    searchContainerRef.current?.classList.remove('fixed-search');
                     setOverlayVisible(false);
                   }
                 }
@@ -247,9 +245,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 <>
                   {/* Fullscreen Overlay */}
                   <div
-                    className={`search-overlay ${
-                      isOverlayVisible ? 'active' : ''
-                    }`}
+                    className={`search-overlay ${isOverlayVisible ? 'active' : ''}`}
                     onClick={handleCloseSearch}
                   ></div>
 
@@ -275,7 +271,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           onClick={() => {
                             inputRef.current.value = '';
                             setSearchResultsVisible(false);
-                            fetchResults({target: {value: ''}});
+                            fetchResults({ target: { value: '' } });
                           }}
                           aria-label="Clear search"
                         >
@@ -301,48 +297,70 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     </div>
                     {isSearchResultsVisible && (
                       <div className="search-results-container">
-                        <SearchResultsPredictive>
-                          {({items, total, term, state, closeSearch}) => {
-                            const {products} = items;
-
-                            if (!total) {
+                        {fetcher.state === 'loading' || !fetcher.data ? (
+                          <div className="predictive-search-result" key="skeleton">
+                            <h5>Products</h5>
+                            <ul>
+                              {[...Array(5)].map((_, i) => (
+                                <li
+                                  key={i}
+                                  className="predictive-search-result-item skeleton"
+                                >
+                                  <div className="search-result-txt">
+                                    <div className="search-result-titDesc skeleton-div">
+                                      <div className="skeleton skeleton-image"></div>
+                                      <div className="skeleten-tds">
+                                        <p className="skeleton skeleton-title"></p>
+                                        <p className="skeleton skeleton-sku"></p>
+                                      </div>
+                                    </div>
+                                    <small className="skeleton skeleton-price"></small>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : (
+                          <SearchResultsPredictive>
+                            {({ items, total, term, state, closeSearch }) => {
+                              const { products } = items;
+                              if (!total) {
+                                return (
+                                  <SearchResultsPredictive.Empty term={term} />
+                                );
+                              }
                               return (
-                                <SearchResultsPredictive.Empty term={term} />
-                              );
-                            }
-
-                            return (
-                              <>
-                                <SearchResultsPredictive.Products
-                                  products={products}
-                                  closeSearch={() => {
-                                    closeSearch();
-                                    handleCloseSearch();
-                                  }}
-                                  term={term}
-                                />
-                                {term.current && total ? (
-                                  <Link
-                                    onClick={() => {
+                                <>
+                                  <SearchResultsPredictive.Products
+                                    products={products}
+                                    closeSearch={() => {
                                       closeSearch();
                                       handleCloseSearch();
                                     }}
-                                    to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
-                                      /\s+/g,
-                                      '-',
-                                    )}`}
-                                    className="view-all-results"
-                                  >
-                                    <p>
-                                      View all results for <q>{term.current}</q>{' '}
-                                      &nbsp; →
-                                    </p>
-                                  </Link>
-                                ) : null}
-                              </>
-                            );
-                          }}
-                        </SearchResultsPredictive>
+                                    term={term}
+                                  />
+                                  {term.current && total ? (
+                                    <Link
+                                      onClick={() => {
+                                        closeSearch();
+                                        handleCloseSearch();
+                                      }}
+                                      to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
+                                        /\s+/g,
+                                        '-'
+                                      )}`}
+                                      className="view-all-results"
+                                    >
+                                      <p>
+                                        View all results for <q>{term.current}</q> &nbsp; →
+                                      </p>
+                                    </Link>
+                                  ) : null}
+                                </>
+                              );
+                            }}
+                          </SearchResultsPredictive>
+                        )}
                       </div>
                     )}
                   </div>
@@ -350,6 +368,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               );
             }}
           </SearchFormPredictive>
+
           {/* New SearchBar Component Implementation */}
           {/* <SearchBar
             className="header-search"
