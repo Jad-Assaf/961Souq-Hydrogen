@@ -49,7 +49,55 @@ function expandSearchTerms(terms) {
 }
 
 /* ------------------------------------------------------------------
-   LOADER
+   NEW HELPER FUNCTION: getSearchTerms
+      - Returns both the normalized term (with spaces) and its concatenated version.
+------------------------------------------------------------------- */
+function getSearchTerms(term) {
+  const normalized = term.replace(/-/g, ' ').trim();
+  const concatenated = normalized.replace(/\s+/g, '');
+  return {normalized, concatenated};
+}
+
+/* ------------------------------------------------------------------
+   Helper: buildExpandedClause
+      - For normalized term: split into words, expand each using the dictionary,
+        and build a clause that ORs synonyms for each word and ANDs across words.
+------------------------------------------------------------------- */
+function buildExpandedClause(normalized, usePrefix) {
+  const baseWords = normalized.split(/\s+/).filter(Boolean);
+  const expandedSynonymClauses = baseWords.map((word) => {
+    const synonyms = expandSearchTerms([word]);
+    const clauses = synonyms.map((syn) => {
+      const termQuery = usePrefix ? `${syn}*` : `*${syn}*`;
+      return `(title:${termQuery} OR variants.sku:${termQuery} OR description:${termQuery} OR product_type:${termQuery} OR tag:${termQuery})`;
+    });
+    return `(${clauses.join(' OR ')})`;
+  });
+  return expandedSynonymClauses.join(' AND ');
+}
+
+/* ------------------------------------------------------------------
+   Helper functions for sorting
+------------------------------------------------------------------- */
+function getSortKey(searchParams) {
+  const sortKeyMapping = {
+    featured: 'RELEVANCE',
+    'price-low-high': 'PRICE',
+    'price-high-low': 'PRICE',
+    'best-selling': 'BEST_SELLING',
+    newest: 'CREATED_AT',
+  };
+  return sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
+}
+function getReverse(searchParams) {
+  const reverseMapping = {
+    'price-high-low': true,
+  };
+  return reverseMapping[searchParams.get('sort')] || false;
+}
+
+/* ------------------------------------------------------------------
+   LOADER (Regular Search)
 ------------------------------------------------------------------- */
 export async function loader({request, context}) {
   const url = new URL(request.url);
@@ -82,12 +130,11 @@ export async function loader({request, context}) {
   const after = searchParams.get('after') || null;
   const before = searchParams.get('before') || null;
 
-  // Filter building
+  // Filter building (for vendor, product type, etc.)
   const shopifyKeyMap = {
     vendor: 'vendor',
     productType: 'product_type',
   };
-
   const filterMap = new Map();
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
@@ -98,7 +145,6 @@ export async function loader({request, context}) {
       filterMap.get(rawKey).push(value);
     }
   }
-
   const filterQueryParts = [];
   for (const [rawKey, values] of filterMap.entries()) {
     const shopifyKey = shopifyKeyMap[rawKey] || rawKey;
@@ -111,85 +157,103 @@ export async function loader({request, context}) {
   }
 
   // Price range & text search
-  // Price range & text search
   const rawTerm = searchParams.get('q') || '';
-  const normalizedTerm = rawTerm.replace(/-/g, ' ');
-  const minPrice = searchParams.get('minPrice');
-  const maxPrice = searchParams.get('maxPrice');
+  const {normalized, concatenated} = getSearchTerms(rawTerm);
 
-  // Build the whole-term clause (using the full normalized term)
-  const termQueryWhole = usePrefix
-    ? `${normalizedTerm}*`
-    : `*${normalizedTerm}*`;
-  const wholeClause = `(title:${termQueryWhole} OR variants.sku:${termQueryWhole} OR description:${termQueryWhole} OR product_type:${termQueryWhole} OR tag:${termQueryWhole})`;
-
-  // Build the split-term clause (splitting by spaces and expanding synonyms)
-  const baseWords = normalizedTerm.split(/\s+/).filter(Boolean);
-  const splitClauses = baseWords.map((word) => {
-    const synonyms = expandSearchTerms([word]);
-    // For each word, build a clause from its synonyms
-    const wordClauses = synonyms.map((syn) => {
-      const termQuery = usePrefix ? `${syn}*` : `*${syn}*`;
-      return `(title:${termQuery} OR variants.sku:${termQuery} OR description:${termQuery} OR product_type:${termQuery} OR tag:${termQuery})`;
-    });
-    // For this word, any synonym match is acceptable.
-    return `(${wordClauses.join(' OR ')})`;
-  });
-  const splitClause = splitClauses.join(' AND ');
-
-  // Combine both clauses so that either approach can yield results
-  const combinedClause = `(${wholeClause} OR (${splitClause}))`;
-
-  // Append additional filter parts (if any)
-  let filterQuery = combinedClause;
+  // --- Build query clauses ---
+  // For concatenated term, use a simple clause
+  const termQueryConcat = usePrefix ? `${concatenated}*` : `*${concatenated}*`;
+  const wholeClauseConcat = `(title:${termQueryConcat} OR variants.sku:${termQueryConcat} OR description:${termQueryConcat} OR product_type:${termQueryConcat} OR tag:${termQueryConcat})`;
+  let filterQueryConcat = wholeClauseConcat;
   if (filterQueryParts.length > 0) {
-    filterQuery += ' AND ' + filterQueryParts.join(' AND ');
+    filterQueryConcat += ' AND ' + filterQueryParts.join(' AND ');
   }
 
-  console.log('Filter Query:', filterQuery);
+  // For normalized term, use dictionary expansion (checking the word first)
+  const expandedClause = buildExpandedClause(normalized, usePrefix);
+  let filterQueryNormal = expandedClause;
+  if (filterQueryParts.length > 0) {
+    filterQueryNormal += ' AND ' + filterQueryParts.join(' AND ');
+  }
 
-  console.log('Filter Query:', filterQuery);
+  // --- Execute both searches ---
+  const sortKey = getSortKey(searchParams);
+  const reverse = getReverse(searchParams);
 
-  // Sorting
-  const sortKeyMapping = {
-    featured: 'RELEVANCE',
-    'price-low-high': 'PRICE',
-    'price-high-low': 'PRICE',
-    'best-selling': 'BEST_SELLING',
-    newest: 'CREATED_AT',
-  };
-  const reverseMapping = {
-    'price-high-low': true,
-  };
-  const sortKey = sortKeyMapping[searchParams.get('sort')] || 'RELEVANCE';
-  const reverse = reverseMapping[searchParams.get('sort')] || false;
-
-  // Perform the search using the regularSearch function.
-  const result = await regularSearch({
+  const resultConcat = await regularSearch({
     request,
     context,
-    filterQuery,
+    filterQuery: filterQueryConcat,
     sortKey,
     reverse,
     after,
     before,
   }).catch((error) => {
-    console.error('Search Error:', error);
+    console.error('Search Error (concat):', error);
     return {term: '', result: null, error: error.message};
   });
 
+  const resultNormal = await regularSearch({
+    request,
+    context,
+    filterQuery: filterQueryNormal,
+    sortKey,
+    reverse,
+    after,
+    before,
+  }).catch((error) => {
+    console.error('Search Error (normal):', error);
+    return {term: '', result: null, error: error.message};
+  });
+
+  // --- Combine results: concatenated results come first ---
+  const concatEdges = resultConcat?.result?.products?.edges || [];
+  const normalEdges = resultNormal?.result?.products?.edges || [];
+  const combinedEdges = [];
+  const seen = new Set();
+  for (const edge of concatEdges) {
+    if (!seen.has(edge.node.id)) {
+      combinedEdges.push(edge);
+      seen.add(edge.node.id);
+    }
+  }
+  for (const edge of normalEdges) {
+    if (!seen.has(edge.node.id)) {
+      combinedEdges.push(edge);
+      seen.add(edge.node.id);
+    }
+  }
+
+  // --- Prioritize vendors "apple" and "samsung" ---
+  const priorityVendors = new Set(['apple', 'samsung']);
+  const finalEdges = combinedEdges.sort((a, b) => {
+    const aVendor = a.node.vendor.toLowerCase();
+    const bVendor = b.node.vendor.toLowerCase();
+    const aPriority = priorityVendors.has(aVendor) ? 0 : 1;
+    const bPriority = priorityVendors.has(bVendor) ? 0 : 1;
+    return aPriority - bPriority;
+  });
+
+  // Simple pagination info (can be refined as needed)
+  const pageInfo = {
+    hasNextPage: false,
+    hasPreviousPage: false,
+    startCursor: finalEdges[0]?.cursor || null,
+    endCursor: finalEdges[finalEdges.length - 1]?.cursor || null,
+  };
+
   // Vendors & productTypes for filters
   const filteredVendors = [
-    ...new Set(result?.result?.products?.edges.map(({node}) => node.vendor)),
+    ...new Set(finalEdges.map(({node}) => node.vendor)),
   ].sort();
   const filteredProductTypes = [
-    ...new Set(
-      result?.result?.products?.edges.map(({node}) => node.productType),
-    ),
+    ...new Set(finalEdges.map(({node}) => node.productType)),
   ].sort();
 
   return json({
-    ...result,
+    type: 'regular',
+    term: rawTerm,
+    result: {products: {edges: finalEdges, pageInfo}},
     vendors: filteredVendors,
     productTypes: filteredProductTypes,
   });
@@ -234,7 +298,6 @@ export default function SearchPage() {
 
   const handleFilterChange = (filterKey, value, checked) => {
     const params = new URLSearchParams(searchParams);
-
     if (checked) {
       params.append(`filter_${filterKey}`, value);
     } else {
@@ -245,7 +308,6 @@ export default function SearchPage() {
         params.append(`filter_${filterKey}`, item),
       );
     }
-
     params.delete('after');
     params.delete('before');
     navigate(`/search?${params.toString()}`);
@@ -315,7 +377,6 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search Results</h1>
-
       <div className="search-filters-container" style={{display: 'flex'}}>
         {/* Sidebar (Desktop) */}
         <div className="filters">
@@ -357,7 +418,6 @@ export default function SearchPage() {
               </div>
             )}
           </fieldset>
-
           <fieldset>
             <button
               type="button"
@@ -400,7 +460,6 @@ export default function SearchPage() {
               </div>
             )}
           </fieldset>
-
           <fieldset>
             <button
               type="button"
@@ -446,10 +505,8 @@ export default function SearchPage() {
             )}
           </fieldset>
         </div>
-
         {/* Main Search Results */}
         <div className="search-results">
-          {/* Sorting */}
           <div>
             <label htmlFor="sort-select">Sort by:</label>
             <select
@@ -464,15 +521,11 @@ export default function SearchPage() {
               <option value="newest">Newest</option>
             </select>
           </div>
-
-          {/* Product Grid */}
           <div className="search-results-grid">
             {edges.map(({node: product}, idx) => (
               <ProductItem product={product} index={idx} key={product.id} />
             ))}
           </div>
-
-          {/* Pagination */}
           <div
             style={{
               marginTop: '1rem',
@@ -512,15 +565,12 @@ export default function SearchPage() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Filters */}
       <button
         className="mobile-filters-toggle"
         onClick={() => setIsMobileFiltersOpen(true)}
       >
         Filter
       </button>
-
       {isMobileFiltersOpen && (
         <div className="mobile-filters-overlay">
           <div className={`mobile-filters-panel ${isClosing ? 'closing' : ''}`}>
@@ -554,7 +604,6 @@ export default function SearchPage() {
                 </g>
               </svg>
             </button>
-
             <fieldset>
               <button
                 type="button"
@@ -592,7 +641,6 @@ export default function SearchPage() {
                 </div>
               )}
             </fieldset>
-
             <fieldset>
               <button
                 type="button"
@@ -632,7 +680,6 @@ export default function SearchPage() {
                 </div>
               )}
             </fieldset>
-
             <fieldset>
               <button
                 type="button"
@@ -762,17 +809,15 @@ async function regularSearch({
   before = null,
 }) {
   const {storefront} = context;
-
   let first = null;
   let last = null;
   if (after) {
-    first = 50; // going forward
+    first = 50;
   } else if (before) {
-    last = 50; // going backward
+    last = 50;
   } else {
     first = 50;
   }
-
   const variables = {
     filterQuery,
     sortKey,
@@ -782,12 +827,10 @@ async function regularSearch({
     first,
     last,
   };
-
   try {
     const {products} = await storefront.query(FILTERED_PRODUCTS_QUERY, {
       variables,
     });
-
     if (!products?.edges) {
       return {
         type: 'regular',
@@ -795,12 +838,7 @@ async function regularSearch({
         result: {products: {edges: []}},
       };
     }
-
-    return {
-      type: 'regular',
-      term: filterQuery,
-      result: {products},
-    };
+    return {type: 'regular', term: filterQuery, result: {products}};
   } catch (error) {
     console.error('Regular search error:', error);
     return {
@@ -813,7 +851,7 @@ async function regularSearch({
 }
 
 /* ------------------------------------------------------------------
-   PREDICTIVE SEARCH (Important: OR synonyms within each word, AND across words)
+   PREDICTIVE SEARCH (Combined Results with Dictionary)
 ------------------------------------------------------------------- */
 const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
   fragment PredictiveArticle on Article {
@@ -821,15 +859,8 @@ const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
     id
     title
     handle
-    blog {
-      handle
-    }
-    image {
-      url
-      altText
-      width
-      height
-    }
+    blog { handle }
+    image { url altText width height }
     trackingParameters
   }
 `;
@@ -839,12 +870,7 @@ const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
     id
     title
     handle
-    image {
-      url
-      altText
-      width
-      height
-    }
+    image { url altText width height }
     trackingParameters
   }
 `;
@@ -872,20 +898,9 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
       nodes {
         id
         sku
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
+        image { url altText width height }
+        price { amount currencyCode }
+        compareAtPrice { amount currencyCode }
       }
     }
   }
@@ -900,10 +915,10 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 `;
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
-    $country: CountryCode
-    $language: LanguageCode
-    $limitScope: PredictiveSearchLimitScope!
-    $term: String!
+    $country: CountryCode,
+    $language: LanguageCode,
+    $limitScope: PredictiveSearchLimitScope!,
+    $term: String!,
     $types: [PredictiveSearchType!]
   ) @inContext(country: $country, language: $language) {
     predictiveSearch(
@@ -911,21 +926,11 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
       query: $term,
       types: $types
     ) {
-      articles {
-        ...PredictiveArticle
-      }
-      collections {
-        ...PredictiveCollection
-      }
-      pages {
-        ...PredictivePage
-      }
-      products {
-        ...PredictiveProduct
-      }
-      queries {
-        ...PredictiveQuery
-      }
+      articles { ...PredictiveArticle }
+      collections { ...PredictiveCollection }
+      pages { ...PredictivePage }
+      products { ...PredictiveProduct }
+      queries { ...PredictiveQuery }
     }
   }
   ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
@@ -936,71 +941,106 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
 `;
 
 /**
- * For each typed word:
- *   1) Expand synonyms => [syn1, syn2, ...]
- *   2) OR them all together for that single word
- * Then AND across multiple typed words.
+ * In predictive search we build a clause for the concatenated term (simple)
+ * and for the normalized term (using dictionary expansion). Both queries are executed,
+ * then their results are combined with duplicates removed.
+ * For the products category, we then re-sort to prioritize vendors "apple" and "samsung".
  */
 async function predictiveSearch({request, context, usePrefix}) {
   const {storefront} = context;
   const url = new URL(request.url);
   const rawTerm = String(url.searchParams.get('q') || '').trim();
-
-  const normalizedTerm = rawTerm.replace(/-/g, ' ');
+  const {normalized, concatenated} = getSearchTerms(rawTerm);
   const limit = Number(url.searchParams.get('limit') || 10000);
   const type = 'predictive';
-
-  if (!normalizedTerm) {
+  if (!normalized) {
     return {type, term: '', result: getEmptyPredictiveSearchResult()};
   }
-
-  // Split the input into separate words
-  const typedWords = normalizedTerm
-    .split(/\s+/)
-    .map((w) => w.trim())
-    .filter(Boolean);
-
-  // For each typed word, build an OR group of synonyms
-  const wordGroups = typedWords.map((baseWord) => {
-    // Expand synonyms for THIS typed word
-    const synonyms = expandSearchTerms([baseWord]);
-    // For each synonym, build the triple check (variants.sku / title / description)
-    // then OR them together
-    const orSynonyms = synonyms.map((syn) => {
-      const termWithWildcard = usePrefix ? `${syn}*` : `*${syn}*`;
-      return `(title:${termWithWildcard} OR variants.sku:${termWithWildcard} OR description:${termWithWildcard} OR product_type:${termWithWildcard} OR tag:${termWithWildcard})`;
-    });
-    // Wrap this single word's synonyms in parentheses and join with OR
-    return `(${orSynonyms.join(' OR ')})`;
-  });
-
-  // Now AND across multiple typed words
-  // e.g. if user typed "horsepower car" => (all synonyms for "horsepower") AND (all synonyms for "car")
-  const queryTerm = wordGroups.join(' AND ');
-
-  // Query the Shopify predictiveSearch API
-  const {predictiveSearch: items, errors} = await storefront.query(
-    PREDICTIVE_SEARCH_QUERY,
-    {
-      variables: {
-        limit,
-        limitScope: 'EACH',
-        term: queryTerm,
-      },
+  // Build clause for concatenated term (simple)
+  const termQueryConcat = usePrefix ? `${concatenated}*` : `*${concatenated}*`;
+  const clauseConcat = `(title:${termQueryConcat} OR variants.sku:${termQueryConcat} OR description:${termQueryConcat} OR product_type:${termQueryConcat} OR tag:${termQueryConcat})`;
+  // Build clause for normalized term using dictionary expansion
+  const expandedClauseNormal = buildExpandedClause(normalized, usePrefix);
+  // Execute both queries
+  const responseConcat = await storefront.query(PREDICTIVE_SEARCH_QUERY, {
+    variables: {
+      limit,
+      limitScope: 'EACH',
+      term: clauseConcat,
     },
-  );
-
-  if (errors) {
+  });
+  if (responseConcat.errors) {
     throw new Error(
-      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
+      `Shopify API errors: ${responseConcat.errors
+        .map(({message}) => message)
+        .join(', ')}`,
     );
   }
-  if (!items) {
-    throw new Error('No predictive search data returned from Shopify API');
+  const itemsConcat = responseConcat.predictiveSearch;
+  const responseNormal = await storefront.query(PREDICTIVE_SEARCH_QUERY, {
+    variables: {
+      limit,
+      limitScope: 'EACH',
+      term: expandedClauseNormal,
+    },
+  });
+  if (responseNormal.errors) {
+    throw new Error(
+      `Shopify API errors: ${responseNormal.errors
+        .map(({message}) => message)
+        .join(', ')}`,
+    );
   }
-
-  const total = Object.values(items).reduce((acc, arr) => acc + arr.length, 0);
-  return {type, term: normalizedTerm, result: {items, total}};
+  const itemsNormal = responseNormal.predictiveSearch;
+  // Combine results for each category
+  const combinedItems = {};
+  const categories = [
+    'articles',
+    'collections',
+    'pages',
+    'products',
+    'queries',
+  ];
+  for (const category of categories) {
+    const concatArray = itemsConcat[category] || [];
+    const normalArray = itemsNormal[category] || [];
+    const combinedArray = [];
+    const seen = new Set();
+    const keyField = category === 'queries' ? 'text' : 'id';
+    for (const item of concatArray) {
+      if (item[keyField] && !seen.has(item[keyField])) {
+        combinedArray.push(item);
+        seen.add(item[keyField]);
+      }
+    }
+    for (const item of normalArray) {
+      if (item[keyField] && !seen.has(item[keyField])) {
+        combinedArray.push(item);
+        seen.add(item[keyField]);
+      }
+    }
+    combinedItems[category] = combinedArray;
+  }
+  // For products, prioritize vendors "apple" and "samsung"
+  if (combinedItems.products) {
+    const priorityVendors = new Set(['apple', 'samsung']);
+    combinedItems.products = combinedItems.products.sort((a, b) => {
+      const aVendor = a.vendor.toLowerCase();
+      const bVendor = b.vendor.toLowerCase();
+      const aPriority = priorityVendors.has(aVendor) ? 0 : 1;
+      const bPriority = priorityVendors.has(bVendor) ? 0 : 1;
+      return aPriority - bPriority;
+    });
+  }
+  const totalCombined = categories.reduce(
+    (acc, cat) => acc + combinedItems[cat].length,
+    0,
+  );
+  return {
+    type,
+    term: rawTerm,
+    result: {items: combinedItems, total: totalCombined},
+  };
 }
 
 /**
