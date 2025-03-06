@@ -301,7 +301,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           <div className="predictive-search-result" key="skeleton">
                             <h5>Products</h5>
                             <ul>
-                              {[...Array(5)].map((_, i) => (
+                              {[...Array(6)].map((_, i) => (
                                 <li
                                   key={i}
                                   className="predictive-search-result-item skeleton"
