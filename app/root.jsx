@@ -11,7 +11,7 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   useNavigation,
-  LiveReload,
+  // LiveReload,
 } from '@remix-run/react';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import resetStyles from '~/styles/reset.css?url';
@@ -120,20 +120,20 @@ async function loadCriticalData({context}) {
 function loadDeferredData({context}) {
   const {storefront, customerAccount, cart} = context;
 
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {footerMenuHandle: 'footer-menu'},
-    })
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
+  // const footer = storefront
+  //   .query(FOOTER_QUERY, {
+  //     cache: storefront.CacheLong(),
+  //     variables: {footerMenuHandle: 'footer-menu'},
+  //   })
+  //   .catch((error) => {
+  //     console.error(error);
+  //     return null;
+  //   });
 
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    // footer,
   };
 }
 
@@ -216,7 +216,7 @@ export function Layout({children}) {
         )}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
-        <LiveReload nonce={nonce} />
+        {/* <LiveReload nonce={nonce} /> */}
       </body>
     </html>
   );
