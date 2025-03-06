@@ -5,7 +5,6 @@ import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
-import { SearchBar } from './SearchResultsOptimized';
 
 
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
@@ -16,7 +15,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [placeholder, setPlaceholder] = useState('Search products');
-  // const searchContainerRef = useRef(null);
+  const searchContainerRef = useRef(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const timeoutRef = useRef(null);
   const blinkIntervalRef = useRef(null);
@@ -53,20 +52,20 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   };
 
   // Close search if clicking outside the search container
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (
-  //       searchContainerRef.current &&
-  //       !searchContainerRef.current.contains(event.target)
-  //     ) {
-  //       setSearchResultsVisible(false);
-  //       setOverlayVisible(false);
-  //       searchContainerRef.current?.classList.remove('fixed-search');
-  //     }
-  //   };
-  //   document.addEventListener('mousedown', handleClickOutside);
-  //   return () => document.removeEventListener('mousedown', handleClickOutside);
-  // }, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setSearchResultsVisible(false);
+        setOverlayVisible(false);
+        searchContainerRef.current?.classList.remove('fixed-search');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -178,7 +177,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               height="50px"
             />
           </NavLink>
-          {/* <SearchFormPredictive className="header-search">
+          <SearchFormPredictive className="header-search">
             {({inputRef, fetchResults, goToSearch, fetcher}) => {
               // Use the updated hook to focus the search on "/" press instead of cmd+k
               useFocusOnSlash(inputRef);
@@ -246,6 +245,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
               return (
                 <>
+                  {/* Fullscreen Overlay */}
                   <div
                     className={`search-overlay ${
                       isOverlayVisible ? 'active' : ''
@@ -253,6 +253,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     onClick={handleCloseSearch}
                   ></div>
 
+                  {/* Main Search Form */}
                   <div ref={searchContainerRef} className="main-search">
                     <div className="search-container">
                       <input
@@ -348,10 +349,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 </>
               );
             }}
-          </SearchFormPredictive> */}
-
+          </SearchFormPredictive>
           {/* New SearchBar Component Implementation */}
-          <SearchBar
+          {/* <SearchBar
             className="header-search"
             onResultSelect={(product) => {
               // Add any logic needed when a product is selected
@@ -360,8 +360,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             closeSearch={() => {
               // Add any logic needed when closing the search
             }}
-          />
-
+          /> */}
           <div className="header-ctas">
             <NavLink
               prefetch="intent"

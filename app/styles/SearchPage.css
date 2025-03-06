@@ -51,16 +51,16 @@
 
 .results-pages>button {
     border: 1px solid #2172af;
-    padding: 5px;
     border-radius: 30px;
     width: 100px;
+    height: 30px;
 }
 
 .pages-btns button {
     padding: 5px;
     border: 1px solid #2172af;
     border-radius: 50%;
-    width: 40px;
+    width: 30px;
     height: 30px;
 }
 
@@ -86,7 +86,7 @@
 }
 
 .search-filters-container {
-    width: 95%;
+    /* width: 95%; */
 }
 
 .filters {
@@ -118,12 +118,12 @@
 
 .search-results {
     /* justify-content: flex-end; */
-    width: 86%;
+    /* width: 86%; */
 }
 
 @media (min-width: 1024px) {
     .search-results-grid {
-        width: 90%;
+        /* width: 85%; */
     }
 }
 
