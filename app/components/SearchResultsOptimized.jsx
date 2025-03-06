@@ -1,7 +1,7 @@
 import {useLoaderData, Link, useNavigate, useLocation} from '@remix-run/react';
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {Money, Image} from '@shopify/hydrogen';
-import {debounce} from 'lodash';
+import debounce from 'lodash/debounce';
 
 // Helper: truncate text to a given length.
 function truncateText(text, maxLength) {
@@ -15,11 +15,11 @@ export function SearchBar({onResultSelect, closeSearch}) {
   const [error, setError] = useState(null);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // new state for loading
+  const [isLoading, setIsLoading] = useState(false);
 
   const inputRef = useRef(null);
   const searchContainerRef = useRef(null);
-  const navigate = useNavigate(); // Use Remix's navigation hook
+  const navigate = useNavigate();
 
   // Debounced fetch from the search endpoint with a limit of 10 products.
   const debouncedFetch = useCallback(
@@ -55,6 +55,13 @@ export function SearchBar({onResultSelect, closeSearch}) {
     return () => debouncedFetch.cancel();
   }, [query, debouncedFetch]);
 
+  // Close the search overlay and results.
+  const handleCloseSearch = useCallback(() => {
+    searchContainerRef.current?.classList.remove('fixed-search');
+    setOverlayVisible(false);
+    setSearchResultsVisible(false);
+  }, []);
+
   // Handle focus: on small screens, add fixed positioning and show overlay.
   const handleFocus = () => {
     if (window.innerWidth < 1024) {
@@ -75,13 +82,6 @@ export function SearchBar({onResultSelect, closeSearch}) {
     }
   };
 
-  // Closes the search overlay and results.
-  const handleCloseSearch = () => {
-    searchContainerRef.current?.classList.remove('fixed-search');
-    setOverlayVisible(false);
-    setSearchResultsVisible(false);
-  };
-
   // Handle Enter key to trigger search.
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -91,12 +91,13 @@ export function SearchBar({onResultSelect, closeSearch}) {
   };
 
   // Trigger search – navigate to the search page with the query as a parameter.
+  // Also close the search.
   const handleSearch = () => {
     if (inputRef.current) {
       const rawTerm = inputRef.current.value.trim();
       if (rawTerm) {
-        // Optionally: trackSearch(rawTerm);
         navigate(`/search?q=${rawTerm}`);
+        handleCloseSearch();
       }
     }
   };
@@ -122,6 +123,38 @@ export function SearchBar({onResultSelect, closeSearch}) {
       document.body.style.overflow = '';
     };
   }, [isOverlayVisible]);
+
+  // Close the search if clicking outside the container.
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target)
+      ) {
+        handleCloseSearch();
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleCloseSearch]);
+
+  // Focus input when pressing '/' (if not already typing in an input).
+  useEffect(() => {
+    function handleSlashFocus(e) {
+      // Only trigger if user isn't currently focused on another input/textarea
+      if (e.key === '/' && !e.target.matches('input, textarea')) {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setSearchResultsVisible(true);
+      }
+    }
+    document.addEventListener('keydown', handleSlashFocus);
+    return () => {
+      document.removeEventListener('keydown', handleSlashFocus);
+    };
+  }, []);
 
   return (
     <>
@@ -163,7 +196,14 @@ export function SearchBar({onResultSelect, closeSearch}) {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 460.775 460.775"
               >
-                <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path>
+                <path
+                  d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 
+                  c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 
+                  c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 
+                  c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55
+                  l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
+                  c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"
+                ></path>
               </svg>
             </button>
           )}
@@ -186,13 +226,11 @@ export function SearchBar({onResultSelect, closeSearch}) {
                       key={i}
                       className="predictive-search-result-item skeleton"
                     >
-                      {/* Skeleton markup (use the improved skeleton structure with shimmer for each element) */}
                       <div className="search-result-txt">
                         <div className="search-result-titDesc skeleton-div">
                           <div className="skeleton skeleton-image"></div>
                           <div className="skeleten-tds">
                             <p className="skeleton skeleton-title"></p>
-                            {/* <p className="skeleton skeleton-description"></p> */}
                             <p className="skeleton skeleton-sku"></p>
                           </div>
                         </div>
@@ -219,7 +257,11 @@ export function SearchBar({onResultSelect, closeSearch}) {
                           <Link
                             to={productUrl}
                             onClick={() => {
-                              if (closeSearch) closeSearch();
+                              // Close both locally and via prop if provided:
+                              handleCloseSearch();
+                              if (closeSearch) {
+                                closeSearch();
+                              }
                               onResultSelect(product);
                             }}
                           >

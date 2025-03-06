@@ -16,7 +16,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const [isSearchResultsVisible, setSearchResultsVisible] = useState(false);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [placeholder, setPlaceholder] = useState('Search products');
-  const searchContainerRef = useRef(null);
+  // const searchContainerRef = useRef(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const timeoutRef = useRef(null);
   const blinkIntervalRef = useRef(null);
@@ -53,20 +53,20 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   };
 
   // Close search if clicking outside the search container
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(event.target)
-      ) {
-        setSearchResultsVisible(false);
-        setOverlayVisible(false);
-        searchContainerRef.current?.classList.remove('fixed-search');
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       searchContainerRef.current &&
+  //       !searchContainerRef.current.contains(event.target)
+  //     ) {
+  //       setSearchResultsVisible(false);
+  //       setOverlayVisible(false);
+  //       searchContainerRef.current?.classList.remove('fixed-search');
+  //     }
+  //   };
+  //   document.addEventListener('mousedown', handleClickOutside);
+  //   return () => document.removeEventListener('mousedown', handleClickOutside);
+  // }, []);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
