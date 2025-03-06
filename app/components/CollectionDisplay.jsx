@@ -203,47 +203,55 @@ export function ProductItem({product, index}) {
         )}
         <h4 className="product-title">{product.title}</h4>
         <div className="product-price">
-          {selectedVariant?.price && <Money data={selectedVariant.price} />}
+          {selectedVariant?.price &&
+            (parseFloat(selectedVariant.price.amount) === 0 ? 'Call for Price!' : <Money data={selectedVariant.price} />)}
           {hasDiscount && (
             <small className="discountedPrice">
               <Money data={selectedVariant.compareAtPrice} />
             </small>
           )}
         </div>
-      </Link>
+        </Link>
 
-      {/* Add to Cart Button */}
-      <AddToCartButton
-        disabled={!selectedVariant || !selectedVariant.availableForSale}
-        onClick={() => {
-          if (product.variants?.nodes?.length > 1) {
-            window.location.href = `/products/${product.handle}`;
-          } else {
-            open('cart');
+        {/* Add to Cart Button */}
+        <AddToCartButton
+          disabled={
+            !selectedVariant ||
+            !selectedVariant.availableForSale ||
+            (selectedVariant?.price && parseFloat(selectedVariant.price.amount) === 0)
           }
-        }}
-        lines={
-          selectedVariant
-            ? [
-                {
-                  merchandiseId: selectedVariant.id,
-                  quantity: 1,
-                  product: {
-                    ...product,
-                    selectedVariant,
-                    handle: product.handle,
+          onClick={() => {
+            if (product.variants?.nodes?.length > 1) {
+              window.location.href = `/products/${product.handle}`;
+            } else {
+              open('cart');
+            }
+          }}
+          lines={
+            selectedVariant
+              ? [
+                  {
+                    merchandiseId: selectedVariant.id,
+                    quantity: 1,
+                    product: {
+                      ...product,
+                      selectedVariant,
+                      handle: product.handle,
+                    },
                   },
-                },
-              ]
-            : []
-        }
-      >
-        {!selectedVariant?.availableForSale
-          ? 'Sold out'
-          : product.variants?.nodes?.length > 1
-          ? 'Select Options'
-          : 'Add to cart'}
-      </AddToCartButton>
+                ]
+              : []
+          }
+        >
+          {!selectedVariant?.availableForSale
+            ? 'Sold out'
+            : (selectedVariant?.price && parseFloat(selectedVariant.price.amount) === 0)
+            ? 'Call for Price'
+            : product.variants?.nodes?.length > 1
+            ? 'Select Options'
+            : 'Add to cart'}
+        </AddToCartButton>
+
     </div>
   );
 }
