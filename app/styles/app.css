@@ -1524,7 +1524,7 @@ li.cart-line .product-price {
     max-width: 100vw !important;
     width: 100vw !important;
     position: absolute;
-    top: 94px;
+    top: -6px;
   }
 
   .search-container {
