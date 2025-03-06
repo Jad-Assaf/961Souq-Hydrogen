@@ -228,7 +228,7 @@ export default function SearchTest() {
       <h1>Search Results</h1>
 
       <form onSubmit={handleSubmit} className="search-form">
-        <input
+        {/* <input
           type="text"
           placeholder="Search..."
           value={inputQuery}
@@ -237,7 +237,11 @@ export default function SearchTest() {
         />
         <button type="submit" className="search-button">
           Search
-        </button>
+        </button> */}
+        <p className="results-count">
+          Showing {edges.length} results on page {page + 1} of{' '}
+          {Math.ceil(total / limit)} (total {total})
+        </p>
         <select
           value={limit}
           onChange={(e) => {
@@ -283,10 +287,6 @@ export default function SearchTest() {
           {error && <p className="error">{error}</p>}
           {edges.length > 0 && (
             <>
-              <p className="results-count">
-                Showing {edges.length} results on page {page + 1} of{' '}
-                {Math.ceil(total / limit)} (total {total})
-              </p>
               <div className="search-results-grid">
                 {edges.map(({node: product}) => (
                   <div key={product.id} className="product-card">
