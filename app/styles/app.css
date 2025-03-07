@@ -1934,6 +1934,10 @@ button#headlessui-menu-button-\:R3lab5\: {
   justify-content: space-between;
 }
 
+.product-info-container a {
+  color: #232323;
+}
+
 .grid-cols-2 .product-description,
 .grid-cols-3 .product-description,
 .grid-cols-4 .product-description,
