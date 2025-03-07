@@ -79,7 +79,7 @@ const MetaPixel = ({pixelId}) => {
       n.version = '2.0';
       n.queue = [];
       t = b.createElement(e);
-      t.async = !0;
+      t.defer = true;
       t.src = v;
       s = b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t, s);
