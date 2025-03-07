@@ -1417,6 +1417,10 @@ button.reset:hover:not(:has(> *)) {
   width: 100%;
 }
 
+.cart-line a{
+  color: #000 !important;
+}
+
 .cart-line img {
   width: 100px;
   height: auto;
