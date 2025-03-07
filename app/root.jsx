@@ -184,22 +184,28 @@ export function Layout({children}) {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
-        <script
-          nonce={nonce}
-          src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
-        ></script>
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-CB623RXLSE');
-            `,
-          }}
-        ></script>
-        <MetaPixel pixelId={PIXEL_ID} />
+        <Suspense fallback={null}>
+          <script
+            nonce={nonce}
+            src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
+          ></script>
+        </Suspense>
+        <Suspense fallback={null}>
+          <script
+            nonce={nonce}
+            dangerouslySetInnerHTML={{
+              __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-CB623RXLSE');
+        `,
+            }}
+          ></script>
+        </Suspense>
+        <Suspense fallback={null}>
+          <MetaPixel pixelId={PIXEL_ID} />
+        </Suspense>
       </head>
       <body>
         <ClarityTracker clarityId={clarityId} />
