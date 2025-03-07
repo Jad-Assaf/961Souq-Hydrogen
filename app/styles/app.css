@@ -507,6 +507,14 @@ button {
   gap: 10px;
 }
 
+.product-card .product-title {
+  transition: all 0.3s linear;
+}
+
+.product-card .product-title:hover {
+  text-decoration: underline #2172af;
+}
+
 .mobile-container {
   margin-bottom: 10px;
 }
@@ -1359,7 +1367,7 @@ button.reset:hover:not(:has(> *)) {
     color: #333;
   }
 
-  .search-result-price{
+  .search-result-price {
     color: #ff4f4f !important;
   }
 }
@@ -1418,7 +1426,7 @@ button.reset:hover:not(:has(> *)) {
   width: 100%;
 }
 
-.cart-line a{
+.cart-line a {
   color: #000 !important;
 }
 

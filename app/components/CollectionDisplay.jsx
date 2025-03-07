@@ -108,7 +108,7 @@ export function ProductItem({product}) {
       const timer = setTimeout(() => {
         setFadeIn(true);
         setFirstLoad(false);
-      }, 10); // delay of 10ms allows the browser to register the change
+      }, 10); // delay allows the browser to register the change
       return () => clearTimeout(timer);
     }
   }, [currentImageIndex, firstLoad]);
@@ -122,6 +122,7 @@ export function ProductItem({product}) {
     selectedVariant?.compareAtPrice &&
     selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
+  // Attach hover events only on the image container
   const handleMouseEnter = () => {
     if (images.length > 1) {
       setCurrentImageIndex(1);
@@ -133,15 +134,15 @@ export function ProductItem({product}) {
   };
 
   return (
-    <div
-      ref={ref}
-      className="product-card"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div ref={ref} className="product-card">
       <Link to={`/products/${encodeURIComponent(product.handle)}`}>
         {images.length > 0 && (
-          <div className="product-image-container" style={styles.slideshow}>
+          <div
+            className="product-image-container"
+            style={styles.slideshow}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             {/* Sold-out banner */}
             <div
               className="sold-out-ban"

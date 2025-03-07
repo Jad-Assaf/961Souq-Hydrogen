@@ -578,7 +578,7 @@ export default function Homepage() {
         <TopProductSections collection={topProducts['lighting']} />
       )}
 
-      {/* <BrandSection brands={brandsData} /> */}
+      <BrandSection brands={brandsData} />
     </div>
   );
 }
