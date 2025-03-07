@@ -206,7 +206,9 @@ export function Layout({children}) {
         </Suspense>
       </head>
       <body>
-        <ClarityTracker clarityId={clarityId} />
+        <Suspense fallback={null}>
+          <ClarityTracker clarityId={clarityId} />
+        </Suspense>
         {data ? (
           <Analytics.Provider
             cart={data.cart}
