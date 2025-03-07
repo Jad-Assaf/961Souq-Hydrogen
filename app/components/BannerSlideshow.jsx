@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Image } from '@shopify/hydrogen';
+import React, {useState, useEffect} from 'react';
 
-export function BannerSlideshow({ banners, interval = 10000 }) {
+export function BannerSlideshow({banners, interval = 10000}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [animationStyle, setAnimationStyle] = useState({});
@@ -25,17 +24,22 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
   }, [banners.length, interval]);
 
   useEffect(() => {
+    // Reset progress whenever the image changes
     setProgress(0);
 
+    // Trigger a brief fade/slide in
     setAnimationStyle({
       opacity: 1,
       transform: 'translateX(0)',
       transition: 'opacity 0.5s ease, transform 0.5s ease',
     });
 
-    setTimeout(() => {
+    // Remove the transition style after the animation completes
+    const timer = setTimeout(() => {
       setAnimationStyle({});
     }, 500);
+
+    return () => clearTimeout(timer);
   }, [currentIndex]);
 
   const handleTouchStart = (e) => {
@@ -63,6 +67,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
         prevIndex === banners.length - 1 ? 0 : prevIndex + 1,
       );
     } else {
+      // Snap back if the user didn't swipe far enough
       setAnimationStyle({
         transform: 'translateX(0)',
         transition: 'transform 0.3s ease',
@@ -70,83 +75,68 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
     }
   };
 
-  const renderedDesktopBanners = banners.map((banner, index) => (
-    <div
-      key={index}
-      className={`banner-slide ${
-        index === currentIndex ? 'active' : 'inactive'
-      }`}
-      style={{
-        ...styles.bannerSlide,
-        ...animationStyle,
-        opacity: index === currentIndex ? 1 : 0,
-        transform:
-          index === currentIndex
+  // Instead of separately rendering “desktop” and “mobile” banners,
+  // we use <picture> with <source> so that the browser only downloads
+  // the matching image for the current viewport size.
+  const renderedSlides = banners.map((banner, index) => {
+    const isActive = index === currentIndex;
+    return (
+      <div
+        key={index}
+        className={`banner-slide ${isActive ? 'active' : 'inactive'}`}
+        style={{
+          ...styles.bannerSlide,
+          ...animationStyle,
+          opacity: isActive ? 1 : 0,
+          transform: isActive
             ? 'translateX(0)'
             : index > currentIndex
             ? 'translateX(50px)'
             : 'translateX(-50px)',
-      }}
-    >
-      <a
-        href={banner.link}
-        target="_self"
-        rel="noopener noreferrer"
-        style={styles.link}
+        }}
       >
-        <img
-          src={banner.desktopImageUrl}
-          srcSet={`${banner.desktopImageUrl}?width=300&quality=85 300w,
-                   ${banner.desktopImageUrl}?width=600&quality=85 600w,
-                   ${banner.desktopImageUrl}?width=1200&quality=85 1200w`}
-          sizes="(max-width: 768px) 100vw, 50vw"
-          alt={`Banner ${index + 1}`}
-          style={styles.bannerImage}
-          loading="eager"
-          decoding="sync"
-        />
-      </a>
-    </div>
-  ));
+        <a
+          href={banner.link}
+          target="_self"
+          rel="noopener noreferrer"
+          style={styles.link}
+        >
+          <picture>
+            {/* Desktop source */}
+            <source
+              media="(min-width: 1025px)"
+              srcSet={`
+                ${banner.desktopImageUrl}?width=300&quality=85 300w,
+                ${banner.desktopImageUrl}?width=600&quality=85 600w,
+                ${banner.desktopImageUrl}?width=1200&quality=85 1200w
+              `}
+              sizes="(min-width: 1025px) 100vw"
+            />
 
-  const renderedMobileBanners = banners.map((banner, index) => (
-    <div
-      key={index}
-      className={`banner-slide ${
-        index === currentIndex ? 'active' : 'inactive'
-      }`}
-      style={{
-        ...styles.bannerSlide,
-        ...animationStyle,
-        opacity: index === currentIndex ? 1 : 0,
-        transform:
-          index === currentIndex
-            ? 'translateX(0)'
-            : index > currentIndex
-            ? 'translateX(50px)'
-            : 'translateX(-50px)',
-      }}
-    >
-      <a
-        href={banner.link}
-        target="_self"
-        rel="noopener noreferrer"
-        style={styles.link}
-      >
-        <img
-          src={banner.mobileImageUrl}
-          srcSet={`${banner.mobileImageUrl}?width=300&quality=85 300w,
-                   ${banner.mobileImageUrl}?width=600&quality=85 600w,
-                   ${banner.mobileImageUrl}?width=1200&quality=85 1200w`}
-          sizes="(max-width: 768px) 100vw, 50vw"
-          alt={`Banner ${index + 1}`}
-          style={styles.bannerImage}
-          loading="eager"
-          decoding="sync"
-        />
-      </a>
-    </div>
-  ));
+            {/* Mobile source */}
+            <source
+              media="(max-width: 1024px)"
+              srcSet={`
+                ${banner.mobileImageUrl}?width=300&quality=85 300w,
+                ${banner.mobileImageUrl}?width=600&quality=85 600w,
+                ${banner.mobileImageUrl}?width=1200&quality=85 1200w
+              `}
+              sizes="(max-width: 1024px) 100vw"
+            />
+
+            {/* Fallback <img> if browser doesn't support <picture> */}
+            <img
+              src={banner.mobileImageUrl}
+              alt={`Banner ${index + 1}`}
+              style={styles.bannerImage}
+              loading="eager"
+              decoding="sync"
+            />
+          </picture>
+        </a>
+      </div>
+    );
+  });
 
   return (
     <div
@@ -156,15 +146,8 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Desktop Banners */}
-      <div className="desktop-banners">
-        {renderedDesktopBanners[currentIndex]}
-      </div>
-
-      {/* Mobile Banners */}
-      <div className="mobile-banners">
-        {renderedMobileBanners[currentIndex]}
-      </div>
+      {/* Render the current slide */}
+      {renderedSlides[currentIndex]}
 
       {/* Progress Bar */}
       <div className="progress-bar" style={styles.progressBar}>
