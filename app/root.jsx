@@ -1,6 +1,10 @@
 // src/root.jsx
-import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
-import {defer} from '@shopify/remix-oxygen';
+import {
+  useNonce,
+  getShopAnalytics,
+  Analytics,
+} from '@shopify/hydrogen';
+import {defer, redirect} from '@shopify/remix-oxygen';
 import {
   Links,
   Meta,
@@ -54,11 +58,20 @@ export function links() {
 /**
  * @param {LoaderFunctionArgs} args
  */
-export async function loader(args) {
+export async function loader({request, context}) {
+  // Implement the redirect for legacy URLs:
+  const url = new URL(request.url);
+  const pathname = url.pathname;
+  const match = pathname.match(/^\/collections\/[^/]+\/products\/(.+)/);
+  if (match) {
+    const productSlug = match[1];
+    return redirect(`/products/${productSlug}`, { status: 301 });
+  }
+
   try {
-    const deferredData = await loadDeferredData(args);
-    const criticalData = await loadCriticalData(args);
-    const {storefront, env} = args.context;
+    const deferredData = await loadDeferredData({request, context});
+    const criticalData = await loadCriticalData({request, context});
+    const {storefront, env} = context;
 
     return defer({
       ...deferredData,
@@ -72,8 +85,8 @@ export async function loader(args) {
         checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
         storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
         withPrivacyBanner: true,
-        country: args.context.storefront.i18n.country,
-        language: args.context.storefront.i18n.language,
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
       },
     });
   } catch (error) {
@@ -120,20 +133,9 @@ async function loadCriticalData({context}) {
 function loadDeferredData({context}) {
   const {storefront, customerAccount, cart} = context;
 
-  // const footer = storefront
-  //   .query(FOOTER_QUERY, {
-  //     cache: storefront.CacheLong(),
-  //     variables: {footerMenuHandle: 'footer-menu'},
-  //   })
-  //   .catch((error) => {
-  //     console.error(error);
-  //     return null;
-  //   });
-
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    // footer,
   };
 }
 
@@ -186,7 +188,6 @@ export function Layout({children}) {
           nonce={nonce}
           src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
         ></script>
-
         <script
           nonce={nonce}
           dangerouslySetInnerHTML={{
@@ -194,7 +195,6 @@ export function Layout({children}) {
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-
               gtag('config', 'G-CB623RXLSE');
             `,
           }}
@@ -316,7 +316,6 @@ export function ErrorBoundary() {
 }
 
 /** @typedef {LoaderReturnData} RootLoader */
-
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @typedef {import('@remix-run/react').ShouldRevalidateFunction} ShouldRevalidateFunction */
 /** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
