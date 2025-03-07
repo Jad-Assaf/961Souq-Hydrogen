@@ -1,9 +1,5 @@
 // src/root.jsx
-import {
-  useNonce,
-  getShopAnalytics,
-  Analytics,
-} from '@shopify/hydrogen';
+import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {defer, redirect} from '@shopify/remix-oxygen';
 import {
   Links,
@@ -65,7 +61,7 @@ export async function loader({request, context}) {
   const match = pathname.match(/^\/collections\/[^/]+\/products\/(.+)/);
   if (match) {
     const productSlug = match[1];
-    return redirect(`/products/${productSlug}`, { status: 301 });
+    return redirect(`/products/${productSlug}`, {status: 301});
   }
 
   try {
@@ -186,12 +182,14 @@ export function Layout({children}) {
         <Links />
         <Suspense fallback={null}>
           <script
+            defer
             nonce={nonce}
             src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
           ></script>
         </Suspense>
         <Suspense fallback={null}>
           <script
+            defer
             nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: `
