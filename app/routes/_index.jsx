@@ -220,7 +220,7 @@ export async function loader(args) {
     'cameras',
     'dyson-products',
     'kitchen-appliances',
-    'cleaning-devices',
+    // 'cleaning-devices',
     'lighting',
   ];
 
@@ -571,14 +571,14 @@ export default function Homepage() {
       {topProducts['kitchen-appliances'] && (
         <TopProductSections collection={topProducts['kitchen-appliances']} />
       )}
-      {topProducts['cleaning-devices'] && (
+      {/* {topProducts['cleaning-devices'] && (
         <TopProductSections collection={topProducts['cleaning-devices']} />
-      )}
+      )} */}
       {topProducts['lighting'] && (
         <TopProductSections collection={topProducts['lighting']} />
       )}
 
-      <BrandSection brands={brandsData} />
+      {/* <BrandSection brands={brandsData} /> */}
     </div>
   );
 }
@@ -610,7 +610,7 @@ const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               currencyCode
             }
           }
-          images(first: 4) {
+          images(first: 2) {
             nodes {
               url
               altText
