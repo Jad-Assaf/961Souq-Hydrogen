@@ -1,14 +1,14 @@
-import React, {Suspense, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Link} from '@remix-run/react';
 import {Money, Image} from '@shopify/hydrogen';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
-import CollectionRows from './CollectionRows'; // Standard import for CollectionRows
+import CollectionRows from './CollectionRows';
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') {
-    return ''; // Return an empty string if text is undefined or not a string
+    return '';
   }
   const words = text.split(' ');
   return words.length > maxWords
@@ -38,8 +38,8 @@ export function ProductRow({products}) {
         <LeftArrowIcon />
       </button>
       <div className="collection-products-row" ref={rowRef}>
-        {products.map((product, index) => (
-          <ProductItem key={product.id} product={product} index={index} />
+        {products.map((product) => (
+          <ProductItem key={product.id} product={product} />
         ))}
       </div>
       <button className="home-next-button" onClick={() => scrollRow(600)}>
@@ -77,15 +77,15 @@ const RightArrowIcon = () => (
   </svg>
 );
 
-export function ProductItem({product, index}) {
+export function ProductItem({product}) {
   const ref = useRef(null);
   const {open} = useAside();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isSoldOut, setIsSoldOut] = useState(false); // State to track sold-out status
-  const slideshowInterval = 1500; // Time for each slide
-
+  // Controls opacity for the fade transition
+  const [fadeIn, setFadeIn] = useState(true);
+  // Flag to avoid applying transition on first render
+  const [firstLoad, setFirstLoad] = useState(true);
+  const [isSoldOut, setIsSoldOut] = useState(false);
   const images = product.images?.nodes || [];
 
   useEffect(() => {
@@ -93,39 +93,25 @@ export function ProductItem({product, index}) {
     const soldOut = !product.variants?.nodes?.some(
       (variant) => variant.availableForSale,
     );
-    setIsSoldOut(soldOut); // Update the state
+    setIsSoldOut(soldOut);
   }, [product]);
 
+  // Trigger fade-in effect when the current image changes
   useEffect(() => {
-    let imageTimer, progressTimer;
-
-    if (isHovered) {
-      // Image slideshow timer
-      imageTimer = setInterval(() => {
-        setCurrentImageIndex((prevIndex) =>
-          prevIndex === images.length - 1 ? 0 : prevIndex + 1,
-        );
-      }, slideshowInterval);
-
-      // Progress bar timer
-      progressTimer = setInterval(() => {
-        setProgress((prev) =>
-          prev >= 100 ? 0 : prev + 100 / (slideshowInterval / 100),
-        );
-      }, 100);
+    if (firstLoad && currentImageIndex === 0) {
+      // On initial render, ensure image is visible with no transition.
+      setFadeIn(true);
     } else {
-      setProgress(0); // Reset progress when not hovered
+      // When switching images, start with opacity 0...
+      setFadeIn(false);
+      // ...and then, after a brief delay, set opacity to 1 to trigger the fade.
+      const timer = setTimeout(() => {
+        setFadeIn(true);
+        setFirstLoad(false);
+      }, 10); // delay of 10ms allows the browser to register the change
+      return () => clearTimeout(timer);
     }
-
-    return () => {
-      clearInterval(imageTimer);
-      clearInterval(progressTimer);
-    };
-  }, [isHovered, images.length]);
-
-  useEffect(() => {
-    setProgress(0); // Reset progress when the current image changes
-  }, [currentImageIndex]);
+  }, [currentImageIndex, firstLoad]);
 
   const selectedVariant =
     product.variants?.nodes?.find((variant) => variant.availableForSale) ||
@@ -136,122 +122,113 @@ export function ProductItem({product, index}) {
     selectedVariant?.compareAtPrice &&
     selectedVariant.compareAtPrice.amount > selectedVariant.price.amount;
 
+  const handleMouseEnter = () => {
+    if (images.length > 1) {
+      setCurrentImageIndex(1);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setCurrentImageIndex(0);
+  };
+
   return (
     <div
       ref={ref}
       className="product-card"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Link to={`/products/${encodeURIComponent(product.handle)}`}>
         {images.length > 0 && (
-          <div className="product-slideshow" style={styles.slideshow}>
+          <div className="product-image-container" style={styles.slideshow}>
             {/* Sold-out banner */}
             <div
               className="sold-out-ban"
-              style={{display: isSoldOut ? 'flex' : 'none'}} // Conditional display
+              style={{display: isSoldOut ? 'flex' : 'none'}}
             >
               <p>Sold Out</p>
             </div>
-            <Image
-              src={images[currentImageIndex]?.url}
-              alt={images[currentImageIndex]?.altText || 'Product Image'}
-              aspectRatio="1/1"
-              sizes="(min-width: 45em) 20vw, 40vw"
-              srcSet={`${images[currentImageIndex]?.url}?width=300&quality=10 300w,
-                                     ${images[currentImageIndex]?.url}?width=600&quality=10 600w,
-                                     ${images[currentImageIndex]?.url}?width=1200&quality=10 1200w`}
-              width="180px"
-              height="180px"
-              loading="lazy"
-              style={styles.image}
-              className="product-slideshow-image"
-            />
-            <div
-              className="product-slideshow-progress-bar"
-              style={styles.progressBar}
-            >
-              <div
-                className="product-slideshow-progress"
+            <div style={styles.imageWrapper}>
+              <Image
+                key={currentImageIndex} // re-mount the image when index changes
+                src={images[currentImageIndex]?.url}
+                alt={images[currentImageIndex]?.altText || 'Product Image'}
+                aspectRatio="1/1"
+                sizes="(min-width: 45em) 20vw, 40vw"
+                srcSet={`
+                  ${images[currentImageIndex]?.url}?width=300&quality=10 300w,
+                  ${images[currentImageIndex]?.url}?width=600&quality=10 600w,
+                  ${images[currentImageIndex]?.url}?width=1200&quality=10 1200w
+                `}
+                width="180px"
+                height="180px"
+                loading="lazy"
                 style={{
-                  ...styles.progress,
-                  width: `${progress}%`,
+                  ...styles.image,
+                  opacity: fadeIn ? 1 : 0,
+                  transition: firstLoad ? 'none' : 'opacity 0.2s linear',
                 }}
-              ></div>
-            </div>
-            {/* Indicator Dots */}
-            <div
-              className="product-slideshow-dots"
-              style={styles.dotsContainer}
-            >
-              {images.map((_, index) => (
-                <div
-                  key={index}
-                  className={`product-slideshow-dot ${
-                    currentImageIndex === index ? 'active' : ''
-                  }`}
-                  style={{
-                    ...styles.dot,
-                    backgroundColor:
-                      currentImageIndex === index ? '#000' : '#e0e0e0',
-                  }}
-                  onClick={() => setCurrentImageIndex(index)}
-                ></div>
-              ))}
+                className="product-image"
+              />
             </div>
           </div>
         )}
         <h4 className="product-title">{product.title}</h4>
         <div className="product-price">
           {selectedVariant?.price &&
-            (parseFloat(selectedVariant.price.amount) === 0 ? 'Call for Price!' : <Money data={selectedVariant.price} />)}
+            (parseFloat(selectedVariant.price.amount) === 0 ? (
+              'Call for Price!'
+            ) : (
+              <Money data={selectedVariant.price} />
+            ))}
           {hasDiscount && (
             <small className="discountedPrice">
               <Money data={selectedVariant.compareAtPrice} />
             </small>
           )}
         </div>
-        </Link>
+      </Link>
 
-        {/* Add to Cart Button */}
-        <AddToCartButton
-          disabled={
-            !selectedVariant ||
-            !selectedVariant.availableForSale ||
-            (selectedVariant?.price && parseFloat(selectedVariant.price.amount) === 0)
+      <AddToCartButton
+        disabled={
+          !selectedVariant ||
+          !selectedVariant.availableForSale ||
+          (selectedVariant?.price &&
+            parseFloat(selectedVariant.price.amount) === 0)
+        }
+        onClick={() => {
+          if (product.variants?.nodes?.length > 1) {
+            window.location.href = `/products/${product.handle}`;
+          } else {
+            open('cart');
           }
-          onClick={() => {
-            if (product.variants?.nodes?.length > 1) {
-              window.location.href = `/products/${product.handle}`;
-            } else {
-              open('cart');
-            }
-          }}
-          lines={
-            selectedVariant
-              ? [
-                  {
-                    merchandiseId: selectedVariant.id,
-                    quantity: 1,
-                    product: {
-                      ...product,
-                      selectedVariant,
-                      handle: product.handle,
-                    },
+        }}
+        lines={
+          selectedVariant
+            ? [
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                  product: {
+                    ...product,
+                    selectedVariant,
+                    handle: product.handle,
                   },
-                ]
-              : []
-          }
-        >
-          {!selectedVariant?.availableForSale
-            ? 'Sold out'
-            : (selectedVariant?.price && parseFloat(selectedVariant.price.amount) === 0)
-            ? 'Call for Price'
-            : product.variants?.nodes?.length > 1
-            ? 'Select Options'
-            : 'Add to cart'}
-        </AddToCartButton>
-
+                },
+              ]
+            : []
+        }
+      >
+        {!selectedVariant?.availableForSale
+          ? 'Sold out'
+          : selectedVariant?.price &&
+            parseFloat(selectedVariant.price.amount) === 0
+          ? 'Call for Price'
+          : product.variants?.nodes?.length > 1
+          ? 'Select Options'
+          : 'Add to cart'}
+      </AddToCartButton>
     </div>
   );
 }
@@ -263,39 +240,13 @@ const styles = {
     height: 'auto',
     overflow: 'hidden',
   },
+  imageWrapper: {
+    width: '100%',
+    height: 'auto',
+  },
   image: {
     width: '100%',
     height: 'auto',
     objectFit: 'cover',
-  },
-  progressBar: {
-    position: 'absolute',
-    bottom: '5px',
-    left: '10%',
-    width: '80%',
-    height: '3px',
-    backgroundColor: '#e0e0e0',
-    borderRadius: '30px',
-  },
-  progress: {
-    height: '100%',
-    backgroundColor: '#000',
-    transition: 'width 0.1s linear',
-    borderRadius: '30px',
-  },
-  dotsContainer: {
-    position: 'absolute',
-    bottom: '15px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    display: 'flex',
-    gap: '8px',
-  },
-  dot: {
-    width: '5px',
-    height: '5px',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
   },
 };
