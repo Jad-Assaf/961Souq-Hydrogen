@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {defer} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
@@ -20,8 +20,6 @@ import {
   tabletsMenu,
 } from '~/components/CollectionCircles';
 import MobileAppPopup from '~/components/MobileAppPopup';
-
-const cache = new Map();
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -84,31 +82,6 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
-  const cacheKey = 'homepage-data';
-  const cacheTTL = 86400 * 1000; // 24 hours in milliseconds
-  const now = Date.now();
-
-  // Check if data is in cache
-  const cachedData = cache.get(cacheKey);
-  if (cachedData && cachedData.expiry > now) {
-    const newArrivals = await fetchCollectionByHandle(
-      args.context,
-      'new-arrivals',
-    );
-
-    return defer(
-      {
-        ...cachedData.value,
-        newArrivals, // Attach the fresh new-arrivals
-      },
-      {
-        headers: {
-          'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
-        },
-      },
-    );
-  }
-
   const banners = [
     {
       desktopImageUrl:
@@ -185,9 +158,8 @@ export async function loader(args) {
   const criticalData = await loadCriticalData(args);
 
   const TOP_PRODUCT_HANDLES = [
-    // Existing ones in your code:
     'apple-accessories',
-    'apple-macbook', // was in your code (if you no longer need this, remove it)
+    'apple-macbook',
     'apple-imac',
     'gaming-laptops',
     'gaming-desktops',
@@ -221,30 +193,23 @@ export async function loader(args) {
     'kitchen-appliances',
     'lighting',
 
-    // NEW: Handles from your menus that weren’t in the array:
-    // Apple
+    // NEW: additional handles
     'apple-macbook-air',
     'apple-macbook-pro',
     'apple-mac-mini',
     'apple-mac-studio',
-
-    // Gaming
     'gaming-monitors',
     'gaming-consoles',
     'handheld-consoles',
     'virtual-reality',
     'ps-accessories',
-
-    // Laptops
     'acer-laptops',
     'asus-laptops',
     'dell-laptops',
     'hp-laptops',
     'lenovo-laptops',
     'microsoft-surface',
-    'msi-laptops', // distinct from 'msi-monitors'
-
-    // Monitors
+    'msi-laptops',
     'aoc-monitors',
     'acer-monitors',
     'asus-monitors',
@@ -256,33 +221,23 @@ export async function loader(args) {
     'philips-monitor',
     'viewsonic-monitors',
     'televisions',
-
-    // Mobiles
     'google-pixel-phones',
     'xiaomi-mobile-phones',
     'infinix',
     'gaming-phones',
-
-    // Tablets
     'drawing-tablets',
     'amazon-tablets',
     'lenovo-tablets',
     'xiaomi-tablets',
-
-    // Audio
     'audio-recorders',
     'surround-systems',
     'microphones',
     'pioneer-equipment',
-
-    // Accessories
     'backpacks-bags',
-    'home-appliances', // if you want a dedicated handle for it
+    'home-appliances',
     'printers',
     'scooters',
     'projectors',
-
-    // Fitness
     'nothing-watch',
     'amazfit-watches',
     'xiaomi-watches',
@@ -292,16 +247,12 @@ export async function loader(args) {
     'green-lion-watch',
     'fitness-equipment',
     'fitness-rings',
-
-    // Cameras
     'gimbal-stabilizer',
     'camera-lenses',
     'camera-accessories',
     'camcorders',
     'webcams',
     'surveillance-cameras',
-
-    // Home Appliances
     'cleaning-devices',
     'streaming-devices',
     'smart-devices',
@@ -314,15 +265,16 @@ export async function loader(args) {
     ),
   );
 
-  const newArrivals = await fetchCollectionByHandle(
-    args.context,
-    'new-arrivals',
-  );
-
   const topProductsByHandle = {};
   TOP_PRODUCT_HANDLES.forEach((handle, index) => {
     topProductsByHandle[handle] = fetchedTopProducts[index];
   });
+
+  // Fetch new arrivals fresh using the query
+  const newArrivals = await fetchCollectionByHandle(
+    args.context,
+    'new-arrivals',
+  );
 
   const newData = {
     banners,
@@ -332,8 +284,6 @@ export async function loader(args) {
     sliderCollections: criticalData.sliderCollections,
     topProducts: topProductsByHandle,
   };
-
-  cache.set(cacheKey, {value: newData, expiry: now + cacheTTL});
 
   return defer(
     {
@@ -354,9 +304,7 @@ export function shouldRevalidate({currentUrl, nextUrl}) {
 
 async function loadCriticalData({context}) {
   const {storefront} = context;
-
   const menuHandles = MANUAL_MENU_HANDLES;
-
   const {shop} = await storefront.query(
     `#graphql
       query ShopDetails {
@@ -367,11 +315,9 @@ async function loadCriticalData({context}) {
       }
     `,
   );
-
   const [sliderCollections] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
   ]);
-
   return {
     sliderCollections,
     title: shop.name,
@@ -396,7 +342,6 @@ async function fetchCollectionsByHandles(context, handles) {
     );
     return collectionByHandle || null;
   });
-
   const collections = await Promise.all(collectionPromises);
   return collections.filter(Boolean);
 }
@@ -465,7 +410,7 @@ const brandsData = [
   {
     name: 'Benq',
     image:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/benq.jpg?v=1733388855',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/benq-products.jpg?v=1733388855',
     link: '/collections/benq-products',
   },
   {
@@ -541,12 +486,11 @@ const getHandleFromUrl = (url) => {
   return handle;
 };
 
-
 export default function Homepage() {
   const {banners, sliderCollections, topProducts, newArrivals} =
     useLoaderData();
 
-  // Create state for each menu group with an initial default (first item)
+  // Keep existing state initialization for each menu group
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
   const [selectedGaming, setSelectedGaming] = useState(gamingMenu[0]);
   const [selectedLaptops, setSelectedLaptops] = useState(laptopsMenu[0]);
