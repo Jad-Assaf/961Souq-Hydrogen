@@ -183,6 +183,8 @@ const styles = {
     position: 'relative',
     width: '100vw',
     overflow: 'hidden',
+    maxWidth: '1500px',
+    margin: 'auto',
   },
   bannerSlide: {
     position: 'absolute',
