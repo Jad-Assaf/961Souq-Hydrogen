@@ -831,7 +831,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .header-menu-desktop>.menu-item-level-1 {
-  color: #fff;
+  color: #fff !important;
   position: static;
   padding: 15px;
 }
@@ -1283,6 +1283,7 @@ button.reset:hover:not(:has(> *)) {
 .search-container .search-bar {
   width: 100vw;
   max-width: 500px;
+  height: 46px;
   margin: 0;
   border: 1px solid #c2c2c2;
   border-radius: 30px;
