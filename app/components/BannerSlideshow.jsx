@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
-export function BannerSlideshow({banners, interval = 10000}) {
+export function BannerSlideshow({ banners, interval = 10000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [animationStyle, setAnimationStyle] = useState({});
@@ -34,7 +34,6 @@ export function BannerSlideshow({banners, interval = 10000}) {
       transition: 'opacity 0.5s ease, transform 0.5s ease',
     });
 
-    // Remove the transition style after the animation completes
     const timer = setTimeout(() => {
       setAnimationStyle({});
     }, 500);
@@ -75,68 +74,8 @@ export function BannerSlideshow({banners, interval = 10000}) {
     }
   };
 
-  // Instead of separately rendering “desktop” and “mobile” banners,
-  // we use <picture> with <source> so that the browser only downloads
-  // the matching image for the current viewport size.
-  const renderedSlides = banners.map((banner, index) => {
-    const isActive = index === currentIndex;
-    return (
-      <div
-        key={index}
-        className={`banner-slide ${isActive ? 'active' : 'inactive'}`}
-        style={{
-          ...styles.bannerSlide,
-          ...animationStyle,
-          opacity: isActive ? 1 : 0,
-          transform: isActive
-            ? 'translateX(0)'
-            : index > currentIndex
-            ? 'translateX(50px)'
-            : 'translateX(-50px)',
-        }}
-      >
-        <a
-          href={banner.link}
-          target="_self"
-          rel="noopener noreferrer"
-          style={styles.link}
-        >
-          <picture>
-            {/* Desktop source */}
-            <source
-              media="(min-width: 1025px)"
-              srcSet={`
-                ${banner.desktopImageUrl}?width=300&quality=85 300w,
-                ${banner.desktopImageUrl}?width=600&quality=85 600w,
-                ${banner.desktopImageUrl}?width=1200&quality=85 1200w
-              `}
-              sizes="(min-width: 1025px) 100vw"
-            />
-
-            {/* Mobile source */}
-            <source
-              media="(max-width: 1024px)"
-              srcSet={`
-                ${banner.mobileImageUrl}?width=300&quality=85 300w,
-                ${banner.mobileImageUrl}?width=600&quality=85 600w,
-                ${banner.mobileImageUrl}?width=1200&quality=85 1200w
-              `}
-              sizes="(max-width: 1024px) 100vw"
-            />
-
-            {/* Fallback <img> if browser doesn't support <picture> */}
-            <img
-              src={banner.mobileImageUrl}
-              alt={`Banner ${index + 1}`}
-              style={styles.bannerImage}
-              loading="eager"
-              decoding="sync"
-            />
-          </picture>
-        </a>
-      </div>
-    );
-  });
+  // Only render the current banner slide (conditional rendering)
+  const currentBanner = banners[currentIndex];
 
   return (
     <div
@@ -146,8 +85,75 @@ export function BannerSlideshow({banners, interval = 10000}) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Render the current slide */}
-      {renderedSlides[currentIndex]}
+      <div
+        className="banner-slide active"
+        style={{
+          ...styles.bannerSlide,
+          ...animationStyle,
+          opacity: 1,
+          transform: 'translateX(0)',
+        }}
+      >
+        <a
+          href={currentBanner.link}
+          target="_self"
+          rel="noopener noreferrer"
+          style={styles.link}
+        >
+          <picture>
+            {/* WebP and fallback for Desktop */}
+            <source
+              type="image/webp"
+              media="(min-width: 1025px)"
+              srcSet={`
+                ${currentBanner.desktopImageUrl}?format=webp&width=300&quality=85 300w,
+                ${currentBanner.desktopImageUrl}?format=webp&width=600&quality=85 600w,
+                ${currentBanner.desktopImageUrl}?format=webp&width=1200&quality=85 1200w
+              `}
+              sizes="(min-width: 1025px) 100vw"
+            />
+            <source
+              media="(min-width: 1025px)"
+              srcSet={`
+                ${currentBanner.desktopImageUrl}?width=300&quality=85 300w,
+                ${currentBanner.desktopImageUrl}?width=600&quality=85 600w,
+                ${currentBanner.desktopImageUrl}?width=1200&quality=85 1200w
+              `}
+              sizes="(min-width: 1025px) 100vw"
+            />
+
+            {/* WebP and fallback for Mobile */}
+            <source
+              type="image/webp"
+              media="(max-width: 1024px)"
+              srcSet={`
+                ${currentBanner.mobileImageUrl}?format=webp&width=300&quality=85 300w,
+                ${currentBanner.mobileImageUrl}?format=webp&width=600&quality=85 600w,
+                ${currentBanner.mobileImageUrl}?format=webp&width=1200&quality=85 1200w
+              `}
+              sizes="(max-width: 1024px) 100vw"
+            />
+            <source
+              media="(max-width: 1024px)"
+              srcSet={`
+                ${currentBanner.mobileImageUrl}?width=300&quality=85 300w,
+                ${currentBanner.mobileImageUrl}?width=600&quality=85 600w,
+                ${currentBanner.mobileImageUrl}?width=1200&quality=85 1200w
+              `}
+              sizes="(max-width: 1024px) 100vw"
+            />
+
+            {/* Fallback image */}
+            <img
+              src={currentBanner.mobileImageUrl}
+              alt={`Banner ${currentIndex + 1}`}
+              style={styles.bannerImage}
+              loading="eager"
+              decoding="sync"
+            />
+          </picture>
+        </a>
+      </div>
 
       {/* Progress Bar */}
       <div className="progress-bar" style={styles.progressBar}>
@@ -239,3 +245,5 @@ const styles = {
     padding: '3px',
   },
 };
+
+export default BannerSlideshow;
