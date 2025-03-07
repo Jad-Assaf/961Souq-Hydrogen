@@ -2,16 +2,24 @@ import {Link} from '@remix-run/react';
 import React, {useEffect, useRef, useState} from 'react';
 
 // Reusable Component for CollectionItem
-const CollectionItem = ({collection, index}) => {
+const CollectionItem = ({collection, index, onSelect}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleImageLoad = () => {
     setIsLoading(false);
   };
 
+  const handleClick = (e) => {
+    if (onSelect) {
+      e.preventDefault(); // Prevent the default navigation
+      onSelect(collection); // Pass the clicked collection upward
+    }
+  };
+
   return (
     <Link
       to={collection.url}
+      onClick={handleClick}
       className={`menu-item-container ${isLoading ? 'loading' : ''}`}
     >
       <div className="menu-item-image-wrapper">
@@ -213,7 +221,7 @@ export const laptopsMenu = [
       altText: 'Asus Laptops',
     },
     title: 'Asus Laptops',
-    url: '/collections/asus',
+    url: '/collections/asus-laptops',
   },
   {
     id: 3,
@@ -222,7 +230,7 @@ export const laptopsMenu = [
       altText: 'Dell Laptops',
     },
     title: 'Dell Laptops',
-    url: '/collections/dell',
+    url: '/collections/dell-laptops',
   },
   {
     id: 4,
@@ -231,7 +239,7 @@ export const laptopsMenu = [
       altText: 'HP Laptops',
     },
     title: 'HP Laptops',
-    url: '/collections/hp',
+    url: '/collections/hp-laptops',
   },
   {
     id: 5,
@@ -240,7 +248,7 @@ export const laptopsMenu = [
       altText: 'Lenovo Laptops',
     },
     title: 'Lenovo Laptops',
-    url: '/collections/lenovo',
+    url: '/collections/lenovo-laptops',
   },
   {
     id: 6,
@@ -258,7 +266,7 @@ export const laptopsMenu = [
       altText: 'MSI Laptops',
     },
     title: 'MSI Laptops',
-    url: '/collections/msi',
+    url: '/collections/msi-laptops',
   },
 ];
 
@@ -597,7 +605,7 @@ export const mobilesMenu = [
       altText: 'Infinix Mobile Phones',
     },
     title: 'Infinix Mobile Phones',
-    url: '/collections/infinix-mobile-phones',
+    url: '/collections/infinix',
   },
   {
     id: 7,
@@ -606,7 +614,7 @@ export const mobilesMenu = [
       altText: 'Asus Gaming Phones',
     },
     title: 'Asus Gaming Phones',
-    url: '/collections/asus-rog-gaming-mobile-phones',
+    url: '/collections/gaming-phones',
   },
 ];
 
@@ -627,7 +635,7 @@ export const tabletsMenu = [
       altText: 'Graphic Design Tablets',
     },
     title: 'Graphic Tablets',
-    url: '/collections/digital-text',
+    url: '/collections/drawing-tablets',
   },
   {
     id: 3,
@@ -938,17 +946,17 @@ export const camerasMenu = [
     title: 'Action Camera Accessories',
     url: '/collections/action-cameras-accessories',
   },
+  // {
+  //   id: 3,
+  //   image: {
+  //     url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/3ce866744a2e083d79cf0545d7b5b5cc.jpg?v=1714657062',
+  //     altText: 'Drones',
+  //   },
+  //   title: 'Drones',
+  //   url: '/collections/drones',
+  // },
   {
     id: 3,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/3ce866744a2e083d79cf0545d7b5b5cc.jpg?v=1714657062',
-      altText: 'Drones',
-    },
-    title: 'Drones',
-    url: '/collections/drones',
-  },
-  {
-    id: 4,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Insta360-Flow-Smartphone-Gimbal-Stabilizer-4.webp?v=1714657884',
       altText: 'Gimbal Stabilizer',
@@ -957,7 +965,7 @@ export const camerasMenu = [
     url: '/collections/gimbal-stabilizer',
   },
   {
-    id: 5,
+    id: 4,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/771748c78dc8da6e89a773af5e1b1a4b.jpg?v=1714657077',
       altText: 'Professional Cameras',
@@ -966,7 +974,7 @@ export const camerasMenu = [
     url: '/collections/cameras',
   },
   {
-    id: 6,
+    id: 5,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/canon-camera-lens.jpg?v=1714657157',
       altText: 'Camera Lenses',
@@ -975,7 +983,7 @@ export const camerasMenu = [
     url: '/collections/camera-lenses',
   },
   {
-    id: 7,
+    id: 6,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Neewer-A111-Bi-Color-Rig-Light-Stabilizer.webp?v=1714657891',
       altText: 'Camera Accessories',
@@ -984,7 +992,7 @@ export const camerasMenu = [
     url: '/collections/camera-accessories',
   },
   {
-    id: 8,
+    id: 7,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Camcorders.jpg?v=1714657342',
       altText: 'Camcorders',
@@ -993,7 +1001,7 @@ export const camerasMenu = [
     url: '/collections/camcorders',
   },
   {
-    id: 9,
+    id: 8,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/razer-webcam.jpg?v=1714657158',
       altText: 'Webcams',
@@ -1002,7 +1010,7 @@ export const camerasMenu = [
     url: '/collections/webcams',
   },
   {
-    id: 10,
+    id: 9,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/64b7bbdad8239f5eb7e1f2fd9db0f323.jpg?v=1714657078',
       altText: 'Surveillance Cameras',
@@ -1056,7 +1064,7 @@ export const homeAppliancesMenu = [
       altText: 'Smart Home',
     },
     title: 'Smart Home',
-    url: '/collections/iot',
+    url: '/collections/smart-devices',
   },
   {
     id: 6,
@@ -1065,11 +1073,11 @@ export const homeAppliancesMenu = [
       altText: 'Personal Care',
     },
     title: 'Personal Care',
-    url: '/collections/personal-care',
+    url: '/collections/health-beauty',
   },
 ];
 
-export const CollectionCircles = ({collections}) => {
+export const CollectionCircles = ({collections, onCollectionSelect}) => {
   const sliderRef = useRef(null); // Reference for the slider container
   const [hasOverflow, setHasOverflow] = useState(false);
 
@@ -1124,6 +1132,7 @@ export const CollectionCircles = ({collections}) => {
               collection={collection}
               index={collectionIndex}
               key={collection.id}
+              onSelect={onCollectionSelect}
             />
           ))
         ) : (

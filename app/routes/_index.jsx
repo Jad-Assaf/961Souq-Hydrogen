@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {defer} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
@@ -185,9 +185,9 @@ export async function loader(args) {
   const criticalData = await loadCriticalData(args);
 
   const TOP_PRODUCT_HANDLES = [
-    // 'new-arrivals',
+    // Existing ones in your code:
     'apple-accessories',
-    'apple-macbook',
+    'apple-macbook', // was in your code (if you no longer need this, remove it)
     'apple-imac',
     'gaming-laptops',
     'gaming-desktops',
@@ -208,7 +208,6 @@ export async function loader(args) {
     'earbuds',
     'headphones',
     'speakers',
-    'computer-accessories',
     'electric-screwdrivers',
     'car-accessories',
     'fitness-bands',
@@ -220,8 +219,93 @@ export async function loader(args) {
     'cameras',
     'dyson-products',
     'kitchen-appliances',
-    // 'cleaning-devices',
     'lighting',
+
+    // NEW: Handles from your menus that weren’t in the array:
+    // Apple
+    'apple-macbook-air',
+    'apple-macbook-pro',
+    'apple-mac-mini',
+    'apple-mac-studio',
+
+    // Gaming
+    'gaming-monitors',
+    'gaming-consoles',
+    'handheld-consoles',
+    'virtual-reality',
+    'ps-accessories',
+
+    // Laptops
+    'acer-laptops',
+    'asus-laptops',
+    'dell-laptops',
+    'hp-laptops',
+    'lenovo-laptops',
+    'microsoft-surface',
+    'msi-laptops', // distinct from 'msi-monitors'
+
+    // Monitors
+    'aoc-monitors',
+    'acer-monitors',
+    'asus-monitors',
+    'benq-monitors',
+    'gigabyte-monitors',
+    'hp-monitors',
+    'lenovo-monitors',
+    'lg-monitors',
+    'philips-monitor',
+    'viewsonic-monitors',
+    'televisions',
+
+    // Mobiles
+    'google-pixel-phones',
+    'xiaomi-mobile-phones',
+    'infinix',
+    'gaming-phones',
+
+    // Tablets
+    'drawing-tablets',
+    'amazon-tablets',
+    'lenovo-tablets',
+    'xiaomi-tablets',
+
+    // Audio
+    'audio-recorders',
+    'surround-systems',
+    'microphones',
+    'pioneer-equipment',
+
+    // Accessories
+    'backpacks-bags',
+    'home-appliances', // if you want a dedicated handle for it
+    'printers',
+    'scooters',
+    'projectors',
+
+    // Fitness
+    'nothing-watch',
+    'amazfit-watches',
+    'xiaomi-watches',
+    'huawei-watches',
+    'fitbit-smartwatch',
+    'porodo-watch',
+    'green-lion-watch',
+    'fitness-equipment',
+    'fitness-rings',
+
+    // Cameras
+    'gimbal-stabilizer',
+    'camera-lenses',
+    'camera-accessories',
+    'camcorders',
+    'webcams',
+    'surveillance-cameras',
+
+    // Home Appliances
+    'cleaning-devices',
+    'streaming-devices',
+    'smart-devices',
+    'health-beauty',
   ];
 
   const fetchedTopProducts = await Promise.all(
@@ -446,9 +530,35 @@ const brandsData = [
   },
 ];
 
+const getHandleFromUrl = (url) => {
+  const parts = url.split('/collections/');
+  if (parts.length < 2) return '';
+  let handle = parts[1].toLowerCase();
+  // Remove trailing slash if present
+  if (handle.endsWith('/')) {
+    handle = handle.slice(0, -1);
+  }
+  return handle;
+};
+
+
 export default function Homepage() {
   const {banners, sliderCollections, topProducts, newArrivals} =
     useLoaderData();
+
+  // Create state for each menu group with an initial default (first item)
+  const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
+  const [selectedGaming, setSelectedGaming] = useState(gamingMenu[0]);
+  const [selectedLaptops, setSelectedLaptops] = useState(laptopsMenu[0]);
+  const [selectedMonitors, setSelectedMonitors] = useState(monitorsMenu[0]);
+  const [selectedMobiles, setSelectedMobiles] = useState(mobilesMenu[0]);
+  const [selectedTablets, setSelectedTablets] = useState(tabletsMenu[0]);
+  const [selectedAudio, setSelectedAudio] = useState(audioMenu[0]);
+  const [selectedFitness, setSelectedFitness] = useState(fitnessMenu[0]);
+  const [selectedCameras, setSelectedCameras] = useState(camerasMenu[0]);
+  const [selectedHomeAppliances, setSelectedHomeAppliances] = useState(
+    homeAppliancesMenu[0],
+  );
 
   return (
     <div className="home">
@@ -457,126 +567,124 @@ export default function Homepage() {
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
-      <CollectionCircles collections={appleMenu} />
-      {topProducts['apple-macbook'] && (
-        <TopProductSections collection={topProducts['apple-macbook']} />
-      )}
-      {topProducts['apple-imac'] && (
-        <TopProductSections collection={topProducts['apple-imac']} />
-      )}
-      {topProducts['apple-accessories'] && (
-        <TopProductSections collection={topProducts['apple-accessories']} />
-      )}
-
-      <CollectionCircles collections={gamingMenu} />
-      {topProducts['gaming-laptops'] && (
-        <TopProductSections collection={topProducts['gaming-laptops']} />
-      )}
-      {topProducts['gaming-desktops'] && (
-        <TopProductSections collection={topProducts['gaming-desktops']} />
-      )}
-      {topProducts['gaming-accessories'] && (
-        <TopProductSections collection={topProducts['gaming-accessories']} />
-      )}
-      {topProducts['console-games'] && (
-        <TopProductSections collection={topProducts['console-games']} />
-      )}
-
-      <CollectionCircles collections={laptopsMenu} />
-      {topProducts['laptops'] && (
-        <TopProductSections collection={topProducts['laptops']} />
-      )}
-      {topProducts['computer-accessories'] && (
-        <TopProductSections collection={topProducts['computer-accessories']} />
-      )}
-
-      <CollectionCircles collections={monitorsMenu} />
-      {topProducts['samsung-monitors'] && (
-        <TopProductSections collection={topProducts['samsung-monitors']} />
-      )}
-      {topProducts['msi-monitors'] && (
-        <TopProductSections collection={topProducts['msi-monitors']} />
-      )}
-      {topProducts['dell-monitors'] && (
-        <TopProductSections collection={topProducts['dell-monitors']} />
-      )}
-
-      <CollectionCircles collections={mobilesMenu} />
-      {topProducts['apple-iphone'] && (
-        <TopProductSections collection={topProducts['apple-iphone']} />
-      )}
-      {topProducts['samsung-mobile-phones'] && (
-        <TopProductSections collection={topProducts['samsung-mobile-phones']} />
-      )}
-      {topProducts['mobile-accessories'] && (
-        <TopProductSections collection={topProducts['mobile-accessories']} />
-      )}
-
-      <CollectionCircles collections={tabletsMenu} />
-      {topProducts['apple-ipad'] && (
-        <TopProductSections collection={topProducts['apple-ipad']} />
-      )}
-      {topProducts['samsung-tablets'] && (
-        <TopProductSections collection={topProducts['samsung-tablets']} />
-      )}
-      {topProducts['kindle-tablets'] && (
-        <TopProductSections collection={topProducts['kindle-tablets']} />
-      )}
-      {topProducts['tablet-accessories'] && (
-        <TopProductSections collection={topProducts['tablet-accessories']} />
-      )}
-
-      <CollectionCircles collections={audioMenu} />
-      {topProducts['headphones'] && (
-        <TopProductSections collection={topProducts['headphones']} />
-      )}
-      {topProducts['earbuds'] && (
-        <TopProductSections collection={topProducts['earbuds']} />
-      )}
-      {topProducts['speakers'] && (
-        <TopProductSections collection={topProducts['speakers']} />
-      )}
-
-      <CollectionCircles collections={fitnessMenu} />
-      {topProducts['apple-watch'] && (
-        <TopProductSections collection={topProducts['apple-watch']} />
-      )}
-      {topProducts['garmin-smart-watch'] && (
-        <TopProductSections collection={topProducts['garmin-smart-watch']} />
-      )}
-      {topProducts['samsung-watches'] && (
-        <TopProductSections collection={topProducts['samsung-watches']} />
-      )}
-      {topProducts['fitness-bands'] && (
-        <TopProductSections collection={topProducts['fitness-bands']} />
-      )}
-
-      <CollectionCircles collections={camerasMenu} />
-      {topProducts['action-cameras'] && (
-        <TopProductSections collection={topProducts['action-cameras']} />
-      )}
-      {topProducts['action-cameras-accessories'] && (
+      {/* Apple Group */}
+      <CollectionCircles
+        collections={appleMenu}
+        onCollectionSelect={setSelectedApple}
+      />
+      {selectedApple && topProducts[getHandleFromUrl(selectedApple.url)] && (
         <TopProductSections
-          collection={topProducts['action-cameras-accessories']}
+          collection={topProducts[getHandleFromUrl(selectedApple.url)]}
         />
       )}
-      {topProducts['cameras'] && (
-        <TopProductSections collection={topProducts['cameras']} />
+
+      {/* Gaming Group */}
+      <CollectionCircles
+        collections={gamingMenu}
+        onCollectionSelect={setSelectedGaming}
+      />
+      {selectedGaming && topProducts[getHandleFromUrl(selectedGaming.url)] && (
+        <TopProductSections
+          collection={topProducts[getHandleFromUrl(selectedGaming.url)]}
+        />
       )}
 
-      <CollectionCircles collections={homeAppliancesMenu} />
-      {topProducts['dyson-products'] && (
-        <TopProductSections collection={topProducts['dyson-products']} />
+      {/* Laptops Group */}
+      <CollectionCircles
+        collections={laptopsMenu}
+        onCollectionSelect={setSelectedLaptops}
+      />
+      {selectedLaptops &&
+        topProducts[getHandleFromUrl(selectedLaptops.url)] && (
+          <TopProductSections
+            collection={topProducts[getHandleFromUrl(selectedLaptops.url)]}
+          />
+        )}
+
+      {/* Monitors Group */}
+      <CollectionCircles
+        collections={monitorsMenu}
+        onCollectionSelect={setSelectedMonitors}
+      />
+      {selectedMonitors &&
+        topProducts[getHandleFromUrl(selectedMonitors.url)] && (
+          <TopProductSections
+            collection={topProducts[getHandleFromUrl(selectedMonitors.url)]}
+          />
+        )}
+
+      {/* Mobiles Group */}
+      <CollectionCircles
+        collections={mobilesMenu}
+        onCollectionSelect={setSelectedMobiles}
+      />
+      {selectedMobiles &&
+        topProducts[getHandleFromUrl(selectedMobiles.url)] && (
+          <TopProductSections
+            collection={topProducts[getHandleFromUrl(selectedMobiles.url)]}
+          />
+        )}
+
+      {/* Tablets Group */}
+      <CollectionCircles
+        collections={tabletsMenu}
+        onCollectionSelect={setSelectedTablets}
+      />
+      {selectedTablets &&
+        topProducts[getHandleFromUrl(selectedTablets.url)] && (
+          <TopProductSections
+            collection={topProducts[getHandleFromUrl(selectedTablets.url)]}
+          />
+        )}
+
+      {/* Audio Group */}
+      <CollectionCircles
+        collections={audioMenu}
+        onCollectionSelect={setSelectedAudio}
+      />
+      {selectedAudio && topProducts[getHandleFromUrl(selectedAudio.url)] && (
+        <TopProductSections
+          collection={topProducts[getHandleFromUrl(selectedAudio.url)]}
+        />
       )}
-      {topProducts['kitchen-appliances'] && (
-        <TopProductSections collection={topProducts['kitchen-appliances']} />
-      )}
-      {/* {topProducts['cleaning-devices'] && (
-        <TopProductSections collection={topProducts['cleaning-devices']} />
-      )} */}
-      {topProducts['lighting'] && (
-        <TopProductSections collection={topProducts['lighting']} />
-      )}
+
+      {/* Fitness Group */}
+      <CollectionCircles
+        collections={fitnessMenu}
+        onCollectionSelect={setSelectedFitness}
+      />
+      {selectedFitness &&
+        topProducts[getHandleFromUrl(selectedFitness.url)] && (
+          <TopProductSections
+            collection={topProducts[getHandleFromUrl(selectedFitness.url)]}
+          />
+        )}
+
+      {/* Cameras Group */}
+      <CollectionCircles
+        collections={camerasMenu}
+        onCollectionSelect={setSelectedCameras}
+      />
+      {selectedCameras &&
+        topProducts[getHandleFromUrl(selectedCameras.url)] && (
+          <TopProductSections
+            collection={topProducts[getHandleFromUrl(selectedCameras.url)]}
+          />
+        )}
+
+      {/* Home Appliances Group */}
+      <CollectionCircles
+        collections={homeAppliancesMenu}
+        onCollectionSelect={setSelectedHomeAppliances}
+      />
+      {selectedHomeAppliances &&
+        topProducts[getHandleFromUrl(selectedHomeAppliances.url)] && (
+          <TopProductSections
+            collection={
+              topProducts[getHandleFromUrl(selectedHomeAppliances.url)]
+            }
+          />
+        )}
 
       <BrandSection brands={brandsData} />
     </div>
