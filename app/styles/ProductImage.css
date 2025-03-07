@@ -68,6 +68,11 @@
     aspect-ratio: 1028/1028;
 }
 
+.main-image img{
+    width: 100%;
+    height: auto;
+}
+
 /* Container for YouTube iframe to maintain aspect ratio */
 .youtube-iframe-container {
     position: relative;

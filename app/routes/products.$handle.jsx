@@ -430,7 +430,7 @@ export function ProductForm({
               >
                 {variantImage ? (
                   <img
-                    src={variantImage}
+                    src={`${variantImage}&quality=10`}
                     alt={value}
                     width="50"
                     height="50"

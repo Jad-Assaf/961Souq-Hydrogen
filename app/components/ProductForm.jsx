@@ -247,7 +247,7 @@ function ProductOptions({option, selectedOptions, onOptionChange}) {
             >
               {variantImage ? (
                 <img
-                  src={variantImage}
+                  src={`${variantImage}&quality=10`}
                   alt={value}
                   style={{width: '50px', height: '50px', objectFit: 'cover'}}
                 />
