@@ -1359,8 +1359,8 @@ button.reset:hover:not(:has(> *)) {
     color: #333;
   }
 
-  .search-result-price {
-    color: #ff4f4f;
+  .search-result-price{
+    color: #ff4f4f !important;
   }
 }
 
@@ -1376,6 +1376,7 @@ button.reset:hover:not(:has(> *)) {
   font-weight: 500;
   letter-spacing: 0.5px;
   text-align: right;
+  color: #2172af;
 }
 
 .search-result-compare-price {
