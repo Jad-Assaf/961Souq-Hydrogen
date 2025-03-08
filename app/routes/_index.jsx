@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, {Suspense, useState} from 'react';
 import {defer} from '@shopify/remix-oxygen';
-import {useLoaderData} from '@remix-run/react';
+import {Await, useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
 import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
@@ -155,8 +155,23 @@ export async function loader(args) {
     },
   ];
 
+  // Load critical site data (slider collections, shop details, etc.)
   const criticalData = await loadCriticalData(args);
 
+  // Fetch new arrivals synchronously
+  const newArrivals = await fetchCollectionByHandle(
+    args.context,
+    'new-arrivals',
+  );
+
+  // For the Apple group, use the first appleMenu item as critical.
+  const criticalAppleHandle = getHandleFromUrl(appleMenu[0].url);
+  const criticalAppleProduct = await fetchCollectionByHandle(
+    args.context,
+    criticalAppleHandle,
+  );
+
+  // Define TOP_PRODUCT_HANDLES as before
   const TOP_PRODUCT_HANDLES = [
     'apple-accessories',
     'apple-macbook',
@@ -192,7 +207,6 @@ export async function loader(args) {
     'dyson-products',
     'kitchen-appliances',
     'lighting',
-
     // NEW: additional handles
     'apple-macbook-air',
     'apple-macbook-pro',
@@ -259,41 +273,43 @@ export async function loader(args) {
     'health-beauty',
   ];
 
-  const fetchedTopProducts = await Promise.all(
-    TOP_PRODUCT_HANDLES.map((handle) =>
+  // Remove the critical Apple handle from deferred fetching.
+  const nonCriticalTopHandles = TOP_PRODUCT_HANDLES.filter(
+    (handle) => handle !== criticalAppleHandle,
+  );
+
+  // Create a promise to fetch all non-critical top products.
+  // Create a promise to fetch all non-critical top products.
+  const deferredTopProductsPromise = Promise.all(
+    nonCriticalTopHandles.map((handle) =>
       fetchCollectionByHandle(args.context, handle),
     ),
-  );
-
-  const topProductsByHandle = {};
-  TOP_PRODUCT_HANDLES.forEach((handle, index) => {
-    topProductsByHandle[handle] = fetchedTopProducts[index];
+  ).then((results) => {
+    const topProductsByHandle = {};
+    nonCriticalTopHandles.forEach((handle, index) => {
+      topProductsByHandle[handle] = results[index];
+    });
+    // Delay resolution by 100ms to allow hydration to finish.
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(topProductsByHandle), 100);
+    });
   });
 
-  // Fetch new arrivals fresh using the query
-  const newArrivals = await fetchCollectionByHandle(
-    args.context,
-    'new-arrivals',
-  );
-
-  const newData = {
-    banners,
-    title: criticalData.title,
-    description: criticalData.description,
-    url: criticalData.url,
-    sliderCollections: criticalData.sliderCollections,
-    topProducts: topProductsByHandle,
-  };
+  // Prepare initial top products with the critical Apple data.
+  const initialTopProducts = {};
+  initialTopProducts[criticalAppleHandle] = criticalAppleProduct;
 
   return defer(
     {
-      ...newData,
+      banners,
+      sliderCollections: criticalData.sliderCollections,
       newArrivals,
+      topProducts: initialTopProducts,
+      restTopProducts: deferredTopProductsPromise,
     },
     {
       headers: {
-        'Cache-Control':
-          'public, max-age=86400, s-maxage=86400',
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
       },
     },
   );
@@ -488,8 +504,13 @@ const getHandleFromUrl = (url) => {
 };
 
 export default function Homepage() {
-  const {banners, sliderCollections, topProducts, newArrivals} =
-    useLoaderData();
+  const {
+    banners,
+    sliderCollections,
+    topProducts,
+    newArrivals,
+    restTopProducts,
+  } = useLoaderData();
 
   // Keep existing state initialization for each menu group
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
@@ -505,6 +526,11 @@ export default function Homepage() {
     homeAppliancesMenu[0],
   );
 
+  const combinedTopProducts = {
+    ...topProducts,
+    // Note: restTopProducts will be merged in after it's resolved.
+  };
+
   return (
     <div className="home">
       {/* <MobileAppPopup /> */}
@@ -512,124 +538,161 @@ export default function Homepage() {
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
-      {/* Apple Group */}
+      {/* Apple Group - data is immediately available */}
       <CollectionCircles
         collections={appleMenu}
         onCollectionSelect={setSelectedApple}
       />
-      {selectedApple && topProducts[getHandleFromUrl(selectedApple.url)] && (
-        <TopProductSections
-          collection={topProducts[getHandleFromUrl(selectedApple.url)]}
-        />
-      )}
-
-      {/* Gaming Group */}
-      <CollectionCircles
-        collections={gamingMenu}
-        onCollectionSelect={setSelectedGaming}
-      />
-      {selectedGaming && topProducts[getHandleFromUrl(selectedGaming.url)] && (
-        <TopProductSections
-          collection={topProducts[getHandleFromUrl(selectedGaming.url)]}
-        />
-      )}
-
-      {/* Laptops Group */}
-      <CollectionCircles
-        collections={laptopsMenu}
-        onCollectionSelect={setSelectedLaptops}
-      />
-      {selectedLaptops &&
-        topProducts[getHandleFromUrl(selectedLaptops.url)] && (
-          <TopProductSections
-            collection={topProducts[getHandleFromUrl(selectedLaptops.url)]}
-          />
-        )}
-
-      {/* Monitors Group */}
-      <CollectionCircles
-        collections={monitorsMenu}
-        onCollectionSelect={setSelectedMonitors}
-      />
-      {selectedMonitors &&
-        topProducts[getHandleFromUrl(selectedMonitors.url)] && (
-          <TopProductSections
-            collection={topProducts[getHandleFromUrl(selectedMonitors.url)]}
-          />
-        )}
-
-      {/* Mobiles Group */}
-      <CollectionCircles
-        collections={mobilesMenu}
-        onCollectionSelect={setSelectedMobiles}
-      />
-      {selectedMobiles &&
-        topProducts[getHandleFromUrl(selectedMobiles.url)] && (
-          <TopProductSections
-            collection={topProducts[getHandleFromUrl(selectedMobiles.url)]}
-          />
-        )}
-
-      {/* Tablets Group */}
-      <CollectionCircles
-        collections={tabletsMenu}
-        onCollectionSelect={setSelectedTablets}
-      />
-      {selectedTablets &&
-        topProducts[getHandleFromUrl(selectedTablets.url)] && (
-          <TopProductSections
-            collection={topProducts[getHandleFromUrl(selectedTablets.url)]}
-          />
-        )}
-
-      {/* Audio Group */}
-      <CollectionCircles
-        collections={audioMenu}
-        onCollectionSelect={setSelectedAudio}
-      />
-      {selectedAudio && topProducts[getHandleFromUrl(selectedAudio.url)] && (
-        <TopProductSections
-          collection={topProducts[getHandleFromUrl(selectedAudio.url)]}
-        />
-      )}
-
-      {/* Fitness Group */}
-      <CollectionCircles
-        collections={fitnessMenu}
-        onCollectionSelect={setSelectedFitness}
-      />
-      {selectedFitness &&
-        topProducts[getHandleFromUrl(selectedFitness.url)] && (
-          <TopProductSections
-            collection={topProducts[getHandleFromUrl(selectedFitness.url)]}
-          />
-        )}
-
-      {/* Cameras Group */}
-      <CollectionCircles
-        collections={camerasMenu}
-        onCollectionSelect={setSelectedCameras}
-      />
-      {selectedCameras &&
-        topProducts[getHandleFromUrl(selectedCameras.url)] && (
-          <TopProductSections
-            collection={topProducts[getHandleFromUrl(selectedCameras.url)]}
-          />
-        )}
-
-      {/* Home Appliances Group */}
-      <CollectionCircles
-        collections={homeAppliancesMenu}
-        onCollectionSelect={setSelectedHomeAppliances}
-      />
-      {selectedHomeAppliances &&
-        topProducts[getHandleFromUrl(selectedHomeAppliances.url)] && (
+      {selectedApple &&
+        combinedTopProducts[getHandleFromUrl(selectedApple.url)] && (
           <TopProductSections
             collection={
-              topProducts[getHandleFromUrl(selectedHomeAppliances.url)]
+              combinedTopProducts[getHandleFromUrl(selectedApple.url)]
             }
           />
         )}
+      <Suspense fallback={<p>Loading more products…</p>}>
+        <Await resolve={restTopProducts}>
+          {(deferredData) => {
+            // Merge deferred top products with the initial ones.
+            const fullTopProducts = {...combinedTopProducts, ...deferredData};
+
+            return (
+              <>
+                {/* Gaming Group */}
+                <CollectionCircles
+                  collections={gamingMenu}
+                  onCollectionSelect={setSelectedGaming}
+                />
+                {selectedGaming &&
+                  fullTopProducts[getHandleFromUrl(selectedGaming.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedGaming.url)]
+                      }
+                    />
+                  )}
+
+                {/* Laptops Group */}
+                <CollectionCircles
+                  collections={laptopsMenu}
+                  onCollectionSelect={setSelectedLaptops}
+                />
+                {selectedLaptops &&
+                  fullTopProducts[getHandleFromUrl(selectedLaptops.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedLaptops.url)]
+                      }
+                    />
+                  )}
+
+                {/* Monitors Group */}
+                <CollectionCircles
+                  collections={monitorsMenu}
+                  onCollectionSelect={setSelectedMonitors}
+                />
+                {selectedMonitors &&
+                  fullTopProducts[getHandleFromUrl(selectedMonitors.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedMonitors.url)]
+                      }
+                    />
+                  )}
+
+                {/* Mobiles Group */}
+                <CollectionCircles
+                  collections={mobilesMenu}
+                  onCollectionSelect={setSelectedMobiles}
+                />
+                {selectedMobiles &&
+                  fullTopProducts[getHandleFromUrl(selectedMobiles.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedMobiles.url)]
+                      }
+                    />
+                  )}
+
+                {/* Tablets Group */}
+                <CollectionCircles
+                  collections={tabletsMenu}
+                  onCollectionSelect={setSelectedTablets}
+                />
+                {selectedTablets &&
+                  fullTopProducts[getHandleFromUrl(selectedTablets.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedTablets.url)]
+                      }
+                    />
+                  )}
+
+                {/* Audio Group */}
+                <CollectionCircles
+                  collections={audioMenu}
+                  onCollectionSelect={setSelectedAudio}
+                />
+                {selectedAudio &&
+                  fullTopProducts[getHandleFromUrl(selectedAudio.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedAudio.url)]
+                      }
+                    />
+                  )}
+
+                {/* Fitness Group */}
+                <CollectionCircles
+                  collections={fitnessMenu}
+                  onCollectionSelect={setSelectedFitness}
+                />
+                {selectedFitness &&
+                  fullTopProducts[getHandleFromUrl(selectedFitness.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedFitness.url)]
+                      }
+                    />
+                  )}
+
+                {/* Cameras Group */}
+                <CollectionCircles
+                  collections={camerasMenu}
+                  onCollectionSelect={setSelectedCameras}
+                />
+                {selectedCameras &&
+                  fullTopProducts[getHandleFromUrl(selectedCameras.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedCameras.url)]
+                      }
+                    />
+                  )}
+
+                {/* Home Appliances Group */}
+                <CollectionCircles
+                  collections={homeAppliancesMenu}
+                  onCollectionSelect={setSelectedHomeAppliances}
+                />
+                {selectedHomeAppliances &&
+                  fullTopProducts[
+                    getHandleFromUrl(selectedHomeAppliances.url)
+                  ] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[
+                          getHandleFromUrl(selectedHomeAppliances.url)
+                        ]
+                      }
+                    />
+                  )}
+              </>
+            );
+          }}
+        </Await>
+      </Suspense>
 
       <BrandSection brands={brandsData} />
     </div>
