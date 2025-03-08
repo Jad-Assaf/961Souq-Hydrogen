@@ -292,7 +292,8 @@ export async function loader(args) {
     },
     {
       headers: {
-        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600',
+        'Cache-Control':
+          'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',
       },
     },
   );
