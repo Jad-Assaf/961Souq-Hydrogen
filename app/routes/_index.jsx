@@ -82,6 +82,7 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
+  // Define banners (critical UI elements)
   const banners = [
     {
       desktopImageUrl:
@@ -155,130 +156,37 @@ export async function loader(args) {
     },
   ];
 
-  // Load critical site data (slider collections, shop details, etc.)
-  const criticalData = await loadCriticalData(args);
-
-  // Fetch new arrivals synchronously
-  const newArrivals = await fetchCollectionByHandle(
+  // Fire off critical queries concurrently so above‑the‑fold content is fast.
+  const criticalDataPromise = loadCriticalData(args);
+  const newArrivalsPromise = fetchCollectionByHandle(
     args.context,
     'new-arrivals',
   );
+ 
+  const [criticalData, newArrivals] = await Promise.all([
+    criticalDataPromise,
+    newArrivalsPromise,
+  ]);
 
-  // For the Apple group, use the first appleMenu item as critical.
-  const criticalAppleHandle = getHandleFromUrl(appleMenu[0].url);
-  const criticalAppleProduct = await fetchCollectionByHandle(
-    args.context,
-    criticalAppleHandle,
-  );
-
-  // Define a static array of collection handles (that worked previously).
-  const TOP_PRODUCT_HANDLES = [
-    'apple-accessories',
-    'apple-macbook',
-    'apple-imac',
-    'gaming-laptops',
-    'gaming-desktops',
-    'gaming-accessories',
-    'console-games',
-    'laptops',
-    'computer-accessories',
-    'samsung-monitors',
-    'msi-monitors',
-    'dell-monitors',
-    'apple-iphone',
-    'samsung-mobile-phones',
-    'mobile-accessories',
-    'apple-ipad',
-    'samsung-tablets',
-    'kindle-tablets',
-    'tablet-accessories',
-    'earbuds',
-    'headphones',
-    'speakers',
-    'electric-screwdrivers',
-    'car-accessories',
-    'fitness-bands',
-    'garmin-smart-watch',
-    'samsung-watches',
-    'apple-watch',
-    'action-cameras',
-    'action-cameras-accessories',
-    'cameras',
-    'dyson-products',
-    'kitchen-appliances',
-    'lighting',
-    // NEW: additional handles
-    'apple-macbook-air',
-    'apple-macbook-pro',
-    'apple-mac-mini',
-    'apple-mac-studio',
-    'gaming-monitors',
-    'gaming-consoles',
-    'handheld-consoles',
-    'virtual-reality',
-    'ps-accessories',
-    'acer-laptops',
-    'asus-laptops',
-    'dell-laptops',
-    'hp-laptops',
-    'lenovo-laptops',
-    'microsoft-surface',
-    'msi-laptops',
-    'aoc-monitors',
-    'acer-monitors',
-    'asus-monitors',
-    'benq-monitors',
-    'gigabyte-monitors',
-    'hp-monitors',
-    'lenovo-monitors',
-    'lg-monitors',
-    'philips-monitor',
-    'viewsonic-monitors',
-    'televisions',
-    'google-pixel-phones',
-    'xiaomi-mobile-phones',
-    'infinix',
-    'gaming-phones',
-    'drawing-tablets',
-    'amazon-tablets',
-    'lenovo-tablets',
-    'xiaomi-tablets',
-    'audio-recorders',
-    'surround-systems',
-    'microphones',
-    'pioneer-equipment',
-    'backpacks-bags',
-    'home-appliances',
-    'printers',
-    'scooters',
-    'projectors',
-    'nothing-watch',
-    'amazfit-watches',
-    'xiaomi-watches',
-    'huawei-watches',
-    'fitbit-smartwatch',
-    'porodo-watch',
-    'green-lion-watch',
-    'fitness-equipment',
-    'fitness-rings',
-    'gimbal-stabilizer',
-    'camera-lenses',
-    'camera-accessories',
-    'camcorders',
-    'webcams',
-    'surveillance-cameras',
-    'cleaning-devices',
-    'streaming-devices',
-    'smart-devices',
-    'health-beauty',
+  // Build a unique list of collection handles from your menus.
+  const menuHandles = [
+    ...appleMenu.map((item) => getHandleFromUrl(item.url)),
+    ...gamingMenu.map((item) => getHandleFromUrl(item.url)),
+    ...laptopsMenu.map((item) => getHandleFromUrl(item.url)),
+    ...monitorsMenu.map((item) => getHandleFromUrl(item.url)),
+    ...mobilesMenu.map((item) => getHandleFromUrl(item.url)),
+    ...tabletsMenu.map((item) => getHandleFromUrl(item.url)),
+    ...audioMenu.map((item) => getHandleFromUrl(item.url)),
+    ...fitnessMenu.map((item) => getHandleFromUrl(item.url)),
+    ...camerasMenu.map((item) => getHandleFromUrl(item.url)),
+    ...homeAppliancesMenu.map((item) => getHandleFromUrl(item.url)),
   ];
+  const uniqueMenuHandles = [...new Set(menuHandles)];
 
-  // Remove the critical Apple handle from deferred fetching.
-  const nonCriticalHandles = TOP_PRODUCT_HANDLES.filter(
-    (handle) => handle !== criticalAppleHandle,
-  );
+  // Exclude the critical Apple handle (already fetched).
+  const nonCriticalHandles = uniqueMenuHandles
 
-  // Create a promise to fetch collections for all non-critical handles.
+  // Fetch non‑critical collections concurrently.
   const deferredTopProductsPromise = Promise.all(
     nonCriticalHandles.map((handle) =>
       fetchCollectionByHandle(args.context, handle),
@@ -288,16 +196,13 @@ export async function loader(args) {
     nonCriticalHandles.forEach((handle, index) => {
       topProductsByHandle[handle] = results[index];
     });
-    // Delay resolution slightly to allow hydration.
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(topProductsByHandle), 100);
-    });
+    return topProductsByHandle;
   });
 
-  // Prepare initial top products with the critical Apple data.
+  // Prepare critical top products.
   const initialTopProducts = {};
-  initialTopProducts[criticalAppleHandle] = criticalAppleProduct;
 
+  // Return critical data immediately and stream non‑critical data.
   return defer(
     {
       banners,
@@ -318,6 +223,26 @@ export function shouldRevalidate({currentUrl, nextUrl}) {
   return currentUrl.pathname !== nextUrl.pathname;
 }
 
+async function fetchCollectionByHandle(context, handle) {
+  const {collectionByHandle} = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    { variables: { handle }, cache: context.storefront.CacheLong() }
+  );
+  return collectionByHandle || null;
+}
+
+async function fetchCollectionsByHandles(context, handles) {
+  const collectionPromises = handles.map(async (handle) => {
+    const {collectionByHandle} = await context.storefront.query(
+      GET_SIMPLE_COLLECTION_QUERY,
+      { variables: { handle }, cache: context.storefront.CacheLong() }
+    );
+    return collectionByHandle || null;
+  });
+  const collections = await Promise.all(collectionPromises);
+  return collections.filter(Boolean);
+}
+
 async function loadCriticalData({context}) {
   const {storefront} = context;
   const menuHandles = MANUAL_MENU_HANDLES;
@@ -330,6 +255,7 @@ async function loadCriticalData({context}) {
         }
       }
     `,
+    { cache: storefront.CacheLong() }
   );
   const [sliderCollections] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
@@ -340,26 +266,6 @@ async function loadCriticalData({context}) {
     description: shop.description,
     url: 'https://961souq.com',
   };
-}
-
-async function fetchCollectionByHandle(context, handle) {
-  const {collectionByHandle} = await context.storefront.query(
-    GET_COLLECTION_BY_HANDLE_QUERY,
-    {variables: {handle}},
-  );
-  return collectionByHandle || null;
-}
-
-async function fetchCollectionsByHandles(context, handles) {
-  const collectionPromises = handles.map(async (handle) => {
-    const {collectionByHandle} = await context.storefront.query(
-      GET_SIMPLE_COLLECTION_QUERY,
-      {variables: {handle}},
-    );
-    return collectionByHandle || null;
-  });
-  const collections = await Promise.all(collectionPromises);
-  return collections.filter(Boolean);
 }
 
 const brandsData = [
@@ -537,19 +443,6 @@ export default function Homepage() {
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
-      {/* Apple Group - data is immediately available */}
-      <CollectionCircles
-        collections={appleMenu}
-        onCollectionSelect={setSelectedApple}
-      />
-      {selectedApple &&
-        combinedTopProducts[getHandleFromUrl(selectedApple.url)] && (
-          <TopProductSections
-            collection={
-              combinedTopProducts[getHandleFromUrl(selectedApple.url)]
-            }
-          />
-        )}
       <Suspense fallback={<p>Loading more products…</p>}>
         <Await resolve={restTopProducts}>
           {(deferredData) => {
@@ -558,6 +451,20 @@ export default function Homepage() {
 
             return (
               <>
+                {/* Gaming Group */}
+                <CollectionCircles
+                  collections={appleMenu}
+                  onCollectionSelect={setSelectedApple}
+                />
+                {selectedApple &&
+                  fullTopProducts[getHandleFromUrl(selectedApple.url)] && (
+                    <TopProductSections
+                      collection={
+                        fullTopProducts[getHandleFromUrl(selectedApple.url)]
+                      }
+                    />
+                  )}
+
                 {/* Gaming Group */}
                 <CollectionCircles
                   collections={gamingMenu}
