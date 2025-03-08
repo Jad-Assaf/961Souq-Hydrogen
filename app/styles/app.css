@@ -1293,7 +1293,7 @@ button.reset:hover:not(:has(> *)) {
 
 .search-result-description {
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   color: #7f7f7f;
 }
 
@@ -1315,11 +1315,11 @@ button.reset:hover:not(:has(> *)) {
 
 @media (max-width: 1024px) {
   .search-result-title {
-    font-size: 13px !important;
+    font-size: 14px !important;
   }
 
   .search-result-description {
-    font-size: 10px !important;
+    font-size: 12px !important;
   }
 }
 
