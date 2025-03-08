@@ -332,7 +332,7 @@ const brandsData = [
   {
     name: 'Benq',
     image:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/benq-products.jpg?v=1733388855',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/benq.jpg?v=1733388855',
     link: '/collections/benq-products',
   },
   {
@@ -443,7 +443,7 @@ export default function Homepage() {
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
-      <Suspense fallback={<p>Loading more products…</p>}>
+      <Suspense fallback={<p>Loading more products...</p>}>
         <Await resolve={restTopProducts}>
           {(deferredData) => {
             // Merge deferred top products with the initial ones.
@@ -600,7 +600,9 @@ export default function Homepage() {
         </Await>
       </Suspense>
 
-      <BrandSection brands={brandsData} />
+      <Suspense fallback={<p>Loading Brands...</p>}>
+        <BrandSection brands={brandsData} />
+      </Suspense>
     </div>
   );
 }

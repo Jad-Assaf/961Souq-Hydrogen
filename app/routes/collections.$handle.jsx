@@ -25,6 +25,7 @@ import {getAppliedFilterLink} from '../lib/filter';
 import {AddToCartButton} from '../components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import '../styles/CollectionSlider.css';
+import '../styles/CollectionsHandle.css';
 
 function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') {

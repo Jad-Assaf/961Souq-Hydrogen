@@ -235,11 +235,14 @@ export async function loader({request, context}) {
   });
 
   // Simple pagination info (can be refined as needed)
+  const {hasNextPage, hasPreviousPage, startCursor, endCursor} =
+    resultConcat.result.products.pageInfo;
+
   const pageInfo = {
-    hasNextPage: false,
-    hasPreviousPage: false,
-    startCursor: finalEdges[0]?.cursor || null,
-    endCursor: finalEdges[finalEdges.length - 1]?.cursor || null,
+    hasNextPage,
+    hasPreviousPage,
+    startCursor,
+    endCursor,
   };
 
   // Vendors & productTypes for filters
