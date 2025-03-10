@@ -162,7 +162,7 @@ export async function loader(args) {
     args.context,
     'new-arrivals',
   );
- 
+
   const [criticalData, newArrivals] = await Promise.all([
     criticalDataPromise,
     newArrivalsPromise,
@@ -184,7 +184,7 @@ export async function loader(args) {
   const uniqueMenuHandles = [...new Set(menuHandles)];
 
   // Exclude the critical Apple handle (already fetched).
-  const nonCriticalHandles = uniqueMenuHandles
+  const nonCriticalHandles = uniqueMenuHandles;
 
   // Fetch non‑critical collections concurrently.
   const deferredTopProductsPromise = Promise.all(
@@ -226,7 +226,7 @@ export function shouldRevalidate({currentUrl, nextUrl}) {
 async function fetchCollectionByHandle(context, handle) {
   const {collectionByHandle} = await context.storefront.query(
     GET_COLLECTION_BY_HANDLE_QUERY,
-    { variables: { handle }, cache: context.storefront.CacheLong() }
+    {variables: {handle}, cache: context.storefront.CacheLong()},
   );
   return collectionByHandle || null;
 }
@@ -235,7 +235,7 @@ async function fetchCollectionsByHandles(context, handles) {
   const collectionPromises = handles.map(async (handle) => {
     const {collectionByHandle} = await context.storefront.query(
       GET_SIMPLE_COLLECTION_QUERY,
-      { variables: { handle }, cache: context.storefront.CacheLong() }
+      {variables: {handle}, cache: context.storefront.CacheLong()},
     );
     return collectionByHandle || null;
   });
@@ -255,7 +255,7 @@ async function loadCriticalData({context}) {
         }
       }
     `,
-    { cache: storefront.CacheLong() }
+    {cache: storefront.CacheLong()},
   );
   const [sliderCollections] = await Promise.all([
     fetchCollectionsByHandles(context, menuHandles),
@@ -451,7 +451,7 @@ export default function Homepage() {
 
             return (
               <>
-                {/* Gaming Group */}
+                {/* Apple Group */}
                 <CollectionCircles
                   collections={appleMenu}
                   onCollectionSelect={setSelectedApple}
@@ -459,6 +459,7 @@ export default function Homepage() {
                 {selectedApple &&
                   fullTopProducts[getHandleFromUrl(selectedApple.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedApple.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedApple.url)]
                       }
@@ -473,6 +474,7 @@ export default function Homepage() {
                 {selectedGaming &&
                   fullTopProducts[getHandleFromUrl(selectedGaming.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedGaming.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedGaming.url)]
                       }
@@ -487,6 +489,7 @@ export default function Homepage() {
                 {selectedLaptops &&
                   fullTopProducts[getHandleFromUrl(selectedLaptops.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedLaptops.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedLaptops.url)]
                       }
@@ -501,6 +504,7 @@ export default function Homepage() {
                 {selectedMonitors &&
                   fullTopProducts[getHandleFromUrl(selectedMonitors.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedMonitors.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedMonitors.url)]
                       }
@@ -515,6 +519,7 @@ export default function Homepage() {
                 {selectedMobiles &&
                   fullTopProducts[getHandleFromUrl(selectedMobiles.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedMobiles.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedMobiles.url)]
                       }
@@ -529,6 +534,7 @@ export default function Homepage() {
                 {selectedTablets &&
                   fullTopProducts[getHandleFromUrl(selectedTablets.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedTablets.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedTablets.url)]
                       }
@@ -543,6 +549,7 @@ export default function Homepage() {
                 {selectedAudio &&
                   fullTopProducts[getHandleFromUrl(selectedAudio.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedAudio.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedAudio.url)]
                       }
@@ -557,6 +564,7 @@ export default function Homepage() {
                 {selectedFitness &&
                   fullTopProducts[getHandleFromUrl(selectedFitness.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedFitness.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedFitness.url)]
                       }
@@ -571,6 +579,7 @@ export default function Homepage() {
                 {selectedCameras &&
                   fullTopProducts[getHandleFromUrl(selectedCameras.url)] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedCameras.url)}
                       collection={
                         fullTopProducts[getHandleFromUrl(selectedCameras.url)]
                       }
@@ -587,6 +596,7 @@ export default function Homepage() {
                     getHandleFromUrl(selectedHomeAppliances.url)
                   ] && (
                     <TopProductSections
+                      key={getHandleFromUrl(selectedHomeAppliances.url)}
                       collection={
                         fullTopProducts[
                           getHandleFromUrl(selectedHomeAppliances.url)
