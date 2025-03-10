@@ -486,7 +486,6 @@ export default function Collection() {
               {/* Grid Columns Options */}
               <div
                 className="grid-columns-options"
-                style={{marginBottom: '1rem'}}
               >
                 <span>View: </span>
                 {[1, 2, 3, 4, 5].map((num) => (
