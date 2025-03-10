@@ -16,7 +16,7 @@ export async function action({ request }) {
   try {
     // 1. Get event data from the client
     const eventData = await request.json();
-    console.log('[Server] Received from client:', eventData);
+    // console.log('[Server] Received from client:', eventData);
 
     // 2. Attempt to get real IP/User-Agent from request headers
     const ipHeader =
@@ -50,11 +50,11 @@ export async function action({ request }) {
       test_event_code: 'TEST31560',
     };
 
-    console.log('[Server] x-forwarded-for:', request.headers.get('x-forwarded-for'));
-    console.log('[Server] client-ip:', request.headers.get('client-ip'));
-    console.log('[Server] cf-connecting-ip:', request.headers.get('cf-connecting-ip'));
-    console.log('[Server] remoteAddress:', request.socket?.remoteAddress);
-    console.log('[Server] Final payload to Meta CAPI:', JSON.stringify(payload, null, 2));
+    // console.log('[Server] x-forwarded-for:', request.headers.get('x-forwarded-for'));
+    // console.log('[Server] client-ip:', request.headers.get('client-ip'));
+    // console.log('[Server] cf-connecting-ip:', request.headers.get('cf-connecting-ip'));
+    // console.log('[Server] remoteAddress:', request.socket?.remoteAddress);
+    // console.log('[Server] Final payload to Meta CAPI:', JSON.stringify(payload, null, 2));
 
     // 6. Send to Meta
     const pixelId = '459846537541051';
@@ -72,7 +72,7 @@ export async function action({ request }) {
     );
 
     const metaResult = await metaResponse.json();
-    console.log('[Server] Meta response:', metaResult);
+    // console.log('[Server] Meta response:', metaResult);
 
     // 7. Respond to client
     return json({ success: true, result: metaResult });

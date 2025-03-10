@@ -36,7 +36,7 @@ export function PaginatedResourceSection({
         );
 
         return (
-          <div>
+          <div className='w-[100%]'>
             <div className="pagination-buttons">
               <PreviousLink className="pagination-button">
                 {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
