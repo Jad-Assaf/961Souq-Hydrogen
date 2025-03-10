@@ -753,7 +753,7 @@ button.reset:hover:not(:has(> *)) {
 
 .header {
   background: #fff;
-  z-index: 5;
+  z-index: 2;
   width: 100vw;
   display: flex;
   flex-direction: column;
