@@ -450,7 +450,7 @@ export default function Collection() {
             onClick={() => setIsDrawerOpen(true)}
             className="mobile-filter-btn"
           >
-            Filter
+            Filters
           </button>
         </div>
         <FiltersDrawer

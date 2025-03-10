@@ -1862,7 +1862,7 @@ input[type="checkbox"] {
   position: fixed;
   bottom: 5px;
   right: 20px;
-  z-index: 999;
+  z-index: 2;
 }
 
 .mobile-filter-btn {
