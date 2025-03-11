@@ -369,11 +369,16 @@ h4 {
 }
 
 .ProductPageBottom table * {
-    vertical-align: top;
+    vertical-align: middle;
+}
+
+.ProductPageBottom td{
+    border: 1px solid #c3c3c3;
 }
 
 .ProductPageBottom table {
-    width: unset !important;
+    width: 100%;
+    max-width: 100%;
 }
 
 .ProductPageBottom h3 {
