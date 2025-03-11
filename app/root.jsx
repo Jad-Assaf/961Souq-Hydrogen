@@ -177,7 +177,7 @@ export function Layout({children}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link
+        {/* <link
           rel="preload"
           as="image"
           href="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-banner-1.jpg?v=1740146682"
@@ -186,7 +186,7 @@ export function Layout({children}) {
           rel="preload"
           as="image"
           href="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-mobile-banner-1.jpg?v=1740146682"
-        />
+        /> */}
         <Meta />
         <Links />
         <Suspense fallback={null}>

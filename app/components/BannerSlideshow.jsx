@@ -150,6 +150,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
               style={styles.bannerImage}
               loading="eager"
               decoding="sync"
+              fetchpriority="high"
             />
           </picture>
         </a>
