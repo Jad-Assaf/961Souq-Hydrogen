@@ -213,7 +213,8 @@ export async function loader(args) {
     },
     {
       headers: {
-        'Cache-Control': 'public, max-age=1, stale-while-revalidate=86399',
+        'Oxygen-Cache-Control':
+          'public, max-age=1, stale-while-revalidate=86399',
       },
     },
   );
