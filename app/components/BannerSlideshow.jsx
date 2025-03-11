@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export function BannerSlideshow({ banners, interval = 30000 }) {
+export function BannerSlideshow({ banners, interval = 10000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [animationStyle, setAnimationStyle] = useState({});
