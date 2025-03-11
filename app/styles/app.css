@@ -521,10 +521,15 @@ button {
   font-weight: 600;
   color: #2172af;
   min-height: 43px;
+  transition: all 0.1s linear;
+}
+
+.product-card:hover .product-price {
+  color: #ff4529;
 }
 
 .discountedPrice {
-  color: #f50006;
+  color: #000000;
   text-decoration: line-through;
 }
 
