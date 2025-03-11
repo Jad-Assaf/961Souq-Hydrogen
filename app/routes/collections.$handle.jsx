@@ -193,7 +193,18 @@ export const meta = ({data}) => {
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  return defer({...deferredData, ...criticalData});
+  return defer(
+    {
+      ...deferredData,
+      ...criticalData,
+    },
+    {
+      headers: {
+        // Adjust these values as you like:
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    },
+  );
 }
 
 /**
@@ -484,9 +495,7 @@ export default function Collection() {
                 </select>
               </div>
               {/* Grid Columns Options */}
-              <div
-                className="grid-columns-options"
-              >
+              <div className="grid-columns-options">
                 <span>View: </span>
                 {[1, 2, 3, 4, 5].map((num) => (
                   <button
@@ -498,7 +507,9 @@ export default function Collection() {
                       padding: '0.1rem 0.5rem',
                       borderRadius: '5px',
                       border:
-                        columns === num ? '2px solid #2172af' : '1px solid #ccc',
+                        columns === num
+                          ? '2px solid #2172af'
+                          : '1px solid #ccc',
                     }}
                   >
                     {num}
