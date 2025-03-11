@@ -141,6 +141,7 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
       'https://search-app-vert.vercel.app/',
+      'https://c.bing.com',
     ],
     mediaSrc: [
       "'self'",
