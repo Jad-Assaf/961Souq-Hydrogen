@@ -1,4 +1,4 @@
-import React, {Suspense, useEffect, useState} from 'react';
+import React, {Suspense, useState} from 'react';
 import {defer} from '@shopify/remix-oxygen';
 import {Await, useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
@@ -20,7 +20,6 @@ import {
   tabletsMenu,
 } from '~/components/CollectionCircles';
 import MobileAppPopup from '~/components/MobileAppPopup';
-import Loader from '~/components/Loader';
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -436,21 +435,6 @@ export default function Homepage() {
     ...topProducts,
     // Note: restTopProducts will be merged in after it's resolved.
   };
-
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    // Simulate an asynchronous operation (e.g., data fetching or DOM hydration)
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 3000);
-
-    // Clean up the timer on unmount
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Render the loader until the state updates
-  if (!isReady) return <Loader />;
 
   return (
     <div className="home">
