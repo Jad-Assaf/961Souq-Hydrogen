@@ -107,8 +107,10 @@ async function loadCriticalData({context}) {
 
   try {
     // Fetch header data using the HEADER_QUERY
+    // --- ADDED: cache: storefront.CacheLong() ---
     const header = await storefront.query(HEADER_QUERY, {
       variables: {headerMenuHandle: 'new-main-menu'},
+      cache: storefront.CacheLong(), // <-- This is the key performance-related change
     });
 
     // Process nested menus to extract images
@@ -177,16 +179,6 @@ export function Layout({children}) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        {/* <link
-          rel="preload"
-          as="image"
-          href="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-banner-1.jpg?v=1740146682"
-        />
-        <link
-          rel="preload"
-          as="image"
-          href="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-mobile-banner-1.jpg?v=1740146682"
-        /> */}
         <Meta />
         <Links />
         <Suspense fallback={null}>
