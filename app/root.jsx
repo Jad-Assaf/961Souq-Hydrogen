@@ -68,22 +68,29 @@ export async function loader({request, context}) {
     const criticalData = await loadCriticalData({request, context});
     const {storefront, env} = context;
 
-    return defer({
-      ...deferredData,
-      ...criticalData,
-      publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
-      shop: getShopAnalytics({
-        storefront,
-        publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
-      }),
-      consent: {
-        checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
-        storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-        // withPrivacyBanner: true,
-        country: storefront.i18n.country,
-        language: storefront.i18n.language,
+    return defer(
+      {
+        ...deferredData,
+        ...criticalData,
+        publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+        shop: getShopAnalytics({
+          storefront,
+          publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
+        }),
+        consent: {
+          checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+          storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+          country: storefront.i18n.country,
+          language: storefront.i18n.language,
+        },
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=1, stale-while-revalidate=86399',
+        },
+      },
+    );
+
   } catch (error) {
     console.error('Loader error:', error);
     throw new Response('Failed to load data', {status: 500});
