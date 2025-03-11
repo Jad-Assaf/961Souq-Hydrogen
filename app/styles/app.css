@@ -502,7 +502,7 @@ button {
 .product-title {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: #000;
   margin: 12px 0;
   white-space: pre-wrap;
   overflow: hidden;
@@ -519,7 +519,7 @@ button {
 .product-price {
   font-size: 1rem;
   font-weight: 600;
-  color: #ff4f4f;
+  color: #fd1919;
   min-height: 43px;
 }
 
