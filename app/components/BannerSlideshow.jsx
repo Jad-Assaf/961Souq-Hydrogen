@@ -145,7 +145,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
 
             {/* Fallback image */}
             <img
-              src={currentBanner.mobileImageUrl}
+              src={`${currentBanner.mobileImageUrl}`}
               alt={`Banner ${currentIndex + 1}`}
               style={styles.bannerImage}
               loading="eager"

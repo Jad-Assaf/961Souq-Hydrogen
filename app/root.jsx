@@ -11,8 +11,6 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   useNavigation,
-  LiveReload,
-  // LiveReload,
 } from '@remix-run/react';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import resetStyles from '~/styles/reset.css?url';
@@ -233,7 +231,6 @@ export function Layout({children}) {
         )}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
-        <LiveReload nonce={nonce} />
       </body>
     </html>
   );
