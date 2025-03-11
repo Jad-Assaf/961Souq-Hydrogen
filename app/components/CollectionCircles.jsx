@@ -29,7 +29,7 @@ const CollectionItem = ({collection, index, onSelect}) => {
             srcSet={`${collection.image.url}?width=300&quality=15 300w,
                      ${collection.image.url}?width=600&quality=15 600w,
                      ${collection.image.url}?width=1200&quality=15 1200w`}
-            alt={collection.image.altText || collection.title}
+            alt={`${collection.image.altText || collection.title} Collection`}
             className="menu-item-image"
             width={150}
             height={150}

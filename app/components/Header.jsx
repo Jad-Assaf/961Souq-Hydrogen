@@ -143,7 +143,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     <>
       <header className="header">
         <div className="header-top">
-          <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+          <button className="mobile-menu-toggle" name='Mobile Menu Button' onClick={toggleMobileMenu}>
             <svg
               width="30px"
               height="30px"

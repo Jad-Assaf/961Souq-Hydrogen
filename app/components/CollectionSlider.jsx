@@ -41,7 +41,10 @@ const svgs = [
 function CategoryItem({collection, index}) {
   return (
     <div className="category-container">
-      <Link to={`/collections/${collection.handle}`}>
+      <Link
+        to={`/collections/${collection.handle}`}
+        aria-label={`${collection.handle}`}
+      >
         <div
           dangerouslySetInnerHTML={{__html: svgs[index % svgs.length]}}
           className="category-svg"
