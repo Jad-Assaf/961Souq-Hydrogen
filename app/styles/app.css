@@ -519,12 +519,12 @@ button {
 .product-price {
   font-size: 1rem;
   font-weight: 600;
-  color: #fd1919;
+  color: #2172af;
   min-height: 43px;
 }
 
 .discountedPrice {
-  color: #545454;
+  color: #f50006;
   text-decoration: line-through;
 }
 

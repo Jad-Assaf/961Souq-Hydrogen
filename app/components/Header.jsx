@@ -143,7 +143,12 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     <>
       <header className="header">
         <div className="header-top">
-          <button className="mobile-menu-toggle" name='Mobile Menu Button' onClick={toggleMobileMenu}>
+          <button
+            className="mobile-menu-toggle"
+            name="Mobile Menu Button"
+            aria-label="Mobile Menu Button"
+            onClick={toggleMobileMenu}
+          >
             <svg
               width="30px"
               height="30px"
@@ -178,7 +183,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             />
           </NavLink>
           <SearchFormPredictive className="header-search">
-            {({ inputRef, fetchResults, goToSearch, fetcher }) => {
+            {({inputRef, fetchResults, goToSearch, fetcher}) => {
               // Use the updated hook to focus the search on "/" press instead of cmd+k
               useFocusOnSlash(inputRef);
 
@@ -198,7 +203,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 if (window.innerWidth < 1024) {
                   const inputValue = inputRef.current?.value.trim();
                   if (!inputValue) {
-                    searchContainerRef.current?.classList.remove('fixed-search');
+                    searchContainerRef.current?.classList.remove(
+                      'fixed-search',
+                    );
                     setOverlayVisible(false);
                   }
                 }
@@ -245,7 +252,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 <>
                   {/* Fullscreen Overlay */}
                   <div
-                    className={`search-overlay ${isOverlayVisible ? 'active' : ''}`}
+                    className={`search-overlay ${
+                      isOverlayVisible ? 'active' : ''
+                    }`}
                     onClick={handleCloseSearch}
                   ></div>
 
@@ -271,7 +280,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           onClick={() => {
                             inputRef.current.value = '';
                             setSearchResultsVisible(false);
-                            fetchResults({ target: { value: '' } });
+                            fetchResults({target: {value: ''}});
                           }}
                           aria-label="Clear search"
                         >
@@ -298,7 +307,10 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     {isSearchResultsVisible && (
                       <div className="search-results-container">
                         {fetcher.state === 'loading' || !fetcher.data ? (
-                          <div className="predictive-search-result" key="skeleton">
+                          <div
+                            className="predictive-search-result"
+                            key="skeleton"
+                          >
                             <h5>Products</h5>
                             <ul>
                               {[...Array(8)].map((_, i) => (
@@ -322,8 +334,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           </div>
                         ) : (
                           <SearchResultsPredictive>
-                            {({ items, total, term, state, closeSearch }) => {
-                              const { products } = items;
+                            {({items, total, term, state, closeSearch}) => {
+                              const {products} = items;
                               if (!total) {
                                 return (
                                   <SearchResultsPredictive.Empty term={term} />
@@ -347,12 +359,13 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                                       }}
                                       to={`${SEARCH_ENDPOINT}?q=${term.current.replace(
                                         /\s+/g,
-                                        '-'
+                                        '-',
                                       )}`}
                                       className="view-all-results"
                                     >
                                       <p>
-                                        View all results for <q>{term.current}</q> &nbsp; →
+                                        View all results for{' '}
+                                        <q>{term.current}</q> &nbsp; →
                                       </p>
                                     </Link>
                                   ) : null}
