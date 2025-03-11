@@ -495,9 +495,10 @@ export default function Collection() {
                     className={`col-btn-${num}`}
                     style={{
                       marginRight: '0.5rem',
-                      padding: '0.25rem 0.5rem',
+                      padding: '0.1rem 0.5rem',
+                      borderRadius: '5px',
                       border:
-                        columns === num ? '2px solid #000' : '1px solid #ccc',
+                        columns === num ? '2px solid #2172af' : '1px solid #ccc',
                     }}
                   >
                     {num}
