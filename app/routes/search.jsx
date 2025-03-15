@@ -312,7 +312,7 @@ export default function SearchPage() {
       </div>
 
       {/* DESKTOP: Show filter form in a sidebar */}
-      <div style={{display: 'flex', gap: '1rem'}}>
+      <div style={{display: 'flex', gap: '1rem', width: '100%'}}>
         <div className="hidden lg:block w-[15%]">
           <ShopifyFilterForm filters={filters} />
         </div>
