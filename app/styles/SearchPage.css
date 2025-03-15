@@ -60,7 +60,7 @@
 .search-results-grid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: start;
+    justify-content: space-between;
     gap: 30px;
 }
 
