@@ -10,7 +10,7 @@ import {ProductItem} from '~/components/CollectionDisplay';
 import {getEmptyPredictiveSearchResult} from '~/lib/search';
 import '../styles/SearchPage.css';
 
-// IMPORT your existing Filter components from the same location as in collections
+// Same Filter UI from your collections
 import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
 
 /**
@@ -22,8 +22,6 @@ export const meta = () => {
 
 /**
  * Helper: buildSearchQuery
- * - If `isPredictive = true`, partial/wildcard in title or sku, ignoring description.
- * - Else keep original exact-phrase logic for multi-word input.
  */
 function buildSearchQuery(rawTerm, isPredictive = false) {
   const trimmed = rawTerm.trim();
@@ -37,7 +35,7 @@ function buildSearchQuery(rawTerm, isPredictive = false) {
     );
     return subQueries.join(' AND ');
   } else {
-    // Original exact phrase logic
+    // Exact phrase for multi-word
     if (trimmed.includes(' ')) {
       return `"${trimmed}"`;
     }
@@ -46,11 +44,7 @@ function buildSearchQuery(rawTerm, isPredictive = false) {
 }
 
 /**
- * Priority logic:
- * - vendor=Apple|Samsung => +0
- * - else => +1
- * - productType in [phones, watches, laptops] => +0, else +1
- * - tag=accessories => +1
+ * Priority logic
  */
 function getPriority(product) {
   let priority = 0;
@@ -72,7 +66,7 @@ function getPriority(product) {
 }
 
 /**
- * Loader
+ * LOADER
  */
 export async function loader({request, context}) {
   const {storefront} = context;
@@ -95,7 +89,12 @@ export async function loader({request, context}) {
         };
       },
     );
-    return json({...result, vendors: [], productTypes: [], pageInfo: {}});
+    return json({
+      ...result,
+      vendors: [],
+      productTypes: [],
+      pageInfo: {},
+    });
   }
 
   // Otherwise: REGULAR search
@@ -114,14 +113,11 @@ export async function loader({request, context}) {
     first = null;
   }
 
-  // ADD: If you want filter logic from ?filter.*
-  // parse them into productFilters
+  // Parse filters & sort
   const productFilters = parseFilters(searchParams);
-
-  // ADD: If you want sort logic from ?sort=...
   const {sortKey, reverse} = parseSort(searchParams);
 
-  // EXTEND the GraphQL query to retrieve productFilters {...} from the "search"
+  // Extended GraphQL to retrieve productFilters data
   const SEARCH_PRODUCTS_QUERY = `#graphql
     query SearchProducts(
       $query: String!,
@@ -194,7 +190,6 @@ export async function loader({request, context}) {
             }
           }
         }
-        # THIS is the new part that includes "productFilters", so we can build a filter UI
         productFilters {
           id
           label
@@ -267,12 +262,11 @@ export default function SearchPage() {
     );
   }
 
-  // We'll read the filters from result.productFilters
-  // so we can pass them to <FiltersDrawer> or <ShopifyFilterForm>
+  // filters from Shopify (for <FiltersDrawer> / <ShopifyFilterForm>)
   const filters = result?.productFilters || [];
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // pagination
+  // Pagination
   const pageInfo = result?.pageInfo || {};
   const hasNextPage = pageInfo.hasNextPage;
   const hasPreviousPage = pageInfo.hasPreviousPage;
@@ -324,7 +318,7 @@ export default function SearchPage() {
         </div>
 
         {/* MAIN AREA */}
-        <div className='w-[85%] mobile-results-container'>
+        <div className="w-[85%] mobile-results-container">
           <div className="search-results-grid">
             {edges.map(({node: product}, idx) => (
               <ProductItem product={product} index={idx} key={product.id} />
@@ -375,9 +369,9 @@ export default function SearchPage() {
   );
 }
 
-/**
- * A simple "Sort By" dropdown – if you want sorting in the UI
- */
+/* ------------------------------------------------------------------
+   A simple "Sort By" dropdown – if you want sorting in the UI
+------------------------------------------------------------------- */
 function SortDropdown() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -407,33 +401,53 @@ function SortDropdown() {
 
 /* ------------------------------------------------------------------
    parseFilters & parseSort 
-   (just like your collections code)
+   (we fix productMetafield to avoid "Field is not defined" errors)
 ------------------------------------------------------------------- */
 function parseFilters(searchParams) {
   const filters = [];
   for (const [key, val] of searchParams.entries()) {
-    if (key.startsWith('filter.')) {
-      const field = key.replace('filter.', '');
-      let parsed;
-      try {
-        parsed = JSON.parse(val);
-      } catch {
-        parsed = val;
-      }
-      filters.push({[field]: parsed});
+    if (!key.startsWith('filter.')) continue;
+    const field = key.replace('filter.', '');
+    let parsedValue;
+    try {
+      parsedValue = JSON.parse(val);
+    } catch {
+      parsedValue = val;
     }
+
+    // The user might pass productMetafield structure like in your collections logic:
+    // e.g. ?filter.productMetafield={"productMetafield":{"namespace":"...","key":"...","value":"..."}}
+    // or simpler. We'll replicate the exact approach from your collections:
+    if (
+      field === 'productMetafield' &&
+      parsedValue &&
+      typeof parsedValue === 'object'
+    ) {
+      // if it has the shape { productMetafield: {...} }, extract that
+      if ('productMetafield' in parsedValue) {
+        parsedValue = parsedValue.productMetafield;
+      }
+      // ensure that "namespace", "key", and "value" exist if you truly need them
+      // otherwise, you can skip or throw an error
+      if (!parsedValue.namespace || !parsedValue.key || !parsedValue.value) {
+        // If it's missing something, skip it or fix it
+        // We'll just skip it:
+        console.warn('Skipping invalid productMetafield filter:', parsedValue);
+        continue;
+      }
+    }
+
+    filters.push({[field]: parsedValue});
   }
   return filters;
 }
 
 function parseSort(searchParams) {
   const sortOption = searchParams.get('sort') || 'default';
-  // Adjust to match "search" sort keys
   const sortMapping = {
     default: {sortKey: 'RELEVANCE', reverse: false},
     priceLowToHigh: {sortKey: 'PRICE', reverse: false},
     priceHighToLow: {sortKey: 'PRICE', reverse: true},
-    alphabetical: {sortKey: 'TITLE', reverse: false},
   };
   return sortMapping[sortOption] || sortMapping.default;
 }
@@ -586,7 +600,7 @@ async function predictiveSearch({request, context, query}) {
   const prefixParam = searchParams.get('prefix');
   let prefix = null;
   if (prefixParam === 'true') {
-    prefix = 'LAST'; // or "ANY"
+    prefix = 'LAST';
   } else if (['LAST', 'ANY', 'NONE'].includes(prefixParam)) {
     prefix = prefixParam;
   }
