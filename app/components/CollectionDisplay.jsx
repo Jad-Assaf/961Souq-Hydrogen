@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Link} from '@remix-run/react';
+import {Link, useRevalidator} from '@remix-run/react';
 import {Money, Image} from '@shopify/hydrogen';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
@@ -80,6 +80,8 @@ const RightArrowIcon = () => (
 export function ProductItem({product}) {
   const ref = useRef(null);
   const {open} = useAside();
+  // Use Remix's revalidator to re-fetch loader data (e.g. cart info)
+  const revalidator = useRevalidator();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   // Controls opacity for the fade transition
   const [fadeIn, setFadeIn] = useState(true);
@@ -108,7 +110,7 @@ export function ProductItem({product}) {
       const timer = setTimeout(() => {
         setFadeIn(true);
         setFirstLoad(false);
-      }, 10); // delay allows the browser to register the change
+      }, 10);
       return () => clearTimeout(timer);
     }
   }, [currentImageIndex, firstLoad]);
@@ -198,10 +200,13 @@ export function ProductItem({product}) {
           (selectedVariant?.price &&
             parseFloat(selectedVariant.price.amount) === 0)
         }
-        onClick={() => {
+        onClick={async () => {
           if (product.variants?.nodes?.length > 1) {
             window.location.href = `/products/${product.handle}`;
           } else {
+            // At this point the product is added to the cart.
+            // Trigger revalidation to fetch the updated cart data.
+            await revalidator.revalidate();
             open('cart');
           }
         }}
