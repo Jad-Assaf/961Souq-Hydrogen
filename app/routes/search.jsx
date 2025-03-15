@@ -319,12 +319,12 @@ export default function SearchPage() {
 
       {/* DESKTOP: Show filter form in a sidebar */}
       <div style={{display: 'flex', gap: '1rem'}}>
-        <div className="hidden lg:block w[15%]">
+        <div className="hidden lg:block w-[15%]">
           <ShopifyFilterForm filters={filters} />
         </div>
 
         {/* MAIN AREA */}
-        <div className='w[85%]'>
+        <div className='w-[85%]'>
           <div className="search-results-grid">
             {edges.map(({node: product}, idx) => (
               <ProductItem product={product} index={idx} key={product.id} />
