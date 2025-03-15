@@ -1694,7 +1694,7 @@ input.search-bar:focus-visible {
 }
 
 .product-options-item {
-  padding: 0.25rem 1rem;
+  padding: 5px 10px;
   transition: all 0.3s ease;
 }
 

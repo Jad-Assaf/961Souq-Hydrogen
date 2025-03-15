@@ -420,8 +420,8 @@ export function ProductForm({
                 className={`product-options-item ${isActive ? 'active' : ''}`}
                 style={{
                   opacity: canPick ? 1 : 0.3,
-                  border: isActive ? '1px solid #000' : '1px solid transparent',
-                  borderRadius: '20px',
+                  border: isActive ? '1px solid #2172af' : '1px solid transparent',
+                  borderRadius: '5px',
                   transition: 'all 0.3s ease-in-out',
                   backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0',
                   boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',

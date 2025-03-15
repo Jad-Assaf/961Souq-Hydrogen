@@ -226,10 +226,10 @@ function ProductOptions({option, selectedOptions, onOptionChange}) {
               style={{
                 border:
                   selectedOptions[option.name] === value
-                    ? '1px solid #000'
+                    ? '1px solid #2172af'
                     : '1px solid transparent',
                 opacity: isAvailable ? 1 : 0.3,
-                borderRadius: '20px',
+                borderRadius: '5px',
                 transition: 'all 0.3s ease-in-out',
                 backgroundColor:
                   selectedOptions[option.name] === value
