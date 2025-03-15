@@ -324,7 +324,7 @@ export default function SearchPage() {
         </div>
 
         {/* MAIN AREA */}
-        <div className='w-[85%]'>
+        <div className='w-[85%] mobile-results-container'>
           <div className="search-results-grid">
             {edges.map(({node: product}, idx) => (
               <ProductItem product={product} index={idx} key={product.id} />

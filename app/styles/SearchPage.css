@@ -111,6 +111,10 @@ select#sort-select {
 }
 
 @media (max-width: 1024px) {
+    .mobile-results-container {
+        width: 100% !important;
+    }
+
     .mobile-filters-toggle {
         display: block;
     }
