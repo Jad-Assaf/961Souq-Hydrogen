@@ -13,7 +13,7 @@ import {useState, useEffect} from 'react';
 export function CartMain({layout, cart: originalCart}) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
-  const cart = useOptimisticCart(originalCart);
+  const cart = (originalCart);
 
   // Loader state to track pending cart updates
   const [isLoading, setIsLoading] = useState(false);
