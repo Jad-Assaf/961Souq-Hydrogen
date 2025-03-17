@@ -4,6 +4,7 @@ import {Money, Image} from '@shopify/hydrogen';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import CollectionRows from './CollectionRows';
+import {CartProvider} from '@shopify/hydrogen-react';
 
 // Truncate text to fit within the given max word count
 export function truncateText(text, maxWords) {
@@ -192,49 +193,53 @@ export function ProductItem({product}) {
           )}
         </div>
       </Link>
-
-      <AddToCartButton
-        disabled={
-          !selectedVariant ||
-          !selectedVariant.availableForSale ||
-          (selectedVariant?.price &&
-            parseFloat(selectedVariant.price.amount) === 0)
-        }
-        onClick={async () => {
-          if (product.variants?.nodes?.length > 1) {
-            window.location.href = `/products/${product.handle}`;
-          } else {
-            // At this point the product is added to the cart.
-            // Trigger revalidation to fetch the updated cart data.
-            await revalidator.revalidate();
-            open('cart');
+        <AddToCartButton
+          disabled={
+            !selectedVariant ||
+            !selectedVariant.availableForSale ||
+            (selectedVariant?.price &&
+              parseFloat(selectedVariant.price.amount) === 0)
           }
-        }}
-        lines={
-          selectedVariant
-            ? [
-                {
-                  merchandiseId: selectedVariant.id,
-                  quantity: 1,
-                  product: {
-                    ...product,
-                    selectedVariant,
-                    handle: product.handle,
+          onClick={async () => {
+            if (product.variants?.nodes?.length > 1) {
+              window.location.href = `/products/${product.handle}`;
+            } else {
+              // At this point the product is added to the cart.
+              // Trigger revalidation to fetch the updated cart data.
+              await revalidator.revalidate();
+              open('cart');
+            }
+          }}
+          lines={
+            selectedVariant
+              ? [
+                  {
+                    merchandiseId: selectedVariant.id,
+                    quantity: 1,
+                    selectedVariant: {
+                      ...selectedVariant,
+                      // Ensure the selectedVariant includes product details needed by Hydrogen
+                      product: {
+                        id: product.id,
+                        title: product.title,
+                        handle: product.handle,
+                        images: product.images,
+                      },
+                    },
                   },
-                },
-              ]
-            : []
-        }
-      >
-        {!selectedVariant?.availableForSale
-          ? 'Sold out'
-          : selectedVariant?.price &&
-            parseFloat(selectedVariant.price.amount) === 0
-          ? 'Call for Price'
-          : product.variants?.nodes?.length > 1
-          ? 'Select Options'
-          : 'Add to cart'}
-      </AddToCartButton>
+                ]
+              : []
+          }
+        >
+          {!selectedVariant?.availableForSale
+            ? 'Sold out'
+            : selectedVariant?.price &&
+              parseFloat(selectedVariant.price.amount) === 0
+            ? 'Call for Price'
+            : product.variants?.nodes?.length > 1
+            ? 'Select Options'
+            : 'Add to cart'}
+        </AddToCartButton>
     </div>
   );
 }

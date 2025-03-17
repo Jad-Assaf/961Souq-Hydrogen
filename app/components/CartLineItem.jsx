@@ -1,8 +1,9 @@
 import { CartForm, Image } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
-import { Link } from '@remix-run/react';
+import { Link, useRevalidator } from '@remix-run/react';
 import { ProductPrice } from './ProductPrice';
 import { useAside } from './Aside';
+import { useEffect } from 'react';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -117,19 +118,32 @@ function CartLineQuantity({ line }) {
  *   disabled: boolean;
  * }}
  */
-function CartLineRemoveButton({ lineIds, disabled }) {
+function CartLineRemoveButton({lineIds, disabled}) {
+  const revalidator = useRevalidator();
+
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
-      inputs={{ lineIds }}
+      inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit" className='cart-remove'>
-        Remove
-      </button>
+      {(fetcher) => {
+        useEffect(() => {
+          if (fetcher.state === 'idle' && fetcher.data) {
+            revalidator.revalidate();
+          }
+        }, [fetcher.state, fetcher.data, revalidator]);
+
+        return (
+          <button disabled={disabled} type="submit" className="cart-remove">
+            Remove
+          </button>
+        );
+      }}
     </CartForm>
   );
 }
+
 
 /**
  * @param {{

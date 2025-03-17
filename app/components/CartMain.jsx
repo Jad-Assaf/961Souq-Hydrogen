@@ -1,32 +1,26 @@
 import {useOptimisticCart} from '@shopify/hydrogen';
+import {useRevalidator} from '@remix-run/react';
 import {Link} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
 import {CartLineItem} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
 import {useState, useEffect} from 'react';
 
-/**
- * The main cart component that displays the cart items and summary.
- * It is used by both the /cart route and the cart aside dialog.
- * @param {CartMainProps}
- */
 export function CartMain({layout, cart: originalCart}) {
-  // The useOptimisticCart hook applies pending actions to the cart
-  // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
-
-  // Loader state to track pending cart updates
+  const revalidator = useRevalidator();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Track cart fetcher state
+  // Monitor pendingActions and trigger revalidation when they clear
   useEffect(() => {
-    // If cart has pending actions, set loading state
     if (cart?.pendingActions?.length > 0) {
       setIsLoading(true);
     } else {
       setIsLoading(false);
+      // Once pending actions are done, re-run the loader to fetch updated cart data.
+      revalidator.revalidate();
     }
-  }, [cart?.pendingActions]);
+  }, [cart?.pendingActions, revalidator]);
 
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
@@ -37,7 +31,6 @@ export function CartMain({layout, cart: originalCart}) {
 
   return (
     <div className={className}>
-      {/* Loader */}
       {isLoading && (
         <div className="cart-loader">
           <p>Updating cart...</p>
@@ -59,21 +52,14 @@ export function CartMain({layout, cart: originalCart}) {
   );
 }
 
-/**
- * @param {{
- *   hidden: boolean;
- *   layout?: CartMainProps['layout'];
- * }}
- */
-function CartEmpty({hidden = false}) {
+function CartEmpty({hidden = false, layout}) {
   const {close} = useAside();
   return (
     <div hidden={hidden}>
       <br />
       <p>
         <strong>
-          Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-          started!
+          Looks like you haven’t added anything yet, let’s get you started!
         </strong>
       </p>
       <br />
