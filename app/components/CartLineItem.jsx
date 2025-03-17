@@ -122,7 +122,7 @@ function CartLineQuantity({line}) {
 function CartLineRemoveButton({lineIds, disabled}) {
   return (
     <CartForm
-      route="/cart"
+      route="/"
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
