@@ -201,7 +201,7 @@ export async function loader(args) {
     {
       headers: {
         // Adjust these values as you like:
-        'Oxygen-Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
       },
     },
   );
