@@ -1,6 +1,6 @@
 // src/root.jsx
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
-import {defer, redirect, json} from '@shopify/remix-oxygen';
+import {defer, redirect} from '@shopify/remix-oxygen';
 import {
   Links,
   Meta,
@@ -21,7 +21,6 @@ import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import React, {Suspense, useEffect, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
-import {CartForm} from '@shopify/hydrogen'; // <-- ADD THIS import for CartForm
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -87,86 +86,15 @@ export async function loader({request, context}) {
       },
       {
         headers: {
-          'Cache-Control': 'public, max-age=1, stale-while-revalidate=86399',
+          'Oxygen-Cache-Control': 'public, max-age=60, stale-while-revalidate=86399',
         },
       },
     );
+
   } catch (error) {
     console.error('Loader error:', error);
     throw new Response('Failed to load data', {status: 500});
   }
-}
-
-/**
- * ADD THE CART ACTION HERE
- */
-export async function action({request, context}) {
-  const {cart} = context;
-  const formData = await request.formData();
-  const {action, inputs} = CartForm.getFormInput(formData);
-
-  if (!action) {
-    throw new Error('No action provided');
-  }
-
-  let status = 200;
-  let result;
-
-  switch (action) {
-    case CartForm.ACTIONS.LinesAdd:
-      result = await cart.addLines(inputs.lines);
-      break;
-    case CartForm.ACTIONS.LinesUpdate:
-      result = await cart.updateLines(inputs.lines);
-      break;
-    case CartForm.ACTIONS.LinesRemove:
-      result = await cart.removeLines(inputs.lineIds);
-      break;
-    case CartForm.ACTIONS.DiscountCodesUpdate: {
-      const formDiscountCode = inputs.discountCode;
-      const discountCodes = formDiscountCode ? [formDiscountCode] : [];
-      discountCodes.push(...inputs.discountCodes);
-      result = await cart.updateDiscountCodes(discountCodes);
-      break;
-    }
-    case CartForm.ACTIONS.GiftCardCodesUpdate: {
-      const formGiftCardCode = inputs.giftCardCode;
-      const giftCardCodes = formGiftCardCode ? [formGiftCardCode] : [];
-      giftCardCodes.push(...inputs.giftCardCodes);
-      result = await cart.updateGiftCardCodes(giftCardCodes);
-      break;
-    }
-    case CartForm.ACTIONS.BuyerIdentityUpdate: {
-      result = await cart.updateBuyerIdentity({
-        ...inputs.buyerIdentity,
-      });
-      break;
-    }
-    default:
-      throw new Error(`${action} cart action is not defined`);
-  }
-
-  const cartId = result?.cart?.id;
-  const headers = cartId ? cart.setCartId(cartId) : new Headers();
-  const {cart: cartResult, errors} = result ?? {};
-
-  // If a form param called "redirectTo" was included, handle it:
-  const redirectTo = formData.get('redirectTo') ?? null;
-  if (typeof redirectTo === 'string') {
-    status = 303;
-    headers.set('Location', redirectTo);
-  }
-
-  return json(
-    {
-      cart: cartResult,
-      errors,
-      analytics: {
-        cartId,
-      },
-    },
-    {status, headers},
-  );
 }
 
 /**

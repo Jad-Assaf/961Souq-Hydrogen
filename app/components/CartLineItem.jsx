@@ -1,8 +1,8 @@
-import {CartForm, Image} from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
-import {Link} from '@remix-run/react';
-import {ProductPrice} from './ProductPrice';
-import {useAside} from './Aside';
+import { CartForm, Image } from '@shopify/hydrogen';
+import { useVariantUrl } from '~/lib/variants';
+import { Link } from '@remix-run/react';
+import { ProductPrice } from './ProductPrice';
+import { useAside } from './Aside';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -12,11 +12,11 @@ import {useAside} from './Aside';
  *   line: CartLine;
  * }}
  */
-export function CartLineItem({layout, line}) {
-  const {id, merchandise} = line;
-  const {product, title, image, selectedOptions} = merchandise;
+export function CartLineItem({ layout, line }) {
+  const { id, merchandise } = line;
+  const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
-  const {close} = useAside();
+  const { close } = useAside();
 
   return (
     <li key={id} className="cart-line">
@@ -67,9 +67,9 @@ export function CartLineItem({layout, line}) {
  * hasn't yet responded that it was successfully added to the cart.
  * @param {{line: CartLine}}
  */
-function CartLineQuantity({line}) {
+function CartLineQuantity({ line }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity, isOptimistic} = line;
+  const { id: lineId, quantity, isOptimistic } = line;
 
   const maxQuantity = 5; // Set the maximum allowed quantity
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
@@ -77,11 +77,9 @@ function CartLineQuantity({line}) {
 
   return (
     <div className="cart-line-quantity">
-      <small>
-        <strong>Quantity:</strong> {quantity} &nbsp;&nbsp;
-      </small>
-      <div style={{display: 'flex', gap: '5px'}}>
-        <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+      <small><strong>Quantity:</strong> {quantity} &nbsp;&nbsp;</small>
+      <div style={{ display: 'flex', gap: '5px' }}>
+        <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
           <button
             aria-label="Decrease quantity"
             disabled={quantity <= 1 || !!isOptimistic}
@@ -93,7 +91,7 @@ function CartLineQuantity({line}) {
           </button>
         </CartLineUpdateButton>
         &nbsp;
-        <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+        <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
           <button
             aria-label="Increase quantity"
             name="increase-quantity"
@@ -104,7 +102,7 @@ function CartLineQuantity({line}) {
             <span>&#43;</span>
           </button>
         </CartLineUpdateButton>
-        <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
+      <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
       </div>
     </div>
   );
@@ -119,14 +117,14 @@ function CartLineQuantity({line}) {
  *   disabled: boolean;
  * }}
  */
-function CartLineRemoveButton({lineIds, disabled}) {
+function CartLineRemoveButton({ lineIds, disabled }) {
   return (
     <CartForm
-      route="/"
+      route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
-      inputs={{lineIds}}
+      inputs={{ lineIds }}
     >
-      <button disabled={disabled} type="submit" className="cart-remove">
+      <button disabled={disabled} type="submit" className='cart-remove'>
         Remove
       </button>
     </CartForm>
@@ -139,12 +137,12 @@ function CartLineRemoveButton({lineIds, disabled}) {
  *   lines: CartLineUpdateInput[];
  * }}
  */
-function CartLineUpdateButton({children, lines}) {
+function CartLineUpdateButton({ children, lines }) {
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={{ lines }}
     >
       {children}
     </CartForm>
