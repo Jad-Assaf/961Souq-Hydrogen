@@ -84,11 +84,6 @@ export async function loader({request, context}) {
           language: storefront.i18n.language,
         },
       },
-      {
-        headers: {
-          'Cache-Control': 'public, max-age=300, stale-while-revalidate=86399',
-        },
-      },
     );
 
   } catch (error) {

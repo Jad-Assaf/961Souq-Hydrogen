@@ -198,12 +198,6 @@ export async function loader(args) {
       ...deferredData,
       ...criticalData,
     },
-    {
-      headers: {
-        // Adjust these values as you like:
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-      },
-    },
   );
 }
 
