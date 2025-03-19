@@ -281,7 +281,7 @@ export default function PCBuilder() {
           <h3>Select {CATEGORIES[currentStep].name}</h3>
           <div className="pcBldr-filters">
             <label>
-              Manufacturer:
+              Manufacturer
               <input
                 type="text"
                 value={manufacturerFilter}
@@ -289,8 +289,8 @@ export default function PCBuilder() {
                 placeholder="Filter by manufacturer"
               />
             </label>
-            <label>
-              Model:
+            <label className='model-input'>
+              Model
               <input
                 type="text"
                 value={modelFilter}
@@ -325,8 +325,8 @@ export default function PCBuilder() {
 
         {/* Right panel: selected item details and summary */}
         <section className="pcBldr-selectedSection">
-          <h3>Selected {CATEGORIES[currentStep].name}</h3>
-          {selectedItem ? (
+          {/* <h3>Selected {CATEGORIES[currentStep].name}</h3> */}
+          {/* {selectedItem ? (
             <div className="pcBldr-selectedDetails">
               <img
                 src={`${selectedItem.image}&quality=50`}
@@ -350,10 +350,10 @@ export default function PCBuilder() {
             </div>
           ) : (
             <p>No {CATEGORIES[currentStep].name} selected yet.</p>
-          )}
+          )} */}
 
           <div className="pcBldr-selectedSummary">
-            <h4>All Selected Items</h4>
+            <h3>All Selected Items</h3>
             {Object.keys(selectedItems).length === 0 ? (
               <p>No items selected yet.</p>
             ) : (

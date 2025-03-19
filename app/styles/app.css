@@ -1009,7 +1009,7 @@ button.reset:hover:not(:has(> *)) {
     display: flex;
     gap: 0;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     max-width: 1500px;
   }
