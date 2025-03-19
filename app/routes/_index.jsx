@@ -46,9 +46,10 @@ export const meta = ({data}) => {
   const truncate = (text, maxLength) =>
     text?.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
   return getSeoMeta({
-    title: '961Souq',
+    title: '961Souq | Leading Electronics Store in Lebanon',
     description: truncate(
-      data?.description || 'Leading Electronics Store in Lebanon.',
+      data?.description ||
+        "Discover Lebanon's top destination for quality electronics and unbeatable deals at 961Souq. Shop the latest gadgets, devices, and accessories today!",
       150,
     ),
     url: data?.url || 'https://961souq.com',
@@ -58,7 +59,8 @@ export const meta = ({data}) => {
         '@type': 'WebPage',
         name: data?.title || '961Souq',
         description: truncate(
-          data?.description || 'Leading Electronics Store in Lebanon.',
+          data?.description ||
+            "Discover Lebanon's top destination for quality electronics and unbeatable deals at 961Souq. Shop the latest gadgets, devices, and accessories today!",
           150,
         ),
         url: data?.url || 'https://961souq.com',
