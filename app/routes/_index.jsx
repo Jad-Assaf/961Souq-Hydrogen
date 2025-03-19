@@ -48,7 +48,7 @@ export const meta = ({data}) => {
   return getSeoMeta({
     title: '961Souq',
     description: truncate(
-      data?.description || 'Default description for this page.',
+      data?.description || 'Leading Electronics Store in Lebanon.',
       150,
     ),
     url: data?.url || 'https://961souq.com',
@@ -58,7 +58,7 @@ export const meta = ({data}) => {
         '@type': 'WebPage',
         name: data?.title || 'Default Title',
         description: truncate(
-          data?.description || 'Default description for this page.',
+          data?.description || 'Leading Electronics Store in Lebanon.',
           150,
         ),
         url: data?.url || 'https://961souq.com',
