@@ -40,7 +40,7 @@ function truncateText(text, maxWords) {
 export const meta = ({data}) => {
   const collection = data?.collection;
   return getSeoMeta({
-    title: `${collection?.title || 'Collection'} | 961Souq`,
+    title: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
     description: truncateText(
       collection?.description || 'Explore our latest collection at 961Souq.',
       20,
@@ -54,7 +54,7 @@ export const meta = ({data}) => {
       {
         '@context': 'http://schema.org/',
         '@type': 'CollectionPage',
-        name: collection?.title || 'Collection',
+        name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
         url: `https://961souq.com/collections/${collection?.handle || ''}`,
         description: truncateText(collection?.description || '', 20),
         image: {
@@ -154,7 +154,7 @@ export const meta = ({data}) => {
           {
             '@type': 'ListItem',
             position: 2,
-            name: collection?.title || 'Collection',
+            name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
             item: `https://961souq.com/collections/${collection?.handle || ''}`,
           },
         ],
@@ -163,7 +163,7 @@ export const meta = ({data}) => {
       {
         '@context': 'http://schema.org/',
         '@type': 'ItemList',
-        name: collection?.title || 'Collection',
+        name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
         description: truncateText(collection?.description || '', 20),
         url: `https://961souq.com/collections/${collection?.handle || ''}`,
         itemListElement: collection?.products?.nodes

@@ -22,7 +22,7 @@ import RelatedProductsRow from '~/components/RelatedProducts';
 import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
-import { trackAddToCartGA } from '~/lib/googleAnalyticsEvents';
+import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 
 // ---------------- SEO & Meta
 export const meta = ({data}) => {
@@ -39,10 +39,10 @@ export const meta = ({data}) => {
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
 
   return getSeoMeta({
-    title: truncate(
+    title: `${truncate(
       product?.seoTitle || product?.title || '961 Souq Product',
       140,
-    ),
+    )} | Lebanon`,
     description: truncate(
       product?.seoDescription ||
         product?.description ||
@@ -56,7 +56,10 @@ export const meta = ({data}) => {
       {
         '@context': 'http://schema.org/',
         '@type': 'Product',
-        name: truncate(product?.title, 140),
+        name: `${truncate(
+          product?.seoTitle || product?.title || '961 Souq Product',
+          140,
+        )} | Lebanon`,
         url: `https://961souq.com/products/${encodeURIComponent(
           product?.handle,
         )}`,
@@ -161,7 +164,10 @@ export const meta = ({data}) => {
           {
             '@type': 'ListItem',
             position: 2,
-            name: truncate(product?.title || 'Product', 140),
+            name: `${truncate(
+              product?.seoTitle || product?.title || '961 Souq Product',
+              140,
+            )} | Lebanon`,
             item: `https://961souq.com/products/${encodeURIComponent(
               product?.handle,
             )}`,
@@ -420,7 +426,9 @@ export function ProductForm({
                 className={`product-options-item ${isActive ? 'active' : ''}`}
                 style={{
                   opacity: canPick ? 1 : 0.3,
-                  border: isActive ? '1px solid #2172af' : '1px solid transparent',
+                  border: isActive
+                    ? '1px solid #2172af'
+                    : '1px solid transparent',
                   borderRadius: '5px',
                   transition: 'all 0.3s ease-in-out',
                   backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0',
