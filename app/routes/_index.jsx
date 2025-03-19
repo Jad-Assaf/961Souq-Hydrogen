@@ -56,7 +56,7 @@ export const meta = ({data}) => {
       {
         '@context': 'https://schema.org',
         '@type': 'WebPage',
-        name: data?.title || 'Default Title',
+        name: data?.title || '961Souq',
         description: truncate(
           data?.description || 'Leading Electronics Store in Lebanon.',
           150,
