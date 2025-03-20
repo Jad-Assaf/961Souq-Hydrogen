@@ -453,6 +453,13 @@ export default function PCBuilder() {
   return (
     <div className="pcBldr-container">
       {/* Sidebar */}
+      {/* <video className="pcBldr-background" autoPlay muted loop playsInline>
+        <source
+          src="https://cdn.shopify.com/videos/c/o/v/776299c50e2343a2b32d10d49558ddc7.mp4"
+          type="video/mp4"
+        />
+      </video> */}
+
       <div className="pcBldr-sidebar">
         <div className="pcBldr-sidebar-div">
           <h2 className="pcBldr-title">PC BUILDER</h2>
@@ -480,7 +487,7 @@ export default function PCBuilder() {
       <main className="pcBldr-main">
         {/* Left panel: filters and item list */}
         <section className="pcBldr-filtersSection">
-          <h3>Select {CATEGORIES[currentStep].name}</h3>
+          {/* <h3>Select {CATEGORIES[currentStep].name}</h3>
           <div className="pcBldr-filters">
             <label>
               <input
@@ -498,7 +505,7 @@ export default function PCBuilder() {
                 placeholder="Filter by model"
               />
             </label>
-          </div>
+          </div> */}
           <div className="pcBldr-itemList">
             {filteredItems.map((item) => {
               const isSelected = selectedItem?.id === item.id;
@@ -512,10 +519,11 @@ export default function PCBuilder() {
                 >
                   <div className="pcBldr-item-top">
                     <img
-                      src={`${item.image}&quality=20`}
+                      src={`${item.image}&quality=10`}
                       alt={item.model}
                       width={100}
                       height={100}
+                      loading="lazy"
                     />
                     <div className="pcBldr-product-title">{item.model}</div>
                     {(CATEGORIES[currentStep].name === 'MEMORY' ||

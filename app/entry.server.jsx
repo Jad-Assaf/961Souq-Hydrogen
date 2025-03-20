@@ -59,6 +59,8 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
       'https://search-app-vert.vercel.app/',
+      'https://youtu.be/',
+      'https://youtube.com/',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -85,6 +87,8 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
       'https://search-app-vert.vercel.app/',
+      'https://youtu.be/',
+      'https://youtube.com/',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -113,6 +117,8 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
       'https://search-app-vert.vercel.app/',
+      'https://youtu.be/',
+      'https://youtube.com/',
     ],
     imgSrc: [
       "'self'", // Allow images from the same origin
@@ -142,6 +148,8 @@ export default async function handleRequest(
       'https://api.ipify.org/',
       'https://search-app-vert.vercel.app/',
       'https://c.bing.com',
+      'https://youtu.be/',
+      'https://youtube.com/',
     ],
     mediaSrc: [
       "'self'",
@@ -156,6 +164,8 @@ export default async function handleRequest(
       'https://youtu.be',
       'https://api.ipify.org/',
       'https://search-app-vert.vercel.app/',
+      'https://youtu.be/',
+      'https://youtube.com/',
       // Add other media sources as needed
     ],
   });
