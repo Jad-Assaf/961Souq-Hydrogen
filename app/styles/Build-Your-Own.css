@@ -3,11 +3,9 @@
     top: 0;
     left: 0;
     z-index: -1;
-    width: auto;
-    min-width: 100vw;
-    height: 100vh;
-    opacity: 0.9;
-    max-width: unset;
+    width: 100vw;
+    height: auto;
+    /* opacity: 0.9; */
 }
 
 .video-background {
@@ -36,7 +34,7 @@
 /* Sidebar */
 .pcBldr-sidebar {
     width: 100vw;
-    background-color: #232323;
+    background-color: #2172af;
     color: #fff;
     /* Blue-ish text color */
     display: flex;
@@ -81,7 +79,7 @@
 
 .pcBldr-navItemActive {
     background: #fff;
-    color: #232323;
+    color: #2172af;
     font-weight: 500;
 }
 
@@ -138,22 +136,18 @@
     gap: 30px;
     justify-content: space-between;
     min-height: 100vh;
-    background: transparent;
-    backdrop-filter: blur(25px);
-    padding: 25px;
-    border-radius: 10px;
-    border: none;
+    margin-top: 20px;
 }
 
 .pcBldr-item {
-    border: 1px solid #2172af2e;
+    border: 1px solid #2171af61;
     border-radius: 10px;
     padding: 1rem;
     cursor: pointer;
     width: 200px;
     text-align: center;
-    background-color: #232323;
-    color: #fff;
+    background-color: #fff;
+    color: #000;
     font-size: 14px;
     min-height: fit-content;
 
@@ -164,13 +158,13 @@
 }
 
 .pcBldr-itemActive {
-    border: 2px solid #fff;
+    border: 2px solid #2172af;
 }
 
 .pcBldr-item img {
     width: 100%;
     margin-bottom: 0.5rem;
-    border-bottom: 1px solid #232323;
+    border-bottom: 1px solid #2172af2e;
     border-radius: 0;
 }
 
@@ -185,8 +179,7 @@
     width: 100%;
     max-width: 1500px;
     margin: auto;
-    background-color: #232323;
-    color: #fff;
+    background-color: #fff;
     border-radius: 10px;
 }
 
@@ -231,8 +224,8 @@
 
 .pcBldr-remove-btn {
     background: none;
-    border: 1px solid #fff;
-    color: #fff;
+    border: 1px solid #2172af;
+    color: #2172af;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
     font-size: 0.9rem;
@@ -254,7 +247,8 @@
 }
 
 a.pcBldr-viewMoreBtn {
-    border: 1px solid #fff;
+    color: #2172af;
+    border: 1px solid #2172af;
     padding: 5px 10px;
     border-radius: 30px;
 }
