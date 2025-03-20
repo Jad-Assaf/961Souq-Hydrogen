@@ -1,5 +1,5 @@
 import React, {useState, useMemo, useEffect} from 'react';
-import {useLoaderData, useFetcher} from '@remix-run/react';
+import {useLoaderData, useFetcher, Link} from '@remix-run/react';
 import '../styles/Build-Your-Own.css';
 
 // Define valid tags for CPU and Memory filtering.
@@ -18,11 +18,11 @@ const CPU_VALID_TAGS = [
 ];
 const MEMORY_VALID_TAGS = ['ddr4 support', 'ddr5 support'];
 
-// Desired order: GPU, CPU, MB, MEMORY, CASE, COOLING, STORAGE, PSU.
+// Desired order: GPU, CPU, Motherboards, MEMORY, CASE, COOLING, STORAGE, PSU.
 const CATEGORY_ORDER = [
   'GPU',
   'CPU',
-  'MB',
+  'Motherboards',
   'MEMORY',
   'CASE',
   'COOLING',
@@ -34,7 +34,7 @@ const CATEGORY_ORDER = [
 const CATEGORY_HANDLES = {
   GPU: 'gpu',
   CPU: 'cpus',
-  MB: 'motherboards',
+  Motherboards: 'motherboards',
   CASE: 'cases',
   COOLING: 'cpu-coolers',
   MEMORY: 'ram',
@@ -42,42 +42,121 @@ const CATEGORY_HANDLES = {
   PSU: 'power-supply',
 };
 
-// Build the list of categories from the ordered list.
+// Build the list of categories.
 const CATEGORIES = CATEGORY_ORDER.map((name) => ({name}));
 
 // --- PSU Recommendation Helpers ---
-
-// Extract recommended PSU wattage from a GPU's description.
-// Assumes the GPU description contains a pattern like "750W" or "750 Watt".
 function extractRecommendedPSUWattage(gpu) {
   if (!gpu || !gpu.description) return 0;
   const match = gpu.description.match(/(\d+)\s*(W|watt)/i);
   return match ? parseInt(match[1], 10) : 0;
 }
 
-// Extract the wattage from a PSU product.
-// Checks the product's model first, then its description.
 function extractPSUWattage(psu) {
   if (!psu) return 0;
   let wattage = 0;
-  // Try extracting from the model (title).
   const matchModel = psu.model.match(/(\d+)\s*(W|watt)/i);
   if (matchModel) {
     wattage = parseInt(matchModel[1], 10);
   }
-  // If not found in the model, try the description.
   if (!wattage && psu.description) {
     const matchDesc = psu.description.match(/(\d+)\s*(W|watt)/i);
     wattage = matchDesc ? parseInt(matchDesc[1], 10) : 0;
   }
   return wattage;
 }
-
 // --- End PSU Helpers ---
 
+// --- Form Factor Extraction Helpers ---
+// Looks for specific form factor patterns in a text.
+function extractFormFactor(text) {
+  if (!text) return null;
+  const lowerText = text.toLowerCase();
+  // EATX: "EATX", "E-ATX", "E ATX"
+  if (/\be[-\s]?atx\b/i.test(lowerText)) {
+    return {factor: 'EATX', order: 3};
+  }
+  // Micro ATX: "Micro ATX", "Micro-ATX", "MicroATX", "MATX"
+  if (/\b(micro[-\s]?atx|matx)\b/i.test(lowerText)) {
+    return {factor: 'Micro ATX', order: 1};
+  }
+  // Mini ATX: "MiniATX", "Mini-ATX"
+  if (/\bmini[-\s]?atx\b/i.test(lowerText)) {
+    return {factor: 'Mini ATX', order: 0};
+  }
+  // Standalone ATX: match "ATX" as a whole word.
+  if (/\batx\b/i.test(lowerText)) {
+    return {factor: 'ATX', order: 2};
+  }
+  return null;
+}
+// --- End Form Factor Helpers ---
+
+// --- Quantity Selector Component ---
+function QuantitySelector({max}) {
+  const [quantity, setQuantity] = useState(1);
+  const handleIncrement = (e) => {
+    e.stopPropagation();
+    setQuantity((q) => Math.min(q + 1, max));
+  };
+  const handleDecrement = (e) => {
+    e.stopPropagation();
+    setQuantity((q) => Math.max(q - 1, 1));
+  };
+  return (
+    <div
+      className="quantity-selector"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+        marginTop: '5px',
+        justifyContent: 'center',
+      }}
+    >
+      <span>Qty:</span>
+      <button
+        type="button"
+        onClick={handleDecrement}
+        style={{
+          padding: '0px 5px',
+          border: '1px solid #2172af',
+          borderRadius: '30px',
+          width: '25px',
+          height: '25px',
+          fontSize: '15px',
+        }}
+      >
+        -
+      </button>
+      <span
+        className="quantity-value"
+        style={{minWidth: '20px', textAlign: 'center'}}
+      >
+        {quantity}
+      </span>
+      <button
+        type="button"
+        onClick={handleIncrement}
+        style={{
+          padding: '0px 5px',
+          border: '1px solid #2172af',
+          borderRadius: '30px',
+          width: '25px',
+          height: '25px',
+          fontSize: '15px',
+        }}
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+// --- Loader ---
+// The query now includes price fields.
 export async function loader({context, request}) {
   const url = new URL(request.url);
-  // Default to the first category's handle.
   const handle =
     url.searchParams.get('handle') || CATEGORY_HANDLES[CATEGORIES[0].name];
 
@@ -88,6 +167,7 @@ export async function loader({context, request}) {
           edges {
             node {
               id
+              handle
               title
               vendor
               productType
@@ -101,31 +181,99 @@ export async function loader({context, request}) {
                   }
                 }
               }
+              variants(first: 10) {
+                edges {
+                  node {
+                    id
+                    title
+                    priceV2 {
+                      amount
+                    }
+                    image {
+                      url
+                      altText
+                    }
+                  }
+                }
+              }
+              priceRange {
+                minVariantPrice {
+                  amount
+                }
+              }
             }
           }
         }
       }
     }
   `;
-
   const data = await context.storefront.query(QUERY, {variables: {handle}});
 
   const products =
-    data.collectionByHandle?.products?.edges.map(({node: product}) => ({
-      id: product.id,
-      manufacturer: product.vendor,
-      model: product.title, // Using title as model.
-      description: product.descriptionHtml, // Rich HTML description.
-      tags: product.tags || [],
-      image:
-        product.images.edges[0]?.node.url ||
-        'https://via.placeholder.com/300?text=No+Image',
-      specs: [],
-    })) || [];
+    data.collectionByHandle?.products?.edges.flatMap(({node: product}) => {
+      // Determine price:
+      // If product has one variant with "Default Title", use the product's minVariantPrice.
+      if (
+        product.variants &&
+        product.variants.edges.length === 1 &&
+        product.variants.edges[0].node.title === 'Default Title'
+      ) {
+        const price =
+          parseFloat(product.priceRange.minVariantPrice.amount) || 100;
+        return [
+          {
+            id: product.id,
+            handle: product.handle,
+            manufacturer: product.vendor,
+            model: product.title,
+            description: product.descriptionHtml,
+            tags: product.tags || [],
+            image:
+              product.images.edges[0]?.node.url ||
+              'https://via.placeholder.com/300?text=No+Image',
+            specs: [],
+            price,
+          },
+        ];
+      } else if (product.variants && product.variants.edges.length > 0) {
+        return product.variants.edges.map(({node: variant}) => ({
+          id: `${product.id}-${variant.id}`,
+          handle: product.handle,
+          manufacturer: product.vendor,
+          model: `${product.title} - ${variant.title}`,
+          description: product.descriptionHtml,
+          tags: product.tags || [],
+          image: variant.image
+            ? variant.image.url
+            : product.images.edges[0]?.node.url ||
+              'https://via.placeholder.com/300?text=No+Image',
+          specs: [],
+          price: parseFloat(variant.priceV2.amount) || 100,
+        }));
+      }
+      const price =
+        parseFloat(product.priceRange.minVariantPrice.amount) || 100;
+      return [
+        {
+          id: product.id,
+          handle: product.handle,
+          manufacturer: product.vendor,
+          model: product.title,
+          description: product.descriptionHtml,
+          tags: product.tags || [],
+          image:
+            product.images.edges[0]?.node.url ||
+            'https://via.placeholder.com/300?text=No+Image',
+          specs: [],
+          price,
+        },
+      ];
+    }) || [];
 
   return {products, currentHandle: handle};
 }
 
+// --- Main Component ---
 export default function PCBuilder() {
   const {products, currentHandle} = useLoaderData();
   const fetcher = useFetcher();
@@ -140,7 +288,6 @@ export default function PCBuilder() {
   const [modelFilter, setModelFilter] = useState('');
   const [currentItems, setCurrentItems] = useState(products);
 
-  // Load products for the current category.
   useEffect(() => {
     const categoryName = CATEGORIES[currentStep].name;
     const handle = CATEGORY_HANDLES[categoryName];
@@ -153,7 +300,6 @@ export default function PCBuilder() {
     }
   }, [fetcher.data]);
 
-  // Filter products based on manufacturer, model and tag relationships.
   const filteredItems = useMemo(() => {
     let items = currentItems.filter((item) => {
       const matchesManufacturer =
@@ -167,8 +313,8 @@ export default function PCBuilder() {
       return matchesManufacturer && matchesModel;
     });
 
-    // For MB filtering (index 2) based on selected CPU (index 1):
-    if (CATEGORIES[currentStep].name === 'MB' && selectedItems[1]) {
+    // Motherboard filtering (index 2) based on CPU (index 1)
+    if (CATEGORIES[currentStep].name === 'Motherboards' && selectedItems[1]) {
       const selectedCPU = selectedItems[1];
       const cpuTags = (selectedCPU.tags || [])
         .map((t) => t.toLowerCase())
@@ -179,7 +325,7 @@ export default function PCBuilder() {
       });
     }
 
-    // For Memory filtering (index 3) based on selected MB (index 2):
+    // Memory filtering (index 3) based on Motherboards (index 2)
     if (CATEGORIES[currentStep].name === 'MEMORY' && selectedItems[2]) {
       const selectedMB = selectedItems[2];
       const mbMemoryTags = (selectedMB.tags || [])
@@ -191,11 +337,36 @@ export default function PCBuilder() {
       });
     }
 
-    // For PSU filtering (index 7) based solely on the GPU's recommendation.
+    // CASE filtering based on selected motherboard form factor.
+    if (CATEGORIES[currentStep].name === 'CASE' && selectedItems[2]) {
+      const selectedMB = selectedItems[2];
+      const mbText = `${selectedMB.model} ${selectedMB.description || ''}`;
+      const mbForm = extractFormFactor(mbText);
+      if (mbForm) {
+        items = items.filter((item) => {
+          const caseText = `${item.model} ${item.description || ''}`;
+          const caseForm = extractFormFactor(caseText);
+          if (!caseForm) return false;
+          return caseForm.order >= mbForm.order;
+        });
+      }
+    }
+
+    // PSU filtering (index 7) based on the GPU's recommendation.
     if (CATEGORIES[currentStep].name === 'PSU' && selectedItems[0]) {
       const recommendedWattage = extractRecommendedPSUWattage(selectedItems[0]);
       items = items.filter(
         (item) => extractPSUWattage(item) >= recommendedWattage,
+      );
+    }
+
+    // STORAGE filtering: remove items with the tag "Internal HDD Storage"
+    if (CATEGORIES[currentStep].name === 'STORAGE') {
+      items = items.filter(
+        (item) =>
+          !item.tags.some(
+            (tag) => tag.toLowerCase() === 'internal hdd storage',
+          ),
       );
     }
 
@@ -211,27 +382,38 @@ export default function PCBuilder() {
   const selectedItem = selectedItems[currentStep];
 
   function handleSelectItem(item) {
+    // For MEMORY and STORAGE, initialize quantity if not set.
+    if (
+      CATEGORIES[currentStep].name === 'MEMORY' ||
+      CATEGORIES[currentStep].name === 'STORAGE'
+    ) {
+      item.quantity = item.quantity || 1;
+    }
     setSelectedItems((prev) => ({
       ...prev,
       [currentStep]: item,
     }));
   }
+
   function handleNext() {
     if (currentStep < CATEGORIES.length - 1) {
       setCurrentStep(currentStep + 1);
       resetFilters();
     }
   }
+
   function handlePrevious() {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
       resetFilters();
     }
   }
+
   function resetFilters() {
     setManufacturerFilter('');
     setModelFilter('');
   }
+
   function handleRemoveItem(categoryIndex) {
     setSelectedItems((prev) => {
       const newSelected = {...prev};
@@ -247,6 +429,27 @@ export default function PCBuilder() {
     }
   }
 
+  // Compute final approximate total price.
+  const totalPrice = Object.values(selectedItems).reduce((total, item) => {
+    const qty = item.quantity || 1;
+    return total + item.price * qty;
+  }, 0);
+
+  // Build a human-friendly WhatsApp message.
+  // Each selected item is on its own line as a bullet point with bold category.
+  const selectedDetails = Object.keys(selectedItems)
+    .map((catIndex) => {
+      const category = CATEGORIES[catIndex].name;
+      const item = selectedItems[catIndex];
+      const qty = item.quantity || 1;
+      return `• *${category}:* ${item.model} (Qty: ${qty}, Price: ${item.price})`;
+    })
+    .join('\n');
+  const whatsappMessage = `Hello, I'm interested in the following configuration:\n${selectedDetails}\n\nTotal Approximate Price: $${totalPrice}`;
+  const whatsappLink = `https://wa.me/96103020030?text=${encodeURIComponent(
+    whatsappMessage,
+  )}`;
+
   return (
     <div className="pcBldr-container">
       {/* Sidebar */}
@@ -255,7 +458,6 @@ export default function PCBuilder() {
           <h2 className="pcBldr-title">PC BUILDER</h2>
           <nav className="pcBldr-nav">
             {CATEGORIES.map((cat, index) => {
-              // A category is clickable only if all previous ones are selected.
               const isEnabled = index === 0 || !!selectedItems[index - 1];
               const isActive = index === currentStep;
               return (
@@ -281,7 +483,6 @@ export default function PCBuilder() {
           <h3>Select {CATEGORIES[currentStep].name}</h3>
           <div className="pcBldr-filters">
             <label>
-              Manufacturer
               <input
                 type="text"
                 value={manufacturerFilter}
@@ -289,8 +490,7 @@ export default function PCBuilder() {
                 placeholder="Filter by manufacturer"
               />
             </label>
-            <label className='model-input'>
-              Model
+            <label className="model-input">
               <input
                 type="text"
                 value={modelFilter}
@@ -310,48 +510,39 @@ export default function PCBuilder() {
                   }`}
                   onClick={() => handleSelectItem(item)}
                 >
-                  <img
-                    src={`${item.image}&quality=20`}
-                    alt={item.model}
-                    width={100}
-                    height={100}
-                  />
-                  <div>{item.model}</div>
+                  <div className="pcBldr-item-top">
+                    <img
+                      src={`${item.image}&quality=20`}
+                      alt={item.model}
+                      width={100}
+                      height={100}
+                    />
+                    <div className="pcBldr-product-title">{item.model}</div>
+                    {(CATEGORIES[currentStep].name === 'MEMORY' ||
+                      CATEGORIES[currentStep].name === 'STORAGE') && (
+                      <QuantitySelector
+                        max={CATEGORIES[currentStep].name === 'MEMORY' ? 4 : 2}
+                      />
+                    )}
+                  </div>
+                  <Link
+                    to={`/products/${item.handle}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    target="_blank"
+                    className="pcBldr-viewMoreBtn"
+                  >
+                    View Product
+                  </Link>
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* Right panel: selected item details and summary */}
+        {/* Right panel: selected item details, total price, and contact button */}
         <section className="pcBldr-selectedSection">
-          {/* <h3>Selected {CATEGORIES[currentStep].name}</h3> */}
-          {/* {selectedItem ? (
-            <div className="pcBldr-selectedDetails">
-              <img
-                src={`${selectedItem.image}&quality=50`}
-                alt={selectedItem.model}
-                style={{width: '100%', maxWidth: '300px', margin: 'auto'}}
-                width={200}
-                height={200}
-              />
-              <h4>
-                {selectedItem.manufacturer} {selectedItem.model}
-              </h4>
-              <div
-                className="pcBldr-description"
-                dangerouslySetInnerHTML={{__html: selectedItem.description}}
-              />
-              <ul>
-                {selectedItem.specs.map((spec, idx) => (
-                  <li key={idx}>{spec}</li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <p>No {CATEGORIES[currentStep].name} selected yet.</p>
-          )} */}
-
           <div className="pcBldr-selectedSummary">
             <h3>All Selected Items</h3>
             {Object.keys(selectedItems).length === 0 ? (
@@ -363,14 +554,44 @@ export default function PCBuilder() {
                 return (
                   <div key={catIndex} className="pcBldr-selectedSummaryItem">
                     <span>
-                      {categoryName}: {item.manufacturer} {item.model}
+                      <strong>{categoryName}:</strong> {item.model}{' '}
+                      {item.quantity ? `(Qty: ${item.quantity})` : ''}
                     </span>
-                    <button onClick={() => handleRemoveItem(catIndex)}>
+                    <button
+                      className="pcBldr-remove-btn"
+                      onClick={() => handleRemoveItem(catIndex)}
+                    >
                       Remove
                     </button>
                   </div>
                 );
               })
+            )}
+            {Object.keys(selectedItems).length > 0 && (
+              <div className="final-summary" style={{marginTop: '20px'}}>
+                <h4>
+                  <strong>Total Approximate Price: </strong>
+                  <span style={{color: 'red', fontWeight: '500'}}>
+                    ${totalPrice}
+                  </span>
+                </h4>
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block',
+                    padding: '10px 20px',
+                    backgroundColor: '#25d366',
+                    color: 'white',
+                    borderRadius: '5px',
+                    textDecoration: 'none',
+                    marginTop: '10px',
+                  }}
+                >
+                  Contact via WhatsApp
+                </a>
+              </div>
             )}
           </div>
         </section>

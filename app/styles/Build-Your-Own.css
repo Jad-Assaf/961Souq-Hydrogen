@@ -12,6 +12,9 @@
     flex-direction: column;
     justify-content: space-between;
     text-align: center;
+    position: absolute;
+    top: 95px;
+    z-index: 11;
 }
 
 .pcBldr-sidebar-div {
@@ -54,10 +57,14 @@
 /* Main content area */
 .pcBldr-main {
     flex: 1;
-    padding: 1rem;
+    margin: 3rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+
+    @media (max-width: 1024px) {
+        margin: 7rem 1rem;
+    }
 }
 
 /* Left panel: filters + list of items */
@@ -77,7 +84,6 @@
     margin-bottom: 1rem;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
 }
 
 .pcBldr-filters label input {
@@ -87,6 +93,7 @@
     border-radius: 30px;
     width: 100%;
     max-width: 205px;
+    font-size: 14px;
 }
 
 .model-input {
@@ -99,8 +106,6 @@
     flex-wrap: wrap;
     gap: 30px;
     justify-content: space-between;
-    max-height: 75vh;
-    overflow-y: auto;
 }
 
 .pcBldr-item {
@@ -113,9 +118,12 @@
     background-color: #fff;
     color: #000;
     font-size: 14px;
-    min-height: 320px;
-    max-height: 320px;
-    overflow-y: auto;
+    min-height: fit-content;
+
+}
+
+.pcBldr-item-top{
+    margin-bottom: 20px
 }
 
 .pcBldr-itemActive {
@@ -129,17 +137,23 @@
     border-radius: 0;
 }
 
+.pcBldr-product-title{
+    min-height: 85px;
+    max-height: 85px;
+    overflow-y: auto;
+}
+
 .pcBldr-selectedSection {
     padding: 25px 0;
     width: 100%;
     max-width: 1500px;
-    height: 300px;
     margin: auto;
 }
 
 .pcBldr-container h3 {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
 .pcBldr-selectedDetails {
@@ -163,8 +177,6 @@
 .pcBldr-selectedSummary {
     border-top: 1px solid #2172af2e;
     padding-top: 1rem;
-    max-height: 200px;
-    overflow-y: auto;
 }
 
 .pcBldr-selectedSummary h4 {
@@ -178,13 +190,14 @@
     margin-bottom: 0.5rem;
 }
 
-.pcBldr-selectedSummaryItem button {
+.pcBldr-remove-btn {
     background: none;
     border: 1px solid #2172af;
     color: #2172af;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
     font-size: 0.9rem;
+    border-radius: 30px;
 }
 
 /* Navigation buttons */
@@ -201,7 +214,15 @@
     cursor: default;
 }
 
-@media (max-width: 450px) {
+a.pcBldr-viewMoreBtn {
+    color: #2172af;
+    border: 1px solid #2172af;
+    padding: 5px;
+    border-radius: 30px;
+    margin-top: 46px;
+}
+
+@media (max-width: 572px) {
     .pcBldr-itemList {
         gap: 10px;
     }
@@ -209,8 +230,6 @@
     .pcBldr-item {
         width: 45%;
         font-size: 12px;
-        min-height: 250px;
-        max-height: 250px;
     }
 
     label {
