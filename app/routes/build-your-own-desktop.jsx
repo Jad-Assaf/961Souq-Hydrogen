@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, {useState, useMemo, useEffect, useRef} from 'react';
 import {useLoaderData, useFetcher, Link} from '@remix-run/react';
 import '../styles/Build-Your-Own.css';
 
@@ -120,7 +120,7 @@ function QuantitySelector({max}) {
         onClick={handleDecrement}
         style={{
           padding: '0px 5px',
-          border: '1px solid #2172af',
+          border: '1px solid #fff',
           borderRadius: '30px',
           width: '25px',
           height: '25px',
@@ -140,7 +140,7 @@ function QuantitySelector({max}) {
         onClick={handleIncrement}
         style={{
           padding: '0px 5px',
-          border: '1px solid #2172af',
+          border: '1px solid #fff',
           borderRadius: '30px',
           width: '25px',
           height: '25px',
@@ -450,15 +450,37 @@ export default function PCBuilder() {
     whatsappMessage,
   )}`;
 
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      // Set playbackRate to 0.5 to play at half speed.
+      videoRef.current.playbackRate = 0.75;
+    }
+  }, []);
+
+
   return (
     <div className="pcBldr-container">
       {/* Sidebar */}
-      {/* <video className="pcBldr-background" autoPlay muted loop playsInline>
+      {/* <img
+        className="pcBldr-background"
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/9331.jpg?v=1742467838"
+        alt=""
+      /> */}
+      <video
+        className="pcBldr-background"
+        autoPlay
+        muted
+        loop
+        playsInline
+        ref={videoRef}
+      >
         <source
-          src="https://cdn.shopify.com/videos/c/o/v/776299c50e2343a2b32d10d49558ddc7.mp4"
+          src="https://cdn.shopify.com/videos/c/o/v/8e369b8ab9364a88a15c1f48fdbe4c43.mp4"
           type="video/mp4"
         />
-      </video> */}
+      </video>
 
       <div className="pcBldr-sidebar">
         <div className="pcBldr-sidebar-div">
