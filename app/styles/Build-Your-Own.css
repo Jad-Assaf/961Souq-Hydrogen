@@ -404,11 +404,15 @@ a.pcBldr-viewMoreBtn {
     border: 1px solid #2172af;
     padding: 5px 10px;
     border-radius: 30px;
+    @media (max-width: 572px) {
+        font-size: 12px;
+    }
 }
 
 @media (max-width: 572px) {
     .pcBldr-itemList {
-        gap: 10px;
+        gap: 10%;
+        row-gap: 30px;
     }
 
     .pcBldr-item {
