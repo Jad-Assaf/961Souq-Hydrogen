@@ -309,6 +309,11 @@
     }
 }
 
+.pcBldr-itemList::after {
+    content: "";
+    flex: auto;
+}
+
 .pcBldr-item img {
     width: 100%;
     margin-bottom: 0.5rem;
