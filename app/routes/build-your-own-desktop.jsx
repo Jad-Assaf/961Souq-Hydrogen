@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, {useState, useMemo, useEffect, useRef} from 'react';
 import {useLoaderData, useFetcher, Link} from '@remix-run/react';
 import '../styles/Build-Your-Own.css';
 
@@ -281,6 +281,9 @@ export default function PCBuilder() {
   const [currentItems, setCurrentItems] = useState(products);
   const [showInstructions, setShowInstructions] = useState(true);
 
+  // Create a ref for the summary section.
+  const summaryRef = useRef(null);
+
   useEffect(() => {
     const categoryName = CATEGORIES[currentStep].name;
     const handle = CATEGORY_HANDLES[categoryName];
@@ -376,10 +379,17 @@ export default function PCBuilder() {
     ) {
       item.quantity = item.quantity || 1;
     }
-    setSelectedItems((prev) => ({
-      ...prev,
-      [currentStep]: item,
-    }));
+    setSelectedItems((prev) => {
+      const newSelected = {
+        ...prev,
+        [currentStep]: item,
+      };
+      // If this is the final component, scroll to the summary section.
+      if (currentStep === CATEGORIES.length - 1 && summaryRef.current) {
+        summaryRef.current.scrollIntoView({behavior: 'smooth'});
+      }
+      return newSelected;
+    });
   }
 
   function handleNext() {
@@ -541,15 +551,8 @@ export default function PCBuilder() {
             })}
           </div>
           {/* Navigation Buttons */}
-          <div
-            className="pcBldr-navigationButtons"
-            style={{marginTop: '20px', textAlign: 'center'}}
-          >
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              style={{marginRight: '10px'}}
-            >
+          <div className="pcBldr-navigationButtons">
+            <button onClick={handlePrevious} disabled={currentStep === 0}>
               Previous
             </button>
             <button
@@ -564,7 +567,7 @@ export default function PCBuilder() {
           </div>
         </section>
 
-        <section className="pcBldr-selectedSection">
+        <section className="pcBldr-selectedSection" ref={summaryRef}>
           <div className="pcBldr-selectedSummary">
             <h3>All Selected Items</h3>
             {Object.keys(selectedItems).length === 0 ? (
@@ -590,7 +593,7 @@ export default function PCBuilder() {
               })
             )}
             {Object.keys(selectedItems).length > 0 && (
-              <div className="final-summary" style={{marginTop: '20px'}}>
+              <div className="final-summary">
                 <h4>
                   <strong>Total Approximate Price: </strong>
                   <span style={{color: 'red', fontWeight: '500'}}>

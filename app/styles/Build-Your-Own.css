@@ -94,15 +94,22 @@
     max-width: 1500px;
     color: #2172af;
     font-weight: 500;
+}
 
-    button {
-        border: 1px solid #2172af;
-        border-radius: 30px;
-        background-color: #fff;
-        width: 100px;
-        height: 35px;
-        box-shadow: -2px -2px 0 cyan, 2px 2px 0 magenta;
-    }
+/* Styling for buttons within the navigation container */
+.pcBldr-navigationButtons button {
+    border: 1px solid #2172af;
+    border-radius: 30px;
+    background-color: #fff;
+    width: 100px;
+    height: 35px;
+    box-shadow: -2px -2px 0 cyan, 2px 2px 0 magenta;
+    transition: transform 0.1s ease;
+}
+
+/* Click animation */
+.pcBldr-navigationButtons button:active {
+    transform: scale(0.95);
 }
 
 .pcBldr-background {
