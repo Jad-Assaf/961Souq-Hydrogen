@@ -18,7 +18,7 @@ const CPU_VALID_TAGS = [
 ];
 const MEMORY_VALID_TAGS = ['ddr4 support', 'ddr5 support'];
 
-// Desired order: GPU, CPU, Motherboards, MEMORY, CASE, COOLING, STORAGE, PSU.
+// Desired order: GPU, CPU, Motherboard, RAM, Case, Cooling, Storage, PSU.
 const CATEGORY_ORDER = [
   'GPU',
   'CPU',
@@ -149,6 +149,7 @@ function QuantitySelector({max}) {
 }
 
 // --- Loader ---
+// (Unchanged – it loads only the main collection as before.)
 export async function loader({context, request}) {
   const url = new URL(request.url);
   const handle =
@@ -269,6 +270,8 @@ export async function loader({context, request}) {
 export default function PCBuilder() {
   const {products, currentHandle} = useLoaderData();
   const fetcher = useFetcher();
+  // Separate fetcher for accessory collections
+  const accessoryFetcher = useFetcher();
 
   const initialIndex =
     CATEGORIES.findIndex(
@@ -281,9 +284,16 @@ export default function PCBuilder() {
   const [currentItems, setCurrentItems] = useState(products);
   const [showInstructions, setShowInstructions] = useState(true);
 
-  // Create a ref for the summary section.
+  // State for additional accessory selection
+  const [selectedAccessory, setSelectedAccessory] = useState(null);
+  // Store the accessory products loaded from the server
+  const [accessoryProducts, setAccessoryProducts] = useState([]);
+  // Store the accessory products that the user has added to their build
+  const [selectedAccessories, setSelectedAccessories] = useState([]);
+
   const summaryRef = useRef(null);
 
+  // Load main collection products when current step changes.
   useEffect(() => {
     const categoryName = CATEGORIES[currentStep].name;
     const handle = CATEGORY_HANDLES[categoryName];
@@ -295,6 +305,21 @@ export default function PCBuilder() {
       setCurrentItems(fetcher.data.products);
     }
   }, [fetcher.data]);
+
+  // When an accessory is selected, load its products using the same endpoint.
+  useEffect(() => {
+    if (selectedAccessory) {
+      accessoryFetcher.load(
+        `/build-your-own-desktop?handle=${selectedAccessory}`,
+      );
+    }
+  }, [selectedAccessory]);
+
+  useEffect(() => {
+    if (accessoryFetcher.data?.products) {
+      setAccessoryProducts(accessoryFetcher.data.products);
+    }
+  }, [accessoryFetcher.data]);
 
   const filteredItems = useMemo(() => {
     let items = currentItems.filter((item) => {
@@ -384,7 +409,6 @@ export default function PCBuilder() {
         ...prev,
         [currentStep]: item,
       };
-      // If this is the final component, scroll to the summary section.
       if (currentStep === CATEGORIES.length - 1 && summaryRef.current) {
         summaryRef.current.scrollIntoView({behavior: 'smooth'});
       }
@@ -395,20 +419,17 @@ export default function PCBuilder() {
   function handleNext() {
     if (currentStep < CATEGORIES.length - 1 && selectedItems[currentStep]) {
       setCurrentStep(currentStep + 1);
-      resetFilters();
+      setManufacturerFilter('');
+      setModelFilter('');
     }
   }
 
   function handlePrevious() {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      resetFilters();
+      setManufacturerFilter('');
+      setModelFilter('');
     }
-  }
-
-  function resetFilters() {
-    setManufacturerFilter('');
-    setModelFilter('');
   }
 
   function handleRemoveItem(categoryIndex) {
@@ -426,12 +447,34 @@ export default function PCBuilder() {
     }
   }
 
-  const totalPrice = Object.values(selectedItems).reduce((total, item) => {
+  // New function to add an accessory to the build
+  function handleSelectAccessory(product) {
+    setSelectedAccessories((prev) => {
+      if (prev.find((p) => p.id === product.id)) {
+        return prev; // Prevent duplicates
+      }
+      return [...prev, product];
+    });
+  }
+
+  // Function to remove an accessory from the build
+  function handleRemoveAccessory(id) {
+    setSelectedAccessories((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  // Calculate total price including main selected items and accessory items.
+  const mainTotal = Object.values(selectedItems).reduce((total, item) => {
     const qty = item.quantity || 1;
     return total + item.price * qty;
   }, 0);
+  const accessoriesTotal = selectedAccessories.reduce((total, item) => {
+    const qty = item.quantity || 1;
+    return total + item.price * qty;
+  }, 0);
+  const totalPrice = mainTotal + accessoriesTotal;
 
-  const selectedDetails = Object.keys(selectedItems)
+  // Build the final summary details including both main items and accessory items.
+  const selectedDetailsMain = Object.keys(selectedItems)
     .map((catIndex) => {
       const category = CATEGORIES[catIndex].name;
       const item = selectedItems[catIndex];
@@ -439,7 +482,20 @@ export default function PCBuilder() {
       return `• *${category}:* ${item.model} (Qty: ${qty}, Price: ${item.price})`;
     })
     .join('\n');
-  const whatsappMessage = `Hello, I'm interested in the following configuration:\n${selectedDetails}\n\nTotal Approximate Price: $${totalPrice}`;
+  const selectedDetailsAccessories = selectedAccessories
+    .map((item) => {
+      const qty = item.quantity || 1;
+      return `• *Accessory:* ${item.model} (Qty: ${qty}, Price: ${item.price})`;
+    })
+    .join('\n');
+  const whatsappMessage = `Hello, I'm interested in the following configuration:
+${selectedDetailsMain}
+${
+  selectedDetailsAccessories
+    ? '\nAdditional Accessories:\n' + selectedDetailsAccessories
+    : ''
+}
+\nTotal Approximate Price: $${totalPrice}`;
   const whatsappLink = `https://wa.me/96103020030?text=${encodeURIComponent(
     whatsappMessage,
   )}`;
@@ -458,9 +514,7 @@ export default function PCBuilder() {
               <li>
                 <strong>Sequential Component Selection</strong>: Each component
                 tab becomes accessible only after you have made a selection in
-                the previous category, ensuring optimal compatibility. Although
-                we strive to provide accurate information, please verify any
-                critical details.
+                the previous category, ensuring optimal compatibility.
               </li>
               <li>
                 <strong>Finalizing Your Build</strong>: After you have chosen
@@ -473,10 +527,7 @@ export default function PCBuilder() {
               onClick={() => setShowInstructions(false)}
               className="start-button"
             >
-              <img
-                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/clideo_editor_80e996ef10ce4705981dfd1bef30a303_2.gif?v=1742549670"
-                alt="Start"
-              />
+              <span>Start</span>
             </button>
           </div>
         </div>
@@ -485,17 +536,14 @@ export default function PCBuilder() {
       {/* Sidebar */}
       <div className="pcBldr-sidebar">
         <div className="pcBldr-sidebar-div">
-          <h2 className="pcBldr-title">PC BUILDER</h2>
+          <h2 className="pcBldr-title">Gaming Desktop Builder</h2>
           <nav className="pcBldr-nav">
             {CATEGORIES.map((cat, index) => {
               const isEnabled = index === 0 || !!selectedItems[index - 1];
               const isActive = index === currentStep;
-              // Only show a tooltip for disabled tabs (except the first one)
               const tooltipMessage =
                 !isEnabled && index > 0
-                  ? `Choose a ${
-                      CATEGORIES[index - 1].name
-                    } first!`
+                  ? `Choose a ${CATEGORIES[index - 1].name} first!`
                   : '';
               return (
                 <div
@@ -514,7 +562,7 @@ export default function PCBuilder() {
         </div>
       </div>
 
-      {/* Main content area */}
+      {/* Main Content Area */}
       <main className="pcBldr-main">
         <section className="pcBldr-filtersSection">
           <div className="pcBldr-itemList">
@@ -544,11 +592,10 @@ export default function PCBuilder() {
                       />
                     )}
                   </div>
+                  <div className="pcBldr-product-price">${item.price}</div>
                   <Link
                     to={`/products/${item.handle}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
+                    onClick={(e) => e.stopPropagation()}
                     target="_blank"
                     className="pcBldr-viewMoreBtn"
                   >
@@ -558,21 +605,21 @@ export default function PCBuilder() {
               );
             })}
           </div>
-          {/* Navigation Buttons */}
-          <div className="pcBldr-navigationButtons">
-            <button onClick={handlePrevious} disabled={currentStep === 0}>
-              Previous
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={
-                !selectedItems[currentStep] ||
-                currentStep === CATEGORIES.length - 1
-              }
-            >
-              Next
-            </button>
-          </div>
+          {!(
+            currentStep === CATEGORIES.length - 1 && selectedItems[currentStep]
+          ) && (
+            <div className="pcBldr-navigationButtons">
+              <button onClick={handlePrevious} disabled={currentStep === 0}>
+                Previous
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!selectedItems[currentStep]}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="pcBldr-selectedSection" ref={summaryRef}>
@@ -599,6 +646,26 @@ export default function PCBuilder() {
                   </div>
                 );
               })
+            )}
+            {/* Display selected accessories in final summary */}
+            {selectedAccessories.length > 0 && (
+              <>
+                <h3>Additional Accessories</h3>
+                {selectedAccessories.map((item) => (
+                  <div key={item.id} className="pcBldr-selectedSummaryItem">
+                    <span>
+                      <strong>Accessory:</strong> {item.model}{' '}
+                      {item.quantity ? `(Qty: ${item.quantity})` : ''}
+                    </span>
+                    <button
+                      className="pcBldr-remove-btn"
+                      onClick={() => handleRemoveAccessory(item.id)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </>
             )}
             {Object.keys(selectedItems).length > 0 && (
               <div className="final-summary">
@@ -628,6 +695,117 @@ export default function PCBuilder() {
             )}
           </div>
         </section>
+
+        {/* Additional Gaming Accessories Section */}
+        {Object.keys(selectedItems).length === CATEGORIES.length && (
+          <section className="pcBldr-accessoriesSection">
+            <h3>Additional Gaming Accessories</h3>
+            <div className="accessories-buttons">
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'gaming-monitors' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('gaming-monitors')}
+              >
+                Monitors
+              </button>
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'gaming-headphones' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('gaming-headphones')}
+              >
+                Headphones
+              </button>
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'gaming-keyboards' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('gaming-keyboards')}
+              >
+                Keyboards
+              </button>
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'gaming-mouse' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('gaming-mouse')}
+              >
+                Mice
+              </button>
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'mousepads' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('mousepads')}
+              >
+                MousePads
+              </button>
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'gaming-speakers' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('gaming-speakers')}
+              >
+                Speakers
+              </button>
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'gaming-chairs' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('gaming-chairs')}
+              >
+                Chairs
+              </button>
+              <button
+                className={`accessory-button ${
+                  selectedAccessory === 'gaming-desks' ? 'active' : ''
+                }`}
+                onClick={() => setSelectedAccessory('gaming-desks')}
+              >
+                Desks
+              </button>
+            </div>
+            {selectedAccessory &&
+              accessoryProducts &&
+              accessoryProducts.length > 0 && (
+                <div className="pcBldr-itemList">
+                  {accessoryProducts.map((product) => (
+                    <div key={product.id} className="pcBldr-item">
+                      <div className="pcBldr-item-top">
+                        <img
+                          src={`${product.image}&quality=10`}
+                          alt={product.model}
+                          width={100}
+                          height={100}
+                          loading="lazy"
+                        />
+                        <div className="pcBldr-product-title">
+                          {product.model}
+                        </div>
+                      </div>
+                      <div className="pcBldr-product-price">
+                        ${product.price}
+                      </div>
+                      <button
+                        className="accessory-add-btn"
+                        onClick={() => handleSelectAccessory(product)}
+                      >
+                        Add
+                      </button>
+                      <Link
+                        to={`/products/${product.handle}`}
+                        target="_blank"
+                        className="pcBldr-viewMoreBtn"
+                      >
+                        View Product
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
+          </section>
+        )}
       </main>
     </div>
   );
