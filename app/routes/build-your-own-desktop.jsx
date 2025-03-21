@@ -22,11 +22,11 @@ const MEMORY_VALID_TAGS = ['ddr4 support', 'ddr5 support'];
 const CATEGORY_ORDER = [
   'GPU',
   'CPU',
-  'Motherboards',
-  'MEMORY',
-  'CASE',
-  'COOLING',
-  'STORAGE',
+  'Motherboard',
+  'RAM',
+  'Case',
+  'Cooling',
+  'Storage',
   'PSU',
 ];
 
@@ -34,11 +34,11 @@ const CATEGORY_ORDER = [
 const CATEGORY_HANDLES = {
   GPU: 'gpu',
   CPU: 'cpus',
-  Motherboards: 'motherboards',
-  CASE: 'cases',
-  COOLING: 'cpu-coolers',
-  MEMORY: 'ram',
-  STORAGE: 'internal-storage',
+  Motherboard: 'motherboards',
+  Case: 'cases',
+  Cooling: 'cpu-coolers',
+  RAM: 'ram',
+  Storage: 'internal-storage',
   PSU: 'power-supply',
 };
 
@@ -309,7 +309,7 @@ export default function PCBuilder() {
       return matchesManufacturer && matchesModel;
     });
 
-    if (CATEGORIES[currentStep].name === 'Motherboards' && selectedItems[1]) {
+    if (CATEGORIES[currentStep].name === 'Motherboard' && selectedItems[1]) {
       const selectedCPU = selectedItems[1];
       const cpuTags = (selectedCPU.tags || [])
         .map((t) => t.toLowerCase())
@@ -320,7 +320,7 @@ export default function PCBuilder() {
       });
     }
 
-    if (CATEGORIES[currentStep].name === 'MEMORY' && selectedItems[2]) {
+    if (CATEGORIES[currentStep].name === 'RAM' && selectedItems[2]) {
       const selectedMB = selectedItems[2];
       const mbMemoryTags = (selectedMB.tags || [])
         .map((t) => t.toLowerCase())
@@ -331,7 +331,7 @@ export default function PCBuilder() {
       });
     }
 
-    if (CATEGORIES[currentStep].name === 'CASE' && selectedItems[2]) {
+    if (CATEGORIES[currentStep].name === 'Case' && selectedItems[2]) {
       const selectedMB = selectedItems[2];
       const mbText = `${selectedMB.model} ${selectedMB.description || ''}`;
       const mbForm = extractFormFactor(mbText);
@@ -352,7 +352,7 @@ export default function PCBuilder() {
       );
     }
 
-    if (CATEGORIES[currentStep].name === 'STORAGE') {
+    if (CATEGORIES[currentStep].name === 'Storage') {
       items = items.filter(
         (item) =>
           !item.tags.some(
@@ -374,8 +374,8 @@ export default function PCBuilder() {
 
   function handleSelectItem(item) {
     if (
-      CATEGORIES[currentStep].name === 'MEMORY' ||
-      CATEGORIES[currentStep].name === 'STORAGE'
+      CATEGORIES[currentStep].name === 'RAM' ||
+      CATEGORIES[currentStep].name === 'Storage'
     ) {
       item.quantity = item.quantity || 1;
     }
@@ -490,15 +490,28 @@ export default function PCBuilder() {
             {CATEGORIES.map((cat, index) => {
               const isEnabled = index === 0 || !!selectedItems[index - 1];
               const isActive = index === currentStep;
+              const tooltipMessage =
+                !isEnabled && index > 0
+                  ? `Choose a ${
+                      CATEGORIES[index - 1].name
+                    } first!`
+                  : '';
               return (
-                <div
-                  key={cat.name}
-                  className={`pcBldr-navItem ${
-                    isActive ? 'pcBldr-navItemActive' : ''
-                  } ${!isEnabled ? 'pcBldr-navItemDisabled' : ''}`}
-                  onClick={isEnabled ? () => setCurrentStep(index) : undefined}
-                >
-                  {cat.name}
+                <div key={cat.name} className="pcBldr-navItemContainer">
+                  <div
+                    className={`pcBldr-navItem ${
+                      isActive ? 'pcBldr-navItemActive' : ''
+                    } ${!isEnabled ? 'pcBldr-navItemDisabled' : ''}`}
+                    onClick={
+                      isEnabled ? () => setCurrentStep(index) : undefined
+                    }
+                  >
+                    {cat.name}
+                  </div>
+                  {/* Render tooltip only for disabled tabs */}
+                  {!isEnabled && index > 0 && (
+                    <span className="pcBldr-tooltip">{tooltipMessage}</span>
+                  )}
                 </div>
               );
             })}
@@ -529,10 +542,10 @@ export default function PCBuilder() {
                       loading="lazy"
                     />
                     <div className="pcBldr-product-title">{item.model}</div>
-                    {(CATEGORIES[currentStep].name === 'MEMORY' ||
-                      CATEGORIES[currentStep].name === 'STORAGE') && (
+                    {(CATEGORIES[currentStep].name === 'RAM' ||
+                      CATEGORIES[currentStep].name === 'Storage') && (
                       <QuantitySelector
-                        max={CATEGORIES[currentStep].name === 'MEMORY' ? 4 : 2}
+                        max={CATEGORIES[currentStep].name === 'RAM' ? 4 : 2}
                       />
                     )}
                   </div>
