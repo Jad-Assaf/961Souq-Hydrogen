@@ -68,23 +68,18 @@ function extractPSUWattage(psu) {
 // --- End PSU Helpers ---
 
 // --- Form Factor Extraction Helpers ---
-// Looks for specific form factor patterns in a text.
 function extractFormFactor(text) {
   if (!text) return null;
   const lowerText = text.toLowerCase();
-  // EATX: "EATX", "E-ATX", "E ATX"
   if (/\be[-\s]?atx\b/i.test(lowerText)) {
     return {factor: 'EATX', order: 3};
   }
-  // Micro ATX: "Micro ATX", "Micro-ATX", "MicroATX", "MATX"
   if (/\b(micro[-\s]?atx|matx)\b/i.test(lowerText)) {
     return {factor: 'Micro ATX', order: 1};
   }
-  // Mini ATX: "MiniATX", "Mini-ATX"
   if (/\bmini[-\s]?atx\b/i.test(lowerText)) {
     return {factor: 'Mini ATX', order: 0};
   }
-  // Standalone ATX: match "ATX" as a whole word.
   if (/\batx\b/i.test(lowerText)) {
     return {factor: 'ATX', order: 2};
   }
@@ -154,7 +149,6 @@ function QuantitySelector({max}) {
 }
 
 // --- Loader ---
-// The query now includes price fields.
 export async function loader({context, request}) {
   const url = new URL(request.url);
   const handle =
@@ -211,8 +205,6 @@ export async function loader({context, request}) {
 
   const products =
     data.collectionByHandle?.products?.edges.flatMap(({node: product}) => {
-      // Determine price:
-      // If product has one variant with "Default Title", use the product's minVariantPrice.
       if (
         product.variants &&
         product.variants.edges.length === 1 &&
@@ -287,6 +279,7 @@ export default function PCBuilder() {
   const [manufacturerFilter, setManufacturerFilter] = useState('');
   const [modelFilter, setModelFilter] = useState('');
   const [currentItems, setCurrentItems] = useState(products);
+  const [showInstructions, setShowInstructions] = useState(true);
 
   useEffect(() => {
     const categoryName = CATEGORIES[currentStep].name;
@@ -313,7 +306,6 @@ export default function PCBuilder() {
       return matchesManufacturer && matchesModel;
     });
 
-    // Motherboard filtering (index 2) based on CPU (index 1)
     if (CATEGORIES[currentStep].name === 'Motherboards' && selectedItems[1]) {
       const selectedCPU = selectedItems[1];
       const cpuTags = (selectedCPU.tags || [])
@@ -325,7 +317,6 @@ export default function PCBuilder() {
       });
     }
 
-    // Memory filtering (index 3) based on Motherboards (index 2)
     if (CATEGORIES[currentStep].name === 'MEMORY' && selectedItems[2]) {
       const selectedMB = selectedItems[2];
       const mbMemoryTags = (selectedMB.tags || [])
@@ -337,7 +328,6 @@ export default function PCBuilder() {
       });
     }
 
-    // CASE filtering based on selected motherboard form factor.
     if (CATEGORIES[currentStep].name === 'CASE' && selectedItems[2]) {
       const selectedMB = selectedItems[2];
       const mbText = `${selectedMB.model} ${selectedMB.description || ''}`;
@@ -352,7 +342,6 @@ export default function PCBuilder() {
       }
     }
 
-    // PSU filtering (index 7) based on the GPU's recommendation.
     if (CATEGORIES[currentStep].name === 'PSU' && selectedItems[0]) {
       const recommendedWattage = extractRecommendedPSUWattage(selectedItems[0]);
       items = items.filter(
@@ -360,7 +349,6 @@ export default function PCBuilder() {
       );
     }
 
-    // STORAGE filtering: remove items with the tag "Internal HDD Storage"
     if (CATEGORIES[currentStep].name === 'STORAGE') {
       items = items.filter(
         (item) =>
@@ -382,7 +370,6 @@ export default function PCBuilder() {
   const selectedItem = selectedItems[currentStep];
 
   function handleSelectItem(item) {
-    // For MEMORY and STORAGE, initialize quantity if not set.
     if (
       CATEGORIES[currentStep].name === 'MEMORY' ||
       CATEGORIES[currentStep].name === 'STORAGE'
@@ -396,7 +383,7 @@ export default function PCBuilder() {
   }
 
   function handleNext() {
-    if (currentStep < CATEGORIES.length - 1) {
+    if (currentStep < CATEGORIES.length - 1 && selectedItems[currentStep]) {
       setCurrentStep(currentStep + 1);
       resetFilters();
     }
@@ -429,14 +416,11 @@ export default function PCBuilder() {
     }
   }
 
-  // Compute final approximate total price.
   const totalPrice = Object.values(selectedItems).reduce((total, item) => {
     const qty = item.quantity || 1;
     return total + item.price * qty;
   }, 0);
 
-  // Build a human-friendly WhatsApp message.
-  // Each selected item is on its own line as a bullet point with bold category.
   const selectedDetails = Object.keys(selectedItems)
     .map((catIndex) => {
       const category = CATEGORIES[catIndex].name;
@@ -452,19 +436,43 @@ export default function PCBuilder() {
 
   return (
     <div className="pcBldr-container">
-      {/* Sidebar */}
-      {/* <img
-        className="pcBldr-background"
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/9331.jpg?v=1742467838"
-        alt=""
-      /> */}
-      {/* <video className="pcBldr-background" autoPlay muted loop playsInline>
-        <source
-          src="https://cdn.shopify.com/videos/c/o/v/8e369b8ab9364a88a15c1f48fdbe4c43.mp4"
-          type="video/mp4"
-        />
-      </video> */}
+      {showInstructions && (
+        <div className="instructions-overlay">
+          <div className="instructions-modal">
+            <h2>Welcome to the PC Builder</h2>
+            <ol>
+              <li>
+                <strong>Item Selection</strong>: Click on an item to select it.
+                For further details, use the "View Product" button.
+              </li>
+              <li>
+                <strong>Sequential Component Selection</strong>: Each component
+                tab becomes accessible only after you have made a selection in
+                the previous category, ensuring optimal compatibility. Although
+                we strive to provide accurate information, please verify any
+                critical details.
+              </li>
+              <li>
+                <strong>Finalizing Your Build</strong>: After you have chosen
+                all components, scroll down and click the "Contact" button. This
+                will send us your custom configuration, and we will respond
+                promptly.
+              </li>
+            </ol>
+            <button
+              onClick={() => setShowInstructions(false)}
+              className="start-button"
+            >
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/clideo_editor_80e996ef10ce4705981dfd1bef30a303_2.gif?v=1742549670"
+                alt="Start"
+              />
+            </button>
+          </div>
+        </div>
+      )}
 
+      {/* Sidebar */}
       <div className="pcBldr-sidebar">
         <div className="pcBldr-sidebar-div">
           <h2 className="pcBldr-title">PC BUILDER</h2>
@@ -490,27 +498,7 @@ export default function PCBuilder() {
 
       {/* Main content area */}
       <main className="pcBldr-main">
-        {/* Left panel: filters and item list */}
         <section className="pcBldr-filtersSection">
-          {/* <h3>Select {CATEGORIES[currentStep].name}</h3>
-          <div className="pcBldr-filters">
-            <label>
-              <input
-                type="text"
-                value={manufacturerFilter}
-                onChange={(e) => setManufacturerFilter(e.target.value)}
-                placeholder="Filter by manufacturer"
-              />
-            </label>
-            <label className="model-input">
-              <input
-                type="text"
-                value={modelFilter}
-                onChange={(e) => setModelFilter(e.target.value)}
-                placeholder="Filter by model"
-              />
-            </label>
-          </div> */}
           <div className="pcBldr-itemList">
             {filteredItems.map((item) => {
               const isSelected = selectedItem?.id === item.id;
@@ -552,9 +540,30 @@ export default function PCBuilder() {
               );
             })}
           </div>
+          {/* Navigation Buttons */}
+          <div
+            className="pcBldr-navigationButtons"
+            style={{marginTop: '20px', textAlign: 'center'}}
+          >
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
+              style={{marginRight: '10px'}}
+            >
+              Previous
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={
+                !selectedItems[currentStep] ||
+                currentStep === CATEGORIES.length - 1
+              }
+            >
+              Next
+            </button>
+          </div>
         </section>
 
-        {/* Right panel: selected item details, total price, and contact button */}
         <section className="pcBldr-selectedSection">
           <div className="pcBldr-selectedSummary">
             <h3>All Selected Items</h3>
