@@ -285,7 +285,7 @@ export default function PCBuilder() {
   const [showInstructions, setShowInstructions] = useState(true);
 
   // State for additional accessory selection
-  const [selectedAccessory, setSelectedAccessory] = useState(null);
+  const [selectedAccessory, setSelectedAccessory] = useState('gaming-monitors');
   // Store the accessory products loaded from the server
   const [accessoryProducts, setAccessoryProducts] = useState([]);
   // Store the accessory products that the user has added to their build
@@ -789,10 +789,16 @@ ${
                       </div>
                       <button
                         className="accessory-add-btn"
-                        onClick={() => handleSelectAccessory(product)}
+                        onClick={() => {
+                          handleSelectAccessory(product);
+                          summaryRef.current.scrollIntoView({
+                            behavior: 'smooth',
+                          });
+                        }}
                       >
                         Add
                       </button>
+
                       <Link
                         to={`/products/${product.handle}`}
                         target="_blank"

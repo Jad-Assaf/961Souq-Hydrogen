@@ -421,9 +421,9 @@ a.pcBldr-viewMoreBtn {
 }
 
 button.accessory-add-btn {
-    width: 50%;
+    width: 60%;
+    height: 30px;
     margin: 10px auto;
-    border: 1px solid #53992c;
     border-radius: 30px;
     background-color: #53992c;
     color: white;
