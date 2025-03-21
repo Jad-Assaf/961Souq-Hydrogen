@@ -3,7 +3,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 100vw;
     height: 100%;
     background: rgba(30, 30, 30, 0.7);
     /* Dark grey background */
@@ -143,37 +143,6 @@
 
 .pcBldr-container {
     min-height: 50vh;
-}
-
-/* Disabled nav items should still allow hover events */
-.pcBldr-navItemDisabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: auto;
-}
-
-/* Custom tooltip that appears fixed at the bottom center */
-.pcBldr-tooltip {
-    position: absolute;
-    top: 90px;
-    /* left: 50%; */
-    transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
-    z-index: 9999;
-}
-
-/* Show tooltip quickly when hovering over the container */
-.pcBldr-navItemContainer:hover .pcBldr-tooltip {
-    opacity: 1;
-    visibility: visible;
 }
 
 /* Sidebar */

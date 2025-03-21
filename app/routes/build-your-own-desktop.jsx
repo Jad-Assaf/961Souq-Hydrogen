@@ -490,6 +490,7 @@ export default function PCBuilder() {
             {CATEGORIES.map((cat, index) => {
               const isEnabled = index === 0 || !!selectedItems[index - 1];
               const isActive = index === currentStep;
+              // Only show a tooltip for disabled tabs (except the first one)
               const tooltipMessage =
                 !isEnabled && index > 0
                   ? `Choose a ${
@@ -497,21 +498,15 @@ export default function PCBuilder() {
                     } first!`
                   : '';
               return (
-                <div key={cat.name} className="pcBldr-navItemContainer">
-                  <div
-                    className={`pcBldr-navItem ${
-                      isActive ? 'pcBldr-navItemActive' : ''
-                    } ${!isEnabled ? 'pcBldr-navItemDisabled' : ''}`}
-                    onClick={
-                      isEnabled ? () => setCurrentStep(index) : undefined
-                    }
-                  >
-                    {cat.name}
-                  </div>
-                  {/* Render tooltip only for disabled tabs */}
-                  {!isEnabled && index > 0 && (
-                    <span className="pcBldr-tooltip">{tooltipMessage}</span>
-                  )}
+                <div
+                  key={cat.name}
+                  className={`pcBldr-navItem ${
+                    isActive ? 'pcBldr-navItemActive' : ''
+                  } ${!isEnabled ? 'pcBldr-navItemDisabled' : ''}`}
+                  onClick={isEnabled ? () => setCurrentStep(index) : undefined}
+                  title={tooltipMessage}
+                >
+                  {cat.name}
                 </div>
               );
             })}
