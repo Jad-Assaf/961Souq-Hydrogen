@@ -622,7 +622,7 @@ export default function PCBuilder() {
                     padding: '10px 20px',
                     backgroundColor: '#25d366',
                     color: 'white',
-                    borderRadius: '5px',
+                    borderRadius: '30px',
                     textDecoration: 'none',
                     marginTop: '10px',
                   }}
