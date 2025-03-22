@@ -88,15 +88,23 @@ function extractFormFactor(text) {
 // --- End Form Factor Helpers ---
 
 // --- Quantity Selector Component ---
-function QuantitySelector({max}) {
+function QuantitySelector({max, onChange}) {
   const [quantity, setQuantity] = useState(1);
   const handleIncrement = (e) => {
     e.stopPropagation();
-    setQuantity((q) => Math.min(q + 1, max));
+    setQuantity((q) => {
+      const newQty = Math.min(q + 1, max);
+      if (onChange) onChange(newQty);
+      return newQty;
+    });
   };
   const handleDecrement = (e) => {
     e.stopPropagation();
-    setQuantity((q) => Math.max(q - 1, 1));
+    setQuantity((q) => {
+      const newQty = Math.max(q - 1, 1);
+      if (onChange) onChange(newQty);
+      return newQty;
+    });
   };
   return (
     <div
@@ -585,12 +593,22 @@ ${
                       loading="lazy"
                     />
                     <div className="pcBldr-product-title">{item.model}</div>
-                    {(CATEGORIES[currentStep].name === 'RAM' ||
-                      CATEGORIES[currentStep].name === 'Storage') && (
-                      <QuantitySelector
-                        max={CATEGORIES[currentStep].name === 'RAM' ? 4 : 2}
-                      />
-                    )}
+                    {isSelected &&
+                      (CATEGORIES[currentStep].name === 'RAM' ||
+                        CATEGORIES[currentStep].name === 'Storage') && (
+                        <QuantitySelector
+                          max={CATEGORIES[currentStep].name === 'RAM' ? 4 : 2}
+                          onChange={(newQty) => {
+                            setSelectedItems((prev) => ({
+                              ...prev,
+                              [currentStep]: {
+                                ...prev[currentStep],
+                                quantity: newQty,
+                              },
+                            }));
+                          }}
+                        />
+                      )}
                   </div>
                   <div className="pcBldr-product-price">${item.price}</div>
                   <Link
