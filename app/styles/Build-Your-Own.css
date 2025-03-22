@@ -275,9 +275,9 @@
     background-color: #fff;
     color: #000;
     font-size: 14px;
-    min-height: -moz-fit-content;
+    height: auto;
     min-height: fit-content;
-    max-height: 335px;
+    max-height: 390px;
     display: flex;
     flex-direction: column;
 }
