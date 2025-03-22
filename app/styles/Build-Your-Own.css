@@ -277,7 +277,6 @@
     font-size: 14px;
     height: auto;
     min-height: fit-content;
-    max-height: 390px;
     display: flex;
     flex-direction: column;
 }
