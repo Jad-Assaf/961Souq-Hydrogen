@@ -275,6 +275,7 @@
     background-color: #fff;
     color: #000;
     font-size: 14px;
+    min-height: -moz-fit-content;
     min-height: fit-content;
     max-height: 335px;
     display: flex;
