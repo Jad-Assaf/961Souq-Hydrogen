@@ -286,7 +286,21 @@ export default function PCBuilder() {
       (cat) => CATEGORY_HANDLES[cat.name] === currentHandle,
     ) || 0;
   const [currentStep, setCurrentStep] = useState(initialIndex);
-  const [selectedItems, setSelectedItems] = useState({});
+  const [selectedItems, setSelectedItems] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedItems = localStorage.getItem('selectedItems');
+      return savedItems ? JSON.parse(savedItems) : {};
+    }
+    return {}; // Return empty object during SSR
+  });
+
+  // Store selected items in localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
+    }
+  }, [selectedItems]);
+
   const [manufacturerFilter, setManufacturerFilter] = useState('');
   const [modelFilter, setModelFilter] = useState('');
   const [currentItems, setCurrentItems] = useState(products);
@@ -412,14 +426,21 @@ export default function PCBuilder() {
     ) {
       item.quantity = item.quantity || 1;
     }
+
     setSelectedItems((prev) => {
       const newSelected = {
         ...prev,
         [currentStep]: item,
       };
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('selectedItems', JSON.stringify(newSelected));
+      }
+
       if (currentStep === CATEGORIES.length - 1 && summaryRef.current) {
         summaryRef.current.scrollIntoView({behavior: 'smooth'});
       }
+
       return newSelected;
     });
   }
@@ -448,8 +469,14 @@ export default function PCBuilder() {
           delete newSelected[key];
         }
       });
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('selectedItems', JSON.stringify(newSelected));
+      }
+
       return newSelected;
     });
+
     if (currentStep >= categoryIndex) {
       setCurrentStep(categoryIndex);
     }

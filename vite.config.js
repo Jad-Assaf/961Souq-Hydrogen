@@ -68,6 +68,13 @@ export default defineConfig({
        * @see https://vitejs.dev/config/dep-optimization-options
        */
       include: [
+        'nano-css/addon/vcssom/cssToTree',
+        'nano-css/addon/vcssom',
+        'nano-css/addon/cssom',
+        'nano-css',
+        'copy-to-clipboard',
+        'js-cookie',
+        'fast-deep-equal/react',
         'lodash/debounce',
         'react-microsoft-clarity',
         'react-lazy-load-image-component',
