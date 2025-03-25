@@ -27,7 +27,7 @@ export default function ScrollingSVGs() {
 
   return (
     <div className="scrolling-container">
-      <h2 className="scrolling-title">Gaming PC Builder</h2>
+      <h2 className="scrolling-title"> <a href="/build-your-own-desktop">Gaming PC Builder</a></h2>
       <div className="scrolling-wrapper">
         <div ref={scrollRef} className="scrolling-content">
           <a href="/build-your-own-desktop" className="scrolling-item">
