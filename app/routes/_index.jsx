@@ -20,6 +20,7 @@ import {
   tabletsMenu,
 } from '~/components/CollectionCircles';
 import MobileAppPopup from '~/components/MobileAppPopup';
+import ScrollingSVGs from '~/components/ScrollingSVGs';
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -443,6 +444,7 @@ export default function Homepage() {
     <div className="home">
       {/* <MobileAppPopup /> */}
       <BannerSlideshow banners={banners} />
+      <ScrollingSVGs />
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
