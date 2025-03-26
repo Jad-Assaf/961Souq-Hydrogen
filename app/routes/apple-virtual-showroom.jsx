@@ -1,5 +1,6 @@
 import {Link} from '@remix-run/react';
 import '../styles/apple-virtual-showroom.css';
+import appVirtualShowroom from '~/assets/MAR_26.jpg';
 import {useState, useEffect} from 'react';
 
 // Manually define your product data with fixed positions
@@ -74,7 +75,7 @@ export default function ProductsImage() {
 }
 
 function ProductImageWithMarkers({products}) {
-  const baseImageUrl = 'app/assets/MAR_26.jpg';
+  const baseImageUrl = appVirtualShowroom;
 
   return (
     <div className="image-container">
