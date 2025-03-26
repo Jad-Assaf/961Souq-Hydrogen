@@ -84,6 +84,35 @@ const products = [
     },
     position: {x: 976, y: 478},
   },
+  {
+    id: '9',
+    title: 'Apple Magic Keyboard With Touch ID and Numeric Keypad - Black',
+    handle: 'apple-magic-keyboard-with-touch-id-and-numeric-keypad?Color=Black',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/q1_ef6ab641-da3c-4873-a805-1d01d948413a.jpg?v=1688999035',
+    },
+    position: {x: 1027, y: 460},
+  },
+  {
+    id: '10',
+    title: 'Apple Magic Mouse (USB-C) - Black',
+    handle: 'apple-magic-mouse-usb-c?Color=Black',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-magic-mouse-black_eada3581-0aec-415d-8714-f6af2b58cf2d.jpg?v=1736263463',
+    },
+    position: {x: 1065, y: 445},
+  },
+  {
+    id: '11',
+    title:
+      'Apple Mac Studio MQH63 - 24-Core M2 Ultra - 64GB Ram - 1TB SSD - 60-Core GPU',
+    handle:
+      'apple-mac-studio-mqh63-24-core-m2-ultra-64gb-ram-1tb-ssd-60-core-gpu',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Mac-Studio-MQH63-2.jpg?v=1688813295',
+    },
+    position: {x: 1065, y: 423},
+  },
 ];
 
 export default function ProductsImage() {
