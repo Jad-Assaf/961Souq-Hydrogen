@@ -9,7 +9,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    min-width: 4096px;
+    min-width: 2325px;
     /* Ensure the image width stays at least 4096px */
     object-fit: cover;
     /* Ensures the image scales correctly without distorting */
