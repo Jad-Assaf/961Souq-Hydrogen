@@ -77,17 +77,30 @@ function ProductImageWithMarkers({products}) {
   const baseImageUrl =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_26.jpg?quality=100';
 
+  useEffect(() => {
+    function scrollToCustomPosition() {
+      const container = document.querySelector('.image-container');
+
+      if (container && window.innerWidth < 768) {
+        container.scrollTo({
+          left: 300,
+          top: 200,
+          behavior: 'smooth', // Smooth scrolling effect
+        });
+      }
+    }
+
+    setTimeout(scrollToCustomPosition, 200); // Delay ensures image loads before scrolling
+  }, []);
+
   return (
     <div className="image-container">
-      {/* Base Image with an id to reference for scaling */}
       <img
         id="base-image"
         src={baseImageUrl}
         alt="Product showcase"
         className="showroom-image"
       />
-
-      {/* Product Markers */}
       {products.map((product) => (
         <ProductMarker
           key={product.id}
