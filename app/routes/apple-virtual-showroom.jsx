@@ -84,7 +84,7 @@ function ProductImageWithMarkers({products}) {
       if (container && window.innerWidth < 768) {
         container.scrollTo({
           left: 300,
-          top: 200,
+          top: 0,
           behavior: 'smooth', // Smooth scrolling effect
         });
       }
