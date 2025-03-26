@@ -180,7 +180,7 @@ export function Layout({children}) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=3" />
         <Meta />
         <Links />
         <Suspense fallback={null}>
