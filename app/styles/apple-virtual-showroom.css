@@ -1,15 +1,18 @@
-.header{
+.header, .footer {
     display: none;
 }
 
 .showroom-image {
     width: 100vw;
     height: auto;
+    /* Fill 100% of the viewport height */
     position: absolute;
     top: 0;
     left: 0;
-    min-width: 2325px;
-    overflow: auto;
+    min-width: 4096px;
+    /* Ensure the image width stays at least 4096px */
+    object-fit: cover;
+    /* Ensures the image scales correctly without distorting */
 }
 
 .animate-pulse {
@@ -27,6 +30,12 @@ nav.vr-header {
 
 .showroom-container {
     position: relative;
+    overflow: auto;
+    /* Allow horizontal scrolling */
+    width: 100vw;
+    /* Full viewport width */
+    height: 100vh;
+    /* Full viewport height */
 }
 
 .vr-header {
@@ -44,7 +53,8 @@ nav.vr-header {
 .image-container {
     position: relative;
     width: 100%;
-    margin: 0 auto;
+    height: 100%;
+    overflow: auto;
 }
 
 .product-marker {
