@@ -74,8 +74,7 @@ export default function ProductsImage() {
 }
 
 function ProductImageWithMarkers({products}) {
-  const baseImageUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_26.jpg?v=1742983051';
+  const baseImageUrl = 'app/assets/MAR_26.jpg';
 
   return (
     <div className="image-container">
