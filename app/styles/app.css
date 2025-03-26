@@ -215,8 +215,8 @@ html:has(.overlay.expanded) {
 }
 
 .header-search img {
-  width: 30px;
-  height: 30px;
+  width: 75px;
+  /* height: 30px; */
 }
 
 .scrolling-container {
@@ -263,7 +263,8 @@ html:has(.overlay.expanded) {
   background-color: #fff;
   border-radius: 50%;
   padding: 5px;
-  @media (max-width: 768px){
+
+  @media (max-width: 768px) {
     width: 75px;
     height: 75px;
   }
@@ -1365,6 +1366,11 @@ button.reset:hover:not(:has(> *)) {
   color: #7f7f7f;
 }
 
+@media (max-width: 1024px) {
+  .search-desc {
+    display: none;
+  }
+}
 
 .search-result-price {
   font-size: 15px;
@@ -1677,6 +1683,11 @@ input.search-bar:focus-visible {
   min-height: 80px;
   max-height: 150px;
   border-bottom: 1px solid #d6d6d6;
+  @media (max-width: 330px){
+    min-height: unset;
+    max-height: unset;
+    flex-direction: column;
+  }
 }
 
 .predictive-search-result-item a img {

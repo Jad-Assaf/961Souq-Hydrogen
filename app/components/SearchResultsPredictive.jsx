@@ -198,7 +198,7 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                     <p className="search-result-title">
                       {truncateText(product.title, 75)}
                     </p>
-                    <p className="search-result-description">
+                    <p className="search-result-description search-desc">
                       {truncateText(product.description, 100)}
                     </p>
                     <p className="search-result-description">
