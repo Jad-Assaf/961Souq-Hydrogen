@@ -53,6 +53,7 @@ nav.vr-header {
     position: absolute;
     transform: translate(-50%, -50%);
     cursor: pointer;
+    padding: 10px;
 }
 
 .marker-dot {
