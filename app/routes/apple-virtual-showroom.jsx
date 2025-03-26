@@ -1,7 +1,8 @@
 import {Link} from '@remix-run/react';
 import '../styles/apple-virtual-showroom.css';
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect} from 'react';
 
+// Manually define your product data with fixed positions
 const products = [
   {
     id: '1',
@@ -12,7 +13,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Macbook-Pro-13-inch-Silver-M3-Pro-2_566cd059-bd2d-49b4-8a99-f619d65b3e30.jpg?v=1699371333',
     },
-    position: {x: 271, y: 848},
+    position: {x: 271, y: 848}, // Original position in pixels (base width: 2325px)
   },
   {
     id: '2',
@@ -47,6 +48,7 @@ const products = [
     },
     position: {x: 392, y: 804},
   },
+  // Add more products as needed with their respective positions
 ];
 
 export default function ProductsImage() {
@@ -75,63 +77,9 @@ function ProductImageWithMarkers({products}) {
   const baseImageUrl =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_26.jpg?quality=100';
 
-  const [scale, setScale] = useState(1);
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    let initialDistance = null;
-
-    function getDistance(touches) {
-      const [touch1, touch2] = touches;
-      return Math.hypot(
-        touch2.pageX - touch1.pageX,
-        touch2.pageY - touch1.pageY,
-      );
-    }
-
-    function handleTouchStart(e) {
-      if (e.touches.length === 2) {
-        initialDistance = getDistance(e.touches);
-      }
-    }
-
-    function handleTouchMove(e) {
-      if (e.touches.length === 2 && initialDistance) {
-        const currentDistance = getDistance(e.touches);
-        let newScale = currentDistance / initialDistance;
-        newScale = Math.max(0.1, Math.min(newScale, 3)); // Limit zoom range
-        setScale(newScale);
-      }
-    }
-
-    function handleTouchEnd() {
-      initialDistance = null;
-    }
-
-    container.addEventListener('touchstart', handleTouchStart);
-    container.addEventListener('touchmove', handleTouchMove);
-    container.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, []);
-
   return (
-    <div
-      ref={containerRef}
-      className="image-container"
-      style={{
-        transform: `scale(${scale})`,
-        transformOrigin: '0 0',
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto',
-      }}
-    >
+    <div className="image-container">
+      {/* Base Image with an id to reference for scaling */}
       <img
         id="base-image"
         src={baseImageUrl}
@@ -139,6 +87,7 @@ function ProductImageWithMarkers({products}) {
         className="showroom-image"
       />
 
+      {/* Product Markers */}
       {products.map((product) => (
         <ProductMarker
           key={product.id}
@@ -157,12 +106,14 @@ function ProductMarker({product, position}) {
     function updatePosition() {
       const img = document.getElementById('base-image');
       if (img) {
-        const originalWidth = 4096;
+        const originalWidth = 2048; // Base width for the image positions
+        // Only scale if the viewport is wider than the original width
         if (window.innerWidth < originalWidth) {
           setScaledPos(position);
           return;
         }
         const currentWidth = img.clientWidth;
+        // Calculate a uniform scale factor based on width
         const scale = currentWidth / originalWidth;
         setScaledPos({
           x: position.x * scale,
@@ -181,7 +132,10 @@ function ProductMarker({product, position}) {
       className="product-marker"
       style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
     >
+      {/* Marker dot */}
       <div className="marker-dot"></div>
+
+      {/* Product tooltip */}
       <div className="product-tooltip">
         {product.featuredImage?.url && (
           <Link

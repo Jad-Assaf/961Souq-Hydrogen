@@ -1,11 +1,12 @@
-.header, .footer {
+.header, .footer, .whatsapp-float {
     display: none;
 }
 
 .showroom-image {
     width: 100vw;
     height: auto;
-    min-width: 4096px;
+    min-width: 2048px;
+    max-width: 4096px;
     object-fit: cover;
 }
 
