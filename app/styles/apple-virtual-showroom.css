@@ -58,9 +58,9 @@ nav.vr-header {
 .marker-dot {
     width: 10px;
     height: 10px;
-    background-color: #2172af;
+    background-color: #fff;
     border-radius: 50%;
-    animation: pulse 1.5s infinite;
+    animation: pulse 3s infinite;
 }
 
 .product-tooltip {
@@ -111,7 +111,7 @@ nav.vr-header {
     }
 
     50% {
-        transform: scale(1.2);
+        transform: scale(1.3);
         opacity: 1;
     }
 

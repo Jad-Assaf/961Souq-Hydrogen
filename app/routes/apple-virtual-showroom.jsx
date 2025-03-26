@@ -13,7 +13,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Macbook-Pro-13-inch-Silver-M3-Pro-2_566cd059-bd2d-49b4-8a99-f619d65b3e30.jpg?v=1699371333',
     },
-    position: {x: 271, y: 848}, // Original position in pixels (base width: 2325px)
+    position: {x: 238, y: 745}, // Original position in pixels (base width: 2325px)
   },
   {
     id: '2',
@@ -24,7 +24,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Pro-14-inch-M3-Space-Gray_857d0249-851e-4ef5-94d6-62070674bc19.jpg?v=1699613635',
     },
-    position: {x: 508, y: 759},
+    position: {x: 444, y: 667},
   },
   {
     id: '3',
@@ -35,7 +35,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/imac_d2a63e75-b90d-403b-b381-7a82993b5604.jpg?v=1731316510',
     },
-    position: {x: 775, y: 570},
+    position: {x: 682, y: 506},
   },
   {
     id: '4',
@@ -46,9 +46,44 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/16_-MacBook-Pro-4.jpg?v=1731315305',
     },
-    position: {x: 392, y: 804},
+    position: {x: 342, y: 705},
   },
-  // Add more products as needed with their respective positions
+  {
+    id: '5',
+    title: 'Apple Magic Trackpad',
+    handle: 'apple-magic-trackpad-touch-surface?Type=Lightning&Color=White',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Magic-Trackpad-2-1.jpg?v=1741095445',
+    },
+    position: {x: 655, y: 595},
+  },
+  {
+    id: '6',
+    title: 'Apple Magic Keyboard with Touch ID',
+    handle: 'apple-magic-keyboard-with-touch-id',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/a1_6bbe2d63-03ae-4b66-b87e-f75d66cf4a38.jpg?v=1668854165',
+    },
+    position: {x: 710, y: 575},
+  },
+  {
+    id: '7',
+    title: 'Apple Magic Mouse (USB-C)',
+    handle: 'apple-magic-mouse-usb-c?Color=White',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-magic-mouse-new.jpg?v=1736263463',
+    },
+    position: {x: 758, y: 555},
+  },
+  {
+    id: '8',
+    title: 'Apple Magic Trackpad - Black',
+    handle: 'apple-magic-trackpad-touch-surface?Type=Lightning&Color=Black',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/Apple-Magic-Trackpad-Touch-Surface-5.jpg?v=1656145311',
+    },
+    position: {x: 976, y: 478},
+  },
 ];
 
 export default function ProductsImage() {
