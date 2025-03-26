@@ -52,6 +52,31 @@ const products = [
 ];
 
 export default function ProductsImage() {
+  useEffect(() => {
+    // Disable zooming via pinch gestures on mobile
+    const preventZoom = (e) => {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    // Disable zooming via mouse wheel or keyboard shortcuts
+    const preventWheel = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    // Attach event listeners
+    window.addEventListener('touchmove', preventZoom, {passive: false});
+    window.addEventListener('wheel', preventWheel, {passive: false});
+
+    return () => {
+      window.removeEventListener('touchmove', preventZoom);
+      window.removeEventListener('wheel', preventWheel);
+    };
+  }, []);
+
   return (
     <div className="showroom-container">
       <nav className="vr-header">
