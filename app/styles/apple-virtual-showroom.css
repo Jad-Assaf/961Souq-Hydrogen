@@ -6,7 +6,7 @@
     width: 100vw;
     height: auto;
     min-width: 2048px;
-    min-width: 4096px;
+    max-width: 4096px;
     object-fit: cover;
 }
 
