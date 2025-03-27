@@ -48,19 +48,10 @@ export const appleMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/12fd96e86a8a35b81eeaeca3d9ce823a.jpg?v=1714657013',
-      altText: 'Apple Accessories',
-    },
-    title: 'Apple Accessories',
-    url: '/collections/apple-accessories',
-  },
-  {
-    id: 2,
-    image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Apple-MacBook-Air.jpg?v=1714657225',
       altText: 'Apple Macbook Air',
     },
-    title: 'Apple Macbook',
+    title: 'Apple Macbook Air',
     url: '/collections/apple-macbook-air',
   },
   {
@@ -80,6 +71,15 @@ export const appleMenu = [
     },
     title: 'Apple iMac',
     url: '/collections/apple-imac',
+  },
+  {
+    id: 2,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/12fd96e86a8a35b81eeaeca3d9ce823a.jpg?v=1714657013',
+      altText: 'Apple Accessories',
+    },
+    title: 'Apple Accessories',
+    url: '/collections/apple-accessories',
   },
   {
     id: 4,
@@ -554,15 +554,6 @@ export const monitorsMenu = [
 
 export const mobilesMenu = [
   {
-    id: 1,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Mobile-accessories.jpg?v=1714656995',
-      altText: 'Mobile Accessories',
-    },
-    title: 'Mobile Accessories',
-    url: '/collections/mobile-accessories',
-  },
-  {
     id: 2,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/b2991d32e4b537945124266af9681644.jpg?v=1714657030',
@@ -579,6 +570,15 @@ export const mobilesMenu = [
     },
     title: 'Samsung Mobile Phones',
     url: '/collections/samsung-mobile-phones',
+  },
+  {
+    id: 1,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Mobile-accessories.jpg?v=1714656995',
+      altText: 'Mobile Accessories',
+    },
+    title: 'Mobile Accessories',
+    url: '/collections/mobile-accessories',
   },
   {
     id: 4,
@@ -620,13 +620,13 @@ export const mobilesMenu = [
 
 export const tabletsMenu = [
   {
-    id: 1,
+    id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Tablet-Accessories.jpg?v=1714657283',
-      altText: 'Tablet Accessories',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/59663e172d1f0fa78bcb873332d7e673.jpg?v=1714657091',
+      altText: 'Samsung Tablets',
     },
-    title: 'Tablet Accessories',
-    url: '/collections/tablet-accessories',
+    title: 'Samsung Tablets',
+    url: '/collections/samsung-tablets',
   },
   {
     id: 2,
@@ -647,6 +647,15 @@ export const tabletsMenu = [
     url: '/collections/kindle-tablets',
   },
   {
+    id: 1,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Tablet-Accessories.jpg?v=1714657283',
+      altText: 'Tablet Accessories',
+    },
+    title: 'Tablet Accessories',
+    url: '/collections/tablet-accessories',
+  },
+  {
     id: 4,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/060ef5a299d547641bd55b509d8ae11c.jpg?v=1714657089',
@@ -654,15 +663,6 @@ export const tabletsMenu = [
     },
     title: 'Amazon Tabelts',
     url: '/collections/amazon-tablets',
-  },
-  {
-    id: 5,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/59663e172d1f0fa78bcb873332d7e673.jpg?v=1714657091',
-      altText: 'Samsung Tablets',
-    },
-    title: 'Samsung Tablets',
-    url: '/collections/samsung-tablets',
   },
   {
     id: 6,
@@ -686,13 +686,13 @@ export const tabletsMenu = [
 
 export const audioMenu = [
   {
-    id: 1,
+    id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Zoom-H8.webp?v=1714657894',
-      altText: 'Audio Recorders',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/headsets_3ca0e802-135e-4a41-87bd-9aeb574a257e.jpg',
+      altText: 'Headphones',
     },
-    title: 'Audio Recorders',
-    url: '/collections/audio-recorders',
+    title: 'Headphones',
+    url: '/collections/headphones',
   },
   {
     id: 2,
@@ -704,15 +704,6 @@ export const audioMenu = [
     url: '/collections/earbuds',
   },
   {
-    id: 3,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/headsets_3ca0e802-135e-4a41-87bd-9aeb574a257e.jpg',
-      altText: 'Headphones',
-    },
-    title: 'Headphones',
-    url: '/collections/headphones',
-  },
-  {
     id: 4,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/speakers_7779c255-7f3b-408c-9e44-726650bda835.jpg',
@@ -720,6 +711,15 @@ export const audioMenu = [
     },
     title: 'Speakers',
     url: '/collections/speakers',
+  },
+  {
+    id: 1,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Zoom-H8.webp?v=1714657894',
+      altText: 'Audio Recorders',
+    },
+    title: 'Audio Recorders',
+    url: '/collections/audio-recorders',
   },
   {
     id: 5,
@@ -818,13 +818,13 @@ export const accessoriesMenu = [
 
 export const fitnessMenu = [
   {
-    id: 1,
+    id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/huawei-band-8-grey-orange-2.jpg?v=1714657604',
-      altText: 'Fitness Bands',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/img_proxy_1d5f1de1-9b79-49a6-9e74-a8c2869daf98.jpg?v=1714657022',
+      altText: 'Garmin Watches',
     },
-    title: 'Fitness Bands',
-    url: '/collections/fitness-bands',
+    title: 'Garmin Watches',
+    url: '/collections/garmin-smart-watch',
   },
   {
     id: 2,
@@ -836,13 +836,13 @@ export const fitnessMenu = [
     url: '/collections/samsung-watches',
   },
   {
-    id: 3,
+    id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/img_proxy_1d5f1de1-9b79-49a6-9e74-a8c2869daf98.jpg?v=1714657022',
-      altText: 'Garmin Watches',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/huawei-band-8-grey-orange-2.jpg?v=1714657604',
+      altText: 'Fitness Bands',
     },
-    title: 'Garmin Watches',
-    url: '/collections/garmin-smart-watch',
+    title: 'Fitness Bands',
+    url: '/collections/fitness-bands',
   },
   {
     id: 4,
@@ -1021,6 +1021,15 @@ export const camerasMenu = [
 ];
 
 export const homeAppliancesMenu = [
+  {
+    id: 1,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Airwrap_3aa48ffd-ad7e-4af5-94a6-2c851683cff8.jpg?v=1740220525',
+      altText: 'dyson products',
+    },
+    title: 'Dyson Products',
+    url: '/collections/dyson-products',
+  },
   {
     id: 1,
     image: {
