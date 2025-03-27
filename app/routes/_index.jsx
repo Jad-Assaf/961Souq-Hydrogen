@@ -138,10 +138,10 @@ export async function loader(args) {
     },
     {
       desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenovo-legion-pro-7-banner-2.jpg?v=1740491546',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-air-m4-banner.jpg?v=1743066206',
       mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lenovo-legion-pro-7-mobile-banner.jpg?v=1740491546',
-      link: '/products/lenovo-legion-pro-7-83de0079in-16-core-i9-14900hx-32gb-ram-1tb-ssd-rtx-4090-16gb',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-air-m4-mobile-banner.jpg?v=1743066206',
+      link: '/collections/apple-macbook-air',
     },
     {
       desktopImageUrl:
