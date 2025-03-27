@@ -108,7 +108,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
               srcSet={`
                 ${currentBanner.desktopImageUrl}?format=webp&width=300&quality=85 300w,
                 ${currentBanner.desktopImageUrl}?format=webp&width=600&quality=85 600w,
-                ${currentBanner.desktopImageUrl}?format=webp&width=1200&quality=85 1200w
+                ${currentBanner.desktopImageUrl}?format=webp&width=1200&quality=100 1200w
               `}
               sizes="(min-width: 1025px) 100vw"
             />
@@ -117,7 +117,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
               srcSet={`
                 ${currentBanner.desktopImageUrl}?width=300&quality=85 300w,
                 ${currentBanner.desktopImageUrl}?width=600&quality=85 600w,
-                ${currentBanner.desktopImageUrl}?width=1200&quality=85 1200w
+                ${currentBanner.desktopImageUrl}?width=1200&quality=100 1200w
               `}
               sizes="(min-width: 1025px) 100vw"
             />
@@ -129,7 +129,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
               srcSet={`
                 ${currentBanner.mobileImageUrl}?format=webp&width=300&quality=85 300w,
                 ${currentBanner.mobileImageUrl}?format=webp&width=600&quality=85 600w,
-                ${currentBanner.mobileImageUrl}?format=webp&width=1200&quality=85 1200w
+                ${currentBanner.mobileImageUrl}?format=webp&width=1200&quality=100 1200w
               `}
               sizes="(max-width: 1024px) 100vw"
             />
@@ -138,7 +138,7 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
               srcSet={`
                 ${currentBanner.mobileImageUrl}?width=300&quality=85 300w,
                 ${currentBanner.mobileImageUrl}?width=600&quality=85 600w,
-                ${currentBanner.mobileImageUrl}?width=1200&quality=85 1200w
+                ${currentBanner.mobileImageUrl}?width=1200&quality=100 1200w
               `}
               sizes="(max-width: 1024px) 100vw"
             />
