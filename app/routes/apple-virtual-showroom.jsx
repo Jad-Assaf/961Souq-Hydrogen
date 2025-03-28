@@ -13,7 +13,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Macbook-Pro-13-inch-Silver-M3-Pro-2_566cd059-bd2d-49b4-8a99-f619d65b3e30.jpg?v=1699371333',
     },
-    position: {x: 238, y: 745}, // Original position in pixels (base width: 2325px)
+    position: {x: 472, y: 685}, // Original position in pixels (base width: 2325px)
   },
   {
     id: '2',
@@ -24,7 +24,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Pro-14-inch-M3-Space-Gray_857d0249-851e-4ef5-94d6-62070674bc19.jpg?v=1699613635',
     },
-    position: {x: 444, y: 667},
+    position: {x: 568, y: 649},
   },
   {
     id: '3',
@@ -35,7 +35,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/imac_d2a63e75-b90d-403b-b381-7a82993b5604.jpg?v=1731316510',
     },
-    position: {x: 682, y: 506},
+    position: {x: 565, y: 435},
   },
   {
     id: '4',
@@ -46,7 +46,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/16_-MacBook-Pro-4.jpg?v=1731315305',
     },
-    position: {x: 342, y: 705},
+    position: {x: 665, y: 611},
   },
   {
     id: '5',
@@ -55,7 +55,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Magic-Trackpad-2-1.jpg?v=1741095445',
     },
-    position: {x: 655, y: 595},
+    position: {x: 534, y: 520},
   },
   {
     id: '6',
@@ -64,7 +64,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/a1_6bbe2d63-03ae-4b66-b87e-f75d66cf4a38.jpg?v=1668854165',
     },
-    position: {x: 710, y: 575},
+    position: {x: 592, y: 500},
   },
   {
     id: '7',
@@ -73,7 +73,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-magic-mouse-new.jpg?v=1736263463',
     },
-    position: {x: 758, y: 555},
+    position: {x: 640, y: 484},
   },
   {
     id: '8',
@@ -82,7 +82,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/Apple-Magic-Trackpad-Touch-Surface-5.jpg?v=1656145311',
     },
-    position: {x: 976, y: 478},
+    position: {x: 863, y: 412},
   },
   {
     id: '9',
@@ -91,7 +91,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/q1_ef6ab641-da3c-4873-a805-1d01d948413a.jpg?v=1688999035',
     },
-    position: {x: 1027, y: 460},
+    position: {x: 917, y: 395},
   },
   {
     id: '10',
@@ -100,7 +100,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-magic-mouse-black_eada3581-0aec-415d-8714-f6af2b58cf2d.jpg?v=1736263463',
     },
-    position: {x: 1065, y: 445},
+    position: {x: 957, y: 382},
   },
   {
     id: '11',
@@ -111,7 +111,16 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Mac-Studio-MQH63-2.jpg?v=1688813295',
     },
-    position: {x: 1065, y: 423},
+    position: {x: 955, y: 354},
+  },
+  {
+    id: '12',
+    title: 'Apple 27" 5K Studio Display',
+    handle: 'apple-mk0u3ll-a-27-5k-studio-display',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/MK0U3-2.jpg?v=1649410393',
+    },
+    position: {x: 880, y: 332},
   },
 ];
 
@@ -139,7 +148,7 @@ export default function ProductsImage() {
 
 function ProductImageWithMarkers({products}) {
   const baseImageUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_26.jpg?quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_28.jpg?v=1743167596&quality=100';
 
   useEffect(() => {
     function scrollToCustomPosition() {

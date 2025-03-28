@@ -14,6 +14,7 @@
   "prettier": "@shopify/prettier-config",
   "dependencies": {
     "@apollo/client": "^3.11.10",
+    "@google/model-viewer": "^4.0.0",
     "@headlessui/react": "^2.2.0",
     "@microsoft/clarity": "^1.0.0",
     "@phosphor-icons/react": "^2.1.7",
