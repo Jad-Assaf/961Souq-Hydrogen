@@ -53,7 +53,7 @@ nav.vr-header {
     position: absolute;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    padding: 10px;
+    padding: 20px;
 }
 
 .marker-dot {
@@ -76,7 +76,7 @@ nav.vr-header {
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 200px;
+    width: 150px;
     text-align: center;
     transition: all 0.3s ease;
     color: #fff;
@@ -90,19 +90,23 @@ nav.vr-header {
 .product-image {
     width: 100%;
     height: auto;
-    margin-bottom: 10px;
 }
 
-.product-title {
-    font-size: 16px;
+.product-title-v {
+    font-size: 12px;
     margin-bottom: 5px;
     text-decoration: none;
 }
 
 .product-link {
-    font-size: 14px;
+    font-size: 12px;
     color: #000;
     text-decoration: none;
+}
+.product-link span{
+    border: 1px solid #232323;
+    border-radius: 20px;
+    padding: 2px 5px;
 }
 
 @keyframes pulse {

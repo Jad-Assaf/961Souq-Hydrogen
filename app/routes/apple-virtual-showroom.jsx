@@ -114,6 +114,15 @@ const products = [
     position: {x: 955, y: 354},
   },
   {
+    id: '44',
+    title: 'Dyson Purifier Cool Formaldehyde™ TP09 purifying fan',
+    handle: 'dyson-purifier-cool-formaldehyde-tp09-purifying-fan-white-gold',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/DysonPurifierCoolFormaldehyde_TP09purifyingfan_White_Gold.jpg?v=1690444097',
+    },
+    position: {x: 1096, y: 354},
+  },
+  {
     id: '12',
     title: 'Apple 27" 5K Studio Display',
     handle: 'apple-mk0u3ll-a-27-5k-studio-display',
@@ -121,6 +130,255 @@ const products = [
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/MK0U3-2.jpg?v=1649410393',
     },
     position: {x: 880, y: 332},
+  },
+  {
+    id: '13',
+    title: 'Apple Watch Ultra 2 with Trail Loop',
+    handle: 'apple-watch-ultra-2-trail-loop?Color=Trail_Orange_Beige',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Watch-Ultra-2-Trail-Loop-6_8bff3b40-9087-4b18-b661-db01fbaa1cc8.jpg?v=1697811500',
+    },
+    position: {x: 120, y: 658},
+  },
+  {
+    id: '14',
+    title: 'Apple AirPods Pro 2nd Gen',
+    handle: 'apple-airpods-pro-2',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/f2_41a37271-e9c7-4e60-a57a-1880219120fe.jpg?v=1669370872',
+    },
+    position: {x: 163, y: 642},
+  },
+  {
+    id: '15',
+    title: 'Apple AirPods Max USB-C',
+    handle: 'apple-airpods-max-2024-usb-c',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-AirPods-Max-_2024_-5.jpg?v=1727351056',
+    },
+    position: {x: 211, y: 565},
+  },
+  {
+    id: '16',
+    title: 'Apple AirTag Pack of 4',
+    handle: 'apple-airtag-pack-of-4',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/aritag.jpg?v=1669125396',
+    },
+    position: {x: 237, y: 635},
+  },
+  {
+    id: '17',
+    title: 'Apple AirPods 4',
+    handle: 'apple-airpods-4',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/AirPods-4-3_488cca85-2c6b-4804-8c0c-4924eb4c28b9.jpg?v=1726653881',
+    },
+    position: {x: 283, y: 603},
+  },
+  {
+    id: '18',
+    title: 'Apple Watch Series 10',
+    handle: 'apple-watch-series-10',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Watch-Series-10.jpg?v=1726745771',
+    },
+    position: {x: 335, y: 587},
+  },
+  {
+    id: '19',
+    title:
+      'Apple MacBook Pro 16" M4 Pro Chip - 14‑core CPU - 48GB Ram - 512GB SSD - 20‑core GPU',
+    handle:
+      'apple-macbook-pro-16-m4-pro-chip-14-core-cpu-48gb-ram-512gb-ssd-20-core-gpu',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/16_-MacBook-Pro-4.jpg?v=1731315305',
+    },
+    position: {x: 862, y: 537},
+  },
+  {
+    id: '20',
+    title:
+      'Apple MacBook Pro 16" M4 Pro Chip - 14‑core CPU - 24GB Ram - 512GB SSD - 20‑core GPU',
+    handle:
+      'apple-macbook-pro-16-m4-pro-chip-14-core-cpu-24gb-ram-512gb-ssd-20-core-gpu',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/16_-MacBook-Pro-4.jpg?v=1731315305',
+    },
+    position: {x: 970, y: 496},
+  },
+  {
+    id: '21',
+    title:
+      'Apple MacBook Air - 15" - M4 chip - 10-core CPU - 10-core GPU - 32GB Ram - 1TB SSD',
+    handle:
+      'apple-macbook-air-15-m4-chip-10-core-cpu-10-core-gpu-32gb-ram-1tb-ssd',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Air-15-midnight_1b238c25-cfac-4c30-accb-ee269e44a5d3.jpg?v=1742382310',
+    },
+    position: {x: 1217, y: 496},
+  },
+  {
+    id: '22',
+    title:
+      'Apple MacBook Air - 15" - M4 chip - 10-core CPU - 10-core GPU - 24GB Ram - 512GB SSD',
+    handle:
+      'apple-macbook-air-15-m4-chip-10-core-cpu-10-core-gpu-24gb-ram-512gb-ssd?Color=Silver',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Air-15-silver.jpg?v=1742382310',
+    },
+    position: {x: 1311, y: 544},
+  },
+  {
+    id: '23',
+    title:
+      'Apple MacBook Air - 15" - M4 chip - 10-core CPU - 10-core GPU - 16GB Ram - 512GB SSD - Sky Blue',
+    handle:
+      'apple-macbook-air-15-m4-chip-10-core-cpu-10-core-gpu-16gb-ram-512gb-ssd?Color=Sky+Blue',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Air-15.jpg?v=1742382310',
+    },
+    position: {x: 1467, y: 624},
+  },
+  {
+    id: '24',
+    title:
+      'Apple MacBook Air - 13" - M4 chip - 10-core CPU - 10-core GPU - 32GB Ram - 1TB SSD',
+    handle:
+      'apple-macbook-air-13-m4-chip-10-core-cpu-10-core-gpu-32gb-ram-1tb-ssd',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/13-inch-MacBook-Air---Midnight_7db70dc2-dc3e-4ccc-b937-892fc8a56b62.jpg?v=1741871240',
+    },
+    position: {x: 1550, y: 665},
+  },
+  {
+    id: '25',
+    title:
+      'Apple MacBook Air - 13" - M4 chip - 10-core CPU - 10-core GPU - 24GB Ram - 512GB SSD',
+    handle:
+      'apple-macbook-air-13-m4-chip-10-core-cpu-10-core-gpu-24gb-ram-512gb-ssd',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/13-inch-MacBook-Air.jpg?v=1741871240',
+    },
+    position: {x: 1634, y: 706},
+  },
+  {
+    id: '26',
+    title: 'Apple iPhone 16',
+    handle: 'apple-iphone-16',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-16.jpg?v=1726644398',
+    },
+    position: {x: 1200, y: 355},
+  },
+  {
+    id: '27',
+    title: 'Apple iPhone 16 Plus',
+    handle: 'apple-iphone-16-plus',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-Plus-4.jpg?v=1726645785',
+    },
+    position: {x: 1250, y: 380},
+  },
+  {
+    id: '28',
+    title: 'Apple iPhone 16 Pro',
+    handle: 'apple-iphone-16-pro',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-Pro-2.jpg?v=1726647260',
+    },
+    position: {x: 1295, y: 400},
+  },
+  {
+    id: '29',
+    title: 'Apple iPhone 16 Pro Max',
+    handle: 'apple-iphone-16-pro-max',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-Pro-Max-3.jpg?v=1726647934',
+    },
+    position: {x: 1340, y: 420},
+  },
+  {
+    id: '30',
+    title: 'Apple iPad Pro M4 13" (2024)',
+    handle: 'apple-ipad-pro-m4-13-2024-wifi-standard-glass',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-pro-5.jpg?v=1716018466',
+    },
+    position: {x: 1478, y: 472},
+  },
+  {
+    id: '31',
+    title: 'Apple iPad Pro M4 11" (2024)',
+    handle:
+      'apple-ipad-pro-11-m4-2024-with-m4-chip-wifi-standard-glass?Color=Space+Black&Storage=256GB',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-pro.jpg?v=1716017288',
+    },
+    position: {x: 1531, y: 499},
+  },
+  {
+    id: '32',
+    title: 'Apple iPad Mini 7 ',
+    handle: 'apple-ipad-mini-a17-pro-chip-space-gray-wifi?Storage=128GB',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple---iPad-mini-_A17-Pro-chip_-1.jpg?v=1730204758',
+    },
+    position: {x: 1585, y: 522},
+  },
+  {
+    id: '33',
+    title: 'Apple iPad Air 11" M3 Chip (2025)',
+    handle: 'apple-ipad-air-11-m3-chip-2025-wi-fi',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPad-Air-m3-11_53fd0f52-4257-4556-8a1e-79acb9744592.jpg?v=1742986604',
+    },
+    position: {x: 1640, y: 547},
+  },
+  {
+    id: '36',
+    title: 'Apple Pencil Pro',
+    handle: 'apple-pencil-pro',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-pencil-pro.jpg?v=1716023207',
+    },
+    position: {x: 1787, y: 614},
+  },
+  {
+    id: '37',
+    title: 'Apple Pencil (Gen 2)',
+    handle: 'apple-pencil-gen-2-for-ipad-pro-11-12-9-inch',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/14-1_729d245f-d209-4099-b664-61c9e275eb5a.jpg?v=1671033703',
+    },
+    position: {x: 1820, y: 627},
+  },
+  {
+    id: '38',
+    title: 'Apple Pencil (USB-C)',
+    handle: 'apple-pencil-usb-c',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MUWA3.jpg?v=1701505583',
+    },
+    position: {x: 1852, y: 639},
+  },
+  {
+    id: '39',
+    title: 'Apple HomePod (2nd Gen)',
+    handle: 'apple-homepod-2nd-gen',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/Apple-HomePod-2nd-Gen-1.jpg?v=1675769218',
+    },
+    position: {x: 1890, y: 643},
+  },
+  {
+    id: '40',
+    title: 'Apple TV 4K (3rd generation) Wi-Fi + Ethernet - 128GB',
+    handle: 'apple-tv-4k-3rd-generation-wi-fi-ethernet-128gb-storage',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-TV-4K-_3rd-generation.jpg?v=1688201168',
+    },
+    position: {x: 1938, y: 671},
   },
 ];
 
@@ -234,8 +492,8 @@ function ProductMarker({product, position}) {
               alt={product.title}
               className="product-image"
             />
-            <h3 className="product-title">{product.title}</h3>
-            View Product →
+            <h3 className="product-title-v">{product.title}</h3>
+            <span>View Product</span>
           </Link>
         )}
       </div>
