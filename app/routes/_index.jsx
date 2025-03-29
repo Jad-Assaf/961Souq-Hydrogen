@@ -190,17 +190,24 @@ export async function loader(args) {
   const nonCriticalHandles = uniqueMenuHandles;
 
   // Fetch non‑critical collections concurrently.
-  const deferredTopProductsPromise = Promise.all(
+  const deferredTopProductsPromise = Promise.allSettled(
     nonCriticalHandles.map((handle) =>
       fetchCollectionByHandle(args.context, handle),
     ),
   ).then((results) => {
     const topProductsByHandle = {};
-    nonCriticalHandles.forEach((handle, index) => {
-      topProductsByHandle[handle] = results[index];
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value) {
+        topProductsByHandle[nonCriticalHandles[index]] = result.value;
+      } else {
+        console.error(
+          `Failed to load collection for handle: ${nonCriticalHandles[index]}`,
+        );
+      }
     });
     return topProductsByHandle;
   });
+
 
   // Prepare critical top products.
   const initialTopProducts = {};
@@ -449,7 +456,14 @@ export default function Homepage() {
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
       <Suspense fallback={<p>Loading more products...</p>}>
-        <Await resolve={restTopProducts}>
+        <Await
+          resolve={restTopProducts}
+          errorElement={
+            <p>
+              There was an error loading some products. Please try again later.
+            </p>
+          }
+        >
           {(deferredData) => {
             // Merge deferred top products with the initial ones.
             const fullTopProducts = {...combinedTopProducts, ...deferredData};
