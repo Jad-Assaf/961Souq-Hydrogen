@@ -479,12 +479,12 @@ function HomeMarker({position}) {
       className="homee home-marker"
       style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
     >
-      <a
+      <div
         href="/"
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
-      ></a>
-      <div className="home-tooltip">Back To HomePage</div>
+      ></div>
+      <a className="home-tooltip">Back To HomePage</a>
     </div>
   );
 }
@@ -522,12 +522,12 @@ function AppleMarker({position}) {
       className="apple home-marker"
       style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
     >
-      <a
+      <div
         href="/collections/apple"
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
-      ></a>
-      <div className="home-tooltip">All Apple Products</div>
+      ></div>
+      <a className="home-tooltip">All Apple Products</a>
     </div>
   );
 }
