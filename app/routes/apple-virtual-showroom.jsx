@@ -1,6 +1,6 @@
 import {Link} from '@remix-run/react';
 import '../styles/apple-virtual-showroom.css';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef, useMemo} from 'react';
 
 // Manually define your product data with fixed positions
 const products = [
@@ -404,24 +404,22 @@ export default function ProductsImage() {
   );
 }
 
-function ProductImageWithMarkers({products}) {
+function ProductImageWithMarkers({ products }) {
   const baseImageUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_28.jpg?v=1743167596&quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_31.jpg?v=1743422206&quality=100';
 
   useEffect(() => {
     function scrollToCustomPosition() {
       const container = document.querySelector('.image-container');
-
       if (container && window.innerWidth < 768) {
         container.scrollTo({
           left: 300,
           top: 0,
-          behavior: 'smooth', // Smooth scrolling effect
+          behavior: 'smooth',
         });
       }
     }
-
-    setTimeout(scrollToCustomPosition, 200); // Delay ensures image loads before scrolling
+    setTimeout(scrollToCustomPosition, 200);
   }, []);
 
   return (
@@ -439,33 +437,210 @@ function ProductImageWithMarkers({products}) {
           position={product.position}
         />
       ))}
+      {/* Home Marker */}
+      <HomeMarker position={{x: 488, y: 235}} />
+      <AppleMarker position={{x: 1443, y: 244}} />
+      <SamsungMarker position={{x: 1848, y: 435}} />
+      <PrevMarker position={{x: 115, y: 368}} />
+    </div>
+  );
+}
+
+function HomeMarker({position}) {
+  const [scaledPos, setScaledPos] = useState(position);
+  const [randomDelay, setRandomDelay] = useState(0);
+
+  // Set a random delay on client mount
+  useEffect(() => {
+    setRandomDelay(Math.random() * 1.25); // animation duration is 1.25s
+  }, []);
+
+  useEffect(() => {
+    function updatePosition() {
+      const img = document.getElementById('base-image');
+      if (img) {
+        const originalWidth = 2048;
+        if (window.innerWidth < originalWidth) {
+          setScaledPos(position);
+          return;
+        }
+        const currentWidth = img.clientWidth;
+        const scale = currentWidth / originalWidth;
+        setScaledPos({x: position.x * scale, y: position.y * scale});
+      }
+    }
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [position]);
+
+  return (
+    <div
+      className="homee home-marker"
+      style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
+    >
+      <a
+        href="/"
+        className="pulsating-circle"
+        style={{'--delay': `-${randomDelay}s`}}
+      ></a>
+      <div className="home-tooltip">Back To HomePage</div>
+    </div>
+  );
+}
+
+function AppleMarker({position}) {
+  const [scaledPos, setScaledPos] = useState(position);
+  const [randomDelay, setRandomDelay] = useState(0);
+
+  // Set a random delay on client mount
+  useEffect(() => {
+    setRandomDelay(Math.random() * 1.25); // animation duration is 1.25s
+  }, []);
+
+  useEffect(() => {
+    function updatePosition() {
+      const img = document.getElementById('base-image');
+      if (img) {
+        const originalWidth = 2048;
+        if (window.innerWidth < originalWidth) {
+          setScaledPos(position);
+          return;
+        }
+        const currentWidth = img.clientWidth;
+        const scale = currentWidth / originalWidth;
+        setScaledPos({x: position.x * scale, y: position.y * scale});
+      }
+    }
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [position]);
+
+  return (
+    <div
+      className="apple home-marker"
+      style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
+    >
+      <a
+        href="/collections/apple"
+        className="pulsating-circle"
+        style={{'--delay': `-${randomDelay}s`}}
+      ></a>
+      <div className="home-tooltip">All Apple Products</div>
+    </div>
+  );
+}
+
+function SamsungMarker({position}) {
+  const [scaledPos, setScaledPos] = useState(position);
+  const [randomDelay, setRandomDelay] = useState(0);
+
+  // Set a random delay on client mount
+  useEffect(() => {
+    setRandomDelay(Math.random() * 1.25); // animation duration is 1.25s
+  }, []);
+
+  useEffect(() => {
+    function updatePosition() {
+      const img = document.getElementById('base-image');
+      if (img) {
+        const originalWidth = 2048;
+        if (window.innerWidth < originalWidth) {
+          setScaledPos(position);
+          return;
+        }
+        const currentWidth = img.clientWidth;
+        const scale = currentWidth / originalWidth;
+        setScaledPos({x: position.x * scale, y: position.y * scale});
+      }
+    }
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [position]);
+
+  return (
+    <div
+      className="home-marker samsung"
+      style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
+    >
+      <div
+        // href="/collections/apple"
+        className="pulsating-circle"
+        style={{'--delay': `-${randomDelay}s`}}
+      ></div>
+      <div className="home-tooltip">Coming Soon!</div>
+    </div>
+  );
+}
+
+function PrevMarker({position}) {
+  const [scaledPos, setScaledPos] = useState(position);
+  const [randomDelay, setRandomDelay] = useState(0);
+
+  // Set a random delay on client mount
+  useEffect(() => {
+    setRandomDelay(Math.random() * 1.25); // animation duration is 1.25s
+  }, []);
+
+  useEffect(() => {
+    function updatePosition() {
+      const img = document.getElementById('base-image');
+      if (img) {
+        const originalWidth = 2048;
+        if (window.innerWidth < originalWidth) {
+          setScaledPos(position);
+          return;
+        }
+        const currentWidth = img.clientWidth;
+        const scale = currentWidth / originalWidth;
+        setScaledPos({x: position.x * scale, y: position.y * scale});
+      }
+    }
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [position]);
+
+  return (
+    <div
+      className="home-marker previous"
+      style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
+    >
+      <div
+        // href="/collections/apple"
+        className="pulsating-circle"
+        style={{'--delay': `-${randomDelay}s`}}
+      ></div>
+      <div className="home-tooltip">Coming Soon!</div>
     </div>
   );
 }
 
 function ProductMarker({product, position}) {
   const [scaledPos, setScaledPos] = useState(position);
+  const [randomDelay, setRandomDelay] = useState(0);
+
+  // Set a random delay on client mount
+  useEffect(() => {
+    setRandomDelay(Math.random() * 10);
+  }, []);
 
   useEffect(() => {
     function updatePosition() {
       const img = document.getElementById('base-image');
       if (img) {
-        const originalWidth = 2048; // Base width for the image positions
-        // Only scale if the viewport is wider than the original width
+        const originalWidth = 2048;
         if (window.innerWidth < originalWidth) {
           setScaledPos(position);
           return;
         }
         const currentWidth = img.clientWidth;
-        // Calculate a uniform scale factor based on width
         const scale = currentWidth / originalWidth;
-        setScaledPos({
-          x: position.x * scale,
-          y: position.y * scale,
-        });
+        setScaledPos({x: position.x * scale, y: position.y * scale});
       }
     }
-
     updatePosition();
     window.addEventListener('resize', updatePosition);
     return () => window.removeEventListener('resize', updatePosition);
@@ -476,10 +651,10 @@ function ProductMarker({product, position}) {
       className="product-marker"
       style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
     >
-      {/* Marker dot */}
-      <div className="marker-dot"></div>
-
-      {/* Product tooltip */}
+      <div
+        className="pulsating-circle"
+        style={{'--delay': `-${randomDelay}s`}}
+      ></div>
       <div className="product-tooltip">
         {product.featuredImage?.url && (
           <Link
@@ -500,3 +675,4 @@ function ProductMarker({product, position}) {
     </div>
   );
 }
+
