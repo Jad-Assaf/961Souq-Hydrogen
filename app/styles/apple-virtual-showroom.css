@@ -91,23 +91,35 @@
     }
 }
 
-.homee .home-tooltip {
+.apple{
+    transform: rotate3d(2, 4, 1, 45deg);
+}
+
+.homee {
     transform: rotate3d(3, -10, -3.5, 35deg);
+}
+
+.samsung {
+    transform: rotate3d(2, 7, 2, 50deg);
+}
+
+.previous {
+    transform: rotate3d(1, -3, -1.5, 32deg);
+}
+
+.homee .home-tooltip {
     box-shadow: -1px 0px 0px 0px #666666;
 }
 
 .apple .home-tooltip {
-    transform: rotate3d(2, 4, 1, 45deg);
     box-shadow: 1px 0px 0px 0px #666666;
 }
 
 .samsung .home-tooltip {
-    transform: rotate3d(2, 7, 2, 50deg);
     box-shadow: 1px 1px 0px 0px #666666;
 }
 
 .previous .home-tooltip {
-    transform: rotate3d(1, -3, -1.5, 32deg);
     box-shadow: -1px 1px 0px 0px #666666;
 }
 
