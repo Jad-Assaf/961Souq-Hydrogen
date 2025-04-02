@@ -385,8 +385,7 @@ const products = [
 export default function ProductsImage() {
   return (
     <div className="showroom-container">
-      {/* <nav className="vr-header">
-        <p>Home</p>
+      <nav className="vr-header">
         <div className="vr-header__logo">
           <a href="https://961souq.com">
             <img
@@ -397,8 +396,7 @@ export default function ProductsImage() {
             />
           </a>
         </div>
-        <p>Next Showroom</p>
-      </nav> */}
+      </nav>
       <ProductImageWithMarkers products={products} />
     </div>
   );

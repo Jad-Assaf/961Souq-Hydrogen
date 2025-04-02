@@ -222,9 +222,10 @@ nav.vr-header {
     position: absolute;
     z-index: 10;
     display: flex;
-    width: 90vw;
-    justify-content: space-between;
-    margin: auto;
+    width: 100vw;
+    justify-content: center;
+    align-items: center;
+    height: 75px;
 }
 
 .showroom-container {
@@ -234,16 +235,10 @@ nav.vr-header {
     height: 100vh;
 }
 
-.vr-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-}
-
 .vr-header__logo img {
     max-width: 100px;
     height: auto;
+    filter: invert(100%);
 }
 
 .image-container {
@@ -311,7 +306,7 @@ nav.vr-header {
 .product-link span {
     border: 1px solid #232323;
     border-radius: 20px;
-    padding: 2px 5px;
+    padding: 3px 7px;
 }
 
 @keyframes pulse {
