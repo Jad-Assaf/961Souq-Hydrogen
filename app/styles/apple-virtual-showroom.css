@@ -4,14 +4,22 @@
     display: none;
 }
 
-.showroom-image.blur {
-    filter: blur(10px);
-    opacity: 1;
+/* Add to your apple-virtual-showroom.css */
+.image-container {
+    overflow: hidden;
+    /* Contain the blur within the container */
+    background: #000;
+    /* Match to your image's dominant edge color */
 }
 
-.showroom-image:not(.blur) {
-    filter: blur(0);
-    opacity: 1;
+.showroom-image {
+    z-index: 1;
+    /* Compensate for blur shrinkage */
+    transition: filter 0.5s ease-out;
+}
+
+.showroom-image.blur {
+    filter: blur(20px);
 }
 
 .showroom-image {
