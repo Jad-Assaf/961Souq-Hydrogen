@@ -495,11 +495,12 @@ function HomeMarker({position}) {
       style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
     >
       <div
-        href="/"
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <a className="home-tooltip">Back To HomePage</a>
+      <a href="/" className="home-tooltip">
+        Back To HomePage
+      </a>
     </div>
   );
 }
@@ -538,11 +539,12 @@ function AppleMarker({position}) {
       style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
     >
       <div
-        href="/collections/apple"
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <a className="home-tooltip">All Apple Products</a>
+      <a href="/collections/apple" className="home-tooltip">
+        All Apple Products
+      </a>
     </div>
   );
 }
