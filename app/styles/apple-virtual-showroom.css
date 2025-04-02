@@ -4,12 +4,23 @@
     display: none;
 }
 
+.showroom-image.blur {
+    filter: blur(10px);
+    opacity: 1;
+}
+
+.showroom-image:not(.blur) {
+    filter: blur(0);
+    opacity: 1;
+}
+
 .showroom-image {
     width: 100vw;
     height: auto;
     min-width: 2048px;
     max-width: 4096px;
     object-fit: cover;
+    transition: filter 0.5s ease-out, opacity 0.5s ease-out;
 }
 
 .home-marker {

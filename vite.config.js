@@ -68,6 +68,13 @@ export default defineConfig({
        * @see https://vitejs.dev/config/dep-optimization-options
        */
       include: [
+        'react-dom/client',
+        'react',
+        'react-babylonjs',
+        'scheduler',
+        'react-reconciler',
+        'use-sync-external-store/shim/with-selector.js',
+        'react-reconciler/constants',
         'nano-css/addon/vcssom/cssToTree',
         'nano-css/addon/vcssom',
         'nano-css/addon/cssom',

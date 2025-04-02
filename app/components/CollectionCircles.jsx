@@ -1031,7 +1031,7 @@ export const homeAppliancesMenu = [
     url: '/collections/dyson-products',
   },
   {
-    id: 1,
+    id: 7,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/kitchen-Appliances.jpg?v=1714657182',
       altText: 'Kitchen Appliances',

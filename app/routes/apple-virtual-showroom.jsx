@@ -404,9 +404,27 @@ export default function ProductsImage() {
   );
 }
 
-function ProductImageWithMarkers({ products }) {
-  const baseImageUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MAR_31.jpg?v=1743422206&quality=100';
+function ProductImageWithMarkers({products}) {
+  const lowQualityUrl =
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr2-2.jpg?v=1743617657&quality=10';
+  const highQualityUrl =
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr2-2.jpg?v=1743617657&quality=100';
+  const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
+  const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = highQualityUrl;
+    img.onload = () => {
+      setCurrentImageSrc(highQualityUrl);
+      setIsHighQualityLoaded(true);
+    };
+
+    // Cleanup
+    return () => {
+      img.onload = null;
+    };
+  }, [highQualityUrl]);
 
   useEffect(() => {
     function scrollToCustomPosition() {
@@ -426,9 +444,9 @@ function ProductImageWithMarkers({ products }) {
     <div className="image-container">
       <img
         id="base-image"
-        src={baseImageUrl}
+        src={currentImageSrc}
         alt="Product showcase"
-        className="showroom-image"
+        className={`showroom-image ${!isHighQualityLoaded ? 'blur' : ''}`}
       />
       {products.map((product) => (
         <ProductMarker
@@ -437,7 +455,6 @@ function ProductImageWithMarkers({ products }) {
           position={product.position}
         />
       ))}
-      {/* Home Marker */}
       <HomeMarker position={{x: 488, y: 235}} />
       <AppleMarker position={{x: 1445, y: 244}} />
       <SamsungMarker position={{x: 1848, y: 435}} />

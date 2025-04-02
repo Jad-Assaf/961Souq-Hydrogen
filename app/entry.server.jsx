@@ -121,7 +121,7 @@ export default async function handleRequest(
       'https://youtube.com/',
     ],
     imgSrc: [
-      "'self'", // Allow images from the same origin
+      "'self' blob:", // Allow images from the same origin
       'https://www.clarity.ms',
       'https://*.clarity.ms',
       'https://x.clarity.ms',
