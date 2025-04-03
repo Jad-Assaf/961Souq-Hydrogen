@@ -387,7 +387,7 @@ export default function ProductsImage() {
     <div className="showroom-container">
       <nav className="vr-header">
         <div className="vr-header__logo">
-          <a href="https://961souq.com">
+          <a href="/">
             <img
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Black-961souqLogo.png?v=1742979250"
               alt="961 Souq Logo"
@@ -406,7 +406,7 @@ function ProductImageWithMarkers({products}) {
   const lowQualityUrl =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr3.jpg?v=1743659665&quality=10';
   const highQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr3.jpg?v=1743659665&quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr3_674194e5-99a8-4789-9f7e-0fda1957481b.png?v=1743675209&quality=100';
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
 
@@ -445,6 +445,8 @@ function ProductImageWithMarkers({products}) {
         src={currentImageSrc}
         alt="Product showcase"
         className={`showroom-image ${!isHighQualityLoaded ? 'blur' : ''}`}
+        width={4096}
+        height={2160}
       />
       {products.map((product) => (
         <ProductMarker
