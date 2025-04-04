@@ -24,8 +24,8 @@
 
 .home-marker {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 70px;
+    height: 70px;
 }
 
 .home-dot {
@@ -71,8 +71,8 @@
 
 .home-tooltip {
     position: absolute;
-    top: 35px;
-    left: -48px;
+    top: 55px;
+    left: -25px;
     background: white;
     color: black;
     /* padding: 5px 15px; */
@@ -89,13 +89,13 @@
 
 @keyframes slide-up {
     0% {
-        top: 35px;
+        top: 55px;
         opacity: 0;
         visibility: hidden;
     }
 
     100% {
-        top: 23px;
+        top: 50px;
         opacity: 1;
         visibility: visible;
     }

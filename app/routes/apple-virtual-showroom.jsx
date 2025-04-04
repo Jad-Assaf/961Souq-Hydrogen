@@ -519,10 +519,10 @@ function ProductImageWithMarkers({ products }) {
           position={product.position}
         />
       ))}
-      <HomeMarker position={{ x: 560, y: 290 }} />
-      <AppleMarker position={{ x: 1650, y: 290 }} />
-      <SamsungMarker position={{ x: 2108, y: 495 }} />
-      <PrevMarker position={{ x: 130, y: 420 }} />
+      <HomeMarker position={{ x: 540, y: 250 }} />
+      <AppleMarker position={{ x: 1625, y: 250 }} />
+      <SamsungMarker position={{ x: 2085, y: 470 }} />
+      <PrevMarker position={{ x: 105, y: 395 }} />
     </div>
   );
 }
