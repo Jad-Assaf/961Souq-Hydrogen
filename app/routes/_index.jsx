@@ -89,9 +89,9 @@ export async function loader(args) {
   const banners = [
     {
       desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/virtual-banner.jpg?v=1743674710&quality=100',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/virtual-banner.jpg?v=1743674710',
       mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobile-virtual-banner.jpg?v=1743672861&quality=100',
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobile-virtual-banner.jpg?v=1743672861',
       link: '/apple-virtual-showroom',
     },
     {
@@ -136,13 +136,13 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-mobilebanner.jpg?v=1728123476',
       link: '/collections/google-products',
     },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-mobile-banner-1.jpg?v=1729678484',
-      link: '/collections/remarkable-tablets',
-    },
+    // {
+    //   desktopImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-banner_25c8cc9c-14de-4556-9e8f-5388ebc1eb1d.jpg?v=1729676718',
+    //   mobileImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/remarkable-pro-mobile-banner-1.jpg?v=1729678484',
+    //   link: '/collections/remarkable-tablets',
+    // },
     {
       desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-air-m4-banner.jpg?v=1743066206',
@@ -157,13 +157,13 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-Pro-mobile.jpg?v=1726321600',
       link: '/collections/apple-iphone',
     },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin-mobile-banner.jpg?v=1726321601',
-      link: '/products/garmin-fenix-8-47-mm-amoled-sapphire-premium-multisport-gps-watch',
-    },
+    // {
+    //   desktopImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin.jpg?v=1726321601',
+    //   mobileImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Garmin-mobile-banner.jpg?v=1726321601',
+    //   link: '/products/garmin-fenix-8-47-mm-amoled-sapphire-premium-multisport-gps-watch',
+    // },
   ];
 
   // Fire off critical queries concurrently so above‑the‑fold content is fast.

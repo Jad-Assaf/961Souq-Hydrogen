@@ -101,44 +101,18 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
           style={styles.link}
         >
           <picture>
-            {/* WebP and fallback for Desktop */}
-            <source
-              type="image/webp"
-              media="(min-width: 1025px)"
-              srcSet={`
-                ${currentBanner.desktopImageUrl}?format=webp&width=300&quality=100 300w,
-                ${currentBanner.desktopImageUrl}?format=webp&width=600&quality=100 600w,
-                ${currentBanner.desktopImageUrl}?format=webp&width=1200&quality=100 1200w
-              `}
-              sizes="(min-width: 1025px) 100vw"
-            />
             <source
               media="(min-width: 1025px)"
               srcSet={`
-                ${currentBanner.desktopImageUrl}?width=300&quality=100 300w,
-                ${currentBanner.desktopImageUrl}?width=600&quality=100 600w,
-                ${currentBanner.desktopImageUrl}?width=1200&quality=100 1200w
+                ${currentBanner.desktopImageUrl}?quality=100
               `}
               sizes="(min-width: 1025px) 100vw"
             />
 
-            {/* WebP and fallback for Mobile */}
-            <source
-              type="image/webp"
-              media="(max-width: 1024px)"
-              srcSet={`
-                ${currentBanner.mobileImageUrl}?format=webp&width=300&quality=100 300w,
-                ${currentBanner.mobileImageUrl}?format=webp&width=600&quality=100 600w,
-                ${currentBanner.mobileImageUrl}?format=webp&width=1200&quality=100 1200w
-              `}
-              sizes="(max-width: 1024px) 100vw"
-            />
             <source
               media="(max-width: 1024px)"
               srcSet={`
-                ${currentBanner.mobileImageUrl}?width=300&quality=100 300w,
-                ${currentBanner.mobileImageUrl}?width=600&quality=100 600w,
-                ${currentBanner.mobileImageUrl}?width=1200&quality=100 1200w
+                ${currentBanner.mobileImageUrl}?quality=100
               `}
               sizes="(max-width: 1024px) 100vw"
             />

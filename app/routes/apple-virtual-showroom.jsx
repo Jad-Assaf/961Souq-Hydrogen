@@ -13,7 +13,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Macbook-Pro-13-inch-Silver-M3-Pro-2_566cd059-bd2d-49b4-8a99-f619d65b3e30.jpg?v=1699371333',
     },
-    position: {x: 472, y: 685}, // Original position in pixels (base width: 2325px)
+    position: {x: 547, y: 791}, // Original position in pixels (base width: 2325px)
   },
   {
     id: '2',
@@ -24,7 +24,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Pro-14-inch-M3-Space-Gray_857d0249-851e-4ef5-94d6-62070674bc19.jpg?v=1699613635',
     },
-    position: {x: 568, y: 649},
+    position: {x: 656, y: 750},
   },
   {
     id: '3',
@@ -35,7 +35,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/imac_d2a63e75-b90d-403b-b381-7a82993b5604.jpg?v=1731316510',
     },
-    position: {x: 565, y: 435},
+    position: {x: 645, y: 500},
   },
   {
     id: '4',
@@ -46,7 +46,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/16_-MacBook-Pro-4.jpg?v=1731315305',
     },
-    position: {x: 665, y: 611},
+    position: {x: 766, y: 708},
   },
   {
     id: '5',
@@ -55,7 +55,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Magic-Trackpad-2-1.jpg?v=1741095445',
     },
-    position: {x: 534, y: 520},
+    position: {x: 612, y: 596},
   },
   {
     id: '6',
@@ -64,7 +64,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/a1_6bbe2d63-03ae-4b66-b87e-f75d66cf4a38.jpg?v=1668854165',
     },
-    position: {x: 592, y: 500},
+    position: {x: 676, y: 574},
   },
   {
     id: '7',
@@ -73,7 +73,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-magic-mouse-new.jpg?v=1736263463',
     },
-    position: {x: 640, y: 484},
+    position: {x: 730, y: 555},
   },
   {
     id: '8',
@@ -82,7 +82,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/Apple-Magic-Trackpad-Touch-Surface-5.jpg?v=1656145311',
     },
-    position: {x: 863, y: 412},
+    position: {x: 986, y: 471},
   },
   {
     id: '9',
@@ -91,7 +91,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/q1_ef6ab641-da3c-4873-a805-1d01d948413a.jpg?v=1688999035',
     },
-    position: {x: 917, y: 395},
+    position: {x: 1045, y: 452},
   },
   {
     id: '10',
@@ -100,7 +100,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-magic-mouse-black_eada3581-0aec-415d-8714-f6af2b58cf2d.jpg?v=1736263463',
     },
-    position: {x: 957, y: 382},
+    position: {x: 1090, y: 435},
   },
   {
     id: '11',
@@ -111,7 +111,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Mac-Studio-MQH63-2.jpg?v=1688813295',
     },
-    position: {x: 955, y: 354},
+    position: {x: 1095, y: 410},
   },
   {
     id: '44',
@@ -120,7 +120,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/DysonPurifierCoolFormaldehyde_TP09purifyingfan_White_Gold.jpg?v=1690444097',
     },
-    position: {x: 1096, y: 354},
+    position: {x: 1250, y: 385},
   },
   {
     id: '12',
@@ -129,7 +129,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/MK0U3-2.jpg?v=1649410393',
     },
-    position: {x: 880, y: 332},
+    position: {x: 1000, y: 382},
   },
   {
     id: '13',
@@ -138,7 +138,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Watch-Ultra-2-Trail-Loop-6_8bff3b40-9087-4b18-b661-db01fbaa1cc8.jpg?v=1697811500',
     },
-    position: {x: 120, y: 658},
+    position: {x: 138, y: 754},
   },
   {
     id: '14',
@@ -147,7 +147,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/f2_41a37271-e9c7-4e60-a57a-1880219120fe.jpg?v=1669370872',
     },
-    position: {x: 163, y: 642},
+    position: {x: 188, y: 735},
   },
   {
     id: '15',
@@ -156,7 +156,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-AirPods-Max-_2024_-5.jpg?v=1727351056',
     },
-    position: {x: 211, y: 565},
+    position: {x: 240, y: 645},
   },
   {
     id: '16',
@@ -165,7 +165,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/aritag.jpg?v=1669125396',
     },
-    position: {x: 237, y: 635},
+    position: {x: 268, y: 720},
   },
   {
     id: '17',
@@ -174,7 +174,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/AirPods-4-3_488cca85-2c6b-4804-8c0c-4924eb4c28b9.jpg?v=1726653881',
     },
-    position: {x: 283, y: 603},
+    position: {x: 324, y: 690},
   },
   {
     id: '18',
@@ -183,7 +183,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Watch-Series-10.jpg?v=1726745771',
     },
-    position: {x: 335, y: 587},
+    position: {x: 382, y: 669},
   },
   {
     id: '19',
@@ -194,7 +194,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/16_-MacBook-Pro-4.jpg?v=1731315305',
     },
-    position: {x: 862, y: 537},
+    position: {x: 996, y: 621},
   },
   {
     id: '20',
@@ -205,7 +205,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/16_-MacBook-Pro-4.jpg?v=1731315305',
     },
-    position: {x: 970, y: 496},
+    position: {x: 1119, y: 574},
   },
   {
     id: '21',
@@ -216,7 +216,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Air-15-midnight_1b238c25-cfac-4c30-accb-ee269e44a5d3.jpg?v=1742382310',
     },
-    position: {x: 1217, y: 496},
+    position: {x: 1377, y: 576},
   },
   {
     id: '22',
@@ -227,7 +227,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Air-15-silver.jpg?v=1742382310',
     },
-    position: {x: 1311, y: 544},
+    position: {x: 1480, y: 630},
   },
   {
     id: '23',
@@ -238,7 +238,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-MacBook-Air-15.jpg?v=1742382310',
     },
-    position: {x: 1467, y: 624},
+    position: {x: 1663, y: 721},
   },
   {
     id: '24',
@@ -249,7 +249,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/13-inch-MacBook-Air---Midnight_7db70dc2-dc3e-4ccc-b937-892fc8a56b62.jpg?v=1741871240',
     },
-    position: {x: 1550, y: 665},
+    position: {x: 1755, y: 766},
   },
   {
     id: '25',
@@ -260,7 +260,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/13-inch-MacBook-Air.jpg?v=1741871240',
     },
-    position: {x: 1634, y: 706},
+    position: {x: 1850, y: 814},
   },
   {
     id: '26',
@@ -269,7 +269,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-16.jpg?v=1726644398',
     },
-    position: {x: 1200, y: 355},
+    position: {x: 1371, y: 402},
   },
   {
     id: '27',
@@ -278,7 +278,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-Plus-4.jpg?v=1726645785',
     },
-    position: {x: 1250, y: 380},
+    position: {x: 1427, y: 430},
   },
   {
     id: '28',
@@ -287,7 +287,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-Pro-2.jpg?v=1726647260',
     },
-    position: {x: 1295, y: 400},
+    position: {x: 1473, y: 453},
   },
   {
     id: '29',
@@ -296,7 +296,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPhone-16-Pro-Max-3.jpg?v=1726647934',
     },
-    position: {x: 1340, y: 420},
+    position: {x: 1524, y: 478},
   },
   {
     id: '30',
@@ -305,7 +305,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-pro-5.jpg?v=1716018466',
     },
-    position: {x: 1478, y: 472},
+    position: {x: 1685, y: 540},
   },
   {
     id: '31',
@@ -315,7 +315,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ipad-pro.jpg?v=1716017288',
     },
-    position: {x: 1531, y: 499},
+    position: {x: 1747, y: 568},
   },
   {
     id: '32',
@@ -324,7 +324,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple---iPad-mini-_A17-Pro-chip_-1.jpg?v=1730204758',
     },
-    position: {x: 1585, y: 522},
+    position: {x: 1809, y: 594},
   },
   {
     id: '33',
@@ -333,7 +333,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iPad-Air-m3-11_53fd0f52-4257-4556-8a1e-79acb9744592.jpg?v=1742986604',
     },
-    position: {x: 1640, y: 547},
+    position: {x: 1874, y: 622},
   },
   {
     id: '36',
@@ -342,7 +342,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-pencil-pro.jpg?v=1716023207',
     },
-    position: {x: 1787, y: 614},
+    position: {x: 2037, y: 699},
   },
   {
     id: '37',
@@ -351,7 +351,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/14-1_729d245f-d209-4099-b664-61c9e275eb5a.jpg?v=1671033703',
     },
-    position: {x: 1820, y: 627},
+    position: {x: 2073, y: 713},
   },
   {
     id: '38',
@@ -360,7 +360,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/MUWA3.jpg?v=1701505583',
     },
-    position: {x: 1852, y: 639},
+    position: {x: 2109, y: 727},
   },
   {
     id: '39',
@@ -369,7 +369,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/Apple-HomePod-2nd-Gen-1.jpg?v=1675769218',
     },
-    position: {x: 1890, y: 643},
+    position: {x: 2157, y: 723},
   },
   {
     id: '40',
@@ -378,7 +378,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-TV-4K-_3rd-generation.jpg?v=1688201168',
     },
-    position: {x: 1938, y: 671},
+    position: {x: 2208, y: 751},
   },
 ];
 
@@ -402,13 +402,14 @@ export default function ProductsImage() {
   );
 }
 
-function ProductImageWithMarkers({products}) {
+function ProductImageWithMarkers({ products }) {
   const lowQualityUrl =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr3.jpg?v=1743659665&quality=10';
   const highQualityUrl =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr3_674194e5-99a8-4789-9f7e-0fda1957481b.png?v=1743675209&quality=100';
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const img = new Image();
@@ -418,15 +419,76 @@ function ProductImageWithMarkers({products}) {
       setIsHighQualityLoaded(true);
     };
 
-    // Cleanup
     return () => {
       img.onload = null;
     };
   }, [highQualityUrl]);
 
+  // Drag-to-scroll functionality
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let isDown = false;
+    let startX;
+    let startY;
+    let scrollLeft;
+    let scrollTop;
+
+    const handleMouseDown = (e) => {
+      isDown = true;
+      container.classList.add('active'); // Optional: change cursor/style
+      startX = e.pageX - container.offsetLeft;
+      startY = e.pageY - container.offsetTop;
+      scrollLeft = container.scrollLeft;
+      scrollTop = container.scrollTop;
+    };
+
+    const handleMouseLeave = () => {
+      isDown = false;
+      container.classList.remove('active');
+    };
+
+    const handleMouseUp = () => {
+      isDown = false;
+      container.classList.remove('active');
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const y = e.pageY - container.offsetTop;
+      const walkX = x - startX;
+      const walkY = y - startY;
+      container.scrollLeft = scrollLeft - walkX;
+      container.scrollTop = scrollTop - walkY;
+    };
+
+    container.addEventListener('mousedown', handleMouseDown);
+    container.addEventListener('mouseleave', handleMouseLeave);
+    container.addEventListener('mouseup', handleMouseUp);
+    container.addEventListener('mousemove', handleMouseMove);
+
+    // Disable right-click context menu
+    const disableContextMenu = (e) => {
+      e.preventDefault();
+    };
+    container.addEventListener('contextmenu', disableContextMenu);
+
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener('mouseup', handleMouseUp);
+      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('contextmenu', disableContextMenu);
+    };
+  }, []);
+
+  // Optional: Custom mobile scroll position
   useEffect(() => {
     function scrollToCustomPosition() {
-      const container = document.querySelector('.image-container');
+      const container = containerRef.current;
       if (container && window.innerWidth < 768) {
         container.scrollTo({
           left: 300,
@@ -439,7 +501,7 @@ function ProductImageWithMarkers({products}) {
   }, []);
 
   return (
-    <div className="image-container">
+    <div className="image-container" ref={containerRef}>
       <img
         id="base-image"
         src={currentImageSrc}
@@ -447,6 +509,8 @@ function ProductImageWithMarkers({products}) {
         className={`showroom-image ${!isHighQualityLoaded ? 'blur' : ''}`}
         width={4096}
         height={2160}
+        draggable={false}
+        onDragStart={(e) => e.preventDefault()}
       />
       {products.map((product) => (
         <ProductMarker
@@ -455,10 +519,10 @@ function ProductImageWithMarkers({products}) {
           position={product.position}
         />
       ))}
-      <HomeMarker position={{x: 488, y: 235}} />
-      <AppleMarker position={{x: 1445, y: 244}} />
-      <SamsungMarker position={{x: 1848, y: 435}} />
-      <PrevMarker position={{x: 115, y: 368}} />
+      <HomeMarker position={{ x: 560, y: 290 }} />
+      <AppleMarker position={{ x: 1650, y: 290 }} />
+      <SamsungMarker position={{ x: 2108, y: 495 }} />
+      <PrevMarker position={{ x: 130, y: 420 }} />
     </div>
   );
 }
@@ -476,7 +540,7 @@ function HomeMarker({position}) {
     function updatePosition() {
       const img = document.getElementById('base-image');
       if (img) {
-        const originalWidth = 2048;
+        const originalWidth = 2335;
         if (window.innerWidth < originalWidth) {
           setScaledPos(position);
           return;
@@ -520,7 +584,7 @@ function AppleMarker({position}) {
     function updatePosition() {
       const img = document.getElementById('base-image');
       if (img) {
-        const originalWidth = 2048;
+        const originalWidth = 2335;
         if (window.innerWidth < originalWidth) {
           setScaledPos(position);
           return;
@@ -564,7 +628,7 @@ function SamsungMarker({position}) {
     function updatePosition() {
       const img = document.getElementById('base-image');
       if (img) {
-        const originalWidth = 2048;
+        const originalWidth = 2335;
         if (window.innerWidth < originalWidth) {
           setScaledPos(position);
           return;
@@ -607,7 +671,7 @@ function PrevMarker({position}) {
     function updatePosition() {
       const img = document.getElementById('base-image');
       if (img) {
-        const originalWidth = 2048;
+        const originalWidth = 2335;
         if (window.innerWidth < originalWidth) {
           setScaledPos(position);
           return;
@@ -650,7 +714,7 @@ function ProductMarker({product, position}) {
     function updatePosition() {
       const img = document.getElementById('base-image');
       if (img) {
-        const originalWidth = 2048;
+        const originalWidth = 2335;
         if (window.innerWidth < originalWidth) {
           setScaledPos(position);
           return;
