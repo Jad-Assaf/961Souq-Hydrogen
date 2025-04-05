@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {defer} from '@shopify/remix-oxygen';
+import {defer, json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
 import {CategorySlider} from '~/components/CollectionSlider';
@@ -204,13 +204,21 @@ export async function loader(args) {
   // Wait for non‑critical data before returning.
   const restTopProducts = await deferredTopProductsPromise;
 
-  return {
-    banners,
-    sliderCollections: criticalData.sliderCollections,
-    newArrivals,
-    topProducts: initialTopProducts,
-    restTopProducts,
-  };
+  return json(
+    {
+      banners,
+      sliderCollections: criticalData.sliderCollections,
+      newArrivals,
+      topProducts: initialTopProducts,
+      restTopProducts,
+    },
+    {
+      headers: {
+        'Oxygen-Cache-Control':
+          'public, max-age=1, stale-while-revalidate=86399',
+      },
+    },
+  );
 }
 
 export function shouldRevalidate({currentUrl, nextUrl}) {
@@ -259,7 +267,7 @@ async function loadCriticalData({context}) {
     title: shop.name,
     description: shop.description,
     url: 'https://961souq.com',
-  };
+  }
 }
 
 const brandsData = [
