@@ -512,20 +512,25 @@ export default function Collection() {
               </div>
             </div>
 
-            <PaginatedResourceSection
-              key="products-grid"
-              connection={collection.products}
-              resourcesClassName={`products-grid grid-cols-${columns} w-[100%]`}
-            >
-              {({node: product, index}) => (
-                <ProductItem
-                  key={product.id}
-                  product={product}
-                  index={index}
-                  numberInRow={1}
-                />
-              )}
-            </PaginatedResourceSection>
+            {/* Check if there are products in the collection */}
+            {collection.products.nodes.length === 0 ? (
+              <p className='no-products-collection'>No products are available in this section right now!</p>
+            ) : (
+              <PaginatedResourceSection
+                key="products-grid"
+                connection={collection.products}
+                resourcesClassName={`products-grid grid-cols-${columns} w-[100%]`}
+              >
+                {({node: product, index}) => (
+                  <ProductItem
+                    key={product.id}
+                    product={product}
+                    index={index}
+                    numberInRow={1}
+                  />
+                )}
+              </PaginatedResourceSection>
+            )}
           </div>
         </div>
       </div>
@@ -541,7 +546,6 @@ export default function Collection() {
     </div>
   );
 }
-
 /**
  * @param {{
  *   product: ProductItemFragment;

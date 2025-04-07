@@ -2027,7 +2027,6 @@ input[type="checkbox"] {
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;
-  width: 95%;
   margin: auto;
   align-items: center;
 }
