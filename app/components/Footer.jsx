@@ -99,7 +99,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     </svg>
                   </i>{' '}
                   <a href="https://wa.me/96171888036" target="_blank">
-                    +961 3 963 961
+                    +961 71 888 036
                   </a>
                 </li>
                 <li>
