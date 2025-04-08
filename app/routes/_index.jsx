@@ -43,17 +43,6 @@ const MANUAL_MENU_HANDLES = [
 /**
  * Custom hook to detect mobile viewport (below 1024px)
  */
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkIsMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-  return isMobile;
-}
-
 /**
  * @type {MetaFunction}
  */
