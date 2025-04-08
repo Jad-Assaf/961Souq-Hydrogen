@@ -99,6 +99,8 @@ export const meta = ({data}) => {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader(args) {
+  const userAgent = args.request.headers.get('user-agent') || '';
+  const isMobile = /mobile/i.test(userAgent);
   // Define banners (critical UI elements)
   const banners = [
     {
@@ -225,6 +227,7 @@ export async function loader(args) {
       newArrivals,
       topProducts: initialTopProducts,
       restTopProducts,
+      isMobile,
     },
     {
       headers: {
@@ -430,6 +433,7 @@ export default function Homepage() {
     topProducts,
     newArrivals,
     restTopProducts,
+    isMobile,
   } = useLoaderData();
   const isMobile = useIsMobile();
 
@@ -498,7 +502,6 @@ export default function Homepage() {
       <ScrollingSVGs />
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
-
       {isMobile ? (
         <div>
           {/* Mobile View: Collection Switch Buttons */}
@@ -702,7 +705,6 @@ export default function Homepage() {
             )}
         </>
       )}
-
       <BrandSection brands={brandsData} />
     </div>
   );
