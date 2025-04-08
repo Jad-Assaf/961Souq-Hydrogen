@@ -437,6 +437,27 @@ button {
   }
 }
 
+.menu-list {
+  max-width: 1500px;
+    margin: 20px auto 40px;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0px 0px 20px 20px #80808017;
+    padding: 20px;
+    border-radius: 50px;
+    overflow-x: auto;
+    gap: 20px;
+}
+
+.menu-list button {
+  padding: 10px 15px;
+  background: #e3e3e3;
+  border: none;
+  border-radius: 30px;
+
+}
+
 .collection-products-row::-webkit-scrollbar {
   display: none;
 }
@@ -1683,7 +1704,8 @@ input.search-bar:focus-visible {
   min-height: 80px;
   max-height: 150px;
   border-bottom: 1px solid #d6d6d6;
-  @media (max-width: 330px){
+
+  @media (max-width: 330px) {
     min-height: unset;
     max-height: unset;
     flex-direction: column;
