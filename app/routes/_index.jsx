@@ -492,28 +492,18 @@ export default function Homepage() {
       {newArrivals && <TopProductSections collection={newArrivals} />}
       {isMobile ? (
         <div>
-          {/* Mobile View: Collection Switch Buttons */}
-          <div className="menu-list">
-            {menuKeys.map((key) => (
-              <button
-                key={key}
-                onClick={() => handleMenuClick(key)}
-                style={{
-                  padding: '8px 16px',
-                  background: key === selectedMenu ? '#2172af55' : '#e3e3e3',
-                  color: key === selectedMenu ? '#fff' : '#000',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.5s ease',
-                  boxShadow:
-                    key === selectedMenu
-                      ? 'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset'
-                      : 'none',
-                }}
-              >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </button>
-            ))}
+          <div className="buttons-list">
+            <div className="menu-list">
+              {menuKeys.map((key) => (
+                <button
+                  key={key}
+                  onClick={() => handleMenuClick(key)}
+                  className={key === selectedMenu ? 'button-85' : ''}
+                >
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
           {/* Wrap your CollectionCircles & TopProductSections in a container with fade transition */}
           <div
