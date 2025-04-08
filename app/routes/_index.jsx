@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {defer, json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
@@ -39,6 +39,20 @@ const MANUAL_MENU_HANDLES = [
   'photography',
   'home-appliances',
 ];
+
+/**
+ * Custom hook to detect mobile viewport (below 1024px)
+ */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+  return isMobile;
+}
 
 /**
  * @type {MetaFunction}
@@ -267,7 +281,7 @@ async function loadCriticalData({context}) {
     title: shop.name,
     description: shop.description,
     url: 'https://961souq.com',
-  }
+  };
 }
 
 const brandsData = [
@@ -403,7 +417,6 @@ const getHandleFromUrl = (url) => {
   const parts = url.split('/collections/');
   if (parts.length < 2) return '';
   let handle = parts[1].toLowerCase();
-  // Remove trailing slash if present
   if (handle.endsWith('/')) {
     handle = handle.slice(0, -1);
   }
@@ -418,8 +431,37 @@ export default function Homepage() {
     newArrivals,
     restTopProducts,
   } = useLoaderData();
+  const isMobile = useIsMobile();
 
-  // Keep existing state initialization for each menu group
+  const combinedTopProducts = {
+    ...topProducts,
+    // restTopProducts is now already resolved.
+  };
+  const fullTopProducts = {...combinedTopProducts, ...restTopProducts};
+
+  // Mobile state: single switch button layout.
+  const menus = {
+    apple: appleMenu,
+    gaming: gamingMenu,
+    laptops: laptopsMenu,
+    monitors: monitorsMenu,
+    mobiles: mobilesMenu,
+    tablets: tabletsMenu,
+    audio: audioMenu,
+    fitness: fitnessMenu,
+    cameras: camerasMenu,
+    homeAppliances: homeAppliancesMenu,
+  };
+  const menuKeys = Object.keys(menus);
+  const [selectedMenu, setSelectedMenu] = useState(menuKeys[0]);
+  const [selectedCollection, setSelectedCollection] = useState(
+    menus[menuKeys[0]][0],
+  );
+  useEffect(() => {
+    setSelectedCollection(menus[selectedMenu][0]);
+  }, [selectedMenu]);
+
+  // Desktop state: original multiple-groups.
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
   const [selectedGaming, setSelectedGaming] = useState(gamingMenu[0]);
   const [selectedLaptops, setSelectedLaptops] = useState(laptopsMenu[0]);
@@ -433,12 +475,21 @@ export default function Homepage() {
     homeAppliancesMenu[0],
   );
 
-  const combinedTopProducts = {
-    ...topProducts,
-    // restTopProducts is now already resolved.
-  };
+  // First, at the top of your component (in the mobile branch section),
+  // add:
+  const [fade, setFade] = useState(false);
 
-  const fullTopProducts = {...combinedTopProducts, ...restTopProducts};
+  const handleMenuClick = (menuKey) => {
+    // Fade out current content
+    setFade(true);
+    // After the fade-out duration, update the menu
+    setTimeout(() => {
+      setSelectedMenu(menuKey);
+      setSelectedCollection(menus[menuKey][0]);
+      // Fade in the new content
+      setFade(false);
+    }, 500); // 300ms transition duration
+  };
 
   return (
     <div className="home">
@@ -448,137 +499,209 @@ export default function Homepage() {
       <CategorySlider sliderCollections={sliderCollections} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
 
-      {/* Apple Group */}
-      <CollectionCircles
-        collections={appleMenu}
-        onCollectionSelect={setSelectedApple}
-      />
-      {selectedApple &&
-        fullTopProducts[getHandleFromUrl(selectedApple.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedApple.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedApple.url)]}
+      {isMobile ? (
+        <div>
+          {/* Mobile View: Collection Switch Buttons */}
+          <div className="menu-list">
+            {menuKeys.map((key) => (
+              <button
+                key={key}
+                onClick={() => handleMenuClick(key)}
+                style={{
+                  padding: '8px 16px',
+                  background: key === selectedMenu ? '#2172af55' : '#e3e3e3',
+                  color: key === selectedMenu ? '#fff' : '#000',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.5s ease',
+                  boxShadow:
+                    key === selectedMenu
+                      ? 'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset'
+                      : 'none',
+                }}
+              >
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </button>
+            ))}
+          </div>
+          {/* Wrap your CollectionCircles & TopProductSections in a container with fade transition */}
+          <div
+            style={{
+              opacity: fade ? 0 : 1,
+              transition: 'opacity 500ms ease-in-out',
+            }}
+          >
+            <CollectionCircles
+              collections={menus[selectedMenu]}
+              onCollectionSelect={setSelectedCollection}
+            />
+            {selectedCollection &&
+              fullTopProducts[getHandleFromUrl(selectedCollection.url)] && (
+                <TopProductSections
+                  key={`${selectedMenu}-${getHandleFromUrl(
+                    selectedCollection.url,
+                  )}`}
+                  collection={
+                    fullTopProducts[getHandleFromUrl(selectedCollection.url)]
+                  }
+                />
+              )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Desktop View: Original layout with multiple groups */}
+          {/* Apple Group */}
+          <CollectionCircles
+            collections={appleMenu}
+            onCollectionSelect={setSelectedApple}
           />
-        )}
+          {selectedApple &&
+            fullTopProducts[getHandleFromUrl(selectedApple.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedApple.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedApple.url)]
+                }
+              />
+            )}
 
-      {/* Gaming Group */}
-      <CollectionCircles
-        collections={gamingMenu}
-        onCollectionSelect={setSelectedGaming}
-      />
-      {selectedGaming &&
-        fullTopProducts[getHandleFromUrl(selectedGaming.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedGaming.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedGaming.url)]}
+          {/* Gaming Group */}
+          <CollectionCircles
+            collections={gamingMenu}
+            onCollectionSelect={setSelectedGaming}
           />
-        )}
+          {selectedGaming &&
+            fullTopProducts[getHandleFromUrl(selectedGaming.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedGaming.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedGaming.url)]
+                }
+              />
+            )}
 
-      {/* Laptops Group */}
-      <CollectionCircles
-        collections={laptopsMenu}
-        onCollectionSelect={setSelectedLaptops}
-      />
-      {selectedLaptops &&
-        fullTopProducts[getHandleFromUrl(selectedLaptops.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedLaptops.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedLaptops.url)]}
+          {/* Laptops Group */}
+          <CollectionCircles
+            collections={laptopsMenu}
+            onCollectionSelect={setSelectedLaptops}
           />
-        )}
+          {selectedLaptops &&
+            fullTopProducts[getHandleFromUrl(selectedLaptops.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedLaptops.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedLaptops.url)]
+                }
+              />
+            )}
 
-      {/* Monitors Group */}
-      <CollectionCircles
-        collections={monitorsMenu}
-        onCollectionSelect={setSelectedMonitors}
-      />
-      {selectedMonitors &&
-        fullTopProducts[getHandleFromUrl(selectedMonitors.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedMonitors.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedMonitors.url)]}
+          {/* Monitors Group */}
+          <CollectionCircles
+            collections={monitorsMenu}
+            onCollectionSelect={setSelectedMonitors}
           />
-        )}
+          {selectedMonitors &&
+            fullTopProducts[getHandleFromUrl(selectedMonitors.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedMonitors.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedMonitors.url)]
+                }
+              />
+            )}
 
-      {/* Mobiles Group */}
-      <CollectionCircles
-        collections={mobilesMenu}
-        onCollectionSelect={setSelectedMobiles}
-      />
-      {selectedMobiles &&
-        fullTopProducts[getHandleFromUrl(selectedMobiles.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedMobiles.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedMobiles.url)]}
+          {/* Mobiles Group */}
+          <CollectionCircles
+            collections={mobilesMenu}
+            onCollectionSelect={setSelectedMobiles}
           />
-        )}
+          {selectedMobiles &&
+            fullTopProducts[getHandleFromUrl(selectedMobiles.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedMobiles.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedMobiles.url)]
+                }
+              />
+            )}
 
-      {/* Tablets Group */}
-      <CollectionCircles
-        collections={tabletsMenu}
-        onCollectionSelect={setSelectedTablets}
-      />
-      {selectedTablets &&
-        fullTopProducts[getHandleFromUrl(selectedTablets.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedTablets.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedTablets.url)]}
+          {/* Tablets Group */}
+          <CollectionCircles
+            collections={tabletsMenu}
+            onCollectionSelect={setSelectedTablets}
           />
-        )}
+          {selectedTablets &&
+            fullTopProducts[getHandleFromUrl(selectedTablets.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedTablets.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedTablets.url)]
+                }
+              />
+            )}
 
-      {/* Audio Group */}
-      <CollectionCircles
-        collections={audioMenu}
-        onCollectionSelect={setSelectedAudio}
-      />
-      {selectedAudio &&
-        fullTopProducts[getHandleFromUrl(selectedAudio.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedAudio.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedAudio.url)]}
+          {/* Audio Group */}
+          <CollectionCircles
+            collections={audioMenu}
+            onCollectionSelect={setSelectedAudio}
           />
-        )}
+          {selectedAudio &&
+            fullTopProducts[getHandleFromUrl(selectedAudio.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedAudio.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedAudio.url)]
+                }
+              />
+            )}
 
-      {/* Fitness Group */}
-      <CollectionCircles
-        collections={fitnessMenu}
-        onCollectionSelect={setSelectedFitness}
-      />
-      {selectedFitness &&
-        fullTopProducts[getHandleFromUrl(selectedFitness.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedFitness.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedFitness.url)]}
+          {/* Fitness Group */}
+          <CollectionCircles
+            collections={fitnessMenu}
+            onCollectionSelect={setSelectedFitness}
           />
-        )}
+          {selectedFitness &&
+            fullTopProducts[getHandleFromUrl(selectedFitness.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedFitness.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedFitness.url)]
+                }
+              />
+            )}
 
-      {/* Cameras Group */}
-      <CollectionCircles
-        collections={camerasMenu}
-        onCollectionSelect={setSelectedCameras}
-      />
-      {selectedCameras &&
-        fullTopProducts[getHandleFromUrl(selectedCameras.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedCameras.url)}
-            collection={fullTopProducts[getHandleFromUrl(selectedCameras.url)]}
+          {/* Cameras Group */}
+          <CollectionCircles
+            collections={camerasMenu}
+            onCollectionSelect={setSelectedCameras}
           />
-        )}
+          {selectedCameras &&
+            fullTopProducts[getHandleFromUrl(selectedCameras.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedCameras.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedCameras.url)]
+                }
+              />
+            )}
 
-      {/* Home Appliances Group */}
-      <CollectionCircles
-        collections={homeAppliancesMenu}
-        onCollectionSelect={setSelectedHomeAppliances}
-      />
-      {selectedHomeAppliances &&
-        fullTopProducts[getHandleFromUrl(selectedHomeAppliances.url)] && (
-          <TopProductSections
-            key={getHandleFromUrl(selectedHomeAppliances.url)}
-            collection={
-              fullTopProducts[getHandleFromUrl(selectedHomeAppliances.url)]
-            }
+          {/* Home Appliances Group */}
+          <CollectionCircles
+            collections={homeAppliancesMenu}
+            onCollectionSelect={setSelectedHomeAppliances}
           />
-        )}
+          {selectedHomeAppliances &&
+            fullTopProducts[getHandleFromUrl(selectedHomeAppliances.url)] && (
+              <TopProductSections
+                key={getHandleFromUrl(selectedHomeAppliances.url)}
+                collection={
+                  fullTopProducts[getHandleFromUrl(selectedHomeAppliances.url)]
+                }
+              />
+            )}
+        </>
+      )}
 
       <BrandSection brands={brandsData} />
     </div>
