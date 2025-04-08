@@ -424,7 +424,6 @@ export default function Homepage() {
     restTopProducts,
     isMobile,
   } = useLoaderData();
-  const isMobile = useIsMobile();
 
   const combinedTopProducts = {
     ...topProducts,
