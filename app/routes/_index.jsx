@@ -488,7 +488,7 @@ export default function Homepage() {
       setSelectedCollection(menus[menuKey][0]);
       // Fade in the new content
       setFade(false);
-    }, 500); // 300ms transition duration
+    }, 300); // 300ms transition duration
   };
 
   return (
@@ -528,7 +528,7 @@ export default function Homepage() {
           <div
             style={{
               opacity: fade ? 0 : 1,
-              transition: 'opacity 500ms ease-in-out',
+              transition: 'opacity 300ms ease-in-out',
             }}
           >
             <CollectionCircles

@@ -439,7 +439,7 @@ button {
 
 .menu-list {
   max-width: 1500px;
-  margin: 20px auto 40px;
+  margin: 0 auto 30px;
   justify-content: space-between;
   display: flex;
   align-items: center;
@@ -472,6 +472,10 @@ button {
   .progress-bar {
     left: 30% !important;
     width: 40% !important;
+  }
+
+  .collection-section {
+    margin: 30px auto !important;
   }
 }
 
