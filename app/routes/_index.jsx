@@ -683,6 +683,108 @@ export default function Homepage() {
             )}
         </>
       )}
+      {/* <div className="multiple-collection-section">
+        <div className="collection-section-1">
+          <img
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215"
+            alt="Section Background"
+            className="multiple-collection-bg"
+          />
+          <h2>Upgrade Your Living Room</h2>
+          <div className="txt-imgs">
+            <a className="collec-1" href="/collections/televisions">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/430766-PEA2UD-168.jpg?v=1744120631"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+          </div>
+        </div>
+        <div className="collection-section-1">
+          <img
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215"
+            alt="Section Background"
+            className="multiple-collection-bg"
+          />
+          <h2>Upgrade Your Living Room</h2>
+          <div className="txt-imgs">
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+          </div>
+        </div>
+        <div className="collection-section-1">
+          <img
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215"
+            alt="Section Background"
+            className="multiple-collection-bg"
+          />
+          <h2>Upgrade Your Living Room</h2>
+          <div className="txt-imgs">
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+            <a className="collec-1">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176"
+                alt=""
+              />
+              <p>Collection</p>
+            </a>
+          </div>
+        </div>
+      </div> */}
       <BrandSection brands={brandsData} />
     </div>
   );
