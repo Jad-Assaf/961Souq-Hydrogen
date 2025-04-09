@@ -67,8 +67,8 @@ export default function BrandSection({brands}) {
                 altText: brand.name, // Use the brand name as alt text
                 url: brand.image, // URL of the brand image
               }}
-              width="150px" // Set a reasonable width for brand logos
-              height="auto" // Set a reasonable height for brand logos
+              width="125" // Set a reasonable width for brand logos
+              height="125" // Set a reasonable height for brand logos
               sizes="(min-width: 45em) 10vw, 20vw" // Responsive sizes
             />
           </a>
