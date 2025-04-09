@@ -686,7 +686,7 @@ export default function Homepage() {
       <div className="multiple-collection-section">
         <div className="collection-section-1">
           <img
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -761,7 +761,7 @@ export default function Homepage() {
         </div>
         <div className="collection-section-1">
           <img
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -838,7 +838,7 @@ export default function Homepage() {
         </div>
         <div className="collection-section-1">
           <img
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -906,6 +906,232 @@ export default function Homepage() {
                 />
               </div>
               <p>PC Accessories</p>
+            </a>
+          </div>
+        </div>
+        <div className="collection-section-1">
+          <img
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            alt="Section Background"
+            className="multiple-collection-bg"
+          />
+          <h2>Spice Up Your Kitchen Adventures</h2>
+          <div className="txt-imgs">
+            <a
+              className="collec-1"
+              href="/collections/coffee-makers"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/L_Or-Barista-Sublime_copy.webp?v=1744196325&quality=5"
+                  alt=""
+                  style={{width: '85%'}}
+                />
+              </div>
+              <p>Coffee Makers</p>
+            </a>
+            <a
+              className="collec-1"
+              href="/collections/blenders"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GreenLion-Ultra-Blend-MixerGrinder_copy.webp?v=1744196325&quality=5"
+                  alt=""
+                  style={{width: ''}}
+                />
+              </div>
+              <p>Mixers & Blenders</p>
+            </a>
+            <a className="collec-1" href="/collections/kettles" target="_blank">
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/LePresso-Smart-Electric-Kettle_copy.webp?v=1744196325&quality=5"
+                  alt=""
+                  style={{width: '90%'}}
+                />
+              </div>
+              <p>Kettles</p>
+            </a>
+            <a
+              className="collec-1"
+              href="/collections/air-fryer"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Xiaomi-Smart-Air-Fryer-6.5L-1_copy.webp?v=1744196325&quality=5"
+                  alt=""
+                  style={{width: '85%'}}
+                />
+              </div>
+              <p>Air Fryers</p>
+            </a>
+          </div>
+        </div>
+        <div className="collection-section-1">
+          <img
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            alt="Section Background"
+            className="multiple-collection-bg"
+          />
+          <h2>Latest Dyson Products</h2>
+          <div className="txt-imgs">
+            <a
+              className="collec-1"
+              href="/collections/dyson-hair-dryers"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Supersonic_-hair-dryer-Professional-Edition-Black-Nickel-_-Free-Supersonic-Stand-_-Fly-Away-Attachment_copy.webp?v=1744199207&quality=5"
+                  alt=""
+                  style={{width: '85%'}}
+                />
+              </div>
+              <p>Hair Dryers</p>
+            </a>
+            <a
+              className="collec-1"
+              href="/collections/dyson-hair-straighteners"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/HS08_6a991f69-cf03-4e00-90d2-f0349d4f01e2_copy.webp?v=1744199207&quality=5"
+                  alt=""
+                  style={{width: ''}}
+                />
+              </div>
+              <p>Hair Straighteners</p>
+            </a>
+            <a className="collec-1" href="/collections/dyson-air-purifiers" target="_blank">
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/BP04_1_copy.webp?v=1744199208&quality=5"
+                  alt=""
+                  style={{width: '90%'}}
+                />
+              </div>
+              <p>Air Purifiers</p>
+            </a>
+            <a
+              className="collec-1"
+              href="/collections/dyson-vacuum-cleaners"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Gen5detect-2_copy.webp?v=1744199207&quality=5"
+                  alt=""
+                  style={{width: '95%'}}
+                />
+              </div>
+              <p>Vacuum Cleaners</p>
+            </a>
+          </div>
+        </div>
+        <div className="collection-section-1">
+          <img
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            alt="Section Background"
+            className="multiple-collection-bg"
+          />
+          <h2>Share Every Moment From Your Adventure</h2>
+          <div className="txt-imgs">
+            <a
+              className="collec-1"
+              href="/collections/gopro-action-cameras"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GoPro-Hero-4K-5_copy.webp?v=1744199968&quality=5"
+                  alt=""
+                  style={{width: '85%'}}
+                />
+              </div>
+              <p>GoPro</p>
+            </a>
+            <a
+              className="collec-1"
+              href="/collections/dji-action-cameras"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Osmo-Action-5-Pro-3_copy.webp?v=1744199968&quality=5"
+                  alt=""
+                  style={{width: ''}}
+                />
+              </div>
+              <p>DJI</p>
+            </a>
+            <a
+              className="collec-1"
+              href="/collections/action-cam-kits"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/SP-Adventure-bundle_copy.webp?v=1744199969&quality=5"
+                  alt=""
+                  style={{width: '90%'}}
+                />
+              </div>
+              <p>Action Cam Kits</p>
+            </a>
+            <a
+              className="collec-1"
+              href="/collections/action-cam-sticks-and-tripods"
+              target="_blank"
+            >
+              <div className="mlt-img-con">
+                <img
+                  loading="lazy"
+                  width={150}
+                  height={150}
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Insta360-3m-9.8ft-Extended-Edition-Selfie-Stick_944848fb-45f6-4ca2-a1f3-16384a99b81e_copy.webp?v=1744199968&quality=5"
+                  alt=""
+                  style={{width: '95%'}}
+                />
+              </div>
+              <p>Sticks & Tripods</p>
             </a>
           </div>
         </div>
