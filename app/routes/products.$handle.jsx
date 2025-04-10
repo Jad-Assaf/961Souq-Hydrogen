@@ -34,9 +34,12 @@ export const meta = ({data}) => {
   const truncate = (text, maxLength) =>
     text?.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
 
+  const rawImage = product.images?.edges?.[0]?.node?.url;
   const image =
-    product.images?.edges?.[0]?.node?.url ||
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
+    rawImage && rawImage.startsWith('//')
+      ? `https:${rawImage}`
+      : rawImage ||
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
 
   return getSeoMeta({
     title: `${truncate(
