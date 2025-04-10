@@ -226,12 +226,26 @@ async function loadCriticalData({context, params, request}) {
   const firstImage = product.images?.edges?.[0]?.node?.url || null;
 
   // Fetch related products
-  const productType = product.productType || 'General';
-  const {products} = await storefront.query(RELATED_PRODUCTS_QUERY, {
-    variables: {productType},
-  });
+  // Fetch the collection from the product
+  const collection = product?.collections?.edges?.[0]?.node;
 
-  const relatedProducts = products?.edges.map((edge) => edge.node) || [];
+  let relatedProducts = [];
+
+  if (collection?.handle) {
+    const {collection: relatedCollection} = await storefront.query(
+      RELATED_PRODUCTS_QUERY,
+      {
+        variables: {
+          handle: collection.handle,
+        },
+      },
+    );
+
+    relatedProducts =
+      relatedCollection?.products?.edges
+        ?.filter((edge) => edge.node.handle !== product.handle) // exclude current product
+        ?.map((edge) => edge.node) || [];
+  }
 
   // Return necessary product data including SEO, first image, and variant price
   return {
@@ -969,6 +983,16 @@ const PRODUCT_FRAGMENT = `#graphql
     descriptionHtml
     description
     productType
+    collections(first: 1) {
+      edges {
+        node {
+          id
+          handle
+          title
+        }
+      }
+    }
+
 
     # Fetch product images for SEO or fallback usage
     images(first: 30) {

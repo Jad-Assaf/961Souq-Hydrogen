@@ -265,49 +265,52 @@ export const FOOTER_QUERY = `#graphql
 `;
 
 export const RELATED_PRODUCTS_QUERY = `#graphql
-  query RelatedProducts($productType: String!, $country: CountryCode, $language: LanguageCode) 
+  query RelatedProductsByCollection($handle: String!, $country: CountryCode, $language: LanguageCode)
   @inContext(country: $country, language: $language) {
-    products(first: 20, query: $productType) {
-      edges {
-        node {
-          id
-          title
-          handle
-          images(first: 1) {
-            edges {
-              node {
-                url
-                altText
+    collection(handle: $handle) {
+      title
+      products(first: 20) {
+        edges {
+          node {
+            id
+            title
+            handle
+            images(first: 1) {
+              edges {
+                node {
+                  url
+                  altText
+                }
               }
             }
-          }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          variants(first: 5) {
-            nodes {
-              id
-              availableForSale
-              price {
+            priceRange {
+              minVariantPrice {
                 amount
                 currencyCode
               }
-              compareAtPrice {
+            }
+            compareAtPriceRange {
+              minVariantPrice {
                 amount
                 currencyCode
               }
-              image {
-                url
-                altText
+            }
+            variants(first: 5) {
+              nodes {
+                id
+                availableForSale
+                price {
+                  amount
+                  currencyCode
+                }
+                compareAtPrice {
+                  amount
+                  currencyCode
+                }
+                image {
+                  url
+                  altText
+                }
               }
             }
           }
