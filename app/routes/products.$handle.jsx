@@ -17,7 +17,7 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import '../styles/ProductPage.css';
 import {CSSTransition} from 'react-transition-group';
-import {RELATED_PRODUCTS_QUERY} from '~/lib/fragments';
+import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
@@ -231,20 +231,16 @@ async function loadCriticalData({context, params, request}) {
 
   let relatedProducts = [];
 
-  if (collection?.handle) {
-    const {collection: relatedCollection} = await storefront.query(
-      RELATED_PRODUCTS_QUERY,
+  if (product?.id) {
+    const {productRecommendations} = await storefront.query(
+      RECOMMENDED_PRODUCTS_QUERY,
       {
         variables: {
-          handle: collection.handle,
+          productId: product.id,
         },
       },
     );
-
-    relatedProducts =
-      relatedCollection?.products?.edges
-        ?.filter((edge) => edge.node.handle !== product.handle) // exclude current product
-        ?.map((edge) => edge.node) || [];
+    relatedProducts = productRecommendations || [];
   }
 
   // Return necessary product data including SEO, first image, and variant price
