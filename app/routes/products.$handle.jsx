@@ -475,7 +475,7 @@ export function ProductForm({
 
   // Possibly build a WhatsApp link
   const isProductPage = location.pathname.includes('/products/');
-  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=${encodeURIComponent(
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=9613963961&text=${encodeURIComponent(
     `Hi, I'd like to buy ${product.title} https://961souq.com${location.pathname}`,
   )}`;
 

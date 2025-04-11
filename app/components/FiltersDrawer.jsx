@@ -156,7 +156,7 @@ export function ShopifyFilterForm({filters}) {
                       key={value.id}
                       className="filters-container mr-2 mb-2"
                     >
-                      {value.label} ({value.count})
+                      {value.label} <span className='value-count'>({value.count})</span>
                       <input
                         type="checkbox"
                         checked={isActive}
