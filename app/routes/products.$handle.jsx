@@ -64,7 +64,7 @@ export const meta = ({data}) => {
   }
 
   return getSeoMeta({
-    title: formattedTitle,
+    title: truncate(formattedTitle, 60),
     description: truncate(
       product?.seoDescription ||
         product?.description ||
