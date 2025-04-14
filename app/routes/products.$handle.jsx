@@ -45,12 +45,23 @@ export const meta = ({data}) => {
     ? rawTitle
     : `${rawTitle} | Lebanon`;
 
-  const rawImage = product.images?.edges?.[0]?.node?.url;
-  const image =
-    rawImage && rawImage.startsWith('//')
-      ? `https:${rawImage}`
-      : rawImage ||
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
+  const rawImage = product.images?.edges?.[0]?.node?.url || '';
+  let image = rawImage;
+
+  // Check for protocol-relative URL
+  if (rawImage.startsWith('//')) {
+    image = `https:${rawImage}`;
+  }
+  // Check for relative path URL (starting with a single "/")
+  else if (rawImage.startsWith('/')) {
+    image = `https://cdn.shopify.com${rawImage}`;
+  }
+
+  // Fallback if image is empty
+  if (!image) {
+    image =
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
+  }
 
   return getSeoMeta({
     title: formattedTitle,
@@ -61,8 +72,8 @@ export const meta = ({data}) => {
       150,
     ),
     url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
-    'og:image': image,
-    'twitter:image': image,
+    'og:image': rawImage,
+    'twitter:image': rawImage,
     jsonLd: [
       {
         '@context': 'http://schema.org/',
@@ -182,7 +193,6 @@ export const meta = ({data}) => {
     ],
   });
 };
-
 
 // ---------------- Loader
 export async function loader(args) {
