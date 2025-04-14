@@ -72,8 +72,7 @@ export const meta = ({data}) => {
       150,
     ),
     url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
-    'og:image': rawImage,
-    'twitter:image': rawImage,
+    media: image,
     jsonLd: [
       {
         '@context': 'http://schema.org/',
