@@ -19,7 +19,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import React, {Suspense, useEffect, useState} from 'react';
-import ClarityTracker from './components/ClarityTracker';
+// import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
 
 /**
@@ -146,7 +146,7 @@ export function Layout({children}) {
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();
   const [nprogress, setNProgress] = useState(null); // Store NProgress instance
-  const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
+  // const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
   useEffect(() => {
     // Load NProgress once and set it in the state
@@ -209,9 +209,9 @@ export function Layout({children}) {
         </Suspense>
       </head>
       <body>
-        <Suspense fallback={null}>
+        {/* <Suspense fallback={null}>
           <ClarityTracker clarityId={clarityId} />
-        </Suspense>
+        </Suspense> */}
         {data ? (
           <Analytics.Provider
             cart={data.cart}
