@@ -34,6 +34,17 @@ export const meta = ({data}) => {
   const truncate = (text, maxLength) =>
     text?.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
 
+  // Create the raw title
+  const rawTitle = truncate(
+    product?.seoTitle || product?.title || '961 Souq Product',
+    140,
+  );
+
+  // Append " | Lebanon" if not already present (case-insensitive)
+  const formattedTitle = rawTitle.toLowerCase().includes('lebanon')
+    ? rawTitle
+    : `${rawTitle} | Lebanon`;
+
   const rawImage = product.images?.edges?.[0]?.node?.url;
   const image =
     rawImage && rawImage.startsWith('//')
@@ -42,10 +53,7 @@ export const meta = ({data}) => {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
 
   return getSeoMeta({
-    title: `${truncate(
-      product?.seoTitle || product?.title || '961 Souq Product',
-      140,
-    )} | Lebanon`,
+    title: formattedTitle,
     description: truncate(
       product?.seoDescription ||
         product?.description ||
@@ -59,10 +67,7 @@ export const meta = ({data}) => {
       {
         '@context': 'http://schema.org/',
         '@type': 'Product',
-        name: `${truncate(
-          product?.seoTitle || product?.title || '961 Souq Product',
-          140,
-        )} | Lebanon`,
+        name: formattedTitle,
         url: `https://961souq.com/products/${encodeURIComponent(
           product?.handle,
         )}`,
@@ -167,10 +172,7 @@ export const meta = ({data}) => {
           {
             '@type': 'ListItem',
             position: 2,
-            name: `${truncate(
-              product?.seoTitle || product?.title || '961 Souq Product',
-              140,
-            )} | Lebanon`,
+            name: formattedTitle,
             item: `https://961souq.com/products/${encodeURIComponent(
               product?.handle,
             )}`,
@@ -180,6 +182,7 @@ export const meta = ({data}) => {
     ],
   });
 };
+
 
 // ---------------- Loader
 export async function loader(args) {
