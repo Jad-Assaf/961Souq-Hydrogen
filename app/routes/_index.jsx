@@ -915,7 +915,7 @@ export default function Homepage() {
             alt="Section Background"
             className="multiple-collection-bg"
           />
-          <h2>Spice Up Your Kitchen Adventures</h2>
+          <h2>Spice Up Your Kitchen</h2>
           <div className="txt-imgs">
             <a
               className="collec-1"
