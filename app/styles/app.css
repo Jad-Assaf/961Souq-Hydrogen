@@ -354,6 +354,9 @@ aside .cart-details {
 
 aside .cart-lines ul{
   padding: 15px !important;
+  @media (max-width: 768px) {
+    padding: 5px !important;
+  }
 }
 
 .circle-prev-button,
@@ -1551,6 +1554,9 @@ button.reset:hover:not(:has(> *)) {
 aside .cart-main {
   height: 92vh;
   width: auto;
+  @media (max-width: 768px) {
+    height: 80vh !important;
+  }
 }
 
 aside .cart-main.with-discount {
