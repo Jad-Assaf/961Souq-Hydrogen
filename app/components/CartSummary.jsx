@@ -13,10 +13,10 @@ export function CartSummary({cart, layout}) {
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
-      <h4>
-        <strong>Subtotal</strong>
-      </h4>
       <dl className="cart-subtotal">
+        <h4>
+          <strong>Subtotal: &nbsp;&nbsp;</strong>
+        </h4>
         <dd>
           {cart.cost?.subtotalAmount?.amount ? (
             <Money
@@ -86,7 +86,7 @@ export default function CartCheckoutActions({
         onClick={handleButtonClick}
         aria-label="Continue to Checkout" // **Optional: Added aria-label for accessibility**
       >
-        Continue to Checkout &nbsp; &rarr;
+        Continue to Checkout
       </button>
 
       {showAlert && (

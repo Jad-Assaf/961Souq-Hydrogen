@@ -313,11 +313,17 @@ html:has(.overlay.expanded) {
   cursor: not-allowed;
 }
 
+.cart-checkout-container {
+  position: relative;
+}
+
 .alert-box {
   margin-top: 1rem;
   padding: 12px 16px;
   background-color: #c0392b;
   position: absolute;
+  top: -30px;
+  left: 0;
   color: #fff;
   border-radius: 4px;
   display: inline-flex;
@@ -339,11 +345,15 @@ html:has(.overlay.expanded) {
   text-decoration: underline;
 }
 
-.cart-details {
+aside .cart-details {
   height: 75%;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+aside .cart-lines ul{
+  padding: 15px !important;
 }
 
 .circle-prev-button,
@@ -1538,12 +1548,12 @@ button.reset:hover:not(:has(> *)) {
   }
 }
 
-.cart-main {
+aside .cart-main {
   height: 92vh;
   width: auto;
 }
 
-.cart-main.with-discount {
+aside .cart-main.with-discount {
   max-height: calc(100vh - var(--cart-aside-summary-height-with-discount));
 }
 
@@ -1552,7 +1562,7 @@ aside .cart-line {
   padding: .75rem 0;
   justify-content: start;
   align-items: center;
-  width: 95%;
+  width: 100%;
 }
 
 aside .cart-line a {
@@ -1652,7 +1662,7 @@ aside li.cart-line .product-price {
 }
 
 aside .cart-checkout-container {
-  border: 1px solid #2172af;
+  /* border: 1px solid #2172af; */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1664,7 +1674,6 @@ aside .cart-checkout-button {
   display: block;
   width: 100%;
   text-align: center;
-  height: 40px;
   align-content: center;
 }
 
