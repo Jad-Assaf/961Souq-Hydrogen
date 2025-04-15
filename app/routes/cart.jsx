@@ -8,7 +8,7 @@ import {CartMain} from '~/components/CartMain';
  * @type {MetaFunction}
  */
 export const meta = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{title: `961Souq | Cart`}];
 };
 
 /**
