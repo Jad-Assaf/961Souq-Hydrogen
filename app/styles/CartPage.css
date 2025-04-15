@@ -2,7 +2,7 @@ h1 {
     text-align: left;
     width: 95%;
     max-width: 1500px;
-    margin: 75px auto 50px;
+    margin: 75px auto 50px !important;
 }
 
 .cart-details {
