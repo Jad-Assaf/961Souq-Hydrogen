@@ -22,12 +22,10 @@ export function CartLineItem({layout, line}) {
   return (
     <li key={id} className="cart-line">
       {image && (
-        <Image
-          data={image}
+        <img
+          src={image.url}
           // sizes="(min-width: 45em) 20vw, 40vw"
           alt={title}
-          width={'200px'}
-          height={'200px'}
           loading="lazy"
         />
       )}
@@ -85,24 +83,43 @@ function CartLineQuantity({line}) {
         <div style={{display: 'flex', gap: '12px', marginBottom: '7px'}}>
           <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
             <button
-              aria-label="Decrease quantity"
-              disabled={quantity <= 1 || !!isOptimistic}
-              name="decrease-quantity"
-              className="decrease-quantity"
-              value={prevQuantity}
+              className="group cursor-pointer outline-none hover:rotate-90 duration-300"
+              title="Add New"
             >
-              <span>&#8722;</span>
+              <svg
+                className="stroke-red-500 fill-none group-hover:fill-red-800 group-active:stroke-red-200 group-active:fill-red-600 group-active:duration-0 duration-300"
+                viewBox="0 0 24 24"
+                height="30px"
+                width="30px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeWidth="1.5"
+                  d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                ></path>
+                <path strokeWidth="1.5" d="M8 12H16"></path>
+              </svg>
             </button>
           </CartLineUpdateButton>
           <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
             <button
-              aria-label="Increase quantity"
-              name="increase-quantity"
-              className="increase-quantity"
-              value={nextQuantity}
-              disabled={quantity >= maxQuantity || !!isOptimistic} // Disable button when maxQuantity is reached
+              className="group cursor-pointer outline-none hover:rotate-90 duration-300"
+              title="Add New"
             >
-              <span>&#43;</span>
+              <svg
+                className="stroke-teal-500 fill-none group-hover:fill-teal-800 group-active:stroke-teal-200 group-active:fill-teal-600 group-active:duration-0 duration-300"
+                viewBox="0 0 24 24"
+                height="30px"
+                width="30px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeWidth="1.5"
+                  d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                ></path>
+                <path strokeWidth="1.5" d="M8 12H16"></path>
+                <path strokeWidth="1.5" d="M12 16V8"></path>
+              </svg>
             </button>
           </CartLineUpdateButton>
         </div>
@@ -128,25 +145,25 @@ function CartLineRemoveButton({lineIds, disabled}) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button class="bin-button">
+      <button className="bin-button">
         <svg
-          class="bin-top"
+          className="bin-top"
           viewBox="0 0 39 7"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <line y1="5" x2="39" y2="5" stroke="white" stroke-width="4"></line>
+          <line y1="5" x2="39" y2="5" stroke="white" strokeWidth="4"></line>
           <line
             x1="12"
             y1="1.5"
             x2="26.0357"
             y2="1.5"
             stroke="white"
-            stroke-width="3"
+            strokeWidth="3"
           ></line>
         </svg>
         <svg
-          class="bin-bottom"
+          className="bin-bottom"
           viewBox="0 0 33 39"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -159,8 +176,8 @@ function CartLineRemoveButton({lineIds, disabled}) {
             fill="white"
             mask="url(#path-1-inside-1_8_19)"
           ></path>
-          <path d="M12 6L12 29" stroke="white" stroke-width="4"></path>
-          <path d="M21 6V29" stroke="white" stroke-width="4"></path>
+          <path d="M12 6L12 29" stroke="white" strokeWidth="4"></path>
+          <path d="M21 6V29" stroke="white" strokeWidth="4"></path>
         </svg>
       </button>
     </CartForm>
