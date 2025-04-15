@@ -150,6 +150,9 @@ button.reset:hover:not(:has(> *)) {
     transition: all 0.3s ease 0s;
     cursor: pointer;
     outline: none;
+    @media (max-width: 768px) {
+        font-size: 11px;
+    }
 }
 
 .cart-checkout-button:hover {
