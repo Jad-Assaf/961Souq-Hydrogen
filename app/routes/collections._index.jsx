@@ -2,6 +2,7 @@ import {useLoaderData, Link} from '@remix-run/react';
 import {defer} from '@shopify/remix-oxygen';
 import {getPaginationVariables, Image} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import '../styles/CollectionsIndex.css'
 
 /**
  * @param {LoaderFunctionArgs} args
@@ -23,7 +24,7 @@ export async function loader(args) {
  */
 async function loadCriticalData({context, request}) {
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 4,
+    pageBy: 50,
   });
 
   const [{collections}] = await Promise.all([
@@ -86,9 +87,10 @@ function CollectionItem({collection, index}) {
       {collection?.image && (
         <Image
           alt={collection.image.altText || collection.title}
-          aspectRatio="1/1"
           data={collection.image}
           loading={index < 3 ? 'eager' : undefined}
+          width={150}
+          height={150}
         />
       )}
       <h5>{collection.title}</h5>
