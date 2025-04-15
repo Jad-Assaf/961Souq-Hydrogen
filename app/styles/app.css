@@ -1504,56 +1504,65 @@ button.reset:hover:not(:has(> *)) {
   max-height: calc(100vh - var(--cart-aside-summary-height-with-discount));
 }
 
-.cart-line {
+aside .cart-line {
   display: flex;
   padding: .75rem 0;
-  justify-content: center;
-  align-items: start;
-  width: 100%;
+  justify-content: start;
+  align-items: center;
+  width: 95%;
 }
 
-.cart-line a {
+aside .cart-line a {
   color: #000 !important;
 }
 
-.cart-line img {
+aside .cart-line img {
   width: 100px;
   height: auto;
   display: block;
   margin-right: 0.75rem;
 }
 
-li.cart-line div {
-  width: 65%;
+aside li.cart-line div {
+  width: 95%;
+  padding: 0;
 }
 
 aside p {
   font-size: 14px;
 }
 
-.cart-summary-page {
+aside .cart-summary-page {
   position: relative;
 }
 
-.cart-summary-aside {
+aside .cart-summary-aside {
   background: white;
   border-top: 1px solid #2172af;
   width: 90%;
   margin: auto;
 }
 
-.cart-line-quantity {
+aside .cart-line-quantity {
   display: flex;
   flex-direction: column;
   align-items: start;
   gap: 10px;
 }
 
-.increase-quantity,
-.decrease-quantity {
+aside .increase-quantity {
+  color: rgb(35, 176, 35);
+}
+
+aside .decrease-quantity{
+  color: #de3b2a;
+}
+
+aside .increase-quantity,
+aside .decrease-quantity {
   background-color: #f1f1f1;
   border-radius: 30px;
-  border: 1px solid #000;
+  border: 1px solid #2172af;
   width: 30px;
   height: 30px;
   text-align: center;
@@ -1561,7 +1570,7 @@ aside p {
   font-weight: 500;
 }
 
-.cart-remove {
+aside .cart-remove {
   width: 90px;
   border-radius: 30px;
   background: #c0392b;
@@ -1570,22 +1579,23 @@ aside p {
   padding: 0 0 3px 0;
 }
 
-.cart-discount {
+aside .cart-discount {
   align-items: center;
   display: flex;
   margin-top: 0.25rem;
 }
 
-.cart-subtotal {
+aside .cart-subtotal {
   align-items: center;
   display: flex;
 }
 
-li.cart-line .product-price {
-  min-height: 30px;
+aside li.cart-line .product-price {
+  min-height: 20px;
+  font-size: 14px;
 }
 
-.cart-checkout-container {
+aside .cart-checkout-container {
   border: 1px solid #2172af;
   display: flex;
   justify-content: center;
@@ -1594,7 +1604,7 @@ li.cart-line .product-price {
   border-radius: 30px;
 }
 
-.cart-checkout-button {
+aside .cart-checkout-button {
   display: block;
   width: 100%;
   text-align: center;
