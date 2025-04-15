@@ -802,6 +802,10 @@ aside {
   right: calc(-1 * var(--aside-width));
   top: 0;
   transition: transform 200ms ease-in-out;
+  @media (max-width: 300px) {
+    min-width: unset;
+    width: 100vw;    
+  }
 }
 
 aside header {
@@ -891,10 +895,49 @@ aside li {
   opacity: 1;
   pointer-events: auto;
   visibility: visible;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .overlay.expanded aside {
   transform: translateX(calc(var(--aside-width) * -1));
+}
+
+/* From Uiverse.io by vinodjangid07 */
+.bin-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 30px;
+  background-color: rgb(255, 95, 95);
+  cursor: pointer;
+  border: 3px solid rgb(255, 201, 201);
+  transition-duration: 0.3s;
+}
+
+.bin-bottom {
+  width: 13px;
+}
+
+.bin-top {
+  width: 15px;
+  transform-origin: right;
+  transition-duration: 0.3s;
+}
+
+.bin-button:hover .bin-top {
+  transform: rotate(45deg);
+}
+
+.bin-button:hover {
+  background-color: rgb(255, 0, 0);
+}
+
+.bin-button:active {
+  transform: scale(0.9);
 }
 
 button.reset {
@@ -941,7 +984,7 @@ button.reset:hover:not(:has(> *)) {
   margin: 15px auto;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1025px) {
   .header-top {
     justify-content: space-between;
   }
@@ -1166,7 +1209,7 @@ button.reset:hover:not(:has(> *)) {
   gap: 1vw;
   margin: auto;
 
-  @media (min-width: 1024px) {
+  @media (min-width: 1025px) {
     display: flex;
     gap: 0;
     flex-wrap: wrap;
@@ -1524,7 +1567,6 @@ aside .cart-line img {
 }
 
 aside li.cart-line div {
-  width: 95%;
   padding: 0;
 }
 
@@ -1543,11 +1585,22 @@ aside .cart-summary-aside {
   margin: auto;
 }
 
+aside .qnt-rem {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  width: 100%;
+  @media (max-width: 600px) {
+    flex-wrap: wrap;
+  }
+}
+
 aside .cart-line-quantity {
   display: flex;
   flex-direction: column;
   align-items: start;
   gap: 10px;
+  width: 95% !important;
 }
 
 aside .increase-quantity {
@@ -1563,8 +1616,8 @@ aside .decrease-quantity {
   background-color: #f1f1f1;
   border-radius: 30px;
   border: 1px solid #2172af;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   text-align: center;
   align-content: center;
   font-weight: 500;

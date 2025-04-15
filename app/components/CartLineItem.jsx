@@ -3,7 +3,7 @@ import {useVariantUrl} from '~/lib/variants';
 import {Link} from '@remix-run/react';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
-import '../styles/CartPage.css'
+import '../styles/CartPage.css';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -26,13 +26,13 @@ export function CartLineItem({layout, line}) {
           data={image}
           // sizes="(min-width: 45em) 20vw, 40vw"
           alt={title}
-          width={"200px"}
-          height={"200px"}
+          width={'200px'}
+          height={'200px'}
           loading="lazy"
         />
       )}
 
-      <div className='cart-item-details'>
+      <div className="cart-item-details">
         <Link
           prefetch="intent"
           to={lineItemUrl}
@@ -43,7 +43,7 @@ export function CartLineItem({layout, line}) {
           }}
         >
           <p>
-            <strong className='cart-product-title'>{product.title}</strong>
+            <strong className="cart-product-title">{product.title}</strong>
           </p>
         </Link>
         <ProductPrice price={line?.cost?.totalAmount} />
@@ -81,7 +81,7 @@ function CartLineQuantity({line}) {
       <small>
         <strong>Quantity:</strong> {quantity} &nbsp;&nbsp;
       </small>
-      <div style={{display: 'flex', gap: '5px'}}>
+      <div className="qnt-rem">
         <div style={{display: 'flex', gap: '12px', marginBottom: '7px'}}>
           <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
             <button
@@ -94,7 +94,6 @@ function CartLineQuantity({line}) {
               <span>&#8722;</span>
             </button>
           </CartLineUpdateButton>
-          &nbsp;
           <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
             <button
               aria-label="Increase quantity"
@@ -129,8 +128,40 @@ function CartLineRemoveButton({lineIds, disabled}) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit" className="cart-remove">
-        Remove
+      <button class="bin-button">
+        <svg
+          class="bin-top"
+          viewBox="0 0 39 7"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <line y1="5" x2="39" y2="5" stroke="white" stroke-width="4"></line>
+          <line
+            x1="12"
+            y1="1.5"
+            x2="26.0357"
+            y2="1.5"
+            stroke="white"
+            stroke-width="3"
+          ></line>
+        </svg>
+        <svg
+          class="bin-bottom"
+          viewBox="0 0 33 39"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <mask id="path-1-inside-1_8_19" fill="white">
+            <path d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z"></path>
+          </mask>
+          <path
+            d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z"
+            fill="white"
+            mask="url(#path-1-inside-1_8_19)"
+          ></path>
+          <path d="M12 6L12 29" stroke="white" stroke-width="4"></path>
+          <path d="M21 6V29" stroke="white" stroke-width="4"></path>
+        </svg>
       </button>
     </CartForm>
   );
