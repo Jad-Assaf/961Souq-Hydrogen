@@ -12,8 +12,8 @@
     margin-bottom: .5rem;
     padding: 0;
     flex-wrap: wrap;
-    gap: 10px;
-    justify-content: space-between;
+    gap: 5%;
+    justify-content: flex-start;
 }
 
 .account fieldset div {
@@ -123,7 +123,7 @@
 }
 
 .address-btn {
-    width: 30%;
+    width: 100%;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 2.5px;
