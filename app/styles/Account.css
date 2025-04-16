@@ -39,6 +39,9 @@
 
 .orders fieldset {
     padding: 0;
+    gap: 10px;
+    width: 30%;
+    margin-bottom: 0;
 }
 
 .order-number {
