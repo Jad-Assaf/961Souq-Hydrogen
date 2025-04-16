@@ -9,6 +9,10 @@
     margin-bottom: 0;
 }
 
+.product-card .product-price {
+    min-height: 43px !important;
+}
+
 .cart .product-price {
     height: 20px;
     min-height: 15px;
