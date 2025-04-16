@@ -352,12 +352,8 @@ aside .cart-details {
   overflow-y: auto;
 }
 
-aside .cart-lines ul {
-  padding: 15px !important;
-
-  @media (max-width: 768px) {
-    padding: 5px !important;
-  }
+aside .cart-lines-ul {
+  width: 95%;
 }
 
 .empty-cart {

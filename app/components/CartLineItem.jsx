@@ -25,8 +25,7 @@ export function CartLineItem({layout, line}) {
     <li key={id} className="cart-line">
       {image && (
         <img
-          src={image.url}
-          // sizes="(min-width: 45em) 20vw, 40vw"
+          src={`${image.url}${image.url.includes('?') ? '&' : '?'}quality=15`}
           alt={title}
           loading="lazy"
         />
@@ -43,24 +42,29 @@ export function CartLineItem({layout, line}) {
           }}
         >
           <p>
-            <strong className="cart-product-title">{truncateText(product.title, 15)}</strong>
+            <strong className="cart-product-title">
+              {truncateText(product.title, 15)}
+            </strong>
           </p>
         </Link>
         <ProductPrice price={line?.cost?.totalAmount} />
-        {/* <ul>
-          {selectedOptions.map((option) => (
-            <li key={option.name}>
-              <small>
-                <strong>{option.name}:</strong> {option.value}
-              </small>
-            </li>
-          ))}
-        </ul> */}
+        <ul>
+          {selectedOptions
+            .filter((option) => option.value.toLowerCase() !== 'default title')
+            .map((option) => (
+              <li key={option.name}>
+                <small>
+                  <strong>{option.name}:</strong> {option.value}
+                </small>
+              </li>
+            ))}
+        </ul>
         <CartLineQuantity line={line} />
       </div>
     </li>
   );
 }
+
 
 /**
  * Provides the controls to update the quantity of a line item in the cart.

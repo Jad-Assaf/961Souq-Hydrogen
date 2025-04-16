@@ -1,22 +1,31 @@
-h1 {
+.cart h1 {
     text-align: left;
     width: 95%;
     max-width: 1500px;
     margin: 75px auto 50px !important;
 }
 
+.cart li {
+    margin-bottom: 0;
+}
+
+.cart .product-price {
+    height: 20px;
+    min-height: 15px;
+}
+
 .cart-details {
     margin-bottom: 20px;
 }
 
-.cart-lines ul {
+.cart-lines-ul {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     max-width: 1500px;
     width: 95%;
     margin: auto;
-    gap: 30px;
+    gap: 20px;
 }
 
 .qnt-rem svg {
@@ -129,8 +138,9 @@ button.reset:hover:not(:has(> *)) {
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 30px;
+    padding-bottom: 30px;
     border-top: 1px solid #2172af;
+    border-bottom: 1px solid #2172af;
 }
 
 .cart-summary-page p {

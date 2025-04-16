@@ -1,8 +1,9 @@
-import {Await, useRouteLoaderData} from '@remix-run/react';
+import {Await, useRouteLoaderData, useLoaderData} from '@remix-run/react';
 import {Suspense} from 'react';
 import {CartForm} from '@shopify/hydrogen';
 import {json} from '@shopify/remix-oxygen';
 import {CartMain} from '~/components/CartMain';
+import {TopProductSections} from '~/components/TopProductSections';
 
 /**
  * @type {MetaFunction}
@@ -12,13 +13,29 @@ export const meta = () => {
 };
 
 /**
- * @param {ActionFunctionArgs}
+ * Loader: Fetch the New Arrivals collection along with any additional data.
+ * (This loader runs in parallel with your root loader.)
+ *
+ * @param {Object} args
+ * @param {import("@shopify/remix-oxygen").OxygenRequestContext} args.context
+ */
+export async function loader({context}) {
+  // Fetch new arrivals using the helper function below.
+  const newArrivals = await fetchCollectionByHandle(context, 'new-arrivals');
+
+  return json({
+    newArrivals,
+  });
+}
+
+/**
+ * Action for updating the cart
+ *
+ * @param {ActionFunctionArgs} args
  */
 export async function action({request, context}) {
   const {cart} = context;
-
   const formData = await request.formData();
-
   const {action, inputs} = CartForm.getFormInput(formData);
 
   if (!action) {
@@ -40,25 +57,15 @@ export async function action({request, context}) {
       break;
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;
-
-      // User inputted discount code
       const discountCodes = formDiscountCode ? [formDiscountCode] : [];
-
-      // Combine discount codes already applied on cart
       discountCodes.push(...inputs.discountCodes);
-
       result = await cart.updateDiscountCodes(discountCodes);
       break;
     }
     case CartForm.ACTIONS.GiftCardCodesUpdate: {
       const formGiftCardCode = inputs.giftCardCode;
-
-      // User inputted gift card code
       const giftCardCodes = formGiftCardCode ? [formGiftCardCode] : [];
-
-      // Combine gift card codes already applied on cart
       giftCardCodes.push(...inputs.giftCardCodes);
-
       result = await cart.updateGiftCardCodes(giftCardCodes);
       break;
     }
@@ -94,24 +101,110 @@ export async function action({request, context}) {
   );
 }
 
+/**
+ * Helper function to fetch a collection by its handle.
+ *
+ * @param {import('@shopify/remix-oxygen').OxygenRequestContext} context
+ * @param {string} handle
+ */
+async function fetchCollectionByHandle(context, handle) {
+  const {collectionByHandle} = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    {
+      variables: {handle},
+      cache: context.storefront.CacheLong(),
+    },
+  );
+  return collectionByHandle || null;
+}
+
+// GraphQL query to retrieve a collection along with its products.
+const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query GetCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+      products(first: 10) {
+        nodes {
+          id
+          title
+          handle
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          compareAtPriceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 2) {
+            nodes {
+              url
+              altText
+            }
+          }
+          variants(first: 5) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 export default function Cart() {
-  /** @type {RootLoader} */
+  // Data from the root loader (for the cart)
   const rootData = useRouteLoaderData('root');
+  // Data from this route's loader (for the new arrivals collection)
+  const {newArrivals} = useLoaderData();
+
   if (!rootData) return null;
 
   return (
     <div className="cart">
       <h1>Cart</h1>
-      <Suspense fallback={<p>Loading cart ...</p>}>
         <Await
           resolve={rootData.cart}
           errorElement={<div>An error occurred</div>}
         >
           {(cart) => {
-            return <CartMain layout="page" cart={cart} />;
+            return (
+              <>
+                <CartMain layout="page" cart={cart} />
+              </>
+            );
           }}
         </Await>
-      </Suspense>
+      {/* Render the New Arrivals section */}
+      {newArrivals && (
+        <section className="new-arrivals-section">
+          <TopProductSections collection={newArrivals} />
+        </section>
+      )}
     </div>
   );
 }
