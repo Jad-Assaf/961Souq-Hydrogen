@@ -4,6 +4,8 @@ import {Link} from '@remix-run/react';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
 import '../styles/CartPage.css';
+import { truncateText } from './CollectionDisplay';
+
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -41,7 +43,7 @@ export function CartLineItem({layout, line}) {
           }}
         >
           <p>
-            <strong className="cart-product-title">{product.title}</strong>
+            <strong className="cart-product-title">{truncateText(product.title, 15)}</strong>
           </p>
         </Link>
         <ProductPrice price={line?.cost?.totalAmount} />
