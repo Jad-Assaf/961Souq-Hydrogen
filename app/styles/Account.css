@@ -10,7 +10,7 @@
     display: flex;
     flex-direction: row;
     margin-bottom: .5rem;
-    padding: 1rem;
+    padding: 0;
     flex-wrap: wrap;
     gap: 10px;
     justify-content: space-between;
@@ -31,6 +31,7 @@
     margin: 50px auto;
     border: 1px solid #2172af;
     border-radius: 30px;
+    padding: 20px;
 }
 
 .account-order {
@@ -90,9 +91,10 @@
 }
 
 .account input {
-    border-color: #2172af !important;
-    padding: 10px 25px;
-    border-radius: 30px;
+    border-color: #2172af91 !important;
+    padding: 8px 10px;
+    border-radius: 5px;
+    background: aliceblue;
 }
 
 .address-btn-container {
