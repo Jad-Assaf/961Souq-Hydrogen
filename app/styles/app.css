@@ -1575,7 +1575,7 @@ aside .cart-main {
   height: 100vh;
   width: auto;
   overflow: auto;
-  padding-bottom: 100px;
+  padding-bottom: 200px;
 }
 
 aside .cart-main.with-discount {
