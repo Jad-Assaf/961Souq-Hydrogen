@@ -1,6 +1,11 @@
 .account a {
     color: #000;
 }
+
+.account p {
+    text-decoration: underline;
+}
+
 .account {
     max-width: 1300px;
     display: flex;
@@ -18,7 +23,7 @@
     padding: 20px;
     width: 75%;
     margin-bottom: 50px;
-    background-color: #f9f9f9;
+    background-color: #fff;
 }
 
 .order-header {
@@ -75,7 +80,7 @@
 }
 
 .account input {
-    border-color: #000 !important;
+    border-color: #2172af !important;
     padding: 10px 25px;
     border-radius: 30px;
 }
