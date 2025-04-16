@@ -6,6 +6,22 @@
     text-decoration: underline;
 }
 
+fieldset {
+    display: flex;
+    /* flex-direction: column; */
+    margin-bottom: .5rem;
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+fieldset div {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+}
+
 .account {
     max-width: 1300px;
     display: flex;
