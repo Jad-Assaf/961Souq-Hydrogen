@@ -505,15 +505,6 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
           />
           <label htmlFor="defaultAddress">Set as default address</label>
         </div>
-        {error ? (
-          <p>
-            <mark>
-              <small>{error}</small>
-            </mark>
-          </p>
-        ) : (
-          <br />
-        )}
         {children({
           stateForMethod: (method) => (formMethod === method ? state : 'idle'),
         })}
