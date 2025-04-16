@@ -17,12 +17,6 @@ h1 {
     width: 95%;
     margin: auto;
     gap: 30px;
-    -webkit-box-shadow: inset 0px 0px 20px 10px rgba(212, 212, 212, 0.5);
-    -moz-box-shadow: inset 0px 0px 20px 10px rgba(212, 212, 212, 0.5);
-    box-shadow: inset 0px 0px 20px 10px rgba(212, 212, 212, 0.5);
-    padding: 35px;
-    border-radius: 20px;
-    border: 1px solid #2172af4d;
 }
 
 .qnt-rem svg {
