@@ -33,6 +33,18 @@
     margin-bottom: 0;
 }
 
+.orders  {
+    width: 100%;
+}
+
+.orders fieldset {
+    padding: 0;
+}
+
+.order-number {
+    color: #2172af;
+}
+
 .account {
     max-width: 1300px;
     display: flex;
@@ -95,10 +107,6 @@
     display: flex;
     flex-direction: column;
     margin: 5px 0;
-}
-
-.account .orders {
-    width: 70%;
 }
 
 .account input {

@@ -88,7 +88,7 @@ function OrderItem({order}) {
     <>
       <fieldset>
         <Link to={`/account/orders/${btoa(order.id)}`}>
-          <strong>#{order.number}</strong>
+          <strong className='order-number'>#{order.number}</strong>
         </Link>
         <p>{new Date(order.processedAt).toDateString()}</p>
         <p>{order.financialStatus}</p>
