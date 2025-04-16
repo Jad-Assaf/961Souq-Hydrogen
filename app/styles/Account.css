@@ -1,3 +1,6 @@
+.account a {
+    color: #000;
+}
 .account {
     max-width: 1300px;
     display: flex;
@@ -5,13 +8,12 @@
     justify-content: center;
     align-items: center;
     margin: 50px auto;
-    ;
-    border: 1px solid #000;
+    border: 1px solid #2172af;
     border-radius: 30px;
 }
 
 .account-order {
-    border: 1px solid #000;
+    border: 1px solid #2172af;
     border-radius: 30px;
     padding: 20px;
     width: 75%;
@@ -85,7 +87,7 @@
 
 .address-btn {
     padding: 5px 25px;
-    border: 1px solid #000;
+    border: 1px solid #2172af;
     border-radius: 30px;
 }
 
