@@ -68,7 +68,7 @@ export function CartMain({layout, cart: originalCart}) {
 function CartEmpty({hidden = false}) {
   const {close} = useAside();
   return (
-    <div hidden={hidden}>
+    <div hidden={hidden} className='empty-cart'>
       <br />
       <p>
         <strong>
@@ -77,7 +77,7 @@ function CartEmpty({hidden = false}) {
         </strong>
       </p>
       <br />
-      <Link to="/collections/new-arrivals" onClick={close} prefetch="viewport">
+      <Link to="/collections/new-arrivals" onClick={close} prefetch="viewport" className='empty-cart-link'>
         Continue shopping →
       </Link>
     </div>

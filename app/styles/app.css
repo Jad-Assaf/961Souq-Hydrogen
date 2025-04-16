@@ -352,11 +352,22 @@ aside .cart-details {
   overflow-y: auto;
 }
 
-aside .cart-lines ul{
+aside .cart-lines ul {
   padding: 15px !important;
+
   @media (max-width: 768px) {
     padding: 5px !important;
   }
+}
+
+.empty-cart {
+  width: 95%;
+  max-width: 1500px;
+  margin: auto;
+}
+
+.empty-cart-link{
+  color: #000;
 }
 
 .circle-prev-button,
@@ -815,9 +826,10 @@ aside {
   right: calc(-1 * var(--aside-width));
   top: 0;
   transition: transform 200ms ease-in-out;
+
   @media (max-width: 300px) {
     min-width: unset;
-    width: 100vw;    
+    width: 100vw;
   }
 }
 
@@ -1554,6 +1566,7 @@ button.reset:hover:not(:has(> *)) {
 aside .cart-main {
   height: 92vh;
   width: auto;
+
   @media (max-width: 768px) {
     height: 80vh !important;
   }
@@ -1600,12 +1613,16 @@ aside .cart-summary-aside {
   width: 90%;
   margin: auto;
 }
+aside .cart-summary-aside p{
+  font-size: 12px;
+}
 
 .qnt-rem {
   display: flex;
   justify-content: space-between;
   gap: 5px;
   width: 100%;
+
   @media (max-width: 600px) {
     flex-wrap: wrap;
   }
@@ -1618,15 +1635,16 @@ aside .cart-line-quantity {
   gap: 10px;
   width: 95% !important;
 }
-aside .cart-line-quantity svg{
- fill: white !important;
+
+aside .cart-line-quantity svg {
+  fill: white !important;
 }
 
 aside .increase-quantity {
   color: rgb(35, 176, 35);
 }
 
-aside .decrease-quantity{
+aside .decrease-quantity {
   color: #de3b2a;
 }
 
