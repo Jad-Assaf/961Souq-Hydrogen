@@ -356,6 +356,20 @@ aside .cart-lines-ul {
   width: 95%;
 }
 
+aside .gtc-button{
+  width: 100%;
+}
+
+aside .go-to-cart{
+  display: inline-block;
+  width: 100px;
+  color: #000;
+  margin: 0 0 10px 0;
+  border: 1px solid #2172af;
+  padding: 5px 10px;
+  border-radius: 30px;
+}
+
 .empty-cart {
   width: 95%;
   max-width: 1500px;
@@ -1606,7 +1620,7 @@ aside .cart-summary-page {
 aside .cart-summary-aside {
   background: white;
   border-top: 1px solid #2172af;
-  width: 90%;
+  width: 95%;
   margin: auto;
 }
 aside .cart-summary-aside p{

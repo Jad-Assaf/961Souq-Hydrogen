@@ -54,6 +54,11 @@ export function CartMain({layout, cart: originalCart}) {
           </ul>
         </div>
       </div>
+      <button className='gtc-button'>
+        <a href="/cart" className="go-to-cart">
+          Go to Cart
+        </a>
+      </button>
       {cartHasItems && <CartSummary cart={cart} layout={layout} />}
     </div>
   );
