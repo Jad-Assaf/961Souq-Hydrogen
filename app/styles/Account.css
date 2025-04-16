@@ -6,9 +6,9 @@
     text-decoration: underline;
 }
 
-fieldset {
+.account fieldset {
     display: flex;
-    /* flex-direction: column; */
+    flex-direction: row;
     margin-bottom: .5rem;
     padding: 1rem;
     flex-wrap: wrap;
@@ -16,7 +16,7 @@ fieldset {
     justify-content: space-between;
 }
 
-fieldset div {
+.account fieldset div {
     display: flex;
     flex-direction: column;
     width: 30%;
@@ -87,12 +87,6 @@ fieldset div {
 
 .account .orders {
     width: 70%;
-}
-
-.account .orders,
-.account .account-profile,
-.account .account-addresses {
-    width: 50%;
 }
 
 .account input {
