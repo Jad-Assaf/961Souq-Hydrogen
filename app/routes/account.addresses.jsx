@@ -496,7 +496,7 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             type="tel"
           />
         </div>
-        <div>
+        <div className='set-default-adrs'>
           <input
             defaultChecked={isDefaultAddress}
             id="defaultAddress"
