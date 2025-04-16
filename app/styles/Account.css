@@ -6,7 +6,7 @@
     text-decoration: underline;
 }
 
-.account fieldset {
+.account-addresses fieldset {
     display: flex;
     flex-direction: row;
     margin-bottom: .5rem;
@@ -17,7 +17,7 @@
     justify-content: flex-start;
 }
 
-.account fieldset div {
+.account-addresses fieldset div {
     display: flex;
     flex-direction: column;
     width: 30%;
