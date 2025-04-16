@@ -23,6 +23,16 @@
     width: 30%;
 }
 
+.account-profile {
+    width: 100%;
+}
+
+.account-profile fieldset{
+    padding: 0;
+    gap: 10px;
+    margin-bottom: 0;
+}
+
 .account {
     max-width: 1300px;
     display: flex;
@@ -111,10 +121,6 @@
     border-radius: 30px;
     width: 30%;
 } */
-
-.profile-update-btn {
-    margin: -6px 20px 20px;
-}
 
 .account .set-default-adrs {
     width: 100% !important;
