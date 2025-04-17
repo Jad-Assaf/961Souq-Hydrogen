@@ -2,7 +2,7 @@ import React from 'react';
 import "../styles/Contact.css";
 
 export const meta = () => {
-    return [{ title: 'Contact Us | Hydrogen Storefront' }];
+    return [{ title: 'Contact Us | 961Souq' }];
 };
 
 export default function ContactUs() {

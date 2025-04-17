@@ -226,7 +226,7 @@ html:has(.overlay.expanded) {
   overflow: hidden;
   background-color: #232323;
   padding: 20px 5px;
-  border-radius: 30px;
+  border-radius: 5px;
 }
 
 .scrolling-title {
@@ -633,7 +633,7 @@ button {
 
 .product-card {
   background-color: #f9f9f9;
-  border-radius: 10px;
+  border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s linear;
   padding: 10px;
@@ -733,7 +733,7 @@ button {
   color: #f5f5f5;
   padding: 8px;
   border: none;
-  border-radius: 30px;
+  border-radius: 5px;
   font-weight: 500;
   font-size: 12px;
   text-transform: uppercase;
@@ -1456,7 +1456,7 @@ button.reset:hover:not(:has(> *)) {
   height: 46px;
   margin: 0;
   border: 1px solid #c2c2c2;
-  border-radius: 30px;
+  border-radius: 5px;
   color: #232323 !important;
   padding: 10px 15px;
   border-right: none;
@@ -1469,8 +1469,8 @@ button.reset:hover:not(:has(> *)) {
 .search-bar-submit {
   position: relative;
   border: 1px solid #c2c2c2;
-  border-top-right-radius: 30px;
-  border-bottom-right-radius: 30px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   border-left: none;
   height: 46px;
   padding: 0px 15px;

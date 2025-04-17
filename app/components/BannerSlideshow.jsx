@@ -183,7 +183,7 @@ const styles = {
     margin: 'auto',
     objectFit: 'contain',
     maxWidth: '1500px',
-    borderRadius: '20px',
+    borderRadius: '5px',
   },
   link: {
     width: '100vw',

@@ -7,10 +7,19 @@
     justify-content: center;
     align-items: center;
     margin: 50px auto;
-    border: 1px solid #000;
     padding: 10px 50px 50px;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: #f9f9f9;
+}
+.policy strong,
+.policy h1,
+.policy h2,
+.policy h3,
+.policy h4,
+.policy h5,
+.policy a,
+.policies strong {
+    color: #2172af;
 }
 
 .policy-index-container {
@@ -27,15 +36,23 @@
     flex-direction: column;
     margin-bottom: .5rem;
     padding: 5px 15px;
-    border: 1px solid #000;
-    border-radius: 20px;
+    border: 1px solid #2172af;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.policies fieldset:hover {
+    background-color: #2172af;
+}
+.policies fieldset:hover a {
+    color: #fff;
 }
 
 .back-policy {
-    border: 1px solid #000;
+    border: 1px solid #2172af;
     padding: 10px 15px;
-    border-radius: 30px;
-    color: #000;
+    border-radius: 5px;
+    color: #2172af;
 }
 
 .policy h3,
