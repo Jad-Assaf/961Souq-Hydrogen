@@ -48,13 +48,18 @@
     height: auto;
 }
 
+.collection .category-title {
+    color: #000;
+}
+
 .category-title {
     margin-top: 10px;
     font-weight: 500 !important;
-    font-size: 13px !important;
-    color: #000;
+    font-size: 12px !important;
+    color: #fff;
     text-transform: uppercase !important;
     min-height: 39px;
+    z-index: 1;
 }
 
 @media screen and (max-width: 1024px) {

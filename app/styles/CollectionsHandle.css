@@ -192,6 +192,8 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .product-info-container .add-to-cart-button {
     display: block;
+    border-radius: 5px;
+    width: 85%;
 }
 
 .grid-cols-1 .collection h4 {

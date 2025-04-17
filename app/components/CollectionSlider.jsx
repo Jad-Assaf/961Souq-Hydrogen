@@ -50,7 +50,7 @@ function CategoryItem({collection, index}) {
           className="category-svg"
         />
       </Link>
-      <div className="category-title">{collection.title}</div>
+      <div className="category-title" style={{color: 'black'}}>{collection.title}</div>
     </div>
   );
 }

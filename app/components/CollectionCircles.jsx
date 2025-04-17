@@ -1135,18 +1135,25 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
         ref={sliderRef}
         style={{overflowX: 'auto', display: 'flex'}}
       >
-        {collections.length > 0 ? (
-          collections.map((collection, collectionIndex) => (
-            <CollectionItem
-              collection={collection}
-              index={collectionIndex}
-              key={collection.id}
-              onSelect={onCollectionSelect}
-            />
-          ))
-        ) : (
-          <p>No collections available.</p>
-        )}
+        <img
+          className="slider-bg"
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/grey_bg.webp?v=1744887607"
+          alt=""
+        />
+        <div className='homeSlider-col-container'>
+          {collections.length > 0 ? (
+            collections.map((collection, collectionIndex) => (
+              <CollectionItem
+                collection={collection}
+                index={collectionIndex}
+                key={collection.id}
+                onSelect={onCollectionSelect}
+              />
+            ))
+          ) : (
+            <p>No collections available.</p>
+          )}
+        </div>
       </div>
 
       {/* Next Button */}
