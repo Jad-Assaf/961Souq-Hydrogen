@@ -185,11 +185,14 @@ export function ProductItem({product}) {
             ) : (
               <Money data={selectedVariant.price} />
             ))}
-          {hasDiscount && (
-            <small className="discountedPrice">
-              <Money data={selectedVariant.compareAtPrice} />
-            </small>
-          )}
+
+          {selectedVariant?.compareAtPrice &&
+            parseFloat(selectedVariant.compareAtPrice.amount) >
+              parseFloat(selectedVariant.price.amount) && (
+              <small className="discountedPrice">
+                <Money data={selectedVariant.compareAtPrice} />
+              </small>
+            )}
         </div>
       </Link>
 
