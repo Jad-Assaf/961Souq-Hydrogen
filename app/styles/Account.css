@@ -4,6 +4,7 @@
 
 .account p {
     text-decoration: underline;
+    color: #2172af;
 }
 
 .account-addresses fieldset {
@@ -55,14 +56,13 @@
     justify-content: center;
     align-items: center;
     margin: 50px auto;
-    border: 1px solid #2172af;
     border-radius: 10px;
     padding: 20px;
 }
 
 .account-order {
     border: 1px solid #2172af;
-    border-radius: 30px;
+    border-radius: 10px;
     padding: 20px;
     width: 75%;
     margin-bottom: 50px;
