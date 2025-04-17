@@ -138,7 +138,7 @@
 
 .homeSlider-col-container {
     display: flex;
-    gap: 3%;
+    gap: 30px;
     justify-content: space-evenly;
     overflow: auto hidden;
     width: 100%;
