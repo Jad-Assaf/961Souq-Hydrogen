@@ -211,11 +211,13 @@ function SearchResultsPredictiveProducts({term, products, closeSearch}) {
                     ) : (
                       <>
                         <Money data={variant.price} />
-                        {variant.compareAtPrice && (
-                          <span className="search-result-compare-price">
-                            <Money data={variant.compareAtPrice} />
-                          </span>
-                        )}
+                        {variant.compareAtPrice &&
+                          parseFloat(variant.compareAtPrice.amount) >
+                            parseFloat(variant.price.amount) && (
+                            <span className="search-result-compare-price">
+                              <Money data={variant.compareAtPrice} />
+                            </span>
+                          )}
                       </>
                     )}
                   </small>
