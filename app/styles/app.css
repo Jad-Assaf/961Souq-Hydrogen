@@ -1962,7 +1962,7 @@ input.search-bar:focus-visible {
 
 .multiple-collection-bg {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 5px;
   height: 450px;
 
   @media (max-width: 1024px) {
@@ -2009,7 +2009,7 @@ input.search-bar:focus-visible {
   align-items: center;
   background-color: transparent;
   backdrop-filter: invert(10);
-  border-radius: 5px;
+  border-radius: 3px;
 }
 
 .txt-imgs img {
