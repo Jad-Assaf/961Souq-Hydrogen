@@ -1456,7 +1456,7 @@ button.reset:hover:not(:has(> *)) {
   height: 46px;
   margin: 0;
   border: 1px solid #c2c2c2;
-  border-radius: 5px;
+  border-radius: 30px;
   color: #232323 !important;
   padding: 10px 15px;
   border-right: none;
@@ -1469,8 +1469,8 @@ button.reset:hover:not(:has(> *)) {
 .search-bar-submit {
   position: relative;
   border: 1px solid #c2c2c2;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
+  border-top-right-radius: 30px;
+  border-bottom-right-radius: 30px;
   border-left: none;
   height: 46px;
   padding: 0px 15px;
