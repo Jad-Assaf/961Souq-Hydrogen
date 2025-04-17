@@ -1,11 +1,18 @@
+.contact-us-page p, .contact-info a{
+    color: #2172af !important;
+}
+
+.contact-us-page strong{
+    color: #000
+}
+
 .contact-us-page {
     width: 90%;
     max-width: 1000px;
     margin: 50px auto;
     padding: 20px 50px;
-    border: 1px solid #000;
-    border-radius: 30px;
-    background-color: #f9f9f9;
+    border-radius: 10px;
+    /* background-color: #f9f9f9; */
 }
 
 @media (max-width: 768px) {
@@ -31,17 +38,17 @@
     padding: 8px;
     margin-top: 5px;
     margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #fff;
+    border: 1px solid #2172af;
+    border-radius: 5px;
+    background-color: aliceblue;
 }
 
 .contact-form button {
     padding: 5px 20px;
-    background-color: #000;
+    background-color: #2172af;
     color: #fff;
     border: none;
-    border-radius: 25px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
