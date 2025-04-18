@@ -227,6 +227,7 @@ html:has(.overlay.expanded) {
   background-color: #232323;
   padding: 20px 5px;
   border-radius: 5px;
+  background-image: url('https://cdn.shopify.com/s/files/1/0552/0883/7292/files/grey_bg.webp?v=1744887607&quality=90');
 }
 
 .scrolling-title {
