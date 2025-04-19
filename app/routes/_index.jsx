@@ -92,13 +92,13 @@ export async function loader(args) {
   const isMobile = /mobile/i.test(userAgent);
   // Define banners (critical UI elements)
   const banners = [
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/virtual-banner.jpg?v=1743674710',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobile-virtual-banner.jpg?v=1743672861',
-      link: '/apple-virtual-showroom',
-    },
+    // {
+    //   desktopImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/virtual-banner.jpg?v=1743674710',
+    //   mobileImageUrl:
+    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobile-virtual-banner.jpg?v=1743672861',
+    //   link: '/apple-virtual-showroom',
+    // },
     {
       desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-banner-1.jpg?v=1740146682',
