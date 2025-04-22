@@ -1115,6 +1115,74 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
 
   return (
     <div className="menu-slider-container" style={{position: 'relative'}}>
+      <div className="noise">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          xmlnsXlink="http://www.w3.org/1999/xlink"
+          xmlns:svgjs="http://svgjs.dev/svgjs"
+          viewBox="0 0 1500 233"
+          width="1500"
+          height="233"
+        >
+          <defs>
+            <filter
+              id="nnnoise-filter"
+              x="-20%"
+              y="-20%"
+              width="140%"
+              height="140%"
+              filterUnits="objectBoundingBox"
+              primitiveUnits="userSpaceOnUse"
+              colorInterpolationFilters="linearRGB"
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.173"
+                numOctaves="4"
+                seed="15"
+                stitchTiles="stitch"
+                x="0%"
+                y="0%"
+                width="100%"
+                height="100%"
+                result="turbulence"
+              ></feTurbulence>
+              <feSpecularLighting
+                surfaceScale="10"
+                specularConstant="1.7"
+                specularExponent="20"
+                lightingColor="#8f2a2a"
+                x="0%"
+                y="0%"
+                width="100%"
+                height="100%"
+                in="turbulence"
+                result="specularLighting"
+              >
+                <feDistantLight azimuth="3" elevation="65"></feDistantLight>
+              </feSpecularLighting>
+              <feColorMatrix
+                type="saturate"
+                values="0"
+                x="0%"
+                y="0%"
+                width="100%"
+                height="100%"
+                in="specularLighting"
+                result="colormatrix"
+              ></feColorMatrix>
+            </filter>
+          </defs>
+          <rect width="1500" height="233" fill="transparent"></rect>
+          <rect
+            width="1500"
+            height="233"
+            fill="#8f2a2a"
+            filter="url(#nnnoise-filter)"
+          ></rect>
+        </svg>
+      </div>
       {collections.length > 0 && hasOverflow && (
         <button
           className="circle-prev-button"
