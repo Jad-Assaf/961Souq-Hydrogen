@@ -162,10 +162,11 @@ export function BannerSlideshow({ banners, interval = 10000 }) {
 const styles = {
   bannerSlideshow: {
     position: 'relative',
-    width: '100vw',
+    width: '100%',
     overflow: 'hidden',
     maxWidth: '1500px',
     margin: 'auto',
+    borderRadius: '5px',
   },
   bannerSlide: {
     position: 'absolute',
