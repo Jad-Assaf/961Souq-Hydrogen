@@ -19,7 +19,7 @@
     display: flex;
     flex-wrap: nowrap;
     flex-direction: row !important;
-    justify-content: flex-start;
+    justify-content: center;
     overflow-x: auto;
     scrollbar-width: none;
     scroll-snap-type: x mandatory;
