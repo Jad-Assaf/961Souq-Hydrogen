@@ -20,9 +20,10 @@ main{
 
 .home{
   max-width: 1500px;
-  margin: auto;
+  margin: 10px auto 0;
   background-color: #fff;
   box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  border-radius: 10px;
 }
 
 :root {
