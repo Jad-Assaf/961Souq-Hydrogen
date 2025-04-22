@@ -423,7 +423,7 @@ export default function Collection() {
                     style={{
                       marginRight: '0.5rem',
                       padding: '0.1rem 0.5rem',
-                      borderRadius: '5px',
+                      borderRadius: '2px',
                       border:
                         columns === num
                           ? '2px solid #2172af'

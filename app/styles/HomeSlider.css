@@ -44,7 +44,7 @@
     margin-top: 5px;
     font-weight: 500 !important;
     font-size: 12px;
-    color: #fff;
+    color: #000;
     z-index: 1;
 }
 
@@ -109,6 +109,7 @@
     border-radius: 5px;
     margin: auto;
     overflow-y: hidden;
+    box-shadow: inset 0 0 20px 0px #bcbcbc;
 }
 
 .menu-item-container {
@@ -144,5 +145,5 @@
     width: 100%;
     height: 100%;
     z-index: 1;
+    background: #f0f8ff82;
 }
-

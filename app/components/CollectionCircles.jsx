@@ -1134,11 +1134,11 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
         className="animated-menu-item"
         style={{overflowX: 'auto', display: 'flex'}}
       >
-        <img
+        {/* <img
           className="slider-bg"
           src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/grey_bg.webp?v=1744887607"
           alt=""
-        />
+        /> */}
         <div className="homeSlider-col-container" ref={containerRef}>
           {collections.length > 0 ? (
             collections.map((collection, collectionIndex) => (
