@@ -16,7 +16,7 @@ import {
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import React, {useEffect, useRef, useState, useMemo} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useMediaQuery} from 'react-responsive';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
@@ -476,7 +476,7 @@ export default function Collection() {
  *   loading?: 'eager' | 'lazy';
  * }}
  */
-const ProductItem = React.memo(({product, index, numberInRow}) => {
+const ProductItem = ({product, index, numberInRow}) => {
   const ref = useRef(null);
   const [isSoldOut, setIsSoldOut] = useState(false);
 
@@ -581,7 +581,7 @@ const ProductItem = React.memo(({product, index, numberInRow}) => {
       </div>
     </div>
   );
-});
+};
 
 /**
  * @param {{
