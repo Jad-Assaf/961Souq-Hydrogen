@@ -1087,17 +1087,18 @@ export const homeAppliancesMenu = [
 ];
 
 export const CollectionCircles = ({collections, onCollectionSelect}) => {
-  const sliderRef = useRef(null); // Reference for the slider container
+  const containerRef = useRef(null); // Ref for .homeSlider-col-container
   const [hasOverflow, setHasOverflow] = useState(false);
 
   useEffect(() => {
     const checkOverflow = () => {
-      if (sliderRef.current) {
+      if (containerRef.current) {
         setHasOverflow(
-          sliderRef.current.scrollWidth > sliderRef.current.clientWidth,
+          containerRef.current.scrollWidth > containerRef.current.clientWidth,
         );
       }
     };
+
     checkOverflow();
     window.addEventListener('resize', checkOverflow);
 
@@ -1107,14 +1108,13 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
   }, [collections]);
 
   const scrollSlider = (distance) => {
-    if (sliderRef.current) {
-      sliderRef.current.scrollBy({left: distance, behavior: 'smooth'});
+    if (containerRef.current) {
+      containerRef.current.scrollBy({left: distance, behavior: 'smooth'});
     }
   };
 
   return (
     <div className="menu-slider-container" style={{position: 'relative'}}>
-      {/* Previous Button */}
       {collections.length > 0 && hasOverflow && (
         <button
           className="circle-prev-button"
@@ -1132,7 +1132,6 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
 
       <div
         className="animated-menu-item"
-        ref={sliderRef}
         style={{overflowX: 'auto', display: 'flex'}}
       >
         <img
@@ -1140,7 +1139,7 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
           src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/grey_bg.webp?v=1744887607"
           alt=""
         />
-        <div className='homeSlider-col-container'>
+        <div className="homeSlider-col-container" ref={containerRef}>
           {collections.length > 0 ? (
             collections.map((collection, collectionIndex) => (
               <CollectionItem
@@ -1156,7 +1155,6 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
         </div>
       </div>
 
-      {/* Next Button */}
       {collections.length > 0 && hasOverflow && (
         <button
           className="circle-next-button"
