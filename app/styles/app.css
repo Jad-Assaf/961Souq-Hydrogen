@@ -433,9 +433,9 @@ aside .go-to-cart {
 
 .circle-prev-button,
 .circle-next-button {
-  background-color: transparent;
-  backdrop-filter: blur(5px) invert(0.3);
-  -webkit-backdrop-filter: blur(5px) invert(0.3);
+  background-color: #ffffff3b;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid #2172af;
   color: #2172af;
   border-radius: 50%;
@@ -944,6 +944,7 @@ aside header h2 {
 
 aside main {
   margin: 1rem 0;
+  background-color: #fff !important;
 }
 
 aside p {
