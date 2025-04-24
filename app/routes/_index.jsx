@@ -686,6 +686,7 @@ export default function Homepage() {
       <div className="multiple-collection-section">
         <div className="collection-section-1">
           <img
+            loading="lazy"
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
@@ -761,6 +762,7 @@ export default function Homepage() {
         </div>
         <div className="collection-section-1">
           <img
+            loading="lazy"
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
@@ -838,6 +840,7 @@ export default function Homepage() {
         </div>
         <div className="collection-section-1">
           <img
+            loading="lazy"
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
@@ -911,6 +914,7 @@ export default function Homepage() {
         </div>
         <div className="collection-section-1">
           <img
+            loading="lazy"
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
@@ -985,6 +989,7 @@ export default function Homepage() {
         </div>
         <div className="collection-section-1">
           <img
+            loading="lazy"
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
@@ -1025,7 +1030,11 @@ export default function Homepage() {
               </div>
               <p>Hair Straighteners</p>
             </a>
-            <a className="collec-1" href="/collections/dyson-air-purifiers" target="_blank">
+            <a
+              className="collec-1"
+              href="/collections/dyson-air-purifiers"
+              target="_blank"
+            >
               <div className="mlt-img-con">
                 <img
                   loading="lazy"
@@ -1059,6 +1068,7 @@ export default function Homepage() {
         </div>
         <div className="collection-section-1">
           <img
+            loading="lazy"
             src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
             alt="Section Background"
             className="multiple-collection-bg"
