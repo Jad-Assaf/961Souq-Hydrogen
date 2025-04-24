@@ -27,7 +27,7 @@ main {
   border-radius: 10px;
 }
 
-.product {
+.product, .search {
   background-color: #fff;
   box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
   border-radius: 10px;
@@ -35,6 +35,16 @@ main {
   margin: 10px auto 25px !important;
   @media (max-width: 1024px) {
     padding: 0 10px !important;
+    margin: 50px auto 20px !important;
+  }
+}
+.search {
+  background-color: #fff;
+  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px auto 25px !important;
+  @media (max-width: 1024px) {
     margin: 50px auto 20px !important;
   }
 }
