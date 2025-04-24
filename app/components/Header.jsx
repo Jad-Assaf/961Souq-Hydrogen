@@ -6,7 +6,6 @@ import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
 
-
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,6 +19,19 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const timeoutRef = useRef(null);
   const blinkIntervalRef = useRef(null);
 
+  // --- NEW: detect mobile vs desktop ---
+  const [isMobileView, setIsMobileView] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 1024 : false,
+  );
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth <= 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  // --------------------------------------
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -143,36 +155,38 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     <>
       <header className="header">
         <div className="header-top">
-          <button
-            className="mobile-menu-toggle"
-            name="Mobile Menu Button"
-            aria-label="Mobile Menu Button"
-            onClick={toggleMobileMenu}
-          >
-            <svg
-              width="30px"
-              height="30px"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              stroke="#000"
+          {isMobileView && (
+            <button
+              className="mobile-menu-toggle"
+              name="Mobile Menu Button"
+              aria-label="Mobile Menu Button"
+              onClick={toggleMobileMenu}
             >
-              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-              <g
-                id="SVGRepo_tracerCarrier"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              ></g>
-              <g id="SVGRepo_iconCarrier">
-                <path
-                  d="M5 6H12H19M5 12H19M5 18H19"
-                  stroke="#2172af"
-                  strokeWidth="2"
+              <svg
+                width="30px"
+                height="30px"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                stroke="#000"
+              >
+                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                <g
+                  id="SVGRepo_tracerCarrier"
                   strokeLinecap="round"
-                ></path>
-              </g>
-            </svg>
-          </button>
+                  strokeLinejoin="round"
+                ></g>
+                <g id="SVGRepo_iconCarrier">
+                  <path
+                    d="M5 6H12H19M5 12H19M5 18H19"
+                    stroke="#2172af"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  ></path>
+                </g>
+              </svg>
+            </button>
+          )}
           <NavLink prefetch="intent" to="/" className="logo-link" end>
             <img
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&quality=5"
@@ -184,7 +198,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           </NavLink>
           <SearchFormPredictive className="header-search">
             {({inputRef, fetchResults, goToSearch, fetcher}) => {
-              // Use the updated hook to focus the search on "/" press instead of cmd+k
               useFocusOnSlash(inputRef);
 
               const handleFocus = () => {
@@ -209,7 +222,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     setOverlayVisible(false);
                   }
                 }
-                // Reset placeholder so the animation will restart
                 setPlaceholder('Search products');
               };
 
@@ -221,14 +233,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
               const handleKeyDown = (e) => {
                 if (e.key === 'Enter') {
-                  e.preventDefault(); // Prevent default form submission
+                  e.preventDefault();
                   handleSearch();
                 }
               };
 
               const handleSearch = () => {
                 if (inputRef.current) {
-                  const rawTerm = inputRef.current.value.trim(); // Get the raw search term
+                  const rawTerm = inputRef.current.value.trim();
                   const term = rawTerm.replace(/\s+/g, '-');
                   if (rawTerm) {
                     trackSearch(rawTerm);
@@ -250,7 +262,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
               return (
                 <>
-                  {/* Fullscreen Overlay */}
                   <div
                     className={`search-overlay ${
                       isOverlayVisible ? 'active' : ''
@@ -258,7 +269,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     onClick={handleCloseSearch}
                   ></div>
 
-                  {/* Main Search Form */}
                   <div ref={searchContainerRef} className="main-search">
                     <div className="search-container">
                       <input
@@ -382,17 +392,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             }}
           </SearchFormPredictive>
 
-          {/* New SearchBar Component Implementation */}
-          {/* <SearchBar
-            className="header-search"
-            onResultSelect={(product) => {
-              // Add any logic needed when a product is selected
-              console.log('Product selected:', product);
-            }}
-            closeSearch={() => {
-              // Add any logic needed when closing the search
-            }}
-          /> */}
           <div className="header-ctas">
             <NavLink
               prefetch="intent"
@@ -410,171 +409,180 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           </div>
         </div>
 
-        <div className="header-bottom">
-          <HeaderMenu
-            menu={menu}
-            viewport="desktop"
-            primaryDomainUrl={header.shop.primaryDomain.url}
-            publicStoreDomain={publicStoreDomain}
-          />
-        </div>
-      </header>
-
-      <>
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-backdrop" onClick={closeMobileMenu}></div>
-        )}
-
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay">
-            <button className="mobile-menu-close" onClick={closeMobileMenu}>
-              <svg
-                fill="#000"
-                height="12px"
-                width="12px"
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 460.775 460.775"
-              >
-                <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path>
-              </svg>
-            </button>
-            <h3>Menu</h3>
-            <div
-              className={`mobile-menu-content ${activeSubmenu ? 'hidden' : ''}`}
-            >
-              {menu.items.map((item) => (
-                <div key={item.id} className="mobile-menu-item">
-                  <button onClick={() => openSubmenu(item.id)}>
-                    {item.imageUrl && (
-                      <div
-                        style={{
-                          width: '50px',
-                          height: '50px',
-                          filter: 'blur(0px)',
-                          opacity: 1,
-                          transition: 'filter 0.3s, opacity 0.3s',
-                        }}
-                      >
-                        <img
-                          sizes="(min-width: 45em) 20vw, 40vw"
-                          srcSet={`${item.imageUrl}?width=300&quality=1 300w,
-                                   ${item.imageUrl}?width=600&quality=1 600w,
-                                   ${item.imageUrl}?width=1200&quality=1 1200w`}
-                          alt={item.altText || item.title}
-                          width="50px"
-                          height="50px"
-                        />
-                      </div>
-                    )}
-                    {item.title}
-                    <span className="mobile-menu-arrow">
-                      <svg
-                        fill="#000"
-                        height="14px"
-                        width="14px"
-                        version="1.1"
-                        id="XMLID_287_"
-                        xmlns="http://www.w3.org/2000/svg"
-                        xmlnsXlink="http://www.w3.org/1999/xlink"
-                        viewBox="0 0 24.00 24.00"
-                        xmlSpace="preserve"
-                        stroke="#000"
-                        strokeWidth="0.00024000000000000003"
-                      >
-                        <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                        <g
-                          id="SVGRepo_tracerCarrier"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          stroke="#CCCCCC"
-                          strokeWidth="0.096"
-                        ></g>
-                        <g id="SVGRepo_iconCarrier">
-                          <g id="next">
-                            <g>
-                              <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon>
-                            </g>
-                          </g>
-                        </g>
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {activeSubmenu && (
-              <div className="mobile-submenu-drawer" data-id={activeSubmenu}>
-                <button className="back-button" onClick={closeSubmenu}>
-                  <svg
-                    fill="#000"
-                    height="14px"
-                    width="14px"
-                    version="1.1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24.00 24.00"
-                    xmlSpace="preserve"
-                    transform="matrix(-1, 0, 0, 1, 0, 0)"
-                  >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      stroke="#CCCCCC"
-                      strokeWidth="0.096"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <g id="next">
-                        <g>
-                          <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                  Back
-                </button>
-                <div className="submenu-list">
-                  {menu.items
-                    .find((item) => item.id === activeSubmenu)
-                    ?.items.map((subItem) => (
-                      <NavLink
-                        key={subItem.id}
-                        to={new URL(subItem.url).pathname}
-                        onClick={closeMobileMenu}
-                      >
-                        {subItem.imageUrl && (
-                          <div
-                            style={{
-                              width: '50px',
-                              height: '50px',
-                              filter: 'blur(0px)',
-                              opacity: 1,
-                              transition: 'filter 0.3s, opacity 0.3s',
-                            }}
-                          >
-                            <img
-                              sizes="(min-width: 45em) 20vw, 40vw"
-                              srcSet={`${subItem.imageUrl}?width=300&quality=1 300w,
-                                 ${subItem.imageUrl}?width=600&quality=1 600w,
-                                 ${subItem.imageUrl}?width=1200&quality=1 1200w`}
-                              alt={subItem.altText || subItem.title}
-                              className="submenu-item-image"
-                              width="50px"
-                              height="50px"
-                            />
-                          </div>
-                        )}
-                        {subItem.title}
-                      </NavLink>
-                    ))}
-                </div>
-              </div>
-            )}
+        {!isMobileView && (
+          <div className="header-bottom">
+            <HeaderMenu
+              menu={menu}
+              viewport="desktop"
+              primaryDomainUrl={header.shop.primaryDomain.url}
+              publicStoreDomain={publicStoreDomain}
+            />
           </div>
         )}
-      </>
+      </header>
+
+      {isMobileView && (
+        <>
+          {isMobileMenuOpen && (
+            <div
+              className="mobile-menu-backdrop"
+              onClick={closeMobileMenu}
+            ></div>
+          )}
+
+          {isMobileMenuOpen && (
+            <div className="mobile-menu-overlay">
+              <button className="mobile-menu-close" onClick={closeMobileMenu}>
+                <svg
+                  fill="#000"
+                  height="12px"
+                  width="12px"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 460.775 460.775"
+                >
+                  <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path>
+                </svg>
+              </button>
+              <h3>Menu</h3>
+              <div
+                className={`mobile-menu-content ${
+                  activeSubmenu ? 'hidden' : ''
+                }`}
+              >
+                {menu.items.map((item) => (
+                  <div key={item.id} className="mobile-menu-item">
+                    <button onClick={() => openSubmenu(item.id)}>
+                      {item.imageUrl && (
+                        <div
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            filter: 'blur(0px)',
+                            opacity: 1,
+                            transition: 'filter 0.3s, opacity 0.3s',
+                          }}
+                        >
+                          <img
+                            sizes="(min-width: 45em) 20vw, 40vw"
+                            srcSet={`${item.imageUrl}?width=300&quality=1 300w,
+                                     ${item.imageUrl}?width=600&quality=1 600w,
+                                     ${item.imageUrl}?width=1200&quality=1 1200w`}
+                            alt={item.altText || item.title}
+                            width="50px"
+                            height="50px"
+                          />
+                        </div>
+                      )}
+                      {item.title}
+                      <span className="mobile-menu-arrow">
+                        <svg
+                          fill="#000"
+                          height="14px"
+                          width="14px"
+                          version="1.1"
+                          id="XMLID_287_"
+                          xmlns="http://www.w3.org/2000/svg"
+                          xmlnsXlink="http://www.w3.org/1999/xlink"
+                          viewBox="0 0 24.00 24.00"
+                          xmlSpace="preserve"
+                          stroke="#000"
+                          strokeWidth="0.00024000000000000003"
+                        >
+                          <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                          <g
+                            id="SVGRepo_tracerCarrier"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            stroke="#CCCCCC"
+                            strokeWidth="0.096"
+                          ></g>
+                          <g id="SVGRepo_iconCarrier">
+                            <g id="next">
+                              <g>
+                                <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon>
+                              </g>
+                            </g>
+                          </g>
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {activeSubmenu && (
+                <div className="mobile-submenu-drawer" data-id={activeSubmenu}>
+                  <button className="back-button" onClick={closeSubmenu}>
+                    <svg
+                      fill="#000"
+                      height="14px"
+                      width="14px"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24.00 24.00"
+                      xmlSpace="preserve"
+                      transform="matrix(-1, 0, 0, 1, 0, 0)"
+                    >
+                      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        stroke="#CCCCCC"
+                        strokeWidth="0.096"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <g id="next">
+                          <g>
+                            <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12 "></polygon>
+                          </g>
+                        </g>
+                      </g>
+                    </svg>
+                    Back
+                  </button>
+                  <div className="submenu-list">
+                    {menu.items
+                      .find((item) => item.id === activeSubmenu)
+                      ?.items.map((subItem) => (
+                        <NavLink
+                          key={subItem.id}
+                          to={new URL(subItem.url).pathname}
+                          onClick={closeMobileMenu}
+                        >
+                          {subItem.imageUrl && (
+                            <div
+                              style={{
+                                width: '50px',
+                                height: '50px',
+                                filter: 'blur(0px)',
+                                opacity: 1,
+                                transition: 'filter 0.3s, opacity 0.3s',
+                              }}
+                            >
+                              <img
+                                sizes="(min-width: 45em) 20vw, 40vw"
+                                srcSet={`${subItem.imageUrl}?width=300&quality=1 300w,
+                                   ${subItem.imageUrl}?width=600&quality=1 600w,
+                                   ${subItem.imageUrl}?width=1200&quality=1 1200w`}
+                                alt={subItem.altText || subItem.title}
+                                className="submenu-item-image"
+                                width="50px"
+                                height="50px"
+                              />
+                            </div>
+                          )}
+                          {subItem.title}
+                        </NavLink>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </>
   );
 }
@@ -732,14 +740,6 @@ function CartIcon() {
   );
 }
 
-function activeLinkStyle({isActive, isPending}) {
-  return {
-    fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? '#fff' : '#fff',
-  };
-}
-
-// Update the hook to focus the search input when "/" is pressed instead of cmd+k
 export function useFocusOnSlash(inputRef) {
   useEffect(() => {
     function handleKeyDown(event) {
@@ -759,16 +759,3 @@ export function useFocusOnSlash(inputRef) {
     };
   }, [inputRef]);
 }
-
-/** @typedef {'desktop' | 'mobile'} Viewport */
-/**
- * @typedef {Object} HeaderProps
- * @property {HeaderQuery} header
- * @property {Promise<CartApiQueryFragment|null>} cart
- * @property {Promise<boolean>} isLoggedIn
- * @property {string} publicStoreDomain
- */
-
-/** @typedef {import('@shopify/hydrogen').CartViewPayload} CartViewPayload */
-/** @typedef {import('storefrontapi.generated').HeaderQuery} HeaderQuery */
-/** @typedef {import('storefrontapi.generated').CartApiQueryFragment} CartApiQueryFragment */
