@@ -328,10 +328,10 @@ function ProductImageWithMarkers({ products }) {
           position={product.position}
         />
       ))}
-      <HomeMarker position={{ x: 540, y: 250 }} />
-      <AppleMarker position={{ x: 1625, y: 250 }} />
-      <SamsungMarker position={{ x: 2085, y: 470 }} />
-      <PrevMarker position={{ x: 105, y: 395 }} />
+      {/* <HomeMarker position={{ x: 540, y: 250 }} />
+      <AppleMarker position={{ x: 1625, y: 250 }} /> */}
+      <SamsungMarker position={{ x: 2100, y: 413 }} />
+      <PrevMarker position={{ x: 155, y: 368 }} />
     </div>
   );
 }
@@ -458,11 +458,10 @@ function SamsungMarker({position}) {
       style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
     >
       <div
-        // href="/collections/apple"
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <div className="home-tooltip">Coming Soon!</div>
+      <a href='/home-appliances-showroom' className="home-tooltip">Home Appliances</a>
     </div>
   );
 }
@@ -505,7 +504,7 @@ function PrevMarker({position}) {
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <div className="home-tooltip">Coming Soon!</div>
+      <a href='/apple-virtual-showroom' className="home-tooltip">Apple Showroom</a>
     </div>
   );
 }

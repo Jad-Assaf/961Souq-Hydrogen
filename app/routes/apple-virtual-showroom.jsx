@@ -519,8 +519,8 @@ function ProductImageWithMarkers({ products }) {
           position={product.position}
         />
       ))}
-      <HomeMarker position={{ x: 540, y: 250 }} />
-      <AppleMarker position={{ x: 1625, y: 250 }} />
+      {/* <HomeMarker position={{ x: 540, y: 250 }} />
+      <AppleMarker position={{ x: 1625, y: 250 }} /> */}
       <SamsungMarker position={{ x: 2085, y: 470 }} />
       <PrevMarker position={{ x: 105, y: 395 }} />
     </div>
@@ -653,7 +653,7 @@ function SamsungMarker({position}) {
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <div className="home-tooltip">Coming Soon!</div>
+      <a href='/samsung-virtual-showroom' className="home-tooltip">Samsung Showroom</a>
     </div>
   );
 }
@@ -696,7 +696,7 @@ function PrevMarker({position}) {
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <div className="home-tooltip">Coming Soon!</div>
+      <a href='/gaming-room' className="home-tooltip">Gaming Room</a>
     </div>
   );
 }

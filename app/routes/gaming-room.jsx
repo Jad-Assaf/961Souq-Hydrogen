@@ -645,7 +645,7 @@ export function NextMarkerr({position}) {
     <MarkerBase
       position={position}
       href="/apple-virtual-showroom"
-      label="Apple Virtual Showroom"
+      label="Apple Showroom"
       svg={nextSvg}
       className="next-marker"
     />
