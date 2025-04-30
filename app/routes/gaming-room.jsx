@@ -6,260 +6,196 @@ import {useState, useEffect, useRef, useMemo} from 'react';
 const products = [
   {
     id: '1',
-    title: 'Dyson Purifier Hot+Cool™ Gen1',
-    handle:
-      'products/dyson-purifier-hot-cool-gen1-machine-purifying-fan-heater',
+    title: 'Nintendo Switch',
+    handle: 'collections/nintendo-switch',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Purifier-Hot_Cool-Gen1-machine-purifying-fan-heater.jpg?v=1695195477',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/nintendo-switch4_a2e8f9d1-6c8f-49ab-a63a-0a67a74c1712.jpg?v=1677159143',
     },
-    position: {x: 105, y: 665},
+    position: {x: 365, y: 750},
   },
   {
     id: '2',
-    title: 'Dyson Purifier Cool Formaldehyde™ TP09',
+    title:
+      'Sony DualSense Wireless Controller for PS5 – Monster Hunter Wilds Limited Edition',
     handle:
-      'products/dyson-purifier-cool-formaldehyde-tp09-purifying-fan-white-gold',
+      'products/sony-dualsense-wireless-controller-for-ps5-monster-hunter-wilds-limited-edition',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/DysonPurifierCoolFormaldehyde_TP09purifyingfan_White_Gold.jpg?v=1690444097',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/DualSense-Wireless-Controller---Monster-Hunter.jpg?v=1745924771',
     },
-    position: {x: 263, y: 565},
+    position: {x: 480, y: 740},
   },
   {
     id: '3',
-    title: 'Dyson TP03 Pure Cool Link Tower',
-    handle: 'products/dyson-tp03-pure-cool-link-tower-white-silver',
+    title: 'PS5 Controllers',
+    handle: 'collections/ps5-controllers',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tp03.jpg?v=1690444115',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/controller5.webp?v=1711798050',
     },
-    position: {x: 480, y: 495},
+    position: {x: 535, y: 720},
   },
   {
     id: '4',
-    title: 'Dyson Purifier Humidify+Cool Formaldehyde PH04',
-    handle:
-      'products/dyson-purifier-humidify-cool-formaldehyde-ph04-white-gold',
+    title: 'PS5 Consoles',
+    handle: 'collections/sony-playstation',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Purifier-Humidify_Cool-Formaldehyde_5098bba3-e27c-4b1e-93d6-2a36a90cd676.jpg?v=1708936893',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Sony-PlayStation-5-Pro-Console-3.jpg?v=1730897478',
     },
-    position: {x: 620, y: 450},
+    position: {x: 590, y: 650},
   },
   {
     id: '5',
-    title: 'Xiaomi Smart Air Purifier Elite',
-    handle: 'products/xiaomi-smart-air-purifier-elite',
+    title: 'Console Games',
+    handle: 'collections/console-games',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Xiaomi-Smart-Air-Purifier-Elite-1.jpg?v=1729672158',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Assassins-Creed-Shadows.jpg?v=1742482335',
     },
-    position: {x: 835, y: 390},
+    position: {x: 430, y: 875},
   },
   {
     id: '6',
-    title: 'Xiaomi Robot Vacuum X20 Pro',
-    handle: 'products/xiaomi-robot-vacuum-x20-pro',
+    title:
+      'Sony PS5 DualSense Wireless Controller – 30th Anniversary Limited Edition',
+    handle:
+      'products/sony-ps5-dualsense-wireless-controller-30th-anniversary-limited-edition',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Xiaomi-Robot-Vacuum-X20-Pro-3.jpg?v=1729512268',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-controller_1c77ee81-38e0-441d-ab1f-7c927c1a6b33.jpg?v=1732187946',
     },
-    position: {x: 905, y: 360},
+    position: {x: 965, y: 1050},
   },
   {
     id: '7',
-    title: 'All Vacuum Cleaners',
-    handle: 'collections/robot-vacuum-cleaners',
+    title: 'RGB Light Bars',
+    handle: 'collections/rgb-led-light-bars',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/Xiaomi-Robot-Vacuum-S10_-1.webp?v=1711807016',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Govee-RGBICW-Smart-Corner-Floor-Lamp.jpg?v=1708163461',
     },
-    position: {x: 1008, y: 378},
+    position: {x: 1175, y: 650},
   },
   {
     id: '8',
-    title: 'Coffee Makers',
-    handle: 'collections/coffee-makers',
+    title: 'VR Headsets',
+    handle: 'collections/vr-headsets',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/L_Or-Barista-Sublime.jpg?v=1737130709',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Meta-quest-3-4_f405fb9c-daf0-4934-9129-6741227679da.jpg?v=1699697613',
     },
-    position: {x: 1240, y: 355},
+    position: {x: 1725, y: 180},
   },
   {
     id: '9',
-    title: 'Blenders & Mixers',
-    handle: 'collections/blenders',
+    title: 'Valve Steam Deck',
+    handle: 'products/valve-steam-deck',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/PD-LSBLGR-BK-3.jpg?v=1725376536',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/valve-steam-deck.jpg?v=1679735186',
     },
-    position: {x: 1305, y: 385},
+    position: {x: 1850, y: 330},
   },
   {
     id: '10',
-    title: 'Kettles',
-    handle: 'collections/kettles',
+    title: 'ROG Ally X',
+    handle: 'products/rog-ally-x-2024-rc72la-handheld-gaming-console',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/LePresso-Smart-Electric-Kettle.jpg?v=1715692734',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/rog-ally-x-9.jpg?v=1725033713',
     },
-    position: {x: 1360, y: 408},
+    position: {x: 2055, y: 385},
   },
   {
     id: '11',
-    title: 'Air Fryers',
-    handle: 'collections/air-fryer',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Xiaomi-Smart-Air-Fryer-6.5L-1.jpg?v=1720870023',
-    },
-    position: {x: 1410, y: 430},
-  },
-  {
-    id: '12',
-    title: 'Massagers',
-    handle: 'collections/massagers',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/KiCAEvo1.jpg?v=1706101257',
-    },
-    position: {x: 1550, y: 500},
-  },
-  {
-    id: '13',
-    title: 'Scales',
-    handle: 'collections/scales',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Eufy-Smart-Scale-P2-Pro.jpg?v=1738225915',
-    },
-    position: {x: 1628, y: 535},
-  },
-  {
-    id: '14',
-    title: 'Hair Trimmers',
-    handle: 'collections/hair-trimmers',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mg9553_a7877ed5-6eea-4b4b-9617-c620afb5710d.jpg?v=1737642836',
-    },
-    position: {x: 1720, y: 580},
-  },
-  {
-    id: '15',
-    title: 'LED Mirrors',
-    handle: 'collections/mirrors',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GNGLMAKE12WH.jpg?v=1729078234',
-    },
-    position: {x: 1885, y: 625},
-  },
-  {
-    id: '16',
-    title: 'Smart Speakers',
-    handle: 'collections/smart-speakers',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Amazon-Echo-Studio-1.jpg?v=1737462952',
-    },
-    position: {x: 1950, y: 685},
-  },
-  {
-    id: '17',
-    title: 'Smart Doorbells',
-    handle: 'collections/smart-doorbell',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GA02076-US-6.jpg?v=1734696025',
-    },
-    position: {x: 1995, y: 710},
-  },
-  {
-    id: '18',
-    title: 'Smart Security Cameras',
-    handle: 'collections/smart-security-cameras',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Stick-Up-Cam_ce4b9e15-2bf6-425d-b792-86a093125820.jpg?v=1739784920',
-    },
-    position: {x: 2045, y: 735},
-  },
-  {
-    id: '19',
-    title: 'Vacuum Cleaners',
-    handle: 'collections/vacuum-cleaners',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Gen5detect-2.jpg?v=1707577090',
-    },
-    position: {x: 580, y: 695},
-  },
-  {
-    id: '20',
-    title: 'Dyson Supersonic Hair Dryer - HD15',
-    handle: 'products/dyson-supersonic-hair-dryer-hd15',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Supersonic-Hair-Dryer-HD15-Onyx-Gold.jpg?v=1716386451',
-    },
-    position: {x: 823, y: 605},
-  },
-  {
-    id: '21',
-    title: 'Dyson Supersonic hair dryer Professional Edition Black/Nickel',
-    handle:
-      'products/dyson-supersonic-hair-dryer-professional-edition-black-nickel-free-supersonic-stand-fly-away-attachment',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Supersonic_-hair-dryer-Professional-Edition-Black-Nickel-_-Free-Supersonic-Stand-_-Fly-Away-Attachment.jpg?v=1695132625',
-    },
-    position: {x: 907, y: 568},
-  },
-  {
-    id: '22',
-    title: 'Dyson Supersonic Hair Dryer HD07',
-    handle: 'products/dyson-supersonic-hair-dryer-hd07',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Supersonic-Hair-Dryer-HD07---Iron-Fuchsia.jpg?v=1708505074',
-    },
-    position: {x: 984, y: 535},
-  },
-  {
-    id: '23',
-    title: 'RGB LED Panels',
+    title: 'RGB Panels',
     handle: 'collections/rgb-led-panels',
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/H6061.jpg?v=1706093616',
     },
-    position: {x: 1270, y: 530},
+    position: {x: 1600, y: 315},
   },
   {
-    id: '24',
-    title: 'RGB LED Light Bars',
-    handle: 'collections/rgb-led-light-bars',
+    id: '12',
+    title: 'Gaming Desktops',
+    handle: 'collections/gaming-desktops',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/JBL-PartyLight-Stick-5.jpg?v=1729004487',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/G16CHR.jpg?v=1737973936',
     },
-    position: {x: 1338, y: 565},
+    position: {x: 1490, y: 400},
   },
   {
-    id: '25',
-    title: 'Razer Aether RGB Light Bars for PC',
+    id: '13',
+    title: 'Gaming Headphones',
+    handle: 'collections/gaming-headphones',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Kraken-V4.jpg?v=1744885451',
+    },
+    position: {x: 1450, y: 580},
+  },
+  {
+    id: '14',
+    title: 'HyperX QuadCast 2 S',
+    handle: 'products/hyperx-quadcast-2-s-advanced-usb-microphone',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/HyperX-QuadCast-2-S_5370e308-5bc4-451f-8d58-1582bbcf6b24.jpg?v=1737114174',
+    },
+    position: {x: 1560, y: 610},
+  },
+  {
+    id: '15',
+    title: 'Gaming Speakers',
+    handle: 'collections/gaming-speakers',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Razer-Nommo.jpg?v=1683894112',
+    },
+    position: {x: 1630, y: 620},
+  },
+  {
+    id: '16',
+    title: 'Gaming Monitors',
+    handle: 'collections/gaming-monitors',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/LS32CG552EMXUE_34c417c9-a4cb-4f75-864f-12ea0422acd4.jpg?v=1743511131',
+    },
+    position: {x: 1810, y: 550},
+  },
+  {
+    id: '17',
+    title: 'Gaming MousePads',
+    handle: 'collections/mousepads',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QcK-Prism-Cloth_dbc969d9-a891-4bc1-9211-fd532b70ea63.jpg?v=1744123558',
+    },
+    position: {x: 1630, y: 660},
+  },
+  {
+    id: '18',
+    title: 'Gaming Keyboards',
+    handle: 'collections/gaming-keyboards',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/SteelSeries-Apex-Pro-Gen-3-Gaming-Keyboard.jpg?v=1744968070',
+    },
+    position: {x: 1730, y: 695},
+  },
+  {
+    id: '19',
+    title: 'Gaming Mouse',
+    handle: 'collections/gaming-mouse',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Logitech-910-005568-G502-Lightspeed-Wireless-Gaming-Mouse.jpg?v=1691742889',
+    },
+    position: {x: 1835, y: 730},
+  },
+  {
+    id: '20',
+    title: 'Razer Aether RGB Light Bars',
     handle: 'products/razer-aether-rgb-light-bars',
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/RZ43-05320100-R3EJ_c12a7340-b986-4eb3-9b2a-d24a83e9685c.jpg?v=1745416560',
     },
-    position: {x: 1400, y: 590},
+    position: {x: 2022, y: 745},
   },
   {
-    id: '26',
-    title: 'Amazon Echo Show 5',
-    handle: 'products/amazon-echo-show-5-3rd-gen',
+    id: '21',
+    title: 'Gaming Chairs',
+    handle: 'collections/gaming-chairs-desks',
     featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Amazon-Echo-Show-5-_3rd-Generation_-7.jpg?v=1735293947',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Defensor-11.jpg?v=1738587890',
     },
-    position: {x: 1530, y: 670},
-  },
-  {
-    id: '27',
-    title: 'Google Nest Hub Max',
-    handle: 'products/google-nest-hub-max-smart-display-with-google-assistant',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Google--Nest-Hub-Max.jpg?v=1691222888',
-    },
-    position: {x: 1590, y: 700},
-  },
-  {
-    id: '28',
-    title: 'Amazon Echo Show 15',
-    handle:
-      'products/echo-show-15-full-hd-15-6-smart-display-with-alexa-and-fire-tv-built-in',
-    featuredImage: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Echo-Show-15.jpg?v=1703064168',
-    },
-    position: {x: 1680, y: 740},
+    position: {x: 1900, y: 830},
   },
 ];
 
@@ -285,9 +221,9 @@ export default function ProductsImage() {
 
 function ProductImageWithMarkers({products}) {
   const lowQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances-showroom.jpg?v=1745827950&quality=10';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-3.jpg?v=1746000620&quality=10';
   const highQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances-showroom.jpg?v=1745827950&quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-3.jpg?v=1746000620&quality=100';
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
   const containerRef = useRef(null);
@@ -533,7 +469,9 @@ function NextMarker({position}) {
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <a href='/gaming-room' className="home-tooltip">Gaming Room</a>
+      <a href="/gaming-room" className="home-tooltip">
+        Gaming Room
+      </a>
     </div>
   );
 }
