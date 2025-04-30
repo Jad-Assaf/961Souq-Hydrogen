@@ -22,6 +22,27 @@
     transition: filter 0.5s ease-out, opacity 0.5s ease-out;
 }
 
+.svg-container {
+    animation: fadeInn 3s infinite ease-in-out;
+    width: 50px;
+    height: 50px;
+}
+
+/* Example animation */
+@keyframes fadeInn {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.01);
+    }
+}
+
 .home-marker {
     position: absolute;
     width: 70px;
@@ -67,6 +88,20 @@
         transform: translate(-50%, -50%) scale(3);
         opacity: 0;
     }
+}
+
+.next-marker .home-tooltip {
+    left: -145px !important;
+    top: 5px !important;
+    width: max-content;
+    padding: 0 10px;
+}
+
+.previous-marker .home-tooltip {
+    left: 45px !important;
+    top: 5px !important;
+    width: max-content;
+    padding: 0 10px;
 }
 
 .home-tooltip {

@@ -221,9 +221,9 @@ export default function ProductsImage() {
 
 function ProductImageWithMarkers({products}) {
   const lowQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-3.jpg?v=1746000620&quality=10';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-6.jpg?v=1746008613&quality=10';
   const highQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-3.jpg?v=1746000620&quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-6.jpg?v=1746008613&quality=100';
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
   const containerRef = useRef(null);
@@ -338,8 +338,10 @@ function ProductImageWithMarkers({products}) {
       ))}
       {/* <HomeMarker position={{ x: 540, y: 250 }} />
       <AppleMarker position={{ x: 1625, y: 250 }} /> */}
-      <NextMarker position={{x: 2015, y: 458}} />
-      <PrevMarker position={{x: 139, y: 425}} />
+      {/* <NextMarker position={{x: 2015, y: 458}} />
+      <PrevMarker position={{x: 139, y: 425}} /> */}
+      <NextMarkerr position={{x: 2250, y: 675}} />
+      <PreviousMarker position={{x: 30, y: 675}} />
     </div>
   );
 }
@@ -575,5 +577,104 @@ function ProductMarker({product, position}) {
         )}
       </div>
     </div>
+  );
+}
+
+function MarkerBase({position, href, label, svg, className}) {
+  const [scaledPos, setScaledPos] = useState(position);
+  const [randomDelay, setRandomDelay] = useState(0);
+
+  useEffect(() => {
+    setRandomDelay(Math.random() * 1.25);
+  }, []);
+
+  useEffect(() => {
+    function updatePosition() {
+      const img = document.getElementById('base-image');
+      if (img) {
+        const originalWidth = 2335;
+        if (window.innerWidth < originalWidth) {
+          setScaledPos(position);
+          return;
+        }
+        const currentWidth = img.clientWidth;
+        const scale = currentWidth / originalWidth;
+        setScaledPos({x: position.x * scale, y: position.y * scale});
+      }
+    }
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [position]);
+
+  return (
+    <div
+      className={`home-marker ${className}`}
+      style={{left: `${scaledPos.x}px`, top: `${scaledPos.y}px`}}
+    >
+      <div
+        className="svg-container"
+        style={{animationDelay: `-${randomDelay}s`}}
+        dangerouslySetInnerHTML={{__html: svg}}
+      ></div>
+      <a href={href} className="home-tooltip">
+        {label}
+      </a>
+    </div>
+  );
+}
+
+export function NextMarkerr({position}) {
+  const nextSvg = `
+    <svg fill="#ffffff" height="30px" width="30px" version="1.1" id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 459 459" stroke="#ffffff">
+      <g> <g>
+        <path d="M229.5,0C102.751,0,0,102.751,0,229.5S102.751,459,229.5,459C356.25,459,459,356.249,
+          459,229.5S356.25,0,229.5,0z M351.738,246.077c-0.063,0.071-0.122,0.144-0.185,
+          0.214c-0.659,0.723,4.184-4.144-85.051,85.091c-9.757,9.757-25.586,
+          9.77-35.356,0c-9.763-9.763-9.763-25.592,0-35.355l41.527-41.527h-146.7c-13.808,
+          0-25-11.193-25-25s11.192-25,25-25h146.701l-41.527-41.527c-9.763-9.763-9.763-25.592,
+          0-35.355c9.764-9.763,25.592-9.763,35.356,0c89.798,89.798,84.708,84.629,85.852,
+          86.022C360.134,223.129,359.904,236.87,351.738,246.077z"/>
+      </g> </g>
+    </svg>
+  `;
+
+  return (
+    <MarkerBase
+      position={position}
+      href="/apple-virtual-showroom"
+      label="Apple Virtual Showroom"
+      svg={nextSvg}
+      className="next-marker"
+    />
+  );
+}
+
+export function PreviousMarker({position}) {
+  const prevSvg = `
+    <svg fill="#ffffff" height="30px" width="30px" version="1.1" id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 459 459" stroke="#ffffff" transform="matrix(-1, 0, 0, 1, 0, 0)">
+      <g> <g>
+        <path d="M229.5,0C102.751,0,0,102.751,0,229.5S102.751,459,229.5,459C356.25,459,459,356.249,
+          459,229.5S356.25,0,229.5,0z M351.738,246.077c-0.063,0.071-0.122,0.144-0.185,
+          0.214c-0.659,0.723,4.184-4.144-85.051,85.091c-9.757,9.757-25.586,
+          9.77-35.356,0c-9.763-9.763-9.763-25.592,0-35.355l41.527-41.527h-146.7c-13.808,
+          0-25-11.193-25-25s11.192-25,25-25h146.701l-41.527-41.527c-9.763-9.763-9.763-25.592,
+          0-35.355c9.764-9.763,25.592-9.763,35.356,0c89.798,89.798,84.708,84.629,85.852,
+          86.022C360.134,223.129,359.904,236.87,351.738,246.077z"/>
+      </g> </g>
+    </svg>
+  `;
+
+  return (
+    <MarkerBase
+      position={position}
+      href="/home-appliances-showroom"
+      label="Home Appliances Showroom"
+      svg={prevSvg}
+      className="previous-marker"
+    />
   );
 }
