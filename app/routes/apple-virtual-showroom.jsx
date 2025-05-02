@@ -540,6 +540,24 @@ function ProductImageWithMarkers({ products }) {
         className="hello-gif-imac"
         style={{zIndex: '1'}}
       />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/original-822e368f018141c9af282d011781e5d0.gif?v=1746187824"
+        alt=""
+        className="macbook-apple"
+        style={{zIndex: '1'}}
+      />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/original-822e368f018141c9af282d011781e5d0.gif?v=1746187824"
+        alt=""
+        className="macbook-apple-1"
+        style={{zIndex: '1'}}
+      />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/original-822e368f018141c9af282d011781e5d0.gif?v=1746187824"
+        alt=""
+        className="macbook-apple-2"
+        style={{zIndex: '1'}}
+      />
     </div>
   );
 }

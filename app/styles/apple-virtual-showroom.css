@@ -385,3 +385,33 @@ nav.vr-header {
     transform: rotate3d(-5, 11, -4, 37deg);
     border-radius: 2px;
 }
+
+.macbook-apple {
+    position: absolute;
+    top: 700px;
+    left: 451px;
+    width: 99px;
+    height: 63px;
+    transform: rotate3d(-2, 10, 7, -31deg);
+    border-radius: 2px;
+}
+
+.macbook-apple-1 {
+    position: absolute;
+    top: 662px;
+    left: 561px;
+    width: 97px;
+    height: 61px;
+    transform: rotate3d(-2, 11.5, 7, -33deg);
+    border-radius: 2px;
+}
+
+.macbook-apple-2 {
+    position: absolute;
+    top: 609px;
+    left: 663px;
+    width: 101px;
+    height: 70px;
+    transform: rotate3d(-6, 10.5, 8, -31deg);
+    border-radius: 2px;
+}
