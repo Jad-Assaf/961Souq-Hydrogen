@@ -1830,13 +1830,14 @@ aside .cart-checkout-button {
   .search-results-container {
     width: 100% !important;
     border-radius: 0 !important;
+    height: 75vh;
   }
 
   .predictive-search-result {
     width: 90% !important;
+    height: 100%;
     margin: auto !important;
     padding: 20px 0 !important;
-    max-height: 75vh !important;
     overscroll-behavior: contain;
   }
 
