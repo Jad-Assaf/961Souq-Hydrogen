@@ -264,7 +264,6 @@ nav.vr-header {
 .vr-header__logo img {
     max-width: 100px;
     height: auto;
-    filter: invert(100%);
 }
 
 .image-container {

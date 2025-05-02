@@ -207,7 +207,7 @@ export default function ProductsImage() {
         <div className="vr-header__logo">
           <a href="/">
             <img
-              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Black-961souqLogo.png?v=1742979250"
+              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912"
               alt="961 Souq Logo"
               width={100}
               height={100}
