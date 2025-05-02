@@ -352,3 +352,13 @@ nav.vr-header {
         opacity: 0.7;
     }
 }
+
+.samsung-logo {
+    position: absolute;
+    top: 260px;
+    left: 2060px;
+    width: 200px;
+    height: auto;
+    transform: rotate3d(13, 11, 6, 39deg);
+    border-radius: 15px;
+}

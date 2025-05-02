@@ -524,6 +524,11 @@ function ProductImageWithMarkers({ products }) {
       <AppleMarker position={{ x: 1625, y: 250 }} /> */}
       <SamsungMarker position={{x: 2085, y: 470}} />
       <PrevMarker position={{x: 105, y: 395}} />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2f2c08966e531741d5a1e1fe465b6a4f.gif?v=1746181329"
+        alt=""
+        className='samsung-logo'
+      />
     </div>
   );
 }
