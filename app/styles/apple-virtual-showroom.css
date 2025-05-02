@@ -356,9 +356,9 @@ nav.vr-header {
 .samsung-logo {
     position: absolute;
     top: 260px;
-    left: 2060px;
-    width: 200px;
+    left: 2070px;
+    width: 175px;
     height: auto;
-    transform: rotate3d(13, 11, 6, 39deg);
+    transform: rotate3d(6, 4, 3, 37deg);
     border-radius: 15px;
 }
