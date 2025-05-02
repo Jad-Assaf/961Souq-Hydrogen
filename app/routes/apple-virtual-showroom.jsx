@@ -486,19 +486,19 @@ function ProductImageWithMarkers({ products }) {
   }, []);
 
   // Optional: Custom mobile scroll position
-  useEffect(() => {
-    function scrollToCustomPosition() {
-      const container = containerRef.current;
-      if (container && window.innerWidth < 768) {
-        container.scrollTo({
-          left: 300,
-          top: 0,
-          behavior: 'smooth',
-        });
-      }
-    }
-    setTimeout(scrollToCustomPosition, 200);
-  }, []);
+  // useEffect(() => {
+  //   function scrollToCustomPosition() {
+  //     const container = containerRef.current;
+  //     if (container && window.innerWidth < 768) {
+  //       container.scrollTo({
+  //         left: 300,
+  //         top: 0,
+  //         behavior: 'smooth',
+  //       });
+  //     }
+  //   }
+  //   setTimeout(scrollToCustomPosition, 200);
+  // }, []);
 
   return (
     <div className="image-container" ref={containerRef}>
