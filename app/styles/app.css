@@ -1830,7 +1830,8 @@ aside .cart-checkout-button {
   .search-results-container {
     width: 100% !important;
     border-radius: 0 !important;
-    height: 75vh;
+    height: auto;
+    max-height: 100vh;
   }
 
   .predictive-search-result {
