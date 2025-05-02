@@ -527,7 +527,12 @@ function ProductImageWithMarkers({ products }) {
       <img
         src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2f2c08966e531741d5a1e1fe465b6a4f.gif?v=1746181329"
         alt=""
-        className='samsung-logo'
+        className="samsung-logo"
+      />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vh1KrUr6Tvl1RFYYk6.webp?v=1746183187"
+        alt=""
+        className="gaming-img"
       />
     </div>
   );
