@@ -404,9 +404,9 @@ export default function ProductsImage() {
 
 function ProductImageWithMarkers({ products }) {
   const lowQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr3.jpg?v=1743659665&quality=10';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-new_100a4675-c36c-45e7-b461-f0b618aa818f.jpg?v=1746170577&quality=10';
   const highQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apr3_674194e5-99a8-4789-9f7e-0fda1957481b.png?v=1743675209&quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-new_100a4675-c36c-45e7-b461-f0b618aa818f.jpg?v=1746170577&quality=100';
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
   const containerRef = useRef(null);

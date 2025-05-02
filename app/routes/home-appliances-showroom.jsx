@@ -285,9 +285,9 @@ export default function ProductsImage() {
 
 function ProductImageWithMarkers({products}) {
   const lowQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances-showroom.jpg?v=1745827950&quality=10';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-new.jpg?v=1746170577&quality=10';
   const highQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances-showroom.jpg?v=1745827950&quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-new.jpg?v=1746170577&quality=100';
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
   const containerRef = useRef(null);

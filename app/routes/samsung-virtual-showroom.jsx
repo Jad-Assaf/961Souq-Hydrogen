@@ -213,9 +213,9 @@ export default function ProductsImage() {
 
 function ProductImageWithMarkers({ products }) {
   const lowQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apr_4.jpg?v=1743836953&quality=10';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-new_245f2596-cee1-4eec-a321-34356394fcc9.jpg?v=1746170577&quality=10';
   const highQualityUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apr_4.jpg?v=1743836953&quality=100';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-new_245f2596-cee1-4eec-a321-34356394fcc9.jpg?v=1746170577&quality=100';
   const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState(lowQualityUrl);
   const containerRef = useRef(null);
