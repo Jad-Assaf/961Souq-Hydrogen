@@ -11,7 +11,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-49_-Odyssey-OLED-G9-_G95SC_-4.jpg?v=1729343777',
     },
-    position: {x: 160, y: 665},
+    position: {x: 170, y: 670},
   },
   {
     id: '2',
@@ -21,7 +21,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/DQHD-Monitor-With-Quantum-Mini-LED-LS49AG950NMXZN_08d4da8c-3291-415b-9371-bb1017ce9077.jpg?v=1716805157',
     },
-    position: {x: 570, y: 520},
+    position: {x: 585, y: 525},
   },
   {
     id: '3',
@@ -31,7 +31,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/34_-Odyssey-OLED-G8-G85SB-LS34BG850SMXUE.jpg?v=1705924931',
     },
-    position: {x: 935, y: 395},
+    position: {x: 945, y: 400},
   },
   {
     id: '4',
@@ -40,7 +40,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QLED4KQ70CSmartTV.jpg?v=1697012176',
     },
-    position: {x: 1395, y: 375},
+    position: {x: 1400, y: 375},
   },
   {
     id: '5',
@@ -49,7 +49,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/QA65LS03BAUXTW_c34c8ee2-cb96-462e-ba6a-71098830aee2.jpg?v=1696945307',
     },
-    position: {x: 1705, y: 495},
+    position: {x: 1705, y: 475},
   },
   {
     id: '6',
@@ -59,7 +59,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Q930C_9b3ffcfe-3fbf-4f3b-8fd3-2a2e557a4deb.jpg?v=1743513633',
     },
-    position: {x: 1685, y: 545},
+    position: {x: 1685, y: 535},
   },
   {
     id: '7',
@@ -69,7 +69,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/2_9cf7615e-fb85-45e1-b819-b4bb1661130c.jpg?v=1666184541',
     },
-    position: {x: 2075, y: 600},
+    position: {x: 2070, y: 600},
   },
   {
     id: '8',
@@ -78,7 +78,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-galaxy-tab-a9.jpg?v=1708610760',
     },
-    position: {x: 470, y: 760},
+    position: {x: 475, y: 750},
   },
   {
     id: '9',
@@ -87,7 +87,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/galaxy-tab-a9-plus.jpg?v=1701181606',
     },
-    position: {x: 540, y: 730},
+    position: {x: 545, y: 720},
   },
   {
     id: '10',
@@ -97,7 +97,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-240676423-au-galaxy-tab-s10-plus-sm-x820-523193-sm-x826bzaaats-543559733--Download-Sour-zoom.webp?v=1743838509',
     },
-    position: {x: 685, y: 672},
+    position: {x: 690, y: 660},
   },
   {
     id: '11',
@@ -106,7 +106,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/541.jpg?v=1672391750',
     },
-    position: {x: 880, y: 600},
+    position: {x: 882, y: 590},
   },
   {
     id: '12',
@@ -115,7 +115,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-Galaxy-Tab-S9-Ultra_9021469e-72fe-4240-98ee-827365821b6a.jpg?v=1693984959',
     },
-    position: {x: 968, y: 565},
+    position: {x: 970, y: 555},
   },
   {
     id: '13',
@@ -124,7 +124,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Galaxy-Tab-S10-series_d6b5f100-7820-4751-8bb2-a5178805a069.jpg?v=1731324325',
     },
-    position: {x: 1060, y: 530},
+    position: {x: 1065, y: 518},
   },
   {
     id: '14',
@@ -133,7 +133,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-Galaxy-S24-Ultra-Titanium-Black_08a47853-d82b-437d-b14f-ac0e727d284f.jpg?v=1705665665',
     },
-    position: {x: 1268, y: 515},
+    position: {x: 1268, y: 505},
   },
   {
     id: '15',
@@ -142,7 +142,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Galaxy-S25-Ultra-27.jpg?v=1737627777',
     },
-    position: {x: 1308, y: 535},
+    position: {x: 1308, y: 525},
   },
   {
     id: '16',
@@ -151,7 +151,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-flip-6-Yellow-3.jpg?v=1721737695',
     },
-    position: {x: 1355, y: 557},
+    position: {x: 1355, y: 547},
   },
   {
     id: '17',
@@ -160,7 +160,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-Galaxy-Z-Fold6.jpg?v=1721740082',
     },
-    position: {x: 1430, y: 570},
+    position: {x: 1430, y: 565},
   },
   {
     id: '18',
@@ -169,7 +169,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/samsung-galaxy-watch-7.jpg?v=1721724215',
     },
-    position: {x: 1568, y: 660},
+    position: {x: 1585, y: 655},
   },
   {
     id: '19',
@@ -178,7 +178,7 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/products/222_64c0cd4e-4760-4df8-a035-5535d1d96dec.jpg?v=1673600586',
     },
-    position: {x: 1608, y: 680},
+    position: {x: 1650, y: 685},
   },
   {
     id: '20',
@@ -187,7 +187,16 @@ const products = [
     featuredImage: {
       url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-Galaxy-Buds3-Pro.jpg?v=1720182371',
     },
-    position: {x: 1648, y: 698},
+    position: {x: 1715, y: 715},
+  },
+  {
+    id: '21',
+    title: 'Samsung Galaxy SmartTag2',
+    handle: 'samsung-galaxy-smarttag2-black-1-pack-ei-t5600bbegww',
+    featuredImage: {
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Samsung-Galaxy-SmartTag2-5.jpg?v=1696666187',
+    },
+    position: {x: 1772, y: 745},
   },
 ];
 
@@ -330,8 +339,8 @@ function ProductImageWithMarkers({ products }) {
       ))}
       {/* <HomeMarker position={{ x: 540, y: 250 }} />
       <AppleMarker position={{ x: 1625, y: 250 }} /> */}
-      <SamsungMarker position={{ x: 2100, y: 413 }} />
-      <PrevMarker position={{ x: 155, y: 368 }} />
+      <SamsungMarker position={{ x: 2100, y: 405 }} />
+      <PrevMarker position={{ x: 162, y: 358 }} />
     </div>
   );
 }
