@@ -558,6 +558,24 @@ function ProductImageWithMarkers({ products }) {
         className="macbook-apple-2"
         style={{zIndex: '1'}}
       />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/wXYTTkzuHmLfs4JDSEQRwP.gif?v=1746192060"
+        alt=""
+        className="studio-display"
+        style={{zIndex: '1'}}
+      />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_9_yN4I_3Mg-XLtpNvi17jQ.gif?v=1746193964&quality=5"
+        alt=""
+        className="iphone-1"
+        style={{zIndex: '1'}}
+      />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vi5AhvxudP9SD1s96f.gif?v=1746193963&quality=5"
+        alt=""
+        className="iphone-2"
+        style={{zIndex: '1'}}
+      />
     </div>
   );
 }

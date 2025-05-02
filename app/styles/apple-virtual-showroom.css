@@ -415,3 +415,33 @@ nav.vr-header {
     transform: rotate3d(-6, 10.5, 8, -31deg);
     border-radius: 2px;
 }
+
+.studio-display {
+    position: absolute;
+    top: 332px;
+    left: 938px;
+    width: 119px;
+    height: 89px;
+    transform: rotate3d(-32, 23, -9, 45deg);
+    border-radius: 2px;
+}
+
+.iphone-1 {
+    position: absolute;
+    top: 371px;
+    left: 1418px;
+    width: 13px;
+    height: 29px;
+    transform: rotate3d(1, 2, 1, 40deg);
+    border-radius: 2px;
+}
+
+.iphone-2 {
+    position: absolute;
+    top: 390px;
+    left: 1468px;
+    width: 13px;
+    height: 29px;
+    transform: rotate3d(1, 2, 1, 40deg);
+    border-radius: 2px;
+}
