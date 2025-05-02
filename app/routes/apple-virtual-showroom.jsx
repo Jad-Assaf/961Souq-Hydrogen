@@ -534,6 +534,12 @@ function ProductImageWithMarkers({ products }) {
         alt=""
         className="gaming-img"
       />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/image_processing20220407-24085-zogxke.gif?v=1746186459"
+        alt=""
+        className="hello-gif-imac"
+        style={{zIndex: '1'}}
+      />
     </div>
   );
 }
