@@ -438,10 +438,20 @@ nav.vr-header {
 
 .iphone-2 {
     position: absolute;
-    top: 390px;
-    left: 1468px;
+    top: 392px;
+    left: 1472px;
     width: 13px;
-    height: 29px;
-    transform: rotate3d(1, 2, 1, 40deg);
+    height: 30px;
+    transform: rotate3d(0.8, 2, 1, 40deg);
+    border-radius: 2px;
+}
+
+.iphone-3 {
+    position: absolute;
+    top: 416px;
+    left: 1523px;
+    width: 13px;
+    height: 31px;
+    transform: rotate3d(0.7, 2, 1, 42deg);
     border-radius: 2px;
 }

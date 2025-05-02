@@ -576,6 +576,12 @@ function ProductImageWithMarkers({ products }) {
         className="iphone-2"
         style={{zIndex: '1'}}
       />
+      <img
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/5RCMjRW7sAJl0b5pWD.gif?v=1746193963&quality=5"
+        alt=""
+        className="iphone-3"
+        style={{zIndex: '1'}}
+      />
     </div>
   );
 }
