@@ -342,6 +342,30 @@ function ProductImageWithMarkers({ products }) {
       <AppleMarker position={{ x: 1625, y: 250 }} /> */}
       <SamsungMarker position={{x: 2100, y: 405}} />
       <PrevMarker position={{x: 162, y: 358}} />
+      <DeviceImage
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/erdtree-elden-ring.gif?v=1746266938&quality=50"
+        className="screen-1 inverted-radius"
+      />
+      <DeviceImage
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/INT9_PC_Valhalla-Combat-Montage-SHORT_Legal-ESRB-ezgif.com-resize.gif?v=1746273272&quality=50"
+        className="screen-2 inverted-radius-2"
+      />
+      <DeviceImage
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jett-valorant.gif?v=1746274237&quality=50"
+        className="screen-3 inverted-radius-3"
+      />
+      <DeviceImage
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/NEO-QLED-Picture-Quality_main3.gif?v=1746275291&quality=30"
+        className="screen-4"
+      />
+      <DeviceImage
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/topic_meet-the-frame-a-tv-designed-for-your-space_1_1_2_3.gif?v=1746276653&quality=30"
+        className="screen-5"
+      />
+      <DeviceImage
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/c221c756f2de42381c8b068a97cd6184.gif?v=1746277690&quality=30"
+        className="screen-6"
+      />
     </div>
   );
 }
@@ -665,3 +689,34 @@ function DragToMoveIndicator({containerRef}) {
     </div>
   );
 }
+
+const DeviceImage = ({src, className, zIndex}) => {
+  const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
+
+  useEffect(() => {
+    const baseImg = document.getElementById('base-image');
+    if (!baseImg) return;
+
+    // if it’s already loaded
+    if (baseImg.complete && baseImg.naturalWidth !== 0) {
+      setIsHighQualityLoaded(true);
+      return;
+    }
+
+    // otherwise listen for its load
+    const onLoad = () => setIsHighQualityLoaded(true);
+    baseImg.addEventListener('load', onLoad);
+    return () => baseImg.removeEventListener('load', onLoad);
+  }, []);
+
+  return (
+    <img
+      src={src}
+      alt=""
+      className={`device-common ${className || ''} ${
+        !isHighQualityLoaded ? 'blur' : ''
+      }`}
+      style={zIndex != null ? {zIndex} : undefined}
+    />
+  );
+};

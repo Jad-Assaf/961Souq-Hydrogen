@@ -526,11 +526,11 @@ function ProductImageWithMarkers({products}) {
       <PrevMarker position={{x: 105, y: 395}} />
       <>
         <DeviceImage
-          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2f2c08966e531741d5a1e1fe465b6a4f.gif?v=1746181329quality=50"
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2f2c08966e531741d5a1e1fe465b6a4f.gif?v=1746181329&quality=50"
           className="samsung-logo"
         />
         <DeviceImage
-          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vh1KrUr6Tvl1RFYYk6.webp?v=1746183187quality=50"
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vh1KrUr6Tvl1RFYYk6.webp?v=1746183187&quality=50"
           className="gaming-img"
         />
         <DeviceImage

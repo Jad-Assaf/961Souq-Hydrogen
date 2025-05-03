@@ -5,7 +5,7 @@
 }
 
 img {
-    transition: all 3s ease !important;
+    /* transition: all 3s ease !important; */
 }
 
 .showroom-image.blur,
@@ -542,4 +542,94 @@ nav.vr-header {
     width: 56px;
     height: 39px;
     transform: rotate3d(-0.57, 1, 1, 38deg) rotate(-90deg);
+}
+
+.screen-1 {
+    top: 557px;
+    left: 18px;
+    width: 312px;
+    height: 106px;
+    transform: rotate3d(-1, 2, 1, 326deg);
+}
+
+.inverted-radius {
+    --s: 160px;
+    aspect-ratio: 1;
+    background: #3FB8AF;
+    mask-image: radial-gradient(ellipse 550% var(--s) at bottom center, transparent 0%, transparent var(--s), black calc(var(--s) + 1px), black 100%);
+    mask-repeat: no-repeat;
+    mask-position: bottom center;
+    -webkit-mask-image: radial-gradient(ellipse 550% var(--s) at bottom center, transparent 0%, transparent var(--s), black calc(var(--s) + 1px), black 100%);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: bottom center;
+    clip-path: ellipse(100% 128px at 50% 122%);
+    -webkit-clip-path: ellipse(100% 128px at 50% 122%);
+}
+
+.screen-2 {
+    top: 402px;
+    left: 463px;
+    width: 262px;
+    height: 101px;
+    transform: rotate3d(-1, 0.7, 0.45, 318deg) rotate(3deg);
+}
+
+.inverted-radius-2 {
+    --s: 132px;
+    /* aspect-ratio: 1; */
+    background: #3FB8AF;
+    mask-image: radial-gradient(ellipse 579% var(--s) at bottom center, transparent 0%, transparent 110px, black calc(var(--s) + 1px), black 100%);
+    mask-repeat: no-repeat;
+    mask-position: bottom center;
+    -webkit-mask-image: radial-gradient(ellipse 579% var(--s) at bottom center, transparent 0%, transparent 110px, black calc(var(--s) + 1px), black 100%);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: bottom center;
+    clip-path: ellipse(110% 126px at 50% 126%);
+    -webkit-clip-path: ellipse(110% 126px at 50% 126%);
+}
+
+.screen-3 {
+    top: 287px;
+    left: 872px;
+    width: 159px;
+    height: 100px;
+    transform: rotate3d(-3, 3, 1, 317deg);
+}
+
+.inverted-radius-3 {
+    --s: 132px;
+    /* aspect-ratio: 1; */
+    background: #3FB8AF;
+    mask-image: radial-gradient(ellipse 579% var(--s) at bottom center, transparent 0%, transparent var(--s), black calc(var(--s) + 1px), black 100%);
+    mask-repeat: no-repeat;
+    mask-position: bottom center;
+    -webkit-mask-image: radial-gradient(ellipse 579% var(--s) at bottom center, transparent 0%, transparent var(--s), black calc(var(--s) + 1px), black 100%);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: bottom center;
+    clip-path: ellipse(105% 119px at 50% 121%);
+    -webkit-clip-path: ellipse(161% 127px at 48% 127%);
+}
+
+.screen-4 {
+    top: 261px;
+    left: 1318px;
+    width: 182px;
+    height: 131px;
+    transform: rotate3d(-9, -9, 3.3, 45deg) skewY(3deg);
+}
+
+.screen-5 {
+    top: 387px;
+    left: 1613px;
+    width: 203px;
+    height: 133px;
+    transform: rotate3d(-7, -7, 3.3, 44deg) skewY(2deg) rotate(-2deg);
+}
+
+.screen-6 {
+    top: 477px;
+    left: 1876px;
+    width: 402px;
+    height: 209px;
+    transform: rotate3d(-7, -7, 3.3, 44deg);
 }
