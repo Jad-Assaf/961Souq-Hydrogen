@@ -402,7 +402,7 @@ export default function ProductsImage() {
   );
 }
 
-function ProductImageWithMarkers({ products }) {
+function ProductImageWithMarkers({products}) {
   const lowQualityUrl =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-new_100a4675-c36c-45e7-b461-f0b618aa818f.jpg?v=1746170577&quality=10';
   const highQualityUrl =
@@ -524,136 +524,116 @@ function ProductImageWithMarkers({ products }) {
       <AppleMarker position={{ x: 1625, y: 250 }} /> */}
       <SamsungMarker position={{x: 2085, y: 470}} />
       <PrevMarker position={{x: 105, y: 395}} />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2f2c08966e531741d5a1e1fe465b6a4f.gif?v=1746181329quality=50"
-        alt=""
-        className="samsung-logo"
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vh1KrUr6Tvl1RFYYk6.webp?v=1746183187quality=50"
-        alt=""
-        className="gaming-img"
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/image_processing20220407-24085-zogxke.gif?v=1746186459quality=50"
-        alt=""
-        className="hello-gif-imac"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/original-822e368f018141c9af282d011781e5d0.gif?v=1746187824&quality=50"
-        alt=""
-        className="macbook-apple"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/25638ca8b85cccc2d210923f86f3368b.gif?v=1746257693&quality=50"
-        alt=""
-        className="macbook-apple-1"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/large-ezgif.com-video-to-gif-converter.gif?v=1746259968&quality=50"
-        alt=""
-        className="macbook-apple-2"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/large2-ezgif.com-video-to-gif-converter.gif?v=1746259971&quality=15"
-        alt=""
-        className="macbook-apple-3"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/large1-ezgif.com-video-to-gif-converter_1.gif?v=1746259972&quality=15"
-        alt=""
-        className="macbook-apple-4"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/becbca09cc81c9ecd1ce133c836b3f25.gif?v=1746261800&quality=15"
-        alt=""
-        className="macbook-apple-5"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_keQs3WyVqED4qEPBVapY2Q.gif?v=1746261801&quality=15"
-        alt=""
-        className="macbook-apple-6"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f64787a7832627863682f696d6167652f75706c6f61642f76313630353831343336352f627562626c655f6139636563622e676966.gif?v=1746261801&quality=15"
-        alt=""
-        className="macbook-apple-7"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Event-iphone16.gif?v=1746262473&quality=10"
-        alt=""
-        className="macbook-apple-8"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_IS9jtv_oJ95qqOkpzt3AIA.gif?v=1746262780&quality=50"
-        alt=""
-        className="macbook-apple-9"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/wXYTTkzuHmLfs4JDSEQRwP.gif?v=1746192060quality=50"
-        alt=""
-        className="studio-display"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_9_yN4I_3Mg-XLtpNvi17jQ.gif?v=1746193964&quality=5"
-        alt=""
-        className="iphone-1"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vi5AhvxudP9SD1s96f.gif?v=1746193963&quality=5"
-        alt=""
-        className="iphone-2"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/5RCMjRW7sAJl0b5pWD.gif?v=1746193963&quality=5"
-        alt=""
-        className="iphone-3"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Event-iphone16-ezgif.com-resize.gif?v=1746257235quality=50"
-        alt=""
-        className="iphone-4"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/live-wallpapers-collection.gif?v=1746257691&quality=50"
-        alt=""
-        className="ipad-1"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-event.gif?v=1746257693&quality=50"
-        alt=""
-        className="ipad-2"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tlMwVe.gif?v=1746257693&quality=50"
-        alt=""
-        className="ipad-3"
-        style={{zIndex: '1'}}
-      />
-      <img
-        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/25638ca8b85cccc2d210923f86f3368b.gif?v=1746257693&quality=50"
-        alt=""
-        className="ipad-4"
-        style={{zIndex: '1'}}
-      />
+      <>
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2f2c08966e531741d5a1e1fe465b6a4f.gif?v=1746181329quality=50"
+          className="samsung-logo"
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vh1KrUr6Tvl1RFYYk6.webp?v=1746183187quality=50"
+          className="gaming-img"
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/image_processing20220407-24085-zogxke.gif?v=1746186459quality=50"
+          className="hello-gif-imac"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/original-822e368f018141c9af282d011781e5d0.gif?v=1746187824&quality=50"
+          className="macbook-apple"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/25638ca8b85cccc2d210923f86f3368b.gif?v=1746257693&quality=50"
+          className="macbook-apple-1"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/large-ezgif.com-video-to-gif-converter.gif?v=1746259968&quality=50"
+          className="macbook-apple-2"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/large2-ezgif.com-video-to-gif-converter.gif?v=1746259971&quality=15"
+          className="macbook-apple-3"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/large1-ezgif.com-video-to-gif-converter_1.gif?v=1746259972&quality=15"
+          className="macbook-apple-4"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/becbca09cc81c9ecd1ce133c836b3f25.gif?v=1746261800&quality=15"
+          className="macbook-apple-5"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_keQs3WyVqED4qEPBVapY2Q.gif?v=1746261801&quality=15"
+          className="macbook-apple-6"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/68747470733a2f2f7265732e636c6f7564696e6172792e636f6d2f64787a7832627863682f696d6167652f75706c6f61642f76313630353831343336352f627562626c655f6139636563622e676966.gif?v=1746261801&quality=15"
+          className="macbook-apple-7"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Event-iphone16.gif?v=1746262473&quality=10"
+          className="macbook-apple-8"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_IS9jtv_oJ95qqOkpzt3AIA.gif?v=1746262780&quality=50"
+          className="macbook-apple-9"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/wXYTTkzuHmLfs4JDSEQRwP.gif?v=1746192060quality=50"
+          className="studio-display"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_9_yN4I_3Mg-XLtpNvi17jQ.gif?v=1746193964&quality=5"
+          className="iphone-1"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Vi5AhvxudP9SD1s96f.gif?v=1746193963&quality=5"
+          className="iphone-2"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/5RCMjRW7sAJl0b5pWD.gif?v=1746193963&quality=5"
+          className="iphone-3"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Event-iphone16-ezgif.com-resize.gif?v=1746257235quality=50"
+          className="iphone-4"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/live-wallpapers-collection.gif?v=1746257691&quality=50"
+          className="ipad-1"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-event.gif?v=1746257693&quality=50"
+          className="ipad-2"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tlMwVe.gif?v=1746257693&quality=50"
+          className="ipad-3"
+          zIndex={1}
+        />
+        <DeviceImage
+          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/25638ca8b85cccc2d210923f86f3368b.gif?v=1746257693&quality=50"
+          className="ipad-4"
+          zIndex={1}
+        />
+      </>
     </div>
   );
 }
@@ -784,7 +764,9 @@ function SamsungMarker({position}) {
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <a href='/samsung-virtual-showroom' className="home-tooltip">Samsung Showroom</a>
+      <a href="/samsung-virtual-showroom" className="home-tooltip">
+        Samsung Showroom
+      </a>
     </div>
   );
 }
@@ -827,7 +809,9 @@ function PrevMarker({position}) {
         className="pulsating-circle"
         style={{'--delay': `-${randomDelay}s`}}
       ></div>
-      <a href='/gaming-room' className="home-tooltip">Gaming Room</a>
+      <a href="/gaming-room" className="home-tooltip">
+        Gaming Room
+      </a>
     </div>
   );
 }
@@ -977,3 +961,34 @@ function DragToMoveIndicator({containerRef}) {
     </div>
   );
 }
+
+const DeviceImage = ({src, className, zIndex}) => {
+  const [isHighQualityLoaded, setIsHighQualityLoaded] = useState(false);
+
+  useEffect(() => {
+    const baseImg = document.getElementById('base-image');
+    if (!baseImg) return;
+
+    // if it’s already loaded
+    if (baseImg.complete && baseImg.naturalWidth !== 0) {
+      setIsHighQualityLoaded(true);
+      return;
+    }
+
+    // otherwise listen for its load
+    const onLoad = () => setIsHighQualityLoaded(true);
+    baseImg.addEventListener('load', onLoad);
+    return () => baseImg.removeEventListener('load', onLoad);
+  }, []);
+
+  return (
+    <img
+      src={src}
+      alt=""
+      className={`device-common ${className || ''} ${
+        !isHighQualityLoaded ? 'blur' : ''
+      }`}
+      style={zIndex != null ? {zIndex} : undefined}
+    />
+  );
+};

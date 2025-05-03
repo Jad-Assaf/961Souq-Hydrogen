@@ -4,13 +4,13 @@
     display: none;
 }
 
-.showroom-image {
-    z-index: 1;
-    transition: filter 0.5s ease-out;
+img {
+    transition: all 3s ease !important;
 }
 
-.showroom-image.blur {
-    filter: blur(20px);
+.showroom-image.blur,
+.blur {
+    filter: blur(8px);
 }
 
 .showroom-image {
@@ -19,7 +19,7 @@
     min-width: 2335px;
     max-width: 4096px;
     object-fit: cover;
-    transition: filter 0.5s ease-out, opacity 0.5s ease-out;
+    z-index: 1;
 }
 
 .svg-container {
@@ -376,202 +376,170 @@ nav.vr-header {
     border-radius: 15px;
 }
 
-.hello-gif-imac {
+/* New shared class with recurring declarations */
+.device-common {
     position: absolute;
+    border-radius: 2px;
+}
+
+/* Individual classes now only contain the unique properties */
+
+.hello-gif-imac {
     top: 461px;
     left: 582px;
     width: 124px;
     height: 70px;
     transform: rotate3d(-5, 11, -4, 37deg);
-    border-radius: 2px;
 }
 
 .macbook-apple {
-    position: absolute;
     top: 700px;
     left: 451px;
     width: 99px;
     height: 63px;
     transform: rotate3d(-2, 10, 7, -31deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-1 {
-    position: absolute;
     top: 662px;
     left: 561px;
     width: 97px;
     height: 61px;
     transform: rotate3d(-2, 11.5, 7, -33deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-2 {
-    position: absolute;
     top: 611px;
     left: 665.4px;
     width: 97.5px;
     height: 68px;
     transform: rotate3d(-2, 3.3, 3, -28deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-3 {
-    position: absolute;
     top: 530px;
     left: 897px;
     width: 90.5px;
     height: 65px;
     transform: rotate3d(-2, 4.3, 3, 329deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-4 {
-    position: absolute;
     top: 486px;
     left: 1023px;
     width: 85px;
     height: 63px;
     transform: rotate3d(-2, 4.3, 3, 329deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-5 {
-    position: absolute;
     top: 491px;
     left: 1393px;
     width: 74.5px;
     height: 65px;
     transform: rotate3d(0.9, 1, 0.9, 38deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-6 {
-    position: absolute;
     top: 543px;
     left: 1501px;
     width: 77.5px;
     height: 66px;
     transform: rotate3d(0.9, 1, 0.9, 38deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-7 {
-    position: absolute;
     top: 628px;
     left: 1678px;
     width: 87.5px;
     height: 70px;
     transform: rotate3d(0.9, 1, 0.9, 38deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-8 {
-    position: absolute;
     top: 680px;
     left: 1769px;
     width: 83.5px;
     height: 67px;
     transform: rotate3d(0.9, 1, 0.9, 38deg);
-    border-radius: 2px;
 }
 
 .macbook-apple-9 {
-    position: absolute;
     top: 727px;
     left: 1862px;
     width: 87px;
     height: 65px;
     transform: rotate3d(0.8, 1.01, 1.09, 34deg);
-    border-radius: 2px;
 }
 
 .studio-display {
-    position: absolute;
     top: 332px;
     left: 938px;
     width: 119px;
     height: 89px;
     transform: rotate3d(-32, 23, -9, 45deg);
-    border-radius: 2px;
 }
 
 .iphone-1 {
-    position: absolute;
     top: 371px;
     left: 1418px;
     width: 13px;
     height: 29px;
     transform: rotate3d(1, 2, 1, 40deg);
-    border-radius: 2px;
 }
 
 .iphone-2 {
-    position: absolute;
     top: 392px;
     left: 1472px;
     width: 13px;
     height: 30px;
     transform: rotate3d(0.8, 2, 1, 40deg);
-    border-radius: 2px;
 }
 
 .iphone-3 {
-    position: absolute;
     top: 416px;
     left: 1523px;
     width: 13px;
     height: 31px;
     transform: rotate3d(0.7, 2, 1, 42deg);
-    border-radius: 2px;
 }
 
 .iphone-4 {
-    position: absolute;
     top: 437px;
     left: 1575px;
     width: 13px;
     height: 32px;
     transform: rotate3d(0.7, 2, 1, 42deg);
-    border-radius: 2px;
 }
 
 .ipad-1 {
-    position: absolute;
     top: 485px;
     left: 1671px;
     width: 64px;
     height: 45px;
     transform: rotate3d(-0.4, 1, 1, 37deg) rotate(-90deg);
-    border-radius: 2px;
 }
 
 .ipad-2 {
-    position: absolute;
     top: 520px;
     left: 1735px;
     width: 55px;
     height: 39px;
     transform: rotate3d(-0.6, 1, 1, 39deg) rotate(-90deg);
-    border-radius: 2px;
 }
 
 .ipad-3 {
-    position: absolute;
     top: 556.5px;
     left: 1798.6px;
     width: 44px;
     height: 28px;
     transform: rotate3d(-0.6, 1, 1, 39deg) rotate(-90deg);
-    border-radius: 2px;
 }
 
 .ipad-4 {
-    position: absolute;
     top: 573.5px;
     left: 1859.5px;
     width: 56px;
     height: 39px;
     transform: rotate3d(-0.57, 1, 1, 38deg) rotate(-90deg);
-    border-radius: 2px;
 }
