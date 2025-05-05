@@ -5,7 +5,7 @@
 }
 
 img {
-    /* transition: all 3s ease !important; */
+    transition: all 3s ease !important;
 }
 
 .showroom-image.blur,
