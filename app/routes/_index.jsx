@@ -797,7 +797,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5games.webp?v=1744186504&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5games_copy.jpg?v=1746612204&quality=30"
                   alt=""
                   className="w-[65%]"
                 />
