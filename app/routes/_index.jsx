@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {defer, json} from '@shopify/remix-oxygen';
+import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
 import {CategorySlider} from '~/components/CollectionSlider';
@@ -19,8 +19,9 @@ import {
   monitorsMenu,
   tabletsMenu,
 } from '~/components/CollectionCircles';
-import MobileAppPopup from '~/components/MobileAppPopup';
+// import MobileAppPopup from '~/components/MobileAppPopup';
 import ScrollingSVGs from '~/components/ScrollingSVGs';
+import {GET_COLLECTION_BY_HANDLE_QUERY, GET_SIMPLE_COLLECTION_QUERY} from '../data/queries.ts'
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -83,6 +84,65 @@ export const meta = ({data}) => {
     ],
   });
 };
+
+export function shouldRevalidate({currentUrl, nextUrl}) {
+  return currentUrl.pathname !== nextUrl.pathname;
+}
+
+async function fetchCollectionByHandle(context, handle) {
+  const {collectionByHandle} = await context.storefront.query(
+    GET_COLLECTION_BY_HANDLE_QUERY,
+    {variables: {handle}, cache: context.storefront.CacheLong()},
+  );
+  return collectionByHandle || null;
+}
+
+async function fetchCollectionsByHandles(context, handles) {
+  const collectionPromises = handles.map(async (handle) => {
+    const {collectionByHandle} = await context.storefront.query(
+      GET_SIMPLE_COLLECTION_QUERY,
+      {variables: {handle}, cache: context.storefront.CacheLong()},
+    );
+    return collectionByHandle || null;
+  });
+  const collections = await Promise.all(collectionPromises);
+  return collections.filter(Boolean);
+}
+
+const getHandleFromUrl = (url) => {
+  const parts = url.split('/collections/');
+  if (parts.length < 2) return '';
+  let handle = parts[1].toLowerCase();
+  if (handle.endsWith('/')) {
+    handle = handle.slice(0, -1);
+  }
+  return handle;
+};
+
+async function loadCriticalData({context}) {
+  const {storefront} = context;
+  const menuHandles = MANUAL_MENU_HANDLES;
+  const {shop} = await storefront.query(
+    `#graphql
+      query ShopDetails {
+        shop {
+          name
+          description
+        }
+      }
+    `,
+    {cache: storefront.CacheLong()},
+  );
+  const [sliderCollections] = await Promise.all([
+    fetchCollectionsByHandles(context, menuHandles),
+  ]);
+  return {
+    sliderCollections,
+    title: shop.name,
+    description: shop.description,
+    url: 'https://961souq.com',
+  };
+}
 
 /**
  * @param {LoaderFunctionArgs} args
@@ -227,55 +287,6 @@ export async function loader(args) {
   );
 }
 
-export function shouldRevalidate({currentUrl, nextUrl}) {
-  return currentUrl.pathname !== nextUrl.pathname;
-}
-
-async function fetchCollectionByHandle(context, handle) {
-  const {collectionByHandle} = await context.storefront.query(
-    GET_COLLECTION_BY_HANDLE_QUERY,
-    {variables: {handle}, cache: context.storefront.CacheLong()},
-  );
-  return collectionByHandle || null;
-}
-
-async function fetchCollectionsByHandles(context, handles) {
-  const collectionPromises = handles.map(async (handle) => {
-    const {collectionByHandle} = await context.storefront.query(
-      GET_SIMPLE_COLLECTION_QUERY,
-      {variables: {handle}, cache: context.storefront.CacheLong()},
-    );
-    return collectionByHandle || null;
-  });
-  const collections = await Promise.all(collectionPromises);
-  return collections.filter(Boolean);
-}
-
-async function loadCriticalData({context}) {
-  const {storefront} = context;
-  const menuHandles = MANUAL_MENU_HANDLES;
-  const {shop} = await storefront.query(
-    `#graphql
-      query ShopDetails {
-        shop {
-          name
-          description
-        }
-      }
-    `,
-    {cache: storefront.CacheLong()},
-  );
-  const [sliderCollections] = await Promise.all([
-    fetchCollectionsByHandles(context, menuHandles),
-  ]);
-  return {
-    sliderCollections,
-    title: shop.name,
-    description: shop.description,
-    url: 'https://961souq.com',
-  };
-}
-
 const brandsData = [
   {
     name: 'Apple',
@@ -405,16 +416,6 @@ const brandsData = [
   },
 ];
 
-const getHandleFromUrl = (url) => {
-  const parts = url.split('/collections/');
-  if (parts.length < 2) return '';
-  let handle = parts[1].toLowerCase();
-  if (handle.endsWith('/')) {
-    handle = handle.slice(0, -1);
-  }
-  return handle;
-};
-
 export default function Homepage() {
   const {
     banners,
@@ -505,7 +506,6 @@ export default function Homepage() {
               ))}
             </div>
           </div>
-          {/* Wrap your CollectionCircles & TopProductSections in a container with fade transition */}
           <div
             style={{
               opacity: fade ? 0 : 1,
@@ -1155,74 +1155,3 @@ export default function Homepage() {
     </div>
   );
 }
-
-const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
-  query GetCollectionByHandle($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-      products(first: 10) {
-        nodes {
-          id
-          title
-          handle
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          images(first: 2) {
-            nodes {
-              url
-              altText
-            }
-          }
-          variants(first: 5) {
-            nodes {
-              id
-              availableForSale
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              selectedOptions {
-                name
-                value
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const GET_SIMPLE_COLLECTION_QUERY = `#graphql
-  query GetSimpleCollection($handle: String!) {
-    collectionByHandle(handle: $handle) {
-      id
-      title
-      handle
-      image {
-        url
-        altText
-      }
-    }
-  }
-`;
