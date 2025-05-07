@@ -157,9 +157,9 @@ export function ProductItem({product}) {
                 src={images[currentImageIndex]?.url}
                 alt={images[currentImageIndex]?.altText || 'Product Image'}
                 srcSet={`
-                  ${images[currentImageIndex]?.url}?width=300&quality=10 300w,
-                  ${images[currentImageIndex]?.url}?width=300&quality=10 600w,
-                  ${images[currentImageIndex]?.url}?width=300&quality=10 1200w
+                  ${images[currentImageIndex]?.url}&width=200 300w,
+                  ${images[currentImageIndex]?.url}&width=200 600w,
+                  ${images[currentImageIndex]?.url}&width=200 1200w
                 `}
                   sizes="(min-width: 45em) 20vw, 40vw"
                   width={180}
