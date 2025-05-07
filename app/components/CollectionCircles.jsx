@@ -151,7 +151,7 @@ export const gamingMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/cbd4f23fcac98d9bf7769fa0e8983881.jpg',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Sony-PlayStation-5-Pro-Console-3.jpg?v=1730897478',
       altText: 'Gaming Consoles',
     },
     title: 'Gaming Console',
