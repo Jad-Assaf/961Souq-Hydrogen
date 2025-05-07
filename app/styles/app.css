@@ -2115,6 +2115,27 @@ input.search-bar:focus-visible {
   width: 100%;
 }
 
+.product-image {
+  /* from styles.image */
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+
+  /* initial state for fade-in */
+  opacity: 0;
+  transition: opacity 0.2s linear;
+}
+
+/* when fadeIn becomes true */
+.product-image.loaded {
+  opacity: 1;
+}
+
+/* suppress transition on very first render */
+.product-image.no-transition {
+  transition: none;
+}
+
 .product-main {
   align-self: start;
   position: relative;

@@ -153,26 +153,22 @@ export function ProductItem({product}) {
               <p>Sold Out</p>
             </div>
             <div style={styles.imageWrapper}>
-              <Image
-                key={currentImageIndex} // re-mount the image when index changes
+              <img
                 src={images[currentImageIndex]?.url}
                 alt={images[currentImageIndex]?.altText || 'Product Image'}
-                aspectRatio="1/1"
-                sizes="(min-width: 45em) 20vw, 40vw"
                 srcSet={`
                   ${images[currentImageIndex]?.url}?width=300&quality=10 300w,
                   ${images[currentImageIndex]?.url}?width=300&quality=10 600w,
                   ${images[currentImageIndex]?.url}?width=300&quality=10 1200w
                 `}
-                width="180px"
-                height="180px"
-                loading="lazy"
-                style={{
-                  ...styles.image,
-                  opacity: fadeIn ? 1 : 0,
-                  transition: firstLoad ? 'none' : 'opacity 0.2s linear',
-                }}
-                className="product-image"
+                              sizes="(min-width: 45em) 20vw, 40vw"
+                              width={180}
+                              height={180}
+                              loading="lazy"
+                              className={`product-image
+                  ${fadeIn ? 'loaded' : ''}
+                  ${firstLoad ? 'no-transition' : ''}
+                `}
               />
             </div>
           </div>
