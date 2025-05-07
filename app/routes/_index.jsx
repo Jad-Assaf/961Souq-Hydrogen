@@ -703,7 +703,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lb-crystal-uhd-cu8000-ua85cu8000uxtw-536557081.png?v=1744183751&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lb-crystal-uhd-cu8000-ua85cu8000uxtw-536557081.png?v=1744183751&width=300"
                   alt=""
                 />
               </div>
@@ -719,7 +719,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/sa-en-q-series-soundbar-hw-q800d-hw-q800d-sa-540755812.png?v=1744184226&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/sa-en-q-series-soundbar-hw-q800d-hw-q800d-sa-540755812.png?v=1744184226&width=300"
                   alt=""
                 />
               </div>
@@ -735,7 +735,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pos-marshall-woburn-ii-bt-black-01_6bde2752-7413-4590-afdc-b72b5e5513b3.png?v=1744185509&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pos-marshall-woburn-ii-bt-black-01_6bde2752-7413-4590-afdc-b72b5e5513b3.png?v=1744185509&width=300"
                   alt=""
                 />
               </div>
@@ -780,7 +780,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-photo.png?v=1744186078&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-photo.png?v=1744186078&width=300"
                   alt=""
                   className="w-[70%]"
                 />
@@ -814,7 +814,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/PSVR2-thumbnail-01-en-22feb22.webp?v=1744186599&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/PSVR2-thumbnail-01-en-22feb22.webp?v=1744186599&width=300"
                   alt=""
                 />
               </div>
@@ -830,7 +830,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/playstation-accessories-keyart-01-en-24mar22.webp?v=1744186723&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/playstation-accessories-keyart-01-en-24mar22.webp?v=1744186723&width=300"
                   alt=""
                   className="w-auto"
                 />
@@ -855,7 +855,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/UX8406MA-DS76T_bundle_copy.png?v=1744187604&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/UX8406MA-DS76T_bundle_copy.png?v=1744187604&width=300"
                   alt=""
                   className="w-[85%]"
                 />
@@ -872,7 +872,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/400.png?v=1744187967&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/400.png?v=1744187967&width=300"
                   alt=""
                   className="w-auto"
                 />
@@ -889,7 +889,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/optiplex-13-5-no-odd-km5221w-franchise-1920x1440-hero.png?v=1744188131&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/optiplex-13-5-no-odd-km5221w-franchise-1920x1440-hero.png?v=1744188131&width=300"
                   alt=""
                 />
               </div>
@@ -905,7 +905,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/PC-Accessories-Banner-IMG.png?v=1744188353&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/PC-Accessories-Banner-IMG.png?v=1744188353&width=300"
                   alt=""
                   className="w-auto"
                 />
@@ -934,7 +934,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/L_Or-Barista-Sublime_copy.webp?v=1744196325&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/L_Or-Barista-Sublime_copy.webp?v=1744196325&width=300"
                   alt=""
                   className="w-[85%]"
                 />
@@ -951,7 +951,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GreenLion-Ultra-Blend-MixerGrinder_copy.webp?v=1744196325&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GreenLion-Ultra-Blend-MixerGrinder_copy.webp?v=1744196325&width=300"
                   alt=""
                   className="w-auto"
                 />
@@ -964,7 +964,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/LePresso-Smart-Electric-Kettle_copy.webp?v=1744196325&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/LePresso-Smart-Electric-Kettle_copy.webp?v=1744196325&width=300"
                   alt=""
                   className="w-[90%]"
                 />
@@ -981,7 +981,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Xiaomi-Smart-Air-Fryer-6.5L-1_copy.webp?v=1744196325&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Xiaomi-Smart-Air-Fryer-6.5L-1_copy.webp?v=1744196325&width=300"
                   alt=""
                   className="w-[85%]"
                 />
@@ -1010,7 +1010,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Supersonic_-hair-dryer-Professional-Edition-Black-Nickel-_-Free-Supersonic-Stand-_-Fly-Away-Attachment_copy.webp?v=1744199207&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Supersonic_-hair-dryer-Professional-Edition-Black-Nickel-_-Free-Supersonic-Stand-_-Fly-Away-Attachment_copy.webp?v=1744199207&width=300"
                   alt=""
                   className="w-[85%]"
                 />
@@ -1027,7 +1027,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/HS08_6a991f69-cf03-4e00-90d2-f0349d4f01e2_copy.webp?v=1744199207&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/HS08_6a991f69-cf03-4e00-90d2-f0349d4f01e2_copy.webp?v=1744199207&width=300"
                   alt=""
                   className="w-auto"
                 />
@@ -1044,7 +1044,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/BP04_1_copy.webp?v=1744199208&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/BP04_1_copy.webp?v=1744199208&width=300"
                   alt=""
                   className="w-[90%]"
                 />
@@ -1061,7 +1061,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Gen5detect-2_copy.webp?v=1744199207&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Gen5detect-2_copy.webp?v=1744199207&width=300"
                   alt=""
                   className="w-[95%]"
                 />
@@ -1090,7 +1090,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GoPro-Hero-4K-5_copy.webp?v=1744199968&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GoPro-Hero-4K-5_copy.webp?v=1744199968&width=300"
                   alt=""
                   className="w-[85%]"
                 />
@@ -1107,7 +1107,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Osmo-Action-5-Pro-3_copy.webp?v=1744199968&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Osmo-Action-5-Pro-3_copy.webp?v=1744199968&width=300"
                   alt=""
                   className="w-auto"
                 />
@@ -1124,7 +1124,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/SP-Adventure-bundle_copy.webp?v=1744199969&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/SP-Adventure-bundle_copy.webp?v=1744199969&width=300"
                   alt=""
                   className="w-[90%]"
                 />
@@ -1141,7 +1141,7 @@ export default function Homepage() {
                   loading="lazy"
                   width={150}
                   height={150}
-                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Insta360-3m-9.8ft-Extended-Edition-Selfie-Stick_944848fb-45f6-4ca2-a1f3-16384a99b81e_copy.webp?v=1744199968&quality=5"
+                  src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Insta360-3m-9.8ft-Extended-Edition-Selfie-Stick_944848fb-45f6-4ca2-a1f3-16384a99b81e_copy.webp?v=1744199968&width=300"
                   alt=""
                   className="w-[95%]"
                 />
