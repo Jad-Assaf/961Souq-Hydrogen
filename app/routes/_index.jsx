@@ -687,7 +687,7 @@ export default function Homepage() {
         <div className="collection-section-1">
           <img
             loading="lazy"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -764,7 +764,7 @@ export default function Homepage() {
         <div className="collection-section-1">
           <img
             loading="lazy"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -843,7 +843,7 @@ export default function Homepage() {
         <div className="collection-section-1">
           <img
             loading="lazy"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -918,7 +918,7 @@ export default function Homepage() {
         <div className="collection-section-1">
           <img
             loading="lazy"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -994,7 +994,7 @@ export default function Homepage() {
         <div className="collection-section-1">
           <img
             loading="lazy"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
             alt="Section Background"
             className="multiple-collection-bg"
           />
@@ -1074,7 +1074,7 @@ export default function Homepage() {
         <div className="collection-section-1">
           <img
             loading="lazy"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=75"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/background.jpg?v=1744117215&quality=50"
             alt="Section Background"
             className="multiple-collection-bg"
           />
