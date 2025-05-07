@@ -85,7 +85,6 @@ export async function loader({request, context}) {
         },
       },
     );
-
   } catch (error) {
     console.error('Loader error:', error);
     throw new Response('Failed to load data', {status: 500});
@@ -98,9 +97,9 @@ export async function loader({request, context}) {
 const processMenuItems = (items) => {
   return items.map((item) => ({
     ...item,
-    imageUrl: item.resource?.image?.src || null, // Extract image URL if available
-    altText: item.resource?.image?.altText || item.title, // Use altText or fallback to title
-    items: item.items ? processMenuItems(item.items) : [], // Recursively process submenus
+    imageUrl: item.resource?.image?.src || null,
+    altText: item.resource?.image?.altText || item.title,
+    items: item.items ? processMenuItems(item.items) : [],
   }));
 };
 
@@ -108,21 +107,18 @@ async function loadCriticalData({context}) {
   const {storefront} = context;
 
   try {
-    // Fetch header data using the HEADER_QUERY
-    // --- ADDED: cache: storefront.CacheLong() ---
     const header = await storefront.query(HEADER_QUERY, {
       variables: {headerMenuHandle: 'new-main-menu'},
-      cache: storefront.CacheLong(), // <-- This is the key performance-related change
+      cache: storefront.CacheLong(),
     });
 
-    // Process nested menus to extract images
     if (header?.menu?.items) {
       header.menu.items = processMenuItems(header.menu.items);
     }
 
     return {header};
   } catch (error) {
-    return {header: null}; // Fallback in case of error
+    return {header: null};
   }
 }
 
@@ -145,31 +141,28 @@ export function Layout({children}) {
   const nonce = useNonce();
   const data = useRouteLoaderData('root');
   const navigation = useNavigation();
-  const [nprogress, setNProgress] = useState(null); // Store NProgress instance
+  const [nprogress, setNProgress] = useState(null);
   const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
   useEffect(() => {
-    // Load NProgress once and set it in the state
     const loadNProgress = async () => {
       const {default: NProgress} = await import('nprogress');
       await import('nprogress/nprogress.css');
       NProgress.configure({showSpinner: true});
-      setNProgress(NProgress); // Set NProgress once it's loaded
+      setNProgress(NProgress);
     };
 
     if (!nprogress) {
-      loadNProgress(); // Only load NProgress the first time
+      loadNProgress();
     }
 
-    // Handle the route loading state
     if (navigation.state === 'loading' && nprogress) {
-      nprogress.start(); // Start progress bar
+      nprogress.start();
     } else if (nprogress) {
-      nprogress.done(); // Finish progress bar
+      nprogress.done();
     }
 
     return () => {
-      // Clean up NProgress when component unmounts or state changes
       if (nprogress) {
         nprogress.done();
       }
@@ -183,35 +176,33 @@ export function Layout({children}) {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
-        <Suspense fallback={null}>
-          <script
-            defer
-            nonce={nonce}
-            src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
-          ></script>
-        </Suspense>
-        <Suspense fallback={null}>
-          <script
-            defer
-            nonce={nonce}
-            dangerouslySetInnerHTML={{
-              __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-CB623RXLSE');
-        `,
-            }}
-          ></script>
-        </Suspense>
-        <Suspense fallback={null}>
-          <MetaPixel pixelId={PIXEL_ID} />
-        </Suspense>
+
+        {/* ——— removed Suspense wrappers so nonce is included on both server & client ——— */}
+        <script
+          defer
+          nonce={nonce}
+          src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
+        ></script>
+        <script
+          defer
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-CB623RXLSE');
+            `,
+          }}
+        ></script>
+        <MetaPixel pixelId={PIXEL_ID} />
+
       </head>
       <body>
         <Suspense fallback={null}>
           <ClarityTracker clarityId={clarityId} />
         </Suspense>
+
         {data ? (
           <Analytics.Provider
             cart={data.cart}
@@ -223,6 +214,7 @@ export function Layout({children}) {
         ) : (
           children
         )}
+
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
@@ -260,7 +252,6 @@ export function ErrorBoundary() {
     errorStatus,
   });
 
-  // Common error page styling
   const containerStyle = {
     display: 'flex',
     flexDirection: 'column',
@@ -306,7 +297,6 @@ export function ErrorBoundary() {
     e.target.style.color = '#232323';
   };
 
-  // Render the error page with appropriate status and message
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>{errorStatus}</h1>
