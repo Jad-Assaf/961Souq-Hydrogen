@@ -161,13 +161,11 @@ export function ProductItem({product}) {
                   ${images[currentImageIndex]?.url}?width=300&quality=10 600w,
                   ${images[currentImageIndex]?.url}?width=300&quality=10 1200w
                 `}
-                              sizes="(min-width: 45em) 20vw, 40vw"
-                              width={180}
-                              height={180}
-                              loading="lazy"
-                              className={`product-image
-                  ${fadeIn ? 'loaded' : ''}
-                  ${firstLoad ? 'no-transition' : ''}
+                  sizes="(min-width: 45em) 20vw, 40vw"
+                  width={180}
+                  height={180}
+                  loading="lazy"
+                  className={`product-image ${fadeIn ? 'loaded' : ''} ${firstLoad ? 'no-transition' : ''}
                 `}
               />
             </div>
