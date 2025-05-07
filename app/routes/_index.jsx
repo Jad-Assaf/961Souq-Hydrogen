@@ -753,13 +753,14 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Govee-RGBIC-Neon-TV-Backlight-7.jpg?v=1706092756&quality=10"
                   alt=""
-                  style={{width: '75%'}}
+                  className="w-3/4"
                 />
               </div>
               <p>RGB Lights</p>
             </a>
           </div>
         </div>
+
         <div className="collection-section-1">
           <img
             loading="lazy"
@@ -781,7 +782,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5-photo.png?v=1744186078&quality=5"
                   alt=""
-                  style={{width: '70%'}}
+                  className="w-[70%]"
                 />
               </div>
               <p>PS Consoles</p>
@@ -798,7 +799,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ps5games.webp?v=1744186504&quality=5"
                   alt=""
-                  style={{width: '65%'}}
+                  className="w-[65%]"
                 />
               </div>
               <p>PS Games</p>
@@ -831,13 +832,14 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/playstation-accessories-keyart-01-en-24mar22.webp?v=1744186723&quality=5"
                   alt=""
-                  style={{width: ''}}
+                  className="w-auto"
                 />
               </div>
               <p>PS Accessories</p>
             </a>
           </div>
         </div>
+
         <div className="collection-section-1">
           <img
             loading="lazy"
@@ -855,7 +857,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/UX8406MA-DS76T_bundle_copy.png?v=1744187604&quality=5"
                   alt=""
-                  style={{width: '85%'}}
+                  className="w-[85%]"
                 />
               </div>
               <p>Business Laptops</p>
@@ -872,7 +874,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/400.png?v=1744187967&quality=5"
                   alt=""
-                  style={{width: ''}}
+                  className="w-auto"
                 />
               </div>
               <p>Gaming Laptops</p>
@@ -905,13 +907,14 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/PC-Accessories-Banner-IMG.png?v=1744188353&quality=5"
                   alt=""
-                  style={{width: ''}}
+                  className="w-auto"
                 />
               </div>
               <p>PC Accessories</p>
             </a>
           </div>
         </div>
+
         <div className="collection-section-1">
           <img
             loading="lazy"
@@ -933,7 +936,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/L_Or-Barista-Sublime_copy.webp?v=1744196325&quality=5"
                   alt=""
-                  style={{width: '85%'}}
+                  className="w-[85%]"
                 />
               </div>
               <p>Coffee Makers</p>
@@ -950,7 +953,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GreenLion-Ultra-Blend-MixerGrinder_copy.webp?v=1744196325&quality=5"
                   alt=""
-                  style={{width: ''}}
+                  className="w-auto"
                 />
               </div>
               <p>Mixers & Blenders</p>
@@ -963,7 +966,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/LePresso-Smart-Electric-Kettle_copy.webp?v=1744196325&quality=5"
                   alt=""
-                  style={{width: '90%'}}
+                  className="w-[90%]"
                 />
               </div>
               <p>Kettles</p>
@@ -980,13 +983,14 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Xiaomi-Smart-Air-Fryer-6.5L-1_copy.webp?v=1744196325&quality=5"
                   alt=""
-                  style={{width: '85%'}}
+                  className="w-[85%]"
                 />
               </div>
               <p>Air Fryers</p>
             </a>
           </div>
         </div>
+
         <div className="collection-section-1">
           <img
             loading="lazy"
@@ -1008,7 +1012,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Supersonic_-hair-dryer-Professional-Edition-Black-Nickel-_-Free-Supersonic-Stand-_-Fly-Away-Attachment_copy.webp?v=1744199207&quality=5"
                   alt=""
-                  style={{width: '85%'}}
+                  className="w-[85%]"
                 />
               </div>
               <p>Hair Dryers</p>
@@ -1025,7 +1029,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/HS08_6a991f69-cf03-4e00-90d2-f0349d4f01e2_copy.webp?v=1744199207&quality=5"
                   alt=""
-                  style={{width: ''}}
+                  className="w-auto"
                 />
               </div>
               <p>Hair Straighteners</p>
@@ -1042,7 +1046,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/BP04_1_copy.webp?v=1744199208&quality=5"
                   alt=""
-                  style={{width: '90%'}}
+                  className="w-[90%]"
                 />
               </div>
               <p>Air Purifiers</p>
@@ -1059,13 +1063,14 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Gen5detect-2_copy.webp?v=1744199207&quality=5"
                   alt=""
-                  style={{width: '95%'}}
+                  className="w-[95%]"
                 />
               </div>
               <p>Vacuum Cleaners</p>
             </a>
           </div>
         </div>
+
         <div className="collection-section-1">
           <img
             loading="lazy"
@@ -1087,7 +1092,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GoPro-Hero-4K-5_copy.webp?v=1744199968&quality=5"
                   alt=""
-                  style={{width: '85%'}}
+                  className="w-[85%]"
                 />
               </div>
               <p>GoPro</p>
@@ -1104,7 +1109,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Osmo-Action-5-Pro-3_copy.webp?v=1744199968&quality=5"
                   alt=""
-                  style={{width: ''}}
+                  className="w-auto"
                 />
               </div>
               <p>DJI</p>
@@ -1121,7 +1126,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/SP-Adventure-bundle_copy.webp?v=1744199969&quality=5"
                   alt=""
-                  style={{width: '90%'}}
+                  className="w-[90%]"
                 />
               </div>
               <p>Action Cam Kits</p>
@@ -1138,7 +1143,7 @@ export default function Homepage() {
                   height={150}
                   src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Insta360-3m-9.8ft-Extended-Edition-Selfie-Stick_944848fb-45f6-4ca2-a1f3-16384a99b81e_copy.webp?v=1744199968&quality=5"
                   alt=""
-                  style={{width: '95%'}}
+                  className="w-[95%]"
                 />
               </div>
               <p>Sticks & Tripods</p>

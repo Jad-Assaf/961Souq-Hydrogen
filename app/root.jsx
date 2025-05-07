@@ -68,24 +68,21 @@ export async function loader({request, context}) {
     const criticalData = await loadCriticalData({request, context});
     const {storefront, env} = context;
 
-    return defer(
-      {
-        ...deferredData,
-        ...criticalData,
-        publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
-        shop: getShopAnalytics({
-          storefront,
-          publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
-        }),
-        consent: {
-          checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
-          storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-          country: storefront.i18n.country,
-          language: storefront.i18n.language,
-        },
+    return defer({
+      ...deferredData,
+      ...criticalData,
+      publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+      shop: getShopAnalytics({
+        storefront,
+        publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
+      }),
+      consent: {
+        checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+        storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
       },
-    );
-
+    });
   } catch (error) {
     console.error('Loader error:', error);
     throw new Response('Failed to load data', {status: 500});
@@ -183,35 +180,27 @@ export function Layout({children}) {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
-        <Suspense fallback={null}>
-          <script
-            defer
-            nonce={nonce}
-            src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
-          ></script>
-        </Suspense>
-        <Suspense fallback={null}>
-          <script
-            defer
-            nonce={nonce}
-            dangerouslySetInnerHTML={{
-              __html: `
+        <script
+          defer
+          nonce={nonce}
+          src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
+        ></script>
+        <script
+          defer
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'G-CB623RXLSE');
         `,
-            }}
-          ></script>
-        </Suspense>
-        <Suspense fallback={null}>
-          <MetaPixel pixelId={PIXEL_ID} />
-        </Suspense>
+          }}
+        ></script>
+        <MetaPixel pixelId={PIXEL_ID} />
       </head>
       <body>
-        <Suspense fallback={null}>
-          <ClarityTracker clarityId={clarityId} />
-        </Suspense>
+        <ClarityTracker clarityId={clarityId} />
         {data ? (
           <Analytics.Provider
             cart={data.cart}
