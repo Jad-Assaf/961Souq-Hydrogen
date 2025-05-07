@@ -1,26 +1,37 @@
 // ClarityTracker.js
-import React, { useEffect } from 'react';
-import { clarity } from 'react-microsoft-clarity';
+import React, {useEffect} from 'react';
+import {clarity} from 'react-microsoft-clarity';
 
-const ClarityTracker = ({ clarityId, userId, userProperties }) => {
-  
+// module‐scope flag prevents any double‐init
+let didInitClarity = false;
+
+const ClarityTracker = ({clarityId, userId, userProperties}) => {
   useEffect(() => {
-    // Initialize Clarity with the provided ID
-    clarity.init(clarityId);
+    // 1) bail if no ID or already initialized
+    if (!clarityId || didInitClarity) return;
 
-    // Optional: Set cookie consent if needed
+    // 2) init & consent
+    clarity.init(clarityId);
     clarity.consent();
 
-    // Optional: Start tracking user behavior
+    // 3) optionally identify the user
+    if (userId) {
+      clarity.identify(userId, userProperties);
+    }
+
+    // 4) start tracking
     clarity.start();
 
-    // Cleanup function to stop tracking when the component unmounts
+    // mark as done
+    didInitClarity = true;
+
+    // cleanup on unmount
     return () => {
       clarity.stop();
     };
-  }, [clarityId, userId, userProperties]);
+  }, [clarityId]); // only re-runs if clarityId itself changes
 
-  return null; // This component does not render anything
+  return null;
 };
 
 export default ClarityTracker;

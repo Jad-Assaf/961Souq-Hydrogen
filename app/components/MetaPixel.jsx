@@ -1,5 +1,5 @@
 // src/components/MetaPixelManual.jsx
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 import {useLocation} from 'react-router-dom';
 
 // --- Helper: Generate a unique event ID
@@ -36,7 +36,7 @@ const trackPageViewCAPI = async (eventId, extraData) => {
   const payload = {
     action_source: 'website',
     event_name: 'PageView',
-    event_id: eventId, // This should match the Pixel eventID
+    event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
       client_user_agent: navigator.userAgent,
@@ -56,107 +56,88 @@ const trackPageViewCAPI = async (eventId, extraData) => {
     body: JSON.stringify(payload),
   })
     .then((res) => res.json())
-    .catch((error) => {});
+    .catch(() => {});
 };
+
+const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
 
 const MetaPixel = ({pixelId}) => {
   const location = useLocation();
+  const didInitRef = useRef(false);
 
+  // 1) Load the pixel script only once
   useEffect(() => {
     if (!pixelId) return;
+    if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) return;
 
-    // Insert the Meta Pixel script
-    !(function (f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function () {
-        n.callMethod
-          ? n.callMethod.apply(n, arguments)
-          : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.defer = true;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(
-      window,
-      document,
-      'script',
-      'https://connect.facebook.net/en_US/fbevents.js',
-    );
+    const s = document.createElement('script');
+    s.defer = true;
+    s.src = SCRIPT_SRC;
+    document.head.appendChild(s);
+  }, [pixelId]);
 
-    // Initialize the Pixel
+  // 2) Initialize fbq & send first PageView exactly once
+  useEffect(() => {
+    if (!pixelId || didInitRef.current) return;
+
+    if (typeof fbq !== 'function') {
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod
+            ? n.callMethod.apply(n, arguments)
+            : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.defer = true;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', SCRIPT_SRC);
+    }
+
     fbq('init', pixelId);
-
-    // Get extra fields
+    const eventId = generateEventId();
     const fbp = getCookie('_fbp');
     const fbc = getCookie('_fbc');
     const external_id = getExternalId();
     const URL = window.location.href;
 
-    // Generate one event ID for the initial PageView
-    const eventId = generateEventId();
-
-    // Track PageView via Pixel with additional fields
-    fbq(
-      'track',
-      'PageView',
-      {
-        URL,
-        'Event id': eventId,
-        fbp,
-        fbc,
-        external_id,
-      },
-      {eventID: eventId},
-    );
-
-    // Also track PageView via Conversions API using the same event_id and extra fields
+    fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
     trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
+
+    didInitRef.current = true;
   }, [pixelId]);
 
-  // On route changes, track PageView events again (both Pixel & CAPI)
+  // 3) Fire a PageView on every route change
   useEffect(() => {
-    if (typeof fbq === 'function') {
-      const fbp = getCookie('_fbp');
-      const fbc = getCookie('_fbc');
-      const external_id = getExternalId();
-      const URL = window.location.href;
-      const eventId = generateEventId();
-      fbq(
-        'track',
-        'PageView',
-        {
-          URL,
-          'Event id': eventId,
-          fbp,
-          fbc,
-          external_id,
-        },
-        {eventID: eventId},
-      );
-      trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
-    }
+    if (typeof fbq !== 'function') return;
+
+    const eventId = generateEventId();
+    const fbp = getCookie('_fbp');
+    const fbc = getCookie('_fbc');
+    const external_id = getExternalId();
+    const URL = window.location.href;
+
+    fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
+    trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
   }, [location]);
 
   return (
-    <>
-      {/* Meta Pixel NoScript fallback */}
-      <noscript>
-        <img
-          height="1"
-          width="1"
-          style={{display: 'none'}}
-          src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
-          alt="Meta Pixel"
-        />
-      </noscript>
-    </>
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style={{display: 'none'}}
+        src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
+        alt="Meta Pixel"
+      />
+    </noscript>
   );
 };
 

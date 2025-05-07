@@ -362,10 +362,10 @@ function ProductImageWithMarkers({ products }) {
         src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/topic_meet-the-frame-a-tv-designed-for-your-space_1_1_2_3.gif?v=1746276653&quality=30"
         className="screen-5"
       />
-      <DeviceImage
+      {/* <DeviceImage
         src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/c221c756f2de42381c8b068a97cd6184.gif?v=1746277690&quality=30"
         className="screen-6"
-      />
+      /> */}
     </div>
   );
 }
