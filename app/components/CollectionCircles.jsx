@@ -25,10 +25,10 @@ const CollectionItem = ({collection, index, onSelect}) => {
       <div className="menu-item-image-wrapper">
         {collection.image && (
           <img
-            src={`${collection.image.url}?width=200&quality=10`}
-            srcSet={`${collection.image.url}?width=200&quality=10 300w,
-                     ${collection.image.url}?width=200&quality=10 600w,
-                     ${collection.image.url}?width=200&quality=10 1200w`}
+            src={`${collection.image.url}?width=200&quality=8`}
+            srcSet={`${collection.image.url}?width=200&quality=8 300w,
+                     ${collection.image.url}?width=200&quality=8 600w,
+                     ${collection.image.url}?width=200&quality=8 1200w`}
             alt={`${collection.image.altText || collection.title} Collection`}
             className="menu-item-image"
             width={150}
