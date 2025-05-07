@@ -14,24 +14,6 @@
     }
 }
 
-/* grid‑column selector buttons */
-.col-btn {
-    margin-right: 0.5rem;
-    padding: 0.1rem 0.5rem;
-    border-radius: 2px;
-    border: 1px solid #ccc;
-    transition: border-color 0.15s;
-}
-
-.col-btn:hover {
-    border-color: #2172af;
-}
-
-/* active / selected state */
-.col-btn.selected {
-    border: 2px solid #2172af;
-}
-
 .no-products-collection {
     padding: 100px 0;
 }
