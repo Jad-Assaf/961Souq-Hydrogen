@@ -302,15 +302,15 @@ html:has(.overlay.expanded) {
 }
 
 .scrolling-item img {
-  height: 100px;
-  width: 100px;
+  height: 75px;
+  width: 75px;
   background-color: #fff;
   border-radius: 50%;
   padding: 5px;
 
   @media (max-width: 768px) {
-    width: 75px;
-    height: 75px;
+    width: 65px;
+    height: 65px;
   }
 }
 
