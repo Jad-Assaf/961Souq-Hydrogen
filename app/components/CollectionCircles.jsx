@@ -93,7 +93,7 @@ export const appleMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/f74fe97487470214273fc892ff0d9dac.jpg?v=1714657017',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/f74fe97487470214273fc892ff0d9dac.jpg?v=1746620561',
       altText: 'Apple Mac Mini',
     },
     title: 'Apple Mac Mini',
@@ -111,7 +111,7 @@ export const appleMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/0b93f20be8c5baec875c87a48cd5f330.jpg?v=1714657020',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Watch-Ultra-2-2.jpg?v=1727879883',
       altText: 'Apple Watch',
     },
     title: 'Apple Watch',
