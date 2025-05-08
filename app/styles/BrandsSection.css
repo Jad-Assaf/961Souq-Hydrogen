@@ -9,29 +9,6 @@
     position: relative;
 }
 
-/* NAVIGATION BUTTONS */
-.circle-prev-button,
-.circle-next-button {
-    position: absolute;
-    top: 60%;
-    transform: translateY(-50%);
-    z-index: 10;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.circle-prev-button {
-    left: 0;
-}
-
-.circle-next-button {
-    right: 0;
-}
-
-/* HORIZONTAL SCROLL GRID */
-
-
 /* BRAND ITEM ANIMATION STATES */
 .brand-item {
     display: flex;
@@ -39,20 +16,12 @@
     align-items: center;
     opacity: 0;
     transform: scale(0.9);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: all 0.5s ease;
 }
 
 .brand-item.visible {
     opacity: 1;
     transform: scale(1);
-}
-
-/* IMAGE STYLES */
-.brand-image {
-    width: 125px;
-    height: 125px;
-    object-fit: contain;
-    display: block;
 }
 
 .brand-section .brand-grid.hidden {
@@ -64,15 +33,6 @@
     opacity: 1;
     transform: scale(1);
     transition: all 0.5s ease;
-}
-
-.brand-item:hover img {
-    transform: scale(1.01);
-}
-
-.container {
-    margin: 0 auto;
-    padding: 0 1rem;
 }
 
 .brand-grid {
@@ -90,19 +50,9 @@
     padding: 0 10px;
 }
 
-.brand-grid {
-    /* padding: 1rem 0; */
-}
-
-.brand-item {
-    transition: transform .5s linear, box-shadow .3s ease;
-}
-
-.brand-item:hover {
-    transform: scale(0.95);
-}
-
 .brand-item img {
+    object-fit: contain;
+    display: block;
     width: 125px;
     height: auto;
     border-radius: 50%;
