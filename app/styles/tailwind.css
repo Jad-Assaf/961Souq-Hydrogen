@@ -1,24 +1,4 @@
 /*! tailwindcss v4.0.0-alpha.17 | MIT License | https://tailwindcss.com */
-@layer theme {
-    :root {
-        --blur: 8px;
-        --blur-sm: 4px;
-        --blur-md: 12px;
-        --blur-lg: 16px;
-        --blur-xl: 24px;
-        --blur-2xl: 40px;
-        --blur-3xl: 64px;
-        --radius: .25rem;
-        --radius-sm: .125rem;
-        --radius-md: .375rem;
-        --radius-lg: .5rem;
-        --radius-xl: .75rem;
-        --radius-2xl: 1rem;
-        --radius-3xl: 1.5rem;
-        --radius-4xl: 2rem;
-    }
-}
-
 @layer base {
 
     *,
@@ -50,6 +30,28 @@
         text-decoration: inherit
     }
 
+    button,
+    input,
+    optgroup,
+    select,
+    textarea {
+        font: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        background: 0 0
+    }
+
+    ::file-selector-button {
+        font: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        background: 0 0
+    }
+
     input:where(:not([type=button], [type=reset], [type=submit])),
     select,
     textarea {
@@ -77,22 +79,7 @@
         box-shadow: none
     }
 
-    ::-webkit-inner-spin-button {
-        height: auto
-    }
-
-    ::-webkit-outer-spin-button {
-        height: auto
-    }
-
-    ::-webkit-search-decoration {
-        -webkit-appearance: none
-    }
-
-    summary {
-        display: list-item
-    }
-
+    
     ol,
     ul,
     menu {
@@ -109,33 +96,10 @@
     }
 
     :disabled {
-        cursor: default
-    }
-
-    img,
-    svg,
-    video,
-    canvas,
-    audio,
-    iframe,
-    embed,
-    object {
-        vertical-align: middle;
-        display: block
-    }
-
-    img,
-    video {
-        max-width: 100%;
-        height: auto
-    }
-
-    [hidden] {
-        display: none !important
+        cursor: not-allowed;
     }
 }
 
-@layer components;
 
 @layer utilities {
     .\!visible {
@@ -255,14 +219,6 @@
         width: 100%
     }
 
-    .transform {
-        transform: var(--tw-rotate-x)var(--tw-rotate-y)var(--tw-rotate-z)var(--tw-skew-x)var(--tw-skew-y)
-    }
-
-    .cursor-pointer {
-        cursor: pointer
-    }
-
     .flex-row {
         flex-direction: row
     }
@@ -277,12 +233,6 @@
 
     .justify-between {
         justify-content: space-between
-    }
-
-    .truncate {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden
     }
 
     .overflow-auto {
@@ -372,38 +322,6 @@
         transition-timing-function: var(--transition-timing-function-out, cubic-bezier(0, 0, .2, 1))
     }
 
-    .group-hover\:fill-red-800:is(:where(.group):hover *) {
-        fill: var(--color-red-800, #991b1b)
-    }
-
-    .group-hover\:fill-teal-800:is(:where(.group):hover *) {
-        fill: var(--color-teal-800, #115e59)
-    }
-
-    .group-active\:fill-red-600:is(:where(.group):active *) {
-        fill: var(--color-red-600, #dc2626)
-    }
-
-    .group-active\:fill-teal-600:is(:where(.group):active *) {
-        fill: var(--color-teal-600, #0d9488)
-    }
-
-    .group-active\:stroke-red-200:is(:where(.group):active *) {
-        stroke: var(--color-red-200, #fecaca)
-    }
-
-    .group-active\:stroke-teal-200:is(:where(.group):active *) {
-        stroke: var(--color-teal-200, #99f6e4)
-    }
-
-    .group-active\:duration-0:is(:where(.group):active *) {
-        transition-duration: 0s
-    }
-
-    .hover\:rotate-90:hover {
-        rotate: 90deg
-    }
-
     @media (width>=64rem) {
         .lg\:block {
             display: block
@@ -414,66 +332,5 @@
         .lg\:hidden {
             display: none
         }
-    }
-}
-
-@supports (-moz-orient:inline) {
-    @layer base {
-
-        *,
-        :before,
-        :after,
-        ::backdrop {
-            --tw-rotate-x: rotateX(0);
-            --tw-rotate-y: rotateY(0);
-            --tw-rotate-z: rotateZ(0);
-            --tw-skew-x: skewX(0);
-            --tw-skew-y: skewY(0);
-            --tw-border-style: solid;
-            --tw-blur: initial;
-            --tw-brightness: initial;
-            --tw-contrast: initial;
-            --tw-grayscale: initial;
-            --tw-hue-rotate: initial;
-            --tw-invert: initial;
-            --tw-opacity: initial;
-            --tw-saturate: initial;
-            --tw-sepia: initial
-        }
-    }
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-@keyframes ping {
-
-    75%,
-    to {
-        opacity: 0;
-        transform: scale(2)
-    }
-}
-
-@keyframes pulse {
-    50% {
-        opacity: .5
-    }
-}
-
-@keyframes bounce {
-
-    0%,
-    to {
-        animation-timing-function: cubic-bezier(.8, 0, 1, 1);
-        transform: translateY(-25%)
-    }
-
-    50% {
-        animation-timing-function: cubic-bezier(0, 0, .2, 1);
-        transform: none
     }
 }

@@ -213,7 +213,7 @@ export function FiltersDrawer({
           {({ open }) => (
             <>
               <DisclosureButton className="flex w-full justify-between items-center mb-2">
-                <span className="text-sm uppercase">{filter.label}</span>
+                <span className="text-sm">{filter.label}</span>
                 {open ? (
                   <IconCaretDown className="w-4 h-4" />
                 ) : (
