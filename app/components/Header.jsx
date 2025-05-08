@@ -399,11 +399,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               className="sign-in-link mobile-user-icon"
               aria-label="Account"
             >
-              <Suspense fallback={<UserIcon />}>
-                <Await resolve={isLoggedIn} errorElement={<UserIcon />}>
-                  {() => <UserIcon />}
-                </Await>
-              </Suspense>
+              <UserIcon />
             </NavLink>
             <CartToggle cart={cart} />
           </div>

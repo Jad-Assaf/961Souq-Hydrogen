@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
-import '..//styles/BannerSlideshow.css';
+import '../styles/BannerSlideshow.css';
 
 export function BannerSlideshow({banners, interval = 10000}) {
   const [current, setCurrent] = useState(0);
