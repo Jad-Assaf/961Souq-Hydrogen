@@ -1867,6 +1867,36 @@ aside .cart-checkout-button {
   z-index: 10;
 }
 
+/* extracted from styles.slideshow */
+.slideshow {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+/* extracted from styles.imageWrapper */
+.imageWrapper {
+  width: 100%;
+  height: auto;
+}
+
+/* extracted from styles.image */
+.image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* existing dynamic classes */
+.product-image.loaded {
+  opacity: 1;
+}
+
+.product-image.no-transition {
+  transition: none;
+}
+
 .sold-out-ban {
   display: none;
   position: absolute;

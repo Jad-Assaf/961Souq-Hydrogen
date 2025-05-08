@@ -688,7 +688,7 @@ export const audioMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/headsets_3ca0e802-135e-4a41-87bd-9aeb574a257e.jpg',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Razer-Kraken-V4-Pro-1.jpg?v=1744629056',
       altText: 'Headphones',
     },
     title: 'Headphones',
@@ -706,7 +706,7 @@ export const audioMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/speakers_7779c255-7f3b-408c-9e44-726650bda835.jpg',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Marshall-Stanmore-III-3.jpg?v=1733497796',
       altText: 'Speakers',
     },
     title: 'Speakers',
@@ -883,7 +883,7 @@ export const fitnessMenu = [
   {
     id: 8,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/068958ad9c591e260a1fd7c8aa4055be.jpg',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Fitbit-Ace-LTE-6.jpg?v=1730821849',
       altText: 'Fitbit Watches',
     },
     title: 'Fitbit Watches',
@@ -910,7 +910,7 @@ export const fitnessMenu = [
   {
     id: 11,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Porodo-Lifestyle-Smart-Voice-Jump-Skip-Rope.webp',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Porodo-Lifestyle-Smart-Voice-Jump-Skip-Rope.jpg?v=1708767815',
       altText: 'Fitness Equipment',
     },
     title: 'Fitness Equipment',

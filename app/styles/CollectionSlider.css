@@ -49,7 +49,7 @@
 }
 
 .collection .category-title {
-    color: #000;
+    color: #000 !important;
 }
 
 .category-title {
