@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
-import '..//styles/BannerSlideshow.css';
+import '../styles/BannerSlideshow.css';
 
 export function BannerSlideshow({banners, interval = 10000}) {
   const [current, setCurrent] = useState(0);
@@ -15,14 +15,12 @@ export function BannerSlideshow({banners, interval = 10000}) {
     [banners.length],
   );
 
-  // autoplay
   useEffect(() => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(next, interval);
     return () => clearInterval(timerRef.current);
   }, [interval, next]);
 
-  // swipe
   const onTouchStart = (e) => (touchStartX.current = e.touches[0].clientX);
   const onTouchEnd = (e) => {
     const diff = e.changedTouches[0].clientX - touchStartX.current;
@@ -32,6 +30,14 @@ export function BannerSlideshow({banners, interval = 10000}) {
 
   const slide = banners[current];
 
+  // define the widths you want to support
+  const desktopWidths = [600, 1000, 1200]; // can be any set of breakpoints :contentReference[oaicite:0]{index=0}
+  const mobileWidths = [400, 800]; // example mobile sizes :contentReference[oaicite:1]{index=1}
+
+  // helper to build a srcset string
+  const makeSrcSet = (url, widths) =>
+    widths.map((w) => `${url}&width=${w} ${w}w`).join(', ');
+
   return (
     <figure
       className="banner-slideshow"
@@ -40,22 +46,26 @@ export function BannerSlideshow({banners, interval = 10000}) {
     >
       <a href={slide.link} className="banner-link">
         <picture>
+          {/* desktop sources */}
           <source
             media="(min-width:1025px)"
-            srcSet={`${slide.desktopImageUrl}?quality=100`}
+            srcSet={makeSrcSet(slide.desktopImageUrl, desktopWidths)}
+            sizes="100vw"
           />
+          {/* mobile fallback */}
           <img
-            src={`${slide.mobileImageUrl}?quality=100`}
+            src={`${slide.mobileImageUrl}&width=${mobileWidths[0]}`}
+            srcSet={makeSrcSet(slide.mobileImageUrl, mobileWidths)}
+            sizes="100vw"
             alt={slide.alt || `Banner ${current + 1}`}
             className="banner-image"
             loading="eager"
             decoding="async"
-            fetchpriority="high"
+            fetchPriority="high"
           />
         </picture>
       </a>
 
-      {/* dots */}
       <ol className="indicator-dots">
         {banners.map((_, i) => (
           <li key={i}>
@@ -68,7 +78,6 @@ export function BannerSlideshow({banners, interval = 10000}) {
         ))}
       </ol>
 
-      {/* progress (CSS animation restarts because of key change) */}
       <span
         key={current}
         className="progress-bar"
