@@ -80,7 +80,7 @@
     flex-wrap: nowrap;
     flex-direction: row !important;
     justify-content: flex-start;
-    overflow-x: auto;
+    overflow: auto hidden;
     scrollbar-width: none;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
