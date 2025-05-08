@@ -2223,6 +2223,8 @@ input.search-bar:focus-visible {
 .home-next-button {
   position: absolute;
   top: 50%;
+  width: 36px;
+  height: 36px;
   transform: translateY(-50%);
   background: transparent;
   backdrop-filter: blur(3px);
