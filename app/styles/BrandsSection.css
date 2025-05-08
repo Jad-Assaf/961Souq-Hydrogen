@@ -1,1 +1,75 @@
-.brand-section{padding:25px 5px;background-color:#f9f9f9;margin-bottom:30px;width:100%;max-width:1500px;margin:0 auto 30px;border-radius:5px;position:relative}.brand-item{display:flex;justify-content:center;align-items:center;opacity:0;transform:scale(.9);transition:all .5s ease}.brand-item.visible{opacity:1;transform:scale(1)}.brand-section .brand-grid.hidden{opacity:0;transform:scale(.9)}.brand-section .brand-grid.visible{opacity:1;transform:scale(1);transition:all .5s ease}.brand-grid{display:flex;flex-wrap:nowrap;flex-direction:row!important;justify-content:flex-start;overflow:auto hidden;scrollbar-width:none;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;max-width:1500px;gap:16px;margin:auto;padding:0 10px}.brand-item img{object-fit:contain;display:block;width:125px;height:auto;border-radius:50%;max-width:unset!important;filter:invert(1)}@media (max-width:1024px){.brand-section{margin-bottom:50px!important}.brand-item img{transition:none}.brand-item img{width:100px}}
+.brand-section {
+    padding: 25px 5px;
+    background-color: #f9f9f9;
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto 30px;
+    border-radius: 5px;
+    position: relative;
+}
+
+/* BRAND ITEM ANIMATION STATES */
+.brand-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.5s ease;
+}
+
+.brand-item.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.brand-section .brand-grid.hidden {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.brand-section .brand-grid.visible {
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.5s ease;
+}
+
+.brand-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row !important;
+    justify-content: flex-start;
+    overflow: auto hidden;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    max-width: 1500px;
+    gap: 16px;
+    margin: auto;
+    padding: 0 10px;
+}
+
+.brand-item img {
+    object-fit: contain;
+    display: block;
+    width: 125px;
+    height: auto;
+    border-radius: 50%;
+    max-width: unset !important;
+    filter: invert(1);
+}
+
+@media (max-width: 1024px) {
+    .brand-section {
+        margin-bottom: 50px !important;
+    }
+
+    .brand-item img {
+        transition: none;
+    }
+
+    .brand-item img {
+        width: 100px;
+    }
+}
