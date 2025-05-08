@@ -52,7 +52,7 @@ h2 {
 
 .product, .search {
   background-color: #fff;
-  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   border-radius: 10px;
   padding: 75px 10px;
   margin: 10px auto 25px !important;
@@ -63,7 +63,7 @@ h2 {
 }
 .search {
   background-color: #fff;
-  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   border-radius: 10px;
   padding: 10px;
   margin: 10px auto 25px !important;
@@ -286,7 +286,7 @@ html:has(.overlay.expanded) {
   padding: 20px 5px;
   border-radius: 5px;
   position: relative;
-  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
 }
 
 .noise {
@@ -679,7 +679,7 @@ button {
   max-width: 1500px;
   margin: 0px auto 30px;
   padding: 30px 5px;
-  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   border-radius: 5px;
 }
 
