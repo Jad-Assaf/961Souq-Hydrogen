@@ -1,5 +1,5 @@
 .brand-section {
-    padding: 30px 10px;
+    padding: 2rem;
     background-color: #f9f9f9;
     margin-bottom: 30px;
     width: 100%;
@@ -7,6 +7,58 @@
     margin: 0 auto 30px;
     border-radius: 5px;
     position: relative;
+}
+
+/* NAVIGATION BUTTONS */
+.circle-prev-button,
+.circle-next-button {
+    position: absolute;
+    top: 60%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.circle-prev-button {
+    left: 0;
+}
+
+.circle-next-button {
+    right: 0;
+}
+
+/* HORIZONTAL SCROLL GRID */
+.brand-grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 1rem 0;
+}
+
+/* BRAND ITEM ANIMATION STATES */
+.brand-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.brand-item.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* IMAGE STYLES */
+.brand-image {
+    width: 125px;
+    height: 125px;
+    object-fit: contain;
+    display: block;
 }
 
 .brand-section .brand-grid.hidden {
