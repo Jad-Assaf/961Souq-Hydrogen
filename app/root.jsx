@@ -14,7 +14,7 @@ import {
 } from '@remix-run/react';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import appStyles from '~/styles/app.css?url';
-import tailwindCss from './styles/tailwind.css?url';
+// import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import React, {Suspense, useEffect, useState} from 'react';
@@ -41,7 +41,7 @@ const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 export function links() {
   return [
     {rel: 'stylesheet', href: appStyles},
-    {rel: 'stylesheet', href: tailwindCss},
+    // {rel: 'stylesheet', href: tailwindCss},
     {rel: 'preconnect', href: 'https://cdn.shopify.com'},
     {rel: 'preconnect', href: 'https://shop.app'},
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
