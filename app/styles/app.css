@@ -7,7 +7,9 @@ html {
 }
 
 body {
-  background-color: #fff;
+  background-color: #f6fbff;
+  margin: 0;
+  padding: 0;
 
   * {
     scrollbar-width: none !important;
@@ -16,6 +18,28 @@ body {
 
 main {
   background-color: #f6fbff;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 1rem;
 }
 
 .home {
@@ -1168,7 +1192,7 @@ button.reset:hover:not(:has(> *)) {
   background-color: #2172af;
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 8;
   box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 3px 0px;
 }
 
@@ -1494,7 +1518,7 @@ button.reset:hover:not(:has(> *)) {
   max-width: 500px;
   position: relative;
   transition: transform 0.5s ease, top 0.5s ease;
-  z-index: 1001;
+  z-index: 9;
 }
 
 .main-search.fixed-search {
@@ -1839,7 +1863,6 @@ aside .cart-checkout-button {
     height: 100%;
     margin: auto !important;
     padding: 20px 0 !important;
-    overscroll-behavior: contain;
   }
 
   .predictive-search-result-item a {
@@ -1980,7 +2003,7 @@ input.search-bar:focus-visible {
 
 .predictive-search-result {
   margin-bottom: 1rem;
-  padding: 20px 24px 0 24px;
+  padding: 30px 24px 0 24px;
   max-height: 750px;
   overflow-y: auto;
   overscroll-behavior: contain;

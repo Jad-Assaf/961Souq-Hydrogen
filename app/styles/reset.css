@@ -1,29 +1,5 @@
-body {
-  margin: 0;
-  padding: 0;
-}
+/* 
 
-h1,
-h2,
-p {
-  margin: 0;
-  padding: 0;
-}
-
-h1 {
-  font-size: 1.6rem;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-bottom: 2rem;
-  margin-top: 2rem;
-}
-
-h2 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-bottom: 1rem;
-}
 
 h4 {
   margin-top: 0.5rem;
@@ -78,7 +54,7 @@ fieldset {
   flex-direction: column;
   margin-bottom: 0.5rem;
   padding: 1rem;
-}
+} */
 
 /* form {
   max-width: 100%;
@@ -96,7 +72,7 @@ fieldset {
   padding: 0.5rem;
 } */
 
-legend {
+/* legend {
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
@@ -120,4 +96,4 @@ code {
   border-radius: 4px;
   font-family: monospace;
   padding: 0.25rem;
-}
+} */

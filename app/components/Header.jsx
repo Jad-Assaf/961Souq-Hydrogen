@@ -1,5 +1,5 @@
-import {Suspense, useEffect, useState, useRef} from 'react';
-import {Await, Link, NavLink} from '@remix-run/react';
+import {useEffect, useState, useRef} from 'react';
+import {Link, NavLink} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
 import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
@@ -663,9 +663,7 @@ function CartToggle({cart}) {
       onClick={() => open('cart')}
       aria-label="Open Cart"
     >
-      <Suspense fallback={<CartIcon />}>
-        <Await resolve={cart}>{() => <CartIcon />}</Await>
-      </Suspense>
+    <CartIcon />
     </button>
   );
 }
