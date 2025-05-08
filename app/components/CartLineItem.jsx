@@ -3,7 +3,6 @@ import {useVariantUrl} from '~/lib/variants';
 import {Link} from '@remix-run/react';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
-import '../styles/CartPage.css';
 import { truncateText } from './CollectionDisplay';
 
 
