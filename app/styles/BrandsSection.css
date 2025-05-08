@@ -30,13 +30,7 @@
 }
 
 /* HORIZONTAL SCROLL GRID */
-.brand-grid {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding: 1rem 0;
-}
+
 
 /* BRAND ITEM ANIMATION STATES */
 .brand-item {
@@ -91,9 +85,13 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     max-width: 1500px;
-    gap: 25px;
+    gap: 16px;
     margin: auto;
     padding: 0 10px;
+}
+
+.brand-grid {
+    /* padding: 1rem 0; */
 }
 
 .brand-item {

@@ -1,37 +1,26 @@
 import React, {useRef} from 'react';
-import {useInView} from 'react-intersection-observer'; // Import useInView
-import {Image} from '@shopify/hydrogen'; // Import the Shopify Image component
+import {useInView} from 'react-intersection-observer';
 import '../styles/BrandsSection.css';
 
 export default function BrandSection({brands}) {
   const {ref, inView} = useInView({
-    triggerOnce: true, // Trigger the animation only once
-    threshold: 0.1, // 10% of the element must be in view
+    triggerOnce: true,
+    threshold: 0.1,
   });
 
-  const gridRef = useRef(null); // Reference for the brand grid container
-
+  const gridRef = useRef(null);
   const scrollGrid = (distance) => {
-    if (gridRef.current) {
-      gridRef.current.scrollBy({left: distance, behavior: 'smooth'});
-    }
+    gridRef.current?.scrollBy({left: distance, behavior: 'smooth'});
   };
 
   return (
-    <section className="brand-section" ref={ref} style={{position: 'relative'}}>
+    <section className="brand-section" ref={ref}>
       <h2>Shop By Brand</h2>
 
-      {/* Previous Button */}
       <button
         className="circle-prev-button"
         onClick={() => scrollGrid(-600)}
-        style={{
-          position: 'absolute',
-          top: '60%',
-          left: '0',
-          transform: 'translateY(-50%)',
-          zIndex: 10,
-        }}
+        aria-label="Previous"
       >
         <CustomLeftArrow />
       </button>
@@ -39,53 +28,29 @@ export default function BrandSection({brands}) {
       <div
         className={`brand-grid ${inView ? 'visible' : 'hidden'}`}
         ref={gridRef}
-        style={{
-          display: 'flex',
-          overflowX: 'auto',
-          scrollBehavior: 'smooth',
-          gap: '16px',
-        }}
       >
         {brands.map((brand, index) => (
           <a
             key={index}
             href={brand.link}
-            className="brand-item"
-            style={{
-              opacity: inView ? 1 : 0,
-              transform: inView ? 'scale(1)' : 'scale(0.9)',
-              transition: `opacity 0.5s ease ${
-                index * 0.1
-              }s, transform 0.5s ease ${index * 0.1}s`,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
+            className={`brand-item ${inView ? 'visible' : 'hidden'}`}
           >
-            <Image
-              data={{
-                altText: brand.name, // Use the brand name as alt text
-                url: brand.image, // URL of the brand image
-              }}
-              width="125" // Set a reasonable width for brand logos
-              height="125" // Set a reasonable height for brand logos
-              sizes="(min-width: 45em) 10vw, 20vw" // Responsive sizes
+            <img
+              src={`${brand.image}&width=150`}
+              alt={brand.name}
+              width={125}
+              height={125}
+              className="brand-image"
+              loading="lazy"
             />
           </a>
         ))}
       </div>
 
-      {/* Next Button */}
       <button
         className="circle-next-button"
         onClick={() => scrollGrid(600)}
-        style={{
-          position: 'absolute',
-          top: '60%',
-          right: '0',
-          transform: 'translateY(-50%)',
-          zIndex: 10,
-        }}
+        aria-label="Next"
       >
         <CustomRightArrow />
       </button>
@@ -93,7 +58,6 @@ export default function BrandSection({brands}) {
   );
 }
 
-// Arrow Icons
 const CustomLeftArrow = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -104,7 +68,7 @@ const CustomLeftArrow = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <polyline points="15 18 9 12 15 6"></polyline>
+    <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
@@ -118,6 +82,6 @@ const CustomRightArrow = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <polyline points="9 18 15 12 9 6"></polyline>
+    <polyline points="9 18 15 12 9 6" />
   </svg>
 );
