@@ -7,6 +7,7 @@
     margin: 0 auto 30px;
     border-radius: 5px;
     position: relative;
+    box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
 }
 
 /* BRAND ITEM ANIMATION STATES */
@@ -72,4 +73,8 @@
     .brand-item img {
         width: 100px;
     }
+}
+
+.circle-next-button {
+    right: 0;
 }

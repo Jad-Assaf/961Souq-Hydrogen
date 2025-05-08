@@ -4,6 +4,7 @@
     margin-inline: auto;
     overflow: hidden;
     border-radius: 5px;
+    box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
 }
 
 /* image */

@@ -46,8 +46,7 @@ h2 {
   max-width: 1500px;
   margin: 10px auto 25px;
   padding: 5px;
-  background-color: #fff;
-  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  background-color: transparent;
   border-radius: 10px;
 }
 
@@ -280,13 +279,14 @@ html:has(.overlay.expanded) {
 
 .scrolling-container {
   max-width: 1500px;
-  margin: 20px auto 0;
+  margin: 30px auto 0;
   text-align: center;
   overflow: hidden;
   background-color: #3d4856;
   padding: 20px 5px;
   border-radius: 5px;
   position: relative;
+  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
 }
 
 .noise {
@@ -383,6 +383,7 @@ html:has(.overlay.expanded) {
   min-height: 190px;
   max-height: 190px;
   position: relative;
+  
 
   @media (max-width: 1024px) {
     border-radius: 0 0 5px 5px !important;
@@ -512,7 +513,7 @@ button {
 
 .banner-slideshow {
   height: 20vw;
-  max-height: 300px;
+  max-height: 298px;
 }
 
 .desktop-banners {
@@ -674,8 +675,12 @@ button {
 
 .collection-section {
   position: relative;
+  background-color: #fff;
   max-width: 1500px;
-  margin: 50px auto;
+  margin: 0px auto 30px;
+  padding: 30px 5px;
+  box-shadow: rgb(0 69 255 / 25%) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  border-radius: 5px;
 }
 
 .collection-section h3 {
