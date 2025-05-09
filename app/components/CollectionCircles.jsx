@@ -202,15 +202,6 @@ export const gamingMenu = [
 
 export const laptopsMenu = [
   {
-    id: 1,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/be78f4b09d08ca7c9af85a5bda2b2066.jpg?v=1714656985',
-      altText: 'Acer Laptops',
-    },
-    title: 'Acer Laptops',
-    url: '/collections/acer-laptops',
-  },
-  {
     id: 2,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/6573823c46feafed973c1af406eff3ac.jpg?v=1714656986',
@@ -218,24 +209,6 @@ export const laptopsMenu = [
     },
     title: 'Asus Laptops',
     url: '/collections/asus-laptops',
-  },
-  {
-    id: 3,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/402c7e42624f70fb506dc8e2ba6ff5d0.jpg?v=1714656983',
-      altText: 'Dell Laptops',
-    },
-    title: 'Dell Laptops',
-    url: '/collections/dell-laptops',
-  },
-  {
-    id: 4,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/c70dff45e570d9e5d8f15ed6553009fb.png?v=1714656977',
-      altText: 'HP Laptops',
-    },
-    title: 'HP Laptops',
-    url: '/collections/hp-laptops',
   },
   {
     id: 5,
@@ -264,6 +237,33 @@ export const laptopsMenu = [
     title: 'MSI Laptops',
     url: '/collections/msi-laptops',
   },
+  {
+    id: 3,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/402c7e42624f70fb506dc8e2ba6ff5d0.jpg?v=1714656983',
+      altText: 'Dell Laptops',
+    },
+    title: 'Dell Laptops',
+    url: '/collections/dell-laptops',
+  },
+  {
+    id: 4,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/c70dff45e570d9e5d8f15ed6553009fb.png?v=1714656977',
+      altText: 'HP Laptops',
+    },
+    title: 'HP Laptops',
+    url: '/collections/hp-laptops',
+  },
+  {
+    id: 1,
+    image: {
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/be78f4b09d08ca7c9af85a5bda2b2066.jpg?v=1714656985',
+      altText: 'Acer Laptops',
+    },
+    title: 'Acer Laptops',
+    url: '/collections/acer-laptops',
+  }
 ];
 
 export const desktopsMenu = [
@@ -594,15 +594,15 @@ export const mobilesMenu = [
     title: 'Xiaomi Mobile Phones',
     url: '/collections/xiaomi-mobile-phones',
   },
-  {
-    id: 6,
-    image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/infinix.jpg?v=1714657080',
-      altText: 'Infinix Mobile Phones',
-    },
-    title: 'Infinix Mobile Phones',
-    url: '/collections/infinix',
-  },
+  // {
+  //   id: 6,
+  //   image: {
+  //     url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/infinix.jpg?v=1714657080',
+  //     altText: 'Infinix Mobile Phones',
+  //   },
+  //   title: 'Infinix Mobile Phones',
+  //   url: '/collections/infinix',
+  // },
   {
     id: 7,
     image: {
