@@ -1730,7 +1730,7 @@ button.reset:hover:not(:has(> *)) {
   background-color: #2172af;
   position: sticky;
   top: 0;
-  z-index: 8;
+  z-index: 1;
   box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 3px 0px;
 }
 
@@ -2056,7 +2056,7 @@ button.reset:hover:not(:has(> *)) {
   max-width: 500px;
   position: relative;
   transition: transform 0.5s ease, top 0.5s ease;
-  z-index: 9;
+  z-index: 2;
 }
 
 .main-search.fixed-search {
@@ -3026,6 +3026,12 @@ input[type="checkbox"] {
   background-color: #fff;
   border-radius: 5px;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+
+  @media (max-width: 1024px) {
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
 }
 
 /* For screens lower than 650px: show only buttons 1 and 2 */
