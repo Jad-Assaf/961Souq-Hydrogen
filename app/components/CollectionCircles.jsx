@@ -27,10 +27,7 @@ const CollectionItem = ({collection, index, onSelect, isActive}) => {
       }}
       className={`menu-item-container ${isLoading ? 'loading' : ''}`}
     >
-      <div
-        /* add conditional class for active state */
-        className={`menu-item-image-wrapper ${isActive ? 'active-mobile' : ''}`}
-      >
+      <div className={`menu-item-image-wrapper ${isActive ? 'active' : ''}`}>
         {collection.image && (
           <img
             src={`${collection.image.url}&width=150`}
@@ -1197,7 +1194,7 @@ export const CollectionCircles = ({
           ></rect>
         </svg>
       </div>
-      {collections.length && hasOverflow ? (
+      {collections.length && hasOverflow && (
         <button
           className="circle-prev-button"
           onClick={() => scrollSlider(-600)}
@@ -1210,7 +1207,7 @@ export const CollectionCircles = ({
         >
           <CustomLeftArrow />
         </button>
-      ) : null}
+      )}
 
       <div
         className="animated-menu-item"
@@ -1218,11 +1215,10 @@ export const CollectionCircles = ({
       >
         <div className="homeSlider-col-container" ref={containerRef}>
           {collections.length ? (
-            collections.map((c, i) => (
+            collections.map((c) => (
               <CollectionItem
                 key={c.id}
                 collection={c}
-                index={i}
                 onSelect={onCollectionSelect}
                 isActive={
                   !!selectedCollection && c.url === selectedCollection.url
@@ -1235,7 +1231,7 @@ export const CollectionCircles = ({
         </div>
       </div>
 
-      {collections.length && hasOverflow ? (
+      {collections.length && hasOverflow && (
         <button
           className="circle-next-button"
           onClick={() => scrollSlider(600)}
@@ -1248,7 +1244,7 @@ export const CollectionCircles = ({
         >
           <CustomRightArrow />
         </button>
-      ) : null}
+      )}
     </div>
   );
 };

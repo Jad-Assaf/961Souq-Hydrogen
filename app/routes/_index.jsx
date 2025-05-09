@@ -21,7 +21,10 @@ import {
 } from '~/components/CollectionCircles';
 // import MobileAppPopup from '~/components/MobileAppPopup';
 import ScrollingSVGs from '~/components/ScrollingSVGs';
-import {GET_COLLECTION_BY_HANDLE_QUERY, GET_SIMPLE_COLLECTION_QUERY} from '../data/queries.ts'
+import {
+  GET_COLLECTION_BY_HANDLE_QUERY,
+  GET_SIMPLE_COLLECTION_QUERY,
+} from '../data/queries.ts';
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -536,6 +539,7 @@ export default function Homepage() {
           {/* Apple Group */}
           <CollectionCircles
             collections={appleMenu}
+            selectedCollection={selectedApple}
             onCollectionSelect={setSelectedApple}
           />
           {selectedApple &&
@@ -551,6 +555,7 @@ export default function Homepage() {
           {/* Gaming Group */}
           <CollectionCircles
             collections={gamingMenu}
+            selectedCollection={selectedGaming}
             onCollectionSelect={setSelectedGaming}
           />
           {selectedGaming &&
@@ -566,6 +571,7 @@ export default function Homepage() {
           {/* Laptops Group */}
           <CollectionCircles
             collections={laptopsMenu}
+            selectedCollection={selectedLaptops}
             onCollectionSelect={setSelectedLaptops}
           />
           {selectedLaptops &&
@@ -581,6 +587,7 @@ export default function Homepage() {
           {/* Monitors Group */}
           <CollectionCircles
             collections={monitorsMenu}
+            selectedCollection={selectedMonitors}
             onCollectionSelect={setSelectedMonitors}
           />
           {selectedMonitors &&
@@ -596,6 +603,7 @@ export default function Homepage() {
           {/* Mobiles Group */}
           <CollectionCircles
             collections={mobilesMenu}
+            selectedCollection={selectedMobiles}
             onCollectionSelect={setSelectedMobiles}
           />
           {selectedMobiles &&
@@ -611,6 +619,7 @@ export default function Homepage() {
           {/* Tablets Group */}
           <CollectionCircles
             collections={tabletsMenu}
+            selectedCollection={selectedTablets}
             onCollectionSelect={setSelectedTablets}
           />
           {selectedTablets &&
@@ -626,6 +635,7 @@ export default function Homepage() {
           {/* Audio Group */}
           <CollectionCircles
             collections={audioMenu}
+            selectedCollection={selectedAudio}
             onCollectionSelect={setSelectedAudio}
           />
           {selectedAudio &&
@@ -641,6 +651,7 @@ export default function Homepage() {
           {/* Fitness Group */}
           <CollectionCircles
             collections={fitnessMenu}
+            selectedCollection={selectedFitness}
             onCollectionSelect={setSelectedFitness}
           />
           {selectedFitness &&
@@ -656,6 +667,7 @@ export default function Homepage() {
           {/* Cameras Group */}
           <CollectionCircles
             collections={camerasMenu}
+            selectedCollection={selectedCameras}
             onCollectionSelect={setSelectedCameras}
           />
           {selectedCameras &&
@@ -671,6 +683,7 @@ export default function Homepage() {
           {/* Home Appliances Group */}
           <CollectionCircles
             collections={homeAppliancesMenu}
+            selectedCollection={selectedHomeAppliances}
             onCollectionSelect={setSelectedHomeAppliances}
           />
           {selectedHomeAppliances &&
