@@ -94,7 +94,7 @@ export function ShopifyFilterForm({filters}) {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 side-filter">
       {filters.map((filter) => {
         const urlKey = getUrlKey(filter.id);
         // Get all current values for this filter key.

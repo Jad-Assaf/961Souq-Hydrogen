@@ -4,9 +4,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #fff;
+    background-color: transparent;
     margin: 10px auto 0;
-    box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
     border-radius: 10px;
 
     @media (max-width: 1024px) {
@@ -75,7 +74,7 @@ button#headlessui-menu-button-\:R3lab5\: {
     flex-wrap: wrap;
     gap: 10px;
     max-width: 1200px;
-    margin: 20px auto auto auto;
+    margin: 0px auto auto auto;
     row-gap: 30px;
 }
 
@@ -283,6 +282,10 @@ button.layout-buttons.first-btn svg {
 .product-item-collection {
     text-align: center;
     text-decoration: none;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+    padding: 0 20px;
 }
 
 .collection h4 {

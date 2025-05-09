@@ -5,17 +5,6 @@ import React, {useEffect, useRef, useState} from 'react';
 const CollectionItem = ({collection, index, onSelect, isActive}) => {
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleImageLoad = () => {
-    setIsLoading(false);
-  };
-
-  const handleClick = (e) => {
-    if (onSelect) {
-      e.preventDefault(); // Prevent the default navigation
-      onSelect(collection); // Pass the clicked collection upward
-    }
-  };
-
   return (
     <Link
       to={collection.url}

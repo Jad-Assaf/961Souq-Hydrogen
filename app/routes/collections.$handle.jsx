@@ -371,7 +371,39 @@ export default function Collection() {
           </div>
         </div>
       )}
-
+      {/* Grid Columns Options */}
+      <div className="view-sort">
+        {/* Sort Options */}
+        <div className="sort-options">
+          <label htmlFor="sort">Sort By: </label>
+          <select id="sort" value={currentSort} onChange={handleSortChange}>
+            <option value="default">Newest</option>
+            <option value="priceLowToHigh">Price: Low to High</option>
+            <option value="priceHighToLow">Price: High to Low</option>
+            <option value="alphabetical">Alphabetical</option>
+          </select>
+        </div>
+        {/* Grid Columns Options */}
+        <div className="grid-columns-options">
+          <span>View: </span>
+          {[1, 2, 3, 4, 5].map((num) => (
+            <button
+              key={num}
+              onClick={() => setColumns(num)}
+              className={`col-btn-${num}`}
+              style={{
+                marginRight: '0.5rem',
+                padding: '0.1rem 0.5rem',
+                borderRadius: '2px',
+                border:
+                  columns === num ? '2px solid #2172af' : '1px solid #ccc',
+              }}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+      </div>
       {/* Mobile Filters Drawer */}
       <div className="lg:hidden mobile-filter-container">
         <div className="my-4">
@@ -389,56 +421,17 @@ export default function Collection() {
         />
       </div>
       <hr className="col-hr" />
-
       <div className="flex w-full">
         <div className="flex mt-10 flex-row w-[100%]">
           <div className="hidden lg:block w-1/4">
             <ShopifyFilterForm filters={collection.products.filters} />
           </div>
           <div className="collections-right-side w-[100%]">
-            {/* Grid Columns Options */}
-            <div className="view-sort">
-              {/* Sort Options */}
-              <div className="sort-options">
-                <label htmlFor="sort">Sort By: </label>
-                <select
-                  id="sort"
-                  value={currentSort}
-                  onChange={handleSortChange}
-                >
-                  <option value="default">Newest</option>
-                  <option value="priceLowToHigh">Price: Low to High</option>
-                  <option value="priceHighToLow">Price: High to Low</option>
-                  <option value="alphabetical">Alphabetical</option>
-                </select>
-              </div>
-              {/* Grid Columns Options */}
-              <div className="grid-columns-options">
-                <span>View: </span>
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => setColumns(num)}
-                    className={`col-btn-${num}`}
-                    style={{
-                      marginRight: '0.5rem',
-                      padding: '0.1rem 0.5rem',
-                      borderRadius: '2px',
-                      border:
-                        columns === num
-                          ? '2px solid #2172af'
-                          : '1px solid #ccc',
-                    }}
-                  >
-                    {num}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Check if there are products in the collection */}
             {collection.products.nodes.length === 0 ? (
-              <p className='no-products-collection'>No products are available in this section right now!</p>
+              <p className="no-products-collection">
+                No products are available in this section right now!
+              </p>
             ) : (
               <PaginatedResourceSection
                 key="products-grid"
