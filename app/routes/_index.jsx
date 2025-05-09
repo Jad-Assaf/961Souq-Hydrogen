@@ -514,6 +514,7 @@ export default function Homepage() {
           >
             <CollectionCircles
               collections={menus[selectedMenu]}
+              selectedCollection={selectedCollection}
               onCollectionSelect={setSelectedCollection}
             />
             {selectedCollection &&

@@ -925,7 +925,8 @@ html:has(.overlay.expanded) {
 .menu-item-image-wrapper {
   position: relative;
   width: 120px;
-  height: auto;
+  height: 120px;
+  margin-bottom: 5px;
 }
 
 .disabled-look {
@@ -3538,5 +3539,23 @@ button.reset:hover:not(:has(> *)) {
     .lg\:hidden {
       display: none
     }
+  }
+}
+
+
+/* default desktop: no change */
+.menu-item-image-wrapper.active-mobile {
+  /* nothing happens above 768 px */
+}
+
+/* mobile highlight */
+@media (max-width: 768px) {
+  .menu-item-image-wrapper.active-mobile {
+    border: 2px solid #2171afad;
+    /* tweak color to match your palette */
+    border-radius: 50%;
+    transform: scale(1.05);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    box-shadow: inset 0 0 20px 0px #bcbcbc, rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   }
 }

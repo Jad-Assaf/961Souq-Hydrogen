@@ -2,7 +2,7 @@ import {Link} from '@remix-run/react';
 import React, {useEffect, useRef, useState} from 'react';
 
 // Reusable Component for CollectionItem
-const CollectionItem = ({collection, index, onSelect}) => {
+const CollectionItem = ({collection, index, onSelect, isActive}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleImageLoad = () => {
@@ -19,22 +19,32 @@ const CollectionItem = ({collection, index, onSelect}) => {
   return (
     <Link
       to={collection.url}
-      onClick={handleClick}
+      onClick={(e) => {
+        if (onSelect) {
+          e.preventDefault();
+          onSelect(collection);
+        }
+      }}
       className={`menu-item-container ${isLoading ? 'loading' : ''}`}
     >
-      <div className="menu-item-image-wrapper">
+      <div
+        /* add conditional class for active state */
+        className={`menu-item-image-wrapper ${isActive ? 'active-mobile' : ''}`}
+      >
         {collection.image && (
           <img
             src={`${collection.image.url}&width=150`}
-            srcSet={`${collection.image.url}&width=150 300w,
-                     ${collection.image.url}&width=150 600w,
-                     ${collection.image.url}&width=150 1200w`}
+            srcSet={`
+              ${collection.image.url}&width=150 300w,
+              ${collection.image.url}&width=150 600w,
+              ${collection.image.url}&width=150 1200w
+            `}
             alt={`${collection.image.altText || collection.title} Collection`}
             className="menu-item-image"
             width={150}
             height={150}
             loading="lazy"
-            onLoad={handleImageLoad}
+            onLoad={() => setIsLoading(false)}
           />
         )}
       </div>
@@ -1086,8 +1096,12 @@ export const homeAppliancesMenu = [
   },
 ];
 
-export const CollectionCircles = ({collections, onCollectionSelect}) => {
-  const containerRef = useRef(null); // Ref for .homeSlider-col-container
+export const CollectionCircles = ({
+  collections,
+  onCollectionSelect,
+  selectedCollection,
+}) => {
+  const containerRef = useRef(null);
   const [hasOverflow, setHasOverflow] = useState(false);
 
   useEffect(() => {
@@ -1183,38 +1197,36 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
           ></rect>
         </svg>
       </div>
-      {collections.length > 0 && hasOverflow && (
+      {collections.length && hasOverflow ? (
         <button
           className="circle-prev-button"
           onClick={() => scrollSlider(-600)}
           style={{
             position: 'absolute',
             top: '50%',
-            left: '0',
+            left: 0,
             transform: 'translateY(-50%)',
           }}
         >
           <CustomLeftArrow />
         </button>
-      )}
+      ) : null}
 
       <div
         className="animated-menu-item"
         style={{overflowX: 'auto', display: 'flex'}}
       >
-        {/* <img
-          className="slider-bg"
-          src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/grey_bg.webp?v=1744887607"
-          alt=""
-        /> */}
         <div className="homeSlider-col-container" ref={containerRef}>
-          {collections.length > 0 ? (
-            collections.map((collection, collectionIndex) => (
+          {collections.length ? (
+            collections.map((c, i) => (
               <CollectionItem
-                collection={collection}
-                index={collectionIndex}
-                key={collection.id}
+                key={c.id}
+                collection={c}
+                index={i}
                 onSelect={onCollectionSelect}
+                isActive={
+                  !!selectedCollection && c.url === selectedCollection.url
+                }
               />
             ))
           ) : (
@@ -1223,20 +1235,20 @@ export const CollectionCircles = ({collections, onCollectionSelect}) => {
         </div>
       </div>
 
-      {collections.length > 0 && hasOverflow && (
+      {collections.length && hasOverflow ? (
         <button
           className="circle-next-button"
           onClick={() => scrollSlider(600)}
           style={{
             position: 'absolute',
             top: '50%',
-            right: '0',
+            right: 0,
             transform: 'translateY(-50%)',
           }}
         >
           <CustomRightArrow />
         </button>
-      )}
+      ) : null}
     </div>
   );
 };
