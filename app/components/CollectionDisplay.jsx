@@ -154,6 +154,7 @@ export function ProductItem({product}) {
             <Money data={selectedVariant.price} />
           )}
           {selectedVariant?.compareAtPrice &&
+            parseFloat(selectedVariant.price.amount) > 0 &&
             parseFloat(selectedVariant.compareAtPrice.amount) >
               parseFloat(selectedVariant.price.amount) && (
               <small className="discountedPrice">

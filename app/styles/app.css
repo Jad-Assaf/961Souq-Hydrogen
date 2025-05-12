@@ -44,6 +44,8 @@ h2 {
 
 .banner-slideshow {
   position: relative;
+  height: 20vw;
+  max-height: 298px;
   max-width: 1500px;
   margin-inline: auto;
   overflow: hidden;
@@ -87,6 +89,11 @@ h2 {
   border: none;
   cursor: pointer;
   padding: 3px;
+  transition: all 0.2s linear;
+}
+
+.dot:hover {
+  scale: 2.5;
 }
 
 .dot.active {
@@ -527,7 +534,6 @@ button.reset:hover:not(:has(> *)) {
   width: 100%;
   background-color: #f5f5f5;
   border-radius: 5px;
-  margin: auto;
   overflow-y: hidden;
   box-shadow: inset 0 0 20px 0px #bcbcbc, rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   margin: 0 auto 30px;
@@ -588,18 +594,6 @@ button.reset:hover:not(:has(> *)) {
 
   @media (max-width: 1024px) {
     padding: 0 10px !important;
-    margin: 50px auto 20px !important;
-  }
-}
-
-.search {
-  background-color: #fff;
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px auto 25px !important;
-
-  @media (max-width: 1024px) {
     margin: 50px auto 20px !important;
   }
 }
@@ -755,14 +749,6 @@ button.reset:hover:not(:has(> *)) {
   background: linear-gradient(90deg, #bbb, #ddd, #bbb);
   background-size: 200% auto;
   -webkit-background-clip: text;
-}
-
-.dot {
-  transition: all 0.2s linear;
-}
-
-.dot:hover {
-  scale: 2.5;
 }
 
 @media (max-width: 1024px) {
@@ -1042,11 +1028,6 @@ img {
 
 button {
   cursor: pointer !important;
-}
-
-.banner-slideshow {
-  height: 20vw;
-  max-height: 298px;
 }
 
 .desktop-banners {
@@ -1521,6 +1502,7 @@ aside main {
 
 aside p {
   margin: 0 0 0.25rem;
+  font-size: 14px;
 }
 
 aside p:last-child {
@@ -1660,15 +1642,15 @@ button.reset:hover:not(:has(> *)) {
   margin: 15px auto;
 }
 
+.header-logo {
+  /* margin-right: auto; */
+  width: 120px;
+  height: auto;
+}
+
 @media (min-width: 1025px) {
   .header-top {
     justify-content: space-between;
-  }
-
-  .header-logo {
-    margin-right: auto;
-    width: 120px;
-    height: auto;
   }
 
   .mobile-menu-toggle {
@@ -1704,11 +1686,6 @@ button.reset:hover:not(:has(> *)) {
     background: none;
     border: none;
     cursor: pointer;
-  }
-
-  .header-logo {
-    max-width: 200px;
-    height: auto;
   }
 
   .header-ctas {
@@ -2246,10 +2223,6 @@ aside .cart-line img {
 
 aside li.cart-line div {
   padding: 0;
-}
-
-aside p {
-  font-size: 14px;
 }
 
 aside .cart-summary-page {

@@ -108,76 +108,71 @@ const ProductItem = React.memo(({product, index, numberInRow}) => {
 
   return (
     <div className="product-item-collection product-card" ref={ref}>
-      <div>
-        <div className="mobile-container">
-          <Link
-            key={product.id}
-            prefetch="intent"
-            to={variantUrl}
-            className="collection-product-link"
-          >
-            {product.featuredImage && (
-              <div className="collection-product-image">
-                <div
-                  className="sold-out-ban"
-                  style={{display: isSoldOut ? 'flex' : 'none'}}
-                >
-                  <p>Sold Out</p>
-                </div>
-                <img
-                  srcSet={`
-                    ${product.featuredImage.url}?width=300&quality=15 300w,
-                    ${product.featuredImage.url}?width=600&quality=15 600w,
-                    ${product.featuredImage.url}?width=1200&quality=15 1200w
-                  `}
-                  alt={product.featuredImage.altText || product.title}
-                  loading="lazy"
-                  width="180"
-                  height="180"
-                />
+      <div className="mobile-container">
+        <Link
+          key={product.id}
+          prefetch="intent"
+          to={variantUrl}
+          className="collection-product-link"
+        >
+          {product.featuredImage && (
+            <div className="collection-product-image">
+              <div
+                className="sold-out-ban"
+                style={{display: isSoldOut ? 'flex' : 'none'}}
+              >
+                <p>Sold Out</p>
               </div>
-            )}
-          </Link>
-          <div className="product-info-container">
-            <Link key={product.id} prefetch="intent" to={variantUrl}>
-              <h4>{truncateText(product.title, 30)}</h4>
-              <div className="price-container">
-                <small
-                  className={`product-price ${hasDiscount ? 'discounted' : ''}`}
-                >
-                  {selectedVariant?.price &&
-                  Number(selectedVariant.price.amount) === 0 ? (
-                    <span>Call For Price</span>
-                  ) : (
-                    <Money data={selectedVariant.price} />
-                  )}
-                </small>
-                {hasDiscount && selectedVariant?.compareAtPrice && (
+              <img
+                srcSet={`
+                  ${product.featuredImage.url}?width=300&quality=15 300w,
+                  ${product.featuredImage.url}?width=600&quality=15 600w,
+                  ${product.featuredImage.url}?width=1200&quality=15 1200w
+                `}
+                alt={product.featuredImage.altText || product.title}
+                loading="lazy"
+                width="180"
+                height="180"
+              />
+            </div>
+          )}
+        </Link>
+        <div className="product-info-container">
+          <Link key={product.id} prefetch="intent" to={variantUrl}>
+            <h4>{truncateText(product.title, 30)}</h4>
+            <div className="price-container">
+              <small
+                className={`product-price ${hasDiscount ? 'discounted' : ''}`}
+              >
+                {selectedVariant?.price &&
+                Number(selectedVariant.price.amount) === 0 ? (
+                  <span>Call For Price</span>
+                ) : (
+                  <Money data={selectedVariant.price} />
+                )}
+              </small>
+
+              {/* only show compare-at if price > 0 */}
+              {Number(selectedVariant.price.amount) > 0 &&
+                hasDiscount &&
+                selectedVariant?.compareAtPrice && (
                   <small className="discountedPrice">
                     <Money data={selectedVariant.compareAtPrice} />
                   </small>
                 )}
-              </div>
-            </Link>
-            <ProductForm
-              product={product}
-              selectedVariant={selectedVariant}
-              setSelectedVariant={setSelectedVariant}
-            />
-          </div>
+            </div>
+          </Link>
+          <ProductForm
+            product={product}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
+          />
         </div>
       </div>
     </div>
   );
 });
 
-/**
- * @param {{
- *   product: ProductFragment;
- *   selectedVariant: ProductVariantFragment;
- *   setSelectedVariant: (variant: ProductVariantFragment) => void;
- * }}
- */
 function ProductForm({product, selectedVariant, setSelectedVariant}) {
   const {open} = useAside();
   const hasVariants = product.variants.nodes.length > 1;

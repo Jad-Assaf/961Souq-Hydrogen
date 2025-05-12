@@ -535,7 +535,8 @@ const ProductItem = ({product, index, numberInRow}) => {
               <div className="price-container">
                 <small
                   className={`product-price ${
-                    selectedVariant?.compareAtPrice &&
+                    Number(selectedVariant.price.amount) > 0 &&
+                    selectedVariant.compareAtPrice &&
                     parseFloat(selectedVariant.compareAtPrice.amount) >
                       parseFloat(selectedVariant.price.amount)
                       ? 'discounted'
@@ -550,7 +551,8 @@ const ProductItem = ({product, index, numberInRow}) => {
                   )}
                 </small>
 
-                {selectedVariant?.compareAtPrice &&
+                {Number(selectedVariant.price.amount) > 0 &&
+                  selectedVariant.compareAtPrice &&
                   parseFloat(selectedVariant.compareAtPrice.amount) >
                     parseFloat(selectedVariant.price.amount) && (
                     <small className="discountedPrice">

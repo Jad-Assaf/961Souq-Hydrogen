@@ -668,22 +668,23 @@ export default function Product() {
           <div className="price-container">
             <small
               className={`product-price ${
-                selectedVariant?.compareAtPrice &&
+                Number(selectedVariant.price.amount) > 0 &&
+                selectedVariant.compareAtPrice &&
                 parseFloat(selectedVariant.compareAtPrice.amount) >
                   parseFloat(selectedVariant.price.amount)
                   ? 'discounted'
                   : ''
               }`}
             >
-              {selectedVariant?.price &&
-              Number(selectedVariant.price.amount) === 0 ? (
-                <span>Call For Price</span>
+              {Number(selectedVariant.price.amount) === 0 ? (
+                <span>Call For Price!</span>
               ) : (
                 <Money data={selectedVariant.price} />
               )}
             </small>
 
-            {selectedVariant?.compareAtPrice &&
+            {Number(selectedVariant.price.amount) > 0 &&
+              selectedVariant.compareAtPrice &&
               parseFloat(selectedVariant.compareAtPrice.amount) >
                 parseFloat(selectedVariant.price.amount) && (
                 <small className="discountedPrice">
