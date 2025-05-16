@@ -460,7 +460,6 @@ button.reset:hover:not(:has(> *)) {
   font-weight: 500 !important;
   font-size: 12px;
   color: #000 !important;
-  z-index: 1;
   min-height: 39px;
 }
 
