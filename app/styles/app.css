@@ -1383,6 +1383,7 @@ button {
   cursor: not-allowed;
   transform: none;
   opacity: 0.7;
+  display: none !important;
 }
 
 .add-to-cart-button.loading {
@@ -1426,6 +1427,7 @@ button {
 .product-form form {
   width: 100%;
   max-width: 400px;
+  height: 36px;
 }
 
 .product-item-collection:hover .add-to-cart-button:not(.disabled) {

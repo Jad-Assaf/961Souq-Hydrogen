@@ -439,3 +439,7 @@ strong {
 .collection-products-row {
     gap: 5px !important;
 }
+
+.product-form form:has(.add-to-cart-button:disabled) {
+    display: none;
+}
