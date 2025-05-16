@@ -1329,6 +1329,7 @@ button {
 
 .price-container {
   min-height: 45px;
+  margin-top: 15px;
 }
 
 .product-price {

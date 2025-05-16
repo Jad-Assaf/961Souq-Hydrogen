@@ -185,15 +185,18 @@ button#headlessui-menu-button-\:R3lab5\: {
 .grid-cols-3 .product-description,
 .grid-cols-4 .product-description,
 .grid-cols-5 .product-description,
-.grid-cols-2 .product-info-container .add-to-cart-button,
-.grid-cols-3 .product-info-container .add-to-cart-button,
-.grid-cols-4 .product-info-container .add-to-cart-button,
-.grid-cols-5 .product-info-container .add-to-cart-button {
+.grid-cols-2 .product-info-container .product-form,
+.grid-cols-3 .product-info-container .product-form,
+.grid-cols-4 .product-info-container .product-form,
+.grid-cols-5 .product-info-container .product-form {
     display: none;
 }
 
-.grid-cols-1 .add-to-cart-button {
+.grid-cols-1 .product-card div>.product-form {
     display: none;
+}
+.grid-cols-1 .product-card .mobile-container .product-form { 
+    display: block !important;
 }
 
 .grid-cols-1 .product-info-container .add-to-cart-button {
