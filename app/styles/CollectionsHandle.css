@@ -195,7 +195,8 @@ button#headlessui-menu-button-\:R3lab5\: {
 .grid-cols-1 .product-card div>.product-form {
     display: none;
 }
-.grid-cols-1 .product-card .mobile-container .product-form { 
+
+.grid-cols-1 .product-card .mobile-container .product-form {
     display: block !important;
 }
 
@@ -387,4 +388,36 @@ button.layout-buttons.first-btn svg {
 
 .ease-in {
     transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* --- new pagination styles --- */
+.pagination-nav {
+    margin-top: 2rem;
+    text-align: center
+}
+
+.pagination-list {
+    display: inline-flex;
+    list-style: none;
+    gap: 25px;
+    padding: 0
+}
+
+.pagination-item {
+    border: 1px solid #2171af56;
+    padding: 3px 10px;
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: rgb(131 126 255 / 61%) 0px 4.8px 14.4px;
+}
+
+.pagination-item.current-page {
+    background: #2172af;
+    color: #fff;
+    border-color: #2172af
+}
+
+.pagination-item.disabled {
+    opacity: .4;
+    pointer-events: none
 }
