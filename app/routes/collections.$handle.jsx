@@ -135,6 +135,11 @@ export async function loadCriticalData({context, params, request}) {
     throw redirect('/collections');
   }
 
+  /* ---------- bot detection ---------- */
+  const isBot = /googlebot|bingbot|slurp/i.test(
+    request.headers.get('user-agent') || '',
+  );
+
   const ALLOWED_FILTERS = [
     'available',
     'price',
@@ -260,7 +265,7 @@ export async function loadCriticalData({context, params, request}) {
     console.error('Error fetching menu:', error);
   }
 
-  if (menu?.items?.length) {
+  if (!isBot && menu?.items?.length) {
     try {
       sliderCollections = await Promise.all(
         menu.items.map(async (item) => {
@@ -696,7 +701,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 25) {
+    variants(first: 5) {
       nodes {
         id
         availableForSale
