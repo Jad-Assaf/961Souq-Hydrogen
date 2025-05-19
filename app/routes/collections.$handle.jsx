@@ -43,7 +43,7 @@ export const meta = ({data}) => {
     title: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
     description: truncateText(
       collection?.description || 'Explore our latest collection at 961Souq.',
-      20,
+      15,
     ),
     url: `https://961souq.com/collections/${collection?.handle || ''}`,
     image:
@@ -55,7 +55,7 @@ export const meta = ({data}) => {
         '@type': 'CollectionPage',
         name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
         url: `https://961souq.com/collections/${collection?.handle || ''}`,
-        description: truncateText(collection?.description || '', 20),
+        description: truncateText(collection?.description || '', 15),
         image: {
           '@type': 'ImageObject',
           url:
@@ -85,10 +85,10 @@ export const meta = ({data}) => {
         '@context': 'http://schema.org/',
         '@type': 'ItemList',
         name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
-        description: truncateText(collection?.description || '', 20),
+        description: truncateText(collection?.description || '', 15),
         url: `https://961souq.com/collections/${collection?.handle || ''}`,
         itemListElement: collection?.products?.nodes
-          ?.slice(0, 20)
+          ?.slice(0, 10)
           .map((product, index) => ({
             '@type': 'ListItem',
             position: index + 1,
@@ -125,6 +125,12 @@ export async function loader(args) {
  *
  * @param {LoaderFunctionArgs} { context, params, request }
  */
+/**
+ * Same loader you supplied – the ONLY change is that any failure in the
+ * “query with filters / retry without filters” block is swallowed.  
+ * We just log it and return an **unfiltered collection** (or a safe empty
+ * shell) instead of throwing. Nothing else is touched.
+ */
 export async function loadCriticalData({context, params, request}) {
   const {handle} = params;
   const {storefront} = context;
@@ -140,6 +146,7 @@ export async function loadCriticalData({context, params, request}) {
     request.headers.get('user-agent') || '',
   );
 
+  /* ---------- filter building (unchanged) ---------- */
   const ALLOWED_FILTERS = [
     'available',
     'price',
@@ -200,6 +207,7 @@ export async function loadCriticalData({context, params, request}) {
     filters.push({[field]: filterValue});
   }
 
+  /* ---------- sort handling (unchanged) ---------- */
   const sortOption = searchParams.get('sort') || 'default';
   const sortMapping = {
     default: {sortKey: 'CREATED', reverse: true},
@@ -209,8 +217,10 @@ export async function loadCriticalData({context, params, request}) {
   };
   const {sortKey, reverse} = sortMapping[sortOption] || sortMapping.default;
 
+  /* ---------- main collection query with silent fallback ---------- */
   let collectionData;
 
+  // 1) try with filters
   try {
     collectionData = await storefront.query(COLLECTION_QUERY, {
       variables: {
@@ -222,28 +232,45 @@ export async function loadCriticalData({context, params, request}) {
         ...paginationVariables,
       },
     });
-  } catch (error) {
-    console.error('Error fetching collection (with filters):', error);
-    if (filters.length) {
-      try {
-        collectionData = await storefront.query(COLLECTION_QUERY, {
-          variables: {
-            handle,
-            first: 20,
-            sortKey,
-            reverse,
-            ...paginationVariables,
+  } catch (errWithFilters) {
+    console.warn('Collection query failed WITH filters – falling back:', errWithFilters);
+  }
+
+  // 2) if that failed, retry without filters
+  if (!collectionData) {
+    try {
+      collectionData = await storefront.query(COLLECTION_QUERY, {
+        variables: {
+          handle,
+          first: 20,
+          sortKey,
+          reverse,
+          ...paginationVariables,
+        },
+      });
+    } catch (errNoFilters) {
+      console.error('Collection query failed WITHOUT filters:', errNoFilters);
+      /* give up: return a harmless empty collection shell */
+      collectionData = {
+        collection: {
+          id: handle,
+          handle,
+          title: handle,
+          description: '',
+          image: null,
+          products: {
+            nodes: [],
+            filters: [],
+            pageInfo: {
+              hasPreviousPage: false,
+              hasNextPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
           },
-        });
-      } catch (retryError) {
-        console.error(
-          'Error fetching collection (retry without filters):',
-          retryError,
-        );
-        throw new Response('Error fetching collection', {status: 500});
-      }
-    } else {
-      throw new Response('Error fetching collection', {status: 500});
+          seo: {title: '', description: ''},
+        },
+      };
     }
   }
 
@@ -292,6 +319,7 @@ export async function loadCriticalData({context, params, request}) {
     }
   }
 
+  /* ---------- return ---------- */
   return {
     collection,
     sliderCollections,
@@ -498,11 +526,6 @@ const ProductItem = ({product, index, numberInRow}) => {
     product.handle,
     selectedVariant.selectedOptions,
   );
-
-  const hasDiscount =
-    product.compareAtPriceRange &&
-    product.compareAtPriceRange.minVariantPrice.amount >
-      product.priceRange.minVariantPrice.amount;
 
   return (
     <div className="product-item-collection product-card" ref={ref}>
