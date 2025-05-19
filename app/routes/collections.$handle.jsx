@@ -50,7 +50,6 @@ export const meta = ({data}) => {
       collection?.image?.url ||
       'https://961souq.com/default-collection-image.jpg',
     jsonLd: [
-      // CollectionPage Schema
       {
         '@context': 'http://schema.org/',
         '@type': 'CollectionPage',
@@ -64,7 +63,6 @@ export const meta = ({data}) => {
             'https://961souq.com/default-collection-image.jpg',
         },
       },
-      // BreadcrumbList Schema
       {
         '@context': 'http://schema.org/',
         '@type': 'BreadcrumbList',
@@ -83,7 +81,6 @@ export const meta = ({data}) => {
           },
         ],
       },
-      // ItemList Schema
       {
         '@context': 'http://schema.org/',
         '@type': 'ItemList',
@@ -117,19 +114,14 @@ export const meta = ({data}) => {
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  return defer(
-    {
-      ...deferredData,
-      ...criticalData,
-    },
-  );
+  return defer({
+    ...deferredData,
+    ...criticalData,
+  });
 }
 
 /**
- * Load critical data with new filter and sort support.
- *
- * URL parameters prefixed with "filter." are mapped to Shopify filter objects.
- * Also, we now support a "sort" query parameter.
+ * Load critical data with filter and sort support.
  *
  * @param {LoaderFunctionArgs} { context, params, request }
  */
@@ -143,58 +135,67 @@ export async function loadCriticalData({context, params, request}) {
     throw redirect('/collections');
   }
 
-  // Mapping for known filter keys.
+  const ALLOWED_FILTERS = [
+    'available',
+    'price',
+    'productMetafield',
+    'productType',
+    'productVendor',
+    'tag',
+    'variantMetafield',
+    'variantOption',
+  ];
+
   const filterMapping = {
     productVendor: 'productVendor',
     productType: 'productType',
   };
 
-  // Build filters array by scanning URL parameters that start with "filter."
   const filters = [];
   for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith('filter.')) {
-      const filterKey = key.replace('filter.', '');
-      const field = filterMapping[filterKey] || filterKey;
-      let filterValue;
-      if (field === 'available') {
-        filterValue = value.toLowerCase() === 'true';
-      } else if (field === 'price' || field === 'productMetafield') {
-        try {
-          filterValue = JSON.parse(value);
-          if (
-            field === 'productMetafield' &&
-            filterValue &&
-            typeof filterValue === 'object'
-          ) {
-            if ('productMetafield' in filterValue) {
-              filterValue = filterValue.productMetafield;
-            }
-          }
-        } catch (e) {
-          filterValue = value;
-        }
-      } else {
-        try {
-          filterValue = JSON.parse(value);
-        } catch (e) {
-          filterValue = value;
-        }
+    if (!key.startsWith('filter.')) continue;
+
+    const filterKey = key.replace('filter.', '');
+    if (!ALLOWED_FILTERS.includes(filterKey)) continue;
+
+    const field = filterMapping[filterKey] || filterKey;
+    let filterValue;
+
+    if (field === 'available') {
+      filterValue = value.toLowerCase() === 'true';
+    } else if (field === 'price' || field === 'productMetafield') {
+      try {
+        filterValue = JSON.parse(value);
         if (
-          typeof filterValue === 'string' &&
-          filterValue.startsWith('"') &&
-          filterValue.endsWith('"')
+          field === 'productMetafield' &&
+          filterValue &&
+          typeof filterValue === 'object' &&
+          'productMetafield' in filterValue
         ) {
-          filterValue = filterValue.slice(1, -1);
+          filterValue = filterValue.productMetafield;
         }
+      } catch {
+        filterValue = value;
       }
-      filters.push({[field]: filterValue});
+    } else {
+      try {
+        filterValue = JSON.parse(value);
+      } catch {
+        filterValue = value;
+      }
+      if (
+        typeof filterValue === 'string' &&
+        filterValue.startsWith('"') &&
+        filterValue.endsWith('"')
+      ) {
+        filterValue = filterValue.slice(1, -1);
+      }
     }
+
+    filters.push({[field]: filterValue});
   }
 
-  // Read the sort option from URL; default to 'default'
   const sortOption = searchParams.get('sort') || 'default';
-  // Map sortOption to Shopify sortKey and reverse flag.
-  // Adjust these keys as needed per Shopify’s Storefront API.
   const sortMapping = {
     default: {sortKey: 'CREATED', reverse: true},
     priceLowToHigh: {sortKey: 'PRICE', reverse: false},
@@ -203,76 +204,98 @@ export async function loadCriticalData({context, params, request}) {
   };
   const {sortKey, reverse} = sortMapping[sortOption] || sortMapping.default;
 
+  let collectionData;
+
   try {
-    const {collection} = await storefront.query(COLLECTION_QUERY, {
+    collectionData = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
         first: 20,
-        filters: filters.length > 0 ? filters : undefined,
-        sortKey, // Pass the sort key
-        reverse, // Pass the reverse flag
+        filters: filters.length ? filters : undefined,
+        sortKey,
+        reverse,
         ...paginationVariables,
       },
     });
-
-    if (!collection) {
-      throw new Response(`Collection ${handle} not found`, {status: 404});
-    }
-
-    let menu = null;
-    let sliderCollections = [];
-
-    try {
-      const menuResult = await storefront.query(MENU_QUERY, {
-        variables: {handle},
-      });
-      menu = menuResult.menu;
-    } catch (error) {
-      console.error('Error fetching menu:', error);
-    }
-
-    if (menu && menu.items && menu.items.length > 0) {
-      try {
-        sliderCollections = await Promise.all(
-          menu.items.map(async (item) => {
-            try {
-              const sanitizedHandle = sanitizeHandle(item.title);
-              const {collection} = await storefront.query(
-                COLLECTION_BY_HANDLE_QUERY,
-                {variables: {handle: sanitizedHandle}},
-              );
-              return collection;
-            } catch (error) {
-              console.error(
-                `Error fetching collection for ${item.title}:`,
-                error,
-              );
-              return null;
-            }
-          }),
-        );
-        sliderCollections = sliderCollections.filter(
-          (collection) => collection !== null,
-        );
-      } catch (error) {
-        console.error('Error fetching slider collections:', error);
-      }
-    }
-
-    return {
-      collection,
-      sliderCollections,
-      seo: {
-        title: collection?.seo?.title || `${collection.title} Collection`,
-        description:
-          collection?.seo?.description || collection.description || '',
-        image: collection?.image?.url || null,
-      },
-    };
   } catch (error) {
-    console.error('Error fetching collection:', error);
-    throw new Response('Error fetching collection', {status: 500});
+    console.error('Error fetching collection (with filters):', error);
+    if (filters.length) {
+      try {
+        collectionData = await storefront.query(COLLECTION_QUERY, {
+          variables: {
+            handle,
+            first: 20,
+            sortKey,
+            reverse,
+            ...paginationVariables,
+          },
+        });
+      } catch (retryError) {
+        console.error(
+          'Error fetching collection (retry without filters):',
+          retryError,
+        );
+        throw new Response('Error fetching collection', {status: 500});
+      }
+    } else {
+      throw new Response('Error fetching collection', {status: 500});
+    }
   }
+
+  const {collection} = collectionData;
+
+  if (!collection) {
+    throw new Response(`Collection ${handle} not found`, {status: 404});
+  }
+
+  let menu = null;
+  let sliderCollections = [];
+
+  try {
+    const menuResult = await storefront.query(MENU_QUERY, {
+      variables: {handle},
+    });
+    menu = menuResult.menu;
+  } catch (error) {
+    console.error('Error fetching menu:', error);
+  }
+
+  if (menu?.items?.length) {
+    try {
+      sliderCollections = await Promise.all(
+        menu.items.map(async (item) => {
+          const sanitizedHandle = sanitizeHandle(item.title);
+          if (!sanitizedHandle) return null;
+          try {
+            const {collection} = await storefront.query(
+              COLLECTION_BY_HANDLE_QUERY,
+              {variables: {handle: sanitizedHandle}},
+            );
+            return collection;
+          } catch (error) {
+            console.error(
+              `Error fetching collection for ${item.title}:`,
+              error,
+            );
+            return null;
+          }
+        }),
+      );
+      sliderCollections = sliderCollections.filter(Boolean);
+    } catch (error) {
+      console.error('Error fetching slider collections:', error);
+    }
+  }
+
+  return {
+    collection,
+    sliderCollections,
+    seo: {
+      title: collection?.seo?.title || `${collection.title} Collection`,
+      description: collection?.seo?.description || collection.description || '',
+      image: collection?.image?.url || null,
+    },
+  };
 }
 
 function sanitizeHandle(handle) {
@@ -284,16 +307,12 @@ function sanitizeHandle(handle) {
     .replace(/\s+/g, '-');
 }
 
-/**
- * Load deferred data.
- * @param {LoaderFunctionArgs} { context }
- */
 function loadDeferredData({context}) {
   return {};
 }
 
 // ------------------
-// Modified COLLECTION component
+// COLLECTION component
 // ------------------
 export default function Collection() {
   const {collection, sliderCollections} = useLoaderData();
@@ -303,13 +322,9 @@ export default function Collection() {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Read current sort from URL (or default)
   const currentSort = searchParams.get('sort') || 'default';
-
-  // New state for grid columns (1–5)
   const [columns, setColumns] = useState(1);
 
-  // Remove unwanted pagination params on initial load.
   useEffect(() => {
     const url = new URL(window.location.href);
     const query = url.searchParams;
@@ -319,12 +334,10 @@ export default function Collection() {
     window.history.replaceState({}, '', cleanUrl);
   }, []);
 
-  // When sort changes, update the URL so that loader refetches sorted data.
   const handleSortChange = (e) => {
     const newSort = e.target.value;
     const url = new URL(window.location.href);
     url.searchParams.set('sort', newSort);
-    // Reset pagination parameters if needed.
     url.searchParams.delete('cursor');
     window.location.href = url.toString();
   };
@@ -371,9 +384,8 @@ export default function Collection() {
           </div>
         </div>
       )}
-      {/* Grid Columns Options */}
+
       <div className="view-sort">
-        {/* Sort Options */}
         <div className="sort-options">
           <label htmlFor="sort">Sort By: </label>
           <select id="sort" value={currentSort} onChange={handleSortChange}>
@@ -383,7 +395,6 @@ export default function Collection() {
             <option value="alphabetical">Alphabetical</option>
           </select>
         </div>
-        {/* Grid Columns Options */}
         <div className="grid-columns-options">
           <span>View: </span>
           {[1, 2, 3, 4, 5].map((num) => (
@@ -404,7 +415,7 @@ export default function Collection() {
           ))}
         </div>
       </div>
-      {/* Mobile Filters Drawer */}
+
       <div className="lg:hidden mobile-filter-container">
         <div className="my-4">
           <button
@@ -427,7 +438,6 @@ export default function Collection() {
             <ShopifyFilterForm filters={collection.products.filters} />
           </div>
           <div className="collections-right-side w-[100%]">
-            {/* Check if there are products in the collection */}
             {collection.products.nodes.length === 0 ? (
               <p className="no-products-collection">
                 No products are available in this section right now!
@@ -463,12 +473,7 @@ export default function Collection() {
     </div>
   );
 }
-/**
- * @param {{
- *   product: ProductItemFragment;
- *   loading?: 'eager' | 'lazy';
- * }}
- */
+
 const ProductItem = ({product, index, numberInRow}) => {
   const ref = useRef(null);
   const [isSoldOut, setIsSoldOut] = useState(false);
@@ -578,13 +583,6 @@ const ProductItem = ({product, index, numberInRow}) => {
   );
 };
 
-/**
- * @param {{
- *   product: ProductFragment;
- *   selectedVariant: ProductVariantFragment;
- *   setSelectedVariant: (variant: ProductVariantFragment) => void;
- * }}
- */
 function ProductForm({product, selectedVariant, setSelectedVariant}) {
   const {open} = useAside();
   const hasVariants = product.variants.nodes.length > 1;
@@ -732,7 +730,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 `;
 
-// Note: COLLECTION_QUERY now accepts two extra variables: $sortKey and $reverse
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
