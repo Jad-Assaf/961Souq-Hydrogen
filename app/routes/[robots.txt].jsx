@@ -74,7 +74,8 @@ function generalDisallowRules({shopId, sitemapUrl}) {
   return `Disallow: /admin
 Disallow: /facebookConversions
 Disallow: /collections/*/*.json
-Disallow: /collections?direction=*
+Disallow: /collections?direction=previous
+allow: /collections?direction=next&*
 Disallow: /cdn/fonts
 Disallow: /cart
 Disallow: /orders
