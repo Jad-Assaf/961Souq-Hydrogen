@@ -403,7 +403,9 @@ export default function Collection() {
 
       <div className="view-sort">
         <div className="sort-options">
-          <label htmlFor="sort">Sort By: </label>
+          <label htmlFor="sort" className="mob-hide">
+            Sort By:{' '}
+          </label>
           <select id="sort" value={currentSort} onChange={handleSortChange}>
             <option value="default">Newest</option>
             <option value="priceLowToHigh">Price: Low to High</option>
@@ -412,7 +414,7 @@ export default function Collection() {
           </select>
         </div>
         <div className="grid-columns-options">
-          <span className='mob-hide'>View: </span>
+          <span className="mob-hide">View: </span>
           {[1, 2, 3, 4, 5].map((num) => (
             <button
               key={num}
