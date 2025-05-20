@@ -18,10 +18,7 @@
     overflow-x: auto;
     scrollbar-width: none;
     display: flex;
-    justify-content: center;
-    @media (max-width: 1024px) {
-        justify-content: space-between;
-    }
+    justify-content: space-between;
 }
 
 .thumbnails {

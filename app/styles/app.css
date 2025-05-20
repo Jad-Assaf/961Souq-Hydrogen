@@ -332,10 +332,8 @@ button.reset:hover:not(:has(> *)) {
 .brand-section {
   padding: 25px 5px;
   background-color: #f9f9f9;
-  margin-bottom: 30px;
   width: 100%;
   max-width: 1500px;
-  margin: 0 auto 30px;
   border-radius: 5px;
   position: relative;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
@@ -393,10 +391,6 @@ button.reset:hover:not(:has(> *)) {
 }
 
 @media (max-width: 1024px) {
-  .brand-section {
-    margin-bottom: 50px !important;
-  }
-
   .brand-item img {
     transition: none;
   }
@@ -1054,7 +1048,7 @@ button {
   }
 
   .banner-slideshow {
-    height: 75vw;
+    height: 73vw;
     max-height: unset !important;
     margin-top: 42px !important;
   }
