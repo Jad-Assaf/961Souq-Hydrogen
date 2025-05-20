@@ -580,7 +580,7 @@ button.reset:hover:not(:has(> *)) {
 
 .home {
   max-width: 1500px;
-  margin: 10px auto 25px;
+  margin: 30px auto;
   padding: 5px;
   background-color: transparent;
   border-radius: 10px;
@@ -799,7 +799,7 @@ html:has(.overlay.expanded) {
 
 .scrolling-container {
   max-width: 1500px;
-  margin: 30px auto 0;
+  margin: 30px auto 30px;
   text-align: center;
   overflow: hidden;
   background-color: #3d4856;
