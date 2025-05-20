@@ -99,11 +99,15 @@ function RelatedProductItem({product, index}) {
             alt={product.images.edges[0]?.node.altText || product.title}
             width="150px"
             height="150px"
-            loading='lazy'
+            loading="lazy"
           />
           <div className="product-title">{product.title}</div>
           <div className="product-price">
-            ${product.priceRange.minVariantPrice.amount}0
+            {Number(product.priceRange.minVariantPrice.amount) === 0 ? (
+              <span>Call For Price</span>
+            ) : (
+              <Money data={product.priceRange.minVariantPrice} />
+            )}
           </div>
         </Link>
       </div>

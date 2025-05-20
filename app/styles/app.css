@@ -591,12 +591,12 @@ button.reset:hover:not(:has(> *)) {
   background-color: #fff;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   border-radius: 10px;
-  padding: 75px 10px;
-  margin: 10px auto 25px !important;
+  padding: 30px 10px;
+  margin: 30px auto !important;
 
   @media (max-width: 1024px) {
     padding: 0 10px !important;
-    margin: 50px auto 20px !important;
+    margin: 50px auto 30px !important;
   }
 }
 
@@ -2109,7 +2109,7 @@ button.reset:hover:not(:has(> *)) {
   z-index: 9999;
   margin-top: -3%;
   border-radius: 30px;
-  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
 }
 
 .view-all-results {
@@ -2672,7 +2672,6 @@ input.search-bar:focus-visible {
   width: 96vw;
   max-width: 1500px;
   margin: 5vw auto;
-  row-gap: 50px;
 }
 
 .product h1 {
