@@ -453,7 +453,9 @@ export default function Collection() {
       <hr className="col-hr" />
 
       <div className="flex w-full">
-        <div className="flex mt-10 flex-row w-[100%]">
+        <div
+          className="flex flex-row w-[100%] collection-bottom"
+        >
           <div className="hidden lg:block w-1/4">
             <ShopifyFilterForm filters={collection.products.filters} />
           </div>
