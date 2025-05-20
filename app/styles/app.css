@@ -2976,6 +2976,10 @@ input[type="checkbox"] {
 .sort-options {
   /* text-align: end; */
   padding: 10px;
+
+  @media (max-width: 1024px) {
+    padding: 0;
+  }
 }
 
 #sort {
@@ -2995,6 +2999,10 @@ input[type="checkbox"] {
   border-radius: 5px;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   padding: 0 20px;
+
+  @media (max-width: 1024px) {
+    padding: 0 5px;
+  }
 }
 
 .side-filter {
