@@ -412,7 +412,7 @@ export default function Collection() {
           </select>
         </div>
         <div className="grid-columns-options">
-          <span>View: </span>
+          <span className='mob-hide'>View: </span>
           {[1, 2, 3, 4, 5].map((num) => (
             <button
               key={num}
