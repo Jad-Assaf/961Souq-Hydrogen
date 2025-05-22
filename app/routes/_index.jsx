@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
-import {CategorySlider} from '~/components/CollectionSlider';
+// import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
 import BrandSection from '~/components/BrandsSection';
 import {getSeoMeta} from '@shopify/hydrogen';
@@ -25,6 +25,7 @@ import {
   GET_COLLECTION_BY_HANDLE_QUERY,
   GET_SIMPLE_COLLECTION_QUERY,
 } from '../data/queries.ts';
+import { CategorySliderWithMoreHeight } from '~/components/CollectionSliderWithMoreHeight';
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -491,8 +492,9 @@ export default function Homepage() {
     <div className="home">
       {/* <MobileAppPopup /> */}
       <BannerSlideshow banners={banners} />
-      <ScrollingSVGs />
-      <CategorySlider sliderCollections={sliderCollections} />
+      {/* <CategorySlider sliderCollections={sliderCollections} /> */}
+      <CategorySliderWithMoreHeight sliderCollections={sliderCollections} />
+
       {newArrivals && <TopProductSections collection={newArrivals} />}
       {isMobile ? (
         <div>
@@ -697,6 +699,7 @@ export default function Homepage() {
             )}
         </>
       )}
+      <ScrollingSVGs />
       <BrandSection brands={brandsData} />
     </div>
   );

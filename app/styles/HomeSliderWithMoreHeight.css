@@ -1,0 +1,87 @@
+.cat-h3 {
+    width: 100%;
+}
+
+.slide-con {
+    background-color: transparent;
+    padding: 0;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+.category-slider {
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 15px;
+    padding: 0 0 80px !important;
+}
+
+.category-container {
+    min-width: 200px;
+    height: 350px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+    padding: 20px 0;
+}
+
+.category-imgg {
+    width: 100%;
+    position: relative;
+    bottom: -20px;
+    border-radius: 10px;
+}
+
+.category-container a {
+    border-radius: 10px;
+    width: 100%;
+    padding: 0;
+}
+
+.category-container {
+    justify-content: space-around;
+}
+
+.category-title h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.category-title p {
+    width: 175px;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.scroll-left-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 55px;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+}
+
+.scroll-right-btn svg {
+    box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.scroll-left-btn svg {
+    box-shadow: rgba(131, 126, 255, 0.3) 0px -4.8px 14.4px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.scroll-right-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 10px;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+}

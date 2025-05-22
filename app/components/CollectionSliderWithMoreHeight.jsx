@@ -1,0 +1,173 @@
+import {Link} from '@remix-run/react';
+import React, {useRef} from 'react'; // ⬅️ add useRef
+import '../styles/HomeSliderWithMoreHeight.css';
+
+export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
+  const sliderRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (!sliderRef.current) return;
+    const {clientWidth} = sliderRef.current;
+    const amount =
+      direction === 'left' ? -clientWidth * 0.8 : clientWidth * 0.8;
+    sliderRef.current.scrollBy({left: amount, behavior: 'smooth'});
+  };
+
+  return (
+    <>
+      <h3 className="cat-h3">Shop By Categories</h3>
+
+      {/* make this container the positioning context for the buttons */}
+      <div className="slide-con" style={{position: 'relative'}}>
+        <div
+          className="category-slider"
+          ref={sliderRef}
+          style={{overflowX: 'auto', scrollBehavior: 'smooth'}}
+        >
+          {sliderCollections.map((collection, index) => (
+            <CategoryItem
+              key={collection.id}
+              collection={collection}
+              index={index}
+            />
+          ))}
+        </div>
+
+        {/* scroll-left button */}
+        <button
+          type="button"
+          aria-label="Scroll categories left"
+          onClick={() => scroll('left')}
+          className="scroll-left-btn"
+        >
+          <svg
+            fill="#2172af"
+            height="64px"
+            width="64px"
+            version="1.1"
+            id="Capa_1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 490 490"
+            xml:space="preserve"
+            stroke="#2172af"
+            transform="rotate(180)"
+          >
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              {' '}
+              <g>
+                {' '}
+                <g>
+                  {' '}
+                  <g>
+                    {' '}
+                    <path d="M490,245C490,109.9,380.1,0,245,0S0,109.9,0,245s109.9,245,245,245S490,380.1,490,245z M34.3,245 c0-116.2,94.5-210.7,210.7-210.7S455.7,128.8,455.7,245S361.2,455.7,245,455.7S34.3,361.2,34.3,245z"></path>{' '}
+                    <path d="M302.3,232.9l-72.1-72.1c-6.7-6.7-17.6-6.7-24.3,0s-6.7,17.6,0,24.3l60,60l-60,60c-6.7,6.7-6.7,17.6,0,24.3 c3.3,3.3,7.7,5,12.1,5c4.4,0,8.8-1.7,12.1-5l72.1-72.1C309,250.4,309,239.6,302.3,232.9z"></path>{' '}
+                  </g>{' '}
+                </g>{' '}
+                <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>{' '}
+                <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>{' '}
+                <g> </g>{' '}
+              </g>{' '}
+            </g>
+          </svg>
+        </button>
+
+        {/* scroll-right button */}
+        <button
+          type="button"
+          aria-label="Scroll categories right"
+          onClick={() => scroll('right')}
+          className="scroll-right-btn"
+        >
+          <svg
+            fill="#2172af"
+            height="64px"
+            width="64px"
+            version="1.1"
+            id="Capa_1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 490 490"
+            xml:space="preserve"
+            stroke="#2172af"
+          >
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              {' '}
+              <g>
+                {' '}
+                <g>
+                  {' '}
+                  <g>
+                    {' '}
+                    <path d="M490,245C490,109.9,380.1,0,245,0S0,109.9,0,245s109.9,245,245,245S490,380.1,490,245z M34.3,245 c0-116.2,94.5-210.7,210.7-210.7S455.7,128.8,455.7,245S361.2,455.7,245,455.7S34.3,361.2,34.3,245z"></path>{' '}
+                    <path d="M302.3,232.9l-72.1-72.1c-6.7-6.7-17.6-6.7-24.3,0s-6.7,17.6,0,24.3l60,60l-60,60c-6.7,6.7-6.7,17.6,0,24.3 c3.3,3.3,7.7,5,12.1,5c4.4,0,8.8-1.7,12.1-5l72.1-72.1C309,250.4,309,239.6,302.3,232.9z"></path>{' '}
+                  </g>{' '}
+                </g>{' '}
+                <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>{' '}
+                <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g>{' '}
+                <g> </g>{' '}
+              </g>{' '}
+            </g>
+          </svg>
+        </button>
+      </div>
+    </>
+  );
+};
+
+const imgs = [
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/store-card-40-refurb-202408_GEO_SG_FMT_WHH.jpg?v=1747908907',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Razer-BlackWidow-Kraken-Basilisk-Essential-Press-Size.webp?v=1747909645',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/SUR24_COMMR_Family_Attract_D3_13_01_Expanded_BloomTaskbar_1920.jpg?v=1747910052',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/kv-bg-xs.jpg?v=1747910586',
+];
+
+const descriptions = [
+  'iPhones, Macs, and extras that just work.',
+  'Gear built for smooth, lag-free play.',
+  'Reliable machines for everyday office tasks.',
+  'Stationary powerhouses for home or work.',
+  'Components to build or upgrade your rig.',
+  'Routers and switches to keep you connected.',
+  'The latest handsets to keep you in touch.',
+  'Portable screens for browsing, streaming, and work.',
+  'Earbuds, Speakers, mixers, and mics for great sound.',
+  'Cables, cases, and add-ons that simplify life.',
+  'Smart gear to track and improve workouts.',
+  'Cameras and lenses to capture every moment.',
+  'Everyday helpers that make chores easier.',
+];
+
+function CategoryItem({collection, index}) {
+  return (
+    <div className="category-container">
+      <div className="category-title">
+        <h3>{collection.title}</h3>
+        <p>{descriptions[index % descriptions.length]}</p>
+      </div>
+      <Link
+        to={`/collections/${collection.handle}`}
+        aria-label={collection.handle}
+      >
+        <img
+          src={collection.image.url}
+          alt={collection.title}
+          className="category-imgg"
+        />
+      </Link>
+    </div>
+  );
+}

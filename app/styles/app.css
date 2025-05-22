@@ -46,7 +46,7 @@ h2 {
   height: 20vw;
   max-height: 298px;
   max-width: 1500px;
-  margin-inline: auto;
+  margin: 0 auto 30px;
   overflow: hidden;
   border-radius: 5px;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
@@ -574,7 +574,7 @@ button.reset:hover:not(:has(> *)) {
 
 .home {
   max-width: 1500px;
-  margin: 30px auto;
+  margin: 10px auto 30px;
   padding: 5px;
   background-color: transparent;
   border-radius: 10px;
@@ -1185,23 +1185,23 @@ button {
 
 .collection-section {
   position: relative;
-  background-color: #fff;
+  background-color: transparent;
   max-width: 1500px;
   margin: 0px auto 30px;
-  padding: 20px 5px;
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  /* padding: 20px 5px; */
   border-radius: 5px;
 }
 
 .collection-section h3 {
-  font-size: 16px;
-  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 500;
 }
 
 .collection-products-row {
   display: flex;
-  gap: 16px;
-  padding: 10px 0;
+  gap: 15px;
+  padding: 20px 0;
   overflow-x: auto;
   scroll-behavior: smooth;
   position: relative;
@@ -1209,7 +1209,7 @@ button {
 }
 
 .collection-header {
-  width: 98%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1236,9 +1236,9 @@ button {
 }
 
 .product-card {
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   transition: box-shadow 0.3s linear;
   min-width: 200px;
   max-width: 200px;
@@ -1312,15 +1312,15 @@ button {
 }
 
 .product-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #000;
   margin: 12px 0;
   white-space: pre-wrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 105px;
-  max-height: 105px;
+  min-height: 90px;
+  max-height: 90px;
   overflow-y: auto;
 }
 
@@ -3002,7 +3002,7 @@ input[type="checkbox"] {
 }
 
 @media (max-width: 500px) {
-  .mob-hide{
+  .mob-hide {
     display: none;
   }
 }
