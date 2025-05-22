@@ -142,6 +142,7 @@ const descriptions = [
   'Stationary powerhouses for home or work.',
   'Components to build or upgrade your rig.',
   'Routers and switches to keep you connected.',
+  'Clear, vibrant displays for work or fun.',
   'The latest handsets to keep you in touch.',
   'Portable screens for browsing, streaming, and work.',
   'Earbuds, Speakers, mixers, and mics for great sound.',
