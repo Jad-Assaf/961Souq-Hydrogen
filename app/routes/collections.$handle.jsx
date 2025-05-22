@@ -343,11 +343,16 @@ export default function Collection() {
     return `${location.pathname}?${params.toString()}`;
   };
 
-  const pageNumbers = [];
-  if (currentPage > 1) pageNumbers.push(currentPage - 1);
-  pageNumbers.push(currentPage);
-  if (pageInfo.hasNextPage) pageNumbers.push(currentPage + 1);
-  while (pageNumbers.length < 3) pageNumbers.push(pageNumbers.at(-1) + 1);
+  /* --- FIX: build pageNumbers without padding to 3 --- */
+  const pageNumbers = [currentPage];
+
+  if (pageInfo.hasPreviousPage) {
+    pageNumbers.unshift(currentPage - 1);
+  }
+
+  if (pageInfo.hasNextPage) {
+    pageNumbers.push(currentPage + 1);
+  }
 
   const handleSortChange = (e) => {
     const url = new URL(window.location.href);
@@ -453,9 +458,7 @@ export default function Collection() {
       <hr className="col-hr" />
 
       <div className="flex w-full">
-        <div
-          className="flex flex-row w-[100%] collection-bottom"
-        >
+        <div className="flex flex-row w-[100%] collection-bottom">
           <div className="hidden lg:block w-1/4">
             <ShopifyFilterForm filters={collection.products.filters} />
           </div>
