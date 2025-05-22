@@ -40,35 +40,7 @@ export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
           onClick={() => scroll('left')}
           className="scroll-left-btn"
         >
-          <svg
-            fill="#2172af"
-            height="64px"
-            width="64px"
-            version="1.1"
-            id="Layer_1"
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 64 64"
-            enable-background="new 0 0 64 64"
-            xml:space="preserve"
-            stroke="#2172af"
-            transform="rotate(180)"
-          >
-            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-            <g
-              id="SVGRepo_tracerCarrier"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></g>
-            <g id="SVGRepo_iconCarrier">
-              {' '}
-              <g id="Right-arrow">
-                {' '}
-                <path d="M29.7070007,17.2929993c-0.3906002-0.3906994-1.0234013-0.3906994-1.4140015,0 c-0.3906994,0.3906002-0.3906994,1.0234013,0,1.4140015L41.5858994,32L28.2929993,45.2929993 c-0.3906994,0.3906021-0.3906994,1.0233994,0,1.4140015C28.4883003,46.9023018,28.7441006,47,29,47 c0.2558002,0,0.5116997-0.0976982,0.7070007-0.2929993l14-14c0.3905983-0.3906021,0.3905983-1.0234013,0-1.4140015 L29.7070007,17.2929993z"></path>{' '}
-                <path d="M32,0C14.3268995,0,0,14.3268003,0,32c0,17.6730995,14.3268995,32,32,32s32-14.3269005,32-32 C64,14.3268003,49.6730995,0,32,0z M32,62C15.4579,62,2,48.542099,2,32S15.4579,2,32,2c16.5419998,0,30,13.4579,30,30 S48.5419998,62,32,62z"></path>{' '}
-              </g>{' '}
-            </g>
-          </svg>
+          <LeftArrowIcon/>
         </button>
 
         {/* scroll-right button */}
@@ -78,34 +50,7 @@ export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
           onClick={() => scroll('right')}
           className="scroll-right-btn"
         >
-          <svg
-            fill="#2172af"
-            height="64px"
-            width="64px"
-            version="1.1"
-            id="Layer_1"
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 64 64"
-            enable-background="new 0 0 64 64"
-            xml:space="preserve"
-            stroke="#2172af"
-          >
-            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-            <g
-              id="SVGRepo_tracerCarrier"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></g>
-            <g id="SVGRepo_iconCarrier">
-              {' '}
-              <g id="Right-arrow">
-                {' '}
-                <path d="M29.7070007,17.2929993c-0.3906002-0.3906994-1.0234013-0.3906994-1.4140015,0 c-0.3906994,0.3906002-0.3906994,1.0234013,0,1.4140015L41.5858994,32L28.2929993,45.2929993 c-0.3906994,0.3906021-0.3906994,1.0233994,0,1.4140015C28.4883003,46.9023018,28.7441006,47,29,47 c0.2558002,0,0.5116997-0.0976982,0.7070007-0.2929993l14-14c0.3905983-0.3906021,0.3905983-1.0234013,0-1.4140015 L29.7070007,17.2929993z"></path>{' '}
-                <path d="M32,0C14.3268995,0,0,14.3268003,0,32c0,17.6730995,14.3268995,32,32,32s32-14.3269005,32-32 C64,14.3268003,49.6730995,0,32,0z M32,62C15.4579,62,2,48.542099,2,32S15.4579,2,32,2c16.5419998,0,30,13.4579,30,30 S48.5419998,62,32,62z"></path>{' '}
-              </g>{' '}
-            </g>
-          </svg>
+          <RightArrowIcon />
         </button>
       </div>
     </>
@@ -157,3 +102,33 @@ function CategoryItem({collection, index}) {
     </div>
   );
 }
+
+
+
+const LeftArrowIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+
+const RightArrowIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
