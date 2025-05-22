@@ -1,4 +1,5 @@
 import {defer, redirect} from '@shopify/remix-oxygen';
+import '../styles/HomeSliderWithMoreHeight.css';
 import {
   useLoaderData,
   Link,
@@ -378,6 +379,10 @@ export default function Collection() {
                     to={`/collections/${sliderCollection.handle}`}
                     className="category-container"
                   >
+                    <div className="category-title">
+                      <h3>{sliderCollection.title}</h3>
+                      {/* <p>{truncateText(sliderCollection.description || '', 10)}</p> */}
+                    </div>
                     {sliderCollection.image && (
                       <img
                         sizes="(min-width: 45em) 20vw, 40vw"
@@ -396,9 +401,6 @@ export default function Collection() {
                         loading="eager"
                       />
                     )}
-                    <div className="category-title">
-                      {sliderCollection.title}
-                    </div>
                   </Link>
                 ),
             )}

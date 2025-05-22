@@ -458,12 +458,9 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .category-image {
-  border: 1px solid #ebebeb;
-  border-radius: 50%;
   max-width: 30vw;
   width: 150px;
   height: auto;
-  box-shadow: #837eff4d 0 4.8px 14.4px;
   margin-bottom: 10px;
 }
 
