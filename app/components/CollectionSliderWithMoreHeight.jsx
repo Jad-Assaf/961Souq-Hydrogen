@@ -146,6 +146,7 @@ const descriptions = [
   'The latest handsets to keep you in touch.',
   'Portable screens for browsing, streaming, and work.',
   'Earbuds, Speakers, mixers, and mics for great sound.',
+  'Club-ready mixers, controllers, and speakers for seamless sets.',
   'Cables, cases, and add-ons that simplify life.',
   'Smart gear to track and improve workouts.',
   'Cameras and lenses to capture every moment.',
