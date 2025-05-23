@@ -337,6 +337,7 @@ button.reset:hover:not(:has(> *)) {
   border-radius: 5px;
   position: relative;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  margin: auto;
 }
 
 /* BRAND ITEM ANIMATION STATES */
