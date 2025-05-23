@@ -2751,7 +2751,7 @@ input.search-bar:focus-visible {
   height: 35px;
   padding: 5px;
   stroke: #2172af;
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 4px !important;
   border-radius: 50%;
 }
 

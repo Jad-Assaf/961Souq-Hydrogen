@@ -61,7 +61,7 @@
 
 .scroll-right-btn svg,
 .scroll-left-btn svg {
-    box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 14.4px !important;
+    box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 4px !important;
     width: 35px !important;
     height: 35px !important;
     border-radius: 50% !important;
