@@ -1187,6 +1187,12 @@ export const CollectionCircles = ({
         <button
           className="circle-prev-button"
           onClick={() => scrollSlider(-600)}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: 0,
+            transform: 'translateY(-50%)',
+          }}
         >
           <CustomLeftArrow />
         </button>
@@ -1218,6 +1224,12 @@ export const CollectionCircles = ({
         <button
           className="circle-next-button"
           onClick={() => scrollSlider(600)}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: 0,
+            transform: 'translateY(-50%)',
+          }}
         >
           <CustomRightArrow />
         </button>

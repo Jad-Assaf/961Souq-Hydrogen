@@ -13,7 +13,7 @@
     width: 100% !important;
     flex-wrap: nowrap !important;
     gap: 15px !important;
-    padding: 0 0 80px !important;
+    padding: 20px 10px 80px !important;
 }
 
 .category-container {
@@ -22,14 +22,13 @@
     border-radius: 10px !important;
     background-color: #fff !important;
     box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 14.4px !important;
-    padding: 20px 0 !important;
+    padding:  0 !important;
     justify-content: space-around !important;
 }
 
 .category-imgg {
     width: 100% !important;
     position: relative !important;
-    bottom: -20px !important;
     border-radius: 10px !important;
 }
 

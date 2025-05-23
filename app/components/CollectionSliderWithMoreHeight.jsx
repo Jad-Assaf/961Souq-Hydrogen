@@ -9,7 +9,7 @@ export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
     if (!sliderRef.current) return;
     const {clientWidth} = sliderRef.current;
     const amount =
-      direction === 'left' ? -clientWidth * 0.8 : clientWidth * 0.8;
+      direction === 'left' ? -clientWidth * 1 : clientWidth * 1;
     sliderRef.current.scrollBy({left: amount, behavior: 'smooth'});
   };
 
@@ -40,7 +40,7 @@ export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
           onClick={() => scroll('left')}
           className="scroll-left-btn"
         >
-          <LeftArrowIcon/>
+          <LeftArrowIcon />
         </button>
 
         {/* scroll-right button */}
@@ -58,10 +58,21 @@ export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
 };
 
 const imgs = [
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/store-card-40-refurb-202408_GEO_SG_FMT_WHH.jpg?v=1747908907',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Razer-BlackWidow-Kraken-Basilisk-Essential-Press-Size.webp?v=1747909645',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/SUR24_COMMR_Family_Attract_D3_13_01_Expanded_BloomTaskbar_1920.jpg?v=1747910052',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/kv-bg-xs.jpg?v=1747910586',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-1.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-1.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/laptops-1.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dekstops.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pc-parts.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-1.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_b9186522-836f-4ab7-9d48-41fbdb1e20ed.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/phones_d5aded45-9b39-47c9-b69e-31b16aaef7aa.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tablets_191d3d41-0840-433d-ab84-644697a6c033.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/earbuds.jpg?v=1747996340',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pioneer.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/accessories_79d5f32e-19db-453e-88ac-8cd3146d101d.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fitness.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/photography.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances.jpg?v=1747995659',
 ];
 
 const descriptions = [
@@ -84,26 +95,31 @@ const descriptions = [
 
 function CategoryItem({collection, index}) {
   return (
-    <div className="category-container">
-      <div className="category-title">
-        <h3>{collection.title}</h3>
-        <p>{descriptions[index % descriptions.length]}</p>
+    <>
+      <div className="category-container">
+        {/* <div className="category-title">
+              <h3>{collection.title}</h3>
+              <p>{descriptions[index % descriptions.length]}</p>
+          </div> */}
+        <Link
+          to={`/collections/${collection.handle}`}
+          aria-label={collection.handle}
+        >
+          <img
+            // src={imgs[index % imgs.length]}
+            src={collection.image.url}
+            alt={collection.title}
+            className="category-imgg"
+          />
+        </Link>
+        <div className="category-title">
+          <h3>{collection.title}</h3>
+          <p>{descriptions[index % descriptions.length]}</p>
+        </div>
       </div>
-      <Link
-        to={`/collections/${collection.handle}`}
-        aria-label={collection.handle}
-      >
-        <img
-          src={collection.image.url}
-          alt={collection.title}
-          className="category-imgg"
-        />
-      </Link>
-    </div>
+    </>
   );
 }
-
-
 
 const LeftArrowIcon = () => (
   <svg

@@ -570,7 +570,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .home {
-  max-width: 1500px;
+  /* max-width: 1500px; */
   margin: 10px auto 30px;
   padding: 5px;
   background-color: transparent;
@@ -1198,7 +1198,7 @@ button {
 .collection-products-row {
   display: flex;
   gap: 15px;
-  padding: 20px 0;
+  padding: 20px 10px;
   overflow-x: auto;
   scroll-behavior: smooth;
   position: relative;
