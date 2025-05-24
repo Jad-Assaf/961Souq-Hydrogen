@@ -3623,23 +3623,22 @@ a.video-link {
 
 .reels-overlay {
   position: fixed;
-  /* full-screen */
   inset: 0;
   background: #000;
-  z-index: 1000;
+  z-index: 1000
 }
 
 .reels-close {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
   width: 36px;
   height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .6);
+  color: #fff;
   font-size: 22px;
   cursor: pointer;
-  z-index: 1001;
+  z-index: 1001
 }

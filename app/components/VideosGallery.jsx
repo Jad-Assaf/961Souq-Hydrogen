@@ -1,57 +1,58 @@
 // VideosGallery.jsx
 import React, {useEffect, useRef, useState} from 'react';
-import '@sayings/react-reels/dist/index.css'; // just the library styles
+import '@sayings/react-reels/dist/index.css';
 
+/* ------------------------------------------------------------------ */
+/* Main component                                                     */
+/* ------------------------------------------------------------------ */
 export default function VideosGallery({videos = [], scrollStep = 400}) {
-  /* ------------------------------------------------------------------ */
-  /*  desktop refs & helpers (unchanged)                                */
-  /* ------------------------------------------------------------------ */
+  /* ===== desktop refs & helpers  ==================================== */
   const sliderRef = useRef(null);
   const videoRefs = useRef([]);
 
-  const loadMeta = (vid) => {
-    if (!vid || vid.dataset.loaded) return;
-    vid.src = vid.dataset.src;
-    vid.load();
-    vid.dataset.loaded = 'true';
+  const loadMeta = (v) => {
+    if (!v || v.dataset.loaded) return;
+    v.src = v.dataset.src;
+    v.load();
+    v.dataset.loaded = 'true';
   };
   const pauseAllExcept = (keep) =>
     videoRefs.current.forEach((v) => v && v !== keep && v.pause());
-  const resetFrame = (vid) => {
-    vid.pause();
-    vid.currentTime = 0;
-    vid.load();
+  const resetFrame = (v) => {
+    v.pause();
+    v.currentTime = 0;
+    v.load();
   };
-  const playNext = (idx) => {
-    const nxt = videoRefs.current[idx + 1];
-    if (!nxt) return;
-    loadMeta(nxt);
-    pauseAllExcept(nxt);
-    nxt.play().catch(() => {});
+  const playNext = (i) => {
+    const n = videoRefs.current[i + 1];
+    if (!n) return;
+    loadMeta(n);
+    pauseAllExcept(n);
+    n.play().catch(() => {});
   };
 
   useEffect(() => {
     const init = () => {
-      videoRefs.current.forEach((v, idx) => {
+      videoRefs.current.forEach((v, i) => {
         if (!v) return;
         loadMeta(v);
         v.addEventListener('ended', () => {
           resetFrame(v);
-          playNext(idx);
+          playNext(i);
         });
       });
       videoRefs.current[0]?.play().catch(() => {});
     };
     'requestIdleCallback' in window
-      ? window.requestIdleCallback(init, {timeout: 3000})
-      : setTimeout(init, 1000);
+      ? window.requestIdleCallback(init, {timeout: 3_000})
+      : setTimeout(init, 1_000);
   }, []);
 
-  const handleDesktopClick = (vid, e) => {
+  const handleDesktopClick = (v, e) => {
     e.stopPropagation();
-    loadMeta(vid);
-    pauseAllExcept(vid);
-    vid.paused ? vid.play().catch(() => {}) : vid.pause();
+    loadMeta(v);
+    pauseAllExcept(v);
+    v.paused ? v.play().catch(() => {}) : v.pause();
   };
   const scroll = (dir) =>
     sliderRef.current?.scrollBy({
@@ -59,14 +60,12 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
       behavior: 'smooth',
     });
 
-  /* ------------------------------------------------------------------ */
-  /*  mobile reels viewer state                                         */
-  /* ------------------------------------------------------------------ */
+  /* ===== mobile-viewer state  ======================================= */
   const [ReelsComp, setReelsComp] = useState(null);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [startIndex, setStartIndex] = useState(0);
+  const [clickedIdx, setClickedIdx] = useState(0);
 
-  /* dynamic import once on client */
+  /* client-only import */
   useEffect(() => {
     import('@sayings/react-reels').then((m) =>
       setReelsComp(() => m.Reels || m.default),
@@ -77,45 +76,48 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
   const handleClipTap = (idx, e) => {
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     if (isMobile && ReelsComp) {
-      setStartIndex(idx);
+      setClickedIdx(idx);
       setViewerOpen(true);
     } else {
       handleDesktopClick(e.currentTarget, e);
     }
   };
 
-  /* map videos → reels data */
+  /* ===== map → reelsData (unique ids & rightMenu) =================== */
   const reelsData = videos.map(({src, poster, href}, i) => ({
-    id: i + 1,
+    id: i + 1, // unique reel id
     reelInfo: {url: src, type: 'video/mp4'},
-    rightMenu: {options: []},
-    bottomSection: href
-      ? {
-          component: (
-            <a
-              className="video-link"
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View Product
-            </a>
-          ),
-        }
-      : undefined,
     poster,
+    rightMenu: href
+      ? {
+          options: [
+            {
+              id: i + 1, // unique key for li
+              label: 'View Product',
+              value: href, // we read it back
+            },
+          ],
+        }
+      : {options: []},
   }));
 
-  /* ------------------------------------------------------------------ */
-  /*  render                                                            */
-  /* ------------------------------------------------------------------ */
+  /* ===== helper: rotate array so clicked reel shows first =========== */
+  const reorderedReels = [
+    ...reelsData.slice(clickedIdx),
+    ...reelsData.slice(0, clickedIdx),
+  ];
+
+  /* ===== menu-click handler ======================================== */
+  const handleMenuItem = ({value}) => window.open(value, '_blank');
+
+  /* ===================  RENDER  ===================================== */
   return (
     <>
-      {/* desktop carousel */}
+      {/* ---------- desktop slider ---------- */}
       <div className="videos-wrapper">
         <div className="videos-slider" ref={sliderRef}>
           {videos.map(({src, href}, i) => (
-            <div key={i} className="video-box">
+            <div key={`box-${i}`} className="video-box">
               <video
                 ref={(el) => (videoRefs.current[i] = el)}
                 data-src={src}
@@ -139,7 +141,6 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
           ))}
         </div>
 
-        {/* horizontal arrows */}
         <button
           className="home-prev-button showww left"
           onClick={() => scroll('left')}
@@ -154,20 +155,20 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
         </button>
       </div>
 
-      {/* mobile full-screen overlay */}
+      {/* ---------- mobile full-screen viewer ---------- */}
       {viewerOpen && ReelsComp && (
         <div className="reels-overlay">
           <button className="reels-close" onClick={() => setViewerOpen(false)}>
             ✕
           </button>
           <ReelsComp
-            reels={reelsData}
-            startIndex={startIndex}
+            reels={reorderedReels}
             autoPlay
             loop={false}
             hideControls
             height="100vh"
             width="100%"
+            onMenuItemClicked={handleMenuItem}
           />
         </div>
       )}
@@ -175,7 +176,7 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
   );
 }
 
-/* ------------------------------------------------------------------ */
+/* ---------------- icons ---------------- */
 const LeftArrowIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
