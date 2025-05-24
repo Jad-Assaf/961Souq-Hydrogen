@@ -2734,7 +2734,7 @@ input.search-bar:focus-visible {
   height: 30px;
   cursor: pointer;
   z-index: 2;
-  border-radius: 50%;  
+  border-radius: 50%;
 }
 
 .home-prev-button {
@@ -3547,4 +3547,66 @@ button.reset:hover:not(:has(> *)) {
   transform: scale(1.02);
   transition: transform 0.3s ease;
   box-shadow: inset 0 0 20px 0px #bcbcbc, rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+}
+
+.videos-wrapper {
+  position: relative;
+  max-width: 1500px;
+  margin: 0 auto 70px;
+  padding: 0 0 10px;
+}
+
+.videos-slider {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 20px;
+  width: 100%;
+  padding-bottom: 55px;
+}
+
+.video-item {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.scroll-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.scroll-btn.left {
+  right: 56px;
+  /* place the left arrow beside the right one */
+}
+
+.video-box {
+  width: 250px;
+  height: 445px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+a.video-link {
+  border: 2px solid #2172af;
+  padding: 5px 10px;
+  border-radius: 30px;
+  margin-top: 5px;
+  width: 50%;
+  color: #2172af;
+  text-align: center;
 }

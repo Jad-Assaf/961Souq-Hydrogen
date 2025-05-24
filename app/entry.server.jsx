@@ -61,6 +61,9 @@ export default async function handleRequest(
       'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
+      'https://www.instagram.com/',
+      'http://www.instagram.com/',
+      'https://scontent.cdninstagram.com/',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -89,6 +92,9 @@ export default async function handleRequest(
       'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
+      'https://www.instagram.com/',
+      'http://www.instagram.com/',
+      'https://scontent.cdninstagram.com/',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -119,6 +125,9 @@ export default async function handleRequest(
       'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
+      'https://www.instagram.com/',
+      'http://www.instagram.com/',
+      'https://scontent.cdninstagram.com/',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -150,6 +159,9 @@ export default async function handleRequest(
       'https://c.bing.com',
       'https://youtu.be/',
       'https://youtube.com/',
+      'https://www.instagram.com/',
+      'http://www.instagram.com/',
+      'https://scontent.cdninstagram.com/',
     ],
     mediaSrc: [
       "'self'",
@@ -166,6 +178,9 @@ export default async function handleRequest(
       'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
+      'https://www.instagram.com/',
+      'http://www.instagram.com/',
+      'https://scontent.cdninstagram.com/',
       // Add other media sources as needed
     ],
   });
