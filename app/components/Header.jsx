@@ -160,7 +160,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
           <NavLink prefetch="intent" to="/" className="logo-link" end>
             <img
-              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=200"
+              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400"
               alt={`${shop.name} Logo`}
               className="header-logo"
               width="100"
