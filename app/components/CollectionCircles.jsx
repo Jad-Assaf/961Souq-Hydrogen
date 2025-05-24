@@ -33,8 +33,8 @@ const CollectionItem = ({collection, index, onSelect, isActive}) => {
             onLoad={() => setIsLoading(false)}
           />
         )}
-      </div>
       <div className="category-title">{collection.title}</div>
+      </div>
     </Link>
   );
 };

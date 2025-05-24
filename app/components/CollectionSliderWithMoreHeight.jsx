@@ -107,7 +107,7 @@ function CategoryItem({collection, index}) {
         >
           <img
             // src={imgs[index % imgs.length]}
-            src={collection.image.url}
+            src={`${collection.image.url}&width=300`}
             alt={collection.title}
             className="category-imgg"
           />
