@@ -3624,8 +3624,17 @@ a.video-link {
 .reels-overlay {
   position: fixed;
   inset: 0;
-  background: #000;
+  height: 100dvh;
   z-index: 1000
+  /* Chrome 108+, Safari 15+, Firefox 106+ */
+}
+
+@supports not (height:100dvh) {
+  .reels-overlay {
+    height: 100svh;
+  }
+
+  /* iOS 15 */
 }
 
 .reels-close {
