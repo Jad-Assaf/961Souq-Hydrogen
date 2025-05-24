@@ -134,11 +134,14 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
         ))}
       </div>
 
-      <button className="home-prev-button left" onClick={() => scroll('left')}>
+      <button
+        className="home-prev-button showww left"
+        onClick={() => scroll('left')}
+      >
         <LeftArrowIcon />
       </button>
       <button
-        className="home-next-button right"
+        className="home-next-button showww right"
         onClick={() => scroll('right')}
       >
         <RightArrowIcon />
