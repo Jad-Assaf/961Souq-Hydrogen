@@ -3566,10 +3566,11 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .video-item {
-  width: 100%;
-  height: auto;
+  width: 250px;
+  height: 445px;
   border-radius: 12px;
   flex-shrink: 0;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
 }
 
 .scroll-btn {
@@ -3609,4 +3610,13 @@ a.video-link {
   width: 50%;
   color: #2172af;
   text-align: center;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 4px;
+}
+
+.show {
+  display: block;
+
+  @media (max-width: 1024px) {
+    display: block;
+  }
 }
