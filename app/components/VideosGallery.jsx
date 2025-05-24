@@ -72,6 +72,21 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
     );
   }, []);
 
+  useEffect(() => {
+    if (viewerOpen) {
+      const el = document.querySelector('.reels-overlay');
+      if (el?.requestFullscreen) {
+        el.requestFullscreen({navigationUI: 'hide'}).catch(() => {});
+      }
+    }
+  }, [viewerOpen]);
+
+  /* close handler */
+  const closeViewer = () => {
+    if (document.fullscreenElement) document.exitFullscreen(); // leave FS first
+    setViewerOpen(false);
+  };
+
   /* tap handler decides mobile vs desktop */
   const handleClipTap = (idx, e) => {
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
@@ -158,15 +173,16 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
       {/* ---------- mobile full-screen viewer ---------- */}
       {viewerOpen && ReelsComp && (
         <div className="reels-overlay">
-          <button className="reels-close" onClick={() => setViewerOpen(false)}>
+          <button className="reels-close" onClick={closeViewer}>
             ✕
           </button>
+
           <ReelsComp
             reels={reorderedReels}
             autoPlay
             loop={false}
             hideControls
-            height="100%"
+            height="100vh"
             width="100%"
             onMenuItemClicked={handleMenuItem}
           />
