@@ -166,7 +166,7 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
             autoPlay
             loop={false}
             hideControls
-            height="100vh"
+            height="100%"
             width="100%"
             onMenuItemClicked={handleMenuItem}
           />
