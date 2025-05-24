@@ -50,6 +50,7 @@
     "react-babylonjs": "^3.2.3-beta.4",
     "react-dom": "^18.2.0",
     "react-facebook-pixel": "^1.0.4",
+    "react-full-screen": "^1.1.1",
     "react-intersection-observer": "^9.13.1",
     "react-lazy-load-image-component": "^1.6.2",
     "react-microsoft-clarity": "^2.0.0",
