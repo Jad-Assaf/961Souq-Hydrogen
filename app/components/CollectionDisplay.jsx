@@ -128,7 +128,7 @@ export function ProductItem({product}) {
             <div className="imageWrapper">
               <img
                 src={images[currentImageIndex]?.url}
-                alt={images[currentImageIndex]?.altText || 'Product Image'}
+                alt={product.title}
                 srcSet={`
                   ${images[currentImageIndex]?.url}&width=200 300w,
                   ${images[currentImageIndex]?.url}&width=200 600w,
