@@ -455,7 +455,7 @@ button.reset:hover:not(:has(> *)) {
   font-weight: 500 !important;
   font-size: 12px;
   color: #000 !important;
-  min-height: 39px;
+  /* min-height: 39px; */
 }
 
 .category-image {
@@ -567,7 +567,7 @@ button.reset:hover:not(:has(> *)) {
   /* height: 100%; */
   z-index: 1;
   background: #f0f8ff82;
-  padding: 15px 0 0;
+  /* padding: 15px 0 0; */
 }
 
 .home {
@@ -3626,15 +3626,12 @@ a.video-link {
   inset: 0;
   height: 100dvh;
   z-index: 1000
-  /* Chrome 108+, Safari 15+, Firefox 106+ */
 }
 
 @supports not (height:100dvh) {
   .reels-overlay {
     height: 100svh;
   }
-
-  /* iOS 15 */
 }
 
 .reels-close {

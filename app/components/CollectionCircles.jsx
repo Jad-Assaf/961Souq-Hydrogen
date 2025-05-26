@@ -33,8 +33,8 @@ const CollectionItem = ({collection, index, onSelect, isActive}) => {
             onLoad={() => setIsLoading(false)}
           />
         )}
-      <div className="category-title">{collection.title}</div>
       </div>
+      <div className="category-title">{collection.title}</div>
     </Link>
   );
 };
@@ -263,7 +263,7 @@ export const laptopsMenu = [
     },
     title: 'Acer Laptops',
     url: '/collections/acer-laptops',
-  }
+  },
 ];
 
 export const desktopsMenu = [
