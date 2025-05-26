@@ -52,10 +52,18 @@ const MANUAL_MENU_HANDLES = [
 /**
  * @type {MetaFunction}
  */
-export const meta = ({data}) => {
+export const meta = ({data, matches}) => {
   const truncate = (text, maxLength) =>
     text?.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
-  return getSeoMeta({
+
+  // Merge in any defaults from your root route’s SEO config
+  const parentSeo = matches[0]?.data?.seo;
+
+  // Your OG image URL
+  const ogImageUrl =
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
+
+  return getSeoMeta(parentSeo, {
     title:
       '961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon',
     description: truncate(
@@ -64,6 +72,16 @@ export const meta = ({data}) => {
       150,
     ),
     url: data?.url || 'https://961souq.com',
+    type: 'website',
+    media: [
+      {
+        url: ogImageUrl,
+        type: 'image',
+        altText: '961Souq Logo',
+        width: 1200,
+        height: 630,
+      },
+    ],
     jsonLd: [
       {
         '@context': 'https://schema.org',
