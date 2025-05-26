@@ -116,8 +116,6 @@ function renderUrlTag({url, lastMod, changeFreq, image}) {
     ? `
     <image:image>
       <image:loc>${image.url}</image:loc>
-      <image:title>${image.title}</image:title>
-      <image:caption>${image.caption}</image:caption>
     </image:image>
   `.trim()
     : '';
