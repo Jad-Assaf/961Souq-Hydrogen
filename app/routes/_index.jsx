@@ -64,8 +64,7 @@ export const meta = ({data, matches}) => {
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
 
   return getSeoMeta(parentSeo, {
-    title:
-      '961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon',
+    title: '961Souq | Leading Electronics, PC and Gaming Gear Store in Lebanon',
     description: truncate(
       data?.description ||
         "Discover Lebanon's top destination for quality electronics and unbeatable deals at 961Souq. Shop the latest gadgets, devices, and accessories today!",
@@ -88,7 +87,7 @@ export const meta = ({data, matches}) => {
         '@type': 'WebPage',
         name:
           data?.title ||
-          '961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon',
+          '961Souq | Leading Electronics, PC and Gaming Gear Store in Lebanon',
         description: truncate(
           data?.description ||
             "Discover Lebanon's top destination for quality electronics and unbeatable deals at 961Souq. Shop the latest gadgets, devices, and accessories today!",
