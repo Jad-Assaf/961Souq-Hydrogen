@@ -107,112 +107,112 @@ export default function ScrollingSVGs() {
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/56789-600x600_copy.webp?v=1744193136&width=75"
-              alt=""
+              alt="Gaming Desktop Setup"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1691936722_MX360-01.webp?v=1742897747&width=75"
-              alt=""
+              alt="Gaming Desktop Case"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/h525.png?v=1742897747&width=75"
-              alt=""
+              alt="Gaming GPU"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/msi-mpg_z490_gaming_carbon_wifi-3d2_rgb.png?v=1742897747&width=75"
-              alt=""
+              alt="Gaming Motherboard"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ae-odyssey-neo-g9-g95nc-ls57cg952nmxue-541731703.avif?v=1742894737&width=75"
-              alt=""
+              alt="Gaming Monitor"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_20056133-8634-45c7-9bcf-cdbd887ef3b2.webp?v=1742897747&width=75"
-              alt=""
+              alt="Gaming NVMe"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/a99efcd10f1f4d27857cbbedab954261.png.1400x1120_q100_crop-fit_optimize.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Speakers"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/8e6a81d97c124f0aa0da84099e0419c7.png.500x400_q100_crop-fit_optimize.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Headphones"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/png-transparent-intel-core-xeon-cpu-socket-land-grid-array-intel-text-rectangle-trademark-thumbnail.png?v=1742897747&width=75"
-              alt=""
+              alt="Gaming CPU"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/qck_prism_4xl_buyimg_02.png__1920x1080_crop-fit_optimize_subsampling-2.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Accessories"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/FURY_Beast_White_RGB_DDR5_2_angle-zm-lg.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming RAM"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GM850W__55109_copy.webp?v=1744192941&width=75"
-              alt=""
+              alt="Gaming PSU"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2037.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Mouse"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Terminator-02.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Chair"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1920_high-resolution-png-progamingkeyboardbty1us.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Keyboard"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/kv-img.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Cooler"
             />
           </a>
           {/* Duplicate the images below to make it seamless */}
@@ -222,112 +222,112 @@ export default function ScrollingSVGs() {
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/56789-600x600_copy.webp?v=1744193136&width=75"
-              alt=""
+              alt="Gaming Desktop Setup"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1691936722_MX360-01.webp?v=1742897747&width=75"
-              alt=""
+              alt="Gaming Desktop Case"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/h525.png?v=1742897747&width=75"
-              alt=""
+              alt="Gaming GPU"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/msi-mpg_z490_gaming_carbon_wifi-3d2_rgb.png?v=1742897747&width=75"
-              alt=""
+              alt="Gaming Motherboard"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ae-odyssey-neo-g9-g95nc-ls57cg952nmxue-541731703.avif?v=1742894737&width=75"
-              alt=""
+              alt="Gaming Monitor"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1_20056133-8634-45c7-9bcf-cdbd887ef3b2.webp?v=1742897747&width=75"
-              alt=""
+              alt="Gaming NVMe"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/a99efcd10f1f4d27857cbbedab954261.png.1400x1120_q100_crop-fit_optimize.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Speakers"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/8e6a81d97c124f0aa0da84099e0419c7.png.500x400_q100_crop-fit_optimize.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Headphones"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/png-transparent-intel-core-xeon-cpu-socket-land-grid-array-intel-text-rectangle-trademark-thumbnail.png?v=1742897747&width=75"
-              alt=""
+              alt="Gaming CPU"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/qck_prism_4xl_buyimg_02.png__1920x1080_crop-fit_optimize_subsampling-2.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Accessories"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/FURY_Beast_White_RGB_DDR5_2_angle-zm-lg.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming RAM"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/GM850W__55109_copy.webp?v=1744192941&width=75"
-              alt=""
+              alt="Gaming PSU"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/2037.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Mouse"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Terminator-02.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Chair"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/1920_high-resolution-png-progamingkeyboardbty1us.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Keyboard"
             />
             <img
               loading="lazy"
               width={75}
               height={75}
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/kv-img.png?v=1742897748&width=75"
-              alt=""
+              alt="Gaming Cooler"
             />
           </a>
         </div>
