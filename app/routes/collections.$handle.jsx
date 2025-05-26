@@ -41,7 +41,7 @@ export const meta = ({data}) => {
     title: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
     description: truncateText(
       collection?.description || 'Explore our latest collection at 961Souq.',
-      15,
+      22,
     ),
     url: `https://961souq.com/collections/${collection?.handle || ''}`,
     image:
@@ -53,7 +53,7 @@ export const meta = ({data}) => {
         '@type': 'CollectionPage',
         name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
         url: `https://961souq.com/collections/${collection?.handle || ''}`,
-        description: truncateText(collection?.description || '', 15),
+        description: truncateText(collection?.description || '', 22),
         image: {
           '@type': 'ImageObject',
           url:
@@ -83,7 +83,7 @@ export const meta = ({data}) => {
         '@context': 'http://schema.org/',
         '@type': 'ItemList',
         name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
-        description: truncateText(collection?.description || '', 15),
+        description: truncateText(collection?.description || '', 22),
         url: `https://961souq.com/collections/${collection?.handle || ''}`,
         itemListElement: collection?.products?.nodes
           ?.slice(0, 10)
