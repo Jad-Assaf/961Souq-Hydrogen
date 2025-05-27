@@ -702,6 +702,7 @@ function ProductForm({product, selectedVariant, setSelectedVariant}) {
               ]
             : []
         }
+        contentId={product.id}
       >
         {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
           ? 'Call For Price'

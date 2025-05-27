@@ -193,6 +193,7 @@ export function ProductItem({product}) {
               ]
             : []
         }
+        contentId={product.id}
       >
         {!selectedVariant.availableForSale
           ? 'Sold out'

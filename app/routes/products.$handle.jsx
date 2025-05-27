@@ -569,6 +569,7 @@ export function ProductForm({
               ? [{merchandiseId: selectedVariant.id, quantity: safeQuantity}]
               : []
           }
+          contentId={product.id}
         >
           {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
             ? 'Call For Price'

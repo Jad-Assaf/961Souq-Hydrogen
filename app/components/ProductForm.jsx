@@ -181,6 +181,7 @@ export function ProductForm({
               ? [{merchandiseId: updatedVariant.id, quantity: safeQuantity}]
               : []
           }
+          contentId={product.id}
         >
           {updatedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
         </AddToCartButton>
