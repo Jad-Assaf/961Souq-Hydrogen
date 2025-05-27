@@ -209,6 +209,7 @@ export function SearchBar({onResultSelect, closeSearch}) {
           )}
           <button
             onClick={handleSearch}
+            data-tt-event="Search"
             className="search-bar-submit"
             aria-label="Search"
           >

@@ -280,6 +280,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                       )}
                       <button
                         onClick={handleSearch}
+                        data-tt-event="Search"
                         className="search-bar-submit"
                         aria-label="Search"
                       >

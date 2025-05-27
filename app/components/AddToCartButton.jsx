@@ -41,6 +41,7 @@ export function AddToCartButton({
           />
           <button
             type="submit"
+            data-tt-event="AddToCart"
             onClick={handleAnimation}
             disabled={disabled ?? fetcher.state !== 'idle'}
             className={`add-to-cart-button ${disabled ? 'disabled' : ''} ${
