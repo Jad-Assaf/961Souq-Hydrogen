@@ -1,0 +1,24 @@
+import {json} from '@shopify/remix-oxygen';
+import { sendTikTokEvent } from './tiktokEvents.server';
+
+export async function action({request}) {
+  const data = await request.json();         // {event, event_id, ...}
+
+  const ip =
+    request.headers.get('cf-connecting-ip') ??
+    request.headers.get('x-forwarded-for') ??
+    '';
+  const ua = request.headers.get('user-agent') ?? '';
+
+  await sendTikTokEvent({
+    ...data,
+    user: {ip, ua, url: data.url},
+  });
+
+  /* ---------- NEW: server-side confirmation ---------- */
+  console.log(
+    `[TikTok] Events API ⇢ ${data.event} • id=${data.event_id}`,
+  );
+
+  return json({ok: true});
+}

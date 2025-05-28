@@ -2,52 +2,48 @@ import {useNonce} from '@shopify/hydrogen';
 import {useEffect} from 'react';
 import {useLocation} from '@remix-run/react';
 
-/* ------------------------------------------------------------------ */
-/* helpers                                                            */
-/* ------------------------------------------------------------------ */
-
-/** Strongly-unique ID for every event fire (TikTok deduplication) */
 const genEventId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
     ? crypto.randomUUID()
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`;
 
-/** Try to pull a product/variant ID off the clicked element */
 const getContentId = (el) =>
   el?.dataset?.ttContentId || el?.dataset?.productId || el?.dataset?.variantId;
 
-/* ------------------------------------------------------------------ */
-/* TikTok Pixel wrapper                                               */
-/* ------------------------------------------------------------------ */
+/* ---------- NEW: central relay with console-log ---------- */
+const sendServer = async (body) => {
+  try {
+    const res = await fetch('/tiktok-event', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+      keepalive: true,
+    });
+    console.log(
+      `[TikTok] relay → /tiktok-event • ${body.event} • id=${body.event_id} • ${res.status}`,
+    );
+  } catch (err) {
+    console.error('[TikTok] relay failed', err);
+  }
+};
 
 export default function TikTokPixel({pixelId}) {
   const nonce = useNonce();
-  const location = useLocation(); // detects SPA navigation changes
+  const {pathname, href} = useLocation();
 
-  /* 1️⃣ bootstrap the pixel once ------------------------------------ */
+  /* pixel loader (unchanged) */
   useEffect(() => {
-    if (!pixelId || window.ttq) return; // already loaded?
-
+    if (!pixelId || window.ttq) return;
     (function (w, d, t, id) {
       w.TiktokAnalyticsObject = t;
       const ttq = (w[t] = w[t] || []);
-      ttq.methods = [
-        'page',
-        'track',
-        'identify',
-        'instances',
-        'debug',
-        'on',
-        'off',
-        'once',
-        'ready',
-        'alias',
-        'group',
-        'enableCookie',
-      ];
-      ttq.setAndDefer = (obj, m) => (obj[m] = (...a) => obj.push([m, ...a]));
+      ttq.methods =
+        'page track identify instances debug on off once ready alias group enableCookie'.split(
+          ' ',
+        );
+      ttq.setAndDefer = (o, m) => (o[m] = (...a) => o.push([m, ...a]));
       ttq.methods.forEach((m) => ttq.setAndDefer(ttq, m));
-      ttq.load = (pid, opts) => {
+      ttq.load = (pid) => {
         const s = d.createElement('script');
         s.async = true;
         s.src =
@@ -56,82 +52,80 @@ export default function TikTokPixel({pixelId}) {
           '&lib=' +
           t;
         d.getElementsByTagName('script')[0].parentNode.insertBefore(s, null);
-        ttq._i = ttq._i || {};
-        ttq._i[pid] = [];
-        ttq._t = ttq._t || {};
-        ttq._t[pid] = +new Date();
-        ttq._o = ttq._o || {};
-        ttq._o[pid] = opts || {};
       };
       ttq.load(id);
     })(window, document, 'ttq', pixelId);
   }, [pixelId]);
 
-  /* 2️⃣ send a single PageView per pathname ------------------------- */
+  /* single PageView per URL */
+  useEffect(() => {
+    if (!window.ttq) return;
+    if (window.__tt_last_path === pathname) return;
+    window.__tt_last_path = pathname;
+
+    const event_id = genEventId();
+    window.ttq.page({event_id});
+    sendServer({event: 'PageView', event_id, url: href});
+  }, [pathname, href]);
+
+  /* AddToCart / Search */
   useEffect(() => {
     if (!window.ttq) return;
 
-    const currentPath = location.pathname;
-
-    /* global guard to stop duplicates (Strict-mode double-mount) */
-    if (window.__tt_last_pageview_path === currentPath) return;
-
-    window.__tt_last_pageview_path = currentPath;
-
-    window.ttq.page({event_id: genEventId()}); // fires TikTok PageView
-  }, [location.pathname]);
-
-  /* 3️⃣ delegated AddToCart / Search click listener ----------------- */
-  useEffect(() => {
-    if (!window.ttq) return;
-
-    const clickHandler = (e) => {
-      const el = e.target.closest('button, a, input[type="submit"]');
+    const handler = (e) => {
+      const el = e.target.closest('button,a,input[type="submit"]');
       if (!el) return;
 
-      const rawLabel =
+      const label = (
         el.dataset.ttEvent ||
         el.getAttribute('aria-label') ||
         el.name ||
         el.id ||
         el.textContent ||
-        '';
+        ''
+      ).toLowerCase();
 
-      const label = rawLabel.toLowerCase();
-
-      /* ----- AddToCart --------------------------------------------- */
+      /* AddToCart */
       if (
         label.includes('add to cart') ||
         label.includes('addtocart') ||
         label.includes('add_cart') ||
         el.dataset.ttEvent === 'AddToCart'
       ) {
-        window.ttq.track('AddToCart', {
-          event_id: genEventId(),
+        const event_id = genEventId();
+        const body = {
+          event: 'AddToCart',
+          event_id,
           content_id: getContentId(el),
           content_type: 'product',
-        });
-        return; // stop bubbling to Search
+          url: location.href,
+        };
+        window.ttq.track('AddToCart', body);
+        sendServer(body);
+        return;
       }
 
-      /* ----- Search -------------------------------------------------- */
+      /* Search */
       if (label.includes('search') || el.dataset.ttEvent === 'Search') {
         const form = el.closest('form');
         const q =
           form?.querySelector('input[type="search"]') ||
           form?.querySelector('input[name="q"]');
-
-        window.ttq.track('Search', {
-          event_id: genEventId(),
+        const event_id = genEventId();
+        const body = {
+          event: 'Search',
+          event_id,
           search_string: q?.value,
-        });
+          url: location.href,
+        };
+        window.ttq.track('Search', body);
+        sendServer(body);
       }
     };
 
-    document.addEventListener('click', clickHandler);
-    return () => document.removeEventListener('click', clickHandler);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
   }, []);
 
-  /* nothing visible – script tag keeps React happy */
   return <script nonce={nonce} />;
 }
