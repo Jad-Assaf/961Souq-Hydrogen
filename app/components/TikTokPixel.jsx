@@ -10,17 +10,17 @@ const genEventId = () =>
 const getContentId = (el) =>
   el?.dataset?.ttContentId || el?.dataset?.productId || el?.dataset?.variantId;
 
-/* ---------- NEW: central relay with console-log ---------- */
 const sendServer = async (body) => {
   try {
     const res = await fetch('/tiktok-event', {
+      // ⇦ new path
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(body),
       keepalive: true,
     });
     console.log(
-      `[TikTok] relay → /tiktok-event • ${body.event} • id=${body.event_id} • ${res.status}`,
+      `[TikTok] relay • ${body.event} • id=${body.event_id} • ${res.status}`,
     );
   } catch (err) {
     console.error('[TikTok] relay failed', err);
@@ -31,7 +31,7 @@ export default function TikTokPixel({pixelId}) {
   const nonce = useNonce();
   const {pathname, href} = useLocation();
 
-  /* pixel loader (unchanged) */
+  /* 1️⃣ load pixel once */
   useEffect(() => {
     if (!pixelId || window.ttq) return;
     (function (w, d, t, id) {
@@ -57,7 +57,7 @@ export default function TikTokPixel({pixelId}) {
     })(window, document, 'ttq', pixelId);
   }, [pixelId]);
 
-  /* single PageView per URL */
+  /* 2️⃣ PageView once per URL */
   useEffect(() => {
     if (!window.ttq) return;
     if (window.__tt_last_path === pathname) return;
@@ -68,7 +68,7 @@ export default function TikTokPixel({pixelId}) {
     sendServer({event: 'PageView', event_id, url: href});
   }, [pathname, href]);
 
-  /* AddToCart / Search */
+  /* 3️⃣ AddToCart + Search */
   useEffect(() => {
     if (!window.ttq) return;
 
