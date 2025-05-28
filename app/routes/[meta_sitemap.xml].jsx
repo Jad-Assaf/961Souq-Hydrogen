@@ -29,7 +29,7 @@ export async function loader({request, context: {storefront}}) {
  * Reusable helper to fetch all paginated data up to the limit.
  */
 async function fetchAllResources({storefront, query, field}) {
-  const MAX_URLS_PER_PAGE = 250;
+  const MAX_URLS_PER_PAGE = 100;
   const TOTAL_LIMIT = 50000;
 
   let allNodes = [];
@@ -85,25 +85,23 @@ function generateMetaXmlFeed({products, baseUrl}) {
 
 /**
  * Renders an individual <item> with whatever fields you need.
- * **Added: fetch google_product_category metafield & output <g:google_product_category>.**
  */
 function renderProductVariantItem(product, variant, baseUrl) {
-  const productId = parseGid(product.id); // Product ID for grouping
-  const variantId = parseGid(variant.id); // Variant ID for unique identification
+  const productId = parseGid(product.id);
+  const variantId = parseGid(variant.id);
 
-  // Example: price from variant
+  // --- NEW: grab Google category from your GraphQL field ---
+  // fullName is the human-readable path for the Google taxon
+  const googleCategory = product?.category?.name || '';
+
   const price = variant?.priceV2?.amount || '0.00';
   const currencyCode = variant?.priceV2?.currencyCode || 'USD';
-
-  // Basic brand fallback
   const brand = product.vendor || 'MyBrand';
 
-  // Use the variant image if available; otherwise, fallback to the first product image
   const variantImage = variant?.image?.url || null;
   const fallbackImage = product?.images?.nodes?.[0]?.url || '';
   const imageUrl = xmlEncode(variantImage || fallbackImage);
 
-  // Additional images: exclude the main image (variant or fallback)
   const additionalImageTags =
     product?.images?.nodes
       ?.filter((img) => img.url !== imageUrl)
@@ -115,23 +113,11 @@ function renderProductVariantItem(product, variant, baseUrl) {
       )
       .join('') || '';
 
-  // Clean up description: remove images and convert tables to text
   const cleanDescription = xmlEncode(
     stripTableTags(stripImgTags(product.description || '')),
   );
 
-  // **NEW: grab the category metafield (namespace "google", key "google_product_category")**
-  const categoryMf = product.metafields?.nodes?.find(
-    (mf) => mf.key === 'google_product_category',
-  );
-  // fallback to productType if not set
-  const googleCategory = xmlEncode(categoryMf?.value || product.productType);
-
-  // Define the option names that should be output as-is
   const expectedAttributes = ['color', 'size', 'material', 'pattern'];
-
-  // Output tags for expected attributes if they exist on the variant.
-  // We do a case-insensitive comparison.
   let expectedOptionsXml = '';
   expectedAttributes.forEach((attr) => {
     const option = variant.selectedOptions?.find(
@@ -142,12 +128,11 @@ function renderProductVariantItem(product, variant, baseUrl) {
     }
   });
 
-  // For any other selected options, combine them into a single additional attribute.
   const additionalOptions = variant.selectedOptions?.filter(
     (o) => !expectedAttributes.includes(o.name.toLowerCase()),
   );
   let additionalOptionsXml = '';
-  if (additionalOptions.length) {
+  if (additionalOptions?.length) {
     const additionalString = additionalOptions
       .map((opt) => `${opt.name}: ${opt.value}`)
       .join('; ');
@@ -156,7 +141,6 @@ function renderProductVariantItem(product, variant, baseUrl) {
     )}</g:additional_variant_attribute>`;
   }
 
-  // Combine all option tags.
   const optionsXml = expectedOptionsXml + additionalOptionsXml;
 
   return `
@@ -170,9 +154,12 @@ function renderProductVariantItem(product, variant, baseUrl) {
   )}?variant=${xmlEncode(variantId)}</g:link>
       ${imageUrl ? `<g:image_link>${imageUrl}</g:image_link>` : ''}
       ${additionalImageTags}
-      <!-- **NEW: Google Product Category** -->
-      <g:google_product_category>${googleCategory}</g:google_product_category>
       <g:brand>${xmlEncode(brand)}</g:brand>
+
+      <g:google_product_category>${xmlEncode(
+        googleCategory,
+      )}</g:google_product_category>
+
       <g:condition>new</g:condition>
       <g:availability>${
         variant?.availableForSale ? 'in stock' : 'out of stock'
@@ -187,6 +174,7 @@ function renderProductVariantItem(product, variant, baseUrl) {
     </item>
   `;
 }
+
 
 /**
  * Parse numeric ID out of the Shopify global ID (e.g. "gid://shopify/Product/12345" -> "12345").
@@ -224,54 +212,51 @@ function stripTableTags(html) {
 }
 
 /**
- * Updated GraphQL query to include productType & the google_product_category metafield.
+ * Updated GraphQL query to include image and selectedOptions for each variant.
  */
 const PRODUCTS_QUERY = `#graphql
   query Products($first: Int!, $after: String) {
-    products(first: $first, after: $after, query: "published_status:'online_store:visible'") {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      nodes {
+  products(first: $first, after: $after, query: "published_status:'online_store:visible'") {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      id
+      handle
+      title
+      description
+      vendor
+      updatedAt
+      category {
         id
-        handle
-        title
-        description
-        vendor
-        updatedAt
-        productType
-        metafields(first: 1, namespaces: ["google"]) {
-          nodes {
-            key
-            value
-          }
+        name
+      }
+      images(first: 5) {
+        nodes {
+          url
+          altText
         }
-        images(first: 5) {
-          nodes {
+      }
+      variants(first: 30) {
+        nodes {
+          id
+          title
+          availableForSale
+          priceV2 {
+            amount
+            currencyCode
+          }
+          image {
             url
-            altText
           }
-        }
-        variants(first: 30) {
-          nodes {
-            id
-            title
-            availableForSale
-            priceV2 {
-              amount
-              currencyCode
-            }
-            image {
-              url
-            }
-            selectedOptions {
-              name
-              value
-            }
+          selectedOptions {
+            name
+            value
           }
         }
       }
     }
   }
+}
 `;
