@@ -85,6 +85,7 @@ function generateMetaXmlFeed({products, baseUrl}) {
 
 /**
  * Renders an individual <item> with whatever fields you need.
+ * **Added: fetch google_product_category metafield & output <g:google_product_category>.**
  */
 function renderProductVariantItem(product, variant, baseUrl) {
   const productId = parseGid(product.id); // Product ID for grouping
@@ -119,6 +120,13 @@ function renderProductVariantItem(product, variant, baseUrl) {
     stripTableTags(stripImgTags(product.description || '')),
   );
 
+  // **NEW: grab the category metafield (namespace "google", key "google_product_category")**
+  const categoryMf = product.metafields?.nodes?.find(
+    (mf) => mf.key === 'google_product_category',
+  );
+  // fallback to productType if not set
+  const googleCategory = xmlEncode(categoryMf?.value || product.productType);
+
   // Define the option names that should be output as-is
   const expectedAttributes = ['color', 'size', 'material', 'pattern'];
 
@@ -130,7 +138,6 @@ function renderProductVariantItem(product, variant, baseUrl) {
       (o) => o.name.toLowerCase() === attr,
     );
     if (option) {
-      // Output using the lower-case tag as defined in expectedAttributes
       expectedOptionsXml += `<g:${attr}>${xmlEncode(option.value)}</g:${attr}>`;
     }
   });
@@ -140,8 +147,7 @@ function renderProductVariantItem(product, variant, baseUrl) {
     (o) => !expectedAttributes.includes(o.name.toLowerCase()),
   );
   let additionalOptionsXml = '';
-  if (additionalOptions && additionalOptions.length) {
-    // Format each additional attribute as "Name: Value"
+  if (additionalOptions.length) {
     const additionalString = additionalOptions
       .map((opt) => `${opt.name}: ${opt.value}`)
       .join('; ');
@@ -164,6 +170,8 @@ function renderProductVariantItem(product, variant, baseUrl) {
   )}?variant=${xmlEncode(variantId)}</g:link>
       ${imageUrl ? `<g:image_link>${imageUrl}</g:image_link>` : ''}
       ${additionalImageTags}
+      <!-- **NEW: Google Product Category** -->
+      <g:google_product_category>${googleCategory}</g:google_product_category>
       <g:brand>${xmlEncode(brand)}</g:brand>
       <g:condition>new</g:condition>
       <g:availability>${
@@ -216,7 +224,7 @@ function stripTableTags(html) {
 }
 
 /**
- * Updated GraphQL query to include image and selectedOptions for each variant.
+ * Updated GraphQL query to include productType & the google_product_category metafield.
  */
 const PRODUCTS_QUERY = `#graphql
   query Products($first: Int!, $after: String) {
@@ -232,6 +240,13 @@ const PRODUCTS_QUERY = `#graphql
         description
         vendor
         updatedAt
+        productType
+        metafields(first: 1, namespaces: ["google"]) {
+          nodes {
+            key
+            value
+          }
+        }
         images(first: 5) {
           nodes {
             url
