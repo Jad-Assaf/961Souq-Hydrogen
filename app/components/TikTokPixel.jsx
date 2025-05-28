@@ -12,18 +12,14 @@ const getContentId = (el) =>
 
 const sendServer = async (body) => {
   try {
-    const res = await fetch('/tiktok-event', {
-      // ⇦ new path
+    await fetch('/tiktok-event', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(body),
       keepalive: true,
     });
-    console.log(
-      `[TikTok] relay • ${body.event} • id=${body.event_id} • ${res.status}`,
-    );
-  } catch (err) {
-    console.error('[TikTok] relay failed', err);
+  } catch {
+    // silent
   }
 };
 
