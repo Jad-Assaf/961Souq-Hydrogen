@@ -967,7 +967,7 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
     product {
       title
       handle
-      images(first: 30) {
+      images(first: 50) {
         edges {
           node {
             __typename
@@ -1014,7 +1014,7 @@ const PRODUCT_FRAGMENT = `#graphql
 
 
     # Fetch product images for SEO or fallback usage
-    images(first: 30) {
+    images(first: 50) {
       edges {
         node {
           __typename
@@ -1028,7 +1028,7 @@ const PRODUCT_FRAGMENT = `#graphql
     }
 
     # Add media for images / video (YouTube) / 3D, etc.
-    media(first: 30) {
+    media(first: 50) {
       edges {
         node {
           __typename

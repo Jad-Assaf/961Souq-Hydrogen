@@ -291,7 +291,7 @@ h4 {
 }
 
 .product-options-item:hover::after {
-    width: 80%;
+    width: 90%;
 }
 
 .OptionName {

@@ -3647,3 +3647,123 @@ a.video-link {
   cursor: pointer;
   z-index: 1001
 }
+
+/* src/styles/CollapsibleVerticalHeader.css */
+.vertical-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 60px;
+  /* start collapsed */
+  height: 100vh;
+  background: #fff;
+  overflow-y: auto;
+  z-index: 1000;
+  transition: width 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vertical-header svg {
+  width: 30px;
+  height: 30px;
+}
+
+.vertical-header:hover {
+  width: 200px;
+  /* expand on hover */
+}
+
+.vh-logo {
+  margin: 1rem 0;
+  transition: transform 0.3s;
+}
+
+.vertical-header:hover .vh-logo {
+  transform: scale(1);
+  /* full size */
+}
+
+.vh-logo-img {
+  width: 40px;
+  /* small in collapsed */
+  height: auto;
+  transition: width 0.3s;
+}
+
+.vertical-header:hover .vh-logo-img {
+  width: 120px;
+  /* larger when expanded */
+}
+
+.vertical-menu {
+  flex: 1;
+  width: 100%;
+}
+
+.vh-item {
+  width: 100%;
+}
+
+.vh-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  cursor: pointer;
+}
+
+.vh-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.vh-navlink {
+  margin-left: 1rem;
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 0.3s;
+}
+
+.vertical-header:hover .vh-navlink {
+  opacity: 1;
+}
+
+.vh-toggle-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.vertical-header:hover .vh-toggle-btn {
+  opacity: 1;
+}
+
+.vh-submenu {
+  padding-left: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.vh-level-2 .vh-link {
+  padding-left: 2rem;
+}
+
+.vh-level-3 .vh-link {
+  padding-left: 2.5rem;
+}
+
+/* scrollbar styling */
+.vertical-header::-webkit-scrollbar {
+  width: 6px;
+}
+
+.vertical-header::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
