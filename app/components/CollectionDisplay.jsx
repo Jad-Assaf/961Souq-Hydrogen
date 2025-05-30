@@ -141,6 +141,7 @@ export function ProductItem({product}) {
                 className={`product-image image${fadeIn ? ' loaded' : ''}${
                   firstLoad ? ' no-transition' : ''
                 }`}
+                onContextMenu={(e) => e.preventDefault()}
               />
             </div>
           </div>

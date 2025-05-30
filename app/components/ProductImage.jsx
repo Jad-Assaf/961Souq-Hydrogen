@@ -206,11 +206,11 @@ export function ProductImages({ media, selectedVariantImage }) {
       {/* Thumbnails */}
       <div className="thumbContainer">
         <div className="thumbnails">
-          {media.map(({ node }, index) => {
-            const { thumbSrc, altText, isVideo } = getThumbnailInfo(node);
+          {media.map(({node}, index) => {
+            const {thumbSrc, altText, isVideo} = getThumbnailInfo(node);
             const isActive = index === selectedIndex;
             const thumbnailStyle = isVideo
-              ? { background: '#232323', padding: '14px' }
+              ? {background: '#232323', padding: '14px'}
               : {};
             return (
               <div
@@ -227,6 +227,7 @@ export function ProductImages({ media, selectedVariantImage }) {
                     width={80}
                     height={80}
                     loading="lazy"
+                    onContextMenu={(e) => e.preventDefault()}
                   />
                 ) : (
                   <div>Media</div>
@@ -241,7 +242,7 @@ export function ProductImages({ media, selectedVariantImage }) {
       <div
         className="main-image"
         onClick={() => setIsLightboxOpen(true)}
-        style={{ cursor: 'grab' }}
+        style={{cursor: 'grab'}}
         {...swipeHandlers}
       >
         {selectedMedia && (
@@ -263,6 +264,7 @@ export function ProductImages({ media, selectedVariantImage }) {
                 onLoad={() => setIsImageLoaded(true)}
                 width="562.5px"
                 height="562.5px"
+                onContextMenu={(e) => e.preventDefault()}
               />
             )}
 
@@ -296,7 +298,7 @@ export function ProductImages({ media, selectedVariantImage }) {
               )}
 
             {selectedMedia.__typename === 'Model3d' && (
-              <div style={{ textAlign: 'center' }}>
+              <div style={{textAlign: 'center'}}>
                 <p>3D Model preview not implemented</p>
               </div>
             )}
@@ -343,6 +345,15 @@ export function ProductImages({ media, selectedVariantImage }) {
           plugins={[Fullscreen]}
           controller={{
             closeOnBackdropClick: true,
+          }}
+          carousel={{
+            // other carousel settings…
+            imageProps: {
+              onContextMenu: (e) => e.preventDefault(),
+              // Optional: disable text selection and dragging
+              draggable: false,
+              style: {userSelect: 'none'},
+            },
           }}
         />
       )}

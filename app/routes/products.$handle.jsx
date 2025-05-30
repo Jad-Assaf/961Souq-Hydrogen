@@ -468,6 +468,7 @@ export function ProductForm({
                     width="50"
                     height="50"
                     style={{objectFit: 'cover'}}
+                    onContextMenu={(e) => e.preventDefault()}
                   />
                 ) : (
                   value

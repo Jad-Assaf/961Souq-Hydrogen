@@ -141,6 +141,7 @@ export default function VideosGallery({videos = [], scrollStep = 400}) {
                 muted
                 className="video-item"
                 onClick={(e) => handleClipTap(i, e)}
+                onContextMenu={(e) => e.preventDefault()}
               />
               {href && (
                 <a
