@@ -2028,6 +2028,10 @@ button.reset:hover:not(:has(> *)) {
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   height: 46px;
   border: 1px solid #2171af7e;
+  @media (max-width: 1024px) {
+    box-shadow: none !important;
+    border: none !important
+  }
 }
 
 .search-toggle svg,
@@ -3716,6 +3720,7 @@ a.video-link {
 
   .search-container .search-bar:focus {
     max-width: 750px;
+    background-color: #ffffff9c;
   }
 
   .search-container .search-bar {
