@@ -512,7 +512,7 @@ export default function Homepage() {
   return (
     <div className="home">
       {/* <MobileAppPopup /> */}
-      <h1 aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"></h1>
+      <h1 className='home-h1' aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"></h1>
 
       <BannerSlideshow banners={banners} />
       {/* <CategorySlider sliderCollections={sliderCollections} /> */}

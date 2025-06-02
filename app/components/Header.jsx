@@ -71,65 +71,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     }
   }, [isMobileMenuOpen]);
 
-  useEffect(() => {
-    if (isInputFocused) {
-      clearTimeout(timeoutRef.current);
-      clearInterval(blinkIntervalRef.current);
-      return;
-    }
-
-    const texts =
-      window.innerWidth > 1024
-        ? ['Press /', 'Search products', 'Find items', 'Type something']
-        : ['Search products', 'Find items', 'Type something'];
-
-    let textIndex = 0;
-    let currentText = texts[textIndex];
-    let charIndex = 0;
-    let deleting = false;
-    let showCursor = true;
-
-    const blinkCursor = () => {
-      showCursor = !showCursor;
-      if (!deleting && charIndex === currentText.length) {
-        setPlaceholder(currentText + (showCursor ? '|' : ''));
-      }
-    };
-
-    const updatePlaceholder = () => {
-      if (deleting) {
-        if (charIndex > 0) {
-          charIndex--;
-          setPlaceholder(currentText.substring(0, charIndex) + '|');
-          timeoutRef.current = setTimeout(updatePlaceholder, 100);
-        } else {
-          deleting = false;
-          textIndex = (textIndex + 1) % texts.length;
-          currentText = texts[textIndex];
-          timeoutRef.current = setTimeout(updatePlaceholder, 500);
-        }
-      } else {
-        if (charIndex < currentText.length) {
-          charIndex++;
-          setPlaceholder(currentText.substring(0, charIndex) + '|');
-          timeoutRef.current = setTimeout(updatePlaceholder, 100);
-        } else {
-          blinkIntervalRef.current = setInterval(blinkCursor, 500);
-          timeoutRef.current = setTimeout(() => {
-            clearInterval(blinkIntervalRef.current);
-            deleting = true;
-            timeoutRef.current = setTimeout(updatePlaceholder, 500);
-          }, 2000);
-        }
-      }
-    };
-
-    timeoutRef.current = setTimeout(updatePlaceholder, 2000);
-    return () => {
-      clearTimeout(timeoutRef.current);
-      clearInterval(blinkIntervalRef.current);
-    };
-  }, [isInputFocused]);
+  /* --------- AUTOMATIC PLACEHOLDER TYPING REMOVED --------- */
 
   return (
     <>
@@ -204,7 +146,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               };
 
               const handleKeyDown = (e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  handleCloseSearch();
+                  if (inputRef.current) {
+                    inputRef.current.value = '';
+                    fetchResults({target: {value: ''}});
+                  }
+                } else if (e.key === 'Enter') {
                   e.preventDefault();
                   handleSearch();
                 }
@@ -289,33 +238,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                     </div>
                     {isSearchResultsVisible && (
                       <div className="search-results-container">
-                        {fetcher.state === 'loading' || !fetcher.data ? (
-                          <div
-                            className="predictive-search-result"
-                            key="skeleton"
-                          >
-                            <h5>Products</h5>
-                            <ul>
-                              {[...Array(8)].map((_, i) => (
-                                <li
-                                  key={i}
-                                  className="predictive-search-result-item skeleton"
-                                >
-                                  <div className="search-result-txt">
-                                    <div className="search-result-titDesc skeleton-div">
-                                      <div className="skeleton skeleton-image"></div>
-                                      <div className="skeleten-tds">
-                                        <p className="skeleton skeleton-title"></p>
-                                        <p className="skeleton skeleton-sku"></p>
-                                      </div>
-                                    </div>
-                                    <small className="skeleton skeleton-price"></small>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ) : (
+                        {fetcher.state === 'loading' || !fetcher.data ? null : (
                           <SearchResultsPredictive>
                             {({items, total, term, state, closeSearch}) => {
                               const {products} = items;
@@ -598,14 +521,21 @@ function CartToggle({cart}) {
 
 function UserIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 1024 1024"
-      width="100%"
-      height="100%"
-    >
-      <path d="M486.4 563.2c-155.275 0-281.6-126.325-281.6-281.6s126.325-281.6 281.6-281.6 281.6 126.325 281.6 281.6-126.325 281.6-281.6 281.6zM486.4 51.2c-127.043 0-230.4 103.357-230.4 230.4s103.357 230.4 230.4 230.4c127.042 0 230.4-103.357 230.4-230.4s-103.358-230.4-230.4-230.4z" />
-      <path d="M896 1024h-819.2c-42.347 0-76.8-34.451-76.8-76.8 0-3.485 0.712-86.285 62.72-168.96 36.094-48.126 85.514-86.36 146.883-113.634 74.957-33.314 168.085-50.206 276.797-50.206 108.71 0 201.838 16.893 276.797 50.206 61.37 27.275 110.789 65.507 146.883 113.634 62.008 82.675 62.72 165.475 62.72 168.96 0 42.349-34.451 76.8-76.8 76.8zM486.4 665.6c-178.52 0-310.267 48.789-381 141.093-53.011 69.174-54.195 139.904-54.2 140.61 0 14.013 11.485 25.498 25.6 25.498h819.2c14.115 0 25.6-11.485 25.6-25.6-0.006-0.603-1.189-71.333-54.198-140.507-70.734-92.304-202.483-141.093-381.002-141.093z" />
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+      <g
+        id="SVGRepo_tracerCarrier"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      ></g>
+      <g id="SVGRepo_iconCarrier">
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM15 9C15 10.6569 13.6569 12 12 12C10.3431 12 9 10.6569 9 9C9 7.34315 10.3431 6 12 6C13.6569 6 15 7.34315 15 9ZM12 20.5C13.784 20.5 15.4397 19.9504 16.8069 19.0112C17.4108 18.5964 17.6688 17.8062 17.3178 17.1632C16.59 15.8303 15.0902 15 11.9999 15C8.90969 15 7.40997 15.8302 6.68214 17.1632C6.33105 17.8062 6.5891 18.5963 7.19296 19.0111C8.56018 19.9503 10.2159 20.5 12 20.5Z"
+          fill="#2172af"
+        ></path>
+      </g>
     </svg>
   );
 }
@@ -633,13 +563,34 @@ function SearchIcon() {
 function CartIcon() {
   return (
     <svg
-      viewBox="0 0 1024 1024"
-      className="icon icon-cart stroke-w-5"
+      fill="#2172af"
+      height="200px"
+      width="200px"
+      version="1.1"
+      id="Layer_1"
       xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      viewBox="0 0 300.005 300.005"
+      xmlSpace="preserve"
+      stroke="#2172af"
     >
-      <path d="M409.6 1024c-56.464 0-102.4-45.936-102.4-102.4s45.936-102.4 102.4-102.4S512 865.136 512 921.6 466.064 1024 409.6 1024zm0-153.6c-28.232 0-51.2 22.968-51.2 51.2s22.968 51.2 51.2 51.2 51.2-22.968 51.2-51.2-22.968-51.2-51.2-51.2z" />
-      <path d="M768 1024c-56.464 0-102.4-45.936-102.4-102.4S711.536 819.2 768 819.2s102.4 45.936 102.4 102.4S824.464 1024 768 1024zm0-153.6c-28.232 0-51.2 22.968-51.2 51.2s22.968 51.2 51.2 51.2 51.2-22.968 51.2-51.2-22.968-51.2-51.2-51.2z" />
-      <path d="M898.021 228.688C885.162 213.507 865.763 204.8 844.8 204.8H217.954l-5.085-30.506C206.149 133.979 168.871 102.4 128 102.4H76.8c-14.138 0-25.6 11.462-25.6 25.6s11.462 25.6 25.6 25.6H128c15.722 0 31.781 13.603 34.366 29.112l85.566 513.395C254.65 736.421 291.929 768 332.799 768h512c14.139 0 25.6-11.461 25.6-25.6s-11.461-25.6-25.6-25.6h-512c-15.722 0-31.781-13.603-34.366-29.11l-12.63-75.784 510.206-44.366c39.69-3.451 75.907-36.938 82.458-76.234l34.366-206.194c3.448-20.677-1.952-41.243-14.813-56.424zm-35.69 48.006l-34.366 206.194c-2.699 16.186-20.043 32.221-36.39 33.645l-514.214 44.714-50.874-305.246h618.314c5.968 0 10.995 2.054 14.155 5.782 3.157 3.73 4.357 9.024 3.376 14.912z" />
+      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+      <g
+        id="SVGRepo_tracerCarrier"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      ></g>
+      <g id="SVGRepo_iconCarrier">
+        <g>
+          <g>
+            <g>
+              <path d="M182.936,76.966h-0.002c0-18.516-15.066-33.58-33.58-33.58c-18.516,0-33.58,15.064-33.58,33.58v11.671h67.162V76.966z"></path>{' '}
+              <path d="M206.585,104.199h-8.09v10.911c2.498,2.179,4.113,5.351,4.113,8.93c0,6.57-5.325,11.897-11.894,11.897 c-6.564,0-11.894-5.327-11.894-11.897c0-3.577,1.611-6.749,4.113-8.927v-10.914h-67.162v10.911c2.5,2.181,4.113,5.351,4.113,8.93 c0,6.57-5.327,11.897-11.894,11.897c-6.57,0-11.894-5.327-11.894-11.897c0-3.577,1.613-6.751,4.113-8.93v-10.911h-8.09 c-4.573,0-8.292,3.719-8.292,8.292v111.168c0,4.573,3.719,8.292,8.292,8.292h114.465c4.57,0,8.292-3.722,8.292-8.292V112.491 C214.877,107.918,211.155,104.199,206.585,104.199z"></path>{' '}
+              <path d="M150,0C67.159,0,0.002,67.162,0.002,150S67.159,300.005,150,300.005S300.003,232.841,300.003,150S232.841,0,150,0z M230.439,223.659c0,13.152-10.704,23.854-23.854,23.854H92.121c-13.152,0-23.854-10.701-23.854-23.854V112.491 c0-13.152,10.701-23.854,23.854-23.854h8.09V76.966c0-27.098,22.046-49.142,49.142-49.142s49.142,22.046,49.142,49.142v11.671 h8.09c13.15,0,23.854,10.701,23.854,23.854V223.659z"></path>{' '}
+            </g>
+          </g>
+        </g>
+      </g>
     </svg>
   );
 }

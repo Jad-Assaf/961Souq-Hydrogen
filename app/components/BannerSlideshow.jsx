@@ -42,10 +42,10 @@ export function BannerSlideshow({banners, interval = 10000}) {
         <picture>
           <source
             media="(min-width:1025px)"
-            srcSet={`${slide.desktopImageUrl}&width=1300`}
+            srcSet={`${slide.desktopImageUrl}&width=1500`}
           />
           <img
-            src={`${slide.mobileImageUrl}&width=600`}
+            src={`${slide.mobileImageUrl}&width=900`}
             alt={slide.alt || `Banner ${current + 1}`}
             className="banner-image"
             loading="eager"
