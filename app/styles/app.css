@@ -3775,7 +3775,7 @@ a.video-link {
     height: 100vh;
     background: #fff;
     overflow-y: auto;
-    z-index: 1;
+    z-index: 3;
     transition: width 0.3s;
     display: flex;
     flex-direction: column;
