@@ -610,7 +610,7 @@ button.reset:hover:not(:has(> *)) {
   --header-height: 64px;
   --color-dark: #000;
   --color-light: #fff;
-  --vh-width-collapsed: 50px;
+  --vh-width-collapsed: 60px;
   --vh-width-expanded: 300px;
 }
 
@@ -2022,7 +2022,7 @@ button.reset:hover:not(:has(> *)) {
   align-items: center;
   gap: 25px;
   background: transparent;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(25px);
   border-radius: 30px;
   padding: 0 10px 0 7px;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
@@ -3732,7 +3732,7 @@ a.video-link {
     padding: 10px 15px;
     background-color: transparent;
     box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(25px);
     transition: all 0.3s ease;
   }
 
@@ -3775,7 +3775,7 @@ a.video-link {
     height: 100vh;
     background: #fff;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 1;
     transition: width 0.3s;
     display: flex;
     flex-direction: column;
@@ -3848,6 +3848,7 @@ a.video-link {
 
   .vh-item {
     width: 100%;
+    margin: 0 0 10px 3px;
   }
 
   .vh-link {
@@ -3858,15 +3859,19 @@ a.video-link {
   }
 
   .vh-icon {
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .vh-icon img {
-    width: 50px;
-    height: 50px;
+    width: 35px;
+    height: auto;
     box-shadow: rgba(131, 126, 255, 0.65) 0px 2px 6px !important;
+    transition: all 0.3s ease;
   }
 
   .vh-navlink {
@@ -3970,9 +3975,8 @@ a.video-link {
     width: 120px;
   }
 
-  .header-expanded .vh-icon svg {
-    width: 50px;
-    height: 50px;
+  .header-expanded .vh-level-1 .vh-icon img {
+    scale: 1.2;
   }
 
   .vh-ctas {}
