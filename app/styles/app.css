@@ -594,7 +594,7 @@ button.reset:hover:not(:has(> *)) {
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   border-radius: 10px;
   padding: 30px 10px;
-  margin: 75px auto !important;
+  margin: 85px auto !important;
 
   @media (max-width: 1024px) {
     padding: 0 10px !important;
@@ -610,7 +610,7 @@ button.reset:hover:not(:has(> *)) {
   --header-height: 64px;
   --color-dark: #000;
   --color-light: #fff;
-  --vh-width-collapsed: 75px;
+  --vh-width-collapsed: 50px;
   --vh-width-expanded: 300px;
 }
 
@@ -1701,7 +1701,7 @@ button.reset:hover:not(:has(> *)) {
     position: absolute;
     right: 10px;
     display: flex;
-    gap: 10px;
+    gap: 10px !important;
   }
 
   /* .header-ctas svg {
@@ -2028,6 +2028,7 @@ button.reset:hover:not(:has(> *)) {
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   height: 46px;
   border: 1px solid #2171af7e;
+
   @media (max-width: 1024px) {
     box-shadow: none !important;
     border: none !important
@@ -3803,10 +3804,12 @@ a.video-link {
     margin-left: 310px;
   }
 
-  .vertical-header svg {
-    width: 30px;
-    height: 30px;
+  .vh-icon svg {
+    width: 40px;
+    height: 40px;
     padding: 9px;
+    transition: all 0.2s ease;
+
   }
 
   .vh-logo-link {
@@ -3818,7 +3821,7 @@ a.video-link {
 
   .vh-logo {
     margin: 1rem 0;
-    transition: transform 0.3s;
+    /* transition: transform 0.5s; */
   }
 
   .vertical-header:hover .vh-logo {
@@ -3850,7 +3853,7 @@ a.video-link {
   .vh-link {
     display: flex;
     align-items: center;
-    padding: 0.75rem;
+    padding: 6px 5px;
     cursor: pointer;
   }
 
@@ -3867,10 +3870,11 @@ a.video-link {
   }
 
   .vh-navlink {
+    position: relative;
     margin-left: 1rem;
     opacity: 0;
     white-space: wrap;
-    width: 150px;
+    flex: 1;
     transition: opacity 0.3s;
   }
 
@@ -3888,6 +3892,11 @@ a.video-link {
     opacity: 0;
     transition: opacity 0.3s;
     padding: 10px 20px;
+  }
+
+  .vh-toggle-btn svg {
+    width: 10px;
+    height: 10px;
   }
 
   .vertical-header:hover .vh-toggle-btn {
@@ -3917,7 +3926,7 @@ a.video-link {
   }
 
   .vh-level-3 .vh-link {
-    /* padding-left: 2.5rem; */
+    padding-left: 3rem;
   }
 
   /* scrollbar styling */
@@ -3934,7 +3943,7 @@ a.video-link {
   .logo-expanded {
     display: block;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all 0.2s ease;
     width: 0;
   }
 
@@ -3942,9 +3951,9 @@ a.video-link {
     display: block;
     opacity: 1;
     padding: 0 6px 6px;
-    width: 55px;
-    height: auto;
-    transition: opacity 0.3s ease;
+    width: 45px;
+    height: 40px;
+    transition: all 0.2s ease;
   }
 
   /* when body has the flag, show the wide logo instead */
@@ -3961,5 +3970,30 @@ a.video-link {
     width: 120px;
   }
 
+  .header-expanded .vh-icon svg {
+    width: 50px;
+    height: 50px;
+  }
+
   .vh-ctas {}
+
+  .vh-navlink p {
+    width: fit-content;
+    position: relative;
+  }
+
+  .vh-navlink p::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #f39c12;
+    transition: width 0.3s ease;
+  }
+
+  .vh-navlink:hover>p::after {
+    width: 100%;
+  }
 }
