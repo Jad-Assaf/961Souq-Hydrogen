@@ -200,6 +200,23 @@ export function Layout({children}) {
         `,
           }}
         ></script>
+        <script
+          defer
+          nonce={nonce}
+          src="https://www.googletagmanager.com/gtag/js?id=AW-378354284"
+        ></script>
+        <script
+          defer
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'AW-378354284');
+        `,
+          }}
+        ></script>
         <MetaPixel pixelId={PIXEL_ID} />
         <TikTokPixel pixelId={TIKTOK_PIXEL_ID} />
       </head>
