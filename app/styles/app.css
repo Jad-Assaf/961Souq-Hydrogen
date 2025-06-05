@@ -772,10 +772,11 @@ html:has(.overlay.expanded) {
 }
 
 .whatsapp-float {
+  display: none;
   position: fixed;
   width: 45px;
   height: 45px;
-  bottom: 70px;
+  bottom: 20px;
   right: 25px;
   background-color: #25d366;
   color: #fff;
@@ -784,10 +785,12 @@ html:has(.overlay.expanded) {
   font-size: 30px;
   box-shadow: rgba(131, 126, 255, 76%) -2px 5px 14.4px;
   z-index: 1;
-  display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease;
+  @media (min-width:1024px) {
+    display: flex;
+  }
 }
 
 .whatsapp-float svg {
@@ -4027,6 +4030,7 @@ a.video-link {
   padding-top: 12.5px;
   padding-bottom: calc(12.5px + env(safe-area-inset-bottom));
   z-index: 2;
+  box-shadow: rgb(131 126 255 / 22%) 0px -3px 14.4px;
 }
 
 .mobile-bottom-nav .nav-item {
