@@ -593,7 +593,7 @@ button.reset:hover:not(:has(> *)) {
   background-color: #fff;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   border-radius: 10px;
-  padding: 30px 10px;
+  padding: 30px 10px 60px;
   margin: 85px auto !important;
 
   @media (max-width: 1024px) {
