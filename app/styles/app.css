@@ -2706,9 +2706,12 @@ input.search-bar:focus-visible {
   flex-direction: column;
   justify-content: center;
   align-items: start;
-  width: 96vw;
+  width: 92vw;
   max-width: 1500px;
   margin: 5vw auto;
+  @media (max-width: 1024px) {
+    width: 96vw !important;
+  }
 }
 
 .product h1 {
