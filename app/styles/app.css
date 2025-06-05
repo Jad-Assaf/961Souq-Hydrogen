@@ -2940,7 +2940,7 @@ input[type="checkbox"] {
 
 .mobile-filter-container {
   position: fixed;
-  bottom: 50px;
+  bottom: 65px;
   right: 20px;
   z-index: 2;
 }
