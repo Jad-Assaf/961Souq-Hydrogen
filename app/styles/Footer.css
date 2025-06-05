@@ -4,7 +4,10 @@
     padding-top: 30px;
     color: #2172af;
     border-top: 1px solid #2172af;
-    margin-bottom: 55px;
+
+    @media (max-width: 1024px) {
+        margin-bottom: 75px;
+    }
 }
 
 .footer .container {
