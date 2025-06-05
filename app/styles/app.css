@@ -3719,6 +3719,10 @@ a.video-link {
     margin-top: 75px !important;
   }
 
+  .header-search {
+    max-width: 750px !important;
+  }
+
   .search-container .search-bar:focus {
     max-width: 750px;
     background-color: #ffffff9c;
