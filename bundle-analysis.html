@@ -3101,7 +3101,7 @@ var drawChart = (function (exports) {
           }, onMouseOver: (event) => {
               event.stopPropagation();
               onMouseOver(node);
-          }, children: [u$1("rect", { fill: backgroundColor, rx: 2, ry: 2, width: x1 - x0, height: y1 - y0, stroke: selected ? "#fff" : undefined, "stroke-width": selected ? 2 : undefined }), u$1("text", Object.assign({ ref: textRef, fill: fontColor, onClick: (event) => {
+          }, children: [u$1("rect", { fill: backgroundColor, rx: 2, ry: 2, width: x1 - x0, height: y1 - y0, stroke: selected ? "#fff" : undefined, "strokeWidth": selected ? 2 : undefined }), u$1("text", Object.assign({ ref: textRef, fill: fontColor, onClick: (event) => {
                       var _a;
                       if (((_a = window.getSelection()) === null || _a === void 0 ? void 0 : _a.toString()) !== "") {
                           event.stopPropagation();

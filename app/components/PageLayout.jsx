@@ -5,6 +5,7 @@ import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {Footer} from './Footer';
 import { CollapsibleVerticalHeader } from './CollapsibleVerticalHeader';
+import MobileBottomNavigation from './MobileBottomNavigation';
 
 const shopMenuData = [
   {title: 'Apple', link: '/collections/apple'},
@@ -47,6 +48,7 @@ export function PageLayout({
       <CartAside cart={cart} />
       {/* <SearchAside /> */}
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+      <MobileBottomNavigation cart={cart} />
       <CollapsibleVerticalHeader header={header} />
       {header && (
         <Header
