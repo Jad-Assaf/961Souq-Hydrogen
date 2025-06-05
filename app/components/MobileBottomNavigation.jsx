@@ -1,9 +1,10 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useRef, useEffect} from 'react';
 import {NavLink} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
 
 export default function MobileBottomNavigation({cart}) {
   const {open} = useAside();
+  const navRef = useRef(null);
 
   /* ---------------------------------------------------------------
      Derive quantity from ANY cart shape
@@ -37,8 +38,34 @@ export default function MobileBottomNavigation({cart}) {
     return 0;
   }, [cart]);
 
+  /* -------------------------------------------------------------------
+     Adjust `bottom` so the nav always sits above any visible browser UI
+  -------------------------------------------------------------------*/
+  useEffect(() => {
+    const navEl = navRef.current;
+    if (!navEl || !window.visualViewport) return;
+
+    function adjustBottom() {
+      const layoutHeight = window.innerHeight;
+      const visibleHeight = window.visualViewport.height;
+      const offset = layoutHeight - visibleHeight;
+      navEl.style.bottom = `${offset}px`;
+    }
+
+    window.visualViewport.addEventListener('resize', adjustBottom);
+    window.visualViewport.addEventListener('scroll', adjustBottom);
+
+    // Initial positioning
+    adjustBottom();
+
+    return () => {
+      window.visualViewport.removeEventListener('resize', adjustBottom);
+      window.visualViewport.removeEventListener('scroll', adjustBottom);
+    };
+  }, []);
+
   return (
-    <nav className="mobile-bottom-nav">
+    <nav ref={navRef} className="mobile-bottom-nav">
       <NavLink prefetch="intent" to="/" className="nav-item" end>
         <HomeIcon />
       </NavLink>
@@ -62,6 +89,7 @@ export default function MobileBottomNavigation({cart}) {
     </nav>
   );
 }
+
 
 /* ----------------------------- ICONS ----------------------------- */
 
