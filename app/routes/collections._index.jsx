@@ -1,8 +1,8 @@
 import {useLoaderData, Link} from '@remix-run/react';
 import {defer} from '@shopify/remix-oxygen';
-import {getPaginationVariables, Image} from '@shopify/hydrogen';
+import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import '../styles/CollectionsIndex.css'
+import '../styles/CollectionsIndex.css';
 
 /**
  * @param {LoaderFunctionArgs} args
@@ -85,9 +85,9 @@ function CollectionItem({collection, index}) {
       prefetch="intent"
     >
       {collection?.image && (
-        <Image
+        <img
+          src={`${collection.image.url}&width=250`}
           alt={collection.image.altText || collection.title}
-          data={collection.image}
           loading={index < 3 ? 'eager' : undefined}
           width={150}
           height={150}
