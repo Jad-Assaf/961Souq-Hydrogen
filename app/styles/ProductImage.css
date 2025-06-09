@@ -187,8 +187,13 @@
 /* The arrow icons do a small left-right "wiggle" */
 .arrow-icons {
     display: flex;
-    gap: 8px;
+    gap: 15px;
     animation: moveLeftRight 0.8s infinite alternate ease-in-out;
+}
+
+.arrow-icons span {
+    width: 30px;
+    height: 30px;
 }
 
 /* basic fade in animation for the indicator */

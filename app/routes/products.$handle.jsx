@@ -1,4 +1,4 @@
-import React, {Suspense, useEffect, useState} from 'react';
+import React, {Suspense, useEffect, useRef, useState} from 'react';
 import {defer, redirect} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, useLocation} from '@remix-run/react';
 import {
@@ -27,7 +27,7 @@ import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 // ---------------- SEO & Meta
 export const meta = ({data}) => {
   const product = data?.product;
-  const variants = product?.variants?.nodes || [];
+  const variants = product.variants || [];
   const currentVariant = variants[0] || {};
 
   // Helper to truncate title
@@ -195,10 +195,7 @@ export const meta = ({data}) => {
 
 // ---------------- Loader
 export async function loader(args) {
-  const deferredData = loadDeferredData(args);
-  const criticalData = await loadCriticalData(args);
-
-  return defer({...deferredData, ...criticalData});
+  return await loadCriticalData(args);
 }
 
 async function loadCriticalData({context, params, request}) {
@@ -220,6 +217,10 @@ async function loadCriticalData({context, params, request}) {
   if (!product) {
     throw new Response('Product not found', {status: 404});
   }
+
+  const {product: fullProduct} = await storefront.query(VARIANTS_QUERY, {
+    variables: {handle /* …country/language… */},
+  });
 
   // Select the first variant as the default if applicable
   const firstVariant = product.variants.nodes[0];
@@ -259,10 +260,12 @@ async function loadCriticalData({context, params, request}) {
   return {
     product: {
       ...product,
-      firstImage, // Add the first image URL
+      // overwrite `variants` with the plain array of nodes
+      variants: fullProduct.variants.nodes,
+      firstImage,
       seoTitle: product.seo?.title || product.title,
       seoDescription: product.seo?.description || product.description,
-      variantPrice: firstVariant?.price || product.priceRange?.minVariantPrice,
+      variantPrice: firstVariant.price || product.priceRange.minVariantPrice,
     },
     relatedProducts,
   };
@@ -386,34 +389,35 @@ export function ProductForm({
   // Handle user picking a new value
   // ------------------------------
   function handleOptionChange(optionName, chosenVal) {
-    setSelectedOptions((prev) => {
-      const newOptions = {...prev, [optionName]: chosenVal};
+    // Build the new options object
+    const newOptions = {...selectedOptions, [optionName]: chosenVal};
 
-      // Attempt to find or “snap” to a variant
-      const found = pickOrSnapVariant(
-        variants,
-        newOptions,
-        optionName,
-        chosenVal,
-      );
+    // Attempt to find or “snap” to a variant
+    const found = pickOrSnapVariant(
+      variants,
+      newOptions,
+      optionName,
+      chosenVal,
+    );
 
-      if (found) {
-        // Overwrite newOptions with found's entire set
-        found.selectedOptions.forEach(({name, value}) => {
-          newOptions[name] = value;
-        });
-        onVariantChange(found);
-      } else {
-        // Revert
-        newOptions[optionName] = prev[optionName];
-      }
+    if (found) {
+      // Normalize to the found variant’s full options
+      const normalized = found.selectedOptions.reduce((acc, {name, value}) => {
+        acc[name] = value;
+        return acc;
+      }, {});
 
-      // Update the URL with final newOptions
-      const params = new URLSearchParams(newOptions).toString();
+      // Update local state
+      setSelectedOptions(normalized);
+
+      // Notify parent
+      onVariantChange(found);
+
+      // Update the URL
+      const params = new URLSearchParams(normalized).toString();
       window.history.replaceState(null, '', `${location.pathname}?${params}`);
-
-      return newOptions;
-    });
+    }
+    // else: do nothing (no invalid state)
   }
 
   // Ensure quantity is safe
@@ -431,7 +435,6 @@ export function ProductForm({
         </h5>
         <div className="product-options-grid">
           {values.map(({value, variant}) => {
-            // Check if picking this new val is possible
             const canPick = isValueAvailable(
               variants,
               selectedOptions,
@@ -439,8 +442,6 @@ export function ProductForm({
               value,
             );
             const isActive = currentValue === value;
-
-            // For color swatches, optionally show an image
             const isColorOption = name.toLowerCase() === 'color';
             const variantImage = isColorOption && variant?.image?.url;
 
@@ -554,7 +555,6 @@ export function ProductForm({
               Number(selectedVariant.price.amount) === 0)
           }
           onClick={() => {
-            // Only trigger add-to-cart if price is not zero
             if (
               !(
                 selectedVariant?.price &&
@@ -562,7 +562,7 @@ export function ProductForm({
               )
             ) {
               handleAddToCart();
-              open('cart'); // open cart aside
+              open('cart');
             }
           }}
           lines={
@@ -595,11 +595,16 @@ export function ProductForm({
   );
 }
 
+
 // -----------------------------------------------------
 //                   Main Product
 // -----------------------------------------------------
 export default function Product() {
-  const {product, variants, relatedProducts} = useLoaderData();
+  const {product, relatedProducts} = useLoaderData();
+  const variants = product.variants;
+  const descriptionRef = useRef(null);
+  const shippingRef = useRef(null);
+  const warrantyRef = useRef(null);
 
   // Safeguard: If `product` is unexpectedly undefined for any reason, bail out early.
   if (!product) {
@@ -713,34 +718,15 @@ export default function Product() {
             })}
           </div>
 
-          <Suspense
-            fallback={
-              <ProductForm
-                product={product}
-                selectedVariant={selectedVariant}
-                onVariantChange={setSelectedVariant}
-                onAddToCart={onAddToCart}
-                variants={[]}
-                quantity={Number(quantity)}
-              />
-            }
-          >
-            <Await
-              resolve={variants}
-              errorElement="There was a problem loading product variants"
-            >
-              {(data) => (
-                <ProductForm
-                  product={product}
-                  selectedVariant={selectedVariant}
-                  onVariantChange={setSelectedVariant}
-                  onAddToCart={onAddToCart}
-                  variants={data?.product?.variants?.nodes || []}
-                  quantity={quantity}
-                />
-              )}
-            </Await>
-          </Suspense>
+          <ProductForm
+            product={product}
+            selectedVariant={selectedVariant}
+            onVariantChange={setSelectedVariant}
+            onAddToCart={onAddToCart}
+            // formerly `variants={[]}` or undefined, now a real array
+            variants={variants}
+            quantity={quantity}
+          />
 
           <hr className="productPage-hr" />
           <div className="product-details">
@@ -773,144 +759,135 @@ export default function Product() {
       </div>
 
       <div className="ProductPageBottom">
-        <div className="tabs">
-          <button
-            className={`tab-button ${
-              activeTab === 'description' ? 'active' : ''
-            }`}
-            onClick={() => setActiveTab('description')}
-          >
-            Description
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'shipping' ? 'active' : ''}`}
-            onClick={() => setActiveTab('shipping')}
-          >
-            Shipping & Exchange
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'warranty' ? 'active' : ''}`}
-            onClick={() => setActiveTab('warranty')}
-          >
-            Warranty
-          </button>
-        </div>
-
-        <CSSTransition
-          in={activeTab === 'description'}
-          timeout={200}
-          classNames="fade"
-          unmountOnExit
-        >
-          <div className="product-section">
-            {/* Safeguard if descriptionHtml is missing */}
-            <div dangerouslySetInnerHTML={{__html: descriptionHtml || ''}} />
+        <>
+          <div className="tabs">
+            <button
+              className={`tab-button ${
+                activeTab === 'description' ? 'active' : ''
+              }`}
+              onClick={() => setActiveTab('description')}
+            >
+              Description
+            </button>
+            <button
+              className={`tab-button ${
+                activeTab === 'shipping' ? 'active' : ''
+              }`}
+              onClick={() => setActiveTab('shipping')}
+            >
+              Shipping & Exchange
+            </button>
+            <button
+              className={`tab-button ${
+                activeTab === 'warranty' ? 'active' : ''
+              }`}
+              onClick={() => setActiveTab('warranty')}
+            >
+              Warranty
+            </button>
           </div>
-        </CSSTransition>
 
-        <CSSTransition
-          in={activeTab === 'shipping'}
-          timeout={200}
-          classNames="fade"
-          unmountOnExit
-        >
-          <div className="product-section">
-            <h3>Shipping Policy</h3>
-            <p>
-              We offer shipping across all Lebanon, facilitated by our dedicated
-              delivery team servicing the Beirut district and through our
-              partnership with Wakilni for orders beyond Beirut.
-            </p>
-            <p>
-              Upon placing an order, we provide estimated shipping and delivery
-              dates tailored to your item's availability and selected product
-              options. For precise shipping details, kindly reach out to us
-              through the contact information listed in our Contact Us section.
-            </p>
-            <p>
-              Please be aware that shipping rates may vary depending on the
-              destination.
-            </p>
-            <h3>Exchange Policy</h3>
-            <p>
-              We operate a 3-day exchange policy, granting you 3 days from
-              receipt of your item to initiate an exchange.
-            </p>
-            <p>
-              To qualify for an exchange, your item must remain in its original
-              condition, unworn or unused, with tags intact, and in its original
-              sealed packaging. Additionally, you will need to provide a receipt
-              or proof of purchase.
-            </p>
-            <p>
-              To initiate an exchange, please contact us at admin@961souq.com.
-              Upon approval of your exchange request, we will furnish you with
-              an exchange shipping label along with comprehensive instructions
-              for package return. Please note that exchanges initiated without
-              prior authorization will not be accepted.
-            </p>
-          </div>
-        </CSSTransition>
+          {activeTab === 'description' && (
+            <div className="product-section">
+              <div dangerouslySetInnerHTML={{__html: descriptionHtml || ''}} />
+            </div>
+          )}
 
-        <CSSTransition
-          in={activeTab === 'warranty'}
-          timeout={200}
-          classNames="fade"
-          unmountOnExit
-        >
-          <div className="product-section">
-            <h3>Operational Warranty Terms and Conditions</h3>
-            <h3>Warranty Coverage</h3>
-            <p>
-              This warranty applies to All Products, purchased from 961 Souq.
-              The warranty covers defects in materials and workmanship under
-              normal use for the period specified at the time of purchase.
-            </p>
-            <h3>What is Covered</h3>
-            <p>
-              During the warranty period, 961 Souq will repair or replace, at no
-              charge, any parts that are found to be defective due to faulty
-              materials or poor workmanship. This warranty is valid only for the
-              original purchaser and is non-transferable.
-            </p>
-            <h3>What is Not Covered</h3>
-            <p>This warranty does not cover:</p>
-            <ul>
-              <li>
-                Any Physical Damage, damage due to misuse, abuse, accidents,
-                modifications, or unauthorized repairs.
-              </li>
-              <li>
-                Wear and tear from regular usage, including cosmetic damage like
-                scratches or dents.
-              </li>
-              <li>
-                Damage caused by power surges, lightning strikes, or electrical
-                malfunctions.
-              </li>
-              <li>Products with altered or removed serial numbers.</li>
-              <li>Software-related issues</li>
-            </ul>
-            <h3>Warranty Claim Process</h3>
-            <p>To make a claim under this warranty:</p>
-            <ol>
-              <li>
-                Contact admin@961souq.com with proof of purchase and a detailed
-                description of the issue.
-              </li>
-              <li>
-                961 Souq will assess the product and, if deemed defective,
-                repair or replace the item at no cost.
-              </li>
-            </ol>
-            <h3>Limitations and Exclusions</h3>
-            <p>
-              This warranty is limited to repair or replacement. 961 Souq will
-              not be liable for any indirect, consequential, or incidental
-              damages, including loss of data or loss of profits.
-            </p>
-          </div>
-        </CSSTransition>
+          {activeTab === 'shipping' && (
+            <div className="product-section">
+              <h3>Shipping Policy</h3>
+              <p>
+                We offer shipping across all Lebanon, facilitated by our
+                dedicated delivery team servicing the Beirut district and
+                through our partnership with Wakilni for orders beyond Beirut.
+              </p>
+              <p>
+                Upon placing an order, we provide estimated shipping and
+                delivery dates tailored to your item's availability and selected
+                product options. For precise shipping details, kindly reach out
+                to us through the contact information listed in our Contact Us
+                section.
+              </p>
+              <p>
+                Please be aware that shipping rates may vary depending on the
+                destination.
+              </p>
+              <h3>Exchange Policy</h3>
+              <p>
+                We operate a 3-day exchange policy, granting you 3 days from
+                receipt of your item to initiate an exchange.
+              </p>
+              <p>
+                To qualify for an exchange, your item must remain in its
+                original condition, unworn or unused, with tags intact, and in
+                its original sealed packaging. Additionally, you will need to
+                provide a receipt or proof of purchase.
+              </p>
+              <p>
+                To initiate an exchange, please contact us at admin@961souq.com.
+                Upon approval of your exchange request, we will furnish you with
+                an exchange shipping label along with comprehensive instructions
+                for package return. Please note that exchanges initiated without
+                prior authorization will not be accepted.
+              </p>
+            </div>
+          )}
+
+          {activeTab === 'warranty' && (
+            <div className="product-section">
+              <h3>Operational Warranty Terms and Conditions</h3>
+              <h3>Warranty Coverage</h3>
+              <p>
+                This warranty applies to All Products, purchased from 961 Souq.
+                The warranty covers defects in materials and workmanship under
+                normal use for the period specified at the time of purchase.
+              </p>
+              <h3>What is Covered</h3>
+              <p>
+                During the warranty period, 961 Souq will repair or replace, at
+                no charge, any parts that are found to be defective due to
+                faulty materials or poor workmanship. This warranty is valid
+                only for the original purchaser and is non-transferable.
+              </p>
+              <h3>What is Not Covered</h3>
+              <p>This warranty does not cover:</p>
+              <ul>
+                <li>
+                  Any Physical Damage, damage due to misuse, abuse, accidents,
+                  modifications, or unauthorized repairs.
+                </li>
+                <li>
+                  Wear and tear from regular usage, including cosmetic damage
+                  like scratches or dents.
+                </li>
+                <li>
+                  Damage caused by power surges, lightning strikes, or
+                  electrical malfunctions.
+                </li>
+                <li>Products with altered or removed serial numbers.</li>
+                <li>Software-related issues</li>
+              </ul>
+              <h3>Warranty Claim Process</h3>
+              <p>To make a claim under this warranty:</p>
+              <ol>
+                <li>
+                  Contact admin@961souq.com with proof of purchase and a
+                  detailed description of the issue.
+                </li>
+                <li>
+                  961 Souq will assess the product and, if deemed defective,
+                  repair or replace the item at no cost.
+                </li>
+              </ol>
+              <h3>Limitations and Exclusions</h3>
+              <p>
+                This warranty is limited to repair or replacement. 961 Souq will
+                not be liable for any indirect, consequential, or incidental
+                damages, including loss of data or loss of profits.
+              </p>
+            </div>
+          )}
+        </>
 
         <Analytics.ProductView
           data={{
