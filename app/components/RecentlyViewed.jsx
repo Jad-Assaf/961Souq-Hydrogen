@@ -192,9 +192,9 @@ function RecentlyViewedProductItem({product, index}) {
             data={product.featuredImage}
             aspectratio="1/1"
             sizes="(min-width: 45em) 20vw, 40vw"
-            srcSet={`${product.featuredImage.url}?width=300&quality=30 300w,
-                     ${product.featuredImage.url}?width=600&quality=30 600w,
-                     ${product.featuredImage.url}?width=1200&quality=30 1200w`}
+            srcSet={`${product.featuredImage.url}&width=200 300w,
+                     ${product.featuredImage.url}&width=200 600w,
+                     ${product.featuredImage.url}&width=200 1200w`}
             alt={product.featuredImage.altText || product.title}
             width="150px"
             height="150px"

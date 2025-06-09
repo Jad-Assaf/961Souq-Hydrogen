@@ -222,7 +222,7 @@ export function ProductImages({ media, selectedVariantImage }) {
               >
                 {thumbSrc ? (
                   <img
-                    src={`${thumbSrc}?width=300&quality=10`}
+                    src={`${thumbSrc}&width=150`}
                     alt={altText}
                     width={80}
                     height={80}
@@ -260,6 +260,7 @@ export function ProductImages({ media, selectedVariantImage }) {
                 src={selectedMedia.image.url}
                 alt={selectedMedia.image.altText || 'Product Image'}
                 loading="eager"
+                fetchpriority='high'
                 decoding="async"
                 onLoad={() => setIsImageLoaded(true)}
                 width="562.5px"
