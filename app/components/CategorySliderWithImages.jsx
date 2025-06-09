@@ -52,7 +52,7 @@ function CategoryItemWithImage({ collection }) {
         <div className="category-image">
           {collection.image ? (
             <img
-              src={`${collection.image.url}?width=300&quality=15`}
+              src={`${collection.image.url}&width=300`}
               alt={collection.image.altText || collection.title}
               className="category-img"
               loading="lazy"

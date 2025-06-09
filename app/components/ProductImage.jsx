@@ -260,7 +260,7 @@ export function ProductImages({ media, selectedVariantImage }) {
                 src={`${selectedMedia.image.url}&width=600`}
                 alt={selectedMedia.image.altText || 'Product Image'}
                 loading="eager"
-                fetchpriority='high'
+                fetchpriority="high"
                 decoding="async"
                 onLoad={() => setIsImageLoaded(true)}
                 width="562.5px"
@@ -343,6 +343,7 @@ export function ProductImages({ media, selectedVariantImage }) {
             )}
             <button
               className="prev-button"
+              aria-label="Previous Image"
               onMouseEnter={() => setShowKeyIndicator(true)}
               onClick={(e) => handleArrowButtonClick(doPrevImage, e)}
             >
@@ -350,6 +351,7 @@ export function ProductImages({ media, selectedVariantImage }) {
             </button>
             <button
               className="next-button"
+              aria-label="Next Image"
               onMouseEnter={() => setShowKeyIndicator(true)}
               onClick={(e) => handleArrowButtonClick(doNextImage, e)}
             >

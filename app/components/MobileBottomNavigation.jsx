@@ -39,15 +39,31 @@ export default function MobileBottomNavigation({cart}) {
 
   return (
     <nav className="mobile-bottom-nav">
-      <NavLink prefetch="intent" to="/" className="nav-item" end>
+      <NavLink
+        prefetch="intent"
+        to="/"
+        className="nav-item"
+        aria-label="Homepage Button"
+        end
+      >
         <HomeIcon />
       </NavLink>
 
-      <NavLink prefetch="intent" to="/collections" className="nav-item">
+      <NavLink
+        prefetch="intent"
+        to="/collections"
+        aria-label="All Collections Button"
+        className="nav-item"
+      >
         <CollectionsIcon />
       </NavLink>
 
-      <NavLink prefetch="intent" to="/account" className="nav-item">
+      <NavLink
+        prefetch="intent"
+        to="/account"
+        className="nav-item"
+        aria-label="User Account Button"
+      >
         <UserIcon />
       </NavLink>
 
@@ -55,6 +71,7 @@ export default function MobileBottomNavigation({cart}) {
         className="nav-item cart-toggle"
         aria-label="Open Cart"
         onClick={() => open('cart')}
+        aria-label="Open Side Cart Button"
       >
         <CartIcon />
         {itemCount > 0 && <span className="badge">{itemCount}</span>}
