@@ -22,7 +22,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
             {/* Shop Menu */}
             <div className="footer-column">
               <h3>Shop</h3>
-              <ul>
+              <ul className="footer-shop">
                 {shopMenu.map((item, index) => (
                   <li key={index}>
                     <a href={item.link}>{item.title}</a>
