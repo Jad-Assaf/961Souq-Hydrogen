@@ -2058,8 +2058,6 @@ button.reset:hover:not(:has(> *)) {
 .sign-in-link svg {
   width: 36px;
   height: 36px;
-  background: transparent;
-  backdrop-filter: blur(14px);
   border-radius: 50%;
 }
 
