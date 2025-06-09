@@ -205,22 +205,6 @@ h2 {
   width: 70%;
 }
 
-.cart-product-title {
-  font-weight: 500;
-  color: black;
-
-  @media (max-width: 1024px) {
-    font-size: 14px;
-  }
-}
-
-.product-price {
-  @media (max-width: 1024px) {
-    font-size: 13px;
-    min-height: unset;
-  }
-}
-
 .bin-button {
   display: flex;
   flex-direction: column;

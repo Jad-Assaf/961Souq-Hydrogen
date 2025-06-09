@@ -491,7 +491,7 @@ export function ProductForm({
 
   // WhatsApp SVG icon
   const WhatsAppIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 175.216 175.552">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 175.216 175.552" width={40} height={40}>
       <defs>
         <linearGradient
           id="linearGradient1780"
