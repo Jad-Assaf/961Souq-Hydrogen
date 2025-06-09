@@ -125,9 +125,9 @@ const ProductItem = React.memo(({product, index, numberInRow}) => {
               </div>
               <img
                 srcSet={`
-                  ${product.featuredImage.url}?width=300&quality=15 300w,
-                  ${product.featuredImage.url}?width=600&quality=15 600w,
-                  ${product.featuredImage.url}?width=1200&quality=15 1200w
+                  ${product.featuredImage.url}&width=300 300w,
+                  ${product.featuredImage.url}&width=300 600w,
+                  ${product.featuredImage.url}&width=300 1200w
                 `}
                 alt={product.featuredImage.altText || product.title}
                 loading="lazy"

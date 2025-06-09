@@ -76,7 +76,7 @@ export function CollapsibleVerticalHeader({header}) {
             <span className="vh-icon">
               {img(item) && (
                 <img
-                  src={`${img(item)}?width=100&quality=80`}
+                  src={`${img(item)}&width=100`}
                   alt={item.altText || item.title}
                   width="40"
                   height="40"

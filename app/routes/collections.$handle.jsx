@@ -387,9 +387,9 @@ export default function Collection() {
                       <img
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`
-                          ${sliderCollection.image.url}?width=300&quality=7 300w,
-                          ${sliderCollection.image.url}?width=600&quality=7 600w,
-                          ${sliderCollection.image.url}?width=1200&quality=7 1200w
+                          ${sliderCollection.image.url}&width=200 300w,
+                          ${sliderCollection.image.url}&width=200 600w,
+                          ${sliderCollection.image.url}&width=200 1200w
                         `}
                         alt={
                           sliderCollection.image.altText ||
@@ -597,9 +597,9 @@ const ProductItem = ({product, index, numberInRow}) => {
                 </div>
                 <img
                   srcSet={`
-                    ${product.featuredImage.url}?width=300&quality=15 300w,
-                    ${product.featuredImage.url}?width=600&quality=15 600w,
-                    ${product.featuredImage.url}?width=1200&quality=15 1200w
+                    ${product.featuredImage.url}&width=400 300w,
+                    ${product.featuredImage.url}&width=400 600w,
+                    ${product.featuredImage.url}&width=400 1200w
                   `}
                   alt={product.featuredImage.altText || product.title}
                   loading="lazy"
