@@ -20,7 +20,7 @@ import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import React, {Suspense, useEffect, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
-import TikTokPixel from './components/TikTokPixel';
+// import TikTokPixel from './components/TikTokPixel';
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -38,7 +38,7 @@ export const shouldRevalidate = ({
 };
 
 const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
-const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
+// const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
 
 export function links() {
   return [
@@ -221,7 +221,7 @@ export function Layout({children}) {
           }}
         ></script>
         <MetaPixel pixelId={PIXEL_ID} />
-        <TikTokPixel pixelId={TIKTOK_PIXEL_ID} />
+        {/* <TikTokPixel pixelId={TIKTOK_PIXEL_ID} /> */}
       </head>
       <body>
         <ClarityTracker clarityId={clarityId} />

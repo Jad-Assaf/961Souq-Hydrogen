@@ -66,6 +66,7 @@ export default async function handleRequest(
       'https://scontent.cdninstagram.com/',
       'https://analytics.tiktok.com/',
       'https://www.tiktok.com/',
+      'https://www.googleadservices.com',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -99,6 +100,7 @@ export default async function handleRequest(
       'https://scontent.cdninstagram.com/',
       'https://analytics.tiktok.com/',
       'https://www.tiktok.com/',
+      'https://www.googleadservices.com',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -134,6 +136,7 @@ export default async function handleRequest(
       'https://scontent.cdninstagram.com/',
       'https://analytics.tiktok.com/',
       'https://www.tiktok.com/',
+      'https://www.googleadservices.com',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -170,6 +173,7 @@ export default async function handleRequest(
       'https://scontent.cdninstagram.com/',
       'https://analytics.tiktok.com/',
       'https://www.tiktok.com/',
+      'https://www.googleadservices.com',
     ],
     mediaSrc: [
       "'self'",
@@ -191,6 +195,7 @@ export default async function handleRequest(
       'https://scontent.cdninstagram.com/',
       'https://analytics.tiktok.com/',
       'https://www.tiktok.com/',
+      'https://www.googleadservices.com',
       // Add other media sources as needed
     ],
   });
