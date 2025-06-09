@@ -512,48 +512,15 @@ export default function Homepage() {
   return (
     <div className="home">
       {/* <MobileAppPopup /> */}
-      <h1 className='home-h1' aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"></h1>
+      <h1
+        className="home-h1"
+        aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"
+      ></h1>
 
       <BannerSlideshow banners={banners} />
       {/* <CategorySlider sliderCollections={sliderCollections} /> */}
       <CategorySliderWithMoreHeight sliderCollections={sliderCollections} />
-      {newArrivals && <TopProductSections collection={newArrivals} />}
-      <VideosGallery
-        videos={[
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/a67b4e70a5b1452f959de8f4189ffc8f.mp4',
-            href: '/products/telesin-fun-shot-magnetic-phone-grip-with-light',
-          },
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/a45eb2a3059e473985a7c76c47861f24.mp4',
-            href: '/collections/whoop-fitness-bands',
-          },
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/d296bab182604700b7eba56640fc94d2.mp4',
-            href: '/products/fujifilm-instax-mini-41-instant-camera',
-          },
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/375f6c7dacae4625af6cdcc6839bb668.mp4',
-            href: '/collections/karl-lagerfeld',
-          },
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/34df6684f0b547f7904ab185d315a148.mp4',
-            href: '/products/asus-proart-p16-h7606-copilot-pc-16-touchscreen-ryzen-ai-9-hx-370-32gb-ram-1tb-ssd-rtx-4060-8gb',
-          },
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/a04a6af8173e4759bbdcb11b218b43eb.mp4',
-            href: '/collections/garmin-smart-watch',
-          },
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/333b871711e54a92835ced0296fe8f59.mp4',
-            href: '/products/fujifilm-instax-wide-evo™-hybrid-instant-camera',
-          },
-          {
-            src: 'https://cdn.shopify.com/videos/c/o/v/7cbd91e1e7be4f738941c9583dcaf3d1.mp4',
-            href: '/collections/ray-ban-smart-glasses',
-          },
-        ]}
-      />
+      {/* {newArrivals && <TopProductSections collection={newArrivals} />} */}
 
       {isMobile ? (
         <div>
@@ -612,6 +579,43 @@ export default function Homepage() {
                 }
               />
             )}
+
+          <VideosGallery
+            videos={[
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/a67b4e70a5b1452f959de8f4189ffc8f.mp4',
+                href: '/products/telesin-fun-shot-magnetic-phone-grip-with-light',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/a45eb2a3059e473985a7c76c47861f24.mp4',
+                href: '/collections/whoop-fitness-bands',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/d296bab182604700b7eba56640fc94d2.mp4',
+                href: '/products/fujifilm-instax-mini-41-instant-camera',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/375f6c7dacae4625af6cdcc6839bb668.mp4',
+                href: '/collections/karl-lagerfeld',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/34df6684f0b547f7904ab185d315a148.mp4',
+                href: '/products/asus-proart-p16-h7606-copilot-pc-16-touchscreen-ryzen-ai-9-hx-370-32gb-ram-1tb-ssd-rtx-4060-8gb',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/a04a6af8173e4759bbdcb11b218b43eb.mp4',
+                href: '/collections/garmin-smart-watch',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/333b871711e54a92835ced0296fe8f59.mp4',
+                href: '/products/fujifilm-instax-wide-evo™-hybrid-instant-camera',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/7cbd91e1e7be4f738941c9583dcaf3d1.mp4',
+                href: '/collections/ray-ban-smart-glasses',
+              },
+            ]}
+          />
 
           {/* Gaming Group */}
           <CollectionCircles
