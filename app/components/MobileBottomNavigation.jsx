@@ -71,7 +71,6 @@ export default function MobileBottomNavigation({cart}) {
         className="nav-item cart-toggle"
         aria-label="Open Cart"
         onClick={() => open('cart')}
-        aria-label="Open Side Cart Button"
       >
         <CartIcon />
         {itemCount > 0 && <span className="badge">{itemCount}</span>}
