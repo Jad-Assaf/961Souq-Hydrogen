@@ -1,6 +1,6 @@
 import React, {useState, useEffect, Suspense} from 'react';
 import {json} from '@shopify/remix-oxygen';
-import {useLoaderData} from '@remix-run/react';
+import {useLoaderData, useMatches} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
 // import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
@@ -20,13 +20,14 @@ import {
   tabletsMenu,
 } from '~/components/CollectionCircles';
 // import MobileAppPopup from '~/components/MobileAppPopup';
-import ScrollingSVGs from '~/components/ScrollingSVGs';
+// import ScrollingSVGs from '~/components/ScrollingSVGs';
 import {
   GET_COLLECTION_BY_HANDLE_QUERY,
   GET_SIMPLE_COLLECTION_QUERY,
 } from '../data/queries.ts';
 import {CategorySliderWithMoreHeight} from '~/components/CollectionSliderWithMoreHeight';
 import VideosGallery from '~/components/VideosGallery';
+import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -451,6 +452,9 @@ export default function Homepage() {
     isMobile,
   } = useLoaderData();
 
+  const rootMatch = useMatches()[0];
+  const header = rootMatch?.data?.header;
+
   const combinedTopProducts = {
     ...topProducts,
     // restTopProducts is now already resolved.
@@ -519,50 +523,52 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       {/* <CategorySlider sliderCollections={sliderCollections} /> */}
-      <CategorySliderWithMoreHeight sliderCollections={sliderCollections} />
+      {/* <CategorySliderWithMoreHeight sliderCollections={sliderCollections} /> */}
       {/* {newArrivals && <TopProductSections collection={newArrivals} />} */}
 
       {isMobile ? (
-        <div>
-          <div className="buttons-list">
-            <div className="menu-list">
-              {menuKeys.map((key) => (
-                <button
-                  key={key}
-                  onClick={() => handleMenuClick(key)}
-                  className={key === selectedMenu ? 'button-85' : ''}
-                >
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div
-            style={{
-              opacity: fade ? 0 : 1,
-              transition: 'opacity 300ms ease-in-out',
-            }}
-          >
-            <CollectionCircles
-              collections={menus[selectedMenu]}
-              selectedCollection={selectedCollection}
-              onCollectionSelect={setSelectedCollection}
-            />
-            {selectedCollection &&
-              fullTopProducts[getHandleFromUrl(selectedCollection.url)] && (
-                <TopProductSections
-                  key={`${selectedMenu}-${getHandleFromUrl(
-                    selectedCollection.url,
-                  )}`}
-                  collection={
-                    fullTopProducts[getHandleFromUrl(selectedCollection.url)]
-                  }
-                />
-              )}
-          </div>
-        </div>
+        <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
       ) : (
+        // <div>
+        //   <div className="buttons-list">
+        //     <div className="menu-list">
+        //       {menuKeys.map((key) => (
+        //         <button
+        //           key={key}
+        //           onClick={() => handleMenuClick(key)}
+        //           className={key === selectedMenu ? 'button-85' : ''}
+        //         >
+        //           {key.charAt(0).toUpperCase() + key.slice(1)}
+        //         </button>
+        //       ))}
+        //     </div>
+        //   </div>
+        //   <div
+        //     style={{
+        //       opacity: fade ? 0 : 1,
+        //       transition: 'opacity 300ms ease-in-out',
+        //     }}
+        //   >
+        //     <CollectionCircles
+        //       collections={menus[selectedMenu]}
+        //       selectedCollection={selectedCollection}
+        //       onCollectionSelect={setSelectedCollection}
+        //     />
+        //     {selectedCollection &&
+        //       fullTopProducts[getHandleFromUrl(selectedCollection.url)] && (
+        //         <TopProductSections
+        //           key={`${selectedMenu}-${getHandleFromUrl(
+        //             selectedCollection.url,
+        //           )}`}
+        //           collection={
+        //             fullTopProducts[getHandleFromUrl(selectedCollection.url)]
+        //           }
+        //         />
+        //       )}
+        //   </div>
+        // </div>
         <>
+          <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
           {/* Desktop View: Original layout with multiple groups */}
           {/* Apple Group */}
           <CollectionCircles
@@ -762,7 +768,7 @@ export default function Homepage() {
             )}
         </>
       )}
-      <ScrollingSVGs />
+      {/* <ScrollingSVGs /> */}
       <BrandSection brands={brandsData} />
     </div>
   );
