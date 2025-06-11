@@ -2123,7 +2123,7 @@ button.reset:hover:not(:has(> *)) {
   max-width: 500px;
   height: 46px;
   margin: 0;
-  border: 1px solid #c2c2c2;
+  border: 1px solid #2171af7e;
   border-radius: 30px;
   color: #232323 !important;
   padding: 10px 15px;
@@ -2136,7 +2136,7 @@ button.reset:hover:not(:has(> *)) {
 
 .search-bar-submit {
   position: relative;
-  border: 1px solid #c2c2c2;
+  border: 1px solid #2171af7e;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
   border-left: none;
@@ -2440,13 +2440,20 @@ aside .cart-checkout-button {
 .clear-search-button {
   position: relative;
   right: 60px;
-  background: none;
-  border: none;
+  background: transparent;
   font-size: 16px;
   color: #000;
   fill: #000;
   cursor: pointer;
   z-index: 10;
+  height: 46px;
+  @media screen {
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #2171af7e;
+    border-left: none;
+      border-right: none;
+  }
 }
 
 /* extracted from styles.slideshow */
@@ -2521,10 +2528,6 @@ input.search-bar::-webkit-clear-button {
 @media (max-width: 1024px) {
   .clear-search-button {
     display: block;
-  }
-
-  .clear-search-button {
-    right: 15% !important;
   }
 }
 
