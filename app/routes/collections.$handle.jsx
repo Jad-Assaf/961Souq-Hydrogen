@@ -383,9 +383,9 @@ export default function Collection() {
                       <img
                         sizes="(min-width: 45em) 20vw, 40vw"
                         srcSet={`
-                          ${sliderCollection.image.url}&width=200 300w,
-                          ${sliderCollection.image.url}&width=200 600w,
-                          ${sliderCollection.image.url}&width=200 1200w
+                          ${sliderCollection.image.url}&width=300 300w,
+                          ${sliderCollection.image.url}&width=300 600w,
+                          ${sliderCollection.image.url}&width=300 1200w
                         `}
                         alt={
                           sliderCollection.image.altText ||

@@ -1088,7 +1088,7 @@ button {
   cursor: pointer;
   position: relative;
   z-index: 0;
-  border-radius: 10px;
+  border-radius: 30px;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
@@ -1118,7 +1118,7 @@ button {
   height: calc(100% + 4px);
   animation: glowing-button-85 20s linear infinite;
   transition: opacity 0.3s ease-in-out;
-  border-radius: 10px;
+  border-radius: 30px;
 }
 
 @keyframes glowing-button-85 {
@@ -1144,7 +1144,7 @@ button {
   background: #2172af;
   left: 0;
   top: 0;
-  border-radius: 10px;
+  border-radius: 30px;
 }
 
 .menu-list button {
