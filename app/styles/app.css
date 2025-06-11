@@ -2082,6 +2082,10 @@ button.reset:hover:not(:has(> *)) {
   position: relative;
   transition: transform 0.5s ease, top 0.5s ease;
   z-index: 2;
+
+  @media (max-width: 1024px) {
+    box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  }
 }
 
 .main-search.fixed-search {
@@ -2130,7 +2134,6 @@ button.reset:hover:not(:has(> *)) {
   border-right: none;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
 
 }
 
@@ -2143,7 +2146,6 @@ button.reset:hover:not(:has(> *)) {
   height: 46px;
   padding: 0px 15px;
   background: #fff;
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
 }
 
 .search-results-container {
@@ -2447,12 +2449,13 @@ aside .cart-checkout-button {
   cursor: pointer;
   z-index: 10;
   height: 46px;
+
   @media (max-width: 1024px) {
     right: 0;
     background-color: #fff;
     border: 1px solid #2171af7e;
     border-left: none;
-      border-right: none;
+    border-right: none;
   }
 }
 
