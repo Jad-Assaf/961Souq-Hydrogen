@@ -85,7 +85,7 @@ export  function CategorySliderFromMenu({menu}) {
           onClick={() => scroll('left')}
           className="scroll-left-btn"
         >
-          {/* <LeftArrowIcon /> */}
+          <LeftArrowIcon />
         </button>
         <button
           type="button"
@@ -93,7 +93,7 @@ export  function CategorySliderFromMenu({menu}) {
           onClick={() => scroll('right')}
           className="scroll-right-btn"
         >
-          {/* <RightArrowIcon /> */}
+          <RightArrowIcon />
         </button>
       </div>
     </>
