@@ -68,8 +68,8 @@ export  function CategorySliderFromMenu({menu}) {
                     alt={title(item)}
                     className="category-imgg"
                     loading='lazy'
-                    width={250}
-                    height={250}
+                    width={200}
+                    height={200}
                   />
                 </Link>
                 <div className="category-title">

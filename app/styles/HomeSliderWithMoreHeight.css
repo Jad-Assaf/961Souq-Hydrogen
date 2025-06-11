@@ -40,6 +40,7 @@
 
 .category-imgg {
     width: 100% !important;
+    height: auto;
     position: relative !important;
     border-radius: 10px !important;
 }
