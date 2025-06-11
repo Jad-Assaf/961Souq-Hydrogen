@@ -57,7 +57,7 @@ export function CategorySliderFromMenuMobile({menu}) {
 
         return (
           <section key={parent.id} className="category-group">
-            <h4 className="parent-title">{parent.title} Products</h4>
+            <h4 className="parent-title">{parent.title}</h4>
 
             <div className="slide-con" style={{position: 'relative'}}>
               <div

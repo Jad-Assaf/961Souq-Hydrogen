@@ -109,6 +109,12 @@ section.category-group {
 }
 
 section.category-group h4 {
-    font-size: 18px;
-    padding: 13px;
+    font-size: 16px;
+    padding: 6px 10px;
+    background-color: #2172af;
+    width: max-content;
+    border-radius: 30px;
+    color: white;
+    font-weight: 400;
+    margin: 00px auto 15px
 }
