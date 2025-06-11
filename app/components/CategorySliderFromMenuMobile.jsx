@@ -38,7 +38,7 @@ export function CategorySliderFromMenuMobile({menu}) {
   /* ---------- component ---------- */
   return (
     <>
-      <h3 className="cat-h3">Browse&nbsp;Categories</h3>
+      {/* <h3 className="cat-h3">Browse&nbsp;Categories</h3> */}
 
       {menu.items.map((parent) => {
         const children = parent.items || [];
