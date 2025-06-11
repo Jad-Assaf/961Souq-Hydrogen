@@ -468,10 +468,8 @@ button.reset:hover:not(:has(> *)) {
     padding-bottom: 10px;
     margin: auto;
     justify-content: space-evenly;
-    gap: 15px !important;
     border-radius: 5px;
     width: 95vw;
-    padding: 0 !important;
   }
 
   .category-container {

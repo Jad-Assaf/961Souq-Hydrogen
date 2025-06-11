@@ -12,11 +12,13 @@
 .category-slider {
     width: 100% !important;
     flex-wrap: nowrap;
-    gap: 15px !important;
+    column-gap: 15px !important;
+    row-gap: 30px !important;
     padding: 20px 10px 80px;
 
     @media (max-width: 1024px) {
         flex-wrap: wrap !important;
+        padding: 20px 10px 25px !important;
     }
 }
 
