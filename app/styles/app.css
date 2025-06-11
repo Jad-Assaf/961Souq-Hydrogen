@@ -2447,7 +2447,7 @@ aside .cart-checkout-button {
   cursor: pointer;
   z-index: 10;
   height: 46px;
-  @media screen {
+  @media (max-width: 1024px) {
     right: 0;
     background-color: #fff;
     border: 1px solid #2171af7e;
