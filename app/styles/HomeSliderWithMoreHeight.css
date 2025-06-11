@@ -18,7 +18,7 @@
 
     @media (max-width: 1024px) {
         flex-wrap: wrap !important;
-        padding: 20px 10px 25px !important;
+        padding: 15px 0px 25px !important;
     }
 }
 
