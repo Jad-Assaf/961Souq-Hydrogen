@@ -28,6 +28,7 @@ import {
 import {CategorySliderWithMoreHeight} from '~/components/CollectionSliderWithMoreHeight';
 import VideosGallery from '~/components/VideosGallery';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
+import { CategorySliderFromMenuMobile } from '~/components/CategorySliderFromMenuMobile';
 
 const MANUAL_MENU_HANDLES = [
   'apple',
@@ -527,7 +528,7 @@ export default function Homepage() {
       {/* {newArrivals && <TopProductSections collection={newArrivals} />} */}
 
       {isMobile ? (
-        <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
+        <>{header && <CategorySliderFromMenuMobile menu={header.menu} />}</>
       ) : (
         // <div>
         //   <div className="buttons-list">

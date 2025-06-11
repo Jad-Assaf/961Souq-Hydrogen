@@ -99,3 +99,13 @@
         display: none;
     }
 }
+
+section.category-group {
+    max-width: 1500px;
+    margin: auto;
+    width: 100%;
+}
+
+section.category-group h4 {
+    font-size: 18px;
+}
