@@ -5,6 +5,7 @@ import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
+import { SearchForm } from '~/routes/search';
 
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
@@ -110,7 +111,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             />
           </NavLink>
 
-          <SearchFormPredictive className="header-search">
+          {/* <SearchFormPredictive className="header-search">
             {({inputRef, fetchResults, goToSearch, fetcher}) => {
               useFocusOnSlash(inputRef);
 
@@ -286,7 +287,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 </>
               );
             }}
-          </SearchFormPredictive>
+          </SearchFormPredictive> */}
+          <SearchForm />
 
           <div className="header-ctas">
             <NavLink
@@ -540,7 +542,7 @@ function UserIcon() {
   );
 }
 
-function SearchIcon() {
+export function SearchIcon() {
   return (
     <svg
       viewBox="0 0 24 24"

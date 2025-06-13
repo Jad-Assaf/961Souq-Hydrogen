@@ -60,7 +60,7 @@
 .search-results-grid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: start;
+    justify-content: center;
     gap: 30px;
 }
 
@@ -282,5 +282,5 @@ select#sort-select {
     text-align: center;
     padding: 5px 20px;
     border-radius: 30px;
-    margin-top: 10px;
+    margin-top: 100px;
 }

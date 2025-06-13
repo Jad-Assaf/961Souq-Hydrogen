@@ -69,6 +69,7 @@ export default async function handleRequest(
       'https://www.googleadservices.com',
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
+      'https://searchserverapi.com/',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -105,6 +106,7 @@ export default async function handleRequest(
       'https://www.googleadservices.com',
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
+      'https://searchserverapi.com/',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -143,6 +145,7 @@ export default async function handleRequest(
       'https://www.googleadservices.com',
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
+      'https://searchserverapi.com/',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -182,6 +185,7 @@ export default async function handleRequest(
       'https://www.googleadservices.com',
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
+      'https://searchserverapi.com/',
     ],
     mediaSrc: [
       "'self'",
@@ -206,7 +210,7 @@ export default async function handleRequest(
       'https://www.googleadservices.com',
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
-      // Add other media sources as needed
+      'https://searchserverapi.com/',
     ],
   });
 

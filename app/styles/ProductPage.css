@@ -363,21 +363,11 @@ strong {
 .productPage-hr {
     margin: 10px 0 20px;
     width: 100%;
-    max-width: 450px;
+    max-width: 451px;
     border-color: #cdcdcd;
     color: #cdcdcd;
 }
 
-.product-item,
-.product-item .product-card {
-    min-width: 180px !important;
-    max-width: 180px !important;
-}
-
-.collection-products-row {
-    gap: 5px !important;
-}
-
-.product-form form:has(.add-to-cart-button:disabled) {
+/* .product-form form:has(.add-to-cart-button:disabled) {
     display: none;
-}
+} */
