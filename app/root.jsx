@@ -329,7 +329,7 @@ export function Layout({children}) {
               justifyContent: 'center',
               alignItems: 'center',
               zIndex: 9999,
-              transition: 'opacity 0.5s ease-in-out',
+              transition: 'opacity 0.3s ease-in-out',
               opacity: 1,
             }}
           >
@@ -339,7 +339,7 @@ export function Layout({children}) {
               width="80"
               height="80"
               style={{
-                animation: 'pulse 1.5s infinite',
+                animation: 'pulse 2s infinite',
               }}
             />
             <style>{`

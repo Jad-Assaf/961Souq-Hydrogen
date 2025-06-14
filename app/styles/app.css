@@ -1157,8 +1157,8 @@ button {
 
 @media (max-width: 768px) {
   .product-item {
-    min-width: unset !important;
-    width: 175px !important;
+    /* min-width: unset !important;
+    width: 175px !important; */
   }
 
   .progress-bar {
