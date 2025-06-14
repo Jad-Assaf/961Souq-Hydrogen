@@ -1,8 +1,8 @@
 // entry.server.jsx
-import { RemixServer } from '@remix-run/react';
+import {RemixServer} from '@remix-run/react';
 import isbot from 'isbot';
-import { renderToReadableStream } from 'react-dom/server';
-import { createContentSecurityPolicy } from '@shopify/hydrogen';
+import {renderToReadableStream} from 'react-dom/server';
+import {createContentSecurityPolicy} from '@shopify/hydrogen';
 
 /**
  * @param {Request} request
@@ -16,7 +16,7 @@ export default async function handleRequest(
   responseStatusCode,
   responseHeaders,
   remixContext,
-  context
+  context,
 ) {
   const url = new URL(request.url);
   if (url.hostname === 'www.961souq.com') {
@@ -58,7 +58,6 @@ export default async function handleRequest(
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
-      'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
       'https://www.instagram.com/',
@@ -95,7 +94,6 @@ export default async function handleRequest(
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
-      'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
       'https://www.instagram.com/',
@@ -134,7 +132,6 @@ export default async function handleRequest(
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
-      'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
       'https://www.instagram.com/',
@@ -173,7 +170,6 @@ export default async function handleRequest(
       'https://stats.g.doubleclick.net/',
       'https://googleads.g.doubleclick.net',
       'https://api.ipify.org/',
-      'https://search-app-vert.vercel.app/',
       'https://c.bing.com',
       'https://youtu.be/',
       'https://youtube.com/',
@@ -199,7 +195,6 @@ export default async function handleRequest(
       'https://youtube.com',
       'https://youtu.be',
       'https://api.ipify.org/',
-      'https://search-app-vert.vercel.app/',
       'https://youtu.be/',
       'https://youtube.com/',
       'https://www.instagram.com/',
@@ -226,7 +221,7 @@ export default async function handleRequest(
         console.error(error);
         responseStatusCode = 500;
       },
-    }
+    },
   );
 
   if (isbot(request.headers.get('user-agent'))) {

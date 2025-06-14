@@ -14,6 +14,10 @@ import {
 } from '@remix-run/react';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import appStyles from '~/styles/app.css?url';
+import footerStyles from '~/styles/Footer.css?url';
+import productStyles from '~/styles/ProductPage.css?url';
+import productImgStyles from '~/styles/ProductImage.css?url';
+import searchStyles from '~/styles/SearchPage.css?url';
 // import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
@@ -38,11 +42,15 @@ export const shouldRevalidate = ({
 };
 
 const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
-const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
+// const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
 
 export function links() {
   return [
     {rel: 'stylesheet', href: appStyles},
+    {rel: 'stylesheet', href: footerStyles},
+    {rel: 'stylesheet', href: productStyles},
+    {rel: 'stylesheet', href: productImgStyles},
+    {rel: 'stylesheet', href: searchStyles},
     // {rel: 'stylesheet', href: tailwindCss},
     {rel: 'preconnect', href: 'https://cdn.shopify.com'},
     {rel: 'preconnect', href: 'https://shop.app'},
@@ -186,42 +194,46 @@ export function Layout({children}) {
         />
         <Meta />
         <Links />
-        <script
-          defer
-          nonce={nonce}
-          src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
-        ></script>
-        <script
-          defer
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `
+        {nonce ? (
+          <>
+            <script
+              defer
+              nonce={nonce}
+              src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
+            ></script>
+            <script
+              defer
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'G-CB623RXLSE');
         `,
-          }}
-        ></script>
-        <script
-          defer
-          nonce={nonce}
-          src="https://www.googletagmanager.com/gtag/js?id=AW-378354284"
-        ></script>
-        <script
-          defer
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `
+              }}
+            ></script>
+            <script
+              defer
+              nonce={nonce}
+              src="https://www.googletagmanager.com/gtag/js?id=AW-378354284"
+            ></script>
+            <script
+              defer
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'AW-378354284');
         `,
-          }}
-        ></script>
+              }}
+            ></script>
+          </>
+        ) : null}
         <MetaPixel pixelId={PIXEL_ID} />
-        <TikTokPixel pixelId={TIKTOK_PIXEL_ID} />
+        {/* <TikTokPixel pixelId={TIKTOK_PIXEL_ID} /> */}
       </head>
       <body>
         <ClarityTracker clarityId={clarityId} />
@@ -237,7 +249,7 @@ export function Layout({children}) {
           children
         )}
         <ScrollRestoration nonce={nonce} />
-        <Scripts nonce={nonce} />
+        {nonce ? <Scripts nonce={nonce} /> : <Scripts />}
       </body>
     </html>
   );

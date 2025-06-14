@@ -72,7 +72,7 @@ export default function RecentlyViewedProducts({currentProductId}) {
     `;
 
     const response = await fetch(
-      `https://961souqs.myshopify.com/api/2024-10/graphql.json`,
+      `https://961souqs.myshopify.com/api/2025-04/graphql.json`,
       {
         method: 'POST',
         headers: {
@@ -99,28 +99,6 @@ export default function RecentlyViewedProducts({currentProductId}) {
     return products;
   }
 
-  // Scroll handling for the product row
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartX(e.pageX - rowRef.current.offsetLeft);
-    setScrollLeft(rowRef.current.scrollLeft);
-  };
-
-  const handleMouseLeave = () => setIsDragging(false);
-  const handleMouseUp = () => setIsDragging(false);
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - rowRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Adjust scroll speed
-    rowRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const scrollRow = (distance) => {
-    rowRef.current.scrollBy({left: distance, behavior: 'smooth'});
-  };
-
   // Removed the early return that hides the component when there are no products
 
   return (
@@ -135,14 +113,7 @@ export default function RecentlyViewedProducts({currentProductId}) {
           <button className="home-prev-button" onClick={() => scrollRow(-600)}>
             <LeftArrowIcon />
           </button>
-          <div
-            className="collection-products-row"
-            ref={rowRef}
-            onMouseDown={handleMouseDown}
-            onMouseLeave={handleMouseLeave}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-          >
+          <div className="collection-products-row">
             {products.map((product, index) => (
               <RecentlyViewedProductItem
                 key={product.id}

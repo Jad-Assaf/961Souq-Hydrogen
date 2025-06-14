@@ -6,7 +6,6 @@ import {
   useNavigate,
 } from '@remix-run/react';
 import {useState, useEffect, useCallback, useRef} from 'react';
-import ClientOnly from '~/components/ClientOnly';
 
 // ───────── Loader ─────────
 export async function loader({request}) {
@@ -242,8 +241,8 @@ export function SearchForm() {
                       }}
                     >
                       <img
-                        src={entry.item.image_link}
-                        alt=""
+                        src={`${entry.item.image_link}&width=200`}
+                        alt={entry.item.title}
                         width={75}
                         height={75}
                       />
