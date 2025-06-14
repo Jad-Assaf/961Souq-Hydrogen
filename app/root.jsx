@@ -21,7 +21,7 @@ import searchStyles from '~/styles/SearchPage.css?url';
 // import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
-import React, {Suspense, useEffect, useState} from 'react';
+import React, {Suspense, useEffect, useRef, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
 import TikTokPixel from './components/TikTokPixel';
@@ -156,6 +156,84 @@ export function Layout({children}) {
   const [nprogress, setNProgress] = useState(null); // Store NProgress instance
   const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [loaderVisible, setLoaderVisible] = useState(true);
+  const loaderRef = useRef(null);
+  const animationRef = useRef(null);
+
+  useEffect(() => {
+    // Only run on client
+    if (typeof document === 'undefined') return;
+
+    // Check if styles are already loaded
+    const stylesheetUrls = [
+      appStyles,
+      footerStyles,
+      productStyles,
+      productImgStyles,
+      searchStyles,
+    ];
+
+    // Function to check if stylesheets are loaded
+    const areStylesLoaded = () => {
+      return stylesheetUrls.every((href) => {
+        return Array.from(document.styleSheets).some(
+          (sheet) => sheet.href === new URL(href, window.location.href).href,
+        );
+      });
+    };
+
+    if (areStylesLoaded()) {
+      setStylesLoaded(true);
+      return;
+    }
+
+    // Set up load event listeners
+    const loadPromises = stylesheetUrls.map((href) => {
+      return new Promise((resolve) => {
+        const link = document.querySelector(`link[href="${href}"]`);
+        if (link) {
+          if (link.sheet) resolve(); // Already loaded
+          else link.addEventListener('load', resolve);
+        } else {
+          resolve(); // Not found, skip
+        }
+      });
+    });
+
+    // Wait for all stylesheets to load or timeout
+    const timeout = new Promise((resolve) => setTimeout(resolve, 3000));
+
+    Promise.race([Promise.all(loadPromises), timeout])
+      .then(() => setStylesLoaded(true))
+      .catch(() => setStylesLoaded(true)); // Fail safe
+
+    return () => {
+      // Clean up event listeners
+      stylesheetUrls.forEach((href) => {
+        const link = document.querySelector(`link[href="${href}"]`);
+        if (link) link.removeEventListener('load', loadPromises);
+      });
+    };
+  }, []);
+
+  // Handle loader fade-out animation
+  useEffect(() => {
+    if (!stylesLoaded || !loaderRef.current) return;
+
+    // Start fade out animation
+    loaderRef.current.style.opacity = '0';
+
+    // Remove loader after animation completes
+    animationRef.current = setTimeout(() => {
+      setLoaderVisible(false);
+    }, 500);
+
+    return () => {
+      if (animationRef.current) clearTimeout(animationRef.current);
+    };
+  }, [stylesLoaded]);
+
   useEffect(() => {
     // Load NProgress once and set it in the state
     const loadNProgress = async () => {
@@ -237,6 +315,42 @@ export function Layout({children}) {
       </head>
       <body>
         <ClarityTracker clarityId={clarityId} />
+        {loaderVisible && (
+          <div
+            ref={loaderRef}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'white',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 9999,
+              transition: 'opacity 0.5s ease-in-out',
+              opacity: 1,
+            }}
+          >
+            <img
+              src={favicon}
+              alt="Loading"
+              width="80"
+              height="80"
+              style={{
+                animation: 'pulse 1.5s infinite',
+              }}
+            />
+            <style>{`
+              @keyframes pulse {
+                0% { transform: scale(0.95); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(0.95); }
+              }
+            `}</style>
+          </div>
+        )}
         {data ? (
           <Analytics.Provider
             cart={data.cart}
