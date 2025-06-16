@@ -15,7 +15,7 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImages} from '~/components/ProductImage'; // We'll update ProductImage.jsx to handle media.
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-// import '../styles/ProductPage.css';
+import '../styles/ProductPage.css';
 import {CSSTransition} from 'react-transition-group';
 import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';

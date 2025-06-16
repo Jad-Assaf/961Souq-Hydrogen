@@ -14,10 +14,10 @@ import {
 } from '@remix-run/react';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import appStyles from '~/styles/app.css?url';
-import footerStyles from '~/styles/Footer.css?url';
-import productStyles from '~/styles/ProductPage.css?url';
-import productImgStyles from '~/styles/ProductImage.css?url';
-import searchStyles from '~/styles/SearchPage.css?url';
+// import footerStyles from '~/styles/Footer.css?url';
+// import productStyles from '~/styles/ProductPage.css?url';
+// import productImgStyles from '~/styles/ProductImage.css?url';
+// import searchStyles from '~/styles/SearchPage.css?url';
 // import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
@@ -47,10 +47,10 @@ const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 export function links() {
   return [
     {rel: 'stylesheet', href: appStyles},
-    {rel: 'stylesheet', href: footerStyles},
-    {rel: 'stylesheet', href: productStyles},
-    {rel: 'stylesheet', href: productImgStyles},
-    {rel: 'stylesheet', href: searchStyles},
+    // {rel: 'stylesheet', href: footerStyles},
+    // {rel: 'stylesheet', href: productStyles},
+    // {rel: 'stylesheet', href: productImgStyles},
+    // {rel: 'stylesheet', href: searchStyles},
     // {rel: 'stylesheet', href: tailwindCss},
     {rel: 'preconnect', href: 'https://cdn.shopify.com'},
     {rel: 'preconnect', href: 'https://shop.app'},
@@ -168,10 +168,10 @@ export function Layout({children}) {
     // Check if styles are already loaded
     const stylesheetUrls = [
       appStyles,
-      footerStyles,
-      productStyles,
-      productImgStyles,
-      searchStyles,
+      // footerStyles,
+      // productStyles,
+      // productImgStyles,
+      // searchStyles,
     ];
 
     // Function to check if stylesheets are loaded

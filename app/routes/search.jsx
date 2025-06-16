@@ -6,6 +6,7 @@ import {
   useNavigate,
 } from '@remix-run/react';
 import {useState, useEffect, useCallback, useRef} from 'react';
+import "../styles/SearchPage.css"
 
 // ───────── Loader ─────────
 export async function loader({request}) {
