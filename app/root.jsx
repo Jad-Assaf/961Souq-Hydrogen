@@ -24,7 +24,7 @@ import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import React, {Suspense, useEffect, useRef, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
-import TikTokPixel from './components/TikTokPixel';
+// import TikTokPixel from './components/TikTokPixel';
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
