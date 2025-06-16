@@ -1,3 +1,4 @@
+import '../styles/ProductPage.css';
 import React, {Suspense, useEffect, useRef, useState} from 'react';
 import {defer, redirect} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, useLocation} from '@remix-run/react';
@@ -15,7 +16,6 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImages} from '~/components/ProductImage'; // We'll update ProductImage.jsx to handle media.
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-import '../styles/ProductPage.css';
 import {CSSTransition} from 'react-transition-group';
 import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
@@ -491,7 +491,12 @@ export function ProductForm({
 
   // WhatsApp SVG icon
   const WhatsAppIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 175.216 175.552" width={40} height={40}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 175.216 175.552"
+      width={40}
+      height={40}
+    >
       <defs>
         <linearGradient
           id="linearGradient1780"
@@ -594,7 +599,6 @@ export function ProductForm({
     </>
   );
 }
-
 
 // -----------------------------------------------------
 //                   Main Product

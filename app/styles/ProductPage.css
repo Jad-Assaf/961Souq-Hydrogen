@@ -46,7 +46,7 @@ h4 {
     width: 50%;
 }
 
-.product-price {
+.product .product-price {
     font-size: 18px !important;
     font-weight: 600;
 }
@@ -153,9 +153,9 @@ h4 {
 .add-to-cart-button {
     display: block !important;
     max-width: 340px !important;
-    padding: 12px 10px !important;
+    /* padding: 12px 10px !important; */
     border-radius: 5px !important;
-    font-size: 14px !important;
+    font-size: 12px !important;
 }
 
 .add-to-cart-button:active {
@@ -175,9 +175,8 @@ h4 {
     }
 }
 
-.product-form form {
+.product .product-form form {
     width: 85% !important;
-    height: auto !important;
 }
 
 @keyframes spin {

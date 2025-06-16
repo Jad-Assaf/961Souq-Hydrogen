@@ -1,3 +1,5 @@
+import '../styles/CollectionSlider.css';
+import '../styles/CollectionsHandle.css';
 import {defer, redirect} from '@shopify/remix-oxygen';
 import '../styles/HomeSliderWithMoreHeight.css';
 import {
@@ -20,8 +22,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useMediaQuery} from 'react-responsive';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-import '../styles/CollectionSlider.css';
-import '../styles/CollectionsHandle.css';
 import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
 
 function truncateText(text, maxWords) {

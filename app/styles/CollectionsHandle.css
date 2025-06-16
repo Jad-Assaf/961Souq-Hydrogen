@@ -198,6 +198,7 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .product-card .mobile-container .product-form {
     display: block !important;
+    max-width: unset;
 }
 
 .grid-cols-1 .product-info-container .add-to-cart-button {

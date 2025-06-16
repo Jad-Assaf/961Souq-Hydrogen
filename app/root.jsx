@@ -1,4 +1,6 @@
 // src/root.jsx
+import appStyles from '~/styles/app.css?url';
+import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {defer, redirect} from '@shopify/remix-oxygen';
 import {
@@ -12,8 +14,6 @@ import {
   isRouteErrorResponse,
   useNavigation,
 } from '@remix-run/react';
-import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
-import appStyles from '~/styles/app.css?url';
 // import footerStyles from '~/styles/Footer.css?url';
 // import productStyles from '~/styles/ProductPage.css?url';
 // import productImgStyles from '~/styles/ProductImage.css?url';

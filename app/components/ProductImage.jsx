@@ -1,8 +1,8 @@
+import '../styles/ProductImage.css';
 import { useEffect, useState, useRef } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import 'yet-another-react-lightbox/styles.css';
-import '../styles/ProductImage.css';
 import { useSwipeable } from 'react-swipeable';
 
 const LeftArrowIcon = () => (
