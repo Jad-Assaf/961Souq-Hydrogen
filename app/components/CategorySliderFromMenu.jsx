@@ -1,7 +1,7 @@
 // app/components/CategorySliderFromMenu.jsx
 import React, {useRef} from 'react';
 import {Link} from '@remix-run/react';
-import '../styles/HomeSliderWithMoreHeight.css';
+// import '../styles/HomeSliderWithMoreHeight.css';
 
 export  function CategorySliderFromMenu({menu}) {
   if (!menu?.items?.length) return null;
@@ -43,7 +43,7 @@ export  function CategorySliderFromMenu({menu}) {
         })();
 
   return (
-    <>
+    <div className="sliderWithMoreHeight">
       <h3 className="cat-h3">Browse Categories</h3>
 
       <div className="slide-con" style={{position: 'relative'}}>
@@ -67,7 +67,7 @@ export  function CategorySliderFromMenu({menu}) {
                     src={`${src}${src.includes('?') ? '&' : '?'}width=300`}
                     alt={title(item)}
                     className="category-imgg"
-                    loading='lazy'
+                    loading="lazy"
                     width={200}
                     height={200}
                   />
@@ -99,7 +99,7 @@ export  function CategorySliderFromMenu({menu}) {
           <RightArrowIcon />
         </button>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 // app/components/CategorySliderFromMenu.jsx
 import React, {useRef} from 'react';
 import {Link} from '@remix-run/react';
-import '../styles/HomeSliderWithMoreHeight.css';
+// import '../styles/HomeSliderWithMoreHeight.css';
 
 /**
  * Display grouped category sliders:
