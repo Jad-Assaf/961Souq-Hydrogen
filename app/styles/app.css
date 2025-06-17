@@ -508,7 +508,8 @@ button.reset:hover:not(:has(> *)) {
   /* padding: 15px 0 0; */
 }
 
-.sliderWithMoreHeight, .collection {
+.sliderWithMoreHeight,
+.collection {
   .cat-h3 {
     width: 100% !important;
   }
@@ -2242,7 +2243,7 @@ aside .cart-checkout-button {
     max-width: 100vw !important;
     width: 100vw !important;
     position: absolute;
-    top: 70px;
+    top: -30px;
   }
 
   .search-container {
@@ -2435,6 +2436,11 @@ input.search-bar:focus-visible {
 
 .predictive-search-result-item {
   margin-bottom: 0.5rem;
+}
+
+.predictive-search-result-item a {
+  display: flex;
+  width: 100%;
 }
 
 .predictive-search-result-item {
@@ -3969,7 +3975,7 @@ a.video-link {
 }
 
 .collection-product-link {
-  width: 100% ;
+  width: 100%;
 }
 
 .search-filters-container {
