@@ -1,21 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "../styles/Footer.css"
 
 export const Footer = ({ shopMenu, policiesMenu }) => {
-    // const [stylesLoaded, setStylesLoaded] = useState(false);
-
-    // useEffect(() => {
-    //     const loadStyles = async () => {
-    //         await import('../styles/Footer.css');
-    //         setStylesLoaded(true);
-    //     };
-    //     loadStyles();
-    // }, []);
-
-    // if (!stylesLoaded) {
-    //     return null; // or return a loading spinner if desired
-    // }
-
+    
     return (
       <footer className="footer">
         <div className="container">
