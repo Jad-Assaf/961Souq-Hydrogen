@@ -1,6 +1,6 @@
 import {Link} from '@remix-run/react';
 import React, {useRef} from 'react';
-import '../styles/HomeSliderWithMoreHeight.css';
+// import '../styles/HomeSliderWithMoreHeight.css';
 
 export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
   const sliderRef = useRef(null);
