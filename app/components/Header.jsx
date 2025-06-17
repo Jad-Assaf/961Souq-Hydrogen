@@ -501,9 +501,10 @@ export function HeaderMenu({menu, viewport}) {
     ));
 
   return (
-    <nav className={`header-menu-${viewport}`} role="navigation">
-      {renderMenuItems(menu?.items)}
-    </nav>
+    // <nav className={`header-menu-${viewport}`} role="navigation">
+    //   {renderMenuItems(menu?.items)}
+    // </nav>
+     <div></div>
   );
 }
 
