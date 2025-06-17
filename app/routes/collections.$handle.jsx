@@ -1,7 +1,7 @@
-import '../styles/CollectionSlider.css';
+// import '../styles/CollectionSlider.css';
 import '../styles/CollectionsHandle.css';
 import {redirect} from '@shopify/remix-oxygen';
-import '../styles/HomeSliderWithMoreHeight.css';
+// import '../styles/HomeSliderWithMoreHeight.css';
 import {
   useLoaderData,
   Link,

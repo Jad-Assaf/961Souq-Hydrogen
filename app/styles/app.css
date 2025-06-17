@@ -554,7 +554,7 @@ button.reset:hover:not(:has(> *)) {
   /* padding: 15px 0 0; */
 }
 
-.sliderWithMoreHeight {
+.sliderWithMoreHeight, .collection {
   .cat-h3 {
     width: 100% !important;
   }
