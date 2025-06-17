@@ -1,6 +1,6 @@
 import '../styles/CollectionSlider.css';
 import '../styles/CollectionsHandle.css';
-import {defer, redirect} from '@shopify/remix-oxygen';
+import {redirect} from '@shopify/remix-oxygen';
 import '../styles/HomeSliderWithMoreHeight.css';
 import {
   useLoaderData,
@@ -8,6 +8,7 @@ import {
   useSearchParams,
   useLocation,
   useNavigate,
+  data,
 } from '@remix-run/react';
 import {
   getPaginationVariables,
@@ -112,7 +113,7 @@ export const meta = ({data}) => {
 export async function loader(args) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  return defer({
+  return data({
     ...deferredData,
     ...criticalData,
   });

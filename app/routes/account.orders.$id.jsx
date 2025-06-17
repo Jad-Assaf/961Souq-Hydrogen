@@ -1,4 +1,4 @@
-import { json, redirect } from '@shopify/remix-oxygen';
+import { redirect } from '@shopify/remix-oxygen';
 import { useLoaderData } from '@remix-run/react';
 import { Money, Image, flattenConnection } from '@shopify/hydrogen';
 import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery';
@@ -47,7 +47,7 @@ export async function loader({ params, context }) {
     firstDiscount?.__typename === 'PricingPercentageValue' &&
     firstDiscount?.percentage;
 
-  return json({
+  return ({
     order,
     lineItems,
     discountValue,

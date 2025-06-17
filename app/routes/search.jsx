@@ -1,9 +1,9 @@
 import {
-  json,
   useLoaderData,
   useSearchParams,
   Link,
   useNavigate,
+  data,
 } from '@remix-run/react';
 import {useState, useEffect, useCallback, useRef} from 'react';
 import "../styles/SearchPage.css"
@@ -16,7 +16,7 @@ export async function loader({request}) {
   const limit = 50;
   const offset = (page - 1) * limit;
 
-  if (!q) return json({results: [], total: 0, facets: [], page, limit});
+  if (!q) return data({results: [], total: 0, facets: [], page, limit});
 
   const apiKey = '0G4C7L6r1R';
   const restrictParams = ['price', 'color']
@@ -37,12 +37,12 @@ export async function loader({request}) {
 
   const res = await fetch(endpoint);
   if (!res.ok) throw new Response(await res.text(), {status: res.status});
-  const data = await res.json();
+  const dataa = await res.json();
 
-  return json({
-    results: data.items || [],
-    total: data.totalItems || 0,
-    facets: data.facets || [],
+  return data({
+    results: dataa.items || [],
+    total: dataa.totalItems || 0,
+    facets: dataa.facets || [],
     page,
     limit,
   });

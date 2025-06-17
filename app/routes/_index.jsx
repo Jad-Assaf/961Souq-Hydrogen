@@ -1,6 +1,5 @@
 import React, {useState, useEffect, Suspense} from 'react';
-import {json} from '@shopify/remix-oxygen';
-import {useLoaderData, useMatches} from '@remix-run/react';
+import {data, useLoaderData, useMatches} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
 // import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
@@ -296,7 +295,7 @@ export async function loader(args) {
   // Wait for non‑critical data before returning.
   const restTopProducts = await deferredTopProductsPromise;
 
-  return json(
+  return data(
     {
       banners,
       sliderCollections: criticalData.sliderCollections,

@@ -1,6 +1,6 @@
 import '../styles/ProductPage.css';
 import React, {Suspense, useEffect, useRef, useState} from 'react';
-import {defer, redirect} from '@shopify/remix-oxygen';
+import {redirect} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, useLocation} from '@remix-run/react';
 import {
   getSelectedProductOptions,

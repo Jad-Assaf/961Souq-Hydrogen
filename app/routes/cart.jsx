@@ -1,7 +1,6 @@
-import {Await, useRouteLoaderData, useLoaderData} from '@remix-run/react';
+import {Await, useRouteLoaderData, useLoaderData, data} from '@remix-run/react';
 import {Suspense} from 'react';
 import {CartForm} from '@shopify/hydrogen';
-import {json} from '@shopify/remix-oxygen';
 import {CartMain} from '~/components/CartMain';
 import {TopProductSections} from '~/components/TopProductSections';
 
@@ -23,7 +22,7 @@ export async function loader({context}) {
   // Fetch new arrivals using the helper function below.
   const newArrivals = await fetchCollectionByHandle(context, 'new-arrivals');
 
-  return json({
+  return ({
     newArrivals,
   });
 }
@@ -89,7 +88,7 @@ export async function action({request, context}) {
     headers.set('Location', redirectTo);
   }
 
-  return json(
+  return data(
     {
       cart: cartResult,
       errors,

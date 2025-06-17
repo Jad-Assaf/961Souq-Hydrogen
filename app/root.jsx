@@ -2,7 +2,7 @@
 import appStyles from '~/styles/app.css?url';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
-import {defer, redirect} from '@shopify/remix-oxygen';
+import {redirect} from '@shopify/remix-oxygen';
 import {
   Links,
   Meta,
@@ -13,6 +13,7 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   useNavigation,
+  data,
 } from '@remix-run/react';
 // import footerStyles from '~/styles/Footer.css?url';
 // import productStyles from '~/styles/ProductPage.css?url';
@@ -34,11 +35,10 @@ export const shouldRevalidate = ({
   formMethod,
   currentUrl,
   nextUrl,
-  defaultShouldRevalidate,
 }) => {
   if (formMethod && formMethod !== 'GET') return true;
   if (currentUrl.toString() === nextUrl.toString()) return true;
-  return defaultShouldRevalidate;
+  return false;
 };
 
 const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
@@ -79,7 +79,7 @@ export async function loader({request, context}) {
     const criticalData = await loadCriticalData({request, context});
     const {storefront, env} = context;
 
-    return defer({
+    return data({
       ...deferredData,
       ...criticalData,
       publicStoreDomain: env.PUBLIC_STORE_DOMAIN,

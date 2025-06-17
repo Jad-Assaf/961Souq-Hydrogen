@@ -1,4 +1,3 @@
-import {json} from '@shopify/remix-oxygen';
 import { sendTikTokEvent } from '../lib/tiktokEvents.server';
 
 export async function action({request}) {
@@ -19,5 +18,5 @@ export async function action({request}) {
     `[TikTok] Events API ➜ ${data.event} • id=${data.event_id}`,
   );
 
-  return json({ok: true});
+  return ({ok: true});
 }

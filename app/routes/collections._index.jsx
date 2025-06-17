@@ -1,5 +1,4 @@
 import {useLoaderData, Link} from '@remix-run/react';
-import {defer} from '@shopify/remix-oxygen';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import '../styles/CollectionsIndex.css';
@@ -14,7 +13,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return defer({...deferredData, ...criticalData});
+  return ({...deferredData, ...criticalData});
 }
 
 /**
