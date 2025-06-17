@@ -29,23 +29,23 @@ import VideosGallery from '~/components/VideosGallery';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 import { CategorySliderFromMenuMobile } from '~/components/CategorySliderFromMenuMobile';
 
-const MANUAL_MENU_HANDLES = [
-  'apple',
-  'gaming',
-  'laptops',
-  'desktops',
-  'pc-parts',
-  'networking',
-  'monitors',
-  'mobiles',
-  'tablets',
-  'audio',
-  'pioneer-equipment',
-  'accessories',
-  'fitness',
-  'photography',
-  'home-appliances',
-];
+// const MANUAL_MENU_HANDLES = [
+//   'apple',
+//   'gaming',
+//   'laptops',
+//   'desktops',
+//   'pc-parts',
+//   'networking',
+//   'monitors',
+//   'mobiles',
+//   'tablets',
+//   'audio',
+//   'pioneer-equipment',
+//   'accessories',
+//   'fitness',
+//   'photography',
+//   'home-appliances',
+// ];
 
 /**
  * Custom hook to detect mobile viewport (below 1024px)
@@ -147,7 +147,7 @@ const getHandleFromUrl = (url) => {
 
 async function loadCriticalData({context}) {
   const {storefront} = context;
-  const menuHandles = MANUAL_MENU_HANDLES;
+  // const menuHandles = MANUAL_MENU_HANDLES;
   const {shop} = await storefront.query(
     `#graphql
       query ShopDetails {
@@ -159,11 +159,11 @@ async function loadCriticalData({context}) {
     `,
     {cache: storefront.CacheLong()},
   );
-  const [sliderCollections] = await Promise.all([
-    fetchCollectionsByHandles(context, menuHandles),
-  ]);
+  // const [sliderCollections] = await Promise.all([
+  //   fetchCollectionsByHandles(context, menuHandles),
+  // ]);
   return {
-    sliderCollections,
+    // sliderCollections,
     title: shop.name,
     description: shop.description,
     url: 'https://961souq.com',
@@ -245,14 +245,14 @@ export async function loader(args) {
 
   // Fire off critical queries concurrently so above‑the‑fold content is fast.
   const criticalDataPromise = loadCriticalData(args);
-  const newArrivalsPromise = fetchCollectionByHandle(
-    args.context,
-    'new-arrivals',
-  );
+  // const newArrivalsPromise = fetchCollectionByHandle(
+  //   args.context,
+  //   'new-arrivals',
+  // );
 
-  const [criticalData, newArrivals] = await Promise.all([
+  const [criticalData] = await Promise.all([
     criticalDataPromise,
-    newArrivalsPromise,
+    // newArrivalsPromise,
   ]);
 
   // Build a unique list of collection handles from your menus.
@@ -298,8 +298,8 @@ export async function loader(args) {
   return data(
     {
       banners,
-      sliderCollections: criticalData.sliderCollections,
-      newArrivals,
+      // sliderCollections: criticalData.sliderCollections,
+      // newArrivals,
       topProducts: initialTopProducts,
       restTopProducts,
       isMobile,
@@ -307,7 +307,7 @@ export async function loader(args) {
     {
       headers: {
         'Oxygen-Cache-Control':
-          'public, max-age=1, stale-while-revalidate=86399',
+          'public, max-age=3600, stale-while-revalidate=86399',
       },
     },
   );
@@ -445,9 +445,9 @@ const brandsData = [
 export default function Homepage() {
   const {
     banners,
-    sliderCollections,
+    // sliderCollections,
     topProducts,
-    newArrivals,
+    // newArrivals,
     restTopProducts,
     isMobile,
   } = useLoaderData();
@@ -457,11 +457,9 @@ export default function Homepage() {
 
   const combinedTopProducts = {
     ...topProducts,
-    // restTopProducts is now already resolved.
   };
   const fullTopProducts = {...combinedTopProducts, ...restTopProducts};
 
-  // Mobile state: single switch button layout.
   const menus = {
     apple: appleMenu,
     gaming: gamingMenu,
@@ -522,8 +520,6 @@ export default function Homepage() {
       ></h1>
 
       <BannerSlideshow banners={banners} />
-      {/* <CategorySlider sliderCollections={sliderCollections} /> */}
-      {/* <CategorySliderWithMoreHeight sliderCollections={sliderCollections} /> */}
       {/* {newArrivals && <TopProductSections collection={newArrivals} />} */}
 
       {isMobile ? (
