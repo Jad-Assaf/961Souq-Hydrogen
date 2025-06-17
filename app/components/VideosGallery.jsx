@@ -1,6 +1,6 @@
 // VideosGallery.jsx
 import React, {useEffect, useRef, useState} from 'react';
-import '@sayings/react-reels/dist/index.css';
+// import '@sayings/react-reels/dist/index.css';
 
 /* ------------------------------------------------------------------ */
 /* Main component                                                     */

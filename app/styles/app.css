@@ -4691,3 +4691,187 @@ svg.icon.icon--full-color {
   width: 50px;
   height: auto;
 }
+
+._2GFMG {
+  width: 100%;
+  height: 100%
+}
+
+._1HTWi {
+  border: 1px solid black
+}
+
+._3K3if {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center
+}
+
+._3zPD8 {
+  position: relative
+}
+
+._RSXB2 {
+  height: 100%;
+  width: 100%;
+  -o-object-fit: cover;
+  object-fit: cover
+}
+
+._3JKGl,
+._2EdcO {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 20px;
+  color: #fff;
+  z-index: 1;
+  cursor: pointer
+}
+
+._1lwou,
+._6g17y {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 20px;
+  color: #fff;
+  z-index: 1;
+  cursor: pointer
+}
+
+._-NsX3,
+._2FRAK {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  -webkit-animation: _3_z7I 1s ease-in-out;
+  animation: _3_z7I 1s ease-in-out;
+  opacity: 0
+}
+
+@-webkit-keyframes _3_z7I {
+  0% {
+    opacity: 0
+  }
+
+  50% {
+    opacity: 1
+  }
+
+  to {
+    opacity: 0
+  }
+}
+
+@keyframes _3_z7I {
+  0% {
+    opacity: 0
+  }
+
+  50% {
+    opacity: 1
+  }
+
+  to {
+    opacity: 0
+  }
+}
+
+._3rQt2 {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  right: -80px;
+  color: #fff;
+  height: 100%;
+  bottom: 0;
+  z-index: 1
+}
+
+._1YhvF {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  right: 20px;
+  bottom: 10px;
+  color: #fff;
+  z-index: 1
+}
+
+._1YhvF div {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center
+}
+
+._1YhvF div:first-child {
+  margin: 0
+}
+
+._3rQt2 div {
+  margin: 25px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center
+}
+
+._3rQt2 div * {
+  cursor: pointer
+}
+
+._3rQt2 div:first-child {
+  flex: 1;
+  margin: 0
+}
+
+._3rQt2 div:last-child {
+  margin-top: 20px;
+  margin-bottom: 0
+}
+
+._2ApqM,
+._1KYDn {
+  margin-top: 10px;
+  font-size: 14px
+}
+
+._2qXEJ,
+._dNLqB {
+  margin-top: 5px;
+  font-size: 14px
+}
+
+._cUGda {
+  position: absolute;
+  bottom: 0;
+  color: #fff;
+  padding: 20px
+}
+
+._cUGda div:first-child {
+  margin: 10px 0;
+  font-size: 14px
+}
+
+._cUGda div:last-child {
+  display: flex;
+  align-items: center;
+  font-size: 14px
+}
+
+._cUGda div:last-child img {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%
+}
+
+._cUGda div:last-child label {
+  padding-left: 10px
+}
