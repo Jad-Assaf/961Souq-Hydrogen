@@ -161,61 +161,61 @@ export function Layout({children}) {
   const loaderRef = useRef(null);
   const animationRef = useRef(null);
 
-  useEffect(() => {
-    // Only run on client
-    if (typeof document === 'undefined') return;
+  // useEffect(() => {
+  //   // Only run on client
+  //   if (typeof document === 'undefined') return;
 
-    // Check if styles are already loaded
-    const stylesheetUrls = [
-      appStyles,
-      // footerStyles,
-      // productStyles,
-      // productImgStyles,
-      // searchStyles,
-    ];
+  //   // Check if styles are already loaded
+  //   const stylesheetUrls = [
+  //     appStyles,
+  //     // footerStyles,
+  //     // productStyles,
+  //     // productImgStyles,
+  //     // searchStyles,
+  //   ];
 
-    // Function to check if stylesheets are loaded
-    const areStylesLoaded = () => {
-      return stylesheetUrls.every((href) => {
-        return Array.from(document.styleSheets).some(
-          (sheet) => sheet.href === new URL(href, window.location.href).href,
-        );
-      });
-    };
+  //   // Function to check if stylesheets are loaded
+  //   const areStylesLoaded = () => {
+  //     return stylesheetUrls.every((href) => {
+  //       return Array.from(document.styleSheets).some(
+  //         (sheet) => sheet.href === new URL(href, window.location.href).href,
+  //       );
+  //     });
+  //   };
 
-    if (areStylesLoaded()) {
-      setStylesLoaded(true);
-      return;
-    }
+  //   if (areStylesLoaded()) {
+  //     setStylesLoaded(true);
+  //     return;
+  //   }
 
-    // Set up load event listeners
-    const loadPromises = stylesheetUrls.map((href) => {
-      return new Promise((resolve) => {
-        const link = document.querySelector(`link[href="${href}"]`);
-        if (link) {
-          if (link.sheet) resolve(); // Already loaded
-          else link.addEventListener('load', resolve);
-        } else {
-          resolve(); // Not found, skip
-        }
-      });
-    });
+  //   // Set up load event listeners
+  //   const loadPromises = stylesheetUrls.map((href) => {
+  //     return new Promise((resolve) => {
+  //       const link = document.querySelector(`link[href="${href}"]`);
+  //       if (link) {
+  //         if (link.sheet) resolve(); // Already loaded
+  //         else link.addEventListener('load', resolve);
+  //       } else {
+  //         resolve(); // Not found, skip
+  //       }
+  //     });
+  //   });
 
-    // Wait for all stylesheets to load or timeout
-    const timeout = new Promise((resolve) => setTimeout(resolve, 3000));
+  //   // Wait for all stylesheets to load or timeout
+  //   const timeout = new Promise((resolve) => setTimeout(resolve, 3000));
 
-    Promise.race([Promise.all(loadPromises), timeout])
-      .then(() => setStylesLoaded(true))
-      .catch(() => setStylesLoaded(true)); // Fail safe
+  //   Promise.race([Promise.all(loadPromises), timeout])
+  //     .then(() => setStylesLoaded(true))
+  //     .catch(() => setStylesLoaded(true)); // Fail safe
 
-    return () => {
-      // Clean up event listeners
-      stylesheetUrls.forEach((href) => {
-        const link = document.querySelector(`link[href="${href}"]`);
-        if (link) link.removeEventListener('load', loadPromises);
-      });
-    };
-  }, []);
+  //   return () => {
+  //     // Clean up event listeners
+  //     stylesheetUrls.forEach((href) => {
+  //       const link = document.querySelector(`link[href="${href}"]`);
+  //       if (link) link.removeEventListener('load', loadPromises);
+  //     });
+  //   };
+  // }, []);
 
   // Handle loader fade-out animation
   useEffect(() => {
@@ -316,7 +316,7 @@ export function Layout({children}) {
       </head>
       <body>
         <ClarityTracker clarityId={clarityId} />
-        {loaderVisible && (
+        {/* {loaderVisible && (
           <div
             ref={loaderRef}
             style={{
@@ -351,7 +351,7 @@ export function Layout({children}) {
               }
             `}</style>
           </div>
-        )}
+        )} */}
         {data ? (
           <Analytics.Provider
             cart={data.cart}
