@@ -82,7 +82,7 @@ function CartEmpty({hidden = false}) {
         </strong>
       </p>
       <br />
-      <Link to="/collections/new-arrivals" onClick={close} prefetch="viewport" className='empty-cart-link'>
+      <Link to="/collections/new-arrivals" onClick={close} className='empty-cart-link'>
         Continue shopping →
       </Link>
     </div>
