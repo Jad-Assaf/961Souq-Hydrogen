@@ -1197,7 +1197,8 @@ button {
 }
 
 .button-85 {
-  padding: 0.6em 2em;
+  padding: 0.3em 2em;
+  margin-top: 30px;
   border: none;
   outline: none;
   color: rgb(255, 255, 255);
@@ -1209,6 +1210,9 @@ button {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  width: max-content;
+  align-self: center;
+  font-weight: 400;
 }
 
 .button-85:before {
