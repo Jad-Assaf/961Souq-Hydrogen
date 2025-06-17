@@ -238,7 +238,7 @@ export function SearchForm() {
                       className="predictive-search-result-item"
                       onMouseDown={(e) => {
                         e.preventDefault(); // Prevent blur until after this
-                        window.location.href = entry.item.link;
+                        window.open(entry.item.link, '_blank');
                       }}
                     >
                       <img
