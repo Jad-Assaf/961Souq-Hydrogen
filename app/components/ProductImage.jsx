@@ -169,7 +169,7 @@ export function ProductImages({ media, selectedVariantImage }) {
       thumbSrc = node.image?.url;
       altText = node.image?.altText || altText;
     } else if (node.__typename === 'ExternalVideo') {
-      thumbSrc = 'https://img.icons8.com/color/480/youtube-play.png';
+      thumbSrc = 'https://img.icons8.com/color/480/youtube-play.png?quality=50';
       isVideo = true;
     } else if (node.__typename === 'Video') {
       thumbSrc = 'https://img.icons8.com/fluency/480/video.png';
