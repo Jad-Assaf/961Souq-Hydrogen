@@ -51,6 +51,8 @@ export function BannerSlideshow({banners, interval = 10000}) {
             loading="eager"
             decoding="async"
             fetchpriority="high"
+            width={1500}
+            height={300}
           />
         </picture>
       </a>
