@@ -90,7 +90,7 @@ h2 {
   background: #2172af;
   cursor: pointer;
   padding: 4px;
-  transition: all 0.2s linear;
+  transition: all 0.2s ease;
   border: 1px solid #fff;
 }
 
@@ -104,7 +104,7 @@ h2 {
 }
 
 .dot:hover {
-  scale: 2;
+  scale: 1.5;
 }
 
 .dot.active {
@@ -205,42 +205,6 @@ h2 {
   gap: 5px;
   padding: 0 5px;
   width: 70%;
-}
-
-.bin-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  border-radius: 30px;
-  background-color: rgb(255, 95, 95);
-  cursor: pointer;
-  border: 3px solid rgb(255, 201, 201);
-  transition-duration: 0.3s;
-}
-
-.bin-bottom {
-  width: 13px;
-}
-
-.bin-top {
-  width: 15px;
-  transform-origin: right;
-  transition-duration: 0.3s;
-}
-
-.bin-button:hover .bin-top {
-  transform: rotate(45deg);
-}
-
-.bin-button:hover {
-  background-color: rgb(255, 0, 0);
-}
-
-.bin-button:active {
-  transform: scale(0.9);
 }
 
 .cart-summary-page {
@@ -1080,7 +1044,7 @@ button {
 
 .view-all-link:hover {
   color: #2172af;
-  transition: all 0.2s linear;
+  transition: all 0.2s ease;
 }
 
 .product-item {
@@ -1095,7 +1059,7 @@ button {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
-  transition: box-shadow 0.3s linear;
+  transition: box-shadow 0.3s ease;
   min-width: 200px;
   max-width: 200px;
   /* margin-left: 5px; */
@@ -1192,7 +1156,7 @@ button {
   font-weight: 600;
   color: #2172af;
   min-height: 43px;
-  transition: all 0.1s linear;
+  transition: all 0.1s ease;
 }
 
 .product-card:hover .product-price {
@@ -1339,7 +1303,7 @@ aside header .close {
   font-size: 30px;
   opacity: 0.8;
   text-decoration: none;
-  transition: all 200ms;
+  transition: all 200ms ease;
   width: 20px;
 }
 
@@ -1418,7 +1382,6 @@ aside li {
   transform: translateX(calc(var(--aside-width) * -1));
 }
 
-/* From Uiverse.io by vinodjangid07 */
 .bin-button {
   display: flex;
   flex-direction: column;
@@ -2486,7 +2449,7 @@ input.search-bar:focus-visible {
 
   /* initial state for fade-in */
   opacity: 0;
-  transition: opacity 0.2s linear;
+  transition: opacity 0.2s ease;
 }
 
 /* when fadeIn becomes true */
@@ -2591,7 +2554,7 @@ input.search-bar:focus-visible {
   height: fit-content;
   padding: 3px 8px;
   margin: 5px;
-  transition: all 0.3s linear;
+  transition: all 0.3s ease;
   background-color: white;
 }
 
@@ -3502,7 +3465,7 @@ a.video-link {
     background: #fff;
     overflow-y: auto;
     z-index: 3;
-    transition: width 0.3s;
+    transition: width 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3522,7 +3485,7 @@ a.video-link {
   main {
     /* or .main-wrapper – whatever wraps your routes */
     margin-left: 75px;
-    transition: margin-left 0.3s;
+    transition: margin-left 0.3s ease;
   }
 
   /* when header is wider, shift content the same amount */
@@ -3551,7 +3514,7 @@ a.video-link {
     width: 40px;
     /* small in collapsed */
     height: auto;
-    transition: width 0.3s;
+    transition: width 0.3s ease;
   }
 
   .vertical-header:hover .vh-logo-img {
@@ -3598,7 +3561,7 @@ a.video-link {
     opacity: 0;
     white-space: wrap;
     flex: 1;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
   }
 
   .vertical-header:hover .vh-navlink {
@@ -3613,7 +3576,7 @@ a.video-link {
     line-height: 1;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
     padding: 10px 20px;
   }
 
@@ -3664,9 +3627,9 @@ a.video-link {
     display: block;
     opacity: 1;
     padding: 0 6px 6px;
-    width: 45px;
-    height: 40px;
-    transition: all 0.2s ease;
+    width: 52.8;
+    height: 46.8px;
+    transition: all 0.2s;
   }
 
   /* when body has the flag, show the wide logo instead */
@@ -3685,7 +3648,7 @@ a.video-link {
   }
 
   .header-expanded .vh-level-1 .vh-icon img {
-    scale: 1.2;
+    width: 45px;
   }
 
   .vh-ctas {}
