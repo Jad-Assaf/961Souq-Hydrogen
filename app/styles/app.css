@@ -132,6 +132,9 @@ h2 {
 
 .arrow-buttons {
   position: relative;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
 }
 
 .arrow-buttons .scroll-left-btn {
