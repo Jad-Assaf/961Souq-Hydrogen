@@ -276,6 +276,7 @@ h2 {
   margin: 0 auto 50px;
 
   .home-prev-button, .home-next-button {
+    display: block !important;
     bottom: -50px;
   }
 }
