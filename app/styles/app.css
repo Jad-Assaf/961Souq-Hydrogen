@@ -43,7 +43,6 @@ h2 {
 .banner-slideshow {
   position: relative;
   height: auto;
-  /* max-height: 298px; */
   max-width: 1500px;
   margin: 0 auto 50px;
   overflow: hidden;
@@ -51,7 +50,6 @@ h2 {
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
 }
 
-/* image */
 .banner-image {
   width: 100%;
   height: 100%;
@@ -66,7 +64,6 @@ h2 {
   display: flex;
 }
 
-/* dots */
 .indicator-dots {
   position: absolute;
   inset-inline: 0;
@@ -98,7 +95,6 @@ h2 {
   background: #fff;
 }
 
-/* progress */
 .progress-bar {
   position: absolute;
   bottom: 15px;
@@ -135,35 +131,12 @@ h2 {
   width: 100%;
   max-width: 1500px;
   margin: 0 auto;
-}
 
-.arrow-buttons .scroll-left-btn {
-  position: absolute !important;
-  bottom: 0px !important;
-  right: 70px !important;
-  z-index: 1 !important;
-  width: 30px !important;
-  height: 30px !important;
-}
-
-.arrow-buttons .scroll-right-btn svg,
-.arrow-buttons .scroll-left-btn svg {
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 4px !important;
-  width: 35px !important;
-  height: 35px !important;
-  border-radius: 50% !important;
-  color: #2172af !important;
-  stroke: #2172af !important;
-  padding: 5px !important;
-}
-
-.arrow-buttons .scroll-right-btn {
-  position: absolute !important;
-  bottom: 0px !important;
-  right: 15px !important;
-  z-index: 1 !important;
-  width: 30px !important;
-  height: 30px !important;
+  .home-prev-button,
+  .home-next-button {
+    bottom: 0;
+    display: block !important;
+  }
 }
 
 .cart h1 {
@@ -300,10 +273,13 @@ h2 {
   border-radius: 5px;
   position: relative;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
-  margin: auto;
+  margin: 0 auto 50px;
+
+  .home-prev-button, .home-next-button {
+    bottom: -50px;
+  }
 }
 
-/* BRAND ITEM ANIMATION STATES */
 .brand-item {
   display: flex;
   justify-content: center;
@@ -395,11 +371,9 @@ h2 {
   justify-content: start;
   overflow-x: auto;
   scrollbar-width: none;
-  /* scroll-snap-type: x mandatory; */
   -webkit-overflow-scrolling: touch;
   margin: auto;
   gap: 50px;
-  /* width: 100%; */
 }
 
 .category-container {
@@ -417,7 +391,6 @@ h2 {
   font-weight: 500 !important;
   font-size: 12px;
   color: #000 !important;
-  /* min-height: 39px; */
 }
 
 .category-container a {
@@ -434,7 +407,6 @@ h2 {
 @media (min-width: 768px) {
   .mobile-app-download-bar {
     display: none;
-    /* Hide the bar on larger screens */
   }
 }
 
@@ -478,10 +450,8 @@ h2 {
   justify-content: space-evenly;
   overflow: auto hidden;
   width: 100%;
-  /* height: 100%; */
   z-index: 1;
   background: #f0f8ff82;
-  /* padding: 15px 0 0; */
 }
 
 .sliderWithMoreHeight,
@@ -554,41 +524,9 @@ h2 {
     font-weight: 500 !important;
   }
 
-  .scroll-left-btn {
-    position: absolute !important;
+  .home-prev-button,
+  .home-next-button {
     bottom: 20px !important;
-    right: 70px !important;
-    z-index: 1 !important;
-    width: 30px !important;
-    height: 30px !important;
-
-    @media (max-width: 1024px) {
-      display: none;
-    }
-  }
-
-  .scroll-right-btn svg,
-  .scroll-left-btn svg {
-    box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 4px !important;
-    width: 35px !important;
-    height: 35px !important;
-    border-radius: 50% !important;
-    color: #2172af !important;
-    stroke: #2172af !important;
-    padding: 5px !important;
-  }
-
-  .scroll-right-btn {
-    position: absolute !important;
-    bottom: 20px !important;
-    right: 15px !important;
-    z-index: 1 !important;
-    width: 30px !important;
-    height: 30px !important;
-
-    @media (max-width: 1024px) {
-      display: none;
-    }
   }
 
   section.category-group {
@@ -611,7 +549,6 @@ h2 {
 }
 
 .home {
-  /* max-width: 1500px; */
   margin: 10px auto 30px;
   padding: 5px;
   background-color: transparent;
@@ -642,43 +579,6 @@ h2 {
   --color-light: #fff;
   --vh-width-collapsed: 60px;
   --vh-width-expanded: 300px;
-}
-
-
-/* nprogress.css */
-#nprogress .bar {
-  background: #29d !important;
-  height: 3px !important;
-  border-radius: 10px !important;
-  position: fixed !important;
-  top: 0 !important;
-}
-
-#nprogress .spinner {
-  position: fixed !important;
-  right: -5px !important;
-  top: 20px !important;
-  z-index: 1031;
-}
-
-#nprogress .spinner-icon {
-  width: 25px !important;
-  height: 25px !important;
-  border: 2px solid transparent !important;
-  border-top-color: rgb(0, 162, 255) !important;
-  border-left-color: rgb(0, 162, 255) !important;
-  border-radius: 50% !important;
-  animation: nprogress-spinner 400ms linear infinite !important;
-}
-
-@keyframes nprogress-spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 html:has(.overlay.expanded) {
@@ -716,7 +616,6 @@ html:has(.overlay.expanded) {
 
 .header-search img {
   width: 75px;
-  /* height: 30px; */
 }
 
 .noise {
@@ -824,32 +723,6 @@ aside .go-to-cart {
 
 .empty-cart-link {
   color: #000;
-}
-
-.circle-prev-button,
-.circle-next-button {
-  background-color: #ffffff3b;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid #2172af;
-  color: #2172af;
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-}
-
-.circle-prev-button svg,
-.circle-next-button svg {
-  width: 24px;
-  height: 24px;
 }
 
 @keyframes fadeIn {
@@ -2395,6 +2268,7 @@ input.search-bar:focus-visible {
 .predictive-search-result-item a {
   display: flex;
   width: 100%;
+  align-items: center;
 }
 
 .predictive-search-result-item {
@@ -2583,7 +2457,6 @@ input.search-bar:focus-visible {
 
 input[type="checkbox"] {
   accent-color: white;
-  /* Tailwind blue-500 */
 }
 
 .filter-btn-active {
@@ -2615,7 +2488,6 @@ input[type="checkbox"] {
   border-radius: 30px;
 }
 
-/* Hide the browser's default checkbox */
 .filters-container input {
   position: absolute;
   opacity: 0;
@@ -2624,7 +2496,6 @@ input[type="checkbox"] {
   width: 0;
 }
 
-/* Create a custom checkbox */
 .checkmark {
   position: absolute;
   top: 3px;
@@ -2636,29 +2507,24 @@ input[type="checkbox"] {
   border-radius: 15px;
 }
 
-/* On mouse-over, add a grey background color */
 .filters-container:hover input~.checkmark {
   background-color: #ccc;
 }
 
-/* When the checkbox is checked, add a blue background */
 .filters-container input:checked~.checkmark {
   background-color: #2196F3;
 }
 
-/* Create the checkmark/indicator (hidden when not checked) */
 .checkmark:after {
   content: "";
   position: absolute;
   display: none;
 }
 
-/* Show the checkmark when checked */
 .filters-container input:checked~.checkmark:after {
   display: block;
 }
 
-/* Style the checkmark/indicator */
 .filters-container .checkmark:after {
   left: 8px;
   top: 4px;
@@ -2670,13 +2536,6 @@ input[type="checkbox"] {
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
 }
-
-/* .filters-div {
-  box-shadow: inset 0px 0px 10px #e6e6e6;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  width: 98%;
-} */
 
 .mobile-filter-container {
   position: fixed;
@@ -2693,7 +2552,6 @@ input[type="checkbox"] {
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
-/* Custom CSS for mobile drawer sliding up from bottom */
 .drawer-overlay {
   position: fixed;
   top: 0;
@@ -2732,7 +2590,6 @@ input[type="checkbox"] {
   transform: translateY(0);
 }
 
-/* Drawer header with a draggable handle */
 .drawer-header {
   display: flex;
   justify-content: center;
@@ -2754,7 +2611,6 @@ input[type="checkbox"] {
 }
 
 .sort-options {
-  /* text-align: end; */
   padding: 10px;
 
   @media (max-width: 1024px) {
@@ -2803,7 +2659,6 @@ input[type="checkbox"] {
   }
 }
 
-/* For screens lower than 650px: show only buttons 1 and 2 */
 @media (max-width: 649px) {
 
   .col-btn-3,
@@ -2813,7 +2668,6 @@ input[type="checkbox"] {
   }
 }
 
-/* For screens between 650px and 899px: show buttons 1, 2, and 3 only */
 @media (min-width: 650px) and (max-width: 899px) {
 
   .col-btn-4,
@@ -2822,7 +2676,6 @@ input[type="checkbox"] {
   }
 }
 
-/* For screens between 900px and 1399px: show buttons 1, 2, 3, and 4 only */
 @media (min-width: 900px) and (max-width: 1399px) {
   .col-btn-5 {
     display: none;

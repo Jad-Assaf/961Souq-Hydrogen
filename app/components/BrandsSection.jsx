@@ -18,7 +18,7 @@ export default function BrandSection({brands}) {
       <h2>Shop By Brand</h2>
 
       <button
-        className="circle-prev-button"
+        className="home-prev-button"
         onClick={() => scrollGrid(-600)}
         aria-label="Previous"
       >
@@ -48,7 +48,7 @@ export default function BrandSection({brands}) {
       </div>
 
       <button
-        className="circle-next-button"
+        className="home-next-button"
         onClick={() => scrollGrid(600)}
         aria-label="Next"
       >

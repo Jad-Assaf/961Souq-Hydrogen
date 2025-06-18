@@ -94,23 +94,6 @@ export function CategorySliderFromMenuMobile({menu}) {
                 })}
               </div>
 
-              {/* nav buttons for this group */}
-              <button
-                type="button"
-                aria-label="Scroll left"
-                onClick={() => scroll('left')}
-                className="scroll-left-btn"
-              >
-                <LeftArrowIcon />
-              </button>
-              <button
-                type="button"
-                aria-label="Scroll right"
-                onClick={() => scroll('right')}
-                className="scroll-right-btn"
-              >
-                <RightArrowIcon />
-              </button>
             </div>
           </section>
         );

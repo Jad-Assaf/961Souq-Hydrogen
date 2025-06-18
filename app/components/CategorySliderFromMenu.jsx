@@ -86,7 +86,7 @@ export  function CategorySliderFromMenu({menu}) {
           type="button"
           aria-label="Scroll categories left"
           onClick={() => scroll('left')}
-          className="scroll-left-btn"
+          className="home-prev-button"
         >
           <LeftArrowIcon />
         </button>
@@ -94,7 +94,7 @@ export  function CategorySliderFromMenu({menu}) {
           type="button"
           aria-label="Scroll categories right"
           onClick={() => scroll('right')}
-          className="scroll-right-btn"
+          className="home-next-button"
         >
           <RightArrowIcon />
         </button>

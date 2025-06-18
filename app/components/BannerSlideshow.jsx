@@ -79,7 +79,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
           type="button"
           aria-label="Scroll categories left"
           onClick={prev}
-          className="scroll-left-btn"
+          className="home-prev-button"
         >
           <LeftArrowIcon />
         </button>
@@ -87,7 +87,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
           type="button"
           aria-label="Scroll categories right"
           onClick={next}
-          className="scroll-right-btn"
+          className="home-next-button"
         >
           <RightArrowIcon />
         </button>
