@@ -3488,11 +3488,6 @@ a.video-link {
     transition: margin-left 0.3s ease;
   }
 
-  /* when header is wider, shift content the same amount */
-  body.header-expanded main {
-    margin-left: 310px;
-  }
-
   .vh-logo-link {
     width: 300px;
     height: auto;
