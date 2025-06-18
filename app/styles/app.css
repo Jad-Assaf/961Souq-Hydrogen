@@ -45,7 +45,7 @@ h2 {
   height: auto;
   /* max-height: 298px; */
   max-width: 1500px;
-  margin: 0 auto 30px;
+  margin: 0 auto 50px;
   overflow: hidden;
   border-radius: 5px;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
@@ -84,27 +84,14 @@ h2 {
 }
 
 .dot {
-  /* width: 3px;
-  height: 3px; */
+  display: block;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #2172af;
   cursor: pointer;
-  padding: 4px;
   transition: all 0.2s ease;
-  border: 1px solid #fff;
-}
-
-.dot::before {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  transform: translate(-50%, -50%);
-  background: transparent;
-}
-
-.dot:hover {
-  scale: 1.5;
+  border: none;
 }
 
 .dot.active {
@@ -141,6 +128,39 @@ h2 {
   to {
     transform: translateX(0%);
   }
+}
+
+.arrow-buttons {
+  position: relative;
+}
+
+.arrow-buttons .scroll-left-btn {
+  position: absolute !important;
+  bottom: 0px !important;
+  right: 70px !important;
+  z-index: 1 !important;
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.arrow-buttons .scroll-right-btn svg,
+.arrow-buttons .scroll-left-btn svg {
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 4px !important;
+  width: 35px !important;
+  height: 35px !important;
+  border-radius: 50% !important;
+  color: #2172af !important;
+  stroke: #2172af !important;
+  padding: 5px !important;
+}
+
+.arrow-buttons .scroll-right-btn {
+  position: absolute !important;
+  bottom: 0px !important;
+  right: 15px !important;
+  z-index: 1 !important;
+  width: 30px !important;
+  height: 30px !important;
 }
 
 .cart h1 {
@@ -3641,7 +3661,7 @@ a.video-link {
     width: 120px;
     height: auto;
   }
-  
+
   .vh-navlink p {
     width: fit-content;
     position: relative;
