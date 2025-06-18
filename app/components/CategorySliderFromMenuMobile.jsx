@@ -87,7 +87,7 @@ export function CategorySliderFromMenuMobile({menu}) {
                         />
                       </Link>
                       <div className="category-title">
-                        <h3>{itemTitle(item)}</h3>
+                        <p>{itemTitle(item)}</p>
                       </div>
                     </div>
                   );
