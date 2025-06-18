@@ -1030,8 +1030,8 @@ button {
 
 @media (max-width: 768px) {
   .progress-bar {
-    left: 30% !important;
-    width: 40% !important;
+    left: 20% !important;
+    width: 60% !important;
   }
 
   .collection-section {
