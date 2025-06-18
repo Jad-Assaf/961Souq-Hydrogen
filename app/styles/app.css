@@ -3641,13 +3641,7 @@ a.video-link {
     width: 120px;
     height: auto;
   }
-
-  .header-expanded .vh-level-1 .vh-icon img {
-    width: 45px;
-  }
-
-  .vh-ctas {}
-
+  
   .vh-navlink p {
     width: fit-content;
     position: relative;
