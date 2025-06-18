@@ -191,7 +191,7 @@ export function CollapsibleVerticalHeader({header}) {
             alt={shop.name}
             className="logo-expanded"
             width="120"
-            height="50"
+            height="46.8"
           />
         </NavLink>
       </div>

@@ -58,7 +58,7 @@ export function CategorySliderFromMenuMobile({menu}) {
         return (
           <section key={parent.id} className="category-group sliderWithMoreHeight">
             <div className="slide-con" style={{position: 'relative'}}>
-              <h4 className="parent-title button-85">{parent.title}</h4>
+              <p className="parent-title button-85">{parent.title}</p>
               <div
                 ref={sliderRef}
                 className="category-slider"

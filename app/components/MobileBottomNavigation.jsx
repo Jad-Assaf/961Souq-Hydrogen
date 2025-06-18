@@ -80,6 +80,7 @@ export default function MobileBottomNavigation({cart}) {
         to="https://wa.me/9613963961"
         className="nav-item"
         target="_blank"
+        aria-label="Contact is on Whatsapp"
       >
         <WhatsappIcon />
       </NavLink>
