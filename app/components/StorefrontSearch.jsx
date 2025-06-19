@@ -26,7 +26,11 @@ export function Hit({hit}) {
       href={`/products/${hit.handle}`}
     >
       {hit.image && (
-        <img src={hit.image} alt={hit.name} className="as-hit-image" />
+        <img
+          src={`${hit.image}&width=150`}
+          alt={hit.name}
+          className="as-hit-image"
+        />
       )}
       <div className="search-result-txt">
         <div className="search-result-titDesc">
