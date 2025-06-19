@@ -30,6 +30,8 @@ export function Hit({hit}) {
           src={`${hit.image}&width=150`}
           alt={hit.name}
           className="as-hit-image"
+          width={58}
+          height={58}
         />
       )}
       <div className="search-result-txt">
