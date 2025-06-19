@@ -69,6 +69,9 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
       'https://searchserverapi.com/',
+      'https://4ahyig5h6v-dsn.algolia.net',
+      'https://cdn.jsdelivr.net',
+      'https://insights.algolia.io',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -105,6 +108,9 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
       'https://searchserverapi.com/',
+      'https://4ahyig5h6v-dsn.algolia.net',
+      'https://cdn.jsdelivr.net',
+      'https://insights.algolia.io',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin

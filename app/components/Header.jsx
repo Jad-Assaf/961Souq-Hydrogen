@@ -5,7 +5,9 @@ import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
-// import { SearchForm } from '~/routes/search';
+import AlgoliaSearch from './StorefrontSearch';
+// import StorefrontSearch from './StorefrontSearch';
+
 
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
@@ -100,7 +102,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               ></path>
             </svg>
           </button>
-
           <NavLink prefetch="intent" to="/" className="logo-link" end>
             <img
               src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400"
@@ -110,8 +111,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               height="50"
             />
           </NavLink>
-
-          <SearchFormPredictive className="header-search">
+          {/* <SearchFormPredictive className="header-search">
             {({inputRef, fetchResults, goToSearch, fetcher}) => {
               useFocusOnSlash(inputRef);
 
@@ -287,9 +287,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 </>
               );
             }}
-          </SearchFormPredictive>
+          </SearchFormPredictive> */}
           {/* <SearchForm /> */}
-
+          <AlgoliaSearch />
           <div className="header-ctas">
             <NavLink
               prefetch="intent"

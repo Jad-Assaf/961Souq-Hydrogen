@@ -70,6 +70,11 @@ export default defineConfig({
        * @see https://vitejs.dev/config/dep-optimization-options
        */
       include: [
+        'algoliasearch',
+        'use-sync-external-store/shim/index.js',
+        'qs',
+        '@algolia/events',
+        'algoliasearch-helper',
         'react-dom/client',
         'react',
         'react-babylonjs',
