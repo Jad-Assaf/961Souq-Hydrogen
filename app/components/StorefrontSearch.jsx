@@ -1,4 +1,3 @@
-// src/components/AlgoliaSearch.jsx
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {algoliasearch} from 'algoliasearch';
 import {
@@ -6,14 +5,11 @@ import {
   Hits,
   Configure,
   useSearchBox,
-  Highlight,
-  Pagination,
-  RefinementList,
 } from 'react-instantsearch';
 import {useNavigate, useSearchParams} from '@remix-run/react';
 import {truncateText} from './CollectionDisplay';
 import {SearchIcon} from './Header';
-import { debounce } from 'lodash';
+import {debounce} from 'lodash';
 
 export const searchClient = algoliasearch(
   '4AHYIG5H6V',
@@ -51,19 +47,16 @@ export function Hit({hit}) {
           </p>
         </div>
         <div className="as-price-container">
-          <div className="as-price-container">
-            {hit.price === 0 ? (
-              <p className="search-result-price">Call For Price!</p>
-            ) : (
-              hit.price && <p className="search-result-price">${hit.price}</p>
-            )}
-
-            {hit.price !== 0 && hit.compare_at_price > 0 && (
-              <p className="search-result-compare-price">
-                ${hit.compare_at_price}
-              </p>
-            )}
-          </div>
+          {hit.price === 0 ? (
+            <p className="search-result-price">Call For Price!</p>
+          ) : (
+            hit.price && <p className="search-result-price">${hit.price}</p>
+          )}
+          {hit.price !== 0 && hit.compare_at_price > 0 && (
+            <p className="search-result-compare-price">
+              ${hit.compare_at_price}
+            </p>
+          )}
         </div>
       </div>
     </a>
@@ -75,11 +68,8 @@ function CustomSearchInput({setShowHits}) {
   const [inputValue, setInputValue] = useState(query || '');
   const navigate = useNavigate();
 
-  // Debounce the refine function
   const debouncedRefine = useRef(
-    debounce((value) => {
-      refine(value);
-    }, 700),
+    debounce((value) => refine(value), 700),
   ).current;
 
   useEffect(() => {
@@ -103,7 +93,9 @@ function CustomSearchInput({setShowHits}) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const q = inputValue.trim();
-    navigate(`/search?q=${encodeURIComponent(q)}`);
+    if (q) {
+      navigate(`/search?q=${encodeURIComponent(q)}`);
+    }
     setShowHits(false);
   };
 
@@ -133,13 +125,10 @@ function CustomSearchInput({setShowHits}) {
 export default function AlgoliaSearch() {
   const [searchParams] = useSearchParams();
   const [showHits, setShowHits] = useState(false);
-  const initialQuery = searchParams.get('q') || '';
   const containerRef = useRef(null);
 
   const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Escape') {
-      setShowHits(false);
-    }
+    if (e.key === 'Escape') setShowHits(false);
   }, []);
 
   const handleClickOutside = useCallback(
@@ -170,31 +159,21 @@ export default function AlgoliaSearch() {
         searchClient={searchClient}
         indexName="shopify_961_25products"
         insights
-        initialUiState={{
-          shopify_961_25products: initialQuery ? {query: initialQuery} : {},
+        searchFunction={(helper) => {
+          const q = helper.state.query.trim();
+          if (q) helper.search();
         }}
       >
         <Configure hitsPerPage={30} />
-
         <div className="search-container">
           <CustomSearchInput setShowHits={setShowHits} />
         </div>
 
         {showHits && (
           <div className="search-results-container">
-            {/* <aside className="as-facet-panel">
-              <RefinementList
-                attribute="brand"
-                classNames={{
-                  list: 'as-refinement-list',
-                  item: 'as-refinement-item',
-                }}
-              />
-            </aside> */}
             <section className="predictive-search-result">
               <h3>Search Results</h3>
               <Hits hitComponent={Hit} />
-              {/* You can render <Pagination /> here if you want */}
             </section>
           </div>
         )}
