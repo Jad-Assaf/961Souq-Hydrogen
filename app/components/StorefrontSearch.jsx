@@ -12,9 +12,10 @@ import {
 } from 'react-instantsearch';
 import {useNavigate, useSearchParams} from '@remix-run/react';
 import {truncateText} from './CollectionDisplay';
-import { SearchIcon } from './Header';
+import {SearchIcon} from './Header';
+import { debounce } from 'lodash';
 
-const searchClient = algoliasearch(
+export const searchClient = algoliasearch(
   '4AHYIG5H6V',
   'db1477d824985f7d0dab8891fa13a5bd',
 );
@@ -74,14 +75,27 @@ function CustomSearchInput({setShowHits}) {
   const [inputValue, setInputValue] = useState(query || '');
   const navigate = useNavigate();
 
+  // Debounce the refine function
+  const debouncedRefine = useRef(
+    debounce((value) => {
+      refine(value);
+    }, 700),
+  ).current;
+
+  useEffect(() => {
+    return () => {
+      debouncedRefine.cancel();
+    };
+  }, [debouncedRefine]);
+
   const handleChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
-    refine(value);
 
     if (value.trim() === '') {
       setShowHits(false);
     } else {
+      debouncedRefine(value);
       setShowHits(true);
     }
   };
@@ -157,7 +171,7 @@ export default function AlgoliaSearch() {
         indexName="shopify_961_25products"
         insights
         initialUiState={{
-          shopify_961_25products: {query: initialQuery},
+          shopify_961_25products: initialQuery ? {query: initialQuery} : {},
         }}
       >
         <Configure hitsPerPage={30} />

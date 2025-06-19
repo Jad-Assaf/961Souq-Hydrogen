@@ -46,6 +46,7 @@
     "js-sha256": "^0.11.0",
     "livereload-js": "^4.0.2",
     "lodash": "^4.17.21",
+    "lodash.debounce": "^4.0.8",
     "nprogress": "^0.2.0",
     "photo-sphere-viewer": "^4.8.1",
     "react": "^18.3.1",

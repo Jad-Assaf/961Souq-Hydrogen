@@ -11,17 +11,13 @@ import {
 } from 'react-instantsearch';
 import {useLoaderData} from '@remix-run/react';
 import { algoliasearch } from 'algoliasearch';
+import { searchClient } from '~/components/StorefrontSearch';
 
 export async function loader({request}) {
   const url = new URL(request.url);
   const query = url.searchParams.get('q') || '';
   return {query};
 }
-
-const searchClient = algoliasearch(
-  '4AHYIG5H6V',
-  'db1477d824985f7d0dab8891fa13a5bd'
-);
 
 function PriceFilter() {
   const {items, refine} = useNumericMenu({
@@ -83,12 +79,16 @@ function CustomHit({hit}) {
 function DebugQuery() {
   const {query} = useLoaderData();
   const {refine} = useSearchBox();
+
   useEffect(() => {
-    refine(query);
+    if (query.trim() !== '') {
+      refine(query);
+    }
   }, [query, refine]);
+
   return null;
 }
-
+  
 export default function SearchPage() {
   const {query} = useLoaderData();
 
