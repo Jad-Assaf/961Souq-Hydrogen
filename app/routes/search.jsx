@@ -98,7 +98,7 @@ export default function SearchPage() {
       {trimmed ? (
         <InstantSearch
           searchClient={searchClient}
-          indexName="shopify_961_25products"
+          indexName="shopify_products-temp-802bf0bf-913d-4339-87c7-5581ba5eba11"
           // prevent any search until DebugQuery calls refine
           searchFunction={(helper) => {
             if (helper.state.query.trim()) {
