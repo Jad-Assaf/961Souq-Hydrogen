@@ -68,6 +68,7 @@ function CustomSearchInput({setShowHits}) {
   const [inputValue, setInputValue] = useState(query || '');
   const navigate = useNavigate();
 
+  // debounce the refine calls
   const debouncedRefine = useRef(
     debounce((value) => refine(value), 700),
   ).current;
@@ -93,10 +94,16 @@ function CustomSearchInput({setShowHits}) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const q = inputValue.trim();
+
+    // if there's a query, navigate to the search page
     if (q) {
       navigate(`/search?q=${encodeURIComponent(q)}`);
     }
+
+    // HIDE predictive hits, CLEAR the input, and RESET the Algolia query
     setShowHits(false);
+    setInputValue('');
+    refine('');
   };
 
   return (
