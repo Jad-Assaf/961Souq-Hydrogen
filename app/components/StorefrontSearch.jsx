@@ -12,8 +12,8 @@ import {SearchIcon} from './Header';
 import {debounce} from 'lodash';
 
 export const searchClient = algoliasearch(
-  '4AHYIG5H6V',
-  'db1477d824985f7d0dab8891fa13a5bd',
+  '1X4CFK3ID0',
+  'b40ffe4a6094ede434e4803ebfc13a58',
 );
 
 export function Hit({hit}) {
