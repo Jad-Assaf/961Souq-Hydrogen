@@ -157,7 +157,7 @@ export default function AlgoliaSearch() {
     <div className="main-search" ref={containerRef}>
       <InstantSearch
         searchClient={searchClient}
-        indexName="shopify_961_25products"
+        indexName="shopify_products-temp-802bf0bf-913d-4339-87c7-5581ba5eba11"
         insights
         searchFunction={(helper) => {
           const q = helper.state.query.trim();
