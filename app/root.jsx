@@ -25,6 +25,7 @@ import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import React, {Suspense, useEffect, useRef, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
+import {SearchProvider} from './lib/searchContext.jsx';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -358,7 +359,9 @@ export function Layout({children}) {
             shop={data.shop}
             consent={data.consent}
           >
-            <PageLayout {...data}>{children}</PageLayout>
+            <SearchProvider>
+              <PageLayout {...data}>{children}</PageLayout>
+            </SearchProvider>
           </Analytics.Provider>
         ) : (
           children

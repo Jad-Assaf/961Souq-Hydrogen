@@ -1,48 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {
-  InstantSearch,
-  Hits,
-  Configure,
-  Pagination,
-  useSearchBox,
-  useNumericMenu,
-} from 'react-instantsearch';
 import {useLoaderData} from '@remix-run/react';
-import {searchClient} from '~/components/StorefrontSearch';
+import {useSearch} from '../lib/searchContext.jsx';
 
 export async function loader({request}) {
   const url = new URL(request.url);
   const query = url.searchParams.get('q') || '';
   return {query};
-}
-
-function PriceFilter() {
-  const {items, refine} = useNumericMenu({
-    attribute: 'price',
-    items: [
-      {label: '$0–$50', start: 0, end: 50},
-      {label: '$50–$100', start: 50, end: 100},
-      {label: '$100+', start: 100},
-    ],
-  });
-
-  return (
-    <ul className="price-filter">
-      {items.map((item) => (
-        <li key={item.value}>
-          <label>
-            <input
-              type="radio"
-              name="price"
-              onChange={() => refine(item.value)}
-              checked={item.isRefined}
-            />
-            {item.label} ({item.count})
-          </label>
-        </li>
-      ))}
-    </ul>
-  );
 }
 
 function CustomHit({hit}) {
@@ -74,46 +37,101 @@ function CustomHit({hit}) {
   );
 }
 
-function DebugQuery() {
+function SearchResults() {
+  const {searchResults, isLoading, currentQuery, searchInput, setInitialQuery} = useSearch();
   const {query} = useLoaderData();
-  const {refine} = useSearchBox();
+  const trimmed = query.trim();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
+  // Debug logging
+  console.log('SearchResults render:', {
+    searchInput,
+    currentQuery,
+    trimmed,
+    searchResultsLength: searchResults.length,
+    isLoading
+  });
+
+  // Only trigger initial search when page loads with a URL query and no current query
   useEffect(() => {
-    if (query.trim() !== '') {
-      refine(query);
+    if (trimmed && !currentQuery) {
+      setInitialQuery(trimmed);
     }
-  }, [query, refine]);
+  }, [trimmed, currentQuery, setInitialQuery]);
 
-  return null;
+  // Use currentQuery for display (the actual search results)
+  const displayQuery = currentQuery || trimmed;
+
+  // Reset page when currentQuery changes (from search bar)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentQuery]);
+
+  // Reset page when searchResults change (from search bar typing)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchResults]);
+
+  if (isLoading) {
+    return <div>Loading search results...</div>;
+  }
+
+  if (!displayQuery) {
+    return <p>Please enter a search term to see results.</p>;
+  }
+
+  if (searchResults.length === 0) {
+    return <p>No results found for "{displayQuery}".</p>;
+  }
+
+  // Calculate pagination
+  const totalPages = Math.ceil(searchResults.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentResults = searchResults.slice(startIndex, endIndex);
+
+  return (
+    <div className="search-results">
+      <div className="ais-Hits-list">
+        {currentResults.map((hit) => (
+          <CustomHit key={hit.objectID} hit={hit} />
+        ))}
+      </div>
+      
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button 
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button 
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function SearchPage() {
   const {query} = useLoaderData();
   const trimmed = query.trim();
+  const {currentQuery, searchInput} = useSearch();
+
+  // Use searchInput if user is typing, otherwise use currentQuery or URL query
+  const displayQuery = searchInput || currentQuery || trimmed;
 
   return (
     <div className="search">
-      <h1>Search Results {trimmed ? `for "${trimmed}"` : ''}</h1>
-
-      {trimmed ? (
-        <InstantSearch
-          searchClient={searchClient}
-          indexName="shopify_products"
-          // prevent any search until DebugQuery calls refine
-          searchFunction={(helper) => {
-            if (helper.state.query.trim()) {
-              helper.search();
-            }
-          }}
-        >
-          <Configure hitsPerPage={100} />
-          <DebugQuery />
-          <Hits hitComponent={CustomHit} />
-          <Pagination />
-        </InstantSearch>
-      ) : (
-        <p>Please enter a search term to see results.</p>
-      )}
+      <h1>Search Results {displayQuery ? `for "${displayQuery}"` : ''}</h1>
+      <SearchResults />
     </div>
   );
 }
