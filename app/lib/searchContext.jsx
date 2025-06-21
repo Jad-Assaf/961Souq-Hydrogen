@@ -46,7 +46,7 @@ export function SearchProvider({ children }) {
           indexName: 'shopify_products',
           query: query.trim(),
           params: {
-            hitsPerPage: 100,
+            hitsPerPage: 3000,
           },
         },
       ]);

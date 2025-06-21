@@ -44,15 +44,6 @@ function SearchResults() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Debug logging
-  console.log('SearchResults render:', {
-    searchInput,
-    currentQuery,
-    trimmed,
-    searchResultsLength: searchResults.length,
-    isLoading
-  });
-
   // Only trigger initial search when page loads with a URL query and no current query
   useEffect(() => {
     if (trimmed && !currentQuery) {
@@ -98,18 +89,24 @@ function SearchResults() {
           <CustomHit key={hit.objectID} hit={hit} />
         ))}
       </div>
-      
+
       {totalPages > 1 && (
         <div className="pagination">
-          <button 
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          <button
+            className="ais-Pagination-link"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button 
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+          <span className='pagination-text'>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="ais-Pagination-link"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+            }
             disabled={currentPage === totalPages}
           >
             Next
