@@ -2,8 +2,8 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { algoliasearch } from 'algoliasearch';
 
 const searchClient = algoliasearch(
-  '1X4CFK3ID0',
-  'b40ffe4a6094ede434e4803ebfc13a58',
+  'J1G0XS6JMY',
+  'd79ceb9a07d6afa035dfda887d8f2f93',
 );
 
 const SearchContext = createContext();
