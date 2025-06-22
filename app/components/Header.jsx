@@ -111,7 +111,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               height="50"
             />
           </NavLink>
-          {/* <SearchFormPredictive className="header-search">
+          <SearchFormPredictive className="header-search">
             {({inputRef, fetchResults, goToSearch, fetcher}) => {
               useFocusOnSlash(inputRef);
 
@@ -287,9 +287,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                 </>
               );
             }}
-          </SearchFormPredictive> */}
+          </SearchFormPredictive>
           {/* <SearchForm /> */}
-          <AlgoliaSearch />
+          {/* <AlgoliaSearch /> */}
           <div className="header-ctas">
             <NavLink
               prefetch="intent"
