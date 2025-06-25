@@ -101,8 +101,8 @@ export default function CartCheckoutActions({
           <span className="alert-message">
             We apologize for any inconvenience! Your order is above $10000.
             Please contact sales to proceed.{' '}
-            <a className="cart-err-msg-link" href="https://wa.me/9613963961">
-              +961 03 963 961
+            <a className="cart-err-msg-link" href="https://wa.me/96181961960">
+              +961 81 961 960
             </a>
           </span>
         </div>
