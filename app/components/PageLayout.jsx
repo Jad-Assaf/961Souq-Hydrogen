@@ -60,7 +60,7 @@ export function PageLayout({
       )}
       <main>{children}</main>
       <a
-        href="https://wa.me/96171888036"
+        href="https://wa.me/9613963961"
         target="_blank"
         className="whatsapp-float"
         aria-label="Chat on WhatsApp"

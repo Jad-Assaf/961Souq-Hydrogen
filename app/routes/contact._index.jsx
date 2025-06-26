@@ -36,11 +36,11 @@ export default function ContactUs() {
           <p>
             <strong>Whatsapp:</strong>{' '}
             <a
-              href="https://wa.me/96171888036"
+              href="https://wa.me/9613963961"
               aria-label="Whatsapp Link"
               target="_blank"
             >
-              +961 71 888 036
+              +961 03 963 961
             </a>
           </p>
           <p>
