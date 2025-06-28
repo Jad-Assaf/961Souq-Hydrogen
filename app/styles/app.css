@@ -44,10 +44,10 @@ h2 {
   position: relative;
   height: auto;
   max-width: 1500px;
-  margin: 0 auto 50px;
+  margin: 0 auto 70px;
   overflow: hidden;
   border-radius: 5px;
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px; 
 }
 
 .banner-image {
@@ -134,7 +134,7 @@ h2 {
 
   .home-prev-button,
   .home-next-button {
-    bottom: 0;
+    bottom: 15px;
     display: block !important;
   }
 }
@@ -4191,6 +4191,7 @@ svg.icon.icon--full-color {
   display: grid !important;
   justify-content: start !important;
   gap: 25px !important;
+
   @media (min-width: 900px) {
     grid-template-columns: repeat(5, 1fr);
   }
@@ -4250,7 +4251,7 @@ svg.icon.icon--full-color {
   max-width: 210px !important;
 }
 
-.search .product-card img{
+.search .product-card img {
   width: 80% !important;
 }
 

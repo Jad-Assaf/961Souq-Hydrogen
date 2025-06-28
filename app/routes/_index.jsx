@@ -245,14 +245,14 @@ export async function loader(args) {
 
   // Fire off critical queries concurrently so above‑the‑fold content is fast.
   const criticalDataPromise = loadCriticalData(args);
-  // const newArrivalsPromise = fetchCollectionByHandle(
-  //   args.context,
-  //   'new-arrivals',
-  // );
+  const newArrivalsPromise = fetchCollectionByHandle(
+    args.context,
+    'new-arrivals',
+  );
 
-  const [criticalData] = await Promise.all([
+  const [criticalData, newArrivals] = await Promise.all([
     criticalDataPromise,
-    // newArrivalsPromise,
+    newArrivalsPromise,
   ]);
 
   // Build a unique list of collection handles from your menus.
@@ -299,7 +299,7 @@ export async function loader(args) {
     {
       banners,
       // sliderCollections: criticalData.sliderCollections,
-      // newArrivals,
+      newArrivals,
       topProducts: initialTopProducts,
       restTopProducts,
       isMobile,
@@ -447,7 +447,7 @@ export default function Homepage() {
     banners,
     // sliderCollections,
     topProducts,
-    // newArrivals,
+    newArrivals,
     restTopProducts,
     isMobile,
   } = useLoaderData();
@@ -520,7 +520,7 @@ export default function Homepage() {
       ></h1>
 
       <BannerSlideshow banners={banners} />
-      {/* {newArrivals && <TopProductSections collection={newArrivals} />} */}
+      {newArrivals && <TopProductSections collection={newArrivals} />}
 
       {isMobile ? (
         <>{header && <CategorySliderFromMenuMobile menu={header.menu} />}</>
