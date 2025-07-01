@@ -43,6 +43,7 @@ Disallow: /*?*oseid=*
 Disallow: /*preview_theme_id*
 Disallow: /*preview_script_id*
 
+
 User-agent: Nutch
 Disallow: /
 
@@ -73,6 +74,8 @@ Crawl-delay: 1
 function generalDisallowRules({shopId, sitemapUrl}) {
   return `Disallow: /admin
 Disallow: /facebookConversions
+Disallow: /search-old
+Disallow: /wp-content
 Disallow: /collections/*/*.json
 Disallow: /collections/*?direction=previous
 allow: /collections/*?direction=next&*
