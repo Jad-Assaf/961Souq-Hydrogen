@@ -76,6 +76,8 @@ function generalDisallowRules({shopId, sitemapUrl}) {
 Disallow: /facebookConversions
 Disallow: /search-old
 Disallow: /wp-content
+Disallow: /wp-admin
+Disallow: /wp-*
 Disallow: /collections/*/*.json
 Disallow: /collections/*?direction=previous
 allow: /collections/*?direction=next&*
