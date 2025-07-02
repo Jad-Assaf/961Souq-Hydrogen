@@ -346,15 +346,23 @@ export default function Collection() {
   };
 
   /* --- FIX: build pageNumbers without padding to 3 --- */
-  const pageNumbers = [currentPage];
+  let pageNumbers = [];
 
-  if (pageInfo.hasPreviousPage) {
-    pageNumbers.unshift(currentPage - 1);
+  // only show “page – 1” if there really is a previous page and we're above page 1
+  if (pageInfo.hasPreviousPage && currentPage > 1) {
+    pageNumbers.push(currentPage - 1);
   }
 
+  // always show the current page
+  pageNumbers.push(currentPage);
+
+  // show “page + 1” if there really is a next page
   if (pageInfo.hasNextPage) {
     pageNumbers.push(currentPage + 1);
   }
+
+  // (optional) dedupe, in case edge-cases introduce duplicates
+  pageNumbers = Array.from(new Set(pageNumbers));
 
   const handleSortChange = (e) => {
     const url = new URL(window.location.href);
