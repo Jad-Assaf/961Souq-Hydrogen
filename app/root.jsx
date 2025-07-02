@@ -47,7 +47,7 @@ const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 
 export function links() {
   return [
-    {rel: 'stylesheet', href: appStyles},
+    // {rel: 'stylesheet', href: appStyles},
     // {rel: 'stylesheet', href: footerStyles},
     // {rel: 'stylesheet', href: productStyles},
     // {rel: 'stylesheet', href: productImgStyles},
