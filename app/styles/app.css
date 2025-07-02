@@ -3231,6 +3231,7 @@ a.video-link {
   color: #2172af;
   text-align: center;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 2px 4px;
+  font-size: 14px;
 
   @media (max-width: 1024px) {
     display: none;
