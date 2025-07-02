@@ -190,6 +190,7 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
       'https://searchserverapi.com/',
+      'https://www.google.nl/',
     ],
     mediaSrc: [
       "'self'",
