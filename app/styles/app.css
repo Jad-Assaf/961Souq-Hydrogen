@@ -1,5 +1,5 @@
 html {
-  font-family: "Avenir Next", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
+  font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif !important;
   scrollbar-color: #0492ff54 #00000014;
   scrollbar-width: thin;
   scrollbar-gutter: stable both-edges;
@@ -1062,8 +1062,11 @@ button {
 }
 
 .discountedPrice {
-  color: #000000;
+  font-size: 12px;
+  color: #232323;
   text-decoration: line-through;
+  font-weight: 300;
+  font-style: italic;
 }
 
 .add-to-cart-button {

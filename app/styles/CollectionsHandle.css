@@ -165,9 +165,21 @@ button#headlessui-menu-button-\:R3lab5\: {
 
 .grid-cols-1 .product-description {
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     color: grey;
     font-weight: 300;
+    font-style: italic;
+}
+
+.collection .grid-cols-1 .price-container {
+    min-height: 20px !important;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.collection .grid-cols-1 .product-price {
+    min-height: unset !important;    
 }
 
 .grid-cols-1 .product-info-container {
@@ -207,9 +219,8 @@ button#headlessui-menu-button-\:R3lab5\: {
     width: 85% !important;
 }
 
-.grid-cols-1 .collection h4 {
-    min-height: unset;
-    font-size: 15px;
+.collection .grid-cols-1 h4 {
+    font-size: 15px !important;
 }
 
 .grid-cols-1 .mobile-container {

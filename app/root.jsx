@@ -1,5 +1,6 @@
 // src/root.jsx
 import appStyles from '~/styles/app.css?url';
+// import fontStyles from '../public/fonts.css';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {redirect} from '@shopify/remix-oxygen';
@@ -272,6 +273,7 @@ export function Layout({children}) {
           content="width=device-width,initial-scale=1,viewport-fit=cover"
         />
         <link rel="stylesheet" href={appStyles}></link>
+        <link rel="stylesheet" href='/public/fonts.css'></link>
         <Meta />
         <Links />
         {nonce ? (
