@@ -430,7 +430,7 @@ button.layout-buttons.first-btn svg {
     border-radius: 30px;
     padding: 3px 10px;
     background: #fff;
-    box-shadow: rgb(131 126 255 / 61%) 0px 4.8px 14.4px;
+    box-shadow: rgb(131 126 255 / 68%) 0px 3px 5px;
 }
 
 .pagination-item.current-page {
