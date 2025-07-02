@@ -175,9 +175,9 @@ export const gamingMenu = [
     id: 7,
     image: {
       url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Virtual-Reality-Collection.jpg?v=1714657200',
-      altText: 'Virutal Reality',
+      altText: 'Virtual Reality',
     },
-    title: 'Virutal Reality',
+    title: 'Virtual Reality',
     url: '/collections/virtual-reality',
   },
   {

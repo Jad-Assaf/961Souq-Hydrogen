@@ -304,7 +304,7 @@ h4 {
     vertical-align: middle;
 }
 
-.ProductPageBottom td{
+.ProductPageBottom td {
     border: 1px solid #c3c3c3;
 }
 
@@ -355,9 +355,12 @@ strong {
 .product-details li,
 .product-metafields li {
     font-size: 12px;
-    font-style: italic;
     margin-bottom: 0.2rem;
     color: #4a4a4a;
+}
+
+.product-metafields li {
+    font-style: italic;
 }
 
 .productPage-hr {
