@@ -38,49 +38,47 @@ function CustomHit({hit}) {
 }
 
 function SearchResults() {
-  const {searchResults, isLoading, currentQuery, searchInput, setInitialQuery} = useSearch();
+  const {searchResults, isLoading, currentQuery, searchInput, setInitialQuery} =
+    useSearch();
   const {query} = useLoaderData();
   const trimmed = query.trim();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Only trigger initial search when page loads with a URL query and no current query
+  // initial‐load trigger
   useEffect(() => {
     if (trimmed && !currentQuery) {
       setInitialQuery(trimmed);
     }
   }, [trimmed, currentQuery, setInitialQuery]);
 
-  // Use currentQuery for display (the actual search results)
-  const displayQuery = currentQuery || trimmed;
-
-  // Reset page when currentQuery changes (from search bar)
+  // reset page on new search
   useEffect(() => {
     setCurrentPage(1);
-  }, [currentQuery]);
+  }, [currentQuery, searchResults]);
 
-  // Reset page when searchResults change (from search bar typing)
+  // scroll to top on page change
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchResults]);
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }, [currentPage]);
 
   if (isLoading) {
     return <div>Loading search results...</div>;
   }
-
-  if (!displayQuery) {
+  if (!currentQuery && !trimmed) {
     return <p>Please enter a search term to see results.</p>;
   }
-
   if (searchResults.length === 0) {
-    return <p>No results found for "{displayQuery}".</p>;
+    return <p>No results found for "{currentQuery || trimmed}".</p>;
   }
 
-  // Calculate pagination
+  // pagination logic
   const totalPages = Math.ceil(searchResults.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentResults = searchResults.slice(startIndex, endIndex);
+  const currentResults = searchResults.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
 
   return (
     <div className="search-results">
@@ -94,19 +92,17 @@ function SearchResults() {
         <div className="pagination">
           <button
             className="ais-Pagination-link"
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span className='pagination-text'>
+          <span className="pagination-text">
             Page {currentPage} of {totalPages}
           </span>
           <button
             className="ais-Pagination-link"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-            }
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
           >
             Next
@@ -121,8 +117,6 @@ export default function SearchPage() {
   const {query} = useLoaderData();
   const trimmed = query.trim();
   const {currentQuery, searchInput} = useSearch();
-
-  // Use searchInput if user is typing, otherwise use currentQuery or URL query
   const displayQuery = searchInput || currentQuery || trimmed;
 
   return (
