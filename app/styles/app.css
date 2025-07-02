@@ -715,6 +715,16 @@ aside .go-to-cart {
   border: 1px solid #2172af;
   padding: 5px 10px;
   border-radius: 30px;
+  font-size: 12px;
+}
+
+.cart .gtc-button {
+  display: none;
+}
+
+.cart .new-arrivals-section {
+  width: 95%;
+  margin: 50px auto;
 }
 
 .empty-cart {

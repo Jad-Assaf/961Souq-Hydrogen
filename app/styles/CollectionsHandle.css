@@ -193,6 +193,7 @@ button#headlessui-menu-button-\:R3lab5\: {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding-top: 10px;
 }
 
 .product-info-container a {
