@@ -105,6 +105,9 @@ button#headlessui-menu-button-\:R3lab5\: {
 .grid-cols-1 .product-item-collection {
     min-width: 100%;
     margin: auto;
+    @media (max-width: 1024px) {
+        min-width: 95% !important;
+    }
 }
 
 .product-item-collection img,
