@@ -51,6 +51,10 @@ h4 {
     font-weight: 600;
 }
 
+.product .product-card .product-price {
+    font-size: 16px !important;
+}
+
 .quantity-selector {
     display: flex;
     align-items: center;
@@ -315,8 +319,9 @@ h4 {
 }
 
 .ProductPageBottom h3 {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
+    color: #2171af;
 }
 
 .ProductPageBottom h2,
@@ -327,8 +332,13 @@ h4 {
     margin-bottom: 20px;
 }
 
+.ProductPageBottom ul {
+    list-style: disc;
+    margin-left: 20px;
+}
+
 strong {
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .fade-enter {
