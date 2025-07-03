@@ -6,7 +6,6 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
   const scriptLoaded = useRef(false);
   const carouselRef = useRef(null);
 
-
   // Load Instagram's embed.js once on mount
   useEffect(() => {
     const loadScript = () => {
@@ -23,10 +22,10 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
     }
   }, []);
 
-  // Process all embeds after first render and whenever reelIds change
+  // Process all embeds after first render and whenever reelIds or current changes
   useEffect(() => {
     if (window.instgrm) window.instgrm.Embeds.process();
-  }, [reelIds]);
+  }, [reelIds, current]);
 
   // Handlers
   const prev = () => setCurrent((i) => (i - 1 + reelIds.length) % reelIds.length);
@@ -47,7 +46,7 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
             style={{ transform: `translateX(-${current * 100}%)` }}
           >
             {reelIds.map((id, idx) => (
-              <div key={id} className="carousel-item">
+              <div key={id + '-' + (productUrls[idx] || idx)} className="carousel-item">
                 <blockquote
                   className="instagram-media"
                   data-instgrm-permalink={`https://www.instagram.com/reel/${id}/`}
@@ -55,9 +54,6 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
                 >
                   <div>Loading…</div>
                 </blockquote>
-                {productUrls[idx] && (
-                  <a className="ig-product-link" href={productUrls[idx]}>View Product</a>
-                )}
               </div>
             ))}
           </div>
@@ -65,6 +61,12 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
         <button onClick={next} className="home-next-button">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
+        {/* View Product link for the current reel, outside the embed and carousel-inner */}
+        {productUrls[current] && (
+          <a className="ig-product-link" href={productUrls[current]}>
+            View Product
+          </a>
+        )}
       </div>
     </>
   );
