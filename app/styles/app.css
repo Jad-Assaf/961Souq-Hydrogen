@@ -4414,7 +4414,8 @@ svg.icon.icon--full-color {
   aspect-ratio: 9/16;
   width: 98% !important;
   height: auto !important;
-  /* min-height: 100vh !important; */
+  min-height: 650px !important;
+  max-height: 750px !important;
   max-width: 100vw !important;
   border: 1px solid #2171af51 !important;
   display: block;
