@@ -43,7 +43,7 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
           <div
             className="carousel-inner"
             ref={carouselRef}
-            style={{ transform: `translateX(-${current * 100}%)` }}
+            style={{ marginLeft: `-${current * 100}%` }}
           >
             {reelIds.map((id, idx) => (
               <div key={id + '-' + (productUrls[idx] || idx)} className="carousel-item">
