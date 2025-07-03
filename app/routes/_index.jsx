@@ -537,7 +537,7 @@ export default function Homepage() {
         <>
           {header && (
             <>
-              <div>
+              <div className="instagram-reels-container">
                 <h1>Instagram Reels</h1>
                 <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />
               </div>

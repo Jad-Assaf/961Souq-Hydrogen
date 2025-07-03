@@ -47,7 +47,7 @@ h2 {
   margin: 0 auto 70px;
   overflow: hidden;
   border-radius: 5px;
-  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px; 
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
 }
 
 .banner-image {
@@ -4379,9 +4379,17 @@ svg.icon.icon--full-color {
   height: auto;
   overflow: hidden;
   padding-bottom: 50px;
-  .home-next-button, .home-prev-button {
+
+  .home-next-button,
+  .home-prev-button {
     display: block;
     bottom: 10px;
+  }
+}
+
+@media (min-width: 700px) {
+  .instagram-reels-container {
+    display: none !important;
   }
 }
 
@@ -4451,10 +4459,11 @@ svg.icon.icon--full-color {
   overflow: hidden;
   width: 100%;
 }
+
 .carousel-inner {
   display: flex;
   width: 100%;
-  transition: transform 0.4s cubic-bezier(.4,2,.6,1);
+  transition: transform 0.4s cubic-bezier(.4, 2, .6, 1);
 }
 
 .ig-product-link {
