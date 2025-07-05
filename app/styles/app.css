@@ -40,6 +40,10 @@ h2 {
   margin-bottom: 1rem;
 }
 
+.cart h4 {
+  font-weight: 500;
+}
+
 .banner-slideshow {
   position: relative;
   height: auto;

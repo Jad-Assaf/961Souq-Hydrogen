@@ -67,7 +67,7 @@ export function links() {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader({request, context}) {
-  // Implement the redirect for legacy URLs:
+  // 1) Legacy URL redirect
   const url = new URL(request.url);
   const pathname = url.pathname;
   const match = pathname.match(/^\/collections\/[^/]+\/products\/(.+)/);
@@ -77,30 +77,41 @@ export async function loader({request, context}) {
   }
 
   try {
+    // 2) Load deferred & critical data in parallel
     const deferredData = await loadDeferredData({request, context});
     const criticalData = await loadCriticalData({request, context});
     const {storefront, env} = context;
 
-    return data({
-      ...deferredData,
-      ...criticalData,
-      publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
-      shop: getShopAnalytics({
-        storefront,
-        publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
-      }),
-      consent: {
-        checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
-        storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-        country: storefront.i18n.country,
-        language: storefront.i18n.language,
+    // 3) Commit the session so the cart ID (and any other session data) is set as a cookie
+    const session = context.session;
+    const headers = new Headers();
+    headers.append('Set-Cookie', await session.commit());
+
+    // 4) Return all data, with Set-Cookie on the response
+    return data(
+      {
+        ...deferredData,
+        ...criticalData,
+        publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+        shop: getShopAnalytics({
+          storefront,
+          publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
+        }),
+        consent: {
+          checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+          storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+          country: storefront.i18n.country,
+          language: storefront.i18n.language,
+        },
       },
-    });
+      {headers},
+    );
   } catch (error) {
     console.error('Loader error:', error);
     throw new Response('Failed to load data', {status: 500});
   }
 }
+
 
 /**
  * Load data necessary for rendering content above the fold.
