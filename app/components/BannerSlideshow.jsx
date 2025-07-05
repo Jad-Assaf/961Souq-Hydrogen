@@ -1,28 +1,68 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, {useState, useEffect, useRef, useCallback, useMemo} from 'react';
+import {useLoaderData} from '@remix-run/react';
 
-export function BannerSlideshow({banners, interval = 10000}) {
+/**
+ * BannerSlideshow
+ * -----------------------------------------
+ * • Detects the visitor’s device once.
+ *   ─ Server side: looks for `isMobile` in loader data
+ *     (generated with `const isMobile = /mobile/i.test(userAgent)`).
+ *   ─ Client side: re-checks `navigator.userAgent` after hydration.
+ * • Renders one <img> variant per slide:
+ *   ─ Mobile visitors → mobile banners only
+ *   ─ Desktop visitors → desktop banners only
+ * • Keeps all existing autoplay, swipe, arrows, dots, progress bar.
+ */
+
+export  function BannerSlideshow({banners, interval = 10000}) {
+  /* -------------------------------------------------------------
+   * 1)  DEVICE DETECTION
+   * ----------------------------------------------------------- */
+  const loaderData = useLoaderData() || {};
+  const ssrIsMobile = !!loaderData.isMobile; // may be undefined if loader omitted
+  const [isMobile, setIsMobile] = useState(ssrIsMobile);
+
+  /* After hydration, double-check on the client */
+  useEffect(() => {
+    if (typeof navigator !== 'undefined') {
+      setIsMobile(/mobile/i.test(navigator.userAgent));
+    }
+  }, []);
+
+  /* Filter banners so we only iterate the ones we’ll really show */
+  const deviceBanners = useMemo(
+    () =>
+      isMobile
+        ? banners.filter((b) => b.mobileImageUrl)
+        : banners.filter((b) => b.desktopImageUrl),
+    [banners, isMobile],
+  );
+
+  /* -------------------------------------------------------------
+   * 2)  SLIDESHOW STATE
+   * ----------------------------------------------------------- */
   const [current, setCurrent] = useState(0);
   const timerRef = useRef(null);
   const touchStartX = useRef(0);
 
   const next = useCallback(
-    () => setCurrent((i) => (i + 1) % banners.length),
-    [banners.length],
+    () => setCurrent((i) => (i + 1) % deviceBanners.length),
+    [deviceBanners.length],
   );
 
   const prev = useCallback(
-    () => setCurrent((i) => (i ? i - 1 : banners.length - 1)),
-    [banners.length],
+    () => setCurrent((i) => (i ? i - 1 : deviceBanners.length - 1)),
+    [deviceBanners.length],
   );
 
-  // autoplay
+  /* Autoplay */
   useEffect(() => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(next, interval);
     return () => clearInterval(timerRef.current);
-  }, [interval, next, current]);  
+  }, [interval, next, current]);
 
-  // swipe
+  /* Swipe handlers */
   const onTouchStart = (e) => (touchStartX.current = e.touches[0].clientX);
   const onTouchEnd = (e) => {
     const diff = e.changedTouches[0].clientX - touchStartX.current;
@@ -30,8 +70,14 @@ export function BannerSlideshow({banners, interval = 10000}) {
     if (diff < -100) next();
   };
 
-  const slide = banners[current];
+  /* No banners for this device? – gracefully abort */
+  if (!deviceBanners.length) return null;
 
+  const slide = deviceBanners[current];
+
+  /* -------------------------------------------------------------
+   * 3)  RENDER
+   * ----------------------------------------------------------- */
   return (
     <>
       <figure
@@ -40,13 +86,26 @@ export function BannerSlideshow({banners, interval = 10000}) {
         onTouchEnd={onTouchEnd}
       >
         <a href={slide.link} className="banner-link">
-          <picture>
-            <source
-              media="(min-width:1025px)"
-              srcSet={`${slide.desktopImageUrl}&width=1500`}
-            />
+          {isMobile ? (
+            /* Mobile image only */
             <img
-              src={`${slide.mobileImageUrl}&width=900`}
+              srcSet={`${slide.mobileImageUrl}&width=320 320w, ${slide.mobileImageUrl}&width=480 480w, ${slide.mobileImageUrl}&width=640 640w, ${slide.mobileImageUrl}&width=900 900w`}
+              sizes="(max-width:640px) 100vw, (max-width:1024px) 100vw, 1024px"
+              src={`${slide.mobileImageUrl}&width=640`}
+              alt={slide.alt || `Banner ${current + 1}`}
+              className="banner-image"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              width={900}
+              height={300}
+            />
+          ) : (
+            /* Desktop image only */
+            <img
+              srcSet={`${slide.desktopImageUrl}&width=1024 1024w, ${slide.desktopImageUrl}&width=1200 1200w, ${slide.desktopImageUrl}&width=1500 1500w, ${slide.desktopImageUrl}&width=2000 2000w`}
+              sizes="(min-width:1025px) 1500px, 100vw"
+              src={`${slide.desktopImageUrl}&width=1500`}
               alt={slide.alt || `Banner ${current + 1}`}
               className="banner-image"
               loading="eager"
@@ -55,29 +114,31 @@ export function BannerSlideshow({banners, interval = 10000}) {
               width={1500}
               height={300}
             />
-          </picture>
+          )}
         </a>
 
-        {/* dots (non-interactive) */}
+        {/* Indicator dots */}
         <ol className="indicator-dots">
-          {banners.map((_, i) => (
+          {deviceBanners.map((_, i) => (
             <li key={i}>
               <span className={i === current ? 'dot active' : 'dot'} />
             </li>
           ))}
         </ol>
 
-        {/* progress bar */}
+        {/* Progress bar */}
         <span
           key={current}
           className="progress-bar"
           style={{'--interval': `${interval}ms`}}
         />
       </figure>
+
+      {/* Arrow buttons */}
       <div className="arrow-buttons">
         <button
           type="button"
-          aria-label="Scroll categories left"
+          aria-label="Scroll banners left"
           onClick={prev}
           className="home-prev-button"
         >
@@ -85,7 +146,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
         </button>
         <button
           type="button"
-          aria-label="Scroll categories right"
+          aria-label="Scroll banners right"
           onClick={next}
           className="home-next-button"
         >
@@ -96,6 +157,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
   );
 }
 
+/* SVG icons – unchanged */
 const LeftArrowIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -123,5 +185,3 @@ const RightArrowIcon = () => (
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
-
-export default BannerSlideshow;
