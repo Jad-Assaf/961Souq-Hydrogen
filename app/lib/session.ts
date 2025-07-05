@@ -28,6 +28,7 @@ export class AppSession implements HydrogenSession {
         path: "/",
         sameSite: "lax",
         secrets,
+        maxAge: 60 * 60 * 24 * 365,
       },
     });
 
