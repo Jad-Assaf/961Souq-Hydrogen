@@ -1,6 +1,6 @@
 // src/root.jsx
 import appStyles from '~/styles/app.css?url';
-import fontStyles from '~/styles/fonts.css?url';
+// import fontStyles from '~/styles/fonts.css?url';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {redirect} from '@shopify/remix-oxygen';
@@ -54,10 +54,6 @@ export function links() {
     // {rel: 'stylesheet', href: productImgStyles},
     // {rel: 'stylesheet', href: searchStyles},
     // {rel: 'stylesheet', href: tailwindCss},
-    {
-      rel: 'stylesheet',
-      href: fontStyles
-    },
     {rel: 'preconnect', href: 'https://cdn.shopify.com'},
     {rel: 'preconnect', href: 'https://shop.app'},
     {rel: 'icon', type: 'image/svg+xml', href: favicon},

@@ -28,7 +28,7 @@ import {CategorySliderWithMoreHeight} from '~/components/CollectionSliderWithMor
 import VideosGallery from '~/components/VideosGallery';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 import {CategorySliderFromMenuMobile} from '~/components/CategorySliderFromMenuMobile';
-import InstagramReelsCarousel from '~/components/InstagramCarousel';
+// import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 // const MANUAL_MENU_HANDLES = [
 //   'apple',
@@ -512,15 +512,15 @@ export default function Homepage() {
     }, 300); // 300ms transition duration
   };
 
-  const reelIds = ['DLIFKQtNTvj', 'DLmgJDxM93m', 'DLaGHiLt0cs', 'DLCs7TsMe0a', 'DKrX0cCsLDQ', 'DKeZDnjsasA'];
-  const productUrls = [
-    '/products/gravastar-mercury-k1-pro-combo-blue-dragon-edition',
-    '/products/canon-powershot-v10-4k-vlogging-camera',
-    '/products/mechtron-tl-g007s-8v-li-ion-cyber-hammer-drill-driver',
-    '/products/godox-ma5r-magnetic-full-color-led-light',
-    '/collections/labubu',
-    '/collections/asus-rog-strix',
-  ];
+  // const reelIds = ['DLIFKQtNTvj', 'DLmgJDxM93m', 'DLaGHiLt0cs', 'DLCs7TsMe0a', 'DKrX0cCsLDQ', 'DKeZDnjsasA'];
+  // const productUrls = [
+  //   '/products/gravastar-mercury-k1-pro-combo-blue-dragon-edition',
+  //   '/products/canon-powershot-v10-4k-vlogging-camera',
+  //   '/products/mechtron-tl-g007s-8v-li-ion-cyber-hammer-drill-driver',
+  //   '/products/godox-ma5r-magnetic-full-color-led-light',
+  //   '/collections/labubu',
+  //   '/collections/asus-rog-strix',
+  // ];
 
   return (
     <div className="home">
@@ -537,10 +537,10 @@ export default function Homepage() {
         <>
           {header && (
             <>
-              <div className="instagram-reels-container">
+              {/* <div className="instagram-reels-container">
                 <h1>Instagram Reels</h1>
                 <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />
-              </div>
+              </div> */}
               <CategorySliderFromMenuMobile menu={header.menu} />
             </>
           )}
