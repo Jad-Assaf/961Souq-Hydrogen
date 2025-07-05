@@ -14,7 +14,7 @@ import {useLoaderData} from '@remix-run/react';
  * • Keeps all existing autoplay, swipe, arrows, dots, progress bar.
  */
 
-export  function BannerSlideshow({banners, interval = 10000}) {
+export function BannerSlideshow({banners, interval = 10000}) {
   /* -------------------------------------------------------------
    * 1)  DEVICE DETECTION
    * ----------------------------------------------------------- */
@@ -89,21 +89,26 @@ export  function BannerSlideshow({banners, interval = 10000}) {
           {isMobile ? (
             /* Mobile image only */
             <img
-              srcSet={`${slide.mobileImageUrl}&width=320 320w, ${slide.mobileImageUrl}&width=480 480w, ${slide.mobileImageUrl}&width=640 640w, ${slide.mobileImageUrl}&width=900 900w`}
-              sizes="(max-width:640px) 100vw, (max-width:1024px) 100vw, 1024px"
-              src={`${slide.mobileImageUrl}&width=640`}
+              srcSet={`
+                ${slide.mobileImageUrl}&width=320&quality=75 320w,
+                ${slide.mobileImageUrl}&width=480&quality=75 480w,
+                ${slide.mobileImageUrl}&width=640&quality=75 640w,
+                ${slide.mobileImageUrl}&width=750&quality=75 750w
+              `}
+              sizes="100vw"
+              src={`${slide.mobileImageUrl}&width=640&quality=75`}
               alt={slide.alt || `Banner ${current + 1}`}
               className="banner-image"
               loading="eager"
               decoding="async"
               fetchpriority="high"
-              width={900}
+              width={640}
               height={300}
             />
           ) : (
             /* Desktop image only */
             <img
-              srcSet={`${slide.desktopImageUrl}&width=1024 1024w, ${slide.desktopImageUrl}&width=1200 1200w, ${slide.desktopImageUrl}&width=1500 1500w, ${slide.desktopImageUrl}&width=2000 2000w`}
+              srcSet={`${slide.desktopImageUrl}&width=1024 1024w, ${slide.desktopImageUrl}&width=1200 1200w, ${slide.desktopImageUrl}&width=1500 1500w`}
               sizes="(min-width:1025px) 1500px, 100vw"
               src={`${slide.desktopImageUrl}&width=1500`}
               alt={slide.alt || `Banner ${current + 1}`}
