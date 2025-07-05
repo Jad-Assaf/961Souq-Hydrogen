@@ -37,6 +37,7 @@ export class AppSession {
         path: '/',
         sameSite: 'lax',
         secrets,
+        maxAge: 60 * 60 * 24 * 365,
       },
     });
 

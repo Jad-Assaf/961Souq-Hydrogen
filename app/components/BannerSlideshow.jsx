@@ -93,7 +93,6 @@ export function BannerSlideshow({banners, interval = 10000}) {
                 ${slide.mobileImageUrl}&width=320&quality=75 320w,
                 ${slide.mobileImageUrl}&width=480&quality=75 480w,
                 ${slide.mobileImageUrl}&width=640&quality=75 640w,
-                ${slide.mobileImageUrl}&width=750&quality=75 750w
               `}
               sizes="100vw"
               src={`${slide.mobileImageUrl}&width=640&quality=75`}
