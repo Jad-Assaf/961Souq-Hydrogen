@@ -31,8 +31,18 @@ const getExternalId = () => {
   return anonId;
 };
 
-// --- Function to send PageView event via Conversions API (without real IP and fbclid)
+// --- Function to send PageView event via Conversions API (now including real IP)
 const trackPageViewCAPI = async (eventId, extraData) => {
+  // 1️⃣ fetch public IP
+  let clientIp = '';
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const json = await res.json();
+    clientIp = json.ip || '';
+  } catch (err) {
+  }
+
+  // 2️⃣ build payload
   const payload = {
     action_source: 'website',
     event_name: 'PageView',
@@ -40,6 +50,7 @@ const trackPageViewCAPI = async (eventId, extraData) => {
     event_time: Math.floor(Date.now() / 1000),
     user_data: {
       client_user_agent: navigator.userAgent,
+      client_ip_address: clientIp,
       fbp: extraData.fbp,
       fbc: extraData.fbc,
       external_id: extraData.external_id,
@@ -50,6 +61,7 @@ const trackPageViewCAPI = async (eventId, extraData) => {
     },
   };
 
+  // 3️⃣ send to your server endpoint
   fetch('/facebookConversions', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -128,9 +140,7 @@ const MetaPixel = ({pixelId}) => {
     trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
   }, [location]);
 
-  return (
-<></>
-  );
+  return null;
 };
 
 export default MetaPixel;
