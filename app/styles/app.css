@@ -4459,3 +4459,62 @@ svg.icon.icon--full-color {
   font-size: 12px;
   text-decoration: none;
 }
+
+
+.product-faq {
+  margin: 50px 5px;
+}
+
+.product-faq h2 {
+  margin-bottom: 1rem;
+}
+
+.product-faq .faq-item {
+  border-bottom: 1px solid #2171af7e;
+  padding: 1rem 0;
+}
+
+.product-faq .faq-question {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  padding-right: 1.5rem;
+}
+
+.product-faq .faq-question::after {
+  content: '+';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease;
+  color: #2172af;
+}
+
+.product-faq .faq-item.open .faq-question::after {
+  content: '-';
+  right: 2px;
+  font-size: 24px;
+}
+
+.product-faq .faq-answer-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.product-faq .faq-item.open .faq-answer-wrapper {
+  max-height: 1000px;
+  /* enough to reveal the full answer */
+}
+
+.product-faq .faq-answer {
+  margin: 20px 0 10px;
+  line-height: 1.5;
+}
+
+.product-faq ul {
+  list-style: inside;
+}

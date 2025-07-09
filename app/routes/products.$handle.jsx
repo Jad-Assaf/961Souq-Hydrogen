@@ -23,6 +23,7 @@ import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
 import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
+import ProductFAQ from '~/components/ProductFAQ';
 
 // ---------------- SEO & Meta
 export const meta = ({data}) => {
@@ -909,6 +910,8 @@ export default function Product() {
           }}
         />
       </div>
+
+      <ProductFAQ productType={product.productType} />
 
       <div className="related-products-row">
         <div className="related-products">
