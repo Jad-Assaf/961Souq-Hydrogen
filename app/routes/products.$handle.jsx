@@ -775,6 +775,12 @@ export default function Product() {
               Description
             </button>
             <button
+              className={`tab-button ${activeTab === 'faq' ? 'active' : ''}`}
+              onClick={() => setActiveTab('faq')}
+            >
+              FAQ
+            </button>
+            <button
               className={`tab-button ${
                 activeTab === 'shipping' ? 'active' : ''
               }`}
@@ -795,6 +801,15 @@ export default function Product() {
           {activeTab === 'description' && (
             <div className="product-section">
               <div dangerouslySetInnerHTML={{__html: descriptionHtml || ''}} />
+            </div>
+          )}
+
+          {activeTab === 'faq' && (
+            <div className="product-section">
+              <ProductFAQ
+                productId={product.id}
+                productType={product.productType}
+              />
             </div>
           )}
 
@@ -910,8 +925,6 @@ export default function Product() {
           }}
         />
       </div>
-
-      <ProductFAQ productId={product.id} productType={product.productType} />
 
       <div className="related-products-row">
         <div className="related-products">

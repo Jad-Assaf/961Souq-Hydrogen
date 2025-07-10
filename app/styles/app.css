@@ -4460,11 +4460,6 @@ svg.icon.icon--full-color {
   text-decoration: none;
 }
 
-
-.product-faq {
-  margin: 50px 5px;
-}
-
 .product-faq h2 {
   margin-bottom: 1rem;
 }
@@ -4472,6 +4467,7 @@ svg.icon.icon--full-color {
 .product-faq .faq-item {
   border-bottom: 1px solid #2171af7e;
   padding: 1rem 0;
+  border-radius: 5px;
 }
 
 .product-faq .faq-question {
@@ -4521,15 +4517,12 @@ svg.icon.icon--full-color {
 
 /* FAQ Form and List Styles */
 .product-faq {
-  margin: 2rem 0;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 2rem 1.5rem;
   width: 100%;
 }
 .product-faq h2 {
-  font-size: 2rem;
+  font-size: 22px;
   margin-bottom: 1.5rem;
   color: #1a202c;
 }
