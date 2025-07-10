@@ -4397,39 +4397,47 @@ svg.icon.icon--full-color {
     display: none !important;
   }
 }
+
 /* --- iOS-safe carousel hot-fix --- */
 .carousel-inner {
-  width: auto;          /* allow the track to grow to N × 100% */
+  width: auto;
+  /* allow the track to grow to N × 100% */
 }
 
 /* Scrollable track */
 .carousel-outer {
-  overflow-x: auto;           /* we scroll horizontally */
+  overflow-x: auto;
+  /* we scroll horizontally */
   overflow-y: hidden;
   width: 100%;
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch; /* smooth momentum */
-  scroll-behavior: smooth;    /* fallback when JS disabled */
+  -webkit-overflow-scrolling: touch;
+  /* smooth momentum */
+  scroll-behavior: smooth;
+  /* fallback when JS disabled */
 }
 
 /* Flex row containing the slides */
 .carousel-inner {
-  display: flex;       /* shrink-wrap to slides */
+  display: flex;
+  /* shrink-wrap to slides */
 }
 
 /* Each slide */
 .carousel-item {
-  flex: 0 0 100%;             /* exactly one viewport wide */
+  flex: 0 0 100%;
+  /* exactly one viewport wide */
   scroll-snap-align: start;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0;                 /* keep previous spacing if needed */
+  padding: 0;
+  /* keep previous spacing if needed */
 }
 
 /* Preserve your existing iframe sizing rules */
-.carousel-item > blockquote.instagram-media {
+.carousel-item>blockquote.instagram-media {
   width: 100% !important;
   max-width: 100% !important;
   min-height: 100% !important;
@@ -4477,6 +4485,7 @@ svg.icon.icon--full-color {
   cursor: pointer;
   position: relative;
   padding-right: 1.5rem;
+
   @media (max-width: 1024px) {
     font-size: 15px;
   }
@@ -4524,22 +4533,27 @@ svg.icon.icon--full-color {
   border-radius: 12px;
   width: 100%;
 }
+
 .product-faq h2 {
   font-size: 22px;
   margin-bottom: 1.5rem;
   color: #1a202c;
 }
+
 .faq-list {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
+
 .faq-item {
   border-bottom: 1px solid #e2e8f0;
   padding: 1rem 0;
   transition: background 0.2s;
 }
+
 .faq-item.open {
   background: #f7fafc;
 }
+
 .faq-question {
   font-size: 1.1rem;
   font-weight: 600;
@@ -4548,66 +4562,73 @@ svg.icon.icon--full-color {
   margin: 0;
   transition: color 0.2s;
 }
+
 .faq-item.open .faq-question {
   color: #3182ce;
 }
+
 .faq-answer-wrapper {
   margin-top: 0.5rem;
 }
+
 .faq-answer {
   color: #4a5568;
   font-size: 1rem;
   line-height: 1.6;
+
   @media (max-width: 1024px) {
     font-size: 14px;
   }
 }
-.faq-ask {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e2e8f0;
-}
+
 .faq-ask h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-  color: #2b6cb0;
+  font-size: 1.1rem !important;
+  margin-bottom: 0.5rem !important;
+  color: #2172af;
 }
+
 .faq-input {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #cbd5e0;
-  border-radius: 6px;
+  border-radius: 5px;
   font-size: 1rem;
   margin-bottom: 1rem;
   transition: border 0.2s;
 }
+
 .faq-input:focus {
-  border-color: #3182ce;
+  border-color: #2172af;
   outline: none;
 }
+
 .faq-submit {
-  background: #3182ce;
+  background: #2172af;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 0.7rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
+  border-radius: 30px;
+  padding: 5px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer !important;
   transition: background 0.2s;
 }
+
 .faq-submit:disabled {
   background: #a0aec0;
   cursor: not-allowed;
 }
+
 .faq-submit:hover:not(:disabled) {
   background: #2563eb;
 }
+
 .faq-thanks {
   color: #38a169;
   font-weight: 500;
   margin-top: 1rem;
 }
+
 .faq-error {
   color: #e53e3e;
   margin-top: 0.5rem;
