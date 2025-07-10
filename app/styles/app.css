@@ -4518,3 +4518,99 @@ svg.icon.icon--full-color {
 .product-faq ul {
   list-style: inside;
 }
+
+/* FAQ Form and List Styles */
+.product-faq {
+  margin: 2rem 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+  width: 100%;
+}
+.product-faq h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #1a202c;
+}
+.faq-list {
+  margin-bottom: 2rem;
+}
+.faq-item {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 0;
+  transition: background 0.2s;
+}
+.faq-item.open {
+  background: #f7fafc;
+}
+.faq-question {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  cursor: pointer;
+  margin: 0;
+  transition: color 0.2s;
+}
+.faq-item.open .faq-question {
+  color: #3182ce;
+}
+.faq-answer-wrapper {
+  margin-top: 0.5rem;
+}
+.faq-answer {
+  color: #4a5568;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.faq-ask {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+.faq-ask h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #2b6cb0;
+}
+.faq-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: border 0.2s;
+}
+.faq-input:focus {
+  border-color: #3182ce;
+  outline: none;
+}
+.faq-submit {
+  background: #3182ce;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.faq-submit:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+.faq-submit:hover:not(:disabled) {
+  background: #2563eb;
+}
+.faq-thanks {
+  color: #38a169;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+.faq-error {
+  color: #e53e3e;
+  margin-top: 0.5rem;
+  font-size: 0.97rem;
+}

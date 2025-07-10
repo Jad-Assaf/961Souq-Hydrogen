@@ -911,7 +911,7 @@ export default function Product() {
         />
       </div>
 
-      <ProductFAQ productType={product.productType} />
+      <ProductFAQ productId={product.id} productType={product.productType} />
 
       <div className="related-products-row">
         <div className="related-products">

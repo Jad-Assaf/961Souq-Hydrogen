@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 // src/components/ProductFAQ.jsx
 const faqByProductType = {
@@ -218,34 +218,131 @@ All monitor prices include VAT (value-added tax) by default; any VAT-exclusive p
   ],
 };
 
-export default function ProductFAQ({productType}) {
+function richTextToHtml(richText) {
+  if (!richText || typeof richText === 'string') return richText || '';
+  if (typeof richText === 'object' && richText.type === 'root' && Array.isArray(richText.children)) {
+    return richText.children.map(child => {
+      if (child.type === 'paragraph') {
+        return `<p>${child.children.map(grand => grand.value || '').join('')}</p>`;
+      }
+      return '';
+    }).join('');
+  }
+  return '';
+}
+
+export default function ProductFAQ({productId, productType}) {
   const [openIndex, setOpenIndex] = useState(null);
-  const faqs = faqByProductType[productType] || [];
-  if (!faqs.length) return null;
+  const [question, setQuestion] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [faqs, setFaqs] = useState([]);
+
+  // Fetch user-submitted FAQs from metafield
+  useEffect(() => {
+    if (!productId) return;
+    async function fetchQuestions() {
+      try {
+        const res = await fetch(`/api/get-faq-questions?productId=${encodeURIComponent(productId)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data.faqs)) setFaqs(data.faqs);
+      } catch {}
+    }
+    fetchQuestions();
+  }, [productId]);
+
+  const allFaqs = [
+    ...(faqByProductType[productType] || []),
+    ...faqs.map(faq => ({
+      question: faq.question,
+      answer: faq.answer
+        ? richTextToHtml(
+            typeof faq.answer === 'string' ? faq.answer : (typeof faq.answer === 'object' ? faq.answer : '')
+          )
+        : '<em>Awaiting answer from support</em>',
+    })),
+  ];
+  if (!allFaqs.length && !productId) return null;
 
   const handleClick = (idx) => setOpenIndex(openIndex === idx ? null : idx);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/admin-create-faq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, question }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubmitted(true);
+        setQuestion('');
+        setFaqs((prev) => [...prev, { question, answer: '' }]);
+      } else {
+        setError(data.error || 'Something went wrong.');
+      }
+    } catch {
+      setError('Failed to submit. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="product-faq">
       <h2>Frequently Asked Questions</h2>
       <div className="faq-list">
-        {faqs.map((item, idx) => (
-          <div
-            key={idx}
-            className={`faq-item ${openIndex === idx ? 'open' : ''}`}
-          >
-            <h3 className="faq-question" onClick={() => handleClick(idx)}>
-              {item.question}
-            </h3>
-            <div className="faq-answer-wrapper">
-              <div
-                className="faq-answer"
-                dangerouslySetInnerHTML={{__html: item.answer}}
-              />
+        {allFaqs.length > 0 ? (
+          allFaqs.map((item, idx) => (
+            <div
+              key={idx}
+              className={`faq-item ${openIndex === idx ? 'open' : ''}`}
+            >
+              <h3 className="faq-question" onClick={() => handleClick(idx)}>
+                {item.question}
+              </h3>
+              <div className="faq-answer-wrapper">
+                <div
+                  className="faq-answer"
+                  dangerouslySetInnerHTML={{__html: item.answer}}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No answered questions yet. Be the first to ask!</p>
+        )}
       </div>
+      {productId && (
+        <div className="faq-ask">
+          <h3>Have a question?</h3>
+          {submitted ? (
+            <p className="faq-thanks">Thanks! We’ll notify you once it’s answered.</p>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                name="question"
+                className="faq-input"
+                placeholder="Type your question here"
+                required
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                disabled={loading}
+              />
+              <button type="submit" className="faq-submit" disabled={loading}>
+                {loading ? 'Submitting...' : 'Submit Question'}
+              </button>
+              {error && <p className="faq-error" style={{color: 'red'}}>{error}</p>}
+            </form>
+          )}
+        </div>
+      )}
     </section>
   );
 }
