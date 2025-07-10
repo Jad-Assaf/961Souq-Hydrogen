@@ -4466,8 +4466,8 @@ svg.icon.icon--full-color {
 
 .product-faq .faq-item {
   border-bottom: 1px solid #2171af7e;
-  padding: 1rem 0;
-  border-radius: 5px;
+  padding: 8px 0;
+  /* border-radius: 5px; */
 }
 
 .product-faq .faq-question {
@@ -4477,6 +4477,9 @@ svg.icon.icon--full-color {
   cursor: pointer;
   position: relative;
   padding-right: 1.5rem;
+  @media (max-width: 1024px) {
+    font-size: 15px;
+  }
 }
 
 .product-faq .faq-question::after {
@@ -4555,6 +4558,9 @@ svg.icon.icon--full-color {
   color: #4a5568;
   font-size: 1rem;
   line-height: 1.6;
+  @media (max-width: 1024px) {
+    font-size: 14px;
+  }
 }
 .faq-ask {
   margin-top: 2rem;
