@@ -778,7 +778,7 @@ export default function Product() {
               className={`tab-button ${activeTab === 'faq' ? 'active' : ''}`}
               onClick={() => setActiveTab('faq')}
             >
-              FAQ
+              Q & A
             </button>
             <button
               className={`tab-button ${
