@@ -129,7 +129,7 @@ function CustomSearchInput({setShowHits}) {
         }}
         autoComplete="off"
       />
-      <button className="search-bar-submit">
+      <button className="search-bar-submit" aria-label="Search Products">
         <SearchIcon />
       </button>
     </form>

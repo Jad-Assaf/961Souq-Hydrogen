@@ -7,7 +7,7 @@ export const TopProductSections = ({collection}) => {
   return (
     <div className="collection-section">
       <div className="collection-header">
-        <h3>{collection.title}</h3>
+        <p className='home-colleciton-title'>{collection.title}</p>
         <Link
           to={`/collections/${collection.handle}`}
           className="view-all-link"

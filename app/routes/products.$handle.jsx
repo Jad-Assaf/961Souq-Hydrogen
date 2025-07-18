@@ -801,6 +801,19 @@ export default function Product() {
           {activeTab === 'description' && (
             <div className="product-section">
               <div dangerouslySetInnerHTML={{__html: descriptionHtml || ''}} />
+
+              {product.metafieldOfficialProductLink?.value && (
+                <p style={{marginTop: '1.5rem'}}>
+                  <a
+                    className='official-product-link'
+                    href={product.metafieldOfficialProductLink.value}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    View official product page
+                  </a>
+                </p>
+              )}
             </div>
           )}
 
@@ -1078,6 +1091,9 @@ const PRODUCT_FRAGMENT = `#graphql
     seo {
       description
       title
+    }
+    metafieldOfficialProductLink: metafield(namespace: "custom", key: "official_product_link") {
+      value
     }
     metafieldCondition: metafield(namespace: "custom", key: "condition") {
       value
