@@ -257,23 +257,11 @@ async function loadCriticalData({context, params, request}) {
     relatedProducts = productRecommendations || [];
   }
 
-  const rawLink = product.metafieldOfficialProductLink?.value;
-  let showOfficialLink = false;
-
-  if (rawLink) {
-    try {
-      const res = await fetch(rawLink, {method: 'HEAD'});
-      showOfficialLink = res.ok; // true for 2xx
-    } catch (e) {
-      showOfficialLink = false;
-    }
-  }
-
+  
   // Return necessary product data including SEO, first image, and variant price
   return {
     product: {
       ...product,
-      metafieldOfficialProductLink: rawLink,
       // overwrite `variants` with the plain array of nodes
       variants: fullProduct.variants.nodes,
       firstImage,
@@ -282,7 +270,6 @@ async function loadCriticalData({context, params, request}) {
       variantPrice: firstVariant.price || product.priceRange.minVariantPrice,
     },
     relatedProducts,
-    showOfficialLink,
   };
 }
 
@@ -619,7 +606,7 @@ export function ProductForm({
 //                   Main Product
 // -----------------------------------------------------
 export default function Product() {
-  const {product, relatedProducts, showOfficialLink} = useLoaderData();
+  const {product, relatedProducts} = useLoaderData();
   const variants = product.variants;
   const descriptionRef = useRef(null);
   const shippingRef = useRef(null);
@@ -816,11 +803,11 @@ export default function Product() {
             <div className="product-section">
               <div dangerouslySetInnerHTML={{__html: descriptionHtml || ''}} />
 
-              {showOfficialLink && (
+              {product.metafieldOfficialProductLink?.value && (
                 <p style={{marginTop: '1.5rem'}}>
                   <a
                     className="official-product-link"
-                    href={product.metafieldOfficialProductLink}
+                    href={product.metafieldOfficialProductLink.value}
                     target="_blank"
                     rel="noopener"
                   >
