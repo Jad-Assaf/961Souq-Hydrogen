@@ -572,7 +572,7 @@ p.home-colleciton-title {
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   border-radius: 10px;
   padding: 30px 10px 60px;
-  margin: 85px auto !important;
+  margin: 50px auto !important;
 
   @media (max-width: 1024px) {
     padding: 0 10px !important;
@@ -1356,7 +1356,7 @@ aside li {
   align-items: center;
   justify-content: space-between;
   height: var(--header-height);
-  width: 99vw;
+  width: 95vw;
   max-width: 1575px;
   margin: 15px auto;
 }
@@ -2354,7 +2354,6 @@ input.search-bar:focus-visible {
   align-items: start;
   width: 92vw;
   max-width: 1500px;
-  margin: 5vw auto;
 
   @media (max-width: 1024px) {
     width: 96vw !important;
@@ -3307,7 +3306,7 @@ a.video-link {
   }
 
   .home {
-    margin-top: 75px !important;
+    margin-top: 50px !important;
   }
 
   .header-search {
@@ -3363,9 +3362,6 @@ a.video-link {
     top: 0;
   }
 
-  .header-top {
-    justify-content: flex-end;
-  }
 
   .vertical-header {
     position: fixed;
@@ -3393,11 +3389,6 @@ a.video-link {
   /* ------------------------------------------------------------------ */
   /* MAIN CONTENT — push it over                                         */
   /* ------------------------------------------------------------------ */
-  main {
-    /* or .main-wrapper – whatever wraps your routes */
-    margin-left: 75px;
-    transition: margin-left 0.3s ease;
-  }
 
   .vh-logo-link {
     width: 300px;

@@ -8,7 +8,6 @@ import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch fun
 import AlgoliaSearch from './StorefrontSearch';
 // import StorefrontSearch from './StorefrontSearch';
 
-
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -289,6 +288,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             }}
           </SearchFormPredictive> */}
           {/* <SearchForm /> */}
+          <NavLink to="/" className={'desk-nav-logo'}>
+            <img
+              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400"
+              alt="961souq logo"
+              width="120"
+              height="47"
+            />
+          </NavLink>
           <AlgoliaSearch />
           <div className="header-ctas">
             <NavLink
@@ -504,7 +511,7 @@ export function HeaderMenu({menu, viewport}) {
     // <nav className={`header-menu-${viewport}`} role="navigation">
     //   {renderMenuItems(menu?.items)}
     // </nav>
-     <div></div>
+    <div></div>
   );
 }
 

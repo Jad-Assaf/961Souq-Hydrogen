@@ -1,0 +1,134 @@
+/* Hide on small screens */
+@media (max-width: 1023.98px) {
+    .nav-bar-container {
+        display: none !important;
+    }
+}
+
+/* Container + backdrop */
+.nav-bar-container {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(25px);
+    padding: 80px 5px 0;
+    justify-content: flex-start;
+}
+
+/* Navbar wrapper */
+.nav-bar {
+    position: sticky;
+    top: 100px;
+    z-index: 50;
+    max-width: 1575px;
+    width: 100%;
+    margin: auto;
+}
+
+/* Top-level list */
+.nav-list {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 2rem;
+    list-style: none;
+    margin: auto;
+    padding: 1rem 0;
+    max-width: 1575px;
+    width: 95vw;
+}
+
+/* Item */
+.nav-item {
+    position: relative;
+}
+
+/* Links */
+.nav-link {
+    text-decoration: none;
+    color: #111;
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link-active {
+    color: #2172af;
+}
+
+/* Submenu wrapper (all levels) */
+.nav-submenu-wrapper {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(5px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    min-width: 250px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+/* Show submenu on hover */
+.nav-item.nav-has-submenu:hover>.nav-submenu-wrapper {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* 3rd+ levels: position to the right of parent */
+/* this ensures 3rd-level panels slide out beside the 2nd level */
+.nav-submenu>li.nav-has-submenu:hover>.nav-submenu-wrapper {
+    top: 0;
+    /* align tops */
+    left: 75%;
+    /* move immediately to the right */
+    margin-left: 0.5rem;
+    /* small gap */
+}
+
+
+/* flip-left positions any submenu to the left of its parent */
+/* Flip submenu back on first hover without overlapping parent panel */
+.nav-item.flip-left>.nav-submenu-wrapper {
+    left: auto;
+    right: 0;
+}
+
+/* Submenu list */
+.nav-submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+}
+
+.nav-submenu li {
+    width: 100%;
+}
+
+/* Submenu links */
+.nav-submenu-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.nav-submenu-link:hover,
+.nav-submenu-link-active {
+    background: #f3f4f6;
+    color: #2172af;
+}
