@@ -3,6 +3,9 @@
     .nav-bar-container {
         display: none !important;
     }
+    .desk-nav-logo {
+        display: none !important;
+    }
 }
 
 /* Container + backdrop */

@@ -3331,6 +3331,7 @@ a.video-link {
     backdrop-filter: blur(25px);
     transition: all 0.3s ease;
     position: relative;
+    margin-left: 30px;
   }
 
   .main-search {
