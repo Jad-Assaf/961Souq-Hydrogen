@@ -606,6 +606,10 @@ export default function Homepage() {
           <VideosGallery
             videos={[
               {
+                src: 'https://cdn.shopify.com/videos/c/o/v/fa446492aa194b0d9b6f9e2dd686111c.mp4',
+                href: '/products/air-cooling-mist-fan',
+              },
+              {
                 src: 'https://cdn.shopify.com/videos/c/o/v/a67b4e70a5b1452f959de8f4189ffc8f.mp4',
                 href: '/products/telesin-fun-shot-magnetic-phone-grip-with-light',
               },
