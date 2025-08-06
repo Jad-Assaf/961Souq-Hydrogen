@@ -80,6 +80,9 @@ Disallow: /wp-admin
 Disallow: /wp-*
 Disallow: /collections/*/*.json
 Disallow: /collections/*?direction
+Disallow: /collections/*?*&direction
+Disallow: /collections?direction
+Disallow: /collections?*&direction
 Disallow: /cdn/fonts
 Disallow: /cart
 Disallow: /orders
