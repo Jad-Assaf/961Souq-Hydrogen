@@ -100,6 +100,8 @@ Disallow: /*?utm_medium=
 Disallow: /*?utm_campaign=
 Disallow: /*?utm_content=
 Disallow: /*?pr_prod_strat*
+Disallow: /collections/*?sort
+Disallow: /collections/*?*&sort
 Disallow: /collections/*sort_by*
 Disallow: /*/collections/*sort_by*
 Disallow: /collections/*+*
