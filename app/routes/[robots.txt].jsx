@@ -81,6 +81,8 @@ Disallow: /wp-*
 Disallow: /collections/*/*.json
 Disallow: /collections/*?direction
 Disallow: /collections/*?*&direction
+Disallow: /collections/*?page
+Disallow: /collections/*?*&page
 Disallow: /collections?direction
 Disallow: /collections?*&direction
 Disallow: /cdn/fonts
@@ -99,7 +101,7 @@ Disallow: /*?utm_source=
 Disallow: /*?utm_medium=
 Disallow: /*?utm_campaign=
 Disallow: /*?utm_content=
-Disallow: /*?pr_prod_strat*
+Disallow: /products/*?pr_prod_strat*
 Disallow: /collections/*?sort
 Disallow: /collections/*?*&sort
 Disallow: /collections/*sort_by*
