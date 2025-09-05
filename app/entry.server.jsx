@@ -113,6 +113,7 @@ export default async function handleRequest(
       'https://*.algolianet.com',
       'https://cdn.jsdelivr.net',
       'https://insights.algolia.io',
+      'https://www.google-analytics.com',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
