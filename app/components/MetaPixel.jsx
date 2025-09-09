@@ -1,11 +1,15 @@
+// src/components/MetaPixelManual.jsx
 import {useEffect, useRef} from 'react';
 import {useLocation} from 'react-router-dom';
 
+// --- Constants ---
+const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
+const FB_SDK_SRC = 'https://connect.facebook.net/en_US/sdk.js';
+
 // --- Helpers ---
 const generateEventId = () => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID)
     return crypto.randomUUID();
-  }
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 };
 
@@ -51,9 +55,7 @@ const ensureFbc = () => {
 };
 
 const getExternalId = () => {
-  if (window.__customerData && window.__customerData.id) {
-    return window.__customerData.id;
-  }
+  if (window.__customerData?.id) return window.__customerData.id;
   let anonId = localStorage.getItem('anonExternalId');
   if (!anonId) {
     anonId = generateEventId();
@@ -62,7 +64,6 @@ const getExternalId = () => {
   return anonId;
 };
 
-// ✅ Only return a valid 2-letter country code (ISO 3166-1 alpha-2, lowercase)
 const getCountry = () => {
   try {
     const c = window.__customerData || {};
@@ -72,46 +73,75 @@ const getCountry = () => {
       c.shippingAddress ||
       c.billingAddress ||
       {};
-
-    // Prefer explicit country code fields
-    const codeFromAddr =
-      addr.countryCode || addr.country_code || addr.countryCodeV2;
-    if (codeFromAddr && /^[A-Za-z]{2}$/.test(String(codeFromAddr))) {
-      return String(codeFromAddr).toLowerCase();
-    }
-    // If the field is already 2 letters in `country`, accept it
-    if (addr.country && /^[A-Za-z]{2}$/.test(String(addr.country))) {
+    if (addr.countryCode && /^[A-Za-z]{2}$/.test(addr.countryCode))
+      return String(addr.countryCode).toLowerCase();
+    if (addr.country && /^[A-Za-z]{2}$/.test(addr.country))
       return String(addr.country).toLowerCase();
-    }
-
-    // Fallbacks: parse region from lang (en-US -> US)
-    const htmlLang = document.documentElement?.lang || '';
-    if (/-|_/.test(htmlLang)) {
-      const part = htmlLang.split(/-|_/)[1];
-      if (part && /^[A-Za-z]{2}$/.test(part)) return part.toLowerCase();
-    }
-    const navLang =
-      navigator.language || (Array.isArray(navigator.languages) && navigator.languages[0]) || '';
-    if (/-|_/.test(navLang)) {
-      const part = navLang.split(/-|_/)[1];
-      if (part && /^[A-Za-z]{2}$/.test(part)) return part.toLowerCase();
-    }
+    const lang = document.documentElement?.lang || '';
+    const m = lang.match(/[-_](?<r>[A-Za-z]{2})/);
+    if (m?.groups?.r) return m.groups.r.toLowerCase();
   } catch {}
-  return ''; // unknown
+  return '';
 };
 
-// Hash helpers for Pixel Advanced Matching
-const sha256Hex = async (value) => {
-  if (!value) return '';
-  const enc = new TextEncoder().encode(String(value).trim().toLowerCase());
-  const buf = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-};
-const normalizePhone = (p) => (p || '').replace(/\D+/g, '');
+// --- Facebook SDK (for fb_login_id) ---
+const loadFacebookSDK = (appId) =>
+  new Promise((resolve) => {
+    if (window.FB) return resolve();
+    window.fbAsyncInit = function () {
+      window.FB.init({appId, cookie: true, xfbml: false, version: 'v20.0'});
+      resolve();
+    };
+    if (!document.querySelector(`script[src="${FB_SDK_SRC}"]`)) {
+      const s = document.createElement('script');
+      s.async = true;
+      s.defer = true;
+      s.src = FB_SDK_SRC;
+      document.head.appendChild(s);
+    } else {
+      // If script already present but fbAsyncInit already fired, resolve soon
+      const wait = setInterval(() => {
+        if (window.FB) {
+          clearInterval(wait);
+          resolve();
+        }
+      }, 50);
+      setTimeout(() => clearInterval(wait), 5000);
+    }
+  });
 
-// --- CAPI: send PageView once per session (server will add IP & hash PII) ---
+const readFbLoginId = async () => {
+  const cached =
+    sessionStorage.getItem('fb_login_id') || window.__fb_login_id || '';
+  if (cached) return cached;
+  if (!window.FB) return '';
+  return new Promise((resolve) => {
+    window.FB.getLoginStatus((resp) => {
+      const id =
+        resp?.status === 'connected' ? resp.authResponse?.userID || '' : '';
+      if (id) {
+        sessionStorage.setItem('fb_login_id', id);
+        window.__fb_login_id = id;
+      }
+      resolve(id || '');
+    });
+  });
+};
+
+const subscribeFbAuthChanges = () => {
+  if (!window.FB?.Event) return;
+  window.FB.Event.subscribe('auth.statusChange', (resp) => {
+    const id =
+      resp?.status === 'connected' ? resp.authResponse?.userID || '' : '';
+    if (id) {
+      sessionStorage.setItem('fb_login_id', id);
+      window.__fb_login_id = id;
+      console.log('[Meta FB SDK] fb_login_id updated →', id);
+    }
+  });
+};
+
+// --- CAPI PageView (server will add IP/UA) ---
 const trackPageViewCAPI = async (eventId, extraData) => {
   const capiPayload = {
     action_source: 'website',
@@ -124,15 +154,10 @@ const trackPageViewCAPI = async (eventId, extraData) => {
       fbp: extraData.fbp,
       fbc: extraData.fbc,
       external_id: extraData.external_id,
-      email: extraData.email || '',
-      phone: extraData.phone || '',
       fb_login_id: extraData.fb_login_id || '',
       country: extraData.country || '',
     },
-    custom_data: {
-      URL: extraData.URL,
-      'Event id': eventId,
-    },
+    custom_data: {URL: extraData.URL, 'Event id': eventId},
   };
 
   console.log('[Meta CAPI][PageView] payload →', capiPayload);
@@ -147,16 +172,24 @@ const trackPageViewCAPI = async (eventId, extraData) => {
     .catch((err) => console.warn('[Meta CAPI][PageView] error', err));
 };
 
-const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
-
-const MetaPixel = ({pixelId}) => {
+const MetaPixel = ({pixelId, facebookAppId}) => {
   const location = useLocation();
   const didInitRef = useRef(false);
 
+  // Initialize fbq once, load FB SDK (optional), and send first PageView
   useEffect(() => {
     if (!pixelId || didInitRef.current) return;
 
+    // Ensure the base script exists only once
+    if (!document.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
+      const s = document.createElement('script');
+      s.defer = true;
+      s.src = SCRIPT_SRC;
+      document.head.appendChild(s);
+    }
+
     if (typeof fbq !== 'function') {
+      // Create fbq stub; insert script only if not present
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return;
         n = f.fbq = function () {
@@ -169,31 +202,44 @@ const MetaPixel = ({pixelId}) => {
         n.loaded = true;
         n.version = '2.0';
         n.queue = [];
-        t = b.createElement(e);
-        t.defer = true;
-        t.src = v;
-        s = b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t, s);
+        if (!b.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
+          t = b.createElement(e);
+          t.defer = true;
+          t.src = v;
+          s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s);
+        }
       })(window, document, 'script', SCRIPT_SRC);
     }
 
     (async () => {
+      // Optional: load FB SDK to get fb_login_id (if App ID provided)
+      const appId = facebookAppId || window.__facebookAppId || '';
+      if (appId) {
+        await loadFacebookSDK(appId);
+        subscribeFbAuthChanges();
+      }
+
+      // Ensure cookies
       const fbp = ensureFbp();
       const fbc = ensureFbc();
 
       const external_id = getExternalId();
-      const rawEmail = window.__customerData?.email || '';
-      const rawPhone = window.__customerData?.phone || '';
       const country = getCountry();
 
-      const am = {external_id};
-      if (rawEmail) am.em = await sha256Hex(rawEmail);
-      if (rawPhone) am.ph = await sha256Hex(normalizePhone(rawPhone));
-      if (country) am.country = country; // ✅ Pixel advanced matching country
+      // 🔒 Global guard to avoid duplicate init for the same Pixel ID
+      window.__META_PIXELS_INITED = window.__META_PIXELS_INITED || new Set();
+      if (!window.__META_PIXELS_INITED.has(pixelId)) {
+        fbq('init', pixelId, {external_id, ...(country ? {country} : {})});
+        window.__META_PIXELS_INITED.add(pixelId);
+      } else {
+        console.warn(
+          '[Meta Pixel] init skipped; already initialized:',
+          pixelId,
+        );
+      }
 
-      fbq('init', pixelId, am);
-      console.log('[Meta Pixel][AM] init userData →', am);
-
+      // First browser PageView
       const eventId = generateEventId();
       const URL = window.location.href;
       console.log('[Meta Pixel][PageView] eventID=', eventId, {
@@ -202,24 +248,29 @@ const MetaPixel = ({pixelId}) => {
         fbc,
         external_id,
       });
-      fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
+      fbq(
+        'track',
+        'PageView',
+        {URL, fbp, fbc, external_id},
+        {eventID: eventId},
+      );
 
-      const fb_login_id = window.__customerData?.fb_login_id || '';
+      // CAPI PageView (include fb_login_id if available)
+      const fb_login_id = await readFbLoginId();
       trackPageViewCAPI(eventId, {
         fbp,
         fbc,
         external_id,
         URL,
-        email: rawEmail,
-        phone: rawPhone,
         fb_login_id,
-        country, // ✅ CAPI country
+        country,
       });
 
       didInitRef.current = true;
     })();
-  }, [pixelId]);
+  }, [pixelId, facebookAppId]);
 
+  // Track PageView on route changes (Pixel only, to avoid CAPI spam)
   useEffect(() => {
     if (typeof fbq !== 'function') return;
 
