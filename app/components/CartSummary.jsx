@@ -14,10 +14,7 @@ export function CartSummary({cart, layout}) {
   return (
     <div aria-labelledby="cart-summary" className={className}>
       <p style={{margin: '15px 0 10px 0'}}>
-        Shipping: &nbsp;TBD
-      </p>
-      <p>
-        Total Tax: &nbsp;TBD
+        Shipping: &nbsp;Calculated At Checkout
       </p>
       <dl className="cart-subtotal">
         <h4>

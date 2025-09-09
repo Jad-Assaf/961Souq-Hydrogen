@@ -1,6 +1,6 @@
 // metaPixelEvents.js
 
-// --- Helper to fetch the Client IP from a public API (ipify) ---
+// Keep IP helper (used by Purchase ONLY; others will not call it)
 export const getClientIP = async () => {
   try {
     const res = await fetch('https://api.ipify.org?format=json');
@@ -12,8 +12,112 @@ export const getClientIP = async () => {
   }
 };
 
-// --- Added Helpers for Customer Data ---
+// --- Utils / Helpers ---
+const generateEventId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+};
 
+const readCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  return parts.length === 2 ? parts.pop().split(';').shift() : '';
+};
+
+const setCookie = (name, value, days = 90) => {
+  try {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+  } catch {}
+};
+
+// Ensure FBP coverage (create if missing)
+const ensureFbp = () => {
+  let fbp = readCookie('_fbp');
+  if (!fbp) {
+    const ts = Math.floor(Date.now() / 1000);
+    const rand = Math.floor(Math.random() * 10 ** 10);
+    fbp = `fb.1.${ts}.${rand}`;
+    setCookie('_fbp', fbp);
+  }
+  return fbp;
+};
+
+// Ensure FBC coverage (synthesize from fbclid if cookie missing)
+const ensureFbc = () => {
+  try {
+    const url = new URL(window.location.href);
+    const fbclid = url.searchParams.get('fbclid');
+    let fbc = readCookie('_fbc');
+    if (!fbc && fbclid) {
+      const ts = Math.floor(Date.now() / 1000);
+      fbc = `fb.1.${ts}.${fbclid}`;
+      setCookie('_fbc', fbc);
+    }
+    return readCookie('_fbc');
+  } catch {
+    return readCookie('_fbc');
+  }
+};
+
+const parseGid = (gid) => {
+  if (!gid) return '';
+  const parts = gid.split('/');
+  return parts[parts.length - 1];
+};
+
+const getExternalId = (customerData = {}) => {
+  if (customerData && customerData.id) return customerData.id;
+  if (window.__customerData && window.__customerData.id)
+    return window.__customerData.id;
+  let anonId = localStorage.getItem('anonExternalId');
+  if (!anonId) {
+    anonId = generateEventId();
+    localStorage.setItem('anonExternalId', anonId);
+  }
+  return anonId;
+};
+
+const getCountry = (customerData = {}) => {
+  try {
+    const c = customerData.id ? customerData : window.__customerData || {};
+    const addr =
+      c.defaultAddress ||
+      c.address ||
+      c.shippingAddress ||
+      c.billingAddress ||
+      {};
+    if (addr.countryCode) return String(addr.countryCode).toLowerCase();
+    if (addr.country) return String(addr.country).slice(0, 2).toLowerCase();
+    const htmlLang = document.documentElement?.lang || '';
+    if (htmlLang.includes('-')) return htmlLang.split('-')[1].toLowerCase();
+    if (htmlLang.length === 2) return htmlLang.toLowerCase();
+  } catch {}
+  return '';
+};
+
+const sendToServerCapi = async (eventData) => {
+  // Debug
+  console.log(`[Meta CAPI][${eventData?.event_name}] payload →`, eventData);
+
+  fetch('/facebookConversions', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(eventData),
+  })
+    .then((res) => res.json())
+    .then((res) =>
+      console.log(`[Meta CAPI][${eventData?.event_name}] response ←`, res),
+    )
+    .catch((error) =>
+      console.warn(`[Meta CAPI][${eventData?.event_name}] error`, error),
+    );
+};
+
+// --- Customer lookup (unchanged) ---
 const CUSTOMER_QUERY = `
   query getCustomer($customerAccessToken: String!) {
     customer(customerAccessToken: $customerAccessToken) {
@@ -26,24 +130,23 @@ const CUSTOMER_QUERY = `
   }
 `;
 
-/**
- * Fetch customer data from Shopify using the Storefront API.
- * @param {string} customerAccessToken - The access token for the logged-in customer.
- * @returns {Promise<Object|null>} - The customer data or null if not found.
- */
 export const fetchCustomerData = async (customerAccessToken) => {
   try {
-    const response = await fetch(`https://${process.env.SHOPIFY_STORE_DOMAIN}/api/2024-10/graphql.json`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': process.env.PUBLIC_STOREFRONT_API_TOKEN,
+    const response = await fetch(
+      `https://${process.env.SHOPIFY_STORE_DOMAIN}/api/2024-10/graphql.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Storefront-Access-Token':
+            process.env.PUBLIC_STOREFRONT_API_TOKEN,
+        },
+        body: JSON.stringify({
+          query: CUSTOMER_QUERY,
+          variables: {customerAccessToken},
+        }),
       },
-      body: JSON.stringify({
-        query: CUSTOMER_QUERY,
-        variables: { customerAccessToken },
-      }),
-    });
+    );
     const result = await response.json();
     if (result.errors) {
       return null;
@@ -54,108 +157,64 @@ export const fetchCustomerData = async (customerAccessToken) => {
   }
 };
 
-/**
- * Helper function to get the external_id.
- * It checks the provided customerData first, then a global variable.
- * If no customer id is available, it generates a persistent anonymous id using localStorage.
- * @param {Object} customerData
- * @returns {string} The external id.
- */
-const getExternalId = (customerData = {}) => {
-  if (customerData && customerData.id) return customerData.id;
-  if (window.__customerData && window.__customerData.id) return window.__customerData.id;
-  let anonId = localStorage.getItem('anonExternalId');
-  if (!anonId) {
-    anonId = generateEventId();
-    localStorage.setItem('anonExternalId', anonId);
-  }
-  return anonId;
-};
-
-// --- Existing Tracking Code ---
+// ---------------- Events ----------------
 
 /**
- * Utility function to extract the numeric ID from Shopify's global ID (gid).
- * Example: "gid://shopify/Product/123456789" => "123456789"
- * @param {string} gid - The global ID from Shopify.
- * @returns {string} - The extracted numeric ID.
- */
-const parseGid = (gid) => {
-  if (!gid) return '';
-  const parts = gid.split('/');
-  return parts[parts.length - 1];
-};
-
-/**
- * Helper function to generate unique event IDs.
- * Uses crypto.randomUUID if available, otherwise falls back to a custom method.
- * @returns {string} - A unique event ID.
- */
-const generateEventId = () => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  } else {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-  }
-};
-
-/**
- * Sends event data to our /facebookConversions endpoint (server-side).
- * @param {Object} eventData - The event data payload.
- */
-const sendToServerCapi = async (eventData) => {
-  fetch('/facebookConversions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(eventData),
-  })
-    .then((res) => res.json())
-    .catch((error) => {});
-};
-
-/**
- * Tracks a ViewContent event when a product is viewed.
- * @param {Object} product - The product details.
- * @param {Object} customerData - (Optional) Customer data with fields such as id, email, fb_login_id, etc.
+ * ViewContent (per-PDP, no global lockout)
  */
 export const trackViewContent = async (product, customerData = {}) => {
-  if (window.__viewContentTracked) return;
-  window.__viewContentTracked = true;
-
+  // De-dupe per PDP (variant or product)
   const variantId = parseGid(product.selectedVariant?.id);
-  const price = product.selectedVariant?.price?.amount || product.price?.amount || 0;
+  const dedupeKey =
+    variantId || `p:${parseGid(product.id)}` || window.location.pathname;
+  window.__vcSeen = window.__vcSeen || new Set();
+  if (window.__vcSeen.has(dedupeKey)) return;
+  window.__vcSeen.add(dedupeKey);
+
+  const price =
+    product.selectedVariant?.price?.amount || product.price?.amount || 0;
   const currency = product.price?.currencyCode || 'USD';
   const eventId = generateEventId();
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    return parts.length === 2 ? parts.pop().split(';').shift() : '';
-  };
-  const fbp = getCookie('_fbp');
-  const fbc = getCookie('_fbc');
+  const fbp = ensureFbp();
+  const fbc = ensureFbc();
 
-  const { email = '', phone = '', fb_login_id = '' } = customerData;
+  const {email = '', phone = '', fb_login_id = ''} = customerData;
   const external_id = getExternalId(customerData);
+  const country = getCountry(customerData);
 
   const URL = window.location.href;
   const content_name = product.title || '';
   const content_category = product.productType || '';
+  const contents = [
+    {
+      id: variantId || '',
+      quantity: 1,
+      item_price: parseFloat(price) || 0,
+    },
+  ];
 
-  // Meta Pixel call (client-side)
+  // Meta Pixel
   if (typeof fbq === 'function') {
+    console.log('[Meta Pixel][ViewContent] eventID=', eventId, {
+      URL,
+      currency,
+      price,
+      variantId,
+    });
     fbq(
       'track',
       'ViewContent',
       {
         URL,
-        "Event id": eventId,
+        'Event id': eventId,
         value: parseFloat(price),
-        currency: currency,
+        currency,
         content_ids: [variantId],
         content_type: 'product_variant',
         content_name,
         content_category,
+        contents,
         fbp,
         fbc,
         external_id,
@@ -163,78 +222,94 @@ export const trackViewContent = async (product, customerData = {}) => {
         phone,
         fb_login_id,
       },
-      { eventID: eventId }
+      {eventID: eventId},
     );
   }
 
-  // Fetch the client IP and then send to the server-side endpoint
-  const clientIP = await getClientIP();
+  // CAPI (no client IP here; server will fill)
   sendToServerCapi({
     action_source: 'website',
     event_name: 'ViewContent',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
+    event_source_url: URL,
     user_data: {
       client_user_agent: navigator.userAgent,
-      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
+      email,
+      phone,
+      fb_login_id,
+      country,
     },
     custom_data: {
       URL,
-      "Event id": eventId,
+      'Event id': eventId,
       value: parseFloat(price),
-      currency: currency,
+      currency,
       content_ids: [variantId],
       content_type: 'product_variant',
       content_name,
       content_category,
+      contents,
     },
   });
 };
 
 /**
- * Tracks an AddToCart event when a product is added to the cart.
- * @param {Object} product - The product details.
- * @param {Object} customerData - (Optional) Customer data.
+ * AddToCart
  */
 export const trackAddToCart = async (product, customerData = {}) => {
   const variantId = parseGid(product.selectedVariant?.id);
-  const price = product.selectedVariant?.price?.amount || product.price?.amount || 0;
+  const unitPrice = parseFloat(
+    product.selectedVariant?.price?.amount || product.price?.amount || 0,
+  );
   const currency = product.price?.currencyCode || 'USD';
+  const quantity = Number(product.quantity || 1);
+  const value = unitPrice * quantity;
   const eventId = generateEventId();
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    return parts.length === 2 ? parts.pop().split(';').shift() : '';
-  };
-  const fbp = getCookie('_fbp');
-  const fbc = getCookie('_fbc');
-  const { email = '', phone = '', fb_login_id = '' } = customerData;
+  const fbp = ensureFbp();
+  const fbc = ensureFbc();
+  const {email = '', phone = '', fb_login_id = ''} = customerData;
   const external_id = getExternalId(customerData);
+  const country = getCountry(customerData);
 
   const URL = window.location.href;
   const content_name = product.title || '';
   const content_category = product.productType || '';
-  const num_items = product.quantity || 1;
+  const contents = [
+    {
+      id: variantId || '',
+      quantity,
+      item_price: unitPrice,
+    },
+  ];
 
-  // Meta Pixel call
+  // Pixel
   if (typeof fbq === 'function') {
+    console.log('[Meta Pixel][AddToCart] eventID=', eventId, {
+      URL,
+      value,
+      currency,
+      variantId,
+      quantity,
+    });
     fbq(
       'track',
       'AddToCart',
       {
         URL,
-        "Event id": eventId,
-        value: parseFloat(price),
-        currency: currency,
+        'Event id': eventId,
+        value,
+        currency,
         content_ids: [variantId],
         content_type: 'product_variant',
         content_name,
         content_category,
-        num_items,
+        num_items: quantity,
+        contents,
         fbp,
         fbc,
         external_id,
@@ -242,42 +317,44 @@ export const trackAddToCart = async (product, customerData = {}) => {
         phone,
         fb_login_id,
       },
-      { eventID: eventId }
+      {eventID: eventId},
     );
   }
 
-  const clientIP = await getClientIP();
-  // Server-to-Server CAPI
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'AddToCart',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
+    event_source_url: URL,
     user_data: {
       client_user_agent: navigator.userAgent,
-      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
+      email,
+      phone,
+      fb_login_id,
+      country,
     },
     custom_data: {
       URL,
-      "Event id": eventId,
-      value: parseFloat(price),
-      currency: currency,
+      'Event id': eventId,
+      value,
+      currency,
       content_ids: [variantId],
       content_type: 'product_variant',
       content_name,
       content_category,
-      num_items,
+      num_items: quantity,
+      contents,
     },
   });
 };
 
 /**
- * Tracks a Purchase event after a successful purchase.
- * @param {Object} order - The order details.
- * @param {Object} customerData - (Optional) Customer data.
+ * Purchase  ❗️DO NOT EDIT (kept exactly as you provided)
  */
 export const trackPurchase = async (order, customerData = {}) => {
   const eventId = generateEventId();
@@ -289,7 +366,7 @@ export const trackPurchase = async (order, customerData = {}) => {
   };
   const fbp = getCookie('_fbp');
   const fbc = getCookie('_fbc');
-  const { email = '', phone = '', fb_login_id = '' } = customerData;
+  const {email = '', phone = '', fb_login_id = ''} = customerData;
   const external_id = getExternalId(customerData);
 
   // Meta Pixel call
@@ -315,7 +392,7 @@ export const trackPurchase = async (order, customerData = {}) => {
         phone,
         fb_login_id,
       },
-      { eventID: eventId }
+      {eventID: eventId},
     );
   }
 
@@ -349,25 +426,21 @@ export const trackPurchase = async (order, customerData = {}) => {
 };
 
 /**
- * Tracks a Search event when a user performs a search.
- * @param {string} query - The search query.
- * @param {Object} customerData - (Optional) Customer data.
+ * Search
  */
 export const trackSearch = async (query, customerData = {}) => {
   const eventId = generateEventId();
+  const fbp = ensureFbp();
+  const fbc = ensureFbc();
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    return parts.length === 2 ? parts.pop().split(';').shift() : '';
-  };
-  const fbp = getCookie('_fbp');
-  const fbc = getCookie('_fbc');
-  const { email = '', fb_login_id = '' } = customerData;
+  const {email = '', phone = '', fb_login_id = ''} = customerData;
   const external_id = getExternalId(customerData);
+  const country = getCountry(customerData);
+  const URL = window.location.href;
 
-  // Meta Pixel call
+  // Pixel
   if (typeof fbq === 'function') {
+    console.log('[Meta Pixel][Search] eventID=', eventId, {query});
     fbq(
       'track',
       'Search',
@@ -378,25 +451,29 @@ export const trackSearch = async (query, customerData = {}) => {
         fbc,
         external_id,
         email,
+        phone,
         fb_login_id,
       },
-      { eventID: eventId }
+      {eventID: eventId},
     );
   }
 
-  const clientIP = await getClientIP();
-  // Server-to-Server CAPI
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'Search',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
+    event_source_url: URL,
     user_data: {
       client_user_agent: navigator.userAgent,
-      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
+      email,
+      phone,
+      fb_login_id,
+      country,
     },
     custom_data: {
       search_string: query,
@@ -405,132 +482,159 @@ export const trackSearch = async (query, customerData = {}) => {
 };
 
 /**
- * Tracks an InitiateCheckout event when a user starts the checkout process.
- * @param {Object} cart - The cart details.
- * @param {Object} customerData - (Optional) Customer data.
+ * InitiateCheckout
  */
 export const trackInitiateCheckout = async (cart, customerData = {}) => {
   const eventId = generateEventId();
   const variantIds = cart.items?.map((item) => parseGid(item.variantId)) || [];
-  const value = parseFloat(cart.cost?.totalAmount?.amount) || 0;
+  const contents = (cart.items || []).map((item) => ({
+    id: parseGid(item.variantId),
+    quantity: Number(item.quantity || 1),
+    item_price: parseFloat(item.price || item?.cost?.amount || 0),
+  }));
+  const value =
+    parseFloat(cart.cost?.totalAmount?.amount) ||
+    contents.reduce((sum, c) => sum + c.item_price * c.quantity, 0);
   const currency = cart.cost?.totalAmount?.currencyCode || 'USD';
   const num_items = cart.items?.length || 0;
   const URL = window.location.href;
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    return parts.length === 2 ? parts.pop().split(';').shift() : '';
-  };
-  const fbp = getCookie('_fbp');
-  const fbc = getCookie('_fbc');
-  const { email = '', fb_login_id = '' } = customerData;
+  const fbp = ensureFbp();
+  const fbc = ensureFbc();
+  const {email = '', phone = '', fb_login_id = ''} = customerData;
   const external_id = getExternalId(customerData);
+  const country = getCountry(customerData);
 
-  // Meta Pixel call
+  // Pixel
   if (typeof fbq === 'function') {
     try {
+      console.log('[Meta Pixel][InitiateCheckout] eventID=', eventId, {
+        value,
+        currency,
+        num_items,
+      });
       fbq(
         'track',
         'InitiateCheckout',
         {
           URL,
-          "Event id": eventId,
+          'Event id': eventId,
           value,
           currency,
           content_ids: variantIds,
           content_type: 'product_variant',
           num_items,
+          contents,
           fbp,
           fbc,
           external_id,
           email,
+          phone,
           fb_login_id,
         },
-        { eventID: eventId }
+        {eventID: eventId},
       );
     } catch (error) {}
   }
 
-  const clientIP = await getClientIP();
-  // Server-to-Server CAPI
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'InitiateCheckout',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
+    event_source_url: URL,
     user_data: {
       client_user_agent: navigator.userAgent,
-      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
+      email,
+      phone,
+      fb_login_id,
+      country,
     },
     custom_data: {
       URL,
-      "Event id": eventId,
+      'Event id': eventId,
       value,
       currency,
       content_ids: variantIds,
       content_type: 'product_variant',
       num_items,
+      contents,
     },
   });
 };
 
 /**
- * Tracks an AddPaymentInfo event when a user adds payment information.
- * @param {Object} order - The order details.
- * @param {Object} customerData - (Optional) Customer data.
+ * AddPaymentInfo
  */
 export const trackAddPaymentInfo = async (order, customerData = {}) => {
   const eventId = generateEventId();
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    return parts.length === 2 ? parts.pop().split(';').shift() : '';
-  };
-  const fbp = getCookie('_fbp');
-  const fbc = getCookie('_fbc');
-  const { email = '', fb_login_id = '' } = customerData;
+  const fbp = ensureFbp();
+  const fbc = ensureFbc();
+  const {email = '', phone = '', fb_login_id = ''} = customerData;
   const external_id = getExternalId(customerData);
+  const country = getCountry(customerData);
 
-  // Meta Pixel call
+  const currency = order.currency || 'USD';
+  const value = order.total || 0;
+  const contents = (order.items || []).map((item) => ({
+    id: parseGid(item.variantId),
+    quantity: Number(item.quantity || 1),
+    item_price: parseFloat(item.price || 0),
+  }));
+  const content_ids = contents.map((c) => c.id);
+  const URL = window.location.href;
+
+  // Pixel
   if (typeof fbq === 'function') {
+    console.log('[Meta Pixel][AddPaymentInfo] eventID=', eventId, {
+      value,
+      currency,
+    });
     fbq(
       'track',
       'AddPaymentInfo',
       {
-        currency: 'USD',
-        value: order.total,
+        currency,
+        value,
         fbp,
         fbc,
         external_id,
         email,
+        phone,
         fb_login_id,
       },
-      { eventID: eventId }
+      {eventID: eventId},
     );
   }
 
-  const clientIP = await getClientIP();
-  // Server-to-Server CAPI
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'AddPaymentInfo',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
+    event_source_url: URL,
     user_data: {
       client_user_agent: navigator.userAgent,
-      client_ip_address: clientIP,
       fbp,
       fbc,
       external_id,
+      email,
+      phone,
+      fb_login_id,
+      country,
     },
     custom_data: {
-      currency: 'USD',
-      value: order.total,
+      currency,
+      value,
+      content_type: 'product_variant',
+      content_ids,
+      contents,
     },
   });
 };

@@ -2,23 +2,57 @@
 import {useEffect, useRef} from 'react';
 import {useLocation} from 'react-router-dom';
 
-// --- Helper: Generate a unique event ID
+// --- Helpers ---
 const generateEventId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
-  } else {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
   }
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 };
 
-// --- Helper: Get cookie value
-const getCookie = (name) => {
+const readCookie = (name) => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   return parts.length === 2 ? parts.pop().split(';').shift() : '';
 };
 
-// --- Helper: Get external id from global customer data or generate an anonymous one
+const setCookie = (name, value, days = 90) => {
+  try {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+  } catch {}
+};
+
+const ensureFbp = () => {
+  let fbp = readCookie('_fbp');
+  if (!fbp) {
+    // Synthesize per Meta format: fb.1.<ts>.<random>
+    const ts = Math.floor(Date.now() / 1000);
+    const rand = Math.floor(Math.random() * 10 ** 10);
+    fbp = `fb.1.${ts}.${rand}`;
+    setCookie('_fbp', fbp);
+  }
+  return fbp;
+};
+
+const ensureFbc = () => {
+  // If there's a fbclid in URL and no _fbc cookie, synthesize _fbc
+  try {
+    const url = new URL(window.location.href);
+    const fbclid = url.searchParams.get('fbclid');
+    let fbc = readCookie('_fbc');
+    if (!fbc && fbclid) {
+      const ts = Math.floor(Date.now() / 1000);
+      fbc = `fb.1.${ts}.${fbclid}`;
+      setCookie('_fbc', fbc);
+    }
+    return readCookie('_fbc'); // return cookie (might be empty)
+  } catch {
+    return readCookie('_fbc');
+  }
+};
+
 const getExternalId = () => {
   if (window.__customerData && window.__customerData.id) {
     return window.__customerData.id;
@@ -31,29 +65,43 @@ const getExternalId = () => {
   return anonId;
 };
 
-// --- Function to send PageView event via Conversions API (now including real IP)
-const trackPageViewCAPI = async (eventId, extraData) => {
-  // 1️⃣ fetch public IP
-  let clientIp = '';
+const getCountry = () => {
+  // Best-effort: customer’s default address, global hint, or html lang
   try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const json = await res.json();
-    clientIp = json.ip || '';
-  } catch (err) {
-  }
+    const c = window.__customerData || {};
+    const addr =
+      c.defaultAddress ||
+      c.address ||
+      c.shippingAddress ||
+      c.billingAddress ||
+      {};
+    if (addr.countryCode) return String(addr.countryCode).toLowerCase();
+    if (addr.country) return String(addr.country).slice(0, 2).toLowerCase();
+    const htmlLang = document.documentElement?.lang || '';
+    if (htmlLang.includes('-')) return htmlLang.split('-')[1].toLowerCase();
+    if (htmlLang.length === 2) return htmlLang.toLowerCase();
+  } catch {}
+  return ''; // unknown
+};
 
-  // 2️⃣ build payload
-  const payload = {
+// --- CAPI: send PageView once per session (server will add IP & hash PII) ---
+const trackPageViewCAPI = async (eventId, extraData) => {
+  const capiPayload = {
     action_source: 'website',
     event_name: 'PageView',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
+    event_source_url: extraData.URL, // top-level (not in custom_data)
     user_data: {
       client_user_agent: navigator.userAgent,
-      client_ip_address: clientIp,
       fbp: extraData.fbp,
       fbc: extraData.fbc,
       external_id: extraData.external_id,
+      // raw PII provided here; server will hash:
+      email: extraData.email || '',
+      phone: extraData.phone || '',
+      fb_login_id: extraData.fb_login_id || '',
+      country: extraData.country || '',
     },
     custom_data: {
       URL: extraData.URL,
@@ -61,14 +109,17 @@ const trackPageViewCAPI = async (eventId, extraData) => {
     },
   };
 
-  // 3️⃣ send to your server endpoint
+  // Debug
+  console.log('[Meta CAPI][PageView] payload →', capiPayload);
+
   fetch('/facebookConversions', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(payload),
+    body: JSON.stringify(capiPayload),
   })
-    .then((res) => res.json())
-    .catch(() => {});
+    .then((r) => r.json())
+    .then((res) => console.log('[Meta CAPI][PageView] response ←', res))
+    .catch((err) => console.warn('[Meta CAPI][PageView] error', err));
 };
 
 const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
@@ -77,18 +128,7 @@ const MetaPixel = ({pixelId}) => {
   const location = useLocation();
   const didInitRef = useRef(false);
 
-  // 1) Load the pixel script only once
-  useEffect(() => {
-    if (!pixelId) return;
-    if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) return;
-
-    const s = document.createElement('script');
-    s.defer = true;
-    s.src = SCRIPT_SRC;
-    document.head.appendChild(s);
-  }, [pixelId]);
-
-  // 2) Initialize fbq & send first PageView exactly once
+  // Initialize fbq & send first PageView exactly once (CAPI only on first load)
   useEffect(() => {
     if (!pixelId || didInitRef.current) return;
 
@@ -113,31 +153,62 @@ const MetaPixel = ({pixelId}) => {
       })(window, document, 'script', SCRIPT_SRC);
     }
 
+    // Ensure cookies coverage
+    const fbp = ensureFbp();
+    const fbc = ensureFbc();
+
     fbq('init', pixelId);
     const eventId = generateEventId();
-    const fbp = getCookie('_fbp');
-    const fbc = getCookie('_fbc');
     const external_id = getExternalId();
     const URL = window.location.href;
 
+    // Optional advanced-matching could be passed at init; keeping minimal as requested.
+
+    // Browser PageView
+    console.log('[Meta Pixel][PageView] eventID=', eventId, {
+      URL,
+      fbp,
+      fbc,
+      external_id,
+    });
     fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
-    trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
+
+    // CAPI PageView only on first load
+    const email = window.__customerData?.email || '';
+    const phone = window.__customerData?.phone || '';
+    const fb_login_id = window.__customerData?.fb_login_id || '';
+    const country = getCountry();
+    trackPageViewCAPI(eventId, {
+      fbp,
+      fbc,
+      external_id,
+      URL,
+      email,
+      phone,
+      fb_login_id,
+      country,
+    });
 
     didInitRef.current = true;
   }, [pixelId]);
 
-  // 3) Fire a PageView on every route change
+  // Fire a Pixel PageView on every route change (no CAPI here to avoid spam)
   useEffect(() => {
     if (typeof fbq !== 'function') return;
 
     const eventId = generateEventId();
-    const fbp = getCookie('_fbp');
-    const fbc = getCookie('_fbc');
+    const fbp = ensureFbp();
+    const fbc = ensureFbc();
     const external_id = getExternalId();
     const URL = window.location.href;
 
+    console.log('[Meta Pixel][PageView@route] eventID=', eventId, {
+      URL,
+      fbp,
+      fbc,
+      external_id,
+    });
     fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
-    trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
   }, [location]);
 
   return null;
