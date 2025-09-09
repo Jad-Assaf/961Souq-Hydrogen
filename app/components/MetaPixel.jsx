@@ -34,7 +34,7 @@ const ensureFbp = () => {
   return fbp;
 };
 
-// --- fbc parsing/validation (90 days) ---
+// fbc parsing/validation (90 days)
 const parseFbc = (fbc) => {
   const m = /^fb\.1\.(\d+)\.(.+)$/.exec(fbc || '');
   return m ? {ts: parseInt(m[1], 10), fbclid: m[2]} : null;
@@ -50,7 +50,7 @@ const ensureFbc = () => {
     const fbclid = url.searchParams.get('fbclid');
     let fbc = readCookie('_fbc');
 
-    // If we have a fresh fbclid on landing, (re)create _fbc with current ts.
+    // Create/refresh only when a fresh fbclid is present
     if (fbclid) {
       const ts = Math.floor(Date.now() / 1000);
       fbc = `fb.1.${ts}.${fbclid}`;
@@ -58,12 +58,10 @@ const ensureFbc = () => {
       return fbc;
     }
 
-    // Otherwise, only keep cookie if it's valid & not expired.
     if (fbc) {
       const parsed = parseFbc(fbc);
       if (!parsed || isFbcExpired(parsed.ts)) {
-        // drop stale value to avoid Meta warning
-        setCookie('_fbc', '', -1); // delete cookie
+        setCookie('_fbc', '', -1); // drop stale cookie to avoid warning
         return '';
       }
     }
@@ -85,7 +83,7 @@ const getExternalId = () => {
   return anonId;
 };
 
-// ✅ Country: only from known customer address fields (2-letter ISO). No language fallback.
+// Country from customer address only (2-letter ISO). No language fallback.
 const getCountry = () => {
   try {
     const c = window.__customerData || {};
@@ -107,7 +105,7 @@ const getCountry = () => {
   return '';
 };
 
-// Hash helpers (kept; not used for country)
+// Hash helpers kept (Pixel hashes AM itself; server hashes CAPI)
 const sha256Hex = async (value) => {
   if (!value) return '';
   const enc = new TextEncoder().encode(String(value).trim().toLowerCase());
@@ -118,7 +116,6 @@ const sha256Hex = async (value) => {
 };
 const normalizePhone = (p) => (p || '').replace(/\D+/g, '');
 
-// --- CAPI: send PageView once (server will add IP & enforce country) ---
 const trackPageViewCAPI = async (eventId, extraData) => {
   const capiPayload = {
     action_source: 'website',
@@ -134,7 +131,7 @@ const trackPageViewCAPI = async (eventId, extraData) => {
       email: extraData.email || '',
       phone: extraData.phone || '',
       fb_login_id: extraData.fb_login_id || '',
-      country: extraData.country || '', // server will override from headers if present
+      country: extraData.country || '', // server enforces hash & no default US
     },
     custom_data: {
       URL: extraData.URL,
@@ -196,7 +193,7 @@ const MetaPixel = ({pixelId}) => {
       const am = {external_id};
       if (rawEmail) am.em = await sha256Hex(rawEmail);
       if (rawPhone) am.ph = await sha256Hex(normalizePhone(rawPhone));
-      if (country) am.country = country; // Pixel AM accepts country
+      if (country) am.country = country; // Pixel AM can take plaintext; Pixel hashes it. :contentReference[oaicite:2]{index=2}
 
       fbq('init', pixelId, am);
       console.log('[Meta Pixel][AM] init userData →', am);

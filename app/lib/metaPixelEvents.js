@@ -1,6 +1,5 @@
 // metaPixelEvents.js
 
-// Keep IP helper (used by Purchase ONLY; others will not call it)
 export const getClientIP = async () => {
   try {
     const res = await fetch('https://api.ipify.org?format=json');
@@ -12,7 +11,6 @@ export const getClientIP = async () => {
   }
 };
 
-// --- Utils / Helpers ---
 const generateEventId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -45,7 +43,6 @@ const ensureFbp = () => {
   return fbp;
 };
 
-// fbc helpers (shared with MetaPixel.jsx logic)
 const parseFbc = (fbc) => {
   const m = /^fb\.1\.(\d+)\.(.+)$/.exec(fbc || '');
   return m ? {ts: parseInt(m[1], 10), fbclid: m[2]} : null;
@@ -99,7 +96,7 @@ const getExternalId = (customerData = {}) => {
   return anonId;
 };
 
-// ✅ Country from customer address only; 2-letter ISO, no language fallback
+// Country from customer address only (2-letter ISO)
 const getCountry = (customerData = {}) => {
   try {
     const c = customerData.id ? customerData : window.__customerData || {};
@@ -138,7 +135,6 @@ const sendToServerCapi = async (eventData) => {
     );
 };
 
-// --- Customer lookup (unchanged) ---
 const CUSTOMER_QUERY = `
   query getCustomer($customerAccessToken: String!) {
     customer(customerAccessToken: $customerAccessToken) {
@@ -179,7 +175,8 @@ export const fetchCustomerData = async (customerAccessToken) => {
 };
 
 // ---------------- Events ----------------
-// (unchanged except they now include validated fbc and country in user_data)
+// (unchanged logic; each event includes plaintext `country` in user_data;
+// server hashes it and avoids defaulting to US)
 
 export const trackViewContent = async (product, customerData = {}) => {
   const variantId = parseGid(product.selectedVariant?.id);
@@ -253,7 +250,7 @@ export const trackViewContent = async (product, customerData = {}) => {
       email,
       phone,
       fb_login_id,
-      country,
+      country, // plaintext; server will hash / filter US default
     },
     custom_data: {
       URL,
@@ -354,7 +351,7 @@ export const trackAddToCart = async (product, customerData = {}) => {
   });
 };
 
-// Purchase: DO NOT EDIT (unchanged)
+// Purchase unchanged
 
 export const trackSearch = async (query, customerData = {}) => {
   const eventId = generateEventId();

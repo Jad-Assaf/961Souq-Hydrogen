@@ -15,6 +15,14 @@ function sha256Phone(value) {
   return sha256(digits);
 }
 
+// Country: two-letter ISO, lowercased, then SHA-256 (Meta requires hashing). :contentReference[oaicite:3]{index=3}
+function sha256Country(value) {
+  if (!value) return '';
+  const cc = String(value).trim().toLowerCase().slice(0, 2);
+  if (!/^[a-z]{2}$/.test(cc)) return '';
+  return sha256(cc);
+}
+
 // Take first IP if list
 function firstIp(ipHeader) {
   if (!ipHeader) return '';
@@ -28,7 +36,7 @@ function parseFbc(fbc) {
 }
 function isFbcExpired(ts) {
   const now = Math.floor(Date.now() / 1000);
-  return now - ts > 90 * 24 * 60 * 60; // 90 days
+  return now - ts > 90 * 24 * 60 * 60; // 90 days per Meta guidance. :contentReference[oaicite:4]{index=4}
 }
 function extractFbclid(url) {
   try {
@@ -65,8 +73,10 @@ export async function action({request, context}) {
         '';
     }
 
-    // 4) Hash PII (email/phone) if present
+    // 4) Hash PII (email/phone) if present; manage country and fbc
     const userData = eventData.user_data || {};
+
+    // email / phone hashing
     if (userData.email) {
       userData.em = sha256Hash(userData.email);
       delete userData.email;
@@ -76,28 +86,43 @@ export async function action({request, context}) {
       delete userData.phone;
     }
 
-    // 5) Country precedence: Oxygen → Cloudflare → payload (2-letter)
-    // Shopify Oxygen custom headers map to Cloudflare geo. :contentReference[oaicite:2]{index=2}
+    // Country precedence: payload (customer address) → headers; never “default” to US.
+    const payloadCountryRaw =
+      (eventData.user_data && eventData.user_data.country) || '';
     const oxyCountry = request.headers.get('oxygen-buyer-country') || '';
     const cfCountry =
       request.headers.get('cf-ipcountry') ||
       request.headers.get('x-vercel-ip-country') ||
       '';
-    const chosenCountry = (
-      oxyCountry ||
-      cfCountry ||
-      userData.country ||
-      ''
-    ).toString();
-    userData.country = /^[A-Za-z]{2}/.test(chosenCountry)
-      ? chosenCountry.slice(0, 2).toLowerCase()
-      : '';
+    let headerCountryRaw = (oxyCountry || cfCountry || '').toString();
 
-    // 6) fbc validation/derivation (per Meta spec, 90 days). :contentReference[oaicite:3]{index=3}
+    // Normalize to 2-letter lowercase
+    const norm = (v) =>
+      /^[A-Za-z]{2}/.test(String(v || ''))
+        ? String(v).slice(0, 2).toLowerCase()
+        : '';
+
+    const payloadCountry = norm(payloadCountryRaw);
+    const headerCountry = norm(headerCountryRaw);
+
+    // Choose country. If it's only coming from headers AND equals 'us', drop it.
+    let chosenCountry = payloadCountry || headerCountry || '';
+    if (!payloadCountry && chosenCountry === 'us') {
+      chosenCountry = '';
+    }
+
+    // Hash country per CAPI requirements (if present) :contentReference[oaicite:5]{index=5}
+    if (chosenCountry) {
+      userData.country = sha256Country(chosenCountry);
+    } else {
+      delete userData.country;
+    }
+
+    // fbc validation/derivation (90 days) :contentReference[oaicite:6]{index=6}
     if (userData.fbc) {
       const parsed = parseFbc(userData.fbc);
       if (!parsed || isFbcExpired(parsed.ts)) {
-        delete userData.fbc; // don't send expired/stale fbc
+        delete userData.fbc; // don't send stale fbc
       }
     }
     if (!userData.fbc) {
@@ -108,19 +133,19 @@ export async function action({request, context}) {
       }
     }
 
-    // 7) Override IP/UA with server readings (if available)
+    // 5) Override IP/UA with server readings (if available)
     userData.client_ip_address = ipHeader || userData.client_ip_address || '';
     userData.client_user_agent =
       userAgentHeader || userData.client_user_agent || '';
     eventData.user_data = userData;
 
-    // 8) Final payload for Meta
+    // 6) Final payload for Meta
     const payload = {
       data: [eventData],
       test_event_code: eventData.test_event_code || 'TEST31560',
     };
 
-    // 9) Env
+    // 7) Env
     const pixelId = context.env.META_PIXEL_ID;
     const accessToken = context.env.META_ACCESS_TOKEN;
     if (!pixelId || !accessToken) {
@@ -129,13 +154,13 @@ export async function action({request, context}) {
       );
     }
 
-    // 10) Logs (sanitized)
+    // 8) Logs (sanitized — country already hashed)
     console.info(
       '[Meta CAPI][Server] Outbound payload:',
       JSON.stringify(payload, null, 2),
     );
 
-    // 11) Send to Meta
+    // 9) Send to Meta
     const metaResponse = await fetch(
       `https://graph.facebook.com/v22.0/${pixelId}/events?access_token=${accessToken}`,
       {
