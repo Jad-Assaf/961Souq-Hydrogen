@@ -61,7 +61,7 @@ const ensureFbc = () => {
     if (fbc) {
       const parsed = parseFbc(fbc);
       if (!parsed || isFbcExpired(parsed.ts)) {
-        setCookie('_fbc', '', -1); // drop stale cookie to avoid warning
+        setCookie('_fbc', '', -1); // drop stale cookie
         return '';
       }
     }
@@ -105,7 +105,7 @@ const getCountry = () => {
   return '';
 };
 
-// Hash helpers kept (Pixel hashes AM itself; server hashes CAPI)
+// Hash helpers (Pixel hashes AM itself; server hashes CAPI)
 const sha256Hex = async (value) => {
   if (!value) return '';
   const enc = new TextEncoder().encode(String(value).trim().toLowerCase());
@@ -116,6 +116,7 @@ const sha256Hex = async (value) => {
 };
 const normalizePhone = (p) => (p || '').replace(/\D+/g, '');
 
+// --- CAPI: send PageView once (server will add IP & enforce country) ---
 const trackPageViewCAPI = async (eventId, extraData) => {
   const capiPayload = {
     action_source: 'website',
@@ -131,7 +132,7 @@ const trackPageViewCAPI = async (eventId, extraData) => {
       email: extraData.email || '',
       phone: extraData.phone || '',
       fb_login_id: extraData.fb_login_id || '',
-      country: extraData.country || '', // server enforces hash & no default US
+      country: extraData.country || '', // server hashes & filters
     },
     custom_data: {
       URL: extraData.URL,
@@ -139,16 +140,11 @@ const trackPageViewCAPI = async (eventId, extraData) => {
     },
   };
 
-  console.log('[Meta CAPI][PageView] payload →', capiPayload);
-
   fetch('/facebookConversions', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(capiPayload),
-  })
-    .then((r) => r.json())
-    .then((res) => console.log('[Meta CAPI][PageView] response ←', res))
-    .catch((err) => console.warn('[Meta CAPI][PageView] error', err));
+  }).catch(() => {});
 };
 
 const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
@@ -193,19 +189,12 @@ const MetaPixel = ({pixelId}) => {
       const am = {external_id};
       if (rawEmail) am.em = await sha256Hex(rawEmail);
       if (rawPhone) am.ph = await sha256Hex(normalizePhone(rawPhone));
-      if (country) am.country = country; // Pixel AM can take plaintext; Pixel hashes it. :contentReference[oaicite:2]{index=2}
+      if (country) am.country = country;
 
       fbq('init', pixelId, am);
-      console.log('[Meta Pixel][AM] init userData →', am);
 
       const eventId = generateEventId();
       const URL = window.location.href;
-      console.log('[Meta Pixel][PageView] eventID=', eventId, {
-        URL,
-        fbp,
-        fbc,
-        external_id,
-      });
       fbq(
         'track',
         'PageView',
@@ -238,12 +227,6 @@ const MetaPixel = ({pixelId}) => {
     const external_id = getExternalId();
     const URL = window.location.href;
 
-    console.log('[Meta Pixel][PageView@route] eventID=', eventId, {
-      URL,
-      fbp,
-      fbc,
-      external_id,
-    });
     fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
   }, [location]);
 

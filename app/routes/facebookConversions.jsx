@@ -15,7 +15,7 @@ function sha256Phone(value) {
   return sha256(digits);
 }
 
-// Country: two-letter ISO, lowercased, then SHA-256 (Meta requires hashing). :contentReference[oaicite:3]{index=3}
+// Country: two-letter ISO, lowercased, then SHA-256 for CAPI
 function sha256Country(value) {
   if (!value) return '';
   const cc = String(value).trim().toLowerCase().slice(0, 2);
@@ -36,7 +36,7 @@ function parseFbc(fbc) {
 }
 function isFbcExpired(ts) {
   const now = Math.floor(Date.now() / 1000);
-  return now - ts > 90 * 24 * 60 * 60; // 90 days per Meta guidance. :contentReference[oaicite:4]{index=4}
+  return now - ts > 90 * 24 * 60 * 60; // 90 days
 }
 function extractFbclid(url) {
   try {
@@ -86,7 +86,7 @@ export async function action({request, context}) {
       delete userData.phone;
     }
 
-    // Country precedence: payload (customer address) → headers; never “default” to US.
+    // Country precedence: payload (customer address) → headers; never default to US
     const payloadCountryRaw =
       (eventData.user_data && eventData.user_data.country) || '';
     const oxyCountry = request.headers.get('oxygen-buyer-country') || '';
@@ -94,35 +94,27 @@ export async function action({request, context}) {
       request.headers.get('cf-ipcountry') ||
       request.headers.get('x-vercel-ip-country') ||
       '';
-    let headerCountryRaw = (oxyCountry || cfCountry || '').toString();
-
-    // Normalize to 2-letter lowercase
     const norm = (v) =>
       /^[A-Za-z]{2}/.test(String(v || ''))
         ? String(v).slice(0, 2).toLowerCase()
         : '';
 
     const payloadCountry = norm(payloadCountryRaw);
-    const headerCountry = norm(headerCountryRaw);
-
-    // Choose country. If it's only coming from headers AND equals 'us', drop it.
+    const headerCountry = norm(oxyCountry || cfCountry || '');
     let chosenCountry = payloadCountry || headerCountry || '';
-    if (!payloadCountry && chosenCountry === 'us') {
-      chosenCountry = '';
-    }
+    if (!payloadCountry && chosenCountry === 'us') chosenCountry = '';
 
-    // Hash country per CAPI requirements (if present) :contentReference[oaicite:5]{index=5}
     if (chosenCountry) {
       userData.country = sha256Country(chosenCountry);
     } else {
       delete userData.country;
     }
 
-    // fbc validation/derivation (90 days) :contentReference[oaicite:6]{index=6}
+    // fbc validation/derivation (90 days)
     if (userData.fbc) {
       const parsed = parseFbc(userData.fbc);
       if (!parsed || isFbcExpired(parsed.ts)) {
-        delete userData.fbc; // don't send stale fbc
+        delete userData.fbc;
       }
     }
     if (!userData.fbc) {
@@ -154,7 +146,7 @@ export async function action({request, context}) {
       );
     }
 
-    // 8) Logs (sanitized — country already hashed)
+    // 8) Logs (server-side only)
     console.info(
       '[Meta CAPI][Server] Outbound payload:',
       JSON.stringify(payload, null, 2),

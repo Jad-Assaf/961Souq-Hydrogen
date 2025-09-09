@@ -1,16 +1,17 @@
 // metaPixelEvents.js
 
+// Keep IP helper (used by Purchase ONLY; others will not call it)
 export const getClientIP = async () => {
   try {
     const res = await fetch('https://api.ipify.org?format=json');
     const data = await res.json();
-    return data.ip;
+    return data.ip; // e.g. "123.45.67.89"
   } catch (error) {
-    console.error('Error fetching client IP:', error);
     return '';
   }
 };
 
+// --- Utils / Helpers ---
 const generateEventId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -32,6 +33,7 @@ const setCookie = (name, value, days = 90) => {
   } catch {}
 };
 
+// Ensure FBP coverage (create if missing)
 const ensureFbp = () => {
   let fbp = readCookie('_fbp');
   if (!fbp) {
@@ -43,6 +45,7 @@ const ensureFbp = () => {
   return fbp;
 };
 
+// Ensure FBC coverage (synthesize from fbclid if cookie missing)
 const parseFbc = (fbc) => {
   const m = /^fb\.1\.(\d+)\.(.+)$/.exec(fbc || '');
   return m ? {ts: parseInt(m[1], 10), fbclid: m[2]} : null;
@@ -96,7 +99,7 @@ const getExternalId = (customerData = {}) => {
   return anonId;
 };
 
-// Country from customer address only (2-letter ISO)
+// Country from customer address only; 2-letter ISO
 const getCountry = (customerData = {}) => {
   try {
     const c = customerData.id ? customerData : window.__customerData || {};
@@ -119,65 +122,18 @@ const getCountry = (customerData = {}) => {
 };
 
 const sendToServerCapi = async (eventData) => {
-  console.log(`[Meta CAPI][${eventData?.event_name}] payload →`, eventData);
-
   fetch('/facebookConversions', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(eventData),
-  })
-    .then((res) => res.json())
-    .then((res) =>
-      console.log(`[Meta CAPI][${eventData?.event_name}] response ←`, res),
-    )
-    .catch((error) =>
-      console.warn(`[Meta CAPI][${eventData?.event_name}] error`, error),
-    );
-};
-
-const CUSTOMER_QUERY = `
-  query getCustomer($customerAccessToken: String!) {
-    customer(customerAccessToken: $customerAccessToken) {
-      id
-      email
-      firstName
-      lastName
-      phone
-    }
-  }
-`;
-
-export const fetchCustomerData = async (customerAccessToken) => {
-  try {
-    const response = await fetch(
-      `https://${process.env.SHOPIFY_STORE_DOMAIN}/api/2024-10/graphql.json`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Storefront-Access-Token':
-            process.env.PUBLIC_STOREFRONT_API_TOKEN,
-        },
-        body: JSON.stringify({
-          query: CUSTOMER_QUERY,
-          variables: {customerAccessToken},
-        }),
-      },
-    );
-    const result = await response.json();
-    if (result.errors) {
-      return null;
-    }
-    return result.data.customer;
-  } catch (error) {
-    return null;
-  }
+  }).catch(() => {});
 };
 
 // ---------------- Events ----------------
-// (unchanged logic; each event includes plaintext `country` in user_data;
-// server hashes it and avoids defaulting to US)
 
+/**
+ * ViewContent (per-PDP, no global lockout)
+ */
 export const trackViewContent = async (product, customerData = {}) => {
   const variantId = parseGid(product.selectedVariant?.id);
   const dedupeKey =
@@ -202,16 +158,14 @@ export const trackViewContent = async (product, customerData = {}) => {
   const content_name = product.title || '';
   const content_category = product.productType || '';
   const contents = [
-    {id: variantId || '', quantity: 1, item_price: parseFloat(price) || 0},
+    {
+      id: variantId || '',
+      quantity: 1,
+      item_price: parseFloat(price) || 0,
+    },
   ];
 
   if (typeof fbq === 'function') {
-    console.log('[Meta Pixel][ViewContent] eventID=', eventId, {
-      URL,
-      currency,
-      price,
-      variantId,
-    });
     fbq(
       'track',
       'ViewContent',
@@ -236,6 +190,7 @@ export const trackViewContent = async (product, customerData = {}) => {
     );
   }
 
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'ViewContent',
@@ -250,7 +205,7 @@ export const trackViewContent = async (product, customerData = {}) => {
       email,
       phone,
       fb_login_id,
-      country, // plaintext; server will hash / filter US default
+      country,
     },
     custom_data: {
       URL,
@@ -266,6 +221,9 @@ export const trackViewContent = async (product, customerData = {}) => {
   });
 };
 
+/**
+ * AddToCart
+ */
 export const trackAddToCart = async (product, customerData = {}) => {
   const variantId = parseGid(product.selectedVariant?.id);
   const unitPrice = parseFloat(
@@ -285,16 +243,15 @@ export const trackAddToCart = async (product, customerData = {}) => {
   const URL = window.location.href;
   const content_name = product.title || '';
   const content_category = product.productType || '';
-  const contents = [{id: variantId || '', quantity, item_price: unitPrice}];
+  const contents = [
+    {
+      id: variantId || '',
+      quantity,
+      item_price: unitPrice,
+    },
+  ];
 
   if (typeof fbq === 'function') {
-    console.log('[Meta Pixel][AddToCart] eventID=', eventId, {
-      URL,
-      value,
-      currency,
-      variantId,
-      quantity,
-    });
     fbq(
       'track',
       'AddToCart',
@@ -320,6 +277,7 @@ export const trackAddToCart = async (product, customerData = {}) => {
     );
   }
 
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'AddToCart',
@@ -351,8 +309,81 @@ export const trackAddToCart = async (product, customerData = {}) => {
   });
 };
 
-// Purchase unchanged
+/**
+ * Purchase  ❗️DO NOT EDIT (kept exactly as provided before)
+ */
+export const trackPurchase = async (order, customerData = {}) => {
+  const eventId = generateEventId();
 
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    return parts.length === 2 ? parts.pop().split(';').shift() : '';
+  };
+  const fbp = getCookie('_fbp');
+  const fbc = getCookie('_fbc');
+  const {email = '', phone = '', fb_login_id = ''} = customerData;
+  const external_id = getExternalId(customerData);
+
+  // Meta Pixel call
+  if (typeof fbq === 'function') {
+    fbq(
+      'track',
+      'Purchase',
+      {
+        content_ids: order.items.map((item) => parseGid(item.variantId)),
+        content_type: 'product_variant',
+        currency: 'USD',
+        value: order.total,
+        num_items: order.items.length,
+        contents: order.items.map((item) => ({
+          id: parseGid(item.variantId),
+          quantity: item.quantity,
+          item_price: item.price,
+        })),
+        fbp,
+        fbc,
+        external_id,
+        email,
+        phone,
+        fb_login_id,
+      },
+      {eventID: eventId},
+    );
+  }
+
+  const clientIP = await getClientIP();
+  // Server-to-Server CAPI
+  sendToServerCapi({
+    action_source: 'website',
+    event_name: 'Purchase',
+    event_id: eventId,
+    event_time: Math.floor(Date.now() / 1000),
+    user_data: {
+      client_user_agent: navigator.userAgent,
+      client_ip_address: clientIP,
+      fbp,
+      fbc,
+      external_id,
+    },
+    custom_data: {
+      currency: 'USD',
+      value: order.total,
+      num_items: order.items.length,
+      content_type: 'product_variant',
+      content_ids: order.items.map((item) => parseGid(item.variantId)),
+      contents: order.items.map((item) => ({
+        id: parseGid(item.variantId),
+        quantity: item.quantity,
+        item_price: item.price,
+      })),
+    },
+  });
+};
+
+/**
+ * Search
+ */
 export const trackSearch = async (query, customerData = {}) => {
   const eventId = generateEventId();
   const fbp = ensureFbp();
@@ -364,7 +395,6 @@ export const trackSearch = async (query, customerData = {}) => {
   const URL = window.location.href;
 
   if (typeof fbq === 'function') {
-    console.log('[Meta Pixel][Search] eventID=', eventId, {query});
     fbq(
       'track',
       'Search',
@@ -382,6 +412,7 @@ export const trackSearch = async (query, customerData = {}) => {
     );
   }
 
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'Search',
@@ -404,6 +435,9 @@ export const trackSearch = async (query, customerData = {}) => {
   });
 };
 
+/**
+ * InitiateCheckout
+ */
 export const trackInitiateCheckout = async (cart, customerData = {}) => {
   const eventId = generateEventId();
   const variantIds = cart.items?.map((item) => parseGid(item.variantId)) || [];
@@ -427,11 +461,6 @@ export const trackInitiateCheckout = async (cart, customerData = {}) => {
 
   if (typeof fbq === 'function') {
     try {
-      console.log('[Meta Pixel][InitiateCheckout] eventID=', eventId, {
-        value,
-        currency,
-        num_items,
-      });
       fbq(
         'track',
         'InitiateCheckout',
@@ -456,6 +485,7 @@ export const trackInitiateCheckout = async (cart, customerData = {}) => {
     } catch (error) {}
   }
 
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'InitiateCheckout',
@@ -485,6 +515,9 @@ export const trackInitiateCheckout = async (cart, customerData = {}) => {
   });
 };
 
+/**
+ * AddPaymentInfo
+ */
 export const trackAddPaymentInfo = async (order, customerData = {}) => {
   const eventId = generateEventId();
 
@@ -505,10 +538,6 @@ export const trackAddPaymentInfo = async (order, customerData = {}) => {
   const URL = window.location.href;
 
   if (typeof fbq === 'function') {
-    console.log('[Meta Pixel][AddPaymentInfo] eventID=', eventId, {
-      value,
-      currency,
-    });
     fbq(
       'track',
       'AddPaymentInfo',
@@ -526,6 +555,7 @@ export const trackAddPaymentInfo = async (order, customerData = {}) => {
     );
   }
 
+  // CAPI
   sendToServerCapi({
     action_source: 'website',
     event_name: 'AddPaymentInfo',
