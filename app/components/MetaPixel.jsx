@@ -1,4 +1,3 @@
-// src/components/MetaPixelManual.jsx
 import {useEffect, useRef} from 'react';
 import {useLocation} from 'react-router-dom';
 
@@ -84,6 +83,17 @@ const getCountry = () => {
   return ''; // unknown
 };
 
+// Hash helpers for Pixel Advanced Matching
+const sha256Hex = async (value) => {
+  if (!value) return '';
+  const enc = new TextEncoder().encode(String(value).trim().toLowerCase());
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+};
+const normalizePhone = (p) => (p || '').replace(/\D+/g, '');
+
 // --- CAPI: send PageView once per session (server will add IP & hash PII) ---
 const trackPageViewCAPI = async (eventId, extraData) => {
   const capiPayload = {
@@ -153,43 +163,56 @@ const MetaPixel = ({pixelId}) => {
       })(window, document, 'script', SCRIPT_SRC);
     }
 
-    // Ensure cookies coverage
-    const fbp = ensureFbp();
-    const fbc = ensureFbc();
+    (async () => {
+      // Ensure cookies coverage
+      const fbp = ensureFbp();
+      const fbc = ensureFbc();
 
-    fbq('init', pixelId);
-    const eventId = generateEventId();
-    const external_id = getExternalId();
-    const URL = window.location.href;
+      // Advanced Matching (hashed) for Pixel init
+      const external_id = getExternalId();
+      const rawEmail = window.__customerData?.email || '';
+      const rawPhone = window.__customerData?.phone || '';
+      const country = getCountry();
 
-    // Optional advanced-matching could be passed at init; keeping minimal as requested.
+      const am = {external_id};
+      if (rawEmail) am.em = await sha256Hex(rawEmail);
+      if (rawPhone) am.ph = await sha256Hex(normalizePhone(rawPhone));
+      if (country) am.country = country; // Pixel accepts country (unhashed)
 
-    // Browser PageView
-    console.log('[Meta Pixel][PageView] eventID=', eventId, {
-      URL,
-      fbp,
-      fbc,
-      external_id,
-    });
-    fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
+      fbq('init', pixelId, am);
+      console.log('[Meta Pixel][AM] init userData →', am);
 
-    // CAPI PageView only on first load
-    const email = window.__customerData?.email || '';
-    const phone = window.__customerData?.phone || '';
-    const fb_login_id = window.__customerData?.fb_login_id || '';
-    const country = getCountry();
-    trackPageViewCAPI(eventId, {
-      fbp,
-      fbc,
-      external_id,
-      URL,
-      email,
-      phone,
-      fb_login_id,
-      country,
-    });
+      // First browser PageView
+      const eventId = generateEventId();
+      const URL = window.location.href;
+      console.log('[Meta Pixel][PageView] eventID=', eventId, {
+        URL,
+        fbp,
+        fbc,
+        external_id,
+      });
+      fbq(
+        'track',
+        'PageView',
+        {URL, fbp, fbc, external_id},
+        {eventID: eventId},
+      );
 
-    didInitRef.current = true;
+      // CAPI PageView only on first load
+      const fb_login_id = window.__customerData?.fb_login_id || '';
+      trackPageViewCAPI(eventId, {
+        fbp,
+        fbc,
+        external_id,
+        URL,
+        email: rawEmail,
+        phone: rawPhone,
+        fb_login_id,
+        country,
+      });
+
+      didInitRef.current = true;
+    })();
   }, [pixelId]);
 
   // Fire a Pixel PageView on every route change (no CAPI here to avoid spam)
