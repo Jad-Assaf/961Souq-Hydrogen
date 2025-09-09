@@ -34,19 +34,42 @@ const ensureFbp = () => {
   return fbp;
 };
 
+// --- fbc parsing/validation (90 days) ---
+const parseFbc = (fbc) => {
+  const m = /^fb\.1\.(\d+)\.(.+)$/.exec(fbc || '');
+  return m ? {ts: parseInt(m[1], 10), fbclid: m[2]} : null;
+};
+const isFbcExpired = (ts) => {
+  const now = Math.floor(Date.now() / 1000);
+  return now - ts > 90 * 24 * 60 * 60; // 90 days
+};
+
 const ensureFbc = () => {
   try {
     const url = new URL(window.location.href);
     const fbclid = url.searchParams.get('fbclid');
     let fbc = readCookie('_fbc');
-    if (!fbc && fbclid) {
+
+    // If we have a fresh fbclid on landing, (re)create _fbc with current ts.
+    if (fbclid) {
       const ts = Math.floor(Date.now() / 1000);
       fbc = `fb.1.${ts}.${fbclid}`;
       setCookie('_fbc', fbc);
+      return fbc;
     }
-    return readCookie('_fbc');
+
+    // Otherwise, only keep cookie if it's valid & not expired.
+    if (fbc) {
+      const parsed = parseFbc(fbc);
+      if (!parsed || isFbcExpired(parsed.ts)) {
+        // drop stale value to avoid Meta warning
+        setCookie('_fbc', '', -1); // delete cookie
+        return '';
+      }
+    }
+    return fbc || '';
   } catch {
-    return readCookie('_fbc');
+    return readCookie('_fbc') || '';
   }
 };
 
@@ -62,7 +85,7 @@ const getExternalId = () => {
   return anonId;
 };
 
-// ✅ Only return a valid 2-letter ISO country code from customer address; no language fallbacks
+// ✅ Country: only from known customer address fields (2-letter ISO). No language fallback.
 const getCountry = () => {
   try {
     const c = window.__customerData || {};
@@ -84,7 +107,7 @@ const getCountry = () => {
   return '';
 };
 
-// Hash helpers for Pixel Advanced Matching
+// Hash helpers (kept; not used for country)
 const sha256Hex = async (value) => {
   if (!value) return '';
   const enc = new TextEncoder().encode(String(value).trim().toLowerCase());
@@ -95,7 +118,7 @@ const sha256Hex = async (value) => {
 };
 const normalizePhone = (p) => (p || '').replace(/\D+/g, '');
 
-// --- CAPI: send PageView once per session (server will add IP & hash PII) ---
+// --- CAPI: send PageView once (server will add IP & enforce country) ---
 const trackPageViewCAPI = async (eventId, extraData) => {
   const capiPayload = {
     action_source: 'website',
@@ -111,7 +134,7 @@ const trackPageViewCAPI = async (eventId, extraData) => {
       email: extraData.email || '',
       phone: extraData.phone || '',
       fb_login_id: extraData.fb_login_id || '',
-      country: extraData.country || '',
+      country: extraData.country || '', // server will override from headers if present
     },
     custom_data: {
       URL: extraData.URL,
@@ -173,7 +196,7 @@ const MetaPixel = ({pixelId}) => {
       const am = {external_id};
       if (rawEmail) am.em = await sha256Hex(rawEmail);
       if (rawPhone) am.ph = await sha256Hex(normalizePhone(rawPhone));
-      if (country) am.country = country; // Pixel AM country
+      if (country) am.country = country; // Pixel AM accepts country
 
       fbq('init', pixelId, am);
       console.log('[Meta Pixel][AM] init userData →', am);
@@ -202,7 +225,7 @@ const MetaPixel = ({pixelId}) => {
         email: rawEmail,
         phone: rawPhone,
         fb_login_id,
-        country, // CAPI country
+        country,
       });
 
       didInitRef.current = true;
