@@ -382,6 +382,14 @@ strong {
     color: #cdcdcd;
 }
 
+.productPageDisclaimer {
+    font-size: 11px;
+    color: #777;
+    margin: 10px 0;
+    max-width: 400px;
+    font-style: italic;
+}
+
 /* .product-form form:has(.add-to-cart-button:disabled) {
     display: none;
 } */
