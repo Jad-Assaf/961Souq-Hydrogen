@@ -764,7 +764,7 @@ export default function Product() {
           <p className="productPageDisclaimer">
             Product images are for reference only. The actual item may differ in
             appearance & colour. Please refer to the product code, SKU, and
-            description for accurate specifications.
+            description from manufacturer website for accurate specifications.
           </p>
         </div>
       </div>

@@ -384,6 +384,7 @@ strong {
 
 .productPageDisclaimer {
     font-size: 11px;
+    line-height: 15px;
     color: #777;
     margin: 10px 0;
     max-width: 400px;
