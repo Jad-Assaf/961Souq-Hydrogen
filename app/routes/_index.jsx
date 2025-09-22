@@ -188,6 +188,13 @@ export async function loader(args) {
     // },
     {
       desktopImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/IPHONE-17_1.jpg?v=1758548805',
+      mobileImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/IPHONE-17-MOBILE-BANNER_1.jpg?v=1758548805',
+      link: '/collections/apple-iphone-17',
+    },
+    {
+      desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/back-to-school.jpg?v=1756984612',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/back-to-school-mobile.jpg?v=1756984612',

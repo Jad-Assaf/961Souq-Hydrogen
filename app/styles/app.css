@@ -62,7 +62,7 @@ h2 {
 }
 
 .banner-link {
-  display: block;
+  display: flex;
 }
 
 .banner-link picture {
