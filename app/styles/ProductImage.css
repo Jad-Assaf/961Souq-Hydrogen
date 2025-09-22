@@ -47,8 +47,8 @@
 
 .thumbnail img {
     object-fit: cover;
-    width: 100%;
-    height: auto;
+    width: auto;
+    height: 100px;
 }
 
 .main-image {
