@@ -11,6 +11,11 @@
     align-items: center;
     justify-content: start;
     flex-direction: column-reverse;
+    margin-right: 20px;
+
+    @media (max-width: 768px) {
+        margin-right: 0 !important;
+    }
 }
 
 .thumbContainer {
@@ -47,7 +52,7 @@
 
 .thumbnail img {
     object-fit: cover;
-    width: auto;
+    width: 100px;
     height: 100px;
 }
 
@@ -56,6 +61,11 @@
     width: 75%;
     cursor: grab;
     transition: transform 0.1s ease;
+    max-width: 562px;
+    height: 562px;
+    max-height: 562px;
+    display: flex;
+    align-items: center;
 }
 
 .main-image:active {
@@ -70,7 +80,7 @@
     aspect-ratio: 1028/1028;
 }
 
-.main-image img{
+.main-image img {
     width: 100%;
     height: auto;
 }
