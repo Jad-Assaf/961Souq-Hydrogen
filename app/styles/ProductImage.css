@@ -66,11 +66,8 @@
     width: 75%;
     cursor: grab;
     transition: transform 0.1s ease;
-    max-width: 562px;
-    height: 562px;
-    max-height: 562px;
-    display: flex;
-    align-items: center;
+    aspect-ratio: 1028/1028;
+    align-content: center;
 }
 
 .main-image:active {
