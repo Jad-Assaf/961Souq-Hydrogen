@@ -256,20 +256,6 @@ export async function loader(args) {
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-mobilebanner.jpg?v=1728123476',
       link: '/collections/google-products',
     },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-air-m4-banner.jpg?v=1743066206',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/macbook-air-m4-mobile-banner.jpg?v=1743066206',
-      link: '/collections/apple-macbook-air',
-    },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-Pro_655c6ee7-a66c-4ed9-9976-99be3122e7b6.jpg?v=1726321897',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-16-Pro-mobile.jpg?v=1726321600',
-      link: '/collections/apple-iphone',
-    },
   ];
 
   // Fire off critical queries concurrently so above‑the‑fold content is fast.
