@@ -282,6 +282,7 @@ export const RECOMMENDED_PRODUCTS_QUERY = `#graphql
           }
         }
       }
+      # keep price ranges if you still need them
       priceRange {
         minVariantPrice {
           amount
@@ -294,9 +295,24 @@ export const RECOMMENDED_PRODUCTS_QUERY = `#graphql
           currencyCode
         }
       }
+      # ✅ add first variant so we can use its price
+      variants(first: 1) {
+        nodes {
+          id
+          price {
+            amount
+            currencyCode
+          }
+          compareAtPrice {
+            amount
+            currencyCode
+          }
+        }
+      }
     }
   }
 `;
+
 
 export const RECENTLY_VIEWED_PRODUCTS_QUERY = `#graphql
   query RecentlyViewedProducts($handles: [String!]!) {

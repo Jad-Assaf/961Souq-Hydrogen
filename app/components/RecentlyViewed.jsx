@@ -66,6 +66,19 @@ export default function RecentlyViewedProducts({currentProductId}) {
                 currencyCode
               }
             }
+            variants(first: 1) {
+              nodes {
+                id
+                price {
+                  amount
+                  currencyCode
+                }
+                compareAtPrice {
+                  amount
+                  currencyCode
+                }
+              }
+            }
           }
         }
       }
@@ -135,12 +148,13 @@ function RecentlyViewedProductItem({product, index}) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsVisible(true);
-    }, index * 50); // Delay based on index for staggered effect
-
+    const timeout = setTimeout(() => setIsVisible(true), index * 50);
     return () => clearTimeout(timeout);
   }, [index]);
+
+  const firstVariant = product.variants?.nodes?.[0];
+  const variantPrice =
+    firstVariant?.price || product.priceRange?.minVariantPrice;
 
   return (
     <div
@@ -173,10 +187,10 @@ function RecentlyViewedProductItem({product, index}) {
           />
           <div className="product-title">{product.title}</div>
           <div className="product-price">
-            {Number(product.priceRange.minVariantPrice.amount) === 0 ? (
-              <span>Call For Price</span>
+            {variantPrice && Number(variantPrice.amount) > 0 ? (
+              <Money data={variantPrice} />
             ) : (
-              <Money data={product.priceRange.minVariantPrice} />
+              <span>Call For Price</span>
             )}
           </div>
         </Link>

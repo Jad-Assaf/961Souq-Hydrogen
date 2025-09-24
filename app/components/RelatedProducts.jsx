@@ -38,10 +38,14 @@ function RelatedProductItem({product, index}) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsVisible(true);
-    }, index * 50); // Staggered delay based on index
-
+    }, index * 50);
     return () => clearTimeout(timeout);
   }, [index]);
+
+  // ✅ Use the first variant’s price instead of minVariantPrice
+  const firstVariant = product.variants?.nodes?.[0];
+  const variantPrice =
+    firstVariant?.price || product.priceRange?.minVariantPrice;
 
   return (
     <div
@@ -66,8 +70,8 @@ function RelatedProductItem({product, index}) {
             aspectratio="1/1"
             sizes="(min-width: 45em) 20vw, 40vw"
             srcSet={`${product.images.edges[0]?.node.url}&width=200 300w,
-                                 ${product.images.edges[0]?.node.url}&width=200 600w,
-                                 ${product.images.edges[0]?.node.url}&width=200 1200w`}
+                     ${product.images.edges[0]?.node.url}&width=200 600w,
+                     ${product.images.edges[0]?.node.url}&width=200 1200w`}
             alt={product.images.edges[0]?.node.altText || product.title}
             width="150px"
             height="150px"
@@ -75,10 +79,10 @@ function RelatedProductItem({product, index}) {
           />
           <div className="product-title">{product.title}</div>
           <div className="product-price">
-            {Number(product.priceRange.minVariantPrice.amount) === 0 ? (
-              <span>Call For Price</span>
+            {variantPrice && Number(variantPrice.amount) > 0 ? (
+              <Money data={variantPrice} />
             ) : (
-              <Money data={product.priceRange.minVariantPrice} />
+              <span>Call For Price</span>
             )}
           </div>
         </Link>
