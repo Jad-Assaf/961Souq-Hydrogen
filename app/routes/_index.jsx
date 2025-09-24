@@ -188,6 +188,20 @@ export async function loader(args) {
     // },
     {
       desktopImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-banner.jpg?v=1758713478',
+      mobileImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-mobile-banner.jpg?v=1758713478',
+      link: '/collections/apple-iphone-17',
+    },
+    {
+      desktopImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-air-banner.jpg?v=1758713477',
+      mobileImageUrl:
+        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-air-mobile-banner.jpg?v=1758713478',
+      link: '/collections/apple-iphone-17',
+    },
+    {
+      desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/IPHONE-17_1.jpg?v=1758548805',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/IPHONE-17-MOBILE-BANNER_1.jpg?v=1758548805',
