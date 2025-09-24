@@ -33,11 +33,7 @@ import {SearchProvider} from './lib/searchContext.jsx';
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
  */
-export const shouldRevalidate = ({
-  formMethod,
-  currentUrl,
-  nextUrl,
-}) => {
+export const shouldRevalidate = ({formMethod, currentUrl, nextUrl}) => {
   if (formMethod && formMethod !== 'GET') return true;
   if (currentUrl.toString() === nextUrl.toString()) return true;
   return false;
@@ -112,7 +108,6 @@ export async function loader({request, context}) {
   }
 }
 
-
 /**
  * Load data necessary for rendering content above the fold.
  */
@@ -173,6 +168,7 @@ export function Layout({children}) {
   const [loaderVisible, setLoaderVisible] = useState(true);
   const loaderRef = useRef(null);
   const animationRef = useRef(null);
+  const isLoading = navigation.state !== 'idle';
 
   // useEffect(() => {
   //   // Only run on client
@@ -327,6 +323,28 @@ export function Layout({children}) {
         ) : null}
         <MetaPixel pixelId={PIXEL_ID} />
         {/* <TikTokPixel pixelId={TIKTOK_PIXEL_ID} /> */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              :root { --route-fade-duration: 220ms; }
+
+              #route-fade {
+                opacity: 1;
+                transition: opacity var(--route-fade-duration) ease-in-out;
+                will-change: opacity;
+              }
+
+              #route-fade[data-loading="true"] {
+                opacity: 0;                 /* full fade-out during navigation */
+                pointer-events: none;       /* avoids clicks during transition */
+              }
+
+              @media (prefers-reduced-motion: reduce) {
+                #route-fade { transition: none; }
+              }
+              `,
+          }}
+        />
       </head>
       <body>
         <ClarityTracker clarityId={clarityId} />
@@ -366,19 +384,21 @@ export function Layout({children}) {
             `}</style>
           </div>
         )} */}
-        {data ? (
-          <Analytics.Provider
-            cart={data.cart}
-            shop={data.shop}
-            consent={data.consent}
-          >
-            <SearchProvider>
-              <PageLayout {...data}>{children}</PageLayout>
-            </SearchProvider>
-          </Analytics.Provider>
-        ) : (
-          children
-        )}
+        <div id="route-fade" data-loading={isLoading}>
+          {data ? (
+            <Analytics.Provider
+              cart={data.cart}
+              shop={data.shop}
+              consent={data.consent}
+            >
+              <SearchProvider>
+                <PageLayout {...data}>{children}</PageLayout>
+              </SearchProvider>
+            </Analytics.Provider>
+          ) : (
+            <PageLayout>{children}</PageLayout>
+          )}
+        </div>
         <ScrollRestoration nonce={nonce} />
         {nonce ? <Scripts nonce={nonce} /> : <Scripts />}
       </body>
