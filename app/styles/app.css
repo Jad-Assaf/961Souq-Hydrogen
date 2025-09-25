@@ -518,6 +518,11 @@ p.home-colleciton-title {
     border-radius: 10px !important;
   }
 
+  img.category-image {
+    width: 90% !important;
+    height: auto !important;
+  }
+
   .category-container a {
     border-radius: 10px !important;
     width: 100% !important;
