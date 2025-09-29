@@ -28,6 +28,7 @@ import {CategorySliderWithMoreHeight} from '~/components/CollectionSliderWithMor
 import VideosGallery from '~/components/VideosGallery';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 import {CategorySliderFromMenuMobile} from '~/components/CategorySliderFromMenuMobile';
+import MobileCategoryTiles from '~/components/MobileCategoryTiles';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 // const MANUAL_MENU_HANDLES = [
@@ -555,6 +556,7 @@ export default function Homepage() {
                 <h1>Instagram Reels</h1>
                 <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />
               </div> */}
+              <MobileCategoryTiles />
               <CategorySliderFromMenuMobile menu={header.menu} />
             </>
           )}
