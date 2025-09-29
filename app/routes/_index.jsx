@@ -557,7 +557,7 @@ export default function Homepage() {
                 <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />
               </div> */}
               <MobileCategoryTiles menu={header.menu} />
-              <CategorySliderFromMenuMobile menu={header.menu} />
+              {/* <CategorySliderFromMenuMobile menu={header.menu} /> */}
             </>
           )}
         </>

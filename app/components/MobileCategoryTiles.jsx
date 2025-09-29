@@ -179,7 +179,7 @@ export default function MobileCategoryTiles({
       </div>
 
       <style>{`
-        .catSection { margin: 20px 16px 8px; }
+        .catSection { margin: 20px 16px 30px; }
         .catTitle { margin: 0 4px 16px; font-size: 20px; font-weight: 700; color: #0F172A; letter-spacing: -0.02em; }
 
         .catList {
