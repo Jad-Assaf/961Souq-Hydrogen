@@ -151,9 +151,9 @@ export default function CategoryTiles({title = 'Shop by Category'}) {
         .catModel {
           position: absolute;
           right: 30px;
-          bottom: 10px;
+          bottom: 0px;
           width: 115px;
-          height: 100px;
+          height: 115px;
           pointer-events: none;
           z-index: 1;
         }
