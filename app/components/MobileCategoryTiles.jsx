@@ -150,22 +150,29 @@ export default function CategoryTiles({title = 'Shop by Category'}) {
         /* Model container (holds the <img> and the gradient overlay mask) */
         .catModel {
           position: absolute;
-          right: 30px;
-          bottom: 0px;
-          width: 115px;
-          height: 115px;
-          pointer-events: none;
-          z-index: 1;
+        right: 30px;
+        bottom: 5px;
+        width: 100px;
+        height: 100px;
+        pointer-events: none;
+        z-index: 1;
+        background: transparent;
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         }
 
         .catImg {
           position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          object-position: right bottom;
-          filter: drop-shadow(3px 2px 2px rgb(from var(--start) r g b / 0.6));
+        /* inset: 0; */
+        width: 80px;
+        height: 80px;
+        /* object-fit: contain; */
+        /* object-position: center center; */
+        filter: drop-shadow(3px 2px 2px rgb(from var(--start) r g b / 0.6));
         }
 
         /* Gradient overlay tinted ONLY where the PNG is opaque */
