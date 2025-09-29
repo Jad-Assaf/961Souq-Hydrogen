@@ -1,4 +1,6 @@
+import React, {useMemo, useState} from 'react';
 import {Link} from '@remix-run/react';
+import {CategorySliderFromMenuMobile} from './CategorySliderFromMenuMobile';
 
 /**
  * PNGs location: app/assets/
@@ -16,41 +18,78 @@ const assetUrlsBySlug = Object.fromEntries(
   }),
 );
 
-export default function CategoryTiles({title = 'Shop by Category'}) {
-  const items = [
-    // Your requested gradient pairs:
-    {label: 'Apple', slug: 'apple', start: '#8BD5E6', end: '#818FDD'},
-    {label: 'Gaming', slug: 'gaming', start: '#80AEFE', end: '#9E79FD'},
-    {label: 'Laptops', slug: 'laptops', start: '#88A9EB', end: '#475EB6'},
-    {label: 'Desktops', slug: 'desktops', start: '#F6B2FE', end: '#7947DA'},
-    {label: 'PC Parts', slug: 'pc-parts', start: '#F4BD40', end: '#F4BD40'}, // flat by design
-    {label: 'Networking', slug: 'networking', start: '#7BD2F4', end: '#2C75E5'},
-    {label: 'Monitors', slug: 'monitors', start: '#F7B7E0', end: '#8666B7'},
-    {label: 'Mobiles', slug: 'mobiles', start: '#4CC8E9', end: '#1273BB'},
+/* ----- helpers to match a parent menu item ----- */
+function slugifyTitle(t = '') {
+  return t
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
-    // Others unchanged:
-    {label: 'Tablets', slug: 'tablets', start: '#8dbb97', end: '#6f9274'},
-    {label: 'Audio', slug: 'audio', start: '#ffd866', end: '#f67b3b'},
-    {
-      label: 'Accessories',
-      slug: 'accessories',
-      start: '#71cbf5',
-      end: '#1593e3',
-    },
-    {label: 'Fitness', slug: 'fitness', start: '#bbe204', end: '#6db300'},
-    {
-      label: 'Photography',
-      slug: 'photography',
-      start: '#e08332',
-      end: '#f29759',
-    },
-    {
-      label: 'Home Appliances',
-      slug: 'home-appliances',
-      start: '#38a8eeff',
-      end: '#107ac6ff',
-    },
-  ];
+function findParentInMenu(menu, slug, label) {
+  if (!menu?.items?.length) return null;
+  const byHandle = menu.items.find((p) => p?.resource?.handle === slug);
+  if (byHandle) return byHandle;
+  const want = slug || slugifyTitle(label);
+  return menu.items.find(
+    (p) =>
+      slugifyTitle(p?.title || '') === want ||
+      slugifyTitle(p?.resource?.title || '') === want,
+  );
+}
+
+export default function MobileCategoryTiles({
+  title = 'Shop by Category',
+  menu, // <-- pass header.menu
+}) {
+  const [openSlug, setOpenSlug] = useState(null);
+  const [closingSlug, setClosingSlug] = useState(null); // for fade-out
+
+  const items = useMemo(
+    () => [
+      // Your requested gradient pairs:
+      {label: 'Apple', slug: 'apple', start: '#8BD5E6', end: '#818FDD'},
+      {label: 'Gaming', slug: 'gaming', start: '#80AEFE', end: '#9E79FD'},
+      {label: 'Laptops', slug: 'laptops', start: '#88A9EB', end: '#475EB6'},
+      {label: 'Desktops', slug: 'desktops', start: '#F6B2FE', end: '#7947DA'},
+      {label: 'PC Parts', slug: 'pc-parts', start: '#F4BD40', end: '#F4BD40'},
+      {
+        label: 'Networking',
+        slug: 'networking',
+        start: '#7BD2F4',
+        end: '#2C75E5',
+      },
+      {label: 'Monitors', slug: 'monitors', start: '#F7B7E0', end: '#8666B7'},
+      {label: 'Mobiles', slug: 'mobiles', start: '#4CC8E9', end: '#1273BB'},
+
+      // Others unchanged:
+      {label: 'Tablets', slug: 'tablets', start: '#8dbb97', end: '#6f9274'},
+      {label: 'Audio', slug: 'audio', start: '#ffd866', end: '#f67b3b'},
+      {
+        label: 'Accessories',
+        slug: 'accessories',
+        start: '#71cbf5',
+        end: '#1593e3',
+      },
+      {label: 'Fitness', slug: 'fitness', start: '#bbe204', end: '#6db300'},
+      {
+        label: 'Photography',
+        slug: 'photography',
+        start: '#e08332',
+        end: '#f29759',
+      },
+      {
+        label: 'Home Appliances',
+        slug: 'home-appliances',
+        start: '#38a8eeff',
+        end: '#107ac6ff',
+      },
+    ],
+    [],
+  );
 
   return (
     <section className="catSection" aria-labelledby="catTitle">
@@ -62,39 +101,79 @@ export default function CategoryTiles({title = 'Shop by Category'}) {
         {items.map((item) => {
           const handle = item.slug;
           const modelUrl = assetUrlsBySlug[item.slug] || '';
+          const isOpen = openSlug === item.slug;
+          const isClosing = closingSlug === item.slug;
+
+          const onTileClick = (e) => {
+            e.preventDefault(); // never navigate on tile tap
+            if (isOpen) {
+              // start fade-out
+              setClosingSlug(item.slug);
+              setOpenSlug(null);
+            } else {
+              // if another is open, cue it to close
+              if (openSlug) setClosingSlug(openSlug);
+              setOpenSlug(item.slug);
+            }
+          };
+
+          const matchedParent = findParentInMenu(menu, item.slug, item.label);
+          const filteredMenu = matchedParent ? {items: [matchedParent]} : null;
+          const shouldRenderSubmenu = (isOpen || isClosing) && filteredMenu;
 
           return (
-            <Link
-              key={item.slug}
-              to={`/collections/${handle}`}
-              className="catCard"
-              aria-label={`Browse ${item.label}`}
-              style={{
-                '--start': item.start,
-                '--end': item.end,
-              }}
-              data-missing={!modelUrl || undefined}
-              prefetch="intent"
-            >
-              <span className="catLabel">{item.label}</span>
-
-              {/* IMAGE ELEMENT inside the slot (no background-image) */}
-              <span
-                className="catModel"
-                aria-hidden="true"
-                style={{'--model': modelUrl ? `url("${modelUrl}")` : 'none'}}
+            <div key={item.slug} className="tileBlock">
+              <Link
+                to={`/collections/${handle}`}
+                className="catCard"
+                aria-label={`Browse ${item.label}`}
+                style={{
+                  '--start': item.start,
+                  '--end': item.end,
+                }}
+                onClick={onTileClick}
+                prefetch="intent"
               >
-                {modelUrl ? (
-                  <img
-                    className="catImg"
-                    src={modelUrl}
-                    alt=""
-                    decoding="async"
-                    loading="lazy"
-                  />
-                ) : null}
-              </span>
-            </Link>
+                <span className="catLabel">{item.label}</span>
+
+                <span
+                  className="catModel"
+                  aria-hidden="true"
+                  style={{'--model': modelUrl ? `url("${modelUrl}")` : 'none'}}
+                >
+                  {modelUrl ? (
+                    <img
+                      className="catImg"
+                      src={modelUrl}
+                      alt=""
+                      decoding="async"
+                      loading="lazy"
+                    />
+                  ) : null}
+                </span>
+              </Link>
+
+              {/* Submenu with fade in/out */}
+              <div
+                className={`submenuWrap ${isOpen ? 'is-open' : ''} ${
+                  isClosing ? 'is-closing' : ''
+                }`}
+                onTransitionEnd={(e) => {
+                  // clear closing state after opacity transition finishes
+                  if (
+                    e.propertyName === 'opacity' &&
+                    closingSlug === item.slug
+                  ) {
+                    setClosingSlug(null);
+                  }
+                }}
+                aria-hidden={!isOpen}
+              >
+                {shouldRenderSubmenu && (
+                  <CategorySliderFromMenuMobile menu={filteredMenu} />
+                )}
+              </div>
+            </div>
           );
         })}
       </div>
@@ -110,22 +189,24 @@ export default function CategoryTiles({title = 'Shop by Category'}) {
           overflow: visible;
         }
 
+        .tileBlock { overflow: visible; }
+
         .catCard {
           position: relative;
-            display: flex;
-            align-items: end;
-            height: 95px;
-            padding: 0 18px 10px;
-            border-radius: 10px;
-            background: linear-gradient(170deg, var(--start), var(--end));
-            color: #fff;
-            text-decoration: none;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, .10);
-            overflow: visible;
-            isolation: isolate;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform .15s ease, box-shadow .15s ease;
-            will-change: transform;
+          display: flex;
+          align-items: end;
+          height: 95px;
+          padding: 0 18px 10px;
+          border-radius: 10px;
+          background: linear-gradient(170deg, var(--start), var(--end));
+          color: #fff;
+          text-decoration: none;
+          box-shadow: 0 10px 28px rgba(0, 0, 0, .10);
+          overflow: visible;
+          isolation: isolate;
+          -webkit-tap-highlight-color: transparent;
+          transition: transform .15s ease, box-shadow .15s ease;
+          will-change: transform;
         }
         .catCard:active { transform: translateY(1px) scale(0.995); }
         @media (hover:hover){ .catCard:hover { box-shadow: 0 14px 34px rgba(0,0,0,.14); } }
@@ -138,7 +219,6 @@ export default function CategoryTiles({title = 'Shop by Category'}) {
           z-index: 2;
         }
 
-        /* Soft highlight + bottom shade for readability */
         .catCard::before {
           content:"";
           position:absolute; inset:0; border-radius:10px; pointer-events:none;
@@ -147,57 +227,58 @@ export default function CategoryTiles({title = 'Shop by Category'}) {
             linear-gradient(180deg, rgba(0,0,0,0) 62%, rgba(0,0,0,.18) 100%);
         }
 
-        /* Model container (holds the <img> and the gradient overlay mask) */
         .catModel {
           position: absolute;
-        right: 30px;
-        bottom: 5px;
-        width: 100px;
-        height: 100px;
-        pointer-events: none;
-        z-index: 1;
-        background: transparent;
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        border: 1px solid transparent;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+          right: 30px;
+          bottom: 5px;
+          width: 100px;
+          height: 100px;
+          pointer-events: none;
+          z-index: 1;
+          background: transparent;
+          backdrop-filter: blur(20px);
+          border-radius: 20px;
+          border: 1px solid transparent;
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
         .catImg {
           position: absolute;
-        /* inset: 0; */
-        width: 80px;
-        height: 80px;
-        /* object-fit: contain; */
-        /* object-position: center center; */
-        filter: drop-shadow(3px 2px 2px rgb(from var(--start) r g b / 0.6));
+          width: 80px;
+          height: 80px;
+          filter: drop-shadow(3px 2px 2px rgb(from var(--start) r g b / 0.6));
         }
 
-        /* Gradient overlay tinted ONLY where the PNG is opaque */
-        // .catModel::after {
-        //   content: "";
-        //   position: absolute;
-        //   inset: 0;
-        //   background: linear-gradient(135deg, var(--start), var(--end));
-        //   opacity: 0.80;
-        //   mix-blend-mode: multiply;
+        /* Fade in/out submenu */
+        .submenuWrap {
+          margin-top: 10px;
+          opacity: 0;
+          max-height: 0;
+          transform: translateY(-4px);
+          overflow: hidden;
+          transition:
+            opacity .18s ease,
+            transform .18s ease,
+            max-height .24s ease;
+        }
+        .submenuWrap.is-open {
+          opacity: 1;
+          max-height: 100%; /* enough space for the slider */
+          transform: translateY(0);
+        }
+        .submenuWrap.is-closing {
+          opacity: 0;
+          max-height: 0;
+          transform: translateY(-4px);
+        }
 
-        //   /* Mask confines the gradient to the model silhouette */
-        //   -webkit-mask-image: var(--model);
-        //   mask-image: var(--model);
-        //   -webkit-mask-repeat: no-repeat;
-        //   mask-repeat: no-repeat;
-        //   -webkit-mask-size: contain;
-        //   mask-size: contain;
-        //   -webkit-mask-position: right bottom;
-        //   mask-position: right bottom;
-        //   pointer-events: none;
-        // }
-
-        /* Fallback if a PNG is missing */
-        .catCard[data-missing] .catModel::after { display: none; }
+        @media (min-width: 640px){ .catList { grid-template-columns: 1fr 1fr; } }
+        @media (prefers-reduced-motion: reduce){
+          .catCard, .catCard:active { transition: none; }
+          .submenuWrap { transition: none; }
+        }
       `}</style>
     </section>
   );
