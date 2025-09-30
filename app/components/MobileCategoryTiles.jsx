@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useRef} from 'react';
+import React, {useMemo, useState, useRef, useEffect} from 'react';
 import {Link} from '@remix-run/react';
 import {CategorySliderFromMenuMobile} from './CategorySliderFromMenuMobile';
 
@@ -49,6 +49,7 @@ export default function MobileCategoryTiles({
   const [openSlugs, setOpenSlugs] = useState(() => new Set());
   const [closingSlugs, setClosingSlugs] = useState(() => new Set()); // per-tile fade-out
 
+  // Build once; used to validate restored slugs
   const items = useMemo(
     () => [
       // Your requested gradient pairs:
@@ -91,6 +92,38 @@ export default function MobileCategoryTiles({
     ],
     [],
   );
+
+  // ---- Persist & restore openSlugs (per path, per tab) ----
+  const allowedSlugs = useMemo(
+    () => new Set(items.map((i) => i.slug)),
+    [items],
+  );
+  const storageKey =
+    typeof window !== 'undefined'
+      ? `mct_open:${window.location.pathname}`
+      : 'mct_open';
+
+  // Restore on mount (client only)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      if (!raw) return;
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return;
+      const valid = arr.filter((s) => allowedSlugs.has(s));
+      if (valid.length) setOpenSlugs(new Set(valid));
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey, allowedSlugs]);
+
+  // Persist whenever openSlugs changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify([...openSlugs]));
+    } catch {}
+  }, [openSlugs, storageKey]);
 
   return (
     <section className="catSection" aria-labelledby="catTitle">
@@ -268,7 +301,7 @@ export default function MobileCategoryTiles({
           border: 1px solid transparent;
           display: flex;
           justify-content: center;
-          align-items: center;
+          align-items: center.
         }
 
         .catImg {
