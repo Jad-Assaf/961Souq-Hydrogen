@@ -3584,8 +3584,8 @@ a.video-link {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding-top: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  padding-top: 10px;
+  padding-bottom: 10px;
   background-color: transparent;
   backdrop-filter: blur(10px) saturate(3);
   border-radius: 40px;
@@ -3604,8 +3604,8 @@ a.video-link {
 }
 
 .mobile-bottom-nav .nav-item svg {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
 }
 
 .mobile-bottom-nav .cart-toggle {
