@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useRef} from 'react';
 import {Link} from '@remix-run/react';
 import {CategorySliderFromMenuMobile} from './CategorySliderFromMenuMobile';
 
@@ -45,8 +45,9 @@ export default function MobileCategoryTiles({
   title = 'Shop by Category',
   menu, // <-- pass header.menu
 }) {
-  const [openSlug, setOpenSlug] = useState(null);
-  const [closingSlug, setClosingSlug] = useState(null); // for fade-out
+  // Allow multiple open: sets of slugs
+  const [openSlugs, setOpenSlugs] = useState(() => new Set());
+  const [closingSlugs, setClosingSlugs] = useState(() => new Set()); // per-tile fade-out
 
   const items = useMemo(
     () => [
@@ -101,19 +102,38 @@ export default function MobileCategoryTiles({
         {items.map((item) => {
           const handle = item.slug;
           const modelUrl = assetUrlsBySlug[item.slug] || '';
-          const isOpen = openSlug === item.slug;
-          const isClosing = closingSlug === item.slug;
+          const isOpen = openSlugs.has(item.slug);
+          const isClosing = closingSlugs.has(item.slug);
 
           const onTileClick = (e) => {
             e.preventDefault(); // never navigate on tile tap
+
             if (isOpen) {
-              // start fade-out
-              setClosingSlug(item.slug);
-              setOpenSlug(null);
+              // Start fade-out for this tile only
+              setClosingSlugs((prev) => {
+                const next = new Set(prev);
+                next.add(item.slug);
+                return next;
+              });
+              setOpenSlugs((prev) => {
+                const next = new Set(prev);
+                next.delete(item.slug);
+                return next;
+              });
             } else {
-              // if another is open, cue it to close
-              if (openSlug) setClosingSlug(openSlug);
-              setOpenSlug(item.slug);
+              // Open this tile; do NOT close others
+              setOpenSlugs((prev) => {
+                const next = new Set(prev);
+                next.add(item.slug);
+                return next;
+              });
+              // if it was in closing (quick re-open), clear closing state
+              setClosingSlugs((prev) => {
+                if (!prev.has(item.slug)) return prev;
+                const next = new Set(prev);
+                next.delete(item.slug);
+                return next;
+              });
             }
           };
 
@@ -162,9 +182,13 @@ export default function MobileCategoryTiles({
                   // clear closing state after opacity transition finishes
                   if (
                     e.propertyName === 'opacity' &&
-                    closingSlug === item.slug
+                    closingSlugs.has(item.slug)
                   ) {
-                    setClosingSlug(null);
+                    setClosingSlugs((prev) => {
+                      const next = new Set(prev);
+                      next.delete(item.slug);
+                      return next;
+                    });
                   }
                 }}
                 aria-hidden={!isOpen}
