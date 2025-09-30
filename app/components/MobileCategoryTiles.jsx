@@ -209,9 +209,12 @@ export default function MobileCategoryTiles({
         .catList {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 40px;
+          gap: 30px;
           overflow: visible;
         }
+          .slide-con {
+            margin-bottom: 0 !important;
+          }
 
         .tileBlock { overflow: visible; }
 
