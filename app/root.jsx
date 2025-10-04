@@ -27,6 +27,7 @@ import React, {Suspense, useEffect, useRef, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
 import {SearchProvider} from './lib/searchContext.jsx';
+import InstantScrollRestoration from './components/InstantScrollRestoration';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -399,7 +400,8 @@ export function Layout({children}) {
             <PageLayout>{children}</PageLayout>
           )}
         </div>
-        <ScrollRestoration nonce={nonce} />
+        <InstantScrollRestoration />
+        {/* <ScrollRestoration nonce={nonce} /> */}
         {nonce ? <Scripts nonce={nonce} /> : <Scripts />}
       </body>
     </html>
