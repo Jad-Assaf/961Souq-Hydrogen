@@ -75,6 +75,8 @@ export default async function handleRequest(
       'https://insights.algolia.io',
       'https://fonts.gstatic.com',
       'https://www.meta.com',
+      'https://www.google-analytics.com',
+      'https://graph.facebook.com',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -118,6 +120,7 @@ export default async function handleRequest(
       'https://www.google-analytics.com',
       'https://fonts.gstatic.com',
       'https://www.meta.com',
+      'https://graph.facebook.com',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -158,6 +161,8 @@ export default async function handleRequest(
       'https://searchserverapi.com/',
       'https://fonts.gstatic.com',
       'https://www.meta.com',
+      'https://www.google-analytics.com',
+      'https://graph.facebook.com',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -200,6 +205,8 @@ export default async function handleRequest(
       'https://www.google.nl/',
       'https://fonts.gstatic.com',
       'https://www.meta.com',
+      'https://www.google-analytics.com',
+      'https://graph.facebook.com',
     ],
     mediaSrc: [
       "'self'",
@@ -226,6 +233,11 @@ export default async function handleRequest(
       'https://searchserverapi.com/',
       'https://fonts.gstatic.com',
       'https://www.meta.com',
+      'https://www.google-analytics.com',
+      'https://stats.g.doubleclick.net/',
+      'https://www.facebook.com',
+      'https://connect.facebook.net',
+      'https://graph.facebook.com',
     ],
   });
 
