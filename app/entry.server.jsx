@@ -77,6 +77,7 @@ export default async function handleRequest(
       'https://www.meta.com',
       'https://www.google-analytics.com',
       'https://graph.facebook.com',
+      'https://staticxx.facebook.com',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -121,6 +122,7 @@ export default async function handleRequest(
       'https://fonts.gstatic.com',
       'https://www.meta.com',
       'https://graph.facebook.com',
+      'https://staticxx.facebook.com',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -163,6 +165,7 @@ export default async function handleRequest(
       'https://www.meta.com',
       'https://www.google-analytics.com',
       'https://graph.facebook.com',
+      'https://staticxx.facebook.com',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -207,6 +210,7 @@ export default async function handleRequest(
       'https://www.meta.com',
       'https://www.google-analytics.com',
       'https://graph.facebook.com',
+      'https://staticxx.facebook.com',
     ],
     mediaSrc: [
       "'self'",
@@ -238,8 +242,8 @@ export default async function handleRequest(
       'https://www.facebook.com',
       'https://connect.facebook.net',
       'https://graph.facebook.com',
+      'https://staticxx.facebook.com',
     ],
-    dataFrameSrc: ['https://www.facebook.com', 'https://connect.facebook.net'],
   });
 
   const body = await renderToReadableStream(
