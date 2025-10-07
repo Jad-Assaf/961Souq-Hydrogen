@@ -239,6 +239,7 @@ export default async function handleRequest(
       'https://connect.facebook.net',
       'https://graph.facebook.com',
     ],
+    dataFrameSrc: ['https://www.facebook.com', 'https://connect.facebook.net'],
   });
 
   const body = await renderToReadableStream(
