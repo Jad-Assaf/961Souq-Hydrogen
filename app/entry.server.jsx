@@ -73,6 +73,8 @@ export default async function handleRequest(
       'https://*.algolianet.com',
       'https://cdn.jsdelivr.net',
       'https://insights.algolia.io',
+      'https://fonts.gstatic.com',
+      'https://www.meta.com',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -114,6 +116,8 @@ export default async function handleRequest(
       'https://cdn.jsdelivr.net',
       'https://insights.algolia.io',
       'https://www.google-analytics.com',
+      'https://fonts.gstatic.com',
+      'https://www.meta.com',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -152,6 +156,8 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
       'https://searchserverapi.com/',
+      'https://fonts.gstatic.com',
+      'https://www.meta.com',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -192,6 +198,8 @@ export default async function handleRequest(
       'https://www.youtube.com',
       'https://searchserverapi.com/',
       'https://www.google.nl/',
+      'https://fonts.gstatic.com',
+      'https://www.meta.com',
     ],
     mediaSrc: [
       "'self'",
@@ -216,6 +224,8 @@ export default async function handleRequest(
       'https://googleads.g.doubleclick.net',
       'https://www.youtube.com',
       'https://searchserverapi.com/',
+      'https://fonts.gstatic.com',
+      'https://www.meta.com',
     ],
   });
 
