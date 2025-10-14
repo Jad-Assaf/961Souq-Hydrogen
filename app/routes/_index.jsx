@@ -619,7 +619,7 @@ export default function Homepage() {
               />
             )}
 
-          <VideosGallery
+          {/* <VideosGallery
             videos={[
               {
                 src: 'https://cdn.shopify.com/videos/c/o/v/fa446492aa194b0d9b6f9e2dd686111c.mp4',
@@ -658,7 +658,7 @@ export default function Homepage() {
                 href: '/collections/ray-ban-smart-glasses',
               },
             ]}
-          />
+          /> */}
 
           {/* Gaming Group */}
           <CollectionCircles
