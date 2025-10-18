@@ -1406,46 +1406,25 @@ aside header h3 {
 }
 
 aside header .close {
-  position: absolute;
-  /* or fixed/sticky; pick what you need */
+  position: relative;
   top: 5px;
-  /* set coordinates so it's not off-screen */
-  right: 12px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 35px;
   height: 35px;
   border-radius: 30px;
   border: 1px solid #2171af96;
-
   font-weight: 500;
   text-decoration: none;
   color: #000;
-
   background-color: rgba(255, 255, 255, 0.45);
-  /* keep alpha */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  /* <- iOS */
-
   box-shadow:
     2px 2px 16px rgba(42, 164, 255, 0.15),
     inset 1px -1px 5px rgba(88, 88, 88, 0.54),
     inset -4px -5px 8px rgba(255, 255, 255, 1);
-
-  transition: transform 200ms ease, opacity 200ms ease;
-
-  z-index: 9999;
-  /* make sure it’s above overlays */
-
-  /* Force proper compositing on iOS */
-  transform: translateZ(0);
-  /* or translate3d(0,0,0) */
-  will-change: transform;
-  isolation: isolate;
 }
 
 aside header h2 {
