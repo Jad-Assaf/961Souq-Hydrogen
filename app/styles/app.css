@@ -1424,10 +1424,6 @@ aside header .close {
   justify-content: center;
 }
 
-aside header .close:hover {
-  opacity: 1;
-}
-
 aside header h2 {
   margin-bottom: 0.6rem;
   margin-top: 0;
