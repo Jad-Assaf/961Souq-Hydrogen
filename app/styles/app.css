@@ -1406,22 +1406,46 @@ aside header h3 {
 }
 
 aside header .close {
-  font-weight: 500;
-  /* font-size: 24px; */
-  text-decoration: none;
-  transition: all 200ms ease;
-  width: 35px;
-  height: 35px;
-  background-color: #ffffff72 !important;
-  backdrop-filter: blur(10px);
-  box-shadow: 2px 2px 16px #2aa4ff26, inset 1px -1px 5px 0px rgb(88 88 88 / 54%), inset -4px -5px 8px 0px rgb(255 255 255);
-  border-radius: 30px;
-  border: 1px solid #2171af96;
-  z-index: 1;
-  color: #000;
+  position: absolute;
+  /* or fixed/sticky; pick what you need */
+  top: 5px;
+  /* set coordinates so it's not off-screen */
+  right: 12px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 35px;
+  height: 35px;
+  border-radius: 30px;
+  border: 1px solid #2171af96;
+
+  font-weight: 500;
+  text-decoration: none;
+  color: #000;
+
+  background-color: rgba(255, 255, 255, 0.45);
+  /* keep alpha */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  /* <- iOS */
+
+  box-shadow:
+    2px 2px 16px rgba(42, 164, 255, 0.15),
+    inset 1px -1px 5px rgba(88, 88, 88, 0.54),
+    inset -4px -5px 8px rgba(255, 255, 255, 1);
+
+  transition: transform 200ms ease, opacity 200ms ease;
+
+  z-index: 9999;
+  /* make sure it’s above overlays */
+
+  /* Force proper compositing on iOS */
+  transform: translateZ(0);
+  /* or translate3d(0,0,0) */
+  will-change: transform;
+  isolation: isolate;
 }
 
 aside header h2 {
