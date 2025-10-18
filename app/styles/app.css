@@ -1396,6 +1396,7 @@ aside header {
   position: fixed;
   top: 3px;
   width: 100%;
+  height: 35px;
 }
 
 aside header h3 {
