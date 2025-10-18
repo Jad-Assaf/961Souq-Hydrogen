@@ -45,6 +45,145 @@ h2 {
   font-weight: 500;
 }
 
+/* Hide on small screens */
+@media (max-width: 1023.98px) {
+  .nav-bar-container {
+    display: none !important;
+  }
+
+  .desk-nav-logo {
+    display: none !important;
+  }
+}
+
+/* Container + backdrop */
+.nav-bar-container {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(25px);
+  padding: 80px 5px 0;
+  justify-content: flex-start;
+}
+
+/* Navbar wrapper */
+.nav-bar {
+  position: sticky;
+  top: 100px;
+  z-index: 50;
+  max-width: 1575px;
+  width: 100%;
+  margin: auto;
+}
+
+/* Top-level list */
+.nav-list {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 2rem;
+  list-style: none;
+  margin: auto;
+  padding: 1rem 0;
+  max-width: 1575px;
+  width: 95vw;
+}
+
+/* Item */
+.nav-item {
+  position: relative;
+}
+
+/* Links */
+.nav-link {
+  text-decoration: none;
+  color: #111;
+  font-weight: 500;
+  font-size: 15px;
+  transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link-active {
+  color: #2172af;
+}
+
+/* Submenu wrapper (all levels) */
+.nav-submenu-wrapper {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  min-width: 250px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+/* Show submenu on hover */
+.nav-item.nav-has-submenu:hover>.nav-submenu-wrapper {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* 3rd+ levels: position to the right of parent */
+/* this ensures 3rd-level panels slide out beside the 2nd level */
+.nav-submenu>li.nav-has-submenu:hover>.nav-submenu-wrapper {
+  top: 0;
+  /* align tops */
+  left: 75%;
+  /* move immediately to the right */
+  margin-left: 0.5rem;
+  /* small gap */
+}
+
+
+/* flip-left positions any submenu to the left of its parent */
+/* Flip submenu back on first hover without overlapping parent panel */
+.nav-item.flip-left>.nav-submenu-wrapper {
+  left: auto;
+  right: 0;
+}
+
+/* Submenu list */
+.nav-submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.nav-submenu li {
+  width: 100%;
+}
+
+/* Submenu links */
+.nav-submenu-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.nav-submenu-link:hover,
+.nav-submenu-link-active {
+  background: #f3f4f6;
+  color: #2172af;
+}
+
 .banner-slideshow {
   position: relative;
   height: auto;
@@ -195,7 +334,9 @@ p.home-colleciton-title {
   width: 48%;
   padding: 15px;
   border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  background-color: #fff !important;
+  gap: 20px;
 
   @media (max-width: 1400px) {
     width: 100%;
@@ -213,6 +354,17 @@ p.home-colleciton-title {
   gap: 5px;
   padding: 0 5px;
   width: 70%;
+}
+
+.cart-line-quantity {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    gap: 10px;
+
+  }
 }
 
 .cart-summary-page {
@@ -714,6 +866,7 @@ html:has(.overlay.expanded) {
 aside .cart-details {
   display: flex;
   flex-direction: column;
+  margin-top: 30px;
 }
 
 aside .cart-lines-ul {
@@ -725,14 +878,20 @@ aside .gtc-button {
 }
 
 aside .go-to-cart {
-  display: inline-block;
-  width: 100px;
-  color: #000;
-  margin: 0 0 10px 0;
-  border: 1px solid #2172af;
-  padding: 5px 10px;
+  text-align: center;
+  padding: 8px;
+  position: fixed;
+  bottom: 10px;
+  width: 75%;
+  background-color: #ffffff72 !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 2px 2px 16px #2aa4ff26, inset 5px 3px 5px 0px rgb(88 88 88 / 54%), inset -4px -5px 8px 0px rgb(255 255 255);
+  left: 12.5%;
   border-radius: 30px;
-  font-size: 12px;
+  border: 1px solid #2171af96;
+  font-weight: 500;
+  font-size: 16px;
+  z-index: 1;
 }
 
 .cart .gtc-button {
@@ -752,6 +911,24 @@ aside .go-to-cart {
 
 .empty-cart-link {
   color: #000;
+}
+
+aside .empty-cart-link {
+  text-align: center;
+  padding: 8px;
+  position: relative;
+  bottom: 22px;
+  width: 75%;
+  background-color: #ffffff72 !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 2px 2px 16px #2aa4ff26, inset 5px 3px 5px 0px rgb(88 88 88 / 54%), inset -4px -5px 8px 0px rgb(255 255 255);
+  left: 12.5%;
+  border-radius: 30px;
+  border: 1px solid #2171af96;
+  font-weight: 500;
+  font-size: 16px;
+  z-index: 1;
+  display: block;
 }
 
 @keyframes fadeIn {
@@ -1215,20 +1392,30 @@ aside {
 
 aside header {
   align-items: center;
-  border-bottom: 1px solid var(--color-dark);
   display: flex;
-  height: var(--header-height);
-  justify-content: space-between;
-  padding: 0 20px;
+  justify-content: center;
+  position: fixed;
+  top: 3px;
+  right: 2%;
+  width: 35px;
+  background-color: #ffffff72 !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 2px 2px 16px #2aa4ff26,
+    inset 1px -1px 5px 0px rgb(88 88 88 / 54%),
+    inset -4px -5px 8px 0px rgb(255 255 255);
+  border-radius: 30px;
+  border: 1px solid #2171af96;
 }
 
 aside header h3 {
   margin: 0;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 aside header .close {
   font-weight: 500;
-  font-size: 30px;
+  font-size: 24px;
   opacity: 0.8;
   text-decoration: none;
   transition: all 200ms ease;
@@ -1245,8 +1432,8 @@ aside header h2 {
 }
 
 aside main {
-  margin: 1rem 0;
-  background-color: #fff !important;
+  margin: 0;
+  background-color: transparent !important;
 }
 
 aside p {
@@ -1310,18 +1497,35 @@ aside li {
   transform: translateX(calc(var(--aside-width) * -1));
 }
 
+.empty-cart-image {
+  display: none;
+}
+
+aside .empty-cart-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 30px;
+  border-radius: 10px;
+  border: 1px solid #2172af7d;
+}
+
 .bin-button {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 35px;
+  width: 100%;
   height: 35px;
+  max-width: 120px;
+  padding: 0 10px;
   border-radius: 30px;
   background-color: rgb(255, 95, 95);
   cursor: pointer;
-  border: 3px solid rgb(255, 201, 201);
+  border: 2px solid rgb(255, 201, 201);
   transition-duration: 0.3s;
+  font-size: 13px;
+  color: #fff;
 }
 
 .bin-bottom {
@@ -1965,7 +2169,7 @@ aside .cart-main.with-discount {
 
 aside .cart-line {
   display: flex;
-  padding: .75rem 0;
+  padding: 10px;
   justify-content: start;
   align-items: center;
   width: 100%;
@@ -2006,10 +2210,17 @@ aside .cart-summary-aside p {
   justify-content: space-between;
   gap: 5px;
   width: 100%;
+  max-width: 170px;
+  align-items: center;
 
   @media (max-width: 600px) {
     flex-wrap: wrap;
   }
+}
+
+.qnt-rem form {
+  width: 30px;
+  height: 30px;
 }
 
 aside .cart-line-quantity {
@@ -2721,70 +2932,6 @@ input[type="checkbox"] {
   }
 }
 
-.cart h1 {
-  text-align: left;
-  width: 95%;
-  max-width: 1500px;
-  margin: 75px auto 50px !important;
-}
-
-.cart li {
-  margin-bottom: 0;
-}
-
-.product-card .product-price {
-  min-height: 43px !important;
-}
-
-.cart .product-price {
-  height: 20px;
-  min-height: 15px;
-}
-
-.cart-details {
-  margin-bottom: 20px;
-}
-
-.cart-lines-ul {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  max-width: 1500px;
-  width: 95%;
-  margin: auto;
-  gap: 20px;
-}
-
-.qnt-rem svg {
-  fill: white
-}
-
-.cart-line {
-  display: flex;
-  align-items: center;
-  width: 48%;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-
-  @media (max-width: 1400px) {
-    width: 100%;
-  }
-}
-
-.cart-line img {
-  width: 30%;
-  max-width: 200px;
-}
-
-.cart-item-details {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 0 5px;
-  width: 70%;
-}
-
 .cart-product-title {
   font-weight: 500;
   color: black;
@@ -2800,105 +2947,6 @@ input[type="checkbox"] {
     min-height: unset;
   }
 }
-
-.bin-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  border-radius: 30px;
-  background-color: rgb(255, 95, 95);
-  cursor: pointer;
-  border: 3px solid rgb(255, 201, 201);
-  transition-duration: 0.3s;
-}
-
-.bin-bottom {
-  width: 13px;
-}
-
-.bin-top {
-  width: 15px;
-  transform-origin: right;
-  transition-duration: 0.3s;
-}
-
-.bin-button:hover .bin-top {
-  transform: rotate(45deg);
-}
-
-.bin-button:hover {
-  background-color: rgb(255, 0, 0);
-}
-
-.bin-button:active {
-  transform: scale(0.9);
-}
-
-.cart-summary-page {
-  width: 95%;
-  max-width: 1500px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding-bottom: 30px;
-  border-top: 1px solid #2172af;
-  border-bottom: 1px solid #2172af;
-}
-
-.cart-summary-page p {
-  font-size: 12px;
-}
-
-.cart-checkout-button {
-  padding: 1.3em 3em;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  font-weight: 500;
-  color: #fff;
-  background-color: #2aa4ff;
-  border: 1px solid #2aa4ff;
-  border-radius: 10px;
-  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease 0s;
-  cursor: pointer;
-  outline: none;
-
-  @media (max-width: 768px) {
-    font-size: 11px;
-  }
-}
-
-.cart-checkout-button:hover {
-  background-color: #23c483;
-  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
-  color: #fff;
-  transform: translateY(-7px);
-}
-
-.cart-checkout-button:active {
-  transform: translateY(-1px);
-}
-
-.cart-subtotal {
-  display: flex;
-  align-items: start;
-  margin-bottom: 15px;
-
-  @media (max-width: 768px) {
-    margin-bottom: 10px;
-  }
-}
-
-.cart-subtotal h4 {
-  margin: 0;
-}
-
 
 /*! tailwindcss v4.0.0-alpha.17 | MIT License | https://tailwindcss.com */
 @layer base {

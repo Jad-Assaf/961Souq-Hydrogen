@@ -73,17 +73,17 @@ export function CartMain({layout, cart: originalCart}) {
 function CartEmpty({hidden = false}) {
   const {close} = useAside();
   return (
-    <div hidden={hidden} className='empty-cart'>
-      <br />
-      <p>
-        <strong>
-          Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-          started!
-        </strong>
-      </p>
-      <br />
-      <Link to="/collections/new-arrivals" onClick={close} className='empty-cart-link'>
-        Continue shopping →
+    <div hidden={hidden} className="empty-cart">
+      <img className='empty-cart-image'
+        src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ChatGPT_Image_Oct_18_2025_12_58_01_PM.png?v=1760781648"
+        alt=""
+      />
+      <Link
+        to="/collections/new-arrivals"
+        onClick={close}
+        className="empty-cart-link"
+      >
+        Continue shopping
       </Link>
     </div>
   );

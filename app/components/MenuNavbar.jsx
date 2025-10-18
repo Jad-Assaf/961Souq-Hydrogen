@@ -1,6 +1,5 @@
 import React from 'react';
 import {NavLink} from '@remix-run/react';
-import '../styles/menu-navbar.css';
 
 const MenuNavbar = ({menu}) => {
   // Measure & flip the submenu inline so it never overflows the viewport
