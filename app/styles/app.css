@@ -866,7 +866,7 @@ html:has(.overlay.expanded) {
 aside .cart-details {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
+  margin-top: 50px;
 }
 
 aside .cart-lines-ul {
@@ -913,7 +913,7 @@ aside .go-to-cart {
   color: #000;
 }
 
-aside .empty-cart-link {
+.empty-cart-link {
   text-align: center;
   padding: 8px;
   position: relative;
@@ -1396,7 +1396,7 @@ aside header {
   justify-content: center;
   position: fixed;
   top: 3px;
-  right: 2%;
+  right: 45%;
   width: 35px;
   background-color: #ffffff72 !important;
   backdrop-filter: blur(10px);
@@ -1505,7 +1505,7 @@ aside .empty-cart-image {
   display: block;
   width: 100%;
   height: auto;
-  margin-top: 30px;
+  margin-top: 50px;
   border-radius: 10px;
   border: 1px solid #2172af7d;
 }

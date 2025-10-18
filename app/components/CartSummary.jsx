@@ -13,12 +13,12 @@ export function CartSummary({cart, layout}) {
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
-      <p style={{margin: '15px 0 10px 0'}}>
+      <p style={{margin: '15px 0 10px 0', fontStyle: 'italic', color: 'grey'}}>
         Shipping: &nbsp;Calculated At Checkout
       </p>
       <dl className="cart-subtotal">
         <h4>
-          <strong>Estimated Total: &nbsp;</strong>
+          Estimated Total: &nbsp;
         </h4>
         <dd>
           {cart.cost?.subtotalAmount?.amount ? (
