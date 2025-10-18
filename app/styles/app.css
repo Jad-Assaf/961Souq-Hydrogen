@@ -1419,6 +1419,7 @@ aside header .close {
   border-radius: 30px;
   border: 1px solid #2171af96;
   z-index: 1;
+  color: #000;
 }
 
 aside header .close:hover {
