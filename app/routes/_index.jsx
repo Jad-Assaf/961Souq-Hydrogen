@@ -120,7 +120,7 @@ export function shouldRevalidate({currentUrl, nextUrl}) {
 async function fetchCollectionByHandle(context, handle) {
   const {collectionByHandle} = await context.storefront.query(
     GET_COLLECTION_BY_HANDLE_QUERY,
-    {variables: {handle}, cache: context.storefront.CacheLong()},
+    {variables: {handle}, cache: context.storefront.CacheShort()},
   );
   return collectionByHandle || null;
 }
