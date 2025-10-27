@@ -159,7 +159,7 @@ async function loadCriticalData({context}) {
         }
       }
     `,
-    {cache: storefront.CacheShort()},
+    {cache: storefront.CacheLong()},
   );
   // const [sliderCollections] = await Promise.all([
   //   fetchCollectionsByHandles(context, menuHandles),
