@@ -301,7 +301,7 @@ export default function MobileCategoryTiles({
           border: 1px solid transparent;
           display: flex;
           justify-content: center;
-          align-items: center.
+          align-items: center;
         }
 
         .catImg {
