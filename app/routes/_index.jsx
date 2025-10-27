@@ -120,7 +120,7 @@ export function shouldRevalidate({currentUrl, nextUrl}) {
 async function fetchCollectionByHandle(context, handle) {
   const {collectionByHandle} = await context.storefront.query(
     GET_COLLECTION_BY_HANDLE_QUERY,
-    {variables: {handle}, cache: context.storefront.CacheLong()},
+    {variables: {handle}, cache: context.storefront.CacheShort()},
   );
   return collectionByHandle || null;
 }
@@ -159,7 +159,7 @@ async function loadCriticalData({context}) {
         }
       }
     `,
-    {cache: storefront.CacheLong()},
+    {cache: storefront.CacheShort()},
   );
   // const [sliderCollections] = await Promise.all([
   //   fetchCollectionsByHandles(context, menuHandles),
