@@ -363,6 +363,10 @@ p.home-colleciton-title {
 .qnt-rem svg {
   fill: white
 }
+.qnt-rem small {
+  font-size: 12px;
+  font-weight: 400 !important;
+ }
 
 .cart-line {
   display: flex;
@@ -975,7 +979,8 @@ aside .go-to-cart {
   padding: 8px;
   position: relative;
   bottom: 10px;
-  width: 75%;
+  width: 250px;
+  margin: 10px 0;
   border-radius: 30px;
   border: 1px solid #2171af96;
   font-weight: 500;
@@ -1529,7 +1534,7 @@ aside main {
 
 aside p {
   margin: 0 0 0.25rem;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 aside p:last-child {
@@ -1607,15 +1612,15 @@ aside .empty-cart-image {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 35px;
+  height: 30px;
   max-width: 120px;
   padding: 0 10px;
   border-radius: 30px;
   background-color: rgb(255, 95, 95);
   cursor: pointer;
-  border: 2px solid rgb(255, 201, 201);
+  border: 1px solid rgb(255, 201, 201);
   transition-duration: 0.3s;
-  font-size: 13px;
+  font-size: 12px;
   color: #fff;
 }
 
@@ -2338,7 +2343,7 @@ aside .cart-line a {
 }
 
 aside .cart-line img {
-  width: 100px;
+  width: 75px;
   height: auto;
   display: block;
   margin-right: 0.75rem;
@@ -2357,10 +2362,12 @@ aside .cart-summary-aside {
   border-top: 1px solid #2172af;
   width: 95%;
   margin: auto;
+  text-align: center;
 }
 
 aside .cart-summary-aside p {
   font-size: 12px;
+
 }
 
 .qnt-rem {
@@ -2431,11 +2438,15 @@ aside .cart-discount {
 aside .cart-subtotal {
   align-items: center;
   display: flex;
+  justify-content: center;
+}
+aside .cart-subtotal h4{ 
+  font-weight: 600;
 }
 
 aside li.cart-line .product-price {
-  min-height: 20px;
-  font-size: 14px;
+  min-height: 10px;
+  font-size: 12px !important;
 }
 
 aside .cart-checkout-container {
