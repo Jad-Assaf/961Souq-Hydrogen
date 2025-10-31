@@ -43,7 +43,7 @@ export function CartSummary({cart, layout}) {
     if (subtotal) message += `Subtotal: $${subtotal} ${currency}\n`;
 
     const encoded = encodeURIComponent(message.trim());
-    const whatsappNumber = '96171039693';
+    const whatsappNumber = '9613963961';
     return `https://wa.me/${whatsappNumber}?text=${encoded}`;
   }, [cart]);
 
