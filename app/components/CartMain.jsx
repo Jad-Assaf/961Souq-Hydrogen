@@ -3,29 +3,14 @@ import {Link} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
 import {CartLineItem} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useMemo} from 'react';
 
-/**
- * The main cart component that displays the cart items and summary.
- * It is used by both the /cart route and the cart aside dialog.
- * @param {CartMainProps}
- */
 export function CartMain({layout, cart: originalCart}) {
-  // The useOptimisticCart hook applies pending actions to the cart
-  // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
-
-  // Loader state to track pending cart updates
   const [isLoading, setIsLoading] = useState(false);
 
-  // Track cart fetcher state
   useEffect(() => {
-    // If cart has pending actions, set loading state
-    if (cart?.pendingActions?.length > 0) {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
+    setIsLoading(cart?.pendingActions?.length > 0);
   }, [cart?.pendingActions]);
 
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
@@ -35,9 +20,47 @@ export function CartMain({layout, cart: originalCart}) {
   const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
   const cartHasItems = cart?.totalQuantity > 0;
 
+  /**
+   * Build clean WhatsApp message
+   */
+  const whatsappLink = useMemo(() => {
+    if (!cartHasItems) return '';
+
+    let message = 'Hi, I want to place an order for the following items:\n\n';
+    let counter = 1;
+
+    for (const line of cart.lines.nodes) {
+      const product = line.merchandise?.product;
+      const title = product?.title || 'Untitled';
+      const variantTitle = line.merchandise?.title;
+      const price = line.cost?.totalAmount?.amount;
+      const currency = line.cost?.totalAmount?.currencyCode || '';
+      const handle = product?.handle;
+      const link = handle
+        ? `https://961souq.com/products/${handle}`
+        : product?.onlineStoreUrl || '';
+
+      message += `${counter}. ${title}${
+        variantTitle && variantTitle !== 'Default Title'
+          ? ` (${variantTitle})`
+          : ''
+      }\n`;
+      if (link) message += `${link}\n`;
+      if (price) message += `Price: $${price} ${currency}\n\n`;
+      counter++;
+    }
+
+    const subtotal = cart.cost?.subtotalAmount?.amount;
+    const currency = cart.cost?.subtotalAmount?.currencyCode;
+    if (subtotal) message += `Subtotal: $${subtotal} ${currency}\n`;
+
+    const encoded = encodeURIComponent(message.trim());
+    const whatsappNumber = '96171039693';
+    return `https://wa.me/${whatsappNumber}?text=${encoded}`;
+  }, [cart, cartHasItems]);
+
   return (
     <div className={className}>
-      {/* Loader */}
       {isLoading && (
         <div className="cart-loader">
           <p>Updating cart...</p>
@@ -45,6 +68,7 @@ export function CartMain({layout, cart: originalCart}) {
       )}
 
       <CartEmpty hidden={linesCount} layout={layout} />
+
       <div className="cart-details">
         <div className="cart-lines" aria-labelledby="cart-lines">
           <ul className="cart-lines-ul">
@@ -54,27 +78,31 @@ export function CartMain({layout, cart: originalCart}) {
           </ul>
         </div>
       </div>
-      <button className='gtc-button'>
+
+      <button className="gtc-button">
         <a href="/cart" className="go-to-cart">
           Go to Cart
         </a>
       </button>
-      {cartHasItems && <CartSummary cart={cart} layout={layout} />}
+
+      {cartHasItems && (
+        <>
+          <CartSummary cart={cart} layout={layout} />
+        </>
+      )}
     </div>
   );
 }
 
 /**
- * @param {{
- *   hidden: boolean;
- *   layout?: CartMainProps['layout'];
- * }}
+ * Empty Cart Component
  */
 function CartEmpty({hidden = false}) {
   const {close} = useAside();
   return (
     <div hidden={hidden} className="empty-cart">
-      <img className='empty-cart-image'
+      <img
+        className="empty-cart-image"
         src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ChatGPT_Image_Oct_18_2025_12_58_01_PM.png?v=1760781648"
         alt=""
       />

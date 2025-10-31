@@ -277,6 +277,42 @@ p.home-colleciton-title {
   font-weight: 500;
 }
 
+.product-card.skeleton {
+  padding: 8px;
+}
+
+.skeleton-img {
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
+  background-size: 400% 100%;
+  animation: sh 1.1s ease-in-out infinite;
+}
+
+.skeleton-line {
+  height: 12px;
+  margin-top: 8px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
+  background-size: 400% 100%;
+  animation: sh 1.1s ease-in-out infinite;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes sh {
+  0% {
+    background-position: 100% 0
+  }
+
+  100% {
+    background-position: -100% 0
+  }
+}
+
 .arrow-buttons {
   position: relative;
   width: 100%;
@@ -384,7 +420,7 @@ p.home-colleciton-title {
   font-size: 12px;
 }
 
-.cart-checkout-button {
+/* .cart-checkout-button {
   padding: 1.3em 3em;
   font-size: 12px;
   text-transform: uppercase;
@@ -413,6 +449,59 @@ p.home-colleciton-title {
 
 .cart-checkout-button:active {
   transform: translateY(-1px);
+} */
+
+.cart-checkout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 250px;
+  max-width: 250px;
+  margin: 5px auto 5px;
+  padding: 14px 10px;
+  border-radius: 9999px;
+  /* pill shape */
+  background: linear-gradient(135deg, #2aa4ff, #29d);
+  color: #fff;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(34, 197, 94, 0.284);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.cart-checkout-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0.1) 60%,
+      transparent 100%);
+  transition: all 0.4s ease;
+}
+
+.cart-checkout-button:hover::after {
+  left: 100%;
+}
+
+.cart-checkout-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(44, 198, 254, 0.55);
+  background: linear-gradient(135deg, #25d366, #128c7e);
+}
+
+.cart-checkout-button:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);
 }
 
 .cart-subtotal {
@@ -2158,12 +2247,79 @@ aside .empty-cart-image {
   }
 }
 
+.whatsapp-cart-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 250px;
+  margin: 5px auto 5px;
+  padding: 0px 10px 0 0;
+  border-radius: 9999px;
+  /* pill shape */
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(34, 197, 94, 0.4);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.whatsapp-cart-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0.1) 60%,
+      transparent 100%);
+  transition: all 0.4s ease;
+}
+
+.whatsapp-cart-button:hover::after {
+  left: 100%;
+}
+
+.whatsapp-cart-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.55);
+  background: linear-gradient(135deg, #25d366, #128c7e);
+}
+
+.whatsapp-cart-button:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);
+}
+
+.whatsapp-icon {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+  transition: transform 0.25s ease;
+}
+
+.whatsapp-cart-button:hover .whatsapp-icon {
+  transform: scale(1.1);
+}
+
 aside .cart-main {
   height: 100vh;
   width: auto;
   overflow: auto;
   padding-bottom: 200px;
 }
+aside .cart-main .aside-h3{
+  display: block !important;
+ }
 
 aside .cart-main.with-discount {
   max-height: calc(100vh - var(--cart-aside-summary-height-with-discount));
@@ -2287,8 +2443,6 @@ aside .cart-checkout-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 50px;
-  border-radius: 30px;
 }
 
 aside .cart-checkout-button {
@@ -2296,6 +2450,18 @@ aside .cart-checkout-button {
   width: 100%;
   text-align: center;
   align-content: center;
+}
+
+.cart-or {
+  text-align: center;
+  font-size: 16px !important;
+  font-weight: 500;
+  color: #484848;
+  width: 250px;
+}
+
+aside .cart-or{
+  margin: 5px auto;
 }
 
 .product-link-wrapper img {
