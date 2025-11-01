@@ -5154,7 +5154,7 @@ svg.icon.icon--full-color {
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 999;
+  z-index: 1;
 }
 
 /* ---------- Focus (keyboard) ---------- */
