@@ -3815,7 +3815,8 @@ a.video-link {
   cursor: pointer;
   position: relative;
 }
-.mobile-bottom-nav .cart-toggle .badge{ 
+
+.mobile-bottom-nav .nav-item .badge{ 
   position: absolute;
   top: -5px;
   right: -5px;
