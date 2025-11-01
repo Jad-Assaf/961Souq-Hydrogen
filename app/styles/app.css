@@ -4967,6 +4967,7 @@ svg.icon.icon--full-color {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(8px);
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  max-width: 97vw !important;
   display: grid;
   grid-template-areas:
     "thumb"
@@ -5203,5 +5204,5 @@ svg.icon.icon--full-color {
 
 .wishlist-page {
   max-width: 1575px;
-  margin: auto;
+  margin: 50px auto 20px;
 }
