@@ -1,4 +1,4 @@
-import {useEffect, useState, useRef} from 'react';
+import {useEffect, useState, useRef, useMemo} from 'react';
 import {Link, NavLink} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
 import {Image} from '@shopify/hydrogen-react';
@@ -6,7 +6,37 @@ import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
 import AlgoliaSearch from './StorefrontSearch';
+import {useWishlist} from '~/lib/WishlistContext';
+import { useOptimisticCart } from '@shopify/hydrogen';
+
 // import StorefrontSearch from './StorefrontSearch';
+
+function getCartCount(cart) {
+  if (!cart) return 0;
+
+  // 1) direct totalQuantity if your loader provides it
+  if (typeof cart.totalQuantity === 'number') return cart.totalQuantity;
+
+  // 2) GraphQL nodes shape
+  if (Array.isArray(cart.lines?.nodes)) {
+    return cart.lines.nodes.reduce((sum, n) => sum + (n?.quantity ?? 0), 0);
+  }
+
+  // 3) Relay edges shape
+  if (Array.isArray(cart.lines?.edges)) {
+    return cart.lines.edges.reduce(
+      (sum, e) => sum + (e?.node?.quantity ?? 0),
+      0,
+    );
+  }
+
+  // 4) Flat array fallback
+  if (Array.isArray(cart.lines)) {
+    return cart.lines.reduce((sum, l) => sum + (l?.quantity ?? 0), 0);
+  }
+
+  return 0;
+}
 
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
@@ -19,6 +49,19 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const timeoutRef = useRef(null);
   const blinkIntervalRef = useRef(null);
+  const {items} = useWishlist();
+  const wishCount = items.length;
+
+  const optimisticCart = useOptimisticCart(cart);
+  const cartCount =
+    optimisticCart?.totalQuantity ??
+    (Array.isArray(optimisticCart?.lines?.edges)
+      ? optimisticCart.lines.edges.reduce(
+          (n, e) => n + (e?.node?.quantity ?? 0),
+          0,
+        )
+      : 0);
+
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
@@ -306,7 +349,21 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             >
               <UserIcon />
             </NavLink>
-            <CartToggle cart={cart} />
+            <NavLink
+              prefetch="intent"
+              to="/wishlist"
+              className="wishlist-icon"
+              aria-label={`Wishlist${wishCount ? ` (${wishCount})` : ''}`}
+            >
+              <div className="wishlist-icon-wrap">
+                <WishListIcon />
+                {wishCount > 0 && (
+                  <span className="wishlist-count-badge">{wishCount}</span>
+                )}
+              </div>
+            </NavLink>
+
+            <CartToggle count={cartCount} />
           </div>
         </div>
 
@@ -515,36 +572,84 @@ export function HeaderMenu({menu, viewport}) {
   );
 }
 
-function CartToggle({cart}) {
+function CartToggle({count = 0}) {
   const {open} = useAside();
 
   return (
     <button
       className="cart-button reset"
       onClick={() => open('cart')}
-      aria-label="Open Cart"
+      aria-label={`Open Cart${count ? ` (${count})` : ''}`}
     >
-      <CartIcon />
+      <div style={{position: 'relative', display: 'inline-block'}}>
+        <CartIcon />
+        <span
+          className="cart-count-badge"
+          aria-hidden="true"
+          data-count={count}
+          style={{
+            opacity: count > 0 ? 1 : 0, // always in DOM
+          }}
+        >
+          {count}
+        </span>
+      </div>
     </button>
+  );
+}
+
+function WishListIcon() {
+  return (
+    <svg
+      width="64px"
+      height="64px"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+      <g
+        id="SVGRepo_tracerCarrier"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></g>
+      <g id="SVGRepo_iconCarrier">
+        {' '}
+        <path
+          d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z"
+          fill="#2172af"
+        ></path>{' '}
+      </g>
+    </svg>
   );
 }
 
 function UserIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+    <svg
+      width="64px"
+      height="64px"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      stroke="#"
+    >
+      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
       <g
         id="SVGRepo_tracerCarrier"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
+        {' '}
         <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM15 9C15 10.6569 13.6569 12 12 12C10.3431 12 9 10.6569 9 9C9 7.34315 10.3431 6 12 6C13.6569 6 15 7.34315 15 9ZM12 20.5C13.784 20.5 15.4397 19.9504 16.8069 19.0112C17.4108 18.5964 17.6688 17.8062 17.3178 17.1632C16.59 15.8303 15.0902 15 11.9999 15C8.90969 15 7.40997 15.8302 6.68214 17.1632C6.33105 17.8062 6.5891 18.5963 7.19296 19.0111C8.56018 19.9503 10.2159 20.5 12 20.5Z"
+          d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
           fill="#2172af"
-        ></path>
+        ></path>{' '}
+        <path
+          d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z"
+          fill="#2172af"
+        ></path>{' '}
       </g>
     </svg>
   );
@@ -573,33 +678,32 @@ export function SearchIcon() {
 function CartIcon() {
   return (
     <svg
-      fill="#2172af"
-      height="200px"
-      width="200px"
-      version="1.1"
-      id="Layer_1"
+      width="64px"
+      height="64px"
+      viewBox="0 0 48 48"
       xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
-      viewBox="0 0 300.005 300.005"
-      xmlSpace="preserve"
-      stroke="#2172af"
+      fill="#2172af"
     >
-      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
       <g
         id="SVGRepo_tracerCarrier"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
-        <g>
-          <g>
-            <g>
-              <path d="M182.936,76.966h-0.002c0-18.516-15.066-33.58-33.58-33.58c-18.516,0-33.58,15.064-33.58,33.58v11.671h67.162V76.966z"></path>{' '}
-              <path d="M206.585,104.199h-8.09v10.911c2.498,2.179,4.113,5.351,4.113,8.93c0,6.57-5.325,11.897-11.894,11.897 c-6.564,0-11.894-5.327-11.894-11.897c0-3.577,1.611-6.749,4.113-8.927v-10.914h-67.162v10.911c2.5,2.181,4.113,5.351,4.113,8.93 c0,6.57-5.327,11.897-11.894,11.897c-6.57,0-11.894-5.327-11.894-11.897c0-3.577,1.613-6.751,4.113-8.93v-10.911h-8.09 c-4.573,0-8.292,3.719-8.292,8.292v111.168c0,4.573,3.719,8.292,8.292,8.292h114.465c4.57,0,8.292-3.722,8.292-8.292V112.491 C214.877,107.918,211.155,104.199,206.585,104.199z"></path>{' '}
-              <path d="M150,0C67.159,0,0.002,67.162,0.002,150S67.159,300.005,150,300.005S300.003,232.841,300.003,150S232.841,0,150,0z M230.439,223.659c0,13.152-10.704,23.854-23.854,23.854H92.121c-13.152,0-23.854-10.701-23.854-23.854V112.491 c0-13.152,10.701-23.854,23.854-23.854h8.09V76.966c0-27.098,22.046-49.142,49.142-49.142s49.142,22.046,49.142,49.142v11.671 h8.09c13.15,0,23.854,10.701,23.854,23.854V223.659z"></path>{' '}
-            </g>
-          </g>
-        </g>
+        {' '}
+        <title>cart-shopping-solid</title>{' '}
+        <g id="Layer_2" data-name="Layer 2">
+          {' '}
+          <g id="invisible_box" data-name="invisible box">
+            {' '}
+            <rect width="48" height="48" fill="none"></rect>{' '}
+          </g>{' '}
+          <g id="icons_Q2" data-name="icons Q2">
+            {' '}
+            <path d="M44.3,10A3.3,3.3,0,0,0,42,9H11.5l-.4-3.4A3,3,0,0,0,8.1,3H5A2,2,0,0,0,5,7H7.2l3.2,26.9A5.9,5.9,0,0,0,7.5,39a6,6,0,0,0,6,6,6.2,6.2,0,0,0,5.7-4H29.8a6.2,6.2,0,0,0,5.7,4,6,6,0,0,0,0-12,6.2,6.2,0,0,0-5.7,4H19.2a6,6,0,0,0-4.9-3.9L14.1,31H39.4a3,3,0,0,0,2.9-2.6L45,12.6A3.6,3.6,0,0,0,44.3,10ZM37.5,39a2,2,0,1,1-2-2A2,2,0,0,1,37.5,39Zm-22,0a2,2,0,1,1-2-2A2,2,0,0,1,15.5,39Z"></path>{' '}
+          </g>{' '}
+        </g>{' '}
       </g>
     </svg>
   );

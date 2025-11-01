@@ -24,6 +24,7 @@ import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
 import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 import ProductFAQ from '~/components/ProductFAQ';
+import WishlistButton from '~/components/WishlistButton';
 
 // ---------------- SEO & Meta
 export const meta = ({data}) => {
@@ -257,7 +258,6 @@ async function loadCriticalData({context, params, request}) {
     relatedProducts = productRecommendations || [];
   }
 
-  
   // Return necessary product data including SEO, first image, and variant price
   return {
     product: {
@@ -543,6 +543,13 @@ export function ProductForm({
     </svg>
   );
 
+  // near other locals in ProductForm (after whatsappShareUrl / icons is fine)
+  const canWishlist = !!(
+    selectedVariant &&
+    selectedVariant.availableForSale &&
+    Number(selectedVariant?.price?.amount) > 0
+  );
+
   return (
     <>
       <VariantSelector
@@ -585,18 +592,22 @@ export function ProductForm({
             ? 'Add to cart'
             : 'Sold out'}
         </AddToCartButton>
-
-        {isProductPage && (
-          <a
-            href={whatsappShareUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="whatsapp-share-button"
-            aria-label="Share on WhatsApp"
-          >
-            <WhatsAppIcon />
-          </a>
-        )}
+        <div className="wishlist-whatsapp-container">
+          {isProductPage && (
+            <a
+              href={whatsappShareUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="whatsapp-share-button"
+              aria-label="Share on WhatsApp"
+            >
+              <WhatsAppIcon />
+            </a>
+          )}
+          {canWishlist && (
+            <WishlistButton product={product} variantId={selectedVariant?.id} />
+          )}
+        </div>
       </div>
     </>
   );
@@ -1029,6 +1040,16 @@ const PRODUCT_FRAGMENT = `#graphql
       }
     }
 
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+      maxVariantPrice {
+        amount
+        currencyCode
+      }
+    }
 
     # Fetch product images for SEO or fallback usage
     images(first: 50) {

@@ -28,6 +28,7 @@ import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
 import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
+import { WishlistProvider } from './lib/WishlistContext';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -68,6 +69,7 @@ export async function loader({request, context}) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const match = pathname.match(/^\/collections\/[^/]+\/products\/(.+)/);
+  const cart = await context.cart.get(); // includes totalQuantity
   if (match) {
     const productSlug = match[1];
     return redirect(`/products/${productSlug}`, {status: 301});
@@ -100,6 +102,7 @@ export async function loader({request, context}) {
           country: storefront.i18n.country,
           language: storefront.i18n.language,
         },
+        cart,
       },
       {headers},
     );
@@ -393,11 +396,17 @@ export function Layout({children}) {
               consent={data.consent}
             >
               <SearchProvider>
-                <PageLayout {...data}>{children}</PageLayout>
+                <WishlistProvider>
+                  <PageLayout {...data}>{children}</PageLayout>
+                </WishlistProvider>
               </SearchProvider>
             </Analytics.Provider>
           ) : (
-            <PageLayout>{children}</PageLayout>
+            <SearchProvider>
+              <WishlistProvider>
+                <PageLayout>{children}</PageLayout>
+              </WishlistProvider>
+            </SearchProvider>
           )}
         </div>
         <InstantScrollRestoration />

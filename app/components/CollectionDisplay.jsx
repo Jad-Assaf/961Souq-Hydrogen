@@ -4,6 +4,7 @@ import {Money} from '@shopify/hydrogen';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import CollectionRows from './CollectionRows';
+import WishlistButton from './WishlistButton';
 
 export function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') return '';
@@ -110,11 +111,21 @@ export function ProductItem({product}) {
     product.variants?.nodes?.[0] ||
     null;
 
+  // right after selectedVariant is defined
+  const showWishlist = !!(
+    selectedVariant &&
+    selectedVariant.availableForSale &&
+    Number(selectedVariant?.price?.amount) > 0
+  );
+
   const handleMouseEnter = () => images.length > 1 && setCurrentImageIndex(1);
   const handleMouseLeave = () => setCurrentImageIndex(0);
 
   return (
     <div ref={ref} className="product-card">
+      {showWishlist && (
+        <WishlistButton product={product} variantId={selectedVariant?.id} />
+      )}
       <Link to={`/products/${encodeURIComponent(product.handle)}`}>
         {images.length > 0 && (
           <div
@@ -164,7 +175,6 @@ export function ProductItem({product}) {
             )}
         </div>
       </Link>
-
       <AddToCartButton
         disabled={
           !selectedVariant ||
