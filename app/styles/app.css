@@ -3826,11 +3826,11 @@ a.video-link {
   font-size: 0.75rem;
   font-weight: 500;
 }
- }
+
 
 @media (min-width: 1024px) {
   .mobile-bottom-nav {
-    display: none;
+    display: none !important;
   }
 }
 
