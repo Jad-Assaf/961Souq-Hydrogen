@@ -81,7 +81,7 @@ export function CartSummary({cart, layout}) {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <g id="SVGRepo_bgCarrier" stroke-width="0">
+            <g id="SVGRepo_bgCarrier" strokeWidth="0">
               <rect
                 x="-4.8"
                 y="-4.8"

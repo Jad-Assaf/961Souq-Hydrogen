@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
-import {Link} from '@remix-run/react';
+import {Link, useLocation} from '@remix-run/react';
 import {Money} from '@shopify/hydrogen';
 
 const API_URL = 'https://961souqs.myshopify.com/api/2025-04/graphql.json';
@@ -9,24 +9,27 @@ const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
 const SOURCE_LIMIT = 30; // ~30 history source IDs
 const OUTPUT_LIMIT = 120; // total cards we’re willing to show
 const BATCH_SIZE = 8; // how many cards to append per “page”
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours (correct)
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const HARD_TIMEOUT_MS = 1800; // abort slow requests
 const SKELETON_HEIGHT = 440; // reserve space to avoid CLS
 const SKELETON_CARD_H = 357;
 
 export default function RelatedProductsFromHistory({currentProductId}) {
+  const location = useLocation();
+
   const [heading, setHeading] = useState('');
   const [rendered, setRendered] = useState([]); // cards currently rendered
   const [pool, setPool] = useState([]); // full deduped pool we can page from
   const [page, setPage] = useState(1); // pagination page (1-based)
   const [isLoading, setIsLoading] = useState(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false); // first paint ready
+  const [refreshKey, setRefreshKey] = useState(0); // bump to force re-read of storage
 
   const sentinelRef = useRef(null);
   const loadingMoreRef = useRef(false); // avoid double triggers
 
-  // -------- pull history ids (client only) --------
-  const sourceIds = useMemo(() => {
+  // ---- UTIL: read viewed history IDs from localStorage
+  const readViewedIds = useCallback(() => {
     if (typeof window === 'undefined') return [];
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
     const list = currentProductId
@@ -34,6 +37,12 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       : viewed;
     return list.slice(0, SOURCE_LIMIT);
   }, [currentProductId]);
+
+  // -------- pull history ids (client only), recompute on route change/refreshKey
+  const sourceIds = useMemo(() => {
+    return readViewedIds();
+    // include location.key so going back to homepage (new key) re-reads storage
+  }, [readViewedIds, location.key, refreshKey]);
 
   // -------- bootstrap from cache immediately + set heading --------
   useEffect(() => {
@@ -64,16 +73,15 @@ export default function RelatedProductsFromHistory({currentProductId}) {
 
     if (collected.length) {
       const deduped = dedupe(collected, currentProductId);
-      setPool(deduped.slice(0, OUTPUT_LIMIT));
-      // pre-render first page immediately
-      setRendered(deduped.slice(0, Math.min(BATCH_SIZE, OUTPUT_LIMIT)));
+      const limited = deduped.slice(0, OUTPUT_LIMIT);
+      setPool(limited);
+      setRendered(limited.slice(0, Math.min(BATCH_SIZE, OUTPUT_LIMIT)));
       setPage(1);
       setIsBootstrapped(true);
     } else {
-      // nothing cached => show skeleton, then fetch
       setPool([]);
       setRendered([]);
-      setPage(0); // nothing rendered yet
+      setPage(0);
       setIsBootstrapped(false);
     }
   }, [sourceIds, currentProductId]);
@@ -96,7 +104,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         const deduped = dedupe(items, currentProductId).slice(0, OUTPUT_LIMIT);
         setPool(deduped);
 
-        // if nothing was rendered from cache, render page 1 now
         if (!isBootstrapped) {
           const firstPage = deduped.slice(
             0,
@@ -128,7 +135,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         const results = await Promise.allSettled(
           needed.map((id) => fetchRecommendationsForId(id, controller.signal)),
         );
-        // write cache per source
+        // cache per source
         results.forEach((res, idx) => {
           const sourceId = needed[idx];
           if (res.status === 'fulfilled' && Array.isArray(res.value)) {
@@ -157,7 +164,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         const deduped = dedupe(merged, currentProductId).slice(0, OUTPUT_LIMIT);
         setPool(deduped);
 
-        // if nothing was rendered from cache, render page 1 now
         if (!isBootstrapped) {
           const firstPage = deduped.slice(
             0,
@@ -178,6 +184,28 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       aborted = true;
     };
   }, [sourceIds, currentProductId, isBootstrapped]);
+
+  // -------- refresh when coming back via BFCache / tab focus / custom event --------
+  useEffect(() => {
+    const bump = () => setRefreshKey((k) => k + 1);
+
+    // Back-forward cache restore fires "pageshow" with persisted = true
+    const onPageShow = (e) => {
+      if (e.persisted) bump();
+    };
+
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('focus', bump);
+    // Optional: if product page dispatches this after writing localStorage
+    // window.dispatchEvent(new Event('viewedProducts:updated'));
+    window.addEventListener('viewedProducts:updated', bump);
+
+    return () => {
+      window.removeEventListener('pageshow', onPageShow);
+      window.removeEventListener('focus', bump);
+      window.removeEventListener('viewedProducts:updated', bump);
+    };
+  }, []);
 
   // -------- infinite “load more” when reaching the end --------
   const loadMore = useCallback(() => {
@@ -208,7 +236,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       (entries) => {
         const [entry] = entries;
         if (entry.isIntersecting) {
-          // Only load more if we still have items available in the pool
           if (rendered.length < Math.min(pool.length, OUTPUT_LIMIT)) {
             loadMore();
           }
@@ -298,7 +325,6 @@ async function fetchRecommendationsForId(productId, signal) {
 }
 
 async function fetchRandomProducts(signal) {
-  // BEST_SELLING as a proxy for “good” randoms; shuffle client-side
   const query = `
     query RandomProducts {
       products(first: 100, sortKey: BEST_SELLING) {
