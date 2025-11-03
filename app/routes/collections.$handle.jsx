@@ -24,6 +24,7 @@ import {useMediaQuery} from 'react-responsive';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
+import WishlistButton from '~/components/WishlistButton';
 
 function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') return '';
@@ -586,6 +587,12 @@ const ProductItem = ({product, index, numberInRow}) => {
     selectedVariant.selectedOptions,
   );
 
+  const showWishlist = !!(
+    selectedVariant &&
+    selectedVariant.availableForSale &&
+    Number(selectedVariant?.price?.amount) > 0
+  );
+
   return (
     <div className="product-item-collection product-card" ref={ref}>
       <div>
@@ -620,6 +627,12 @@ const ProductItem = ({product, index, numberInRow}) => {
           </Link>
 
           <div className="product-info-container">
+            {showWishlist && (
+              <WishlistButton
+                product={product}
+                variantId={selectedVariant?.id}
+              />
+            )}
             <Link key={product.id} prefetch="intent" to={variantUrl}>
               <h4>{truncateText(product.title, 30)}</h4>
               <p className="product-description">

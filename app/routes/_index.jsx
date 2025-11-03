@@ -29,6 +29,7 @@ import VideosGallery from '~/components/VideosGallery';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 import {CategorySliderFromMenuMobile} from '~/components/CategorySliderFromMenuMobile';
 import MobileCategoryTiles from '~/components/MobileCategoryTiles';
+import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 // const MANUAL_MENU_HANDLES = [
@@ -547,6 +548,7 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
+      <RelatedProductsFromHistory />
 
       {isMobile ? (
         <>
