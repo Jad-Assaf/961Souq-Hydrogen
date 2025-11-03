@@ -472,6 +472,31 @@ export default function Homepage() {
   const rootMatch = useMatches()[0];
   const header = rootMatch?.data?.header;
 
+  const [rpKey, setRpKey] = useState(0);
+
+  useEffect(() => {
+    const bump = () => setRpKey((k) => k + 1);
+
+    // BFCache restore + general refocus
+    const onPageShow = (e) => bump();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') bump();
+    };
+    const onPopState = () => bump();
+
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('focus', bump);
+    window.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('popstate', onPopState);
+
+    return () => {
+      window.removeEventListener('pageshow', onPageShow);
+      window.removeEventListener('focus', bump);
+      window.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
+
   const combinedTopProducts = {
     ...topProducts,
   };
@@ -548,7 +573,7 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
-      <RelatedProductsFromHistory />
+      <RelatedProductsFromHistory key={rpKey} />
 
       {isMobile ? (
         <>

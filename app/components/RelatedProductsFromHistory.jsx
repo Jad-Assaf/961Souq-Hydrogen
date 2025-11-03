@@ -9,9 +9,9 @@ const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
 const SOURCE_LIMIT = 30; // how many history IDs to consider
 const OUTPUT_LIMIT = 120; // total cards to render at most
 const BATCH_SIZE = 8; // cards per “page”
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const CACHE_TTL_MS = 600 * 60 * 60 * 1000; // 6 hours
 const HARD_TIMEOUT_MS = 1800; // abort slow requests
-const SKELETON_HEIGHT = 440; // reserve container height
+const SKELETON_HEIGHT = 400; // reserve container height
 const SKELETON_CARD_H = 357; // skeleton card height
 
 export default function RelatedProductsFromHistory({currentProductId}) {
