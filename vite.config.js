@@ -70,6 +70,10 @@ export default defineConfig({
        * @see https://vitejs.dev/config/dep-optimization-options
        */
       include: [
+        'ts-easing',
+        'fast-shallow-equal',
+        'react-universal-interface',
+        'screenfull',
         'react-social-media-embed',
         'algoliasearch',
         'use-sync-external-store/shim/index.js',

@@ -1,92 +1,70 @@
 import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
-import {Link, useLocation} from '@remix-run/react';
+import {Link} from '@remix-run/react';
 import {Money} from '@shopify/hydrogen';
 
 const API_URL = 'https://961souqs.myshopify.com/api/2025-04/graphql.json';
 const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
 
 /** Tuning */
-const SOURCE_LIMIT = 30; // ~30 history source IDs
-const OUTPUT_LIMIT = 120; // total cards we’re willing to show
-const BATCH_SIZE = 8; // how many cards to append per “page”
+const SOURCE_LIMIT = 30; // how many history IDs to consider
+const OUTPUT_LIMIT = 120; // total cards to render at most
+const BATCH_SIZE = 8; // cards per “page”
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const HARD_TIMEOUT_MS = 1800; // abort slow requests
-const SKELETON_HEIGHT = 440; // reserve space to avoid CLS
-const SKELETON_CARD_H = 357;
+const SKELETON_HEIGHT = 440; // reserve container height
+const SKELETON_CARD_H = 357; // skeleton card height
 
 export default function RelatedProductsFromHistory({currentProductId}) {
-  const location = useLocation();
-
   const [heading, setHeading] = useState('');
-  const [rendered, setRendered] = useState([]); // cards currently rendered
-  const [pool, setPool] = useState([]); // full deduped pool we can page from
-  const [page, setPage] = useState(1); // pagination page (1-based)
+  const [rendered, setRendered] = useState([]); // currently painted cards
+  const [pool, setPool] = useState([]); // full deduped pool
   const [isLoading, setIsLoading] = useState(false);
-  const [isBootstrapped, setIsBootstrapped] = useState(false); // first paint ready
-  const [refreshKey, setRefreshKey] = useState(0); // bump to force re-read of storage
+  const [isBootstrapped, setIsBootstrapped] = useState(false);
 
   const sentinelRef = useRef(null);
-  const loadingMoreRef = useRef(false); // avoid double triggers
+  const loadingMoreRef = useRef(false);
 
-  // ---- UTIL: read viewed history IDs from localStorage
-  const readViewedIds = useCallback(() => {
+  // ---- read history synchronously (client only) ----
+  const sourceIds = useMemo(() => {
     if (typeof window === 'undefined') return [];
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
+    // assume viewed[0] is most recent; keep order
     const list = currentProductId
       ? viewed.filter((id) => id !== currentProductId)
       : viewed;
     return list.slice(0, SOURCE_LIMIT);
   }, [currentProductId]);
 
-  // -------- pull history ids (client only), recompute on route change/refreshKey
-  const sourceIds = useMemo(() => {
-    return readViewedIds();
-    // include location.key so going back to homepage (new key) re-reads storage
-  }, [readViewedIds, location.key, refreshKey]);
-
-  // -------- bootstrap from cache immediately + set heading --------
+  // ---- Bootstrap from cache: only use cache for the most recent *contiguous* sources
+  // If the newest source has no cache yet, we DO NOT show older cached recs.
+  // This prevents “one step behind” where you see previous product’s recs.
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const now = Date.now();
-    const collected = [];
-
+    const contiguous = readContiguousCached(sourceIds);
     if (sourceIds.length) {
-      for (const id of sourceIds) {
-        const raw = sessionStorage.getItem(cacheKey(id));
-        if (!raw) continue;
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed.expires > now && Array.isArray(parsed.items)) {
-            collected.push(...parsed.items);
-          } else {
-            sessionStorage.removeItem(cacheKey(id));
-          }
-        } catch {
-          sessionStorage.removeItem(cacheKey(id));
-        }
-      }
       setHeading('Based on items you viewed');
     } else {
       setHeading('Random Items');
     }
 
-    if (collected.length) {
-      const deduped = dedupe(collected, currentProductId);
-      const limited = deduped.slice(0, OUTPUT_LIMIT);
-      setPool(limited);
-      setRendered(limited.slice(0, Math.min(BATCH_SIZE, OUTPUT_LIMIT)));
-      setPage(1);
+    if (contiguous.length) {
+      const deduped = dedupe(contiguous, currentProductId).slice(
+        0,
+        OUTPUT_LIMIT,
+      );
+      setPool(deduped);
+      setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
       setIsBootstrapped(true);
     } else {
+      // no contiguous cache for newest item → show skeleton until fetched
       setPool([]);
       setRendered([]);
-      setPage(0);
       setIsBootstrapped(false);
     }
   }, [sourceIds, currentProductId]);
 
-  // -------- fetch data (history → recs OR random fallback) --------
+  // ---- Fetch data (history → recs OR random fallback) ----
   useEffect(() => {
     let aborted = false;
     const controller = new AbortController();
@@ -95,22 +73,18 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     (async () => {
       setIsLoading(true);
 
-      // If no history: fetch random pool once
+      // No history → random fallback once
       if (!sourceIds.length) {
         const items = await fetchRandomProducts(controller.signal).catch(
           () => [],
         );
         if (aborted) return;
+
         const deduped = dedupe(items, currentProductId).slice(0, OUTPUT_LIMIT);
         setPool(deduped);
 
         if (!isBootstrapped) {
-          const firstPage = deduped.slice(
-            0,
-            Math.min(BATCH_SIZE, OUTPUT_LIMIT),
-          );
-          setRendered(firstPage);
-          setPage(firstPage.length ? 1 : 0);
+          setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
           setIsBootstrapped(true);
         }
 
@@ -118,62 +92,59 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         return;
       }
 
-      // With history: fetch only missing/expired source recs in parallel
-      const now = Date.now();
-      const needed = sourceIds.filter((id) => {
-        const raw = sessionStorage.getItem(cacheKey(id));
-        if (!raw) return true;
-        try {
-          const parsed = JSON.parse(raw);
-          return !(parsed.expires > now && Array.isArray(parsed.items));
-        } catch {
-          return true;
-        }
-      });
-
-      if (needed.length) {
-        const results = await Promise.allSettled(
-          needed.map((id) => fetchRecommendationsForId(id, controller.signal)),
+      // With history:
+      // 1) ensure the MOST RECENT source is fetched FIRST (to avoid stale UI)
+      const firstId = sourceIds[0];
+      const hasValidFirst = hasValidCache(firstId);
+      if (!hasValidFirst) {
+        const first = await fetchRecommendationsForId(
+          firstId,
+          controller.signal,
         );
-        // cache per source
+        if (!aborted && Array.isArray(first)) {
+          writeCache(firstId, first);
+          // After first fetch, re-bootstrap from cache (contiguous)
+          const contiguous = readContiguousCached(sourceIds);
+          const deduped = dedupe(contiguous, currentProductId).slice(
+            0,
+            OUTPUT_LIMIT,
+          );
+          setPool(deduped);
+          if (!isBootstrapped) {
+            setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
+            setIsBootstrapped(true);
+          }
+        }
+      }
+
+      // 2) fetch remaining missing/expired in parallel
+      const remaining = sourceIds.slice(1).filter((id) => !hasValidCache(id));
+      if (remaining.length) {
+        const results = await Promise.allSettled(
+          remaining.map((id) =>
+            fetchRecommendationsForId(id, controller.signal),
+          ),
+        );
         results.forEach((res, idx) => {
-          const sourceId = needed[idx];
+          const sourceId = remaining[idx];
           if (res.status === 'fulfilled' && Array.isArray(res.value)) {
-            sessionStorage.setItem(
-              cacheKey(sourceId),
-              JSON.stringify({
-                items: res.value,
-                expires: Date.now() + CACHE_TTL_MS,
-              }),
-            );
+            writeCache(sourceId, res.value);
           }
         });
       }
 
-      // merge everything from cache after fetch
+      // 3) merge from cache
       if (!aborted) {
-        const merged = [];
-        for (const id of sourceIds) {
-          const raw = sessionStorage.getItem(cacheKey(id));
-          if (!raw) continue;
-          try {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed.items)) merged.push(...parsed.items);
-          } catch {}
-        }
-        const deduped = dedupe(merged, currentProductId).slice(0, OUTPUT_LIMIT);
+        const mergedAll = readAllCached(sourceIds);
+        const deduped = dedupe(mergedAll, currentProductId).slice(
+          0,
+          OUTPUT_LIMIT,
+        );
         setPool(deduped);
-
-        if (!isBootstrapped) {
-          const firstPage = deduped.slice(
-            0,
-            Math.min(BATCH_SIZE, OUTPUT_LIMIT),
-          );
-          setRendered(firstPage);
-          setPage(firstPage.length ? 1 : 0);
+        if (!isBootstrapped && deduped.length) {
+          setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
           setIsBootstrapped(true);
         }
-
         setIsLoading(false);
       }
     })();
@@ -185,29 +156,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     };
   }, [sourceIds, currentProductId, isBootstrapped]);
 
-  // -------- refresh when coming back via BFCache / tab focus / custom event --------
-  useEffect(() => {
-    const bump = () => setRefreshKey((k) => k + 1);
-
-    // Back-forward cache restore fires "pageshow" with persisted = true
-    const onPageShow = (e) => {
-      if (e.persisted) bump();
-    };
-
-    window.addEventListener('pageshow', onPageShow);
-    window.addEventListener('focus', bump);
-    // Optional: if product page dispatches this after writing localStorage
-    // window.dispatchEvent(new Event('viewedProducts:updated'));
-    window.addEventListener('viewedProducts:updated', bump);
-
-    return () => {
-      window.removeEventListener('pageshow', onPageShow);
-      window.removeEventListener('focus', bump);
-      window.removeEventListener('viewedProducts:updated', bump);
-    };
-  }, []);
-
-  // -------- infinite “load more” when reaching the end --------
+  // ---- infinite “load more” when reaching the end ----
   const loadMore = useCallback(() => {
     if (loadingMoreRef.current) return;
     loadingMoreRef.current = true;
@@ -223,22 +172,22 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       loadingMoreRef.current = false;
       return slice.length ? prev.concat(slice) : prev;
     });
-    setPage((p) => p + 1);
   }, [pool]);
 
-  // Observe the last rendered card to trigger loadMore
+  // Observe last card to trigger loadMore
+  const sentinelIndex = rendered.length - 1;
   useEffect(() => {
-    if (!rendered.length) return;
+    if (sentinelIndex < 0) return;
     const el = sentinelRef.current;
     if (!el) return;
 
     const io = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          if (rendered.length < Math.min(pool.length, OUTPUT_LIMIT)) {
-            loadMore();
-          }
+      ([entry]) => {
+        if (
+          entry.isIntersecting &&
+          rendered.length < Math.min(pool.length, OUTPUT_LIMIT)
+        ) {
+          loadMore();
         }
       },
       {rootMargin: '200px 0px 0px 0px', threshold: 0.01},
@@ -246,10 +195,9 @@ export default function RelatedProductsFromHistory({currentProductId}) {
 
     io.observe(el);
     return () => io.disconnect();
-  }, [rendered, pool, loadMore]);
+  }, [rendered, pool, loadMore, sentinelIndex]);
 
-  // -------- UI --------
-
+  // ---- UI ----
   const showSkeleton = !isBootstrapped && (isLoading || rendered.length === 0);
 
   return (
@@ -293,7 +241,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   );
 }
 
-/* ------------ networking ------------ */
+/* ---------------- networking ---------------- */
 
 async function fetchRecommendationsForId(productId, signal) {
   const query = `
@@ -325,6 +273,7 @@ async function fetchRecommendationsForId(productId, signal) {
 }
 
 async function fetchRandomProducts(signal) {
+  // BEST_SELLING as proxy; client-side shuffle; we page on the client anyway
   const query = `
     query RandomProducts {
       products(first: 100, sortKey: BEST_SELLING) {
@@ -361,10 +310,59 @@ async function fetchRandomProducts(signal) {
   return arr;
 }
 
-/* ------------ helpers ------------ */
+/* ---------------- cache helpers ---------------- */
 
-function cacheKey(sourceId) {
-  return `recs:${sourceId}`;
+function cacheKey(id) {
+  return `recs:${id}`;
+}
+
+function hasValidCache(id) {
+  try {
+    const raw = sessionStorage.getItem(cacheKey(id));
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    return parsed.expires > Date.now() && Array.isArray(parsed.items);
+  } catch {
+    return false;
+  }
+}
+
+function writeCache(id, items) {
+  try {
+    sessionStorage.setItem(
+      cacheKey(id),
+      JSON.stringify({items, expires: Date.now() + CACHE_TTL_MS}),
+    );
+  } catch {}
+}
+
+function readContiguousCached(ids) {
+  const out = [];
+  for (const id of ids) {
+    try {
+      const raw = sessionStorage.getItem(cacheKey(id));
+      if (!raw) break; // stop at first hole
+      const parsed = JSON.parse(raw);
+      if (!(parsed.expires > Date.now() && Array.isArray(parsed.items))) break;
+      out.push(...parsed.items);
+    } catch {
+      break;
+    }
+  }
+  return out;
+}
+
+function readAllCached(ids) {
+  const out = [];
+  for (const id of ids) {
+    try {
+      const raw = sessionStorage.getItem(cacheKey(id));
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.items)) out.push(...parsed.items);
+    } catch {}
+  }
+  return out;
 }
 
 function dedupe(list, currentProductId) {
@@ -376,7 +374,7 @@ function dedupe(list, currentProductId) {
   return Array.from(map.values());
 }
 
-/* ------------ UI ------------ */
+/* ---------------- UI ---------------- */
 
 function SkeletonRow({count = 8, fixedHeight = SKELETON_HEIGHT}) {
   return (
@@ -414,8 +412,7 @@ function SkeletonRow({count = 8, fixedHeight = SKELETON_HEIGHT}) {
           background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite;
         }
         .skeleton-line {
-          height: 12px; margin-top: 8px; border-radius: 6px;
-          width: 80%;
+          height: 12px; margin-top: 8px; border-radius: 6px; width: 80%;
           background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
           background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite;
         }
