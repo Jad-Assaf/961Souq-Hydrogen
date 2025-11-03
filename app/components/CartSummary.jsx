@@ -67,7 +67,7 @@ export function CartSummary({cart, layout}) {
       </dl>
 
       {/* WhatsApp Button Moved Here */}
-      <div className="cart-checkout-container">
+      {/* <div className="cart-checkout-container">
         <a
           href={whatsappLink}
           target="_blank"
@@ -102,7 +102,7 @@ export function CartSummary({cart, layout}) {
           <span>Send Cart via WhatsApp</span>
         </a>
       </div>
-      <p className='cart-or'>OR</p>
+      <p className='cart-or'>OR</p> */}
       <CartCheckoutActions
         checkoutUrl={cart.checkoutUrl}
         cartTotal={subtotal}
