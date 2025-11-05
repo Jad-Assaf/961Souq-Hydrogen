@@ -55,6 +55,15 @@ export default function BlackNovemberRoute() {
     --ring:rgba(0,170,255,.5);
     --shadow:0 10px 30px rgba(0,0,0,.45);
   }
+
+  .nav-bar-container{
+    background: rgb(255 255 255 / 0%);
+    backdrop-filter: blur(10px) saturate(2.5);
+    box-shadow: 0px 2px 14px 1px black;
+  }
+
+    .nav-link{
+    color: #fff;}
   *{box-sizing:border-box}
   body{background:var(--bg)}
   .bn-wrap{
@@ -80,6 +89,8 @@ export default function BlackNovemberRoute() {
     height:auto;
     filter:saturate(1.2) brightness(1.2);
   }
+    @media (max-width: 768px){
+    .bn-hero img{ filter: brightness(2.2); }}
   .bn-hero::after{
     content:""; position:absolute; inset:0;
     background:radial-gradient(65% 50% at 50% 100%, rgba(0,0,0,.0) 0%, rgba(0,0,0,.35) 65%, rgba(0,0,0,.55) 100%);
