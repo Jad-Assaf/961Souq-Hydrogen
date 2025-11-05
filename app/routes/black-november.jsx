@@ -162,7 +162,7 @@ export default function BlackNovemberRoute() {
     position:absolute; top:3px; left:3px; padding:6px 9px; border-radius:16px;
     background:#fff;
     border:1px solid rgba(0,170,255,.35); color:deepskyblue; font-weight:500; font-size:12px; letter-spacing:.3px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
     mix-blend-mode: difference;
   }
 
