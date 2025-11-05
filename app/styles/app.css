@@ -2769,6 +2769,7 @@ input.search-bar:focus-visible {
 
 .product h1 {
   margin-top: 0;
+  overflow-wrap: break-word;
 }
 
 .product-image img {
