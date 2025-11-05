@@ -73,7 +73,7 @@ export default function BlackNovemberRoute() {
     position:relative; border-radius:22px; overflow:hidden;
     margin:24px auto 18px;
     background:linear-gradient(180deg, #0d1218 0%, #0a0f15 100%);
-    box-shadow:var(--shadow); isolation:isolate;
+    box-shadow:0px 0px 30px 20px rgb(255 0 0 / 13%); isolation:isolate;
   }
   .bn-hero img{
     width:100%;
