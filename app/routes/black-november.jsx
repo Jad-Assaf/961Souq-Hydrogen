@@ -66,14 +66,14 @@ export default function BlackNovemberRoute() {
       var(--bg);
     padding-bottom:56px;
   }
-  .bn-container{ width:min(1200px, 92vw); margin-inline:auto; }
+  .bn-container{ width:min(1200px, 92vw); margin: 75px auto; }
 
   /* ------------------------------ Banner ------------------------------ */
   .bn-hero{
     position:relative; border-radius:22px; overflow:hidden;
     margin:24px auto 18px;
     background:linear-gradient(180deg, #0d1218 0%, #0a0f15 100%);
-    box-shadow:0px 0px 30px 20px rgb(255 0 0 / 13%); isolation:isolate;
+    box-shadow:0px 5px 30px 5px rgb(255 0 0 / 13%);
   }
   .bn-hero img{
     width:100%;
