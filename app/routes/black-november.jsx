@@ -55,9 +55,6 @@ export default function BlackNovemberRoute() {
     --ring:rgba(0,170,255,.5);
     --shadow:0 10px 30px rgba(0,0,0,.45);
   }
-    .header{
-    background:transparent !important; 
-    }
   *{box-sizing:border-box}
   body{background:var(--bg)}
   .bn-wrap{
@@ -152,11 +149,10 @@ export default function BlackNovemberRoute() {
   .price .was{ color:var(--muted); text-decoration:line-through; font-size:13px; }
 
   .badgee{
-    position:absolute; top:10px; left:10px; padding:6px 9px; border-radius:10px;
+    position:absolute; top:3px; left:3px; padding:6px 9px; border-radius:16px;
     background:#fff;
     border:1px solid rgba(0,170,255,.35); color:#000; font-weight:500; font-size:12px; letter-spacing:.3px;
-    backdrop-filter: blur(6px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 16px rgba(0,0,0,.35);
+    backdrop-filter: blur(10px);
     mix-blend-mode: difference;
   }
 
