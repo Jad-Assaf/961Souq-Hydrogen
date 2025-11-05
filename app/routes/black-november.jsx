@@ -61,7 +61,6 @@ export default function BlackNovemberRoute() {
     backdrop-filter: blur(10px) saturate(2.5);
     box-shadow: 0px 2px 14px 1px black;
   }
-
     .nav-link{
     color: #fff;}
   *{box-sizing:border-box}
@@ -80,7 +79,7 @@ export default function BlackNovemberRoute() {
   /* ------------------------------ Banner ------------------------------ */
   .bn-hero{
     position:relative; border-radius:22px; overflow:hidden;
-    margin:24px auto 18px;
+    margin:24px auto 50px;
     background:linear-gradient(180deg, #0d1218 0%, #0a0f15 100%);
     box-shadow:0px 5px 30px 5px rgb(255 0 0 / 13%);
   }
@@ -102,7 +101,7 @@ export default function BlackNovemberRoute() {
     display:flex; align-items:center; justify-content:space-between; flex-direction:column;
     gap:12px; margin: 6px 4px 4px;
   }
-  .bn-title{ font-size:clamp(22px, 3.2vw, 36px); letter-spacing:.3px; font-weight:700; }
+  .bn-title{ font-size:26px; letter-spacing:.3px; font-weight:700;text-align:center;color:white; }
   .bn-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 
   .pill{
@@ -191,6 +190,7 @@ export default function BlackNovemberRoute() {
         {/* Banner: robust switch with <picture>. 
            - Mobile first (<=767px) uses mobile image
            - Fallback <img> is desktop */}
+        <h1 className="bn-title">Black November</h1>
         <div className="bn-hero">
           {/* Mobile banner */}
           <img
@@ -217,7 +217,6 @@ export default function BlackNovemberRoute() {
         </div>
 
         <div className="bn-head">
-          <h1 className="bn-title">Black November</h1>
           <div className="bn-right">
             <span className="pill">
               <span className="dot" /> Month-long offers
