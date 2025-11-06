@@ -1,3 +1,4 @@
+// app/components/RelatedProductsFromHistory.jsx
 import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
 import {Link} from '@remix-run/react';
 import {Money} from '@shopify/hydrogen';
@@ -16,22 +17,19 @@ const SKELETON_CARD_H = 357; // skeleton card height
 
 export default function RelatedProductsFromHistory({currentProductId}) {
   const [heading, setHeading] = useState('');
-  const [rendered, setRendered] = useState([]); // currently painted cards
-  const [pool, setPool] = useState([]); // full deduped pool
+  const [rendered, setRendered] = useState([]);
+  const [pool, setPool] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
 
   const sentinelRef = useRef(null);
   const loadingMoreRef = useRef(false);
 
-  // NEW: ref to the horizontal scroller
+  // horizontal scroll ref + handler (for prev/next buttons)
   const rowRef = useRef(null);
-
-  // NEW: scroll handler used by the prev/next buttons
   const scrollRow = useCallback((delta) => {
     const el = rowRef.current;
     if (!el) return;
-    // ensure the row is horizontally scrollable in CSS (overflow-x:auto)
     el.scrollBy({left: delta, behavior: 'smooth'});
   }, []);
 
@@ -39,7 +37,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   const sourceIds = useMemo(() => {
     if (typeof window === 'undefined') return [];
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
-    // assume viewed[0] is most recent; keep order
     const list = currentProductId
       ? viewed.filter((id) => id !== currentProductId)
       : viewed;
@@ -51,11 +48,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     if (typeof window === 'undefined') return;
 
     const contiguous = readContiguousCached(sourceIds);
-    if (sourceIds.length) {
-      setHeading('Based on items you viewed');
-    } else {
-      setHeading('Random Items');
-    }
+    setHeading(sourceIds.length ? 'Based on items you viewed' : 'Random Items');
 
     if (contiguous.length) {
       const deduped = dedupe(contiguous, currentProductId).slice(
@@ -81,7 +74,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     (async () => {
       setIsLoading(true);
 
-      // No history → random fallback once
       if (!sourceIds.length) {
         const items = await fetchRandomProducts(controller.signal).catch(
           () => [],
@@ -100,8 +92,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         return;
       }
 
-      // With history:
-      // 1) ensure the MOST RECENT source is fetched FIRST (to avoid stale UI)
       const firstId = sourceIds[0];
       const hasValidFirst = hasValidCache(firstId);
       if (!hasValidFirst) {
@@ -111,7 +101,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         );
         if (!aborted && Array.isArray(first)) {
           writeCache(firstId, first);
-          // After first fetch, re-bootstrap from cache (contiguous)
           const contiguous = readContiguousCached(sourceIds);
           const deduped = dedupe(contiguous, currentProductId).slice(
             0,
@@ -125,7 +114,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         }
       }
 
-      // 2) fetch remaining missing/expired in parallel
       const remaining = sourceIds.slice(1).filter((id) => !hasValidCache(id));
       if (remaining.length) {
         const results = await Promise.allSettled(
@@ -141,7 +129,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         });
       }
 
-      // 3) merge from cache
       if (!aborted) {
         const mergedAll = readAllCached(sourceIds);
         const deduped = dedupe(mergedAll, currentProductId).slice(
@@ -205,12 +192,34 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     return () => io.disconnect();
   }, [rendered, pool, loadMore, sentinelIndex]);
 
-  // ---- UI ----
   const showSkeleton = !isBootstrapped && (isLoading || rendered.length === 0);
 
   return (
     <div className="collection-section">
-      <h2>{heading}</h2>
+      <div
+        className="section-head"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <h2 style={{margin: 0}}>{heading}</h2>
+
+        {/* View all → pass preselection if you want */}
+        <Link
+          to={
+            currentProductId
+              ? `/recently-viewed?select=${encodeURIComponent(
+                  currentProductId,
+                )}`
+              : '/recently-viewed'
+          }
+          className="view-all-link"
+        >
+          View all
+        </Link>
+      </div>
 
       {showSkeleton ? (
         <SkeletonRow count={8} fixedHeight={SKELETON_HEIGHT} />
@@ -227,10 +236,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
             <LeftArrowIcon />
           </button>
 
-          <div
-            className="collection-products-row"
-            ref={rowRef}  
-          >
+          <div className="collection-products-row" ref={rowRef}>
             {rendered.map((product, index) => {
               const isLast = index === rendered.length - 1;
               return (
@@ -330,7 +336,6 @@ async function fetchRandomProducts(signal) {
 function cacheKey(id) {
   return `recs:${id}`;
 }
-
 function hasValidCache(id) {
   try {
     const raw = sessionStorage.getItem(cacheKey(id));
@@ -341,7 +346,6 @@ function hasValidCache(id) {
     return false;
   }
 }
-
 function writeCache(id, items) {
   try {
     sessionStorage.setItem(
@@ -350,13 +354,12 @@ function writeCache(id, items) {
     );
   } catch {}
 }
-
 function readContiguousCached(ids) {
   const out = [];
   for (const id of ids) {
     try {
       const raw = sessionStorage.getItem(cacheKey(id));
-      if (!raw) break; // stop at first hole
+      if (!raw) break;
       const parsed = JSON.parse(raw);
       if (!(parsed.expires > Date.now() && Array.isArray(parsed.items))) break;
       out.push(...parsed.items);
@@ -366,7 +369,6 @@ function readContiguousCached(ids) {
   }
   return out;
 }
-
 function readAllCached(ids) {
   const out = [];
   for (const id of ids) {
@@ -379,7 +381,6 @@ function readAllCached(ids) {
   }
   return out;
 }
-
 function dedupe(list, currentProductId) {
   const map = new Map();
   for (const p of list) {
@@ -413,24 +414,9 @@ function SkeletonRow({count = 8, fixedHeight = SKELETON_HEIGHT}) {
       </div>
 
       <style>{`
-        .product-card.skeleton {
-          padding: 8px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: flex-start;
-          box-sizing: border-box;
-        }
-        .skeleton-img {
-          width: 150px; height: 150px; border-radius: 8px;
-          background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
-          background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite;
-        }
-        .skeleton-line {
-          height: 12px; margin-top: 8px; border-radius: 6px; width: 80%;
-          background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
-          background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite;
-        }
+        .product-card.skeleton { padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; box-sizing: border-box; }
+        .skeleton-img { width: 150px; height: 150px; border-radius: 8px; background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%); background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite; }
+        .skeleton-line { height: 12px; margin-top: 8px; border-radius: 6px; width: 80%; background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%); background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite; }
         .skeleton-line.short { width: 60%; }
         @keyframes sh { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
       `}</style>
@@ -472,15 +458,28 @@ function RelatedProductCard({product, index, refProp}) {
 }
 
 const LeftArrowIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
-
 const RightArrowIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
