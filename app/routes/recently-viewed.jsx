@@ -345,9 +345,11 @@ export default function RecentlyViewedPage() {
                   flexWrap: 'wrap',
                   gap: 24,
                   alignItems: 'flex-start',
+                  justifyContent: 'center',
                   background: '#fff',
                   borderRadius: 20,
                   boxShadow: 'rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px',
+                  marginBottom: 30,
                 }}
               >
                 {/* Left: big image */}
@@ -381,19 +383,24 @@ export default function RecentlyViewedPage() {
                     flex: '1 1 320px',
                     minWidth: 280,
                     marginTop: 50,
+                    padding: 15,
                   }}
                 >
                   <Link
                     to={`/products/${encodeURIComponent(selected.handle)}`}
                     style={{textDecoration: 'none', color: 'inherit'}}
                   >
-                    <h3 style={{margin: 0, fontWeight: 600}}>
+                    <h3
+                      className="selectedTitle"
+                      style={{margin: 0, fontWeight: 600}}
+                    >
                       {selected.title}
                     </h3>
                   </Link>
 
                   {selected?.description ? (
                     <p
+                      className="selectedDescription"
                       style={{
                         margin: 0,
                         fontSize: 14,
@@ -510,7 +517,7 @@ export default function RecentlyViewedPage() {
         .skeleton-line.short { width: 60%; }
         @keyframes sh { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
         .related-card { max-width: 200px; }
-        @media (max-width: 720px) {.related-card { max-width: 47%; } .related-flex { justify-content: space-between; } }
+        @media (max-width: 720px) {.related-card { max-width: 47%; } .related-flex { justify-content: space-between; } .selectedTitle {font-size: 18px !important, font-weight: 500 !important} .selectedDescription{font-size: 12px !important}}
       `}</style>
     </div>
   );
