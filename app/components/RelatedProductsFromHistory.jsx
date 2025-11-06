@@ -24,6 +24,17 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   const sentinelRef = useRef(null);
   const loadingMoreRef = useRef(false);
 
+  // NEW: ref to the horizontal scroller
+  const rowRef = useRef(null);
+
+  // NEW: scroll handler used by the prev/next buttons
+  const scrollRow = useCallback((delta) => {
+    const el = rowRef.current;
+    if (!el) return;
+    // ensure the row is horizontally scrollable in CSS (overflow-x:auto)
+    el.scrollBy({left: delta, behavior: 'smooth'});
+  }, []);
+
   // ---- read history synchronously (client only) ----
   const sourceIds = useMemo(() => {
     if (typeof window === 'undefined') return [];
@@ -35,9 +46,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     return list.slice(0, SOURCE_LIMIT);
   }, [currentProductId]);
 
-  // ---- Bootstrap from cache: only use cache for the most recent *contiguous* sources
-  // If the newest source has no cache yet, we DO NOT show older cached recs.
-  // This prevents “one step behind” where you see previous product’s recs.
+  // ---- Bootstrap from cache ----
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -57,7 +66,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
       setIsBootstrapped(true);
     } else {
-      // no contiguous cache for newest item → show skeleton until fetched
       setPool([]);
       setRendered([]);
       setIsBootstrapped(false);
@@ -213,12 +221,16 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         >
           <button
             className="home-prev-button"
-            onClick={() => scrollRow?.(-600)}
+            onClick={() => scrollRow(-600)}
+            aria-label="Previous"
           >
             <LeftArrowIcon />
           </button>
 
-          <div className="collection-products-row">
+          <div
+            className="collection-products-row"
+            ref={rowRef}  
+          >
             {rendered.map((product, index) => {
               const isLast = index === rendered.length - 1;
               return (
@@ -232,7 +244,11 @@ export default function RelatedProductsFromHistory({currentProductId}) {
             })}
           </div>
 
-          <button className="home-next-button" onClick={() => scrollRow?.(600)}>
+          <button
+            className="home-next-button"
+            onClick={() => scrollRow(600)}
+            aria-label="Next"
+          >
             <RightArrowIcon />
           </button>
         </div>
@@ -273,7 +289,6 @@ async function fetchRecommendationsForId(productId, signal) {
 }
 
 async function fetchRandomProducts(signal) {
-  // BEST_SELLING as proxy; client-side shuffle; we page on the client anyway
   const query = `
     query RandomProducts {
       products(first: 100, sortKey: BEST_SELLING) {
@@ -457,29 +472,15 @@ function RelatedProductCard({product, index, refProp}) {
 }
 
 const LeftArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
 const RightArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
