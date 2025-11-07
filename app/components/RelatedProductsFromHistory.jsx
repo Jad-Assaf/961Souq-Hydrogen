@@ -15,6 +15,18 @@ const HARD_TIMEOUT_MS = 1800; // abort slow requests
 const SKELETON_HEIGHT = 400; // reserve container height
 const SKELETON_CARD_H = 357; // skeleton card height
 
+// NEW: minimal customer-account tracking on product click
+function trackAccountProductView({id, handle, source = 'related-history'}) {
+  try {
+    fetch('/api/track/view', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({id, handle, source}),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
+}
+
 export default function RelatedProductsFromHistory({currentProductId}) {
   const [heading, setHeading] = useState('');
   const [rendered, setRendered] = useState([]);
@@ -470,7 +482,16 @@ function RelatedProductCard({product, index, refProp}) {
       style={{transitionDelay: `${index * 40}ms`}}
     >
       <div className="product-card">
-        <Link to={`/products/${encodeURIComponent(product.handle)}`}>
+        <Link
+          to={`/products/${encodeURIComponent(product.handle)}`}
+          onClick={() =>
+            trackAccountProductView({
+              id: product.id,
+              handle: product.handle,
+              source: 'related-history',
+            })
+          }
+        >
           <img
             src={`${product.featuredImage.url}&width=200`}
             alt={product.featuredImage.altText || product.title}

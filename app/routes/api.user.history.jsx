@@ -1,63 +1,63 @@
 // app/routes/api.user.history.jsx
 import {json} from '@shopify/remix-oxygen';
-import {viewedHandlesCookie} from '~/lib/viewedHandlesCookie.server';
 
 export async function loader({request, context}) {
-  const url = new URL(request.url);
-  const limit = Math.max(
-    1,
-    Math.min(parseInt(url.searchParams.get('limit') || '60', 10), 60),
-  );
-  const expand = url.searchParams.get('expand'); // 'products' | undefined
+  try {
+    const {storefront, env} = context;
+    const adminToken = env.PRIVATE_ADMIN_API_TOKEN;
+    const shop = env.PUBLIC_STORE_DOMAIN;
+    if (!adminToken || !shop) return json({ids: []});
 
-  const cookieRaw = request.headers.get('Cookie');
-  const handles = ((await viewedHandlesCookie.parse(cookieRaw)) || []).slice(
-    0,
-    limit,
-  );
+    const cookies = Object.fromEntries(
+      (request.headers.get('cookie') || '')
+        .split(';')
+        .map((c) => c.trim().split('=').map(decodeURIComponent))
+        .filter(([k]) => k),
+    );
+    const customerAccessToken =
+      cookies.customerAccessToken || cookies['hydrogen_customer_token'] || '';
+    if (!customerAccessToken) return json({ids: []});
 
-  if (!expand || handles.length === 0) {
-    return json({handles});
+    const CUSTOMER_Q = `#graphql
+      query CustomerFromToken($token: String!) {
+        customer(customerAccessToken: $token) { id }
+      }
+    `;
+    const {data: cData} = await storefront.query(CUSTOMER_Q, {
+      variables: {token: customerAccessToken},
+    });
+    const customerId = cData?.customer?.id;
+    if (!customerId) return json({ids: []});
+
+    const adminUrl = `https://${shop}/admin/api/2025-10/graphql.json`;
+
+    const res = await fetch(adminUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': adminToken,
+      },
+      body: JSON.stringify({
+        query: `
+          query GetViewed($id: ID!) {
+            customer(id: $id) {
+              metafield(namespace: "personal", key: "viewed") { value }
+            }
+          }
+        `,
+        variables: {id: customerId},
+      }),
+    });
+    const j = await res.json();
+    const raw = j?.data?.customer?.metafield?.value || '{}';
+    let ids = [];
+    try {
+      const parsed = JSON.parse(raw);
+      ids = Array.isArray(parsed?.ids) ? parsed.ids : [];
+    } catch {}
+
+    return json({ids});
+  } catch {
+    return json({ids: []});
   }
-
-  // Expand to minimal product data using Storefront API.
-  const {PUBLIC_STOREFRONT_API_TOKEN, PUBLIC_STORE_DOMAIN} = context.env;
-  const API_URL = `https://${PUBLIC_STORE_DOMAIN}/api/2025-04/graphql.json`;
-  const API_TOKEN = PUBLIC_STOREFRONT_API_TOKEN;
-
-  // Build a single aliased query:
-  // p0: product(handle:"h0"){ ...fields }
-  const fields = `
-    id
-    handle
-    title
-    featuredImage { url altText }
-    priceRange { minVariantPrice { amount currencyCode } }
-  `;
-  const capped = handles.slice(0, 25); // keep the query reasonable
-  const blocks = capped.map(
-    (h, i) => `p${i}: product(handle: ${JSON.stringify(h)}) { ${fields} }`,
-  );
-  const query = `query UserHistory { ${blocks.join('\n')} }`;
-
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': API_TOKEN,
-    },
-    body: JSON.stringify({query}),
-  });
-  const jsonRes = await res.json();
-
-  const products = [];
-  if (jsonRes?.data) {
-    // Preserve cookie order
-    for (let i = 0; i < capped.length; i++) {
-      const node = jsonRes.data[`p${i}`];
-      if (node) products.push(node);
-    }
-  }
-
-  return json({handles, products});
 }

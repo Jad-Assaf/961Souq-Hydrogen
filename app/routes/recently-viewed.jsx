@@ -14,6 +14,18 @@ export async function loader({context}) {
 
 const SKELETON_CARD_H = 357;
 
+// NEW: minimal customer-account tracking on product click
+function trackAccountProductView({id, handle, source = 'recently-viewed'}) {
+  try {
+    fetch('/api/track/view', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({id, handle, source}),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
+}
+
 /* ---------------- Utils ---------------- */
 function truncateWords(text, maxWords = 50) {
   if (!text) return '';
@@ -402,6 +414,13 @@ export default function RecentlyViewedPage() {
               >
                 <Link
                   to={`/products/${encodeURIComponent(selected.handle)}`}
+                  onClick={() =>
+                    trackAccountProductView({
+                      id: selected.id,
+                      handle: selected.handle,
+                      source: 'recently-selected',
+                    })
+                  }
                   style={{display: 'block', flex: '0 1 360px', maxWidth: 360}}
                 >
                   <img
@@ -438,6 +457,13 @@ export default function RecentlyViewedPage() {
                 >
                   <Link
                     to={`/products/${encodeURIComponent(selected.handle)}`}
+                    onClick={() =>
+                      trackAccountProductView({
+                        id: selected.id,
+                        handle: selected.handle,
+                        source: 'recently-selected',
+                      })
+                    }
                     style={{textDecoration: 'none', color: 'inherit'}}
                   >
                     <h3
@@ -612,7 +638,16 @@ function ProductCard({product, index = 0}) {
         className="product-card"
         style={{maxWidth: '100%', width: '100%', minWidth: '100%'}}
       >
-        <Link to={`/products/${encodeURIComponent(product.handle)}`}>
+        <Link
+          to={`/products/${encodeURIComponent(product.handle)}`}
+          onClick={() =>
+            trackAccountProductView({
+              id: product.id,
+              handle: product.handle,
+              source: 'recently-related',
+            })
+          }
+        >
           <img
             src={`${product.featuredImage?.url || ''}&width=200`}
             alt={product.featuredImage?.altText || product.title || 'Product'}
