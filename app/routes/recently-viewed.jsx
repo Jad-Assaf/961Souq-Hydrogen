@@ -14,7 +14,7 @@ export async function loader({context}) {
 
 const SKELETON_CARD_H = 357;
 
-// NEW: minimal customer-account tracking on product click
+// Minimal customer-account tracking on product click
 function trackAccountProductView({id, handle, source = 'recently-viewed'}) {
   try {
     fetch('/api/track/view', {
@@ -153,6 +153,45 @@ export default function RecentlyViewedPage() {
   const [loadingRecent, setLoadingRecent] = useState(true);
   const [loadingRelated, setLoadingRelated] = useState(false);
 
+  const [preferServerOnly, setPreferServerOnly] = useState(false); // NEW
+
+  // Detect login (prefer server-only when logged in)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/user/history?ping=1', {
+          headers: {accept: 'application/json'},
+        });
+        if (cancelled) return;
+
+        let logged = false;
+        if (res.ok) {
+          const hdr = res.headers.get('x-customer-logged-in');
+          if (hdr === '1' || hdr === 'true') logged = true;
+          try {
+            const body = await res.clone().json();
+            if (
+              body &&
+              (body.loggedIn === true ||
+                body.customerId ||
+                body.customer?.id ||
+                body.customer)
+            ) {
+              logged = true;
+            }
+          } catch {}
+        }
+        setPreferServerOnly(!!logged);
+      } catch {
+        setPreferServerOnly(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Thumbnails strip scroller
   const thumbsRef = useRef(null);
   const scrollThumbs = useCallback((delta) => {
@@ -169,21 +208,51 @@ export default function RecentlyViewedPage() {
       try {
         setLoadingRecent(true);
 
-        const idsLocal = Array.from(
-          new Set(JSON.parse(localStorage.getItem('viewedProducts') || '[]')),
-        );
+        const idsLocal = preferServerOnly
+          ? []
+          : Array.from(
+              new Set(
+                JSON.parse(localStorage.getItem('viewedProducts') || '[]'),
+              ),
+            );
 
-        // Ask the server cookie for expanded products, then combine with local ids
-        const server = await fetch(
-          '/api/user/history?expand=products&limit=60',
-          {headers: {accept: 'application/json'}},
-        )
-          .then((r) => r.json())
-          .catch(() => ({}));
+        // Ask the server cookie for expanded products
+        const resp = await fetch('/api/user/history?expand=products&limit=60', {
+          headers: {accept: 'application/json'},
+        }).catch(() => null);
+
+        let server = {};
+        if (resp) {
+          try {
+            server = await resp.json();
+          } catch {
+            server = {};
+          }
+        }
 
         const serverProds = Array.isArray(server?.products)
           ? server.products
           : [];
+
+        if (preferServerOnly) {
+          // When logged in, ignore local completely
+          if (isMounted) {
+            const uniq = [];
+            const uSeen = new Set();
+            for (const p of serverProds) {
+              if (!p || !p.id || uSeen.has(p.id)) continue;
+              uSeen.add(p.id);
+              uniq.push(p);
+            }
+            setRecent(uniq);
+            const initial =
+              preselect && uniq.find((p) => p.id === preselect)
+                ? preselect
+                : uniq[0]?.id || null;
+            setSelectedId(initial);
+          }
+          return;
+        }
 
         // Build a map from server products for fast lookup
         const serverMap = new Map(serverProds.map((p) => [p.id, p]));
@@ -202,7 +271,8 @@ export default function RecentlyViewedPage() {
         }
 
         const allProds = [...serverProds, ...fetched];
-        // Now preserve the overall order: cookie first (already ordered), then local in seen order
+
+        // Preserve overall order: cookie first (already ordered), then local in seen order
         const seen = new Set(allProds.map((p) => p.id));
         for (const id of idsLocal) {
           if (!seen.has(id)) {
@@ -237,7 +307,7 @@ export default function RecentlyViewedPage() {
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preselect, API_URL, API_TOKEN]);
+  }, [preselect, API_URL, API_TOKEN, preferServerOnly]);
 
   // When a product is selected, load its related products
   useEffect(() => {

@@ -15,7 +15,7 @@ const HARD_TIMEOUT_MS = 1800; // abort slow requests
 const SKELETON_HEIGHT = 400; // reserve container height
 const SKELETON_CARD_H = 357; // skeleton card height
 
-// NEW: minimal customer-account tracking on product click
+// Minimal customer-account tracking on product click
 function trackAccountProductView({id, handle, source = 'related-history'}) {
   try {
     fetch('/api/track/view', {
@@ -34,7 +34,8 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
 
-  const [serverIds, setServerIds] = useState([]); // NEW: ids from cookie-based history
+  const [serverIds, setServerIds] = useState([]); // ids from cookie-based history
+  const [preferServerOnly, setPreferServerOnly] = useState(false); // NEW: ignore local when logged in
 
   const sentinelRef = useRef(null);
   const loadingMoreRef = useRef(false);
@@ -47,7 +48,44 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     el.scrollBy({left: delta, behavior: 'smooth'});
   }, []);
 
-  // ---- NEW: fetch per-user cookie history (expanded to products -> IDs) ----
+  // NEW: detect logged-in status (prefer server-only history if true)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/user/history?ping=1', {
+          headers: {accept: 'application/json'},
+        });
+        if (cancelled) return;
+
+        let logged = false;
+        if (res.ok) {
+          const hdr = res.headers.get('x-customer-logged-in');
+          if (hdr === '1' || hdr === 'true') logged = true;
+          try {
+            const body = await res.clone().json();
+            if (
+              body &&
+              (body.loggedIn === true ||
+                body.customerId ||
+                body.customer?.id ||
+                body.customer)
+            ) {
+              logged = true;
+            }
+          } catch {}
+        }
+        setPreferServerOnly(!!logged);
+      } catch {
+        setPreferServerOnly(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // fetch per-user cookie history (expanded to products -> IDs)
   useEffect(() => {
     let abort = false;
     (async () => {
@@ -71,19 +109,19 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     };
   }, []);
 
-  // ---- read local history synchronously (client only) ----
+  // read local history synchronously (client only) — DISABLED when logged in
   const localIds = useMemo(() => {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === 'undefined' || preferServerOnly) return [];
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
     const list = currentProductId
       ? viewed.filter((id) => id !== currentProductId)
       : viewed;
     return list.slice(0, SOURCE_LIMIT);
-  }, [currentProductId]);
+  }, [currentProductId, preferServerOnly]);
 
-  // ---- merge server + local sources for seed IDs ----
+  // merge sources for seed IDs (server-only if logged in)
   const sourceIds = useMemo(() => {
-    const merged = [...serverIds, ...localIds];
+    const merged = preferServerOnly ? serverIds : [...serverIds, ...localIds];
     // unique, preserve order
     const seen = new Set();
     const out = [];
@@ -94,9 +132,9 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       }
     }
     return out.slice(0, SOURCE_LIMIT);
-  }, [serverIds, localIds, currentProductId]);
+  }, [serverIds, localIds, currentProductId, preferServerOnly]);
 
-  // ---- Bootstrap from cache ----
+  // Bootstrap from cache
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -118,7 +156,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     }
   }, [sourceIds, currentProductId]);
 
-  // ---- Fetch data (history → recs OR random fallback) ----
+  // Fetch data (history → recs OR random fallback)
   useEffect(() => {
     let aborted = false;
     const controller = new AbortController();
@@ -204,7 +242,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     };
   }, [sourceIds, currentProductId, isBootstrapped]);
 
-  // ---- infinite “load more” when reaching the end ----
+  // infinite “load more” when reaching the end
   const loadMore = useCallback(() => {
     if (loadingMoreRef.current) return;
     loadingMoreRef.current = true;
