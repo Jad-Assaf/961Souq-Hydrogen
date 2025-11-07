@@ -1,10 +1,16 @@
 // app/routes/recently-viewed.jsx
 import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
-import {Link, useSearchParams} from '@remix-run/react';
+import {Link, useSearchParams, useLoaderData} from '@remix-run/react';
 import {Money, CartForm} from '@shopify/hydrogen';
+import {json} from '@shopify/remix-oxygen';
 
-const API_URL = 'https://961souqs.myshopify.com/api/2025-04/graphql.json';
-const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
+export async function loader({context}) {
+  const {PUBLIC_STOREFRONT_API_TOKEN, PUBLIC_STORE_DOMAIN} = context.env;
+  return json({
+    API_URL: `https://${PUBLIC_STORE_DOMAIN}/api/2025-04/graphql.json`,
+    API_TOKEN: PUBLIC_STOREFRONT_API_TOKEN,
+  });
+}
 
 const SKELETON_CARD_H = 357;
 
@@ -19,7 +25,7 @@ function truncateWords(text, maxWords = 50) {
 
 /* ---------------- GraphQL helpers ---------------- */
 
-async function fetchProductsByIds(ids, signal) {
+async function fetchProductsByIds(ids, signal, API_URL, API_TOKEN) {
   if (!ids.length) return [];
   const query = `
     query ProductsByIds($ids: [ID!]!) {
@@ -57,7 +63,12 @@ async function fetchProductsByIds(ids, signal) {
   return nodes.filter(Boolean);
 }
 
-async function fetchRecommendationsForId(productId, signal) {
+async function fetchRecommendationsForId(
+  productId,
+  signal,
+  API_URL,
+  API_TOKEN,
+) {
   const query = `
     query productRecommendationsAndCollection($productId: ID!) {
       productRecommendations(productId: $productId) {
@@ -122,6 +133,7 @@ async function fetchRecommendationsForId(productId, signal) {
 /* ---------------- Page ---------------- */
 
 export default function RecentlyViewedPage() {
+  const {API_URL, API_TOKEN} = useLoaderData();
   const [searchParams] = useSearchParams();
   const preselect = searchParams.get('select') || null;
 
@@ -156,7 +168,12 @@ export default function RecentlyViewedPage() {
         }
 
         const controller = new AbortController();
-        const prods = await fetchProductsByIds(ids, controller.signal);
+        const prods = await fetchProductsByIds(
+          ids,
+          controller.signal,
+          API_URL,
+          API_TOKEN,
+        );
 
         const map = new Map(prods.map((p) => [p.id, p]));
         const ordered = ids.map((id) => map.get(id)).filter(Boolean);
@@ -178,7 +195,7 @@ export default function RecentlyViewedPage() {
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preselect]);
+  }, [preselect, API_URL, API_TOKEN]);
 
   // When a product is selected, load its related products
   useEffect(() => {
@@ -194,6 +211,8 @@ export default function RecentlyViewedPage() {
       const recs = await fetchRecommendationsForId(
         selectedId,
         controller.signal,
+        API_URL,
+        API_TOKEN,
       );
       if (isMounted) {
         setRelated(recs || []);
@@ -205,7 +224,7 @@ export default function RecentlyViewedPage() {
       isMounted = false;
       controller.abort();
     };
-  }, [selectedId]);
+  }, [selectedId, API_URL, API_TOKEN]);
 
   // Selected product object (for the middle card)
   const selected = useMemo(
@@ -517,7 +536,7 @@ export default function RecentlyViewedPage() {
         .skeleton-line.short { width: 60%; }
         @keyframes sh { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
         .related-card { max-width: 200px; }
-        @media (max-width: 720px) {.related-card { max-width: 47%; } .related-flex { justify-content: space-between; } .selectedTitle {font-size: 18px !important, font-weight: 500 !important} .selectedDescription{font-size: 12px !important}}
+        @media (max-width: 720px) {.related-card { maxWidth: 47%; } .related-flex { justify-content: space-between; } .selectedTitle {font-size: 18px !important, font-weight: 500 !important} .selectedDescription{font-size: 12px !important}}
       `}</style>
     </div>
   );
@@ -551,7 +570,12 @@ function ProductCard({product, index = 0}) {
   return (
     <div
       className="product-item"
-      style={{transitionDelay: `${index * 40}ms`, width: '100%', minWidth: '100%', margin: '0 auto'}}
+      style={{
+        transitionDelay: `${index * 40}ms`,
+        width: '100%',
+        minWidth: '100%',
+        margin: '0 auto',
+      }}
     >
       <div
         className="product-card"
