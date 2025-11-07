@@ -117,7 +117,6 @@ async function fetchRecommendationsForId(
     json?.data?.product?.collections?.nodes?.flatMap((c) => c.products.nodes) ||
     [];
 
-  // merge and deduplicate
   const combined = [...recs, ...collectionProducts];
   const seen = new Map();
   const unique = combined.filter((p) => {
@@ -126,7 +125,6 @@ async function fetchRecommendationsForId(
     return true;
   });
 
-  // limit to 30 products (or however many you want)
   return unique.slice(0, 90);
 }
 
@@ -150,7 +148,7 @@ export default function RecentlyViewedPage() {
     if (el) el.scrollBy({left: delta, behavior: 'smooth'});
   }, []);
 
-  // Load recent product IDs and fetch their data
+  // Load recent product IDs and fetch their data (merge server cookie + localStorage)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     let isMounted = true;
@@ -158,32 +156,64 @@ export default function RecentlyViewedPage() {
     (async () => {
       try {
         setLoadingRecent(true);
-        const idsRaw = JSON.parse(
-          localStorage.getItem('viewedProducts') || '[]',
+
+        const idsLocal = Array.from(
+          new Set(JSON.parse(localStorage.getItem('viewedProducts') || '[]')),
         );
-        const ids = Array.from(new Set(idsRaw)); // unique, preserve order
-        if (!ids.length) {
-          if (isMounted) setRecent([]);
-          return;
+
+        // Ask the server cookie for expanded products, then combine with local ids
+        const server = await fetch(
+          '/api/user/history?expand=products&limit=60',
+          {headers: {accept: 'application/json'}},
+        )
+          .then((r) => r.json())
+          .catch(() => ({}));
+
+        const serverProds = Array.isArray(server?.products)
+          ? server.products
+          : [];
+
+        // Build a map from server products for fast lookup
+        const serverMap = new Map(serverProds.map((p) => [p.id, p]));
+        // Ensure all local ids have entries; we’ll fetch them if missing
+        const needFetch = idsLocal.filter((id) => !serverMap.has(id));
+
+        let fetched = [];
+        if (needFetch.length) {
+          const controller = new AbortController();
+          fetched = await fetchProductsByIds(
+            needFetch,
+            controller.signal,
+            API_URL,
+            API_TOKEN,
+          );
         }
 
-        const controller = new AbortController();
-        const prods = await fetchProductsByIds(
-          ids,
-          controller.signal,
-          API_URL,
-          API_TOKEN,
-        );
+        const allProds = [...serverProds, ...fetched];
+        // Now preserve the overall order: cookie first (already ordered), then local in seen order
+        const seen = new Set(allProds.map((p) => p.id));
+        for (const id of idsLocal) {
+          if (!seen.has(id)) {
+            const fake = {id, handle: '', title: '', featuredImage: null};
+            allProds.push(fake); // placeholder if fetch failed
+          }
+        }
 
-        const map = new Map(prods.map((p) => [p.id, p]));
-        const ordered = ids.map((id) => map.get(id)).filter(Boolean);
+        // Filter nulls and dedupe by id (server first)
+        const uniq = [];
+        const uSeen = new Set();
+        for (const p of allProds) {
+          if (!p || !p.id || uSeen.has(p.id)) continue;
+          uSeen.add(p.id);
+          uniq.push(p);
+        }
 
         if (isMounted) {
-          setRecent(ordered);
+          setRecent(uniq);
           const initial =
-            preselect && map.get(preselect)
+            preselect && uniq.find((p) => p.id === preselect)
               ? preselect
-              : ordered[0]?.id || null;
+              : uniq[0]?.id || null;
           setSelectedId(initial);
         }
       } finally {
@@ -311,8 +341,8 @@ export default function RecentlyViewedPage() {
                   }}
                 >
                   <img
-                    src={`${p.featuredImage?.url}&width=144`}
-                    alt={p.featuredImage?.altText || p.title}
+                    src={`${p.featuredImage?.url || ''}&width=144`}
+                    alt={p.featuredImage?.altText || p.title || 'Product'}
                     width="72"
                     height="72"
                     style={{
@@ -351,7 +381,6 @@ export default function RecentlyViewedPage() {
             const hasPrice = firstPrice && Number(firstPrice.amount) > 0;
             const firstVariantId = selected?.variants?.nodes?.[0]?.id || null;
 
-            // In stock if product or its first variant is available
             const inStock =
               (selected?.availableForSale ?? true) &&
               (selected?.variants?.nodes?.[0]?.availableForSale ?? true);
@@ -371,14 +400,17 @@ export default function RecentlyViewedPage() {
                   marginBottom: 30,
                 }}
               >
-                {/* Left: big image */}
                 <Link
                   to={`/products/${encodeURIComponent(selected.handle)}`}
                   style={{display: 'block', flex: '0 1 360px', maxWidth: 360}}
                 >
                   <img
-                    src={`${selected.featuredImage?.url}&width=720`}
-                    alt={selected.featuredImage?.altText || selected.title}
+                    src={`${selected.featuredImage?.url || ''}&width=720`}
+                    alt={
+                      selected.featuredImage?.altText ||
+                      selected.title ||
+                      'Product'
+                    }
                     width="360"
                     height="360"
                     style={{
@@ -392,7 +424,6 @@ export default function RecentlyViewedPage() {
                   />
                 </Link>
 
-                {/* Right: title, truncated description, price, button */}
                 <div
                   className="selected-info"
                   style={{
@@ -413,7 +444,7 @@ export default function RecentlyViewedPage() {
                       className="selectedTitle"
                       style={{margin: 0, fontWeight: 600}}
                     >
-                      {selected.title}
+                      {selected.title || 'Product'}
                     </h3>
                   </Link>
 
@@ -443,10 +474,6 @@ export default function RecentlyViewedPage() {
                     )}
                   </div>
 
-                  {/* Buttons:
-                      - price = 0  -> no button
-                      - price > 0 && !inStock -> disabled "Out of stock"
-                      - price > 0 && inStock -> Add to cart (first variant) */}
                   {hasPrice ? (
                     inStock ? (
                       firstVariantId ? (
@@ -528,7 +555,6 @@ export default function RecentlyViewedPage() {
         )}
       </section>
 
-      {/* minimal skeleton/card CSS matching your existing format */}
       <style>{`
         .product-card.skeleton { padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; box-sizing: border-box; }
         .skeleton-img { width: 150px; height: 150px; border-radius: 8px; background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%); background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite; }
@@ -536,7 +562,12 @@ export default function RecentlyViewedPage() {
         .skeleton-line.short { width: 60%; }
         @keyframes sh { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
         .related-card { max-width: 200px; }
-        @media (max-width: 720px) {.related-card { maxWidth: 47%; } .related-flex { justify-content: space-between; } .selectedTitle {font-size: 18px !important, font-weight: 500 !important} .selectedDescription{font-size: 12px !important}}
+        @media (max-width: 720px) {
+          .related-card { max-width: 47%; }
+          .related-flex { justify-content: space-between; }
+          .selectedTitle { font-size: 18px !important; font-weight: 500 !important; }
+          .selectedDescription { font-size: 12px !important; }
+        }
       `}</style>
     </div>
   );
@@ -583,15 +614,15 @@ function ProductCard({product, index = 0}) {
       >
         <Link to={`/products/${encodeURIComponent(product.handle)}`}>
           <img
-            src={`${product.featuredImage?.url}&width=200`}
-            alt={product.featuredImage?.altText || product.title}
+            src={`${product.featuredImage?.url || ''}&width=200`}
+            alt={product.featuredImage?.altText || product.title || 'Product'}
             width="150"
             height="150"
             loading={index < 2 ? 'eager' : 'lazy'}
             fetchpriority={index < 2 ? 'high' : 'auto'}
             decoding="async"
           />
-          <div className="product-title">{product.title}</div>
+          <div className="product-title">{product.title || 'Product'}</div>
           <div className="product-price">
             {firstPrice && Number(firstPrice.amount) > 0 ? (
               <Money data={firstPrice} />

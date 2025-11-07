@@ -623,11 +623,12 @@ export default function Product() {
   const shippingRef = useRef(null);
   const warrantyRef = useRef(null);
 
-  // Safeguard: If `product` is unexpectedly undefined for any reason, bail out early.
+  // Safeguard
   if (!product) {
     return <div>Loading product data...</div>;
   }
 
+  // -------- State (before effects) --------
   const [selectedVariant, setSelectedVariant] = useState(
     product.selectedVariant,
   );
@@ -635,16 +636,27 @@ export default function Product() {
   const [subtotal, setSubtotal] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
 
-  useEffect(() => {
-    // Reset when the product changes
-    setSelectedVariant(product.selectedVariant);
-    setQuantity(1);
-  }, [product]);
+  // -------- Effects --------
 
+  // Pixel / analytics
   useEffect(() => {
     trackViewContent(product);
   }, [product]);
 
+  // Edge-cacheable tracking endpoint (per view)
+  const trackOnceRef = useRef(false);
+  useEffect(() => {
+    if (!product?.handle || trackOnceRef.current) return;
+    trackOnceRef.current = true;
+
+    fetch('/api/track/view', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({handle: product.handle}),
+    }).catch(() => {});
+  }, [product?.handle]);
+
+  // Subtotal
   useEffect(() => {
     if (selectedVariant?.price) {
       const price = parseFloat(selectedVariant.price.amount);
@@ -652,6 +664,13 @@ export default function Product() {
     }
   }, [quantity, selectedVariant]);
 
+  // Reset on product change
+  useEffect(() => {
+    setSelectedVariant(product.selectedVariant);
+    setQuantity(1);
+  }, [product]);
+
+  // -------- Locals --------
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
   const decrementQuantity = () =>
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
@@ -672,7 +691,7 @@ export default function Product() {
       : product.images?.edges?.map((edge) => ({
           node: {
             __typename: 'MediaImage',
-            image: edge.node, // edge.node already has {id, url, altText, ...}
+            image: edge.node,
           },
         })) || [];
 

@@ -10,7 +10,7 @@ const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
 const SOURCE_LIMIT = 30; // how many history IDs to consider
 const OUTPUT_LIMIT = 120; // total cards to render at most
 const BATCH_SIZE = 8; // cards per “page”
-const CACHE_TTL_MS = 600 * 60 * 60 * 1000; // 6 hours
+const CACHE_TTL_MS = 600 * 60 * 60 * 1000; // 6 hours? (Note: value is ~600h)
 const HARD_TIMEOUT_MS = 1800; // abort slow requests
 const SKELETON_HEIGHT = 400; // reserve container height
 const SKELETON_CARD_H = 357; // skeleton card height
@@ -21,6 +21,8 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   const [pool, setPool] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
+
+  const [serverIds, setServerIds] = useState([]); // NEW: ids from cookie-based history
 
   const sentinelRef = useRef(null);
   const loadingMoreRef = useRef(false);
@@ -33,8 +35,32 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     el.scrollBy({left: delta, behavior: 'smooth'});
   }, []);
 
-  // ---- read history synchronously (client only) ----
-  const sourceIds = useMemo(() => {
+  // ---- NEW: fetch per-user cookie history (expanded to products -> IDs) ----
+  useEffect(() => {
+    let abort = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/user/history?expand=products&limit=${SOURCE_LIMIT}`,
+          {headers: {accept: 'application/json'}},
+        );
+        const data = await res.json().catch(() => ({}));
+        const ids =
+          Array.isArray(data?.products) && data.products.length
+            ? data.products.map((p) => p.id).filter(Boolean)
+            : [];
+        if (!abort) setServerIds(ids);
+      } catch {
+        if (!abort) setServerIds([]);
+      }
+    })();
+    return () => {
+      abort = true;
+    };
+  }, []);
+
+  // ---- read local history synchronously (client only) ----
+  const localIds = useMemo(() => {
     if (typeof window === 'undefined') return [];
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
     const list = currentProductId
@@ -42,6 +68,21 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       : viewed;
     return list.slice(0, SOURCE_LIMIT);
   }, [currentProductId]);
+
+  // ---- merge server + local sources for seed IDs ----
+  const sourceIds = useMemo(() => {
+    const merged = [...serverIds, ...localIds];
+    // unique, preserve order
+    const seen = new Set();
+    const out = [];
+    for (const id of merged) {
+      if (id && !seen.has(id) && id !== currentProductId) {
+        seen.add(id);
+        out.push(id);
+      }
+    }
+    return out.slice(0, SOURCE_LIMIT);
+  }, [serverIds, localIds, currentProductId]);
 
   // ---- Bootstrap from cache ----
   useEffect(() => {
@@ -206,7 +247,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       >
         <h2 style={{margin: 0}}>{heading}</h2>
 
-        {/* View all → pass preselection if you want */}
         <Link
           to={
             currentProductId
@@ -392,7 +432,7 @@ function dedupe(list, currentProductId) {
 
 /* ---------------- UI ---------------- */
 
-function SkeletonRow({count = 8, fixedHeight = SKELETON_HEIGHT}) {
+function SkeletonRow({count = 8, fixedHeight = 400}) {
   return (
     <div
       className="product-row-container"
@@ -401,10 +441,7 @@ function SkeletonRow({count = 8, fixedHeight = SKELETON_HEIGHT}) {
       <div className="collection-products-row">
         {Array.from({length: count}).map((_, i) => (
           <div key={i} className="product-item">
-            <div
-              className="product-card skeleton"
-              style={{height: SKELETON_CARD_H}}
-            >
+            <div className="product-card skeleton" style={{height: 357}}>
               <div className="skeleton-img" />
               <div className="skeleton-line" />
               <div className="skeleton-line short" />
