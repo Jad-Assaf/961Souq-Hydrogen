@@ -15,18 +15,6 @@ const HARD_TIMEOUT_MS = 1800; // abort slow requests
 const SKELETON_HEIGHT = 400; // reserve container height
 const SKELETON_CARD_H = 357; // skeleton card height
 
-// Minimal customer-account tracking on product click
-function trackAccountProductView({id, handle, source = 'related-history'}) {
-  try {
-    fetch('/api/track/view', {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({id, handle, source}),
-      keepalive: true,
-    }).catch(() => {});
-  } catch {}
-}
-
 export default function RelatedProductsFromHistory({currentProductId}) {
   const [heading, setHeading] = useState('');
   const [rendered, setRendered] = useState([]);
@@ -35,7 +23,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   const [isBootstrapped, setIsBootstrapped] = useState(false);
 
   const [serverIds, setServerIds] = useState([]); // ids from cookie-based history
-  const [preferServerOnly, setPreferServerOnly] = useState(false); // NEW: ignore local when logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // NEW: customer accounts (new) login state
 
   const sentinelRef = useRef(null);
   const loadingMoreRef = useRef(false);
@@ -48,44 +36,26 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     el.scrollBy({left: delta, behavior: 'smooth'});
   }, []);
 
-  // NEW: detect logged-in status (prefer server-only history if true)
+  // ---- NEW: check if customer is logged in (new customer accounts) ----
   useEffect(() => {
-    let cancelled = false;
+    let abort = false;
     (async () => {
       try {
-        const res = await fetch('/api/user/history?ping=1', {
+        const res = await fetch('/api/user/status', {
           headers: {accept: 'application/json'},
         });
-        if (cancelled) return;
-
-        let logged = false;
-        if (res.ok) {
-          const hdr = res.headers.get('x-customer-logged-in');
-          if (hdr === '1' || hdr === 'true') logged = true;
-          try {
-            const body = await res.clone().json();
-            if (
-              body &&
-              (body.loggedIn === true ||
-                body.customerId ||
-                body.customer?.id ||
-                body.customer)
-            ) {
-              logged = true;
-            }
-          } catch {}
-        }
-        setPreferServerOnly(!!logged);
+        const data = await res.json().catch(() => ({}));
+        if (!abort) setIsLoggedIn(Boolean(data?.loggedIn));
       } catch {
-        setPreferServerOnly(false);
+        if (!abort) setIsLoggedIn(false);
       }
     })();
     return () => {
-      cancelled = true;
+      abort = true;
     };
   }, []);
 
-  // fetch per-user cookie history (expanded to products -> IDs)
+  // ---- fetch per-user cookie history (expanded to products -> IDs) ----
   useEffect(() => {
     let abort = false;
     (async () => {
@@ -109,19 +79,21 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     };
   }, []);
 
-  // read local history synchronously (client only) — DISABLED when logged in
+  // ---- read local history synchronously (client only) ----
   const localIds = useMemo(() => {
-    if (typeof window === 'undefined' || preferServerOnly) return [];
+    if (typeof window === 'undefined') return [];
+    // NEW: if logged in, ignore localStorage completely
+    if (isLoggedIn) return [];
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
     const list = currentProductId
       ? viewed.filter((id) => id !== currentProductId)
       : viewed;
     return list.slice(0, SOURCE_LIMIT);
-  }, [currentProductId, preferServerOnly]);
+  }, [currentProductId, isLoggedIn]);
 
-  // merge sources for seed IDs (server-only if logged in)
+  // ---- merge server + local sources for seed IDs ----
   const sourceIds = useMemo(() => {
-    const merged = preferServerOnly ? serverIds : [...serverIds, ...localIds];
+    const merged = [...serverIds, ...localIds];
     // unique, preserve order
     const seen = new Set();
     const out = [];
@@ -132,9 +104,9 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       }
     }
     return out.slice(0, SOURCE_LIMIT);
-  }, [serverIds, localIds, currentProductId, preferServerOnly]);
+  }, [serverIds, localIds, currentProductId]);
 
-  // Bootstrap from cache
+  // ---- Bootstrap from cache ----
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -156,7 +128,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     }
   }, [sourceIds, currentProductId]);
 
-  // Fetch data (history → recs OR random fallback)
+  // ---- Fetch data (history → recs OR random fallback) ----
   useEffect(() => {
     let aborted = false;
     const controller = new AbortController();
@@ -242,7 +214,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     };
   }, [sourceIds, currentProductId, isBootstrapped]);
 
-  // infinite “load more” when reaching the end
+  // ---- infinite “load more” when reaching the end ----
   const loadMore = useCallback(() => {
     if (loadingMoreRef.current) return;
     loadingMoreRef.current = true;
@@ -520,16 +492,7 @@ function RelatedProductCard({product, index, refProp}) {
       style={{transitionDelay: `${index * 40}ms`}}
     >
       <div className="product-card">
-        <Link
-          to={`/products/${encodeURIComponent(product.handle)}`}
-          onClick={() =>
-            trackAccountProductView({
-              id: product.id,
-              handle: product.handle,
-              source: 'related-history',
-            })
-          }
-        >
+        <Link to={`/products/${encodeURIComponent(product.handle)}`}>
           <img
             src={`${product.featuredImage.url}&width=200`}
             alt={product.featuredImage.altText || product.title}

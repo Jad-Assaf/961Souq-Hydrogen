@@ -14,18 +14,6 @@ export async function loader({context}) {
 
 const SKELETON_CARD_H = 357;
 
-// Minimal customer-account tracking on product click
-function trackAccountProductView({id, handle, source = 'recently-viewed'}) {
-  try {
-    fetch('/api/track/view', {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({id, handle, source}),
-      keepalive: true,
-    }).catch(() => {});
-  } catch {}
-}
-
 /* ---------------- Utils ---------------- */
 function truncateWords(text, maxWords = 50) {
   if (!text) return '';
@@ -153,50 +141,32 @@ export default function RecentlyViewedPage() {
   const [loadingRecent, setLoadingRecent] = useState(true);
   const [loadingRelated, setLoadingRelated] = useState(false);
 
-  const [preferServerOnly, setPreferServerOnly] = useState(false); // NEW
-
-  // Detect login (prefer server-only when logged in)
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch('/api/user/history?ping=1', {
-          headers: {accept: 'application/json'},
-        });
-        if (cancelled) return;
-
-        let logged = false;
-        if (res.ok) {
-          const hdr = res.headers.get('x-customer-logged-in');
-          if (hdr === '1' || hdr === 'true') logged = true;
-          try {
-            const body = await res.clone().json();
-            if (
-              body &&
-              (body.loggedIn === true ||
-                body.customerId ||
-                body.customer?.id ||
-                body.customer)
-            ) {
-              logged = true;
-            }
-          } catch {}
-        }
-        setPreferServerOnly(!!logged);
-      } catch {
-        setPreferServerOnly(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // NEW
 
   // Thumbnails strip scroller
   const thumbsRef = useRef(null);
   const scrollThumbs = useCallback((delta) => {
     const el = thumbsRef.current;
     if (el) el.scrollBy({left: delta, behavior: 'smooth'});
+  }, []);
+
+  // NEW: check login state (new customer accounts)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/user/status', {
+          headers: {accept: 'application/json'},
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!cancelled) setIsLoggedIn(Boolean(json?.loggedIn));
+      } catch {
+        if (!cancelled) setIsLoggedIn(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Load recent product IDs and fetch their data (merge server cookie + localStorage)
@@ -208,7 +178,8 @@ export default function RecentlyViewedPage() {
       try {
         setLoadingRecent(true);
 
-        const idsLocal = preferServerOnly
+        // NEW: if logged in, ignore local storage completely
+        const idsLocal = isLoggedIn
           ? []
           : Array.from(
               new Set(
@@ -216,43 +187,17 @@ export default function RecentlyViewedPage() {
               ),
             );
 
-        // Ask the server cookie for expanded products
-        const resp = await fetch('/api/user/history?expand=products&limit=60', {
-          headers: {accept: 'application/json'},
-        }).catch(() => null);
-
-        let server = {};
-        if (resp) {
-          try {
-            server = await resp.json();
-          } catch {
-            server = {};
-          }
-        }
+        // Ask the server cookie (or server store) for expanded products
+        const server = await fetch(
+          '/api/user/history?expand=products&limit=60',
+          {headers: {accept: 'application/json'}},
+        )
+          .then((r) => r.json())
+          .catch(() => ({}));
 
         const serverProds = Array.isArray(server?.products)
           ? server.products
           : [];
-
-        if (preferServerOnly) {
-          // When logged in, ignore local completely
-          if (isMounted) {
-            const uniq = [];
-            const uSeen = new Set();
-            for (const p of serverProds) {
-              if (!p || !p.id || uSeen.has(p.id)) continue;
-              uSeen.add(p.id);
-              uniq.push(p);
-            }
-            setRecent(uniq);
-            const initial =
-              preselect && uniq.find((p) => p.id === preselect)
-                ? preselect
-                : uniq[0]?.id || null;
-            setSelectedId(initial);
-          }
-          return;
-        }
 
         // Build a map from server products for fast lookup
         const serverMap = new Map(serverProds.map((p) => [p.id, p]));
@@ -271,8 +216,7 @@ export default function RecentlyViewedPage() {
         }
 
         const allProds = [...serverProds, ...fetched];
-
-        // Preserve overall order: cookie first (already ordered), then local in seen order
+        // Preserve order: server first (already ordered), then local in seen order
         const seen = new Set(allProds.map((p) => p.id));
         for (const id of idsLocal) {
           if (!seen.has(id)) {
@@ -307,7 +251,7 @@ export default function RecentlyViewedPage() {
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preselect, API_URL, API_TOKEN, preferServerOnly]);
+  }, [preselect, API_URL, API_TOKEN, isLoggedIn]);
 
   // When a product is selected, load its related products
   useEffect(() => {
@@ -484,13 +428,6 @@ export default function RecentlyViewedPage() {
               >
                 <Link
                   to={`/products/${encodeURIComponent(selected.handle)}`}
-                  onClick={() =>
-                    trackAccountProductView({
-                      id: selected.id,
-                      handle: selected.handle,
-                      source: 'recently-selected',
-                    })
-                  }
                   style={{display: 'block', flex: '0 1 360px', maxWidth: 360}}
                 >
                   <img
@@ -527,13 +464,6 @@ export default function RecentlyViewedPage() {
                 >
                   <Link
                     to={`/products/${encodeURIComponent(selected.handle)}`}
-                    onClick={() =>
-                      trackAccountProductView({
-                        id: selected.id,
-                        handle: selected.handle,
-                        source: 'recently-selected',
-                      })
-                    }
                     style={{textDecoration: 'none', color: 'inherit'}}
                   >
                     <h3
@@ -708,16 +638,7 @@ function ProductCard({product, index = 0}) {
         className="product-card"
         style={{maxWidth: '100%', width: '100%', minWidth: '100%'}}
       >
-        <Link
-          to={`/products/${encodeURIComponent(product.handle)}`}
-          onClick={() =>
-            trackAccountProductView({
-              id: product.id,
-              handle: product.handle,
-              source: 'recently-related',
-            })
-          }
-        >
+        <Link to={`/products/${encodeURIComponent(product.handle)}`}>
           <img
             src={`${product.featuredImage?.url || ''}&width=200`}
             alt={product.featuredImage?.altText || product.title || 'Product'}
