@@ -1,5 +1,5 @@
 import {useEffect, useState, useRef, useMemo} from 'react';
-import {Link, NavLink} from '@remix-run/react';
+import {Link, NavLink, useLocation} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
 import {Image} from '@shopify/hydrogen-react';
 import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
@@ -116,6 +116,18 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     }
   }, [isMobileMenuOpen]);
 
+  const location = useLocation();
+  const isBlackNovember =
+    location.pathname === '/black-november' ||
+    location.pathname === '/black-november/';
+
+  const DEFAULT_LOGO =
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400';
+  const BLACK_NOVEMBER_LOGO =
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-white_6a233cc8-9b7b-415c-b352-84aac4668966.png?v=1762774820';
+
+
+
   /* --------- AUTOMATIC PLACEHOLDER TYPING REMOVED --------- */
 
   return (
@@ -146,8 +158,10 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           </button>
           <NavLink prefetch="intent" to="/" className="logo-link" end>
             <img
-              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400"
-              alt={`${shop.name} Logo`}
+              src={isBlackNovember ? BLACK_NOVEMBER_LOGO : DEFAULT_LOGO}
+              alt={
+                isBlackNovember ? '961souq Black November logo' : '961souq logo'
+              }
               className="header-logo"
               width="100"
               height="50"
@@ -333,8 +347,10 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           {/* <SearchForm /> */}
           <NavLink to="/" className={'desk-nav-logo'}>
             <img
-              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400"
-              alt="961souq logo"
+              src={isBlackNovember ? BLACK_NOVEMBER_LOGO : DEFAULT_LOGO}
+              alt={
+                isBlackNovember ? '961souq Black November logo' : '961souq logo'
+              }
               width="120"
               height="47"
             />
@@ -611,7 +627,7 @@ function WishListIcon() {
       <g
         id="SVGRepo_tracerCarrier"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke-linejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
         {' '}
@@ -638,7 +654,7 @@ function UserIcon() {
       <g
         id="SVGRepo_tracerCarrier"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke-linejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
         {' '}
@@ -688,7 +704,7 @@ function CartIcon() {
       <g
         id="SVGRepo_tracerCarrier"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke-linejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
         {' '}

@@ -69,19 +69,18 @@ export default function BlackNovemberRoute() {
     color:var(--ink);
     min-height:100%;
     background:
-      radial-gradient(1200px 600px at 70% -10%, rgba(0,150,255,.12), transparent 60%),
-      radial-gradient(900px 500px at -10% 20%, rgba(0,255,190,.08), transparent 70%),
+      radial-gradient(1200px 600px at 70% 10%, rgba(0,150,255,.12), transparent 60%),
+      radial-gradient(900px 500px at 20% 45%, rgba(0,255,190,.08), transparent 70%),
       var(--bg);
     padding-bottom:56px;
   }
-  .bn-container{ width:min(1200px, 92vw); margin: 75px auto; }
+  .bn-container{ width:min(1200px, 92vw); margin: 0px auto; padding: 75px 0}
 
   /* ------------------------------ Banner ------------------------------ */
   .bn-hero{
     position:relative; border-radius:22px; overflow:hidden;
     margin:24px auto 50px;
     background:linear-gradient(180deg, #0d1218 0%, #0a0f15 100%);
-    box-shadow:0px 5px 30px 5px rgb(255 0 0 / 13%);
   }
   .bn-hero img{
     width:100%;
@@ -178,8 +177,22 @@ export default function BlackNovemberRoute() {
     @media (min-width: 768px){
     .only-mobile { display:none !important; }
     .only-desktop { display:block !important; }
+    .search-bar{border:1px solid #fff !important;} 
     }
-
+    .search-container svg {stroke: #fff !important;}
+    .header-ctas .wishlist-icon svg *,.header-ctas .sign-in-link svg *, .cart-button svg {fill: #fff !important;}
+    .header .mobile-menu-toggle svg *{ stroke:#fff !important; }
+    .footer{ background: var(--bg-2) !important; border-top: 1px solid rgba(255,255,255,.08) !important; }
+    .footer-column ul li a, .footer-column h3{ color:#fff !important; }
+    li i svg *{ fill:#fff !important; }
+    .social-links *{ background:#fff !important;color:#000 !important; }
+    .social-links a svg *{ fill:#000 !important; }
+    .copyright{background:var(--bg-2) !important;}
+    @media (max-width: 1024px){
+    .search-bar-submit, .search-bar, .header {background: transparent !important; border: none !important;}
+    .header{backdrop-filter: blur(15px) saturate(1.5);}
+    .header-top{ padding: 35px 0 81px !important}
+    }
   `;
 
   return (
