@@ -8,9 +8,9 @@ import {useLoaderData} from '@remix-run/react';
  *   ─ Server side: looks for `isMobile` in loader data
  *     (generated with `const isMobile = /mobile/i.test(userAgent)`).
  *   ─ Client side: re-checks `navigator.userAgent` after hydration.
- * • Renders one <img> variant per slide:
- *   ─ Mobile visitors → mobile banners only
- *   ─ Desktop visitors → desktop banners only
+ * • Renders one <img>/<video> variant per slide:
+ *   ─ Mobile visitors → mobile assets only
+ *   ─ Desktop visitors → desktop assets only
  * • Keeps all existing autoplay, swipe, arrows, dots, progress bar.
  */
 
@@ -29,12 +29,16 @@ export function BannerSlideshow({banners, interval = 10000}) {
     }
   }, []);
 
+  /* Helper to detect if a URL is a video file */
+  const isVideoUrl = (url) =>
+    typeof url === 'string' && /\.(mp4|webm|ogg)(?:$|\?)/i.test(url);
+
   /* Filter banners so we only iterate the ones we’ll really show */
   const deviceBanners = useMemo(
     () =>
       isMobile
-        ? banners.filter((b) => b.mobileImageUrl)
-        : banners.filter((b) => b.desktopImageUrl),
+        ? banners.filter((b) => b.mobileImageUrl || b.mobileVideoUrl)
+        : banners.filter((b) => b.desktopImageUrl || b.desktopVideoUrl),
     [banners, isMobile],
   );
 
@@ -86,39 +90,87 @@ export function BannerSlideshow({banners, interval = 10000}) {
         onTouchEnd={onTouchEnd}
       >
         <a href={slide.link} className="banner-link">
-          {isMobile ? (
-            /* Mobile image only */
-            <img
-              srcSet={`
-                ${slide.mobileImageUrl}&width=320 320w,
-                ${slide.mobileImageUrl}&width=480 480w,
-                ${slide.mobileImageUrl}&width=640 640w,
-              `}
-              sizes="100vw"
-              src={`${slide.mobileImageUrl}&width=640`}
-              alt={slide.alt || `Banner ${current + 1}`}
-              className="banner-image"
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-              width={640}
-              height={300}
-            />
-          ) : (
-            /* Desktop image only */
-            <img
-              srcSet={`${slide.desktopImageUrl}&width=1024 1024w, ${slide.desktopImageUrl}&width=1200 1200w, ${slide.desktopImageUrl}&width=1500 1500w`}
-              sizes="(min-width:1025px) 1500px, 100vw"
-              src={`${slide.desktopImageUrl}&width=1500`}
-              alt={slide.alt || `Banner ${current + 1}`}
-              className="banner-image"
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-              width={1500}
-              height={300}
-            />
-          )}
+          {isMobile
+            ? /* Mobile asset (image or video) */
+              (() => {
+                const videoSrc =
+                  slide.mobileVideoUrl ||
+                  (isVideoUrl(slide.mobileImageUrl)
+                    ? slide.mobileImageUrl
+                    : null);
+                if (videoSrc) {
+                  return (
+                    <video
+                      src={videoSrc}
+                      className="banner-image"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="auto"
+                      width={640}
+                      height={300}
+                      aria-label={slide.alt || `Banner ${current + 1}`}
+                    />
+                  );
+                }
+                return (
+                  <img
+                    srcSet={`
+                    ${slide.mobileImageUrl}&width=320 320w,
+                    ${slide.mobileImageUrl}&width=480 480w,
+                    ${slide.mobileImageUrl}&width=640 640w,
+                  `}
+                    sizes="100vw"
+                    src={`${slide.mobileImageUrl}&width=640`}
+                    alt={slide.alt || `Banner ${current + 1}`}
+                    className="banner-image"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                    width={640}
+                    height={300}
+                  />
+                );
+              })()
+            : /* Desktop asset (image or video) */
+              (() => {
+                const videoSrc =
+                  slide.desktopVideoUrl ||
+                  (isVideoUrl(slide.desktopImageUrl)
+                    ? slide.desktopImageUrl
+                    : null);
+                if (videoSrc) {
+                  return (
+                    <video
+                      src={videoSrc}
+                      className="banner-image"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="auto"
+                      width={1500}
+                      height={300}
+                      aria-label={slide.alt || `Banner ${current + 1}`}
+                    />
+                  );
+                }
+                return (
+                  <img
+                    srcSet={`${slide.desktopImageUrl}&width=1024 1024w, ${slide.desktopImageUrl}&width=1200 1200w, ${slide.desktopImageUrl}&width=1500 1500w`}
+                    sizes="(min-width:1025px) 1500px, 100vw"
+                    src={`${slide.desktopImageUrl}&width=1500`}
+                    alt={slide.alt || `Banner ${current + 1}`}
+                    className="banner-image"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                    width={1500}
+                    height={300}
+                  />
+                );
+              })()}
         </a>
 
         {/* Indicator dots */}

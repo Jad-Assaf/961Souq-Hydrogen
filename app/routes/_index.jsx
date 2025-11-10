@@ -190,6 +190,13 @@ export async function loader(args) {
     // },
     {
       desktopImageUrl:
+        'https://cdn.shopify.com/videos/c/o/v/91f205b1be684b3187cdbbeddcf9683a.mp4?quality=100',
+      mobileImageUrl:
+        'https://cdn.shopify.com/videos/c/o/v/53f5d3341457452e9f35b5290ebc794c.mp4?quality=100',
+      link: '/black-november',
+    },
+    {
+      desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-banner.jpg?v=1758713478',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-mobile-banner.jpg?v=1758713478',
