@@ -192,6 +192,7 @@ export default function BlackNovemberRoute() {
     .search-bar-submit, .search-bar, .header {background: transparent !important; border: none !important;}
     .header{backdrop-filter: blur(15px) saturate(1.5);}
     .header-top{ padding: 35px 0 81px !important}
+    .main-search {box-shadow: rgb(0 0 0 / 23%) 0px 8px 7px 0px !important;}
     }
   `;
 
