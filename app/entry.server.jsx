@@ -78,6 +78,7 @@ export default async function handleRequest(
       'https://www.google-analytics.com',
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
+      'https://whatsapp-otp-gate-k4b9bjhnr-jadaassafgmailcoms-projects.vercel.app/',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -123,6 +124,7 @@ export default async function handleRequest(
       'https://www.meta.com',
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
+      'https://whatsapp-otp-gate.vercel.app/',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
