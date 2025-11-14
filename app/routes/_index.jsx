@@ -32,18 +32,27 @@ import MobileCategoryTiles from '~/components/MobileCategoryTiles';
 import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
-// 🔹 NEW: import the Build My Setup section + its loader + CSS
-import {
-  BuildMySetupSection,
-  loader as buildMySetupLoader,
-} from '~/routes/build-my-setup';
-import buildMySetupStyles from '~/styles/build-my-setup.css?url';
+// const MANUAL_MENU_HANDLES = [
+//   'apple',
+//   'gaming',
+//   'laptops',
+//   'desktops',
+//   'pc-parts',
+//   'networking',
+//   'monitors',
+//   'mobiles',
+//   'tablets',
+//   'audio',
+//   'pioneer-equipment',
+//   'accessories',
+//   'fitness',
+//   'photography',
+//   'home-appliances',
+// ];
 
 /**
- * Route-level CSS (for Build My Setup)
+ * Custom hook to detect mobile viewport (below 1024px)
  */
-export const links = () => [{rel: 'stylesheet', href: buildMySetupStyles}];
-
 /**
  * @type {MetaFunction}
  */
@@ -170,7 +179,6 @@ async function loadCriticalData({context}) {
 export async function loader(args) {
   const userAgent = args.request.headers.get('user-agent') || '';
   const isMobile = /mobile/i.test(userAgent);
-
   // Define banners (critical UI elements)
   const banners = [
     // {
@@ -259,12 +267,7 @@ export async function loader(args) {
     },
   ];
 
-  // 🔹 NEW: kick off Build My Setup loader in parallel
-  const buildMySetupDataPromise = buildMySetupLoader(args).then((res) =>
-    res.json(),
-  );
-
-  // Fire off critical queries concurrently so above-the-fold content is fast.
+  // Fire off critical queries concurrently so above‑the‑fold content is fast.
   const criticalDataPromise = loadCriticalData(args);
   const newArrivalsPromise = fetchCollectionByHandle(
     args.context,
@@ -291,7 +294,7 @@ export async function loader(args) {
   ];
   const uniqueMenuHandles = [...new Set(menuHandles)];
 
-  // Fetch non-critical collections concurrently.
+  // Fetch non‑critical collections concurrently.
   const deferredTopProductsPromise = Promise.allSettled(
     uniqueMenuHandles.map((handle) =>
       fetchCollectionByHandle(args.context, handle),
@@ -313,11 +316,8 @@ export async function loader(args) {
   // Prepare critical top products.
   const initialTopProducts = {};
 
-  // Wait for non-critical data before returning.
+  // Wait for non‑critical data before returning.
   const restTopProducts = await deferredTopProductsPromise;
-
-  // 🔹 NEW: wait for Build My Setup data
-  const buildMySetup = await buildMySetupDataPromise;
 
   return data(
     {
@@ -327,7 +327,6 @@ export async function loader(args) {
       topProducts: initialTopProducts,
       restTopProducts,
       isMobile,
-      buildMySetup, // 🔹 NEW
     },
     {
       headers: {
@@ -475,7 +474,6 @@ export default function Homepage() {
     newArrivals,
     restTopProducts,
     isMobile,
-    buildMySetup, // 🔹 NEW
   } = useLoaderData();
 
   const rootMatch = useMatches()[0];
@@ -584,14 +582,6 @@ export default function Homepage() {
       {newArrivals && <TopProductSections collection={newArrivals} />}
       <RelatedProductsFromHistory key={rpKey} />
 
-      {/* 🔹 NEW: Build My Setup as a homepage section */}
-      {buildMySetup && (
-        <BuildMySetupSection
-          setupConfig={buildMySetup.setupConfig}
-          productsByHandle={buildMySetup.productsByHandle}
-        />
-      )}
-
       {isMobile ? (
         <>
           {header && (
@@ -606,6 +596,44 @@ export default function Homepage() {
           )}
         </>
       ) : (
+        // <div>
+        //   <div className="buttons-list">
+        //     <div className="menu-list">
+        //       {menuKeys.map((key) => (
+        //         <button
+        //           key={key}
+        //           onClick={() => handleMenuClick(key)}
+        //           className={key === selectedMenu ? 'button-85' : ''}
+        //         >
+        //           {key.charAt(0).toUpperCase() + key.slice(1)}
+        //         </button>
+        //       ))}
+        //     </div>
+        //   </div>
+        //   <div
+        //     style={{
+        //       opacity: fade ? 0 : 1,
+        //       transition: 'opacity 300ms ease-in-out',
+        //     }}
+        //   >
+        //     <CollectionCircles
+        //       collections={menus[selectedMenu]}
+        //       selectedCollection={selectedCollection}
+        //       onCollectionSelect={setSelectedCollection}
+        //     />
+        //     {selectedCollection &&
+        //       fullTopProducts[getHandleFromUrl(selectedCollection.url)] && (
+        //         <TopProductSections
+        //           key={`${selectedMenu}-${getHandleFromUrl(
+        //             selectedCollection.url,
+        //           )}`}
+        //           collection={
+        //             fullTopProducts[getHandleFromUrl(selectedCollection.url)]
+        //           }
+        //         />
+        //       )}
+        //   </div>
+        // </div>
         <>
           <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
           {/* Desktop View: Original layout with multiple groups */}
@@ -624,6 +652,47 @@ export default function Homepage() {
                 }
               />
             )}
+
+          {/* <VideosGallery
+            videos={[
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/fa446492aa194b0d9b6f9e2dd686111c.mp4',
+                href: '/products/air-cooling-mist-fan',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/a67b4e70a5b1452f959de8f4189ffc8f.mp4',
+                href: '/products/telesin-fun-shot-magnetic-phone-grip-with-light',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/a45eb2a3059e473985a7c76c47861f24.mp4',
+                href: '/collections/whoop-fitness-bands',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/d296bab182604700b7eba56640fc94d2.mp4',
+                href: '/products/fujifilm-instax-mini-41-instant-camera',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/375f6c7dacae4625af6cdcc6839bb668.mp4',
+                href: '/collections/karl-lagerfeld',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/34df6684f0b547f7904ab185d315a148.mp4',
+                href: '/products/asus-proart-p16-h7606-copilot-pc-16-touchscreen-ryzen-ai-9-hx-370-32gb-ram-1tb-ssd-rtx-4060-8gb',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/a04a6af8173e4759bbdcb11b218b43eb.mp4',
+                href: '/collections/garmin-smart-watch',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/333b871711e54a92835ced0296fe8f59.mp4',
+                href: '/products/fujifilm-instax-wide-evo™-hybrid-instant-camera',
+              },
+              {
+                src: 'https://cdn.shopify.com/videos/c/o/v/7cbd91e1e7be4f738941c9583dcaf3d1.mp4',
+                href: '/collections/ray-ban-smart-glasses',
+              },
+            ]}
+          /> */}
 
           {/* Gaming Group */}
           <CollectionCircles
