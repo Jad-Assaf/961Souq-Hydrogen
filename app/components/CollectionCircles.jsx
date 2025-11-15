@@ -1115,7 +1115,7 @@ export const CollectionCircles = ({
 
   return (
     <div className="menu-slider-container" style={{position: 'relative'}}>
-      <div className="noise">
+      {/* <div className="noise">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           version="1.1"
@@ -1182,7 +1182,7 @@ export const CollectionCircles = ({
             filter="url(#nnnoise-filter)"
           ></rect>
         </svg>
-      </div>
+      </div> */}
       {collections.length && hasOverflow && (
         <button
           className="circle-prev-button"

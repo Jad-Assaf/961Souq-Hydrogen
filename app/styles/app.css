@@ -308,6 +308,39 @@ h2 {
   }
 }
 
+.collection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.collection-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.collection-search-wrap {
+  position: relative;
+}
+
+.collection-search-icon {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 0.85rem;
+}
+
+.collection-search-input {
+  padding: 0.35rem 0.6rem 0.35rem 1.5rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+}
+
 p.home-colleciton-title {
   font-size: 20px;
   font-weight: 500;
@@ -560,11 +593,11 @@ p.home-colleciton-title {
 }
 
 .brand-section {
-  padding: 25px 5px;
-  background-color: #f9f9f9;
+  padding: 25px 0px;
+  background-color: #fff;
   width: 100%;
   max-width: 1500px;
-  border-radius: 5px;
+  border-radius: 10px;
   position: relative;
   box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   margin: 0 auto 50px;
@@ -573,6 +606,9 @@ p.home-colleciton-title {
   .home-next-button {
     display: block !important;
     bottom: -50px;
+  }
+  h2{
+    margin-left: 15px;
   }
 }
 
@@ -611,11 +647,16 @@ p.home-colleciton-title {
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   max-width: 1500px;
-  gap: 16px;
+  gap: 25px;
   margin: auto;
-  padding: 0 10px;
+  padding: 15px 10px;
 }
 
+.brand-item { 
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  border-radius: 50%;
+
+}
 .brand-item img {
   object-fit: contain;
   display: block;
@@ -717,10 +758,10 @@ p.home-colleciton-title {
   -webkit-overflow-scrolling: touch;
   max-width: 1500px;
   width: 100%;
-  background-color: #f5f5f5;
-  border-radius: 5px;
+  background-color: #fff;
+  border-radius: 10px;
   overflow-y: hidden;
-  box-shadow: inset 0 0 20px 0px #bcbcbc, rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
+  box-shadow: rgba(131, 126, 255, 0.3) 0px 4.8px 14.4px;
   margin: 0 auto 30px;
 }
 
@@ -747,7 +788,6 @@ p.home-colleciton-title {
   overflow: auto hidden;
   width: 100%;
   z-index: 1;
-  background: #f0f8ff82;
 }
 
 .sliderWithMoreHeight,
@@ -1237,7 +1277,7 @@ button {
 
 .collection-section {
   position: relative;
-  background-color: transparent;
+  background-color: unset;
   max-width: 1500px;
   margin: 0px auto 80px;
   /* padding: 20px 5px; */
