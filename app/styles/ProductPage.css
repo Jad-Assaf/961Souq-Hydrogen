@@ -245,7 +245,11 @@ h4 {
 .OptionValue {
     font-weight: 300;
 }
-
+.computer-components-note {
+        font-style: italic;
+        font-size: 14px;
+        color: #2172af;
+}
 .whatsapp-share-button {
     display: inline-flex;
     align-items: center;
