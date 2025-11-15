@@ -351,6 +351,9 @@ export function ProductForm({
 }) {
   const location = useLocation();
   const {open} = useAside();
+  const isComputerComponent =
+    Array.isArray(product?.tags) &&
+    product.tags.includes('computer components');
 
   // ------------------------------
   // Initialize local selectedOptions
@@ -592,6 +595,14 @@ export function ProductForm({
             ? 'Add to cart'
             : 'Sold out'}
         </AddToCartButton>
+        {isComputerComponent && (
+          <span className="computer-components-note">
+            Due to high demand and limited stock, computer components may have
+            variable availability and prices. Please contact us via WhatsApp to confirm
+            stock before placing your order.
+          </span>
+        )}
+
         <div className="wishlist-whatsapp-container">
           {isProductPage && (
             <a
@@ -1049,6 +1060,7 @@ const PRODUCT_FRAGMENT = `#graphql
     descriptionHtml
     description
     productType
+    tags
     collections(first: 1) {
       edges {
         node {
