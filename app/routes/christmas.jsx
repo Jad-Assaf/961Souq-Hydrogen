@@ -137,14 +137,15 @@ function formatPrice(price) {
 function createFlake(viewport) {
   const width = viewport.width || 0;
   const height = viewport.height || 0;
-  const size = 3 + Math.random() * 7; // 5–12px
+  const size = 3 + Math.random() * 7; // 3–10px
 
   return {
     id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
     x: Math.random() * width,
     y: -Math.random() * height * 0.7,
-    vx: (Math.random() - 0.5) * 30,
-    vy: 45 + Math.random() * 55,
+    // slower drift and fall
+    vx: (Math.random() - 0.5) * 18,
+    vy: 18 + Math.random() * 26,
     size,
     settled: false,
     variant: 1 + Math.floor(Math.random() * 3), // 1, 2, or 3
@@ -153,7 +154,8 @@ function createFlake(viewport) {
   };
 }
 
-function SnowField({enabled, maxFlakes = 130, initialCount = 50}) {
+// Slightly fewer flakes by default; mobile "lite" mode handled in loop
+function SnowField({enabled, maxFlakes = 100, initialCount = 40}) {
   const [flakes, setFlakes] = useState([]);
   const viewportRef = useRef({width: 0, height: 0});
   const frameRef = useRef();
@@ -278,6 +280,8 @@ function SnowField({enabled, maxFlakes = 130, initialCount = 50}) {
         return;
       }
 
+      const isMobileViewport = width <= 768; // "lite" mode trigger
+
       setFlakes((current) => {
         let next = ensureInitialFlakes(current, viewport);
         if (next.length === 0) {
@@ -306,14 +310,14 @@ function SnowField({enabled, maxFlakes = 130, initialCount = 50}) {
           let vx = flake.vx;
           let vy = flake.vy;
 
-          // Base motion: fall + drift
+          // Base motion: fall + drift (slower)
           y += vy * dt;
           x += vx * dt;
 
-          // Small jitter for organic paths
-          const jitter = 8;
+          // Small jitter for organic paths (reduced for smoother anim)
+          const jitter = 4;
           vx += (Math.random() - 0.5) * jitter * dt;
-          const maxVx = 40;
+          const maxVx = 25;
           if (vx > maxVx) vx = maxVx;
           if (vx < -maxVx) vx = -maxVx;
 
@@ -333,14 +337,14 @@ function SnowField({enabled, maxFlakes = 130, initialCount = 50}) {
               if (distSq < influenceRadiusSq) {
                 const dist = Math.sqrt(distSq) || 0.0001;
                 const strength = (influenceRadius - dist) / influenceRadius; // 0..1
-                const pushBase = isTouch ? 290 : 190;
+                const pushBase = isTouch ? 260 : 180;
                 const push = pushBase * strength * dt;
                 const nx = dx / dist;
                 const ny = dy / dist;
 
                 // Radial push away from pointer (wave)
                 x += nx * push;
-                y += ny * push * 0.5; // less vertical to keep general fall direction
+                y += ny * push * 0.5;
                 vx += nx * push * 0.9;
                 vy += ny * push * 0.4;
               }
@@ -378,45 +382,47 @@ function SnowField({enabled, maxFlakes = 130, initialCount = 50}) {
           });
         }
 
-        // 2) Flake–flake soft separation
-        const len = updated.length;
-        for (let i = 0; i < len; i++) {
-          for (let j = i + 1; j < len; j++) {
-            const a = updated[i];
-            const b = updated[j];
+        // 2) Flake–flake soft separation (desktop / larger viewports only)
+        if (!isMobileViewport) {
+          const len = updated.length;
+          for (let i = 0; i < len; i++) {
+            for (let j = i + 1; j < len; j++) {
+              const a = updated[i];
+              const b = updated[j];
 
-            const ra = a.size * 0.5;
-            const rb = b.size * 0.5;
-            const ax = a.x + ra;
-            const ay = a.y + ra;
-            const bx = b.x + rb;
-            const by = b.y + rb;
+              const ra = a.size * 0.5;
+              const rb = b.size * 0.5;
+              const ax = a.x + ra;
+              const ay = a.y + ra;
+              const bx = b.x + rb;
+              const by = b.y + rb;
 
-            const dx = bx - ax;
-            const dy = by - ay;
-            const minDist = ra + rb;
-            const distSq = dx * dx + dy * dy;
+              const dx = bx - ax;
+              const dy = by - ay;
+              const minDist = ra + rb;
+              const distSq = dx * dx + dy * dy;
 
-            if (distSq > 0 && distSq < minDist * minDist) {
-              const dist = Math.sqrt(distSq) || 0.0001;
-              const overlap = minDist - dist;
-              const nx = dx / dist;
-              const ny = dy / dist;
+              if (distSq > 0 && distSq < minDist * minDist) {
+                const dist = Math.sqrt(distSq) || 0.0001;
+                const overlap = minDist - dist;
+                const nx = dx / dist;
+                const ny = dy / dist;
 
-              const moveA = !a.settled;
-              const moveB = !b.settled;
+                const moveA = !a.settled;
+                const moveB = !b.settled;
 
-              if (moveA && moveB) {
-                a.x -= nx * overlap * 0.5;
-                b.x += nx * overlap * 0.5;
-                a.y -= ny * overlap * 0.2;
-                b.y += ny * overlap * 0.2;
-              } else if (moveA && !moveB) {
-                a.x -= nx * overlap;
-                a.y -= ny * overlap * 0.3;
-              } else if (!moveA && moveB) {
-                b.x += nx * overlap;
-                b.y += ny * overlap * 0.3;
+                if (moveA && moveB) {
+                  a.x -= nx * overlap * 0.5;
+                  b.x += nx * overlap * 0.5;
+                  a.y -= ny * overlap * 0.2;
+                  b.y += ny * overlap * 0.2;
+                } else if (moveA && !moveB) {
+                  a.x -= nx * overlap;
+                  a.y -= ny * overlap * 0.3;
+                } else if (!moveA && moveB) {
+                  b.x += nx * overlap;
+                  b.y += ny * overlap * 0.3;
+                }
               }
             }
           }
@@ -626,7 +632,7 @@ export default function ChristmasPage() {
             <div className="orbit-ring orbit-ring-outer" />
             <div className="orbit-ring orbit-ring-inner" />
 
-            {/* NEW: rotating track, icons stay upright */}
+            {/* rotating track, icons stay upright */}
             <div className="orbit-track">
               <div className="orbit-product orbit-product-1">
                 <div className="orbit-product-inner">
