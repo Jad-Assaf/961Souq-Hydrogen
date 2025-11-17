@@ -626,25 +626,36 @@ export default function ChristmasPage() {
             <div className="orbit-ring orbit-ring-outer" />
             <div className="orbit-ring orbit-ring-inner" />
 
-            <div className="orbit-product orbit-product-1">
-              <span role="img" aria-label="Headphones">
-                🎧
-              </span>
-            </div>
-            <div className="orbit-product orbit-product-2">
-              <span role="img" aria-label="Game controller">
-                🎮
-              </span>
-            </div>
-            <div className="orbit-product orbit-product-3">
-              <span role="img" aria-label="Laptop">
-                💻
-              </span>
-            </div>
-            <div className="orbit-product orbit-product-4">
-              <span role="img" aria-label="Phone">
-                📱
-              </span>
+            {/* NEW: rotating track, icons stay upright */}
+            <div className="orbit-track">
+              <div className="orbit-product orbit-product-1">
+                <div className="orbit-product-inner">
+                  <span role="img" aria-label="Headphones">
+                    🎧
+                  </span>
+                </div>
+              </div>
+              <div className="orbit-product orbit-product-2">
+                <div className="orbit-product-inner">
+                  <span role="img" aria-label="Game controller">
+                    🎮
+                  </span>
+                </div>
+              </div>
+              <div className="orbit-product orbit-product-3">
+                <div className="orbit-product-inner">
+                  <span role="img" aria-label="Laptop">
+                    💻
+                  </span>
+                </div>
+              </div>
+              <div className="orbit-product orbit-product-4">
+                <div className="orbit-product-inner">
+                  <span role="img" aria-label="Phone">
+                    📱
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -685,7 +696,7 @@ export default function ChristmasPage() {
                   )}
 
                   <div className="card-hover-layer">
-                    <span className="card-hover-label">View gift</span>
+                    <span className="card-hover-label">View</span>
                   </div>
 
                   {!product.availableForSale && (
