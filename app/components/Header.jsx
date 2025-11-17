@@ -120,6 +120,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const isBlackNovember =
     location.pathname === '/black-november' ||
     location.pathname === '/black-november/';
+  const isChristmas =
+    location.pathname === '/christmas' || location.pathname === '/christmas/';
 
   const DEFAULT_LOGO =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400';
@@ -158,9 +160,17 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           </button>
           <NavLink prefetch="intent" to="/" className="logo-link" end>
             <img
-              src={isBlackNovember ? BLACK_NOVEMBER_LOGO : DEFAULT_LOGO}
+              src={
+                isBlackNovember || isChristmas
+                  ? BLACK_NOVEMBER_LOGO
+                  : DEFAULT_LOGO
+              }
               alt={
-                isBlackNovember ? '961souq Black November logo' : '961souq logo'
+                isBlackNovember
+                  ? '961souq Black November logo'
+                  : '961souq logo' || isChristmas
+                  ? '961souq Black November logo'
+                  : '961souq logo'
               }
               className="header-logo"
               width="100"
@@ -347,9 +357,17 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           {/* <SearchForm /> */}
           <NavLink to="/" className={'desk-nav-logo'}>
             <img
-              src={isBlackNovember ? BLACK_NOVEMBER_LOGO : DEFAULT_LOGO}
+              src={
+                isBlackNovember || isChristmas
+                  ? BLACK_NOVEMBER_LOGO
+                  : DEFAULT_LOGO
+              }
               alt={
-                isBlackNovember ? '961souq Black November logo' : '961souq logo'
+                isBlackNovember
+                  ? '961souq Black November logo'
+                  : '961souq logo' || isChristmas
+                  ? '961souq Black November logo'
+                  : '961souq logo'
               }
               width="120"
               height="47"
