@@ -137,7 +137,7 @@ function formatPrice(price) {
 function createFlake(viewport) {
   const width = viewport.width || 0;
   const height = viewport.height || 0;
-  const size = 5 + Math.random() * 7; // 5–12px
+  const size = 3 + Math.random() * 7; // 5–12px
 
   return {
     id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
@@ -153,7 +153,7 @@ function createFlake(viewport) {
   };
 }
 
-function SnowField({enabled, maxFlakes = 150, initialCount = 80}) {
+function SnowField({enabled, maxFlakes = 130, initialCount = 50}) {
   const [flakes, setFlakes] = useState([]);
   const viewportRef = useRef({width: 0, height: 0});
   const frameRef = useRef();

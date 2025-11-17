@@ -632,11 +632,6 @@ body {
         order: -1;
         margin-bottom: 12px;
     }
-
-    .christmas-orbit {
-        width: 220px;
-        height: 220px;
-    }
 }
 
 @media (max-width: 640px) {
