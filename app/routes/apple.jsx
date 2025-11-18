@@ -1,5 +1,5 @@
 // app/routes/apple.jsx
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import appleStyles from '~/styles/apple.css?url';
@@ -61,6 +61,22 @@ export async function loader({context}) {
 
 export default function AppleCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [isRippling, setIsRippling] = useState(false);
+
+  const handleLogoClick = () => {
+    // Reset and retrigger so animation can replay even on rapid clicks
+    setIsRippling(false);
+    requestAnimationFrame(() => {
+      setIsRippling(true);
+    });
+  };
+
+  useEffect(() => {
+    if (!isRippling) return;
+    // Match the longest animation (outer ring) + its delay + small buffer
+    const timeout = setTimeout(() => setIsRippling(false), 1600);
+    return () => clearTimeout(timeout);
+  }, [isRippling]);
 
   return (
     <div className="apple-page">
@@ -76,11 +92,23 @@ export default function AppleCategoryPage() {
             </p>
           </div>
 
-          <div className="apple-hero-orbit">
+          <div
+            className={`apple-hero-orbit ${
+              isRippling ? 'apple-hero-orbit--rippling' : ''
+            }`}
+          >
             <div className="orbit-circle orbit-circle--outer" />
             <div className="orbit-circle orbit-circle--inner" />
-            <div className="apple-logo-pill">
-              <span>
+
+            <div
+              className={`apple-logo-pill ${
+                isRippling ? 'apple-logo-pill--rippling' : ''
+              }`}
+              onClick={handleLogoClick}
+              role="button"
+              aria-label="Trigger Apple ripple animation"
+            >
+              <span className="apple-logo-pill-icon">
                 <svg
                   width="24px"
                   height="24px"
@@ -98,7 +126,8 @@ export default function AppleCategoryPage() {
                   ></g>
                   <g id="SVGRepo_iconCarrier">
                     <title>apple [#173]</title>
-                    <desc>Created with Sketch.</desc> <defs> </defs>
+                    <desc>Created with Sketch.</desc>
+                    <defs></defs>
                     <g
                       id="Page-1"
                       stroke="none"

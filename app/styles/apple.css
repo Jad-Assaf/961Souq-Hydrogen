@@ -9,6 +9,8 @@
     /* classic Apple-ish blue */
     --apple-text-main: #111827;
     --apple-text-muted: #6b7280;
+    --apple-shadow-blue-soft: rgba(0, 113, 227, 0.1);
+    --apple-shadow-blue-strong: rgba(0, 113, 227, 0.22);
 }
 
 /* Page wrapper */
@@ -79,7 +81,11 @@
     position: absolute;
     border-radius: 999px;
     border: 1px dashed rgba(148, 163, 184, 0.5);
-    box-shadow: 0 0 40px rgba(15, 23, 42, 0.06);
+    box-shadow:
+        0 0 40px rgba(15, 23, 42, 0.06),
+        0 0 28px var(--apple-shadow-blue-soft);
+    transform-origin: center center;
+    will-change: transform, box-shadow;
 }
 
 .orbit-circle--outer {
@@ -102,8 +108,26 @@
     border: 1px solid #e5e7eb;
     box-shadow:
         0 14px 28px rgba(15, 23, 42, 0.12),
-        0 0 0 1px rgba(148, 163, 184, 0.18);
+        0 0 0 1px rgba(148, 163, 184, 0.18),
+        0 0 36px var(--apple-shadow-blue-soft);
     font-size: 1.05rem;
+    cursor: pointer;
+    overflow: hidden;
+    transform-origin: center center;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform, box-shadow;
+}
+
+.apple-logo-pill-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.apple-logo-pill-icon svg {
+    display: block;
+    transform-origin: center center;
+    will-change: transform;
 }
 
 /* COLLECTION GRID */
@@ -147,7 +171,7 @@
     position: relative;
     overflow: hidden;
     min-height: 320px;
-    /* ← more vertical presence */
+    /* more vertical presence */
     transition:
         transform 160ms ease-out,
         box-shadow 160ms ease-out,
@@ -172,7 +196,8 @@
     border-color: #d1d5db;
     box-shadow:
         0 20px 40px rgba(15, 23, 42, 0.12),
-        0 0 0 1px rgba(148, 163, 184, 0.16);
+        0 0 0 1px rgba(148, 163, 184, 0.16),
+        0 0 36px var(--apple-shadow-blue-soft);
     background: #ffffff;
 }
 
@@ -185,7 +210,6 @@
     border-radius: 1rem;
     overflow: hidden;
     padding-top: 120%;
-    /* ← taller media (4:3-ish) */
     margin-bottom: 0.8rem;
     background: radial-gradient(circle at center, #e5e7eb, #f3f4f6);
 }
@@ -282,5 +306,156 @@
     .apple-collections-grid {
         grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
+    }
+}
+
+/* ============================
+   Wave / Ripple animations
+   ============================ */
+
+/* SVG = center, starts first */
+.apple-logo-pill--rippling .apple-logo-pill-icon svg {
+    animation: apple-svg-wave 0.9s cubic-bezier(0.18, 0.89, 0.32, 1.1) 0s;
+}
+
+/* Pill = just after svg */
+.apple-logo-pill--rippling {
+    animation: apple-pill-wave 0.95s cubic-bezier(0.18, 0.89, 0.32, 1.1) 0.12s;
+}
+
+/* Inner circle = after pill */
+.apple-hero-orbit--rippling .orbit-circle--inner {
+    animation: apple-orbit-inner-wave 1s ease-out 0.24s;
+}
+
+/* Outer circle = last (end of wave) */
+.apple-hero-orbit--rippling .orbit-circle--outer {
+    animation: apple-orbit-outer-wave 1.05s ease-out 0.36s;
+}
+
+/* Icon: center wave – shrink, hold, overshoot, settle */
+@keyframes apple-svg-wave {
+    0% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(0.88);
+        /* shrink inwards */
+    }
+
+    50% {
+        transform: scale(0.88);
+        /* hold small while wave moves out */
+    }
+
+    75% {
+        transform: scale(1.12);
+        /* overshoot */
+    }
+
+    100% {
+        transform: scale(1);
+        /* back to normal */
+    }
+}
+
+/* Pill: follows svg – smaller shrink and overshoot, blue-tinted shadow */
+@keyframes apple-pill-wave {
+    0% {
+        transform: scale(1);
+        box-shadow:
+            0 14px 28px rgba(15, 23, 42, 0.12),
+            0 0 0 1px rgba(148, 163, 184, 0.18),
+            0 0 36px var(--apple-shadow-blue-soft);
+    }
+
+    25% {
+        transform: scale(0.93);
+        box-shadow:
+            0 10px 22px rgba(15, 23, 42, 0.1),
+            0 0 0 1px rgba(148, 163, 184, 0.2),
+            0 0 26px rgba(0, 113, 227, 0.12);
+    }
+
+    50% {
+        transform: scale(0.93);
+        /* hold pressed while circles expand */
+        box-shadow:
+            0 10px 22px rgba(15, 23, 42, 0.1),
+            0 0 0 1px rgba(148, 163, 184, 0.2),
+            0 0 26px rgba(0, 113, 227, 0.12);
+    }
+
+    75% {
+        transform: scale(1.06);
+        box-shadow:
+            0 18px 38px rgba(15, 23, 42, 0.16),
+            0 0 0 1px rgba(148, 163, 184, 0.26),
+            0 0 50px var(--apple-shadow-blue-strong);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow:
+            0 14px 28px rgba(15, 23, 42, 0.12),
+            0 0 0 1px rgba(148, 163, 184, 0.18),
+            0 0 36px var(--apple-shadow-blue-soft);
+    }
+}
+
+/* Inner circle: part of the wave – grows after pill, then back */
+@keyframes apple-orbit-inner-wave {
+    0% {
+        transform: scale(0.96);
+        box-shadow:
+            0 0 40px rgba(15, 23, 42, 0.06),
+            0 0 28px var(--apple-shadow-blue-soft);
+        border-color: rgba(148, 163, 184, 0.5);
+    }
+
+    50% {
+        transform: scale(1.1);
+        /* wave mid */
+        box-shadow:
+            0 0 70px rgba(15, 23, 42, 0.12),
+            0 0 60px rgba(0, 113, 227, 0.26);
+        border-color: rgba(148, 163, 184, 0.9);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow:
+            0 0 40px rgba(15, 23, 42, 0.06),
+            0 0 28px var(--apple-shadow-blue-soft);
+        border-color: rgba(148, 163, 184, 0.5);
+    }
+}
+
+/* Outer circle: last in wave – biggest expansion */
+@keyframes apple-orbit-outer-wave {
+    0% {
+        transform: scale(0.98);
+        box-shadow:
+            0 0 40px rgba(15, 23, 42, 0.06),
+            0 0 28px var(--apple-shadow-blue-soft);
+        border-color: rgba(148, 163, 184, 0.5);
+    }
+
+    50% {
+        transform: scale(1.14);
+        /* wave reaches furthest ring */
+        box-shadow:
+            0 0 80px rgba(15, 23, 42, 0.14),
+            0 0 80px rgba(0, 113, 227, 0.3);
+        border-color: rgba(148, 163, 184, 0.95);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow:
+            0 0 40px rgba(15, 23, 42, 0.06),
+            0 0 28px var(--apple-shadow-blue-soft);
+        border-color: rgba(148, 163, 184, 0.5);
     }
 }
