@@ -133,7 +133,7 @@
 .apple-collections-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 1.4rem;
+    gap: 1rem;
 }
 
 .apple-collection-card {
@@ -281,5 +281,6 @@
 
     .apple-collections-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
     }
 }
