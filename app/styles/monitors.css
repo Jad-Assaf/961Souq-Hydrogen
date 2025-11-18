@@ -1,0 +1,498 @@
+/* app/styles/monitors.css */
+/* Medium-dark hybrid business + gaming theme for Monitors */
+
+:root {
+    --mon-bg: radial-gradient(circle at top, #0b1120 0, #020617 45%, #000000 100%);
+    --mon-card-bg: radial-gradient(circle at top left, #020617, #020617 45%, #020617 100%);
+    --mon-card-border: #1f2933;
+    --mon-accent: #6366f1;
+    --mon-accent-soft: #0ea5e9;
+    --mon-accent-gaming: #7c3aed;
+    --mon-accent-office: #38bdf8;
+    --mon-text-main: #f9fafb;
+    --mon-text-muted: #9ca3af;
+}
+
+/* PAGE */
+.mon-page {
+    min-height: 100vh;
+    background: var(--mon-bg);
+    color: var(--mon-text-main);
+    padding: 4rem min(5vw, 4rem) 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+        'SF Pro Display', sans-serif;
+}
+
+/* HERO */
+.mon-hero {
+    max-width: 1200px;
+    margin: 0 auto 3.5rem;
+}
+
+.mon-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 2.6rem 2.4rem;
+    border-radius: 1.9rem;
+    background: radial-gradient(circle at top left, #020617, #020617 60%, #020617 100%);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow:
+        0 26px 70px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.mon-hero-copy {
+    max-width: 460px;
+}
+
+.mon-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    color: var(--mon-accent-soft);
+    margin-bottom: 0.65rem;
+}
+
+.mon-title {
+    font-size: clamp(2.4rem, 4vw, 3.1rem);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.mon-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--mon-text-muted);
+    max-width: 420px;
+}
+
+/* Hero pills */
+.mon-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.15rem;
+}
+
+.mon-pill {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.65);
+    color: #e5e7eb;
+    background: radial-gradient(circle at top, #020617, #020617 70%, #000000);
+}
+
+/* Small stats row */
+.mon-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+    margin-top: 1.2rem;
+}
+
+.mon-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.mon-meta-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #6b7280;
+}
+
+.mon-meta-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+/* HERO VISUAL – control panel */
+.mon-hero-visual {
+    position: relative;
+    flex: 1;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0;
+}
+
+.mon-hero-panel {
+    position: relative;
+    width: clamp(320px, 32vw, 360px);
+    height: 220px;
+    border-radius: 1.7rem;
+    background: radial-gradient(circle at top, #020617, #020617 55%, #000000 100%);
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    box-shadow:
+        0 26px 70px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.95);
+    overflow: hidden;
+}
+
+/* subtle grid */
+.mon-hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(31, 41, 55, 0.7) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(31, 41, 55, 0.7) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.32;
+}
+
+/* concentric rings */
+.mon-hero-ring {
+    position: absolute;
+    border-radius: 999px;
+    border: 1px solid rgba(129, 140, 248, 0.7);
+    box-shadow:
+        0 0 40px rgba(79, 70, 229, 0.65),
+        0 0 70px rgba(56, 189, 248, 0.45);
+    transform: translate(-50%, -50%);
+    top: 52%;
+    left: 50%;
+}
+
+.mon-hero-ring--outer {
+    width: 230px;
+    height: 230px;
+    opacity: 0.65;
+    animation: mon-ring-pulse 6s ease-in-out infinite;
+}
+
+.mon-hero-ring--inner {
+    width: 170px;
+    height: 170px;
+    opacity: 0.8;
+    animation: mon-ring-pulse 4.6s ease-in-out infinite;
+    animation-delay: 0.5s;
+}
+
+/* main floating window */
+.mon-hero-window {
+    position: absolute;
+    border-radius: 1.3rem;
+    background: rgba(15, 23, 42, 0.9);
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(30, 64, 175, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.mon-hero-window--primary {
+    width: 250px;
+    left: 50%;
+    top: 16%;
+    transform: translateX(-50%);
+    padding: 0.35rem 0.9rem 0.9rem;
+}
+
+.mon-window-header {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    padding: 0.3rem 0 0.25rem;
+}
+
+.mon-window-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+}
+
+.mon-window-dot--green {
+    background: #22c55e;
+}
+
+.mon-window-dot--amber {
+    background: #eab308;
+}
+
+.mon-window-dot--red {
+    background: #ef4444;
+}
+
+.mon-window-body {
+    padding-top: 0.1rem;
+}
+
+.mon-window-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: #f9fafb;
+}
+
+.mon-window-text {
+    font-size: 0.83rem;
+    color: var(--mon-text-muted);
+    line-height: 1.5;
+}
+
+/* chips */
+.mon-hero-window--gaming,
+.mon-hero-window--creative {
+    padding: 0.55rem 0.9rem 0.6rem;
+    border-radius: 999px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    background: rgba(15, 23, 42, 0.9);
+    box-shadow:
+        0 14px 30px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(37, 99, 235, 0.85);
+}
+
+.mon-hero-window--gaming {
+    top: 64%;
+    left: 2%;
+}
+
+.mon-hero-window--creative {
+    top: 75%;
+    right: 2%;
+}
+
+.mon-chip-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: rgba(191, 219, 254, 0.95);
+}
+
+.mon-chip-value {
+    font-size: 0.86rem;
+    color: #e5e7eb;
+}
+
+/* glow */
+.mon-hero-glow {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    width: 260px;
+    height: 120px;
+    transform: translate(-50%, -30%);
+    background: radial-gradient(ellipse at center,
+            rgba(56, 189, 248, 0.5),
+            transparent 70%);
+    opacity: 0.8;
+    filter: blur(12px);
+    pointer-events: none;
+}
+
+/* ring pulse */
+@keyframes mon-ring-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.97);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.03);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(0.97);
+        opacity: 0.5;
+    }
+}
+
+/* COLLECTIONS */
+.mon-collections {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mon-collections-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.75rem;
+}
+
+.mon-collections-header h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.mon-collections-header p {
+    font-size: 0.9rem;
+    color: var(--mon-text-muted);
+}
+
+/* Cards grid */
+.mon-collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 0fr));
+    gap: 1rem;
+}
+
+.mon-collection-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.35rem;
+    background: var(--mon-card-bg);
+    border: 1px solid var(--mon-card-border);
+    text-decoration: none;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    /* taller cards, like other category routes */
+    transition:
+        transform 160ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 160ms ease-out,
+        background 160ms ease-out;
+    max-width: 227px;
+}
+
+.mon-collection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top,
+            rgba(129, 140, 248, 0.25),
+            transparent 55%);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+    pointer-events: none;
+}
+
+.mon-collection-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(129, 140, 248, 0.85);
+    box-shadow:
+        0 22px 50px rgba(15, 23, 42, 0.95),
+        0 0 32px rgba(129, 140, 248, 0.45);
+    background: radial-gradient(circle at top, #020617, #020617 55%, #000000 100%);
+}
+
+.mon-collection-card:hover::before {
+    opacity: 1;
+}
+
+/* Card media */
+.mon-collection-media {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    padding-top: 120%;
+    margin-bottom: 0.8rem;
+    background: radial-gradient(circle at center, #111827, #020617);
+}
+
+.mon-collection-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mon-collection-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--mon-text-muted);
+}
+
+/* Card body */
+.mon-collection-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.mon-collection-body h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #f9fafb;
+}
+
+.mon-collection-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--mon-text-muted);
+    max-height: 3.6em;
+    /* ~2 lines */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.mon-collection-cta {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--mon-accent-soft);
+}
+
+/* Empty state */
+.mon-empty-state {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #020617;
+    border: 1px dashed rgba(148, 163, 184, 0.55);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--mon-text-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .mon-hero-ring {
+        animation: none;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .mon-page {
+        padding: 5rem 1.25rem 4rem;
+    }
+
+    .mon-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mon-hero-visual {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .mon-hero-inner {
+        padding: 2rem 1.8rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .mon-title {
+        font-size: 2.1rem;
+    }
+
+    .mon-collections-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+}

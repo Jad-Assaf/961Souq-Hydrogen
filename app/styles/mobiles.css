@@ -1,0 +1,579 @@
+/* app/styles/mobiles.css */
+/* Mobiles – dark, vibrant phone hub (phones + accessories) */
+
+:root {
+    --mob-bg: radial-gradient(circle at top, #020617 0, #020617 40%, #000000 100%);
+    --mob-card-bg: radial-gradient(circle at top left, #020617, #020617 45%, #020617 100%);
+    --mob-card-border: #1f2933;
+    --mob-accent-pink: #ec4899;
+    --mob-accent-cyan: #38bdf8;
+    --mob-accent-lime: #a3e635;
+    --mob-text-main: #f9fafb;
+    --mob-text-muted: #9ca3af;
+}
+
+/* PAGE */
+.mob-page {
+    min-height: 100vh;
+    background: var(--mob-bg);
+    color: var(--mob-text-main);
+    padding: 4rem min(5vw, 4rem) 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+        'SF Pro Display', sans-serif;
+}
+
+/* HERO */
+.mob-hero {
+    max-width: 1200px;
+    margin: 0 auto 3.5rem;
+}
+
+.mob-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 2.6rem 2.4rem;
+    border-radius: 1.9rem;
+    background: radial-gradient(circle at top left, #020617, #020617 60%, #020617 100%);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow:
+        0 26px 70px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.mob-hero-copy {
+    max-width: 460px;
+}
+
+.mob-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    color: var(--mob-accent-cyan);
+    margin-bottom: 0.65rem;
+}
+
+.mob-title {
+    font-size: clamp(2.4rem, 4vw, 3.1rem);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.mob-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--mob-text-muted);
+    max-width: 420px;
+}
+
+/* Hero pills */
+.mob-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.15rem;
+}
+
+.mob-pill {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.75);
+    color: #e5e7eb;
+    background: radial-gradient(circle at top, #020617, #020617 70%, #000000);
+}
+
+/* Small stats row */
+.mob-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+    margin-top: 1.2rem;
+}
+
+.mob-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.mob-meta-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #6b7280;
+}
+
+.mob-meta-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+/* HERO VISUAL – phone + chips */
+.mob-hero-visual {
+    position: relative;
+    flex: 1;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0;
+}
+
+.mob-hero-panel {
+    position: relative;
+    width: clamp(320px, 32vw, 360px);
+    height: 230px;
+    border-radius: 1.9rem;
+    background: radial-gradient(circle at top, #020617, #020617 60%, #000000 100%);
+    border: 1px solid rgba(15, 23, 42, 0.96);
+    box-shadow:
+        0 28px 74px rgba(15, 23, 42, 1),
+        0 0 0 1px rgba(15, 23, 42, 1);
+    overflow: hidden;
+}
+
+/* soft gradient + grid in the background */
+.mob-hero-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.35), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.35), transparent 65%);
+    opacity: 0.9;
+}
+
+.mob-hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(15, 23, 42, 0.8) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.75) 1px, transparent 1px);
+    background-size: 18px 18px;
+    opacity: 0.25;
+}
+
+/* Phone shell */
+.mob-phone {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 210px;
+    height: 210px;
+    transform: translate(-50%, -55%);
+    border-radius: 2.2rem;
+    background: radial-gradient(circle at top, #020617, #020617 60%, #000000);
+    box-shadow:
+        0 26px 50px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(31, 41, 55, 0.95),
+        0 0 0 4px rgba(15, 23, 42, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mob-phone-inner {
+    position: relative;
+    width: 86%;
+    height: 86%;
+    border-radius: 1.9rem;
+    background: radial-gradient(circle at top, #020617, #020617 70%);
+    overflow: hidden;
+    box-shadow:
+        inset 0 0 18px rgba(15, 23, 42, 0.9),
+        0 0 24px rgba(15, 23, 42, 0.9);
+}
+
+/* notch */
+.mob-phone-notch {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 38%;
+    height: 12px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: linear-gradient(to right, #020617, #020617);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* strips / notifications */
+.mob-phone-strip {
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    border-radius: 999px;
+    padding: 0.18rem 0.55rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.mob-phone-strip--top {
+    top: 1%;
+    background: rgba(15, 23, 42, 0.9);
+    color: #e5e7eb;
+    border: 1px solid rgba(148, 163, 184, 0.8);
+    box-shadow:
+        0 10px 22px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 1);
+}
+
+.mob-phone-strip--mid {
+    top: 46%;
+    background: linear-gradient(90deg,
+            rgba(56, 189, 248, 0.2),
+            rgba(96, 165, 250, 0.8),
+            rgba(236, 72, 153, 0.8),
+            rgba(56, 189, 248, 0.2));
+    color: #f9fafb;
+    box-shadow:
+        0 14px 28px rgba(15, 23, 42, 0.95),
+        0 0 26px rgba(96, 165, 250, 0.9);
+}
+
+.mob-phone-strip--bottom {
+    bottom: 17%;
+    background: rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    box-shadow:
+        0 10px 22px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.mob-strip-label {
+    letter-spacing: 0.05em;
+}
+
+.mob-strip-pill {
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* inner glow */
+.mob-phone-glow {
+    position: absolute;
+    inset: 35% 0 auto;
+    height: 40%;
+    background: radial-gradient(circle at center,
+            rgba(56, 189, 248, 0.5),
+            transparent 70%);
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+/* floating chips */
+.mob-chip {
+    position: absolute;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    background: rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+    border: 1px solid rgba(148, 163, 184, 0.8);
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 1);
+    backdrop-filter: blur(10px);
+}
+
+.mob-chip--left-up {
+    top: 18%;
+    left: 12%;
+    animation: mob-chip-float-1 6s ease-in-out infinite;
+}
+
+.mob-chip--right-up {
+    top: 22%;
+    right: 10%;
+    animation: mob-chip-float-2 7s ease-in-out infinite;
+}
+
+.mob-chip--left-down {
+    bottom: 16%;
+    left: 8%;
+    animation: mob-chip-float-3 7.4s ease-in-out infinite;
+}
+
+.mob-chip--right-down {
+    bottom: 14%;
+    right: 12%;
+    animation: mob-chip-float-4 6.5s ease-in-out infinite;
+}
+
+.mob-chip-label {
+    white-space: nowrap;
+}
+
+/* subtle dots */
+.mob-hero-dots {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--mob-accent-cyan);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.9);
+}
+
+.mob-hero-dots--one {
+    top: 30%;
+    left: 50%;
+}
+
+.mob-hero-dots--two {
+    bottom: 20%;
+    right: 25%;
+}
+
+/* chip float animations */
+@keyframes mob-chip-float-1 {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(-6px) translateX(4px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+@keyframes mob-chip-float-2 {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(-4px) translateX(-6px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+@keyframes mob-chip-float-3 {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(5px) translateX(4px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+@keyframes mob-chip-float-4 {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(4px) translateX(-4px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+/* COLLECTIONS */
+.mob-collections {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mob-collections-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.75rem;
+}
+
+.mob-collections-header h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.mob-collections-header p {
+    font-size: 0.9rem;
+    color: var(--mob-text-muted);
+}
+
+/* Cards grid */
+.mob-collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+}
+
+.mob-collection-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.35rem;
+    background: var(--mob-card-bg);
+    border: 1px solid var(--mob-card-border);
+    text-decoration: none;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    transition:
+        transform 160ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 160ms ease-out,
+        background 160ms ease-out;
+}
+
+.mob-collection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top,
+            rgba(236, 72, 153, 0.25),
+            transparent 55%);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+    pointer-events: none;
+}
+
+.mob-collection-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(236, 72, 153, 0.9);
+    box-shadow:
+        0 22px 50px rgba(15, 23, 42, 0.95),
+        0 0 34px rgba(236, 72, 153, 0.45);
+    background: radial-gradient(circle at top, #020617, #020617 55%, #000000 100%);
+}
+
+.mob-collection-card:hover::before {
+    opacity: 1;
+}
+
+/* Card media */
+.mob-collection-media {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    padding-top: 120%;
+    margin-bottom: 0.8rem;
+    background: radial-gradient(circle at center, #111827, #020617);
+}
+
+.mob-collection-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mob-collection-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--mob-text-muted);
+}
+
+/* Card body */
+.mob-collection-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.mob-collection-body h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #f9fafb;
+}
+
+.mob-collection-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--mob-text-muted);
+    max-height: 3.6em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.mob-collection-cta {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--mob-accent-cyan);
+}
+
+/* Empty state */
+.mob-empty-state {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #020617;
+    border: 1px dashed rgba(148, 163, 184, 0.55);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--mob-text-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .mob-chip,
+    .mob-phone-strip,
+    .mob-phone-glow {
+        animation: none;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .mob-page {
+        padding: 5rem 1.25rem 4rem;
+    }
+
+    .mob-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mob-hero-visual {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .mob-hero-inner {
+        padding: 2rem 1.8rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .mob-title {
+        font-size: 2.1rem;
+    }
+
+    .mob-collections-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+}
