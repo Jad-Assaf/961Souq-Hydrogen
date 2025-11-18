@@ -1,5 +1,5 @@
 // app/routes/business-laptops.jsx
-import React from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import businessLaptopsStyles from '~/styles/business-laptops.css?url';
@@ -62,6 +62,68 @@ export async function loader({context}) {
 export default function BusinessLaptopsCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
 
+  // Orbit rotation state
+  const [outerAngle, setOuterAngle] = useState(0);
+  const [innerAngle, setInnerAngle] = useState(180);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({
+    startX: 0,
+    outerStart: 0,
+    innerStart: 0,
+  });
+
+  const getClientX = (event) =>
+    'touches' in event ? event.touches[0].clientX : event.clientX;
+
+  const handleDragStart = (event) => {
+    const x = getClientX(event);
+    setIsDragging(true);
+    dragRef.current = {
+      startX: x,
+      outerStart: outerAngle,
+      innerStart: innerAngle,
+    };
+  };
+
+  const handleDragMove = (event) => {
+    if (!isDragging) return;
+    const x = getClientX(event);
+    const deltaX = x - dragRef.current.startX;
+    const factor = 0.35; // degrees per pixel
+    const deltaAngle = deltaX * factor;
+
+    setOuterAngle(dragRef.current.outerStart + deltaAngle);
+    setInnerAngle(dragRef.current.innerStart - deltaAngle * 0.8);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Subtle auto-orbit when not dragging (JS version of the old CSS animation)
+  useEffect(() => {
+    let frameId;
+    let lastTime;
+
+    const tick = (time) => {
+      if (!lastTime) lastTime = time;
+      const delta = time - lastTime;
+      lastTime = time;
+
+      if (!isDragging) {
+        const outerSpeed = 360 / 26000; // deg per ms (~26s per full turn)
+        const innerSpeed = -360 / 34000; // opposite, slightly slower
+        setOuterAngle((prev) => prev + delta * outerSpeed);
+        setInnerAngle((prev) => prev + delta * innerSpeed);
+      }
+
+      frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [isDragging]);
+
   return (
     <div className="bl-page">
       {/* HERO */}
@@ -84,19 +146,42 @@ export default function BusinessLaptopsCategoryPage() {
             <div className="bl-meta-row">
               <div className="bl-meta-item">
                 <span className="bl-meta-label">Screen size</span>
-                <span className="bl-meta-value">13″ – 16″</span>
+                <span className="bl-meta-value">12″ – 18″</span>
               </div>
               <div className="bl-meta-item">
                 <span className="bl-meta-label">Ideal for</span>
-                <span className="bl-meta-value">Office • Hybrid • Travel</span>
+                <span className="bl-meta-value">
+                  Office • Hybrid • School • Travel
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="bl-hero-visual">
+          <div
+            className={`bl-hero-visual ${
+              isDragging ? 'bl-hero-visual--dragging' : ''
+            }`}
+            onMouseDown={handleDragStart}
+            onMouseMove={handleDragMove}
+            onMouseUp={handleDragEnd}
+            onMouseLeave={handleDragEnd}
+            onTouchStart={handleDragStart}
+            onTouchMove={handleDragMove}
+            onTouchEnd={handleDragEnd}
+          >
             {/* OUTER ORBIT – main card */}
-            <div className="bl-hero-orbit bl-hero-orbit--outer">
-              <div className="bl-hero-card bl-hero-card--primary">
+            <div
+              className="bl-hero-orbit bl-hero-orbit--outer"
+              style={{
+                transform: `translate(-50%, -50%) rotate(${outerAngle}deg)`,
+              }}
+            >
+              <div
+                className="bl-hero-card bl-hero-card--primary"
+                style={{
+                  transform: `translate(-50%, -50%) rotate(${-outerAngle}deg)`,
+                }}
+              >
                 <div className="bl-hero-card-header">
                   <span className="bl-hero-dot bl-hero-dot--green" />
                   <span className="bl-hero-dot bl-hero-dot--amber" />
@@ -113,8 +198,18 @@ export default function BusinessLaptopsCategoryPage() {
             </div>
 
             {/* INNER ORBIT – secondary chip card */}
-            <div className="bl-hero-orbit bl-hero-orbit--inner">
-              <div className="bl-hero-card bl-hero-card--secondary">
+            <div
+              className="bl-hero-orbit bl-hero-orbit--inner"
+              style={{
+                transform: `translate(-50%, -50%) rotate(${innerAngle}deg)`,
+              }}
+            >
+              <div
+                className="bl-hero-card bl-hero-card--secondary"
+                style={{
+                  transform: `translate(-50%, -50%) rotate(${-innerAngle}deg)`,
+                }}
+              >
                 <p className="bl-hero-chip-label">Recommended focus</p>
                 <p className="bl-hero-chip-value">
                   Stability • Portability • Security
@@ -176,7 +271,7 @@ export default function BusinessLaptopsCategoryPage() {
           {collections.length === 0 && (
             <p className="bl-empty-state">
               No Business Laptop collections are linked to the
-              “business-laptops” menu yet.
+              "business-laptops" menu yet.
             </p>
           )}
         </div>
