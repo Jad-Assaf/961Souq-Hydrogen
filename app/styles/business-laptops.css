@@ -12,6 +12,10 @@
     --bl-text-muted: #6b7280;
 }
 
+main {
+    overflow-x: hidden;
+}
+
 /* PAGE */
 .bl-page {
     min-height: 100vh;
