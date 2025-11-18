@@ -1,0 +1,497 @@
+/* app/styles/pc-parts.css */
+/* Light, technical theme for PC Parts with PCB-style hero */
+
+:root {
+    --pp-bg: #eff3fb;
+    --pp-card-bg: #ffffff;
+    --pp-card-border: #e5e7eb;
+    --pp-accent: #2563eb;
+    --pp-accent-soft: #dbeafe;
+    --pp-accent-teal: #0f766e;
+    --pp-text-main: #0f172a;
+    --pp-text-muted: #6b7280;
+}
+
+/* PAGE */
+.pp-page {
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #e0ecff 0, #eff3fb 35%, #eef2ff 100%);
+    color: var(--pp-text-main);
+    padding: 4rem min(5vw, 4rem) 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+        'SF Pro Display', sans-serif;
+}
+
+/* HERO */
+.pp-hero {
+    max-width: 1200px;
+    margin: 0 auto 3.5rem;
+}
+
+.pp-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 2.6rem 2.4rem;
+    border-radius: 1.9rem;
+    background: linear-gradient(135deg, #ffffff, #e5f0ff);
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.18);
+}
+
+.pp-hero-copy {
+    max-width: 460px;
+}
+
+.pp-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    color: var(--pp-accent);
+    margin-bottom: 0.65rem;
+}
+
+.pp-title {
+    font-size: clamp(2.4rem, 4vw, 3.1rem);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.pp-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--pp-text-muted);
+    max-width: 420px;
+}
+
+/* Hero pills */
+.pp-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.15rem;
+}
+
+.pp-pill {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    background: linear-gradient(135deg, #ffffff, #e8f2ff);
+}
+
+/* Small stats row */
+.pp-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+    margin-top: 1.2rem;
+}
+
+.pp-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.pp-meta-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #9ca3af;
+}
+
+.pp-meta-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* HERO VISUAL */
+.pp-hero-visual {
+    position: relative;
+    flex: 1;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0;
+}
+
+/* Board wrapper */
+.pp-board {
+    position: relative;
+    width: clamp(320px, 32vw, 340px);
+    height: 220px;
+    border-radius: 1.6rem;
+    background: radial-gradient(circle at top left, #e0edff, #dbeafe 45%, #bfdbfe 100%);
+    border: 1px solid rgba(148, 163, 184, 0.65);
+    box-shadow:
+        0 26px 60px rgba(15, 23, 42, 0.16),
+        0 0 0 1px rgba(148, 163, 184, 0.30);
+    overflow: hidden;
+}
+
+/* faint grid */
+.pp-board-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.11) 1px, transparent 1px);
+    background-size: 18px 18px;
+    opacity: 0.45;
+}
+
+/* chips */
+.pp-chip {
+    position: absolute;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 12px 24px rgba(15, 23, 42, 0.14),
+        0 0 0 1px rgba(148, 163, 184, 0.14);
+    padding: 0.3rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    color: #111827;
+}
+
+.pp-chip-label {
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+/* center CPU */
+.pp-chip--cpu {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 0.45rem 1.1rem;
+    border-radius: 1.1rem;
+    background: radial-gradient(circle at top, #e0f2fe, #ffffff);
+}
+
+/* around the board – pulled slightly inward from edges */
+.pp-chip--gpu {
+    top: 20%;
+    left: 18%;
+}
+
+.pp-chip--mb {
+    top: 18%;
+    right: 15%;
+}
+
+.pp-chip--ram {
+    bottom: 20%;
+    left: 18%;
+}
+
+.pp-chip--storage {
+    bottom: 18%;
+    right: 18%;
+}
+
+/* traces */
+.pp-trace {
+    position: absolute;
+    border-radius: 999px;
+    background: linear-gradient(to right,
+            rgba(37, 99, 235, 0.0),
+            rgba(37, 99, 235, 0.55),
+            rgba(56, 189, 248, 0.9),
+            rgba(37, 99, 235, 0.0));
+    opacity: 0.75;
+    filter: blur(0.4px);
+}
+
+/* main line directly under CPU */
+.pp-trace--one {
+    top: 52%;
+    left: 20%;
+    width: 60%;
+    height: 2px;
+    animation: pp-trace-pulse 3.4s ease-in-out infinite;
+}
+
+/* supporting lines above/below, slightly shorter */
+.pp-trace--two {
+    top: 40%;
+    left: 24%;
+    width: 52%;
+    height: 2px;
+    animation: pp-trace-pulse 4s ease-in-out infinite;
+}
+
+.pp-trace--three {
+    top: 64%;
+    left: 26%;
+    width: 48%;
+    height: 2px;
+    animation: pp-trace-pulse 3s ease-in-out infinite;
+}
+
+/* nodes */
+.pp-node {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: radial-gradient(circle at center, #38bdf8, #2563eb);
+    box-shadow:
+        0 0 12px rgba(56, 189, 248, 0.7),
+        0 0 16px rgba(37, 99, 235, 0.65);
+    opacity: 0.9;
+    animation: pp-node-pulse 2.6s ease-in-out infinite;
+}
+
+.pp-node--one {
+    top: 38%;
+    left: 32%;
+    animation-delay: 0s;
+}
+
+.pp-node--two {
+    top: 50%;
+    right: 26%;
+    animation-delay: 0.35s;
+}
+
+.pp-node--three {
+    bottom: 22%;
+    left: 44%;
+    animation-delay: 0.75s;
+}
+
+/* traces animation */
+@keyframes pp-trace-pulse {
+    0% {
+        opacity: 0.45;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.45;
+    }
+}
+
+/* nodes animation */
+@keyframes pp-node-pulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+}
+
+/* COLLECTIONS */
+.pp-collections {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pp-collections-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.75rem;
+}
+
+.pp-collections-header h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.pp-collections-header p {
+    font-size: 0.9rem;
+    color: var(--pp-text-muted);
+}
+
+/* Cards grid */
+.pp-collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+}
+
+.pp-collection-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.35rem;
+    background: var(--pp-card-bg);
+    border: 1px solid var(--pp-card-border);
+    text-decoration: none;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    transition:
+        transform 160ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 160ms ease-out,
+        background 160ms ease-out;
+}
+
+.pp-collection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left,
+            rgba(129, 140, 248, 0.18),
+            transparent 55%);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+    pointer-events: none;
+}
+
+.pp-collection-card:hover {
+    transform: translateY(-3px);
+    border-color: #c7d2fe;
+    box-shadow:
+        0 20px 40px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.2);
+    background: #ffffff;
+}
+
+.pp-collection-card:hover::before {
+    opacity: 1;
+}
+
+/* Card media */
+.pp-collection-media {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    padding-top: 120%;
+    /* taller media */
+    margin-bottom: 0.8rem;
+    background: radial-gradient(circle at center, #e5e7eb, #f3f4f6);
+}
+
+.pp-collection-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pp-collection-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--pp-text-muted);
+}
+
+/* Card body */
+.pp-collection-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.pp-collection-body h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.pp-collection-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--pp-text-muted);
+    max-height: 3.6em;
+    /* ~2 lines */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.pp-collection-cta {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--pp-accent);
+}
+
+/* Empty state */
+.pp-empty-state {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    border: 1px dashed #d1d5db;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--pp-text-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .pp-trace,
+    .pp-node {
+        animation: none;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .pp-page {
+        padding: 5rem 1.25rem 4rem;
+    }
+
+    .pp-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pp-hero-visual {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .pp-hero-inner {
+        padding: 2rem 1.8rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .pp-title {
+        font-size: 2.1rem;
+    }
+
+    .pp-collections-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+}
