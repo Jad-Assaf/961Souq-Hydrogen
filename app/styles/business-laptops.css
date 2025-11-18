@@ -122,15 +122,9 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem 0;
-    user-select: none;
-    cursor: grab;
 }
 
-.bl-hero-visual--dragging {
-    cursor: grabbing;
-}
-
-/* Orbit wrappers (JS-driven rotation) */
+/* Orbit wrappers (these rotate around center) */
 .bl-hero-orbit {
     position: absolute;
     top: 50%;
@@ -142,12 +136,14 @@
 .bl-hero-orbit--outer {
     width: 230px;
     height: 230px;
+    animation: bl-orbit-outer 26s linear infinite;
     z-index: 1;
 }
 
 .bl-hero-orbit--inner {
     width: 170px;
     height: 170px;
+    animation: bl-orbit-inner 34s linear infinite;
     z-index: 0;
 }
 
@@ -161,11 +157,13 @@
 /* Primary card at top of outer orbit */
 .bl-hero-orbit--outer .bl-hero-card--primary {
     top: 0;
+    animation: bl-orbit-card-outer 26s linear infinite;
 }
 
 /* Secondary card at bottom of inner orbit */
 .bl-hero-orbit--inner .bl-hero-card--secondary {
     top: 100%;
+    animation: bl-orbit-card-inner 34s linear infinite;
 }
 
 /* Base card styling */
@@ -280,7 +278,7 @@
     transform: translate(-50%, -50%);
 }
 
-/* Old CSS keyframes kept in case you ever want them again (currently unused) */
+/* Orbit animations – rotate orbits */
 @keyframes bl-orbit-outer {
     0% {
         transform: translate(-50%, -50%) rotate(0deg);
@@ -301,6 +299,7 @@
     }
 }
 
+/* Card counter-rotation to keep upright */
 @keyframes bl-orbit-card-outer {
     0% {
         transform: translate(-50%, -50%) rotate(0deg);
