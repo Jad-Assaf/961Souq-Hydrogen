@@ -1,0 +1,285 @@
+/* app/styles/apple.css */
+/* Light, Apple-style white + soft grey theme */
+
+:root {
+    --apple-bg: #f5f5f7;
+    --apple-card-bg: #ffffff;
+    --apple-card-border: #e5e7eb;
+    --apple-accent: #0071e3;
+    /* classic Apple-ish blue */
+    --apple-text-main: #111827;
+    --apple-text-muted: #6b7280;
+}
+
+/* Page wrapper */
+.apple-page {
+    min-height: 100vh;
+    background: var(--apple-bg);
+    color: var(--apple-text-main);
+    padding: 4rem min(5vw, 4rem) 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+        'SF Pro Display', sans-serif;
+}
+
+/* HERO */
+.apple-hero {
+    max-width: 1200px;
+    margin: 0 auto 3.5rem;
+}
+
+.apple-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 2.5rem 2.25rem;
+    border-radius: 1.75rem;
+    background: linear-gradient(145deg, #ffffff, #f9fafb);
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.15);
+}
+
+.apple-hero-copy {
+    max-width: 460px;
+}
+
+.apple-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    color: var(--apple-accent);
+    margin-bottom: 0.65rem;
+}
+
+.apple-title {
+    font-size: clamp(2.4rem, 4vw, 3rem);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.apple-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--apple-text-muted);
+}
+
+/* HERO ORBIT / DECORATION */
+.apple-hero-orbit {
+    position: relative;
+    flex: 1;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.orbit-circle {
+    position: absolute;
+    border-radius: 999px;
+    border: 1px dashed rgba(148, 163, 184, 0.5);
+    box-shadow: 0 0 40px rgba(15, 23, 42, 0.06);
+}
+
+.orbit-circle--outer {
+    width: 260px;
+    height: 260px;
+    opacity: 0.9;
+}
+
+.orbit-circle--inner {
+    width: 180px;
+    height: 180px;
+    opacity: 1;
+}
+
+.apple-logo-pill {
+    position: relative;
+    padding: 0.9rem 1.7rem;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 14px 28px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.18);
+    font-size: 1.05rem;
+}
+
+/* COLLECTION GRID */
+.apple-collections {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.apple-collections-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.75rem;
+}
+
+.apple-collections-header h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.apple-collections-header p {
+    font-size: 0.9rem;
+    color: var(--apple-text-muted);
+}
+
+/* Cards layout */
+.apple-collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1.4rem;
+}
+
+.apple-collection-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.35rem;
+    background: var(--apple-card-bg);
+    border: 1px solid var(--apple-card-border);
+    text-decoration: none;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    /* ← more vertical presence */
+    transition:
+        transform 160ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 160ms ease-out,
+        background 160ms ease-out;
+}
+
+.apple-collection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left,
+            rgba(148, 163, 184, 0.12),
+            transparent 55%);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+    pointer-events: none;
+}
+
+.apple-collection-card:hover {
+    transform: translateY(-3px);
+    border-color: #d1d5db;
+    box-shadow:
+        0 20px 40px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.16);
+    background: #ffffff;
+}
+
+.apple-collection-card:hover::before {
+    opacity: 1;
+}
+
+.apple-collection-media {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    padding-top: 120%;
+    /* ← taller media (4:3-ish) */
+    margin-bottom: 0.8rem;
+    background: radial-gradient(circle at center, #e5e7eb, #f3f4f6);
+}
+
+.apple-collection-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.apple-collection-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--apple-text-muted);
+}
+
+/* Card body */
+.apple-collection-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.apple-collection-body h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.apple-collection-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--apple-text-muted);
+    max-height: 3.6em;
+    /* ~2 lines */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.apple-collection-cta {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--apple-accent);
+}
+
+/* Empty state */
+.apple-empty-state {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    border: 1px dashed #d1d5db;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--apple-text-muted);
+}
+
+/* Responsiveness */
+@media (max-width: 900px) {
+    .apple-page {
+        padding: 5rem 1.25rem 4rem;
+    }
+
+    .apple-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .apple-hero-orbit {
+        align-self: stretch;
+    }
+
+    .apple-hero-inner {
+        padding: 1.8rem 1.6rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .apple-title {
+        font-size: 2rem;
+    }
+
+    .apple-collections-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
