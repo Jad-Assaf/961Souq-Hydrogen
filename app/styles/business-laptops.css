@@ -1,0 +1,511 @@
+/* app/styles/business-laptops.css */
+/* Light, professional theme for Business Laptops with orbiting hero cards */
+
+:root {
+    --bl-bg: #f3f4f6;
+    --bl-card-bg: #ffffff;
+    --bl-card-border: #e5e7eb;
+    --bl-accent: #0f766e;
+    --bl-accent-soft: #e0f2fe;
+    --bl-accent-strong: #0284c7;
+    --bl-text-main: #0f172a;
+    --bl-text-muted: #6b7280;
+}
+
+/* PAGE */
+.bl-page {
+    min-height: 100vh;
+    background: var(--bl-bg);
+    color: var(--bl-text-main);
+    padding: 4rem min(5vw, 4rem) 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+        'SF Pro Display', sans-serif;
+}
+
+/* HERO */
+.bl-hero {
+    max-width: 1200px;
+    margin: 0 auto 3.5rem;
+}
+
+.bl-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 2.6rem 2.4rem;
+    border-radius: 1.9rem;
+    background: linear-gradient(135deg, #ffffff, #e5f0ff);
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.2);
+}
+
+.bl-hero-copy {
+    max-width: 460px;
+}
+
+.bl-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    color: var(--bl-accent-strong);
+    margin-bottom: 0.65rem;
+}
+
+.bl-title {
+    font-size: clamp(2.4rem, 4vw, 3.1rem);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.bl-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--bl-text-muted);
+    max-width: 420px;
+}
+
+/* Hero pills */
+.bl-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.15rem;
+}
+
+.bl-pill {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    background: linear-gradient(135deg, #ffffff, #e5f4ff);
+}
+
+/* Small stats row */
+.bl-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+    margin-top: 1.2rem;
+}
+
+.bl-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.bl-meta-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #9ca3af;
+}
+
+.bl-meta-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* HERO VISUAL – orbiting cards */
+.bl-hero-visual {
+    position: relative;
+    flex: 1;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
+/* Orbit wrappers (these rotate around center) */
+.bl-hero-orbit {
+    position: absolute;
+    top: 50%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+}
+
+.bl-hero-orbit--outer {
+    width: 230px;
+    height: 230px;
+    animation: bl-orbit-outer 26s linear infinite;
+    z-index: 1;
+}
+
+.bl-hero-orbit--inner {
+    width: 170px;
+    height: 170px;
+    animation: bl-orbit-inner 34s linear infinite;
+    z-index: 0;
+}
+
+/* Cards inside orbits – positioned on the path */
+.bl-hero-orbit .bl-hero-card {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Primary card at top of outer orbit */
+.bl-hero-orbit--outer .bl-hero-card--primary {
+    top: 0;
+    animation: bl-orbit-card-outer 26s linear infinite;
+}
+
+/* Secondary card at bottom of inner orbit */
+.bl-hero-orbit--inner .bl-hero-card--secondary {
+    top: 100%;
+    animation: bl-orbit-card-inner 34s linear infinite;
+}
+
+/* Base card styling */
+.bl-hero-card {
+    border-radius: 1.4rem;
+    background: #ffffff5c;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.18);
+    backdrop-filter: blur(10px);
+}
+
+.bl-hero-card--primary {
+    width: 260px;
+    padding: 0.35rem 0.9rem 0.95rem;
+    z-index: 2;
+}
+
+.bl-hero-card-header {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    padding: 0.3rem 0 0.2rem;
+}
+
+.bl-hero-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+}
+
+.bl-hero-dot--green {
+    background: #22c55e;
+}
+
+.bl-hero-dot--amber {
+    background: #fbbf24;
+}
+
+.bl-hero-dot--red {
+    background: #ef4444;
+}
+
+.bl-hero-card-body {
+    padding-top: 0.1rem;
+}
+
+.bl-hero-card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #111827;
+}
+
+.bl-hero-card-text {
+    font-size: 0.83rem;
+    color: var(--bl-text-muted);
+    line-height: 1.5;
+}
+
+/* Secondary chip-style card */
+.bl-hero-card--secondary {
+    width: 220px;
+    height: 50%;
+    padding: 0.7rem 0.85rem;
+    background: linear-gradient(135deg, #e0f2fe7b, #f9fafb);
+    box-shadow:
+        0 14px 30px rgba(148, 163, 184, 0.6),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    z-index: 1;
+}
+
+.bl-hero-chip-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #0284c7;
+    margin-bottom: 0.15rem;
+}
+
+.bl-hero-chip-value {
+    font-size: 0.86rem;
+    color: #0f172a;
+}
+
+/* Decorative circles behind everything */
+.bl-hero-circle {
+    position: absolute;
+    border-radius: 999px;
+    border: 1px dashed rgba(148, 163, 184, 0.6);
+    background: radial-gradient(circle at center, #eff6ff, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bl-hero-circle--one {
+    width: 230px;
+    height: 230px;
+    opacity: 0.7;
+    top: 50%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+}
+
+.bl-hero-circle--two {
+    width: 170px;
+    height: 170px;
+    opacity: 0.5;
+    top: 50%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+}
+
+/* Orbit animations – rotate orbits */
+@keyframes bl-orbit-outer {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes bl-orbit-inner {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(-360deg);
+    }
+}
+
+/* Card counter-rotation to keep upright */
+@keyframes bl-orbit-card-outer {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(-360deg);
+    }
+}
+
+@keyframes bl-orbit-card-inner {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* COLLECTIONS */
+.bl-collections {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.bl-collections-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.75rem;
+}
+
+.bl-collections-header h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.bl-collections-header p {
+    font-size: 0.9rem;
+    color: var(--bl-text-muted);
+}
+
+/* Cards grid */
+.bl-collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+}
+
+.bl-collection-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.35rem;
+    background: var(--bl-card-bg);
+    border: 1px solid var(--bl-card-border);
+    text-decoration: none;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    /* taller card like other routes */
+    transition:
+        transform 160ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 160ms ease-out,
+        background 160ms ease-out;
+}
+
+.bl-collection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left,
+            rgba(148, 163, 184, 0.16),
+            transparent 55%);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+    pointer-events: none;
+}
+
+.bl-collection-card:hover {
+    transform: translateY(-3px);
+    border-color: #cbd5f5;
+    box-shadow:
+        0 20px 40px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.2);
+    background: #ffffff;
+}
+
+.bl-collection-card:hover::before {
+    opacity: 1;
+}
+
+/* Card media */
+.bl-collection-media {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    padding-top: 120%;
+    /* taller visual area */
+    margin-bottom: 0.8rem;
+    background: radial-gradient(circle at center, #e5e7eb, #f3f4f6);
+}
+
+.bl-collection-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bl-collection-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--bl-text-muted);
+}
+
+/* Card body */
+.bl-collection-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.bl-collection-body h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.bl-collection-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--bl-text-muted);
+    max-height: 3.6em;
+    /* ~2 lines */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.bl-collection-cta {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--bl-accent-strong);
+}
+
+/* Empty state */
+.bl-empty-state {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    border: 1px dashed #d1d5db;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--bl-text-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .bl-hero-orbit,
+    .bl-hero-orbit .bl-hero-card {
+        animation: none;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .bl-page {
+        padding: 5rem 1.25rem 4rem;
+    }
+
+    .bl-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .bl-hero-visual {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .bl-hero-inner {
+        padding: 2rem 1.8rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .bl-title {
+        font-size: 2.1rem;
+    }
+
+    .bl-collections-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+}
