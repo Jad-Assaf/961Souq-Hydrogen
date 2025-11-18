@@ -1,0 +1,496 @@
+/* app/styles/accessories.css */
+/* Light, neutral theme for Accessories with layered “preset” tiles hero */
+
+:root {
+    --acc-bg: #f4f5f7;
+    --acc-card-bg: #ffffff;
+    --acc-card-border: #e5e7eb;
+    --acc-accent: #0f766e;
+    --acc-accent-blue: #2563eb;
+    --acc-accent-amber: #f59e0b;
+    --acc-text-main: #0f172a;
+    --acc-text-muted: #6b7280;
+}
+
+/* PAGE */
+.acc-page {
+    min-height: 100vh;
+    background: var(--acc-bg);
+    color: var(--acc-text-main);
+    padding: 4rem min(5vw, 4rem) 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+        'SF Pro Display', sans-serif;
+}
+
+/* HERO */
+.acc-hero {
+    max-width: 1200px;
+    margin: 0 auto 3.5rem;
+}
+
+.acc-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 2.6rem 2.4rem;
+    border-radius: 1.9rem;
+    background: linear-gradient(135deg, #ffffff, #e5f0ff);
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.2);
+}
+
+.acc-hero-copy {
+    max-width: 460px;
+}
+
+.acc-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    color: var(--acc-accent-blue);
+    margin-bottom: 0.65rem;
+}
+
+.acc-title {
+    font-size: clamp(2.4rem, 4vw, 3.1rem);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.acc-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--acc-text-muted);
+    max-width: 430px;
+}
+
+/* Pills */
+.acc-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.15rem;
+}
+
+.acc-pill {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    background: linear-gradient(135deg, #ffffff, #e5f4ff);
+}
+
+/* Meta row */
+.acc-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+    margin-top: 1.2rem;
+}
+
+.acc-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.acc-meta-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #9ca3af;
+}
+
+.acc-meta-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* HERO VISUAL – layered tiles board */
+.acc-hero-visual {
+    position: relative;
+    flex: 1;
+    min-height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
+.acc-hero-board {
+    position: relative;
+    width: clamp(260px, 32vw, 360px);
+    height: 240px;
+    border-radius: 1.6rem;
+    background: radial-gradient(circle at top left, #ffffff, #e5f1ff);
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 22px 50px rgba(148, 163, 184, 0.45),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    overflow: hidden;
+}
+
+/* soft glow */
+.acc-board-glow {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top left,
+            rgba(56, 189, 248, 0.22),
+            transparent 60%),
+        radial-gradient(circle at bottom right,
+            rgba(52, 211, 153, 0.2),
+            transparent 65%);
+    pointer-events: none;
+}
+
+/* header strip */
+.acc-board-header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 0.65rem;
+    background: linear-gradient(90deg, #f9fafb, #e5f3ff);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.acc-board-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+}
+
+.acc-board-dot--green {
+    background: #22c55e;
+}
+
+.acc-board-dot--amber {
+    background: #fbbf24;
+}
+
+.acc-board-dot--red {
+    background: #ef4444;
+}
+
+.acc-board-title {
+    margin-left: auto;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #6b7280;
+}
+
+/* tiles */
+.acc-tile {
+    position: absolute;
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 16px 30px rgba(148, 163, 184, 0.4),
+        0 0 0 1px rgba(209, 213, 219, 0.9);
+    padding: 0.7rem 0.8rem 0.8rem;
+    max-width: 190px;
+    backdrop-filter: blur(4px);
+}
+
+.acc-tile-tag {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 0.15rem 0.6rem;
+    background: #ecfdf5;
+    color: #047857;
+    margin-bottom: 0.25rem;
+}
+
+.acc-tile-tag--blue {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.acc-tile-tag--amber {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.acc-tile-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+    color: #111827;
+}
+
+.acc-tile-text {
+    font-size: 0.8rem;
+    color: var(--acc-text-muted);
+    line-height: 1.5;
+}
+
+/* tile positions */
+.acc-tile--desk {
+    top: 56px;
+    left: 18px;
+}
+
+.acc-tile--travel {
+    top: 32px;
+    right: 18px;
+    transform: rotate(3deg);
+}
+
+.acc-tile--home {
+    bottom: 22px;
+    left: 60px;
+    transform: rotate(-3deg);
+}
+
+/* side chips column */
+.acc-chip-column {
+    position: absolute;
+    right: 8px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    z-index: 3;
+}
+
+.acc-chip {
+    font-size: 0.72rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.03);
+    border: 1px dashed rgba(148, 163, 184, 0.7);
+    color: #374151;
+    backdrop-filter: blur(2px);
+}
+
+/* connectors */
+.acc-connector {
+    position: absolute;
+    left: 50%;
+    width: 90px;
+    height: 1px;
+    background: linear-gradient(90deg,
+            rgba(148, 163, 184, 0.1),
+            rgba(148, 163, 184, 0.9));
+    transform-origin: left center;
+    opacity: 0.7;
+}
+
+.acc-connector--top {
+    top: 74px;
+    transform: translateX(0) rotate(6deg);
+}
+
+.acc-connector--middle {
+    top: 120px;
+    transform: translateX(0) rotate(-4deg);
+}
+
+.acc-connector--bottom {
+    bottom: 44px;
+    transform: translateX(0) rotate(2deg);
+}
+
+/* COLLECTIONS */
+.acc-collections {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.acc-collections-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.75rem;
+}
+
+.acc-collections-header h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.acc-collections-header p {
+    font-size: 0.9rem;
+    color: var(--acc-text-muted);
+}
+
+/* Cards grid */
+.acc-collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+}
+
+.acc-collection-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.35rem;
+    background: var(--acc-card-bg);
+    border: 1px solid var(--acc-card-border);
+    text-decoration: none;
+    padding: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    /* match other tall cards */
+    transition:
+        transform 160ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 160ms ease-out,
+        background 160ms ease-out;
+}
+
+.acc-collection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left,
+            rgba(148, 163, 184, 0.16),
+            transparent 55%);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+    pointer-events: none;
+}
+
+.acc-collection-card:hover {
+    transform: translateY(-3px);
+    border-color: #cbd5f5;
+    box-shadow:
+        0 20px 40px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.2);
+    background: #ffffff;
+}
+
+.acc-collection-card:hover::before {
+    opacity: 1;
+}
+
+/* Card media */
+.acc-collection-media {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    padding-top: 120%;
+    /* taller visual */
+    margin-bottom: 0.8rem;
+    background: radial-gradient(circle at center, #e5e7eb, #f3f4f6);
+}
+
+.acc-collection-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.acc-collection-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--acc-text-muted);
+}
+
+/* Card body */
+.acc-collection-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.acc-collection-body h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.acc-collection-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--acc-text-muted);
+    max-height: 3.6em;
+    /* ~2 lines */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.acc-collection-cta {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--acc-accent-blue);
+}
+
+/* Empty state */
+.acc-empty-state {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    border: 1px dashed #d1d5db;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--acc-text-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .acc-connector {
+        animation: none;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .acc-page {
+        padding: 5rem 1.25rem 4rem;
+    }
+
+    .acc-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .acc-hero-visual {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .acc-hero-inner {
+        padding: 2rem 1.8rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .acc-title {
+        font-size: 2.1rem;
+    }
+
+    .acc-collections-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+}
