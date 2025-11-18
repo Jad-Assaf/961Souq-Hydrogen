@@ -1,0 +1,443 @@
+/* app/styles/gaming-laptops.css */
+/* Dark neon theme for Gaming Laptops – laptop PNG + YouTube video in screen */
+
+:root {
+    --gl-bg: radial-gradient(circle at top, #020617 0, #020617 35%, #000000 100%);
+    --gl-card-bg: radial-gradient(circle at top left, #020617, #020617 45%, #020617 100%);
+    --gl-card-border: #0a0e17;
+    --gl-accent: #22c55e;
+    --gl-accent-secondary: #38bdf8;
+    --gl-text-main: #f9fafb;
+    --gl-text-muted: #9ca3af;
+    --gl-surface: #01030b;
+}
+
+/* PAGE */
+.gl-page {
+    min-height: 100vh;
+    background: var(--gl-bg);
+    color: var(--gl-text-main);
+    padding: 4rem min(5vw, 4rem) 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+        'SF Pro Display', sans-serif;
+}
+
+/* HERO */
+.gl-hero {
+    max-width: 1200px;
+    margin: 0 auto 3.5rem;
+}
+
+.gl-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+    padding: 2.6rem 2.4rem;
+    border-radius: 1.9rem;
+    background: radial-gradient(circle at top left, #020617, #020617 50%, #020617 100%);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow:
+        0 30px 70px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.95);
+}
+
+.gl-hero-copy {
+    max-width: 460px;
+}
+
+.gl-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    color: var(--gl-accent-secondary);
+    margin-bottom: 0.65rem;
+}
+
+.gl-title {
+    font-size: clamp(2.4rem, 4vw, 3.1rem);
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.gl-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--gl-text-muted);
+    max-width: 420px;
+}
+
+.gl-spec-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 1.15rem;
+}
+
+.gl-chip {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    color: #e5e7eb;
+    background: radial-gradient(circle at top, #020617, #020617 70%, #000000);
+}
+
+/* HERO LAPTOP VISUAL */
+.gl-hero-laptop {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: 230px;
+}
+
+/* Laptop PNG as background */
+.gl-hero-laptop-screen {
+    position: relative;
+    width: clamp(280px, 34vw, 380px);
+    aspect-ratio: 16 / 9;
+    background-image: url('https://cdn.shopify.com/s/files/1/0552/0883/7292/files/h732_15.png?v=1763464451');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 1.3rem;
+    border: none;
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.9),
+        0 0 30px rgba(56, 189, 248, 0.35);
+    overflow: visible;
+}
+
+/* YouTube video slot aligned to the laptop screen area */
+.gl-hero-laptop-video-slot {
+    position: absolute;
+    /* tweak these 4 values if you need a perfect pixel fit */
+    top: 13%;
+    left: 27%;
+    width: 46%;
+    height: 47%;
+    border-radius: 1px;
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+        0 0 16px rgba(0, 0, 0, 0.8) inset,
+        0 0 18px rgba(15, 23, 42, 0.8);
+}
+
+/* iframe fills the slot */
+.gl-hero-laptop-video {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    pointer-events: none;
+}
+
+/* keyboard deck */
+.gl-hero-laptop-base {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: clamp(280px, 35vw, 380px);
+    height: 14px;
+    transform: translateX(-50%);
+    border-radius: 0 0 999px 999px;
+    background: linear-gradient(to right,
+            rgba(15, 23, 42, 0.9),
+            rgba(30, 64, 175, 0.9),
+            rgba(15, 23, 42, 0.9));
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 1),
+        0 0 20px rgba(56, 189, 248, 0.35);
+}
+
+/* subtle underglow */
+.gl-hero-laptop-glow {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    width: 240px;
+    height: 40px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center,
+            rgba(56, 189, 248, 0.45),
+            transparent 70%);
+    filter: blur(12px);
+    opacity: 0.7;
+}
+
+/* FEATURED ROW */
+.gl-featured {
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+}
+
+.gl-section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.gl-section-header h2 {
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.gl-section-header p {
+    font-size: 0.9rem;
+    color: var(--gl-text-muted);
+}
+
+.gl-featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+}
+
+.gl-featured-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.4rem;
+    background: var(--gl-card-bg);
+    border: 1px solid rgba(31, 41, 55, 0.95);
+    text-decoration: none;
+    overflow: hidden;
+    position: relative;
+    transition:
+        transform 170ms ease-out,
+        box-shadow 170ms ease-out,
+        border-color 170ms ease-out,
+        background 170ms ease-out;
+}
+
+.gl-featured-media {
+    position: relative;
+    padding-top: 62%;
+    overflow: hidden;
+}
+
+.gl-featured-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gl-featured-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--gl-text-muted);
+    background: radial-gradient(circle at center, #111827, #020617);
+}
+
+/* diagonal gradient overlay */
+.gl-featured-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(56, 189, 248, 0.4),
+            transparent 45%,
+            transparent 70%,
+            rgba(244, 63, 94, 0.35));
+    mix-blend-mode: screen;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.gl-featured-body {
+    padding: 0.9rem 0.95rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.gl-featured-body h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gl-text-main);
+}
+
+.gl-featured-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--gl-text-muted);
+    max-height: 3.6em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.gl-featured-cta {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--gl-accent-secondary);
+}
+
+/* hover */
+.gl-featured-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(59, 130, 246, 0.85);
+    box-shadow:
+        0 26px 60px rgba(15, 23, 42, 0.95),
+        0 0 40px rgba(56, 189, 248, 0.35);
+    background: radial-gradient(circle at top, #020617, #020617 60%, #000000 100%);
+}
+
+/* OTHER COLLECTIONS GRID */
+.gl-collections {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.gl-section-header--compact {
+    margin-bottom: 1.25rem;
+}
+
+.gl-collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 0.9rem;
+}
+
+.gl-collection-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.25rem;
+    background: var(--gl-card-bg);
+    border: 1px solid rgba(31, 41, 55, 0.9);
+    text-decoration: none;
+    overflow: hidden;
+    position: relative;
+    min-height: 320px;
+    /* more vertical presence, same as Apple/Gaming */
+    transition:
+        transform 160ms ease-out,
+        box-shadow 160ms ease-out,
+        border-color 160ms ease-out,
+        background 160ms ease-out;
+}
+
+.gl-collection-media {
+    position: relative;
+    padding-top: 120%;
+    /* taller media area, similar to Apple/Gaming */
+    overflow: hidden;
+    background: radial-gradient(circle at center, #111827, #020617);
+}
+
+.gl-collection-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gl-collection-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gl-text-muted);
+}
+
+.gl-collection-body {
+    padding: 0.85rem 0.9rem 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.gl-collection-body h3 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--gl-text-main);
+}
+
+.gl-collection-description {
+    font-size: 0.83rem;
+    line-height: 1.5;
+    color: var(--gl-text-muted);
+    max-height: 3.6em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.gl-collection-cta {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--gl-accent-secondary);
+}
+
+/* hover */
+.gl-collection-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(56, 189, 248, 0.7);
+    box-shadow:
+        0 22px 50px rgba(15, 23, 42, 0.95),
+        0 0 30px rgba(56, 189, 248, 0.25);
+    background: radial-gradient(circle at top, #020617, #020617 55%, #000000 100%);
+}
+
+/* EMPTY STATE */
+.gl-empty-state {
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #020617;
+    border: 1px dashed rgba(148, 163, 184, 0.5);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--gl-text-muted);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .gl-page {
+        padding: 5rem 1.25rem 4rem;
+    }
+
+    .gl-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .gl-hero-laptop {
+        align-self: stretch;
+    }
+
+    .gl-hero-inner {
+        padding: 2rem 1.8rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .gl-title {
+        font-size: 2.1rem;
+    }
+
+    .gl-collections-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+}
