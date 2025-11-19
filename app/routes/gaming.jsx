@@ -378,7 +378,7 @@ export default function GamingCategoryPage() {
                           {minPrice && (
                             <span className="gaming-product-price">
                               {currency
-                                ? `${currency} ${minPrice}`
+                                ? `$${minPrice}`
                                 : `$${minPrice}`}
                             </span>
                           )}

@@ -386,7 +386,7 @@ export default function PcPartsCategoryPage() {
                           <span className="pp-product-price">
                             {hasPrice
                               ? currency
-                                ? `${currency} ${amountStr}`
+                                ? `$${amountStr}`
                                 : `$${amountStr}`
                               : 'Call for Price'}
                           </span>

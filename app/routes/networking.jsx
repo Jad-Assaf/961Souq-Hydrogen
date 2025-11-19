@@ -384,7 +384,7 @@ export default function NetworkingCategoryPage() {
                           <span className="nw-product-price">
                             {hasPrice
                               ? currency
-                                ? `${currency} ${amountStr}`
+                                ? `$${amountStr}`
                                 : `$${amountStr}`
                               : 'Call for Price'}
                           </span>

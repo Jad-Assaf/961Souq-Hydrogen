@@ -385,7 +385,7 @@ export default function DesktopsCategoryPage() {
                           {minPrice && (
                             <span className="d-product-price">
                               {currency
-                                ? `${currency} ${minPrice}`
+                                ? `$${minPrice}`
                                 : `$${minPrice}`}
                             </span>
                           )}

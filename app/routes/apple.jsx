@@ -408,7 +408,7 @@ export default function AppleCategoryPage() {
                           {minPrice && (
                             <span className="apple-product-price">
                               {currency
-                                ? `${currency} ${minPrice}`
+                                ? `$${minPrice}`
                                 : `$${minPrice}`}
                             </span>
                           )}

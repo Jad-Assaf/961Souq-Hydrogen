@@ -351,7 +351,7 @@ export default function GamingLaptopsCategoryPage() {
                           {minPrice && (
                             <span className="gl-product-price">
                               {currency
-                                ? `${currency} ${minPrice}`
+                                ? `$${minPrice}`
                                 : `$${minPrice}`}
                             </span>
                           )}
