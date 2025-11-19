@@ -1,5 +1,5 @@
 // app/routes/apple.jsx
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import appleStyles from '~/styles/apple.css?url';
@@ -25,6 +25,27 @@ const APPLE_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -62,6 +83,10 @@ export async function loader({context}) {
 export default function AppleCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
   const [isRippling, setIsRippling] = useState(false);
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
 
   const handleLogoClick = () => {
     // Reset and retrigger so animation can replay even on rapid clicks
@@ -77,6 +102,22 @@ export default function AppleCategoryPage() {
     const timeout = setTimeout(() => setIsRippling(false), 1600);
     return () => clearTimeout(timeout);
   }, [isRippling]);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProducts = activeCollection?.products?.nodes || [];
 
   return (
     <div className="apple-page">
@@ -171,13 +212,21 @@ export default function AppleCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="apple-collection-card"
+              className={`apple-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'apple-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="apple-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -207,6 +256,95 @@ export default function AppleCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="apple-products"
+          id="apple-products"
+          ref={productsSectionRef}
+        >
+          <header className="apple-products-header">
+            <div className="apple-products-header-top">
+              <h2>{activeCollection.title}</h2>
+              <span className="apple-products-pill">
+                Showing up to 50 products
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="apple-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const minPrice =
+                    product.priceRange?.minVariantPrice?.amount ?? null;
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode ?? '';
+                  const isAvailable = product.availableForSale;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="apple-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="apple-product-media">
+                        {product.featuredImage ? (
+                          <img
+                            src={`${product.featuredImage.url}&width=300`}
+                            alt={product.featuredImage.altText || product.title}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="apple-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="apple-product-body">
+                        <h3 className="apple-product-title">{product.title}</h3>
+                        <div className="apple-product-meta">
+                          {minPrice && (
+                            <span className="apple-product-price">
+                              {currency} {minPrice}
+                            </span>
+                          )}
+                          <span
+                            className={`apple-product-badge ${
+                              isAvailable
+                                ? 'apple-product-badge--in'
+                                : 'apple-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="apple-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="apple-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="apple-products-empty">
+              No products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // app/routes/home-appliances.jsx
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import homeAppliancesStyles from '~/styles/home-appliances.css?url';
@@ -25,6 +25,27 @@ const HOME_APPLIANCES_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -61,6 +82,26 @@ export async function loader({context}) {
 
 export default function HomeAppliancesCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProducts = activeCollection?.products?.nodes || [];
 
   return (
     <div className="ha-page">
@@ -152,13 +193,21 @@ export default function HomeAppliancesCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="ha-collection-card"
+              className={`ha-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'ha-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="ha-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -189,6 +238,101 @@ export default function HomeAppliancesCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="ha-products"
+          id="ha-products"
+          ref={productsSectionRef}
+        >
+          <header className="ha-products-header">
+            <div className="ha-products-header-top">
+              <h2>Products in {activeCollection.title}</h2>
+              <span className="ha-products-pill">
+                Showing up to 50 products
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="ha-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const amountStr = product.priceRange?.minVariantPrice?.amount;
+                  const amountNum = parseFloat(amountStr ?? '0');
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode || '';
+                  const hasPrice = !Number.isNaN(amountNum) && amountNum > 0;
+                  const isAvailable = product.availableForSale;
+                  const imageUrl = product.featuredImage?.url
+                    ? `${product.featuredImage.url}&width=300`
+                    : null;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="ha-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="ha-product-media">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              product.featuredImage?.altText || product.title
+                            }
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="ha-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="ha-product-body">
+                        <h3 className="ha-product-title">{product.title}</h3>
+                        <div className="ha-product-meta">
+                          <span className="ha-product-price">
+                            {hasPrice
+                              ? `${currency} ${amountStr}`
+                              : 'Call for Price'}
+                          </span>
+                          <span
+                            className={`ha-product-badge ${
+                              isAvailable
+                                ? 'ha-product-badge--in'
+                                : 'ha-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="ha-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="ha-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="ha-products-empty">
+              No products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

@@ -306,6 +306,16 @@
     opacity: 1;
 }
 
+/* active card */
+.gaming-collection-card--active {
+    border-color: rgba(56, 189, 248, 0.9);
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.95),
+        0 0 45px rgba(56, 189, 248, 0.4),
+        0 0 0 1px rgba(15, 23, 42, 0.95);
+    background: radial-gradient(circle at top, #020617, #020617 55%, #000000 100%);
+}
+
 .gaming-collection-media {
     position: relative;
     border-radius: 1rem;
@@ -378,6 +388,189 @@
     color: var(--gaming-text-muted);
 }
 
+/* PRODUCTS SECTION */
+.gaming-products {
+    max-width: 1200px;
+    margin: 3rem auto 0;
+    padding-top: 100px;
+}
+
+.gaming-products-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.gaming-products-header-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.8rem;
+}
+
+.gaming-products-header h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.gaming-products-pill {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    color: var(--gaming-text-muted);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+/* product grid */
+.gaming-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+}
+
+.gaming-product-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.25rem;
+    background: var(--gaming-card-bg);
+    border: 1px solid var(--gaming-card-border);
+    text-decoration: none;
+    overflow: hidden;
+    position: relative;
+    transition:
+        transform 150ms ease-out,
+        box-shadow 150ms ease-out,
+        border-color 150ms ease-out,
+        background 150ms ease-out;
+}
+
+.gaming-product-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(56, 189, 248, 0.7);
+    box-shadow:
+        0 20px 46px rgba(15, 23, 42, 0.95),
+        0 0 35px rgba(56, 189, 248, 0.3);
+    background: radial-gradient(circle at top, #020617, #020617 55%, #000000 100%);
+}
+
+.gaming-product-media {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #111827, #020617);
+}
+
+.gaming-product-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gaming-product-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gaming-text-muted);
+}
+
+/* product body */
+.gaming-product-body {
+    padding: 0.75rem 0.85rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.gaming-product-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+.gaming-product-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+}
+
+.gaming-product-price {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+.gaming-product-badge {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+}
+
+.gaming-product-badge--in {
+    color: #bbf7d0;
+    border-color: rgba(22, 163, 74, 0.5);
+    background: rgba(21, 128, 61, 0.35);
+}
+
+.gaming-product-badge--out {
+    color: #fecaca;
+    border-color: rgba(248, 113, 113, 0.5);
+    background: rgba(153, 27, 27, 0.5);
+}
+
+/* products footer */
+.gaming-products-footer {
+    margin-top: 1.75rem;
+    display: flex;
+    justify-content: center;
+}
+
+.gaming-products-view-all {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1.6rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    background: #020617;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: rgba(56, 189, 248, 0.95);
+    transition:
+        background 140ms ease-out,
+        border-color 140ms ease-out,
+        transform 140ms ease-out,
+        box-shadow 140ms ease-out;
+}
+
+.gaming-products-view-all:hover {
+    background: #020617;
+    border-color: rgba(56, 189, 248, 0.95);
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(56, 189, 248, 0.4);
+    transform: translateY(-1px);
+}
+
+.gaming-products-empty {
+    font-size: 0.9rem;
+    color: var(--gaming-text-muted);
+    padding: 1.5rem 0;
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
     .gaming-page {
@@ -396,6 +589,11 @@
     .gaming-hero-inner {
         padding: 1.8rem 1.6rem;
     }
+
+    .gaming-products-header-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 @media (max-width: 640px) {
@@ -406,6 +604,11 @@
     .gaming-collections-grid {
         grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
+    }
+
+    .gaming-products-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
     }
 }
 

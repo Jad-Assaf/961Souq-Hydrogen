@@ -1,5 +1,5 @@
 // app/routes/desktops.jsx
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import desktopsStyles from '~/styles/desktops.css?url';
@@ -25,6 +25,27 @@ const DESKTOPS_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -61,6 +82,32 @@ export async function loader({context}) {
 
 export default function DesktopsCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProductsRaw = activeCollection?.products?.nodes || [];
+
+  const activeProducts = activeProductsRaw.filter((product) => {
+    const amountStr = product.priceRange?.minVariantPrice?.amount;
+    const amountNum = parseFloat(amountStr ?? '0');
+    return !Number.isNaN(amountNum) && amountNum > 0;
+  });
 
   return (
     <div className="d-page">
@@ -148,13 +195,21 @@ export default function DesktopsCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="d-collection-card"
+              className={`d-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'd-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="d-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -167,11 +222,6 @@ export default function DesktopsCategoryPage() {
 
               <div className="d-collection-body">
                 <h3>{collection.title}</h3>
-                {collection.description && (
-                  <p className="d-collection-description">
-                    {collection.description}
-                  </p>
-                )}
                 <span className="d-collection-cta">Browse</span>
               </div>
             </Link>
@@ -184,6 +234,100 @@ export default function DesktopsCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="d-products"
+          id="d-products"
+          ref={productsSectionRef}
+        >
+          <header className="d-products-header">
+            <div className="d-products-header-top">
+              <h2>Products in {activeCollection.title}</h2>
+              <span className="d-products-pill">
+                Showing up to 50 products (priced)
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="d-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const minPrice =
+                    product.priceRange?.minVariantPrice?.amount ?? null;
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode ?? '';
+                  const isAvailable = product.availableForSale;
+                  const imageUrl = product.featuredImage?.url
+                    ? `${product.featuredImage.url}&width=300`
+                    : null;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="d-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="d-product-media">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              product.featuredImage?.altText || product.title
+                            }
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="d-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="d-product-body">
+                        <h3 className="d-product-title">{product.title}</h3>
+                        <div className="d-product-meta">
+                          {minPrice && (
+                            <span className="d-product-price">
+                              {currency} {minPrice}
+                            </span>
+                          )}
+                          <span
+                            className={`d-product-badge ${
+                              isAvailable
+                                ? 'd-product-badge--in'
+                                : 'd-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="d-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="d-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="d-products-empty">
+              No priced products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // app/routes/networking.jsx
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import networkingStyles from '~/styles/networking.css?url';
@@ -25,6 +25,27 @@ const NETWORKING_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -61,6 +82,26 @@ export async function loader({context}) {
 
 export default function NetworkingCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProducts = activeCollection?.products?.nodes || [];
 
   return (
     <div className="nw-page">
@@ -147,13 +188,21 @@ export default function NetworkingCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="nw-collection-card"
+              className={`nw-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'nw-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="nw-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -183,6 +232,101 @@ export default function NetworkingCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="nw-products"
+          id="nw-products"
+          ref={productsSectionRef}
+        >
+          <header className="nw-products-header">
+            <div className="nw-products-header-top">
+              <h2>Products in {activeCollection.title}</h2>
+              <span className="nw-products-pill">
+                Showing up to 50 products
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="nw-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const amountStr = product.priceRange?.minVariantPrice?.amount;
+                  const amountNum = parseFloat(amountStr ?? '0');
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode ?? '';
+                  const hasPrice = !Number.isNaN(amountNum) && amountNum > 0;
+                  const isAvailable = product.availableForSale;
+                  const imageUrl = product.featuredImage?.url
+                    ? `${product.featuredImage.url}&width=300`
+                    : null;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="nw-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="nw-product-media">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              product.featuredImage?.altText || product.title
+                            }
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="nw-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="nw-product-body">
+                        <h3 className="nw-product-title">{product.title}</h3>
+                        <div className="nw-product-meta">
+                          <span className="nw-product-price">
+                            {hasPrice
+                              ? `${currency} ${amountStr}`
+                              : 'Call for Price'}
+                          </span>
+                          <span
+                            className={`nw-product-badge ${
+                              isAvailable
+                                ? 'nw-product-badge--in'
+                                : 'nw-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="nw-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="nw-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="nw-products-empty">
+              No products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

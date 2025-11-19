@@ -1,5 +1,5 @@
 // app/routes/audio.jsx
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import audioStyles from '~/styles/audio.css?url';
@@ -25,6 +25,27 @@ const AUDIO_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -61,6 +82,26 @@ export async function loader({context}) {
 
 export default function AudioCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProducts = activeCollection?.products?.nodes || [];
 
   return (
     <div className="au-page">
@@ -184,13 +225,21 @@ export default function AudioCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="au-collection-card"
+              className={`au-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'au-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="au-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -220,6 +269,101 @@ export default function AudioCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="au-products"
+          id="au-products"
+          ref={productsSectionRef}
+        >
+          <header className="au-products-header">
+            <div className="au-products-header-top">
+              <h2>Products in {activeCollection.title}</h2>
+              <span className="au-products-pill">
+                Showing up to 50 products
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="au-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const amountStr = product.priceRange?.minVariantPrice?.amount;
+                  const amountNum = parseFloat(amountStr ?? '0');
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode ?? '';
+                  const hasPrice = !Number.isNaN(amountNum) && amountNum > 0;
+                  const isAvailable = product.availableForSale;
+                  const imageUrl = product.featuredImage?.url
+                    ? `${product.featuredImage.url}&width=300`
+                    : null;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="au-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="au-product-media">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              product.featuredImage?.altText || product.title
+                            }
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="au-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="au-product-body">
+                        <h3 className="au-product-title">{product.title}</h3>
+                        <div className="au-product-meta">
+                          <span className="au-product-price">
+                            {hasPrice
+                              ? `${currency} ${amountStr}`
+                              : 'Call for Price'}
+                          </span>
+                          <span
+                            className={`au-product-badge ${
+                              isAvailable
+                                ? 'au-product-badge--in'
+                                : 'au-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="au-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="au-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="au-products-empty">
+              No products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

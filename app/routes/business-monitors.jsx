@@ -1,5 +1,5 @@
 // app/routes/monitors.jsx
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import monitorsStyles from '~/styles/monitors.css?url';
@@ -25,6 +25,27 @@ const MONITORS_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -61,6 +82,26 @@ export async function loader({context}) {
 
 export default function MonitorsCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProducts = activeCollection?.products?.nodes || [];
 
   return (
     <div className="mon-page">
@@ -151,13 +192,21 @@ export default function MonitorsCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="mon-collection-card"
+              className={`mon-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'mon-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="mon-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -187,6 +236,101 @@ export default function MonitorsCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="mon-products"
+          id="mon-products"
+          ref={productsSectionRef}
+        >
+          <header className="mon-products-header">
+            <div className="mon-products-header-top">
+              <h2>Products in {activeCollection.title}</h2>
+              <span className="mon-products-pill">
+                Showing up to 50 products
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="mon-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const amountStr = product.priceRange?.minVariantPrice?.amount;
+                  const amountNum = parseFloat(amountStr ?? '0');
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode ?? '';
+                  const hasPrice = !Number.isNaN(amountNum) && amountNum > 0;
+                  const isAvailable = product.availableForSale;
+                  const imageUrl = product.featuredImage?.url
+                    ? `${product.featuredImage.url}&width=300`
+                    : null;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="mon-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="mon-product-media">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              product.featuredImage?.altText || product.title
+                            }
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="mon-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mon-product-body">
+                        <h3 className="mon-product-title">{product.title}</h3>
+                        <div className="mon-product-meta">
+                          <span className="mon-product-price">
+                            {hasPrice
+                              ? `${currency} ${amountStr}`
+                              : 'Call for Price'}
+                          </span>
+                          <span
+                            className={`mon-product-badge ${
+                              isAvailable
+                                ? 'mon-product-badge--in'
+                                : 'mon-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="mon-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="mon-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="mon-products-empty">
+              No products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

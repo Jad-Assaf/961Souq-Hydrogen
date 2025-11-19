@@ -1,5 +1,5 @@
 // app/routes/fitness.jsx
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import fitnessStyles from '~/styles/fitness.css?url';
@@ -25,6 +25,27 @@ const FITNESS_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -61,6 +82,26 @@ export async function loader({context}) {
 
 export default function FitnessCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProducts = activeCollection?.products?.nodes || [];
 
   return (
     <div className="fit-page">
@@ -97,7 +138,7 @@ export default function FitnessCategoryPage() {
             </div>
           </div>
 
-          {/* NEW HERO VISUAL – stacked fitness dashboard card */}
+          {/* HERO VISUAL – stacked fitness dashboard card */}
           <div className="fit-hero-visual">
             <div className="fit-hero-dashboard-shell">
               {/* main card */}
@@ -195,13 +236,21 @@ export default function FitnessCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="fit-collection-card"
+              className={`fit-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'fit-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="fit-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -231,6 +280,101 @@ export default function FitnessCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="fit-products"
+          id="fit-products"
+          ref={productsSectionRef}
+        >
+          <header className="fit-products-header">
+            <div className="fit-products-header-top">
+              <h2>Products in {activeCollection.title}</h2>
+              <span className="fit-products-pill">
+                Showing up to 50 products
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="fit-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const amountStr = product.priceRange?.minVariantPrice?.amount;
+                  const amountNum = parseFloat(amountStr ?? '0');
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode || '';
+                  const hasPrice = !Number.isNaN(amountNum) && amountNum > 0;
+                  const isAvailable = product.availableForSale;
+                  const imageUrl = product.featuredImage?.url
+                    ? `${product.featuredImage.url}&width=300`
+                    : null;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="fit-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="fit-product-media">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              product.featuredImage?.altText || product.title
+                            }
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="fit-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="fit-product-body">
+                        <h3 className="fit-product-title">{product.title}</h3>
+                        <div className="fit-product-meta">
+                          <span className="fit-product-price">
+                            {hasPrice
+                              ? `${currency} ${amountStr}`
+                              : 'Call for Price'}
+                          </span>
+                          <span
+                            className={`fit-product-badge ${
+                              isAvailable
+                                ? 'fit-product-badge--in'
+                                : 'fit-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="fit-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="fit-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="fit-products-empty">
+              No products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

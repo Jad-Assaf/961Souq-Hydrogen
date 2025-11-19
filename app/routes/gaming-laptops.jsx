@@ -1,5 +1,5 @@
 // app/routes/gaming-laptops.jsx
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import gamingLaptopsStyles from '~/styles/gaming-laptops.css?url';
@@ -25,6 +25,27 @@ const GAMING_LAPTOPS_MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 50) {
+              nodes {
+                id
+                handle
+                title
+                availableForSale
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
             }
           }
         }
@@ -61,6 +82,26 @@ export async function loader({context}) {
 
 export default function GamingLaptopsCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
+    collections[0]?.handle || null,
+  );
+  const productsSectionRef = useRef(null);
+
+  const handleCollectionClick = (handle) => {
+    setSelectedCollectionHandle(handle);
+    if (productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const activeCollection =
+    collections.find((c) => c.handle === selectedCollectionHandle) ||
+    collections[0];
+
+  const activeProducts = activeCollection?.products?.nodes || [];
 
   return (
     <div className="gl-page">
@@ -115,13 +156,21 @@ export default function GamingLaptopsCategoryPage() {
             <Link
               key={collection.id}
               to={`/collections/${collection.handle}`}
-              className="gl-collection-card"
+              className={`gl-collection-card ${
+                collection.handle === activeCollection?.handle
+                  ? 'gl-collection-card--active'
+                  : ''
+              }`}
               prefetch="intent"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCollectionClick(collection.handle);
+              }}
             >
               <div className="gl-collection-media">
                 {collection.image ? (
                   <img
-                    src={collection.image.url}
+                    src={`${collection.image.url}&width=300`}
                     alt={collection.image.altText || collection.title}
                     loading="lazy"
                   />
@@ -151,6 +200,100 @@ export default function GamingLaptopsCategoryPage() {
           )}
         </div>
       </section>
+
+      {/* PRODUCTS SECTION */}
+      {activeCollection && (
+        <section
+          className="gl-products"
+          id="gl-products"
+          ref={productsSectionRef}
+        >
+          <header className="gl-products-header">
+            <div className="gl-products-header-top">
+              <h2>Products in {activeCollection.title}</h2>
+              <span className="gl-products-pill">
+                Showing up to 50 products
+              </span>
+            </div>
+          </header>
+
+          {activeProducts.length > 0 ? (
+            <>
+              <div className="gl-products-grid">
+                {activeProducts.slice(0, 50).map((product) => {
+                  const minPrice =
+                    product.priceRange?.minVariantPrice?.amount ?? null;
+                  const currency =
+                    product.priceRange?.minVariantPrice?.currencyCode ?? '';
+                  const isAvailable = product.availableForSale;
+                  const imageUrl = product.featuredImage?.url
+                    ? `${product.featuredImage.url}&width=300`
+                    : null;
+
+                  return (
+                    <Link
+                      key={product.id}
+                      to={`/products/${product.handle}`}
+                      className="gl-product-card"
+                      prefetch="intent"
+                    >
+                      <div className="gl-product-media">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              product.featuredImage?.altText || product.title
+                            }
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="gl-product-placeholder">
+                            <span>{product.title?.charAt(0) || '?'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="gl-product-body">
+                        <h3 className="gl-product-title">{product.title}</h3>
+                        <div className="gl-product-meta">
+                          {minPrice && (
+                            <span className="gl-product-price">
+                              {currency} {minPrice}
+                            </span>
+                          )}
+                          <span
+                            className={`gl-product-badge ${
+                              isAvailable
+                                ? 'gl-product-badge--in'
+                                : 'gl-product-badge--out'
+                            }`}
+                          >
+                            {isAvailable ? 'In stock' : 'Sold out'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="gl-products-footer">
+                <Link
+                  to={`/collections/${activeCollection.handle}`}
+                  className="gl-products-view-all"
+                  prefetch="intent"
+                >
+                  View all products in {activeCollection.title}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="gl-products-empty">
+              No products found in this collection yet.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }
