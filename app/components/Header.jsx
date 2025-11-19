@@ -38,6 +38,25 @@ function getCartCount(cart) {
   return 0;
 }
 
+function getMobileMenuPath(url) {
+  if (!url) return '/';
+
+  try {
+    // Works for both absolute and relative URLs
+    const pathname = new URL(url, 'https://dummy.base').pathname;
+
+    if (pathname.startsWith('/collections/')) {
+      const segments = pathname.split('/').filter(Boolean); // ["collections", "apple"]
+      const handle = segments[segments.length - 1]; // "apple"
+      return `/${handle}`; // → "/apple"
+    }
+
+    return pathname;
+  } catch {
+    return '/';
+  }
+}
+
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -434,46 +453,50 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             <div
               className={`mobile-menu-content ${activeSubmenu ? 'hidden' : ''}`}
             >
-              {menu.items.map((item) => (
-                <div key={item.id} className="mobile-menu-item">
-                  <button onClick={() => openSubmenu(item.id)}>
-                    {item.imageUrl && (
-                      <div
-                        style={{
-                          width: '50px',
-                          height: '50px',
-                          filter: 'blur(0px)',
-                          opacity: 1,
-                          transition: 'filter 0.3s, opacity 0.3s',
-                        }}
-                      >
-                        <img
-                          sizes="(min-width: 45em) 20vw, 40vw"
-                          srcSet={`${item.imageUrl}&width=150 300w,
-                                   ${item.imageUrl}&width=150 600w,
-                                   ${item.imageUrl}&width=150 1200w`}
-                          alt={item.altText || item.title}
-                          width="50px"
-                          height="50px"
-                        />
-                      </div>
-                    )}
-                    {item.title}
-                    <span className="mobile-menu-arrow">
-                      <svg
-                        fill="#000"
-                        height="14px"
-                        width="14px"
-                        viewBox="0 0 24 24"
-                        stroke="#000"
-                        strokeWidth="0.00024"
-                      >
-                        <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12"></polygon>
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-              ))}
+              {menu.items.map((item) => {
+                const mobilePath = getMobileMenuPath(item.url);
+
+                return (
+                  <div key={item.id} className="mobile-menu-item">
+                    <NavLink to={mobilePath} onClick={closeMobileMenu} style={{display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0'}}>
+                      {item.imageUrl && (
+                        <div
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            filter: 'blur(0px)',
+                            opacity: 1,
+                            transition: 'filter 0.3s, opacity 0.3s',
+                          }}
+                        >
+                          <img
+                            sizes="(min-width: 45em) 20vw, 40vw"
+                            srcSet={`${item.imageUrl}&width=150 300w,
+                         ${item.imageUrl}&width=150 600w,
+                         ${item.imageUrl}&width=150 1200w`}
+                            alt={item.altText || item.title}
+                            width="50px"
+                            height="50px"
+                          />
+                        </div>
+                      )}
+                      {item.title}
+                      <span className="mobile-menu-arrow">
+                        <svg
+                          fill="#000"
+                          height="14px"
+                          width="14px"
+                          viewBox="0 0 24 24"
+                          stroke="#000"
+                          strokeWidth="0.00024"
+                        >
+                          <polygon points="6.8,23.7 5.4,22.3 15.7,12 5.4,1.7 6.8,0.3 18.5,12"></polygon>
+                        </svg>
+                      </span>
+                    </NavLink>
+                  </div>
+                );
+              })}
             </div>
 
             {activeSubmenu && (
