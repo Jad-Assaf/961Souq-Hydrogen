@@ -371,6 +371,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 1rem;
+
+    @media (min-width: 1300px) {
+        grid-template-columns: repeat(auto-fit, minmax(210px, 220px));
+        justify-content: start;
+        gap: 1.5rem;
+    }
 }
 
 .ha-collection-card {
@@ -542,6 +548,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 1rem;
+
+    @media (min-width: 1300px) {
+        grid-template-columns: repeat(auto-fit, minmax(210px, 220px));
+        justify-content: start;
+        gap: 1.5rem;
+    }
 }
 
 .ha-product-card {
