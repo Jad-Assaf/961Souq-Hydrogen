@@ -12,6 +12,13 @@
     --mob-text-muted: #9ca3af;
 }
 
+#mob-collections-level2,
+#mob-collections-level3,
+#mob-collections-level4,
+#mob-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .mob-page {
     min-height: 100vh;

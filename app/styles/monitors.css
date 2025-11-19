@@ -13,6 +13,13 @@
     --mon-text-muted: #9ca3af;
 }
 
+#mon-collections-level2,
+#mon-collections-level3,
+#mon-collections-level4,
+#mon-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .mon-page {
     min-height: 100vh;

@@ -12,6 +12,13 @@
     --acc-text-muted: #6b7280;
 }
 
+#acc-collections-level2,
+#acc-collections-level3,
+#acc-collections-level4,
+#acc-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .acc-page {
     min-height: 100vh;

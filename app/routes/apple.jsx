@@ -1,8 +1,9 @@
 // app/routes/apple.jsx
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import appleStyles from '~/styles/apple.css?url';
+import {useMenuHierarchy} from '~/lib/useMenuHierarchy';
 
 const APPLE_MENU_HANDLE = 'apple';
 
@@ -42,6 +43,7 @@ const APPLE_MENU_QUERY = `#graphql
                 priceRange {
                   minVariantPrice {
                     amount
+                    currencyCode
                   }
                 }
               }
@@ -81,14 +83,11 @@ export async function loader({context}) {
 
 export default function AppleCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
+
+  // Hero ripple state
   const [isRippling, setIsRippling] = useState(false);
-  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
-    collections[0]?.handle || null,
-  );
-  const productsSectionRef = useRef(null);
 
   const handleLogoClick = () => {
-    // Reset and retrigger so animation can replay even on rapid clicks
     setIsRippling(false);
     requestAnimationFrame(() => {
       setIsRippling(true);
@@ -97,31 +96,77 @@ export default function AppleCategoryPage() {
 
   useEffect(() => {
     if (!isRippling) return;
-    // Match the longest animation (outer ring) + its delay + small buffer
     const timeout = setTimeout(() => setIsRippling(false), 1600);
     return () => clearTimeout(timeout);
   }, [isRippling]);
 
-  const handleCollectionClick = (handle) => {
-    setSelectedCollectionHandle(handle);
-    if (productsSectionRef.current) {
-      productsSectionRef.current.scrollIntoView({
+  // Dynamic hierarchy
+  const {
+    levels,
+    activeCollection,
+    activeProducts,
+    selectLevel,
+    productsSectionRef,
+  } = useMenuHierarchy(collections, {submenuPath: '/api/menu-submenu'});
+
+  // Auto-select first top-level collection on load (no scroll)
+  useEffect(() => {
+    if (!collections || collections.length === 0) return;
+    if (!levels || levels.length === 0) return;
+
+    const root = levels[0];
+    if (!root || root.collections.length === 0) return;
+
+    if (root.selectedIndex == null) {
+      selectLevel(0, 0, {scrollToProducts: false});
+    }
+  }, [collections, levels, selectLevel]);
+
+  // Smooth scroll between levels
+  // Smooth scroll between levels
+  const sectionRefs = useRef([]);
+  const lastClickRef = useRef(null);
+
+  useEffect(() => {
+    const lastClick = lastClickRef.current;
+    if (!lastClick) return;
+
+    const targetDepth = lastClick.depth + 1;
+
+    // ⛔ Do NOT clear lastClickRef just because the next level
+    // doesn't exist yet. That just means we're still waiting
+    // for the submenu query to finish.
+    if (targetDepth >= levels.length) {
+      // No deeper level yet → wait for the next levels update.
+      return;
+    }
+
+    const targetLevel = levels[targetDepth];
+
+    // If the next level exists but has no collections, it means either:
+    // - It’s still loading, or
+    // - There is no submenu and this click was a leaf.
+    // In both cases, the hook handles scrolling to products if needed,
+    // so we just watch for real collections here.
+    if (!targetLevel || !targetLevel.collections?.length) {
+      return;
+    }
+
+    const el = sectionRefs.current[targetDepth];
+    if (el) {
+      el.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       });
+      // ✅ We’ve scrolled to the new level; clear the click marker.
+      lastClickRef.current = null;
     }
-  };
-
-  const activeCollection =
-    collections.find((c) => c.handle === selectedCollectionHandle) ||
-    collections[0];
-
-  const activeProducts = activeCollection?.products?.nodes || [];
+  }, [levels]);
 
   return (
     <div className="apple-page">
       {/* HERO */}
-      <section className="apple-hero">
+      <section className="apple-hero" id="apple-hero-section">
         <div className="apple-hero-inner">
           <div className="apple-hero-copy">
             <p className="apple-eyebrow">Category hub</p>
@@ -199,64 +244,118 @@ export default function AppleCategoryPage() {
         </div>
       </section>
 
-      {/* COLLECTION GRID */}
-      <section className="apple-collections">
-        <header className="apple-collections-header">
-          <h2>Shop by collection</h2>
-          <p>Pick a collection to dive into Macs, iPhones, iPads, and more.</p>
-        </header>
+      {/* COLLECTION LEVELS (0, 1, 2, ... unlimited) */}
+      {levels.map((level, depth) => {
+        const collectionsAtLevel = level.collections || [];
+        if (!collectionsAtLevel.length) {
+          // Don’t render empty levels
+          return null;
+        }
 
-        <div className="apple-collections-grid">
-          {collections.map((collection) => (
-            <Link
-              key={collection.id}
-              to={`/collections/${collection.handle}`}
-              className={`apple-collection-card ${
-                collection.handle === activeCollection?.handle
-                  ? 'apple-collection-card--active'
-                  : ''
-              }`}
-              prefetch="intent"
-              onClick={(e) => {
-                e.preventDefault();
-                handleCollectionClick(collection.handle);
-              }}
-            >
-              <div className="apple-collection-media">
-                {collection.image ? (
-                  <img
-                    src={`${collection.image.url}&width=300`}
-                    alt={collection.image.altText || collection.title}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="apple-collection-placeholder">
-                    <span>{collection.title?.charAt(0) || '?'}</span>
-                  </div>
-                )}
-              </div>
+        const isRoot = depth === 0;
 
-              <div className="apple-collection-body">
-                <h3>{collection.title}</h3>
-                {collection.description && (
-                  <p className="apple-collection-description">
-                    {collection.description}
-                  </p>
-                )}
-                <span className="apple-collection-cta">Browse</span>
-              </div>
-            </Link>
-          ))}
+        // Parent collection for this level (for headings)
+        let parentTitle = null;
+        if (!isRoot && levels[depth - 1]) {
+          const parentLevel = levels[depth - 1];
+          if (
+            parentLevel.selectedIndex != null &&
+            parentLevel.selectedIndex < parentLevel.collections.length
+          ) {
+            parentTitle =
+              parentLevel.collections[parentLevel.selectedIndex]?.title || null;
+          }
+        }
 
-          {collections.length === 0 && (
-            <p className="apple-empty-state">
-              No Apple collections are linked to the “apple” menu yet.
-            </p>
-          )}
-        </div>
-      </section>
+        let heading = 'Shop by collection';
+        let subheading =
+          'Pick a collection to see its sub-collections or products.';
 
-      {/* PRODUCTS SECTION */}
+        if (!isRoot) {
+          heading = parentTitle
+            ? `${parentTitle} sub-collections`
+            : 'Sub-collections';
+          if (depth === 1) {
+            subheading = 'Select a sub-collection to refine further.';
+          } else {
+            subheading = 'Choose a sub-collection to go deeper.';
+          }
+        }
+
+        const sectionId = `apple-collections-level${depth + 1}`;
+
+        return (
+          <section
+            key={sectionId}
+            className="apple-collections"
+            id={sectionId}
+            ref={(el) => {
+              sectionRefs.current[depth] = el;
+            }}
+          >
+            <header className="apple-collections-header">
+              <h2>{heading}</h2>
+              <p>{subheading}</p>
+            </header>
+
+            <div className="apple-collections-grid">
+              {collectionsAtLevel.map((collection, index) => {
+                const isActive = level.selectedIndex === index;
+
+                return (
+                  <Link
+                    key={collection.id}
+                    to={`/collections/${collection.handle}`}
+                    className={`apple-collection-card ${
+                      isActive ? 'apple-collection-card--active' : ''
+                    }`}
+                    prefetch="intent"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Remember which depth was clicked; when the submenu for this
+                      // depth loads, the effect above will scroll to that section.
+                      lastClickRef.current = {depth};
+                      selectLevel(depth, index, {scrollToProducts: true});
+                    }}
+                  >
+                    <div className="apple-collection-media">
+                      {collection.image ? (
+                        <img
+                          src={`${collection.image.url}&width=300`}
+                          alt={collection.image.altText || collection.title}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="apple-collection-placeholder">
+                          <span>{collection.title?.charAt(0) || '?'}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="apple-collection-body">
+                      <h3>{collection.title}</h3>
+                      {collection.description && (
+                        <p className="apple-collection-description">
+                          {collection.description}
+                        </p>
+                      )}
+                      <span className="apple-collection-cta">Browse</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {isRoot && collectionsAtLevel.length === 0 && (
+              <p className="apple-empty-state">
+                No Apple collections are linked to the “apple” menu yet.
+              </p>
+            )}
+          </section>
+        );
+      })}
+
+      {/* PRODUCTS: leaf collection (no submenu) */}
       {activeCollection && (
         <section
           className="apple-products"
@@ -308,7 +407,9 @@ export default function AppleCategoryPage() {
                         <div className="apple-product-meta">
                           {minPrice && (
                             <span className="apple-product-price">
-                              ${minPrice}
+                              {currency
+                                ? `${currency} ${minPrice}`
+                                : `$${minPrice}`}
                             </span>
                           )}
                           <span

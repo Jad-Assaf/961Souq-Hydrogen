@@ -12,6 +12,13 @@
     --nw-text-muted: #6b7280;
 }
 
+#nw-collections-level2,
+#nw-collections-level3,
+#nw-collections-level4,
+#nw-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .nw-page {
     min-height: 100vh;

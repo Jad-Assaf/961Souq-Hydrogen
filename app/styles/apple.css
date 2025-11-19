@@ -136,6 +136,10 @@
     margin: 0 auto;
 }
 
+#apple-collections-level2, #apple-collections-level3, #apple-collections-level4, #apple-collections-level5 {
+    padding-top: 100px;
+}
+
 .apple-collections-header {
     display: flex;
     flex-direction: column;

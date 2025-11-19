@@ -13,6 +13,13 @@
     --ha-text-muted: #6b7280;
 }
 
+#ha-collections-level2,
+#ha-collections-level3,
+#ha-collections-level4,
+#ha-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .ha-page {
     min-height: 100vh;

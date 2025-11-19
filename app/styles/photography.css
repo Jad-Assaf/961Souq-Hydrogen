@@ -11,6 +11,13 @@
     --ph-text-muted: #9ca3af;
 }
 
+#ph-collections-level2,
+#ph-collections-level3,
+#ph-collections-level4,
+#ph-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .ph-page {
     min-height: 100vh;
@@ -400,6 +407,13 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 1rem;
+    justify-content: center;
+
+    @media (min-width: 1300px) {
+        grid-template-columns: repeat(auto-fit, minmax(210px, 220px));
+        justify-content: start;
+        gap: 1.5rem;
+    }
 }
 
 .ph-collection-card {

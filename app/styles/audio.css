@@ -12,6 +12,13 @@
     --au-text-muted: #9ca3af;
 }
 
+#au-collections-level2,
+#au-collections-level3,
+#au-collections-level4,
+#au-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .au-page {
     min-height: 100vh;

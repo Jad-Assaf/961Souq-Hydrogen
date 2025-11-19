@@ -12,6 +12,13 @@
     --pp-text-muted: #6b7280;
 }
 
+#pp-collections-level2,
+#pp-collections-level3,
+#pp-collections-level4,
+#pp-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .pp-page {
     min-height: 100vh;

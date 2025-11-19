@@ -13,6 +13,13 @@
     --fit-text-muted: #6b7280;
 }
 
+#fit-collections-level2,
+#fit-collections-level3,
+#fit-collections-level4,
+#fit-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .fit-page {
     min-height: 100vh;

@@ -176,6 +176,13 @@
     margin: 0 auto 3rem;
 }
 
+#gl-collections-level2,
+#gl-collections-level3,
+#gl-collections-level4,
+#gl-collections-level5 {
+    padding-top: 100px;
+}
+
 .gl-section-header {
     display: flex;
     flex-direction: column;

@@ -12,6 +12,13 @@
     --tab-text-muted: #64748b;
 }
 
+#tab-collections-level2,
+#tab-collections-level3,
+#tab-collections-level4,
+#tab-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .tab-page {
     min-height: 100vh;

@@ -12,6 +12,13 @@
     --d-text-muted: #9ca3af;
 }
 
+#d-collections-level2,
+#d-collections-level3,
+#d-collections-level4,
+#d-collections-level5 {
+    padding-top: 100px;
+}
+
 /* PAGE */
 .d-page {
     min-height: 100vh;

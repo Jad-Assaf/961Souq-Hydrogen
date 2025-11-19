@@ -22,7 +22,7 @@
     background: var(--gaming-bg);
     color: var(--gaming-text-main);
     padding: 4rem min(5vw, 4rem) 5rem;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    font-family: system-ui, -gaming-system, BlinkMacSystemFont, 'SF Pro Text',
         'SF Pro Display', sans-serif;
 }
 
@@ -231,6 +231,13 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #e5e7eb;
+}
+
+#gaming-collections-level2,
+#gaming-collections-level3,
+#gaming-collections-level4,
+#gaming-collections-level5 {
+    padding-top: 100px;
 }
 
 /* COLLECTIONS */

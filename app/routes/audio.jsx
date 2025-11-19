@@ -1,8 +1,9 @@
 // app/routes/audio.jsx
-import React, {useState, useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import audioStyles from '~/styles/audio.css?url';
+import {useMenuHierarchy} from '~/lib/useMenuHierarchy';
 
 const AUDIO_MENU_HANDLE = 'audio'; // adjust if your menu handle is different
 
@@ -82,26 +83,65 @@ export async function loader({context}) {
 
 export default function AudioCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
-  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
-    collections[0]?.handle || null,
-  );
-  const productsSectionRef = useRef(null);
 
-  const handleCollectionClick = (handle) => {
-    setSelectedCollectionHandle(handle);
-    if (productsSectionRef.current) {
-      productsSectionRef.current.scrollIntoView({
+  // Dynamic hierarchy using shared hook
+  const {
+    levels,
+    activeCollection,
+    activeProducts,
+    selectLevel,
+    productsSectionRef,
+  } = useMenuHierarchy(collections, {submenuPath: '/api/menu-submenu'});
+
+  // Auto-select first top-level collection on load (no scroll)
+  useEffect(() => {
+    if (!collections || collections.length === 0) return;
+    if (!levels || levels.length === 0) return;
+
+    const root = levels[0];
+    if (!root || root.collections.length === 0) return;
+
+    if (root.selectedIndex == null) {
+      selectLevel(0, 0, {scrollToProducts: false});
+    }
+  }, [collections, levels, selectLevel]);
+
+  // Smooth scroll between levels
+  const sectionRefs = useRef([]);
+  const lastClickRef = useRef(null);
+
+  useEffect(() => {
+    const lastClick = lastClickRef.current;
+    if (!lastClick) return;
+
+    const targetDepth = lastClick.depth + 1;
+
+    // If there is no deeper level yet, we’re still waiting for the submenu
+    // query to resolve. Do nothing and wait for the next levels update.
+    if (targetDepth >= levels.length) {
+      return;
+    }
+
+    const targetLevel = levels[targetDepth];
+
+    // If the next level exists but has no collections, either:
+    // - it’s still loading, or
+    // - there is no submenu and this was a leaf click.
+    // In the leaf case, the hook scrolls to products; we only handle
+    // real submenu sections here.
+    if (!targetLevel || !targetLevel.collections?.length) {
+      return;
+    }
+
+    const el = sectionRefs.current[targetDepth];
+    if (el) {
+      el.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       });
+      lastClickRef.current = null;
     }
-  };
-
-  const activeCollection =
-    collections.find((c) => c.handle === selectedCollectionHandle) ||
-    collections[0];
-
-  const activeProducts = activeCollection?.products?.nodes || [];
+  }, [levels]);
 
   return (
     <div className="au-page">
@@ -210,65 +250,116 @@ export default function AudioCategoryPage() {
         </div>
       </section>
 
-      {/* COLLECTION GRID */}
-      <section className="au-collections">
-        <header className="au-collections-header">
-          <h2>Shop audio collections</h2>
-          <p>
-            Move between earbuds, headphones, speakers, surround systems,
-            microphones, Rode and Pioneer gear, DJ equipment and more.
-          </p>
-        </header>
+      {/* COLLECTION LEVELS (0, 1, 2, ... unlimited) */}
+      {levels.map((level, depth) => {
+        const collectionsAtLevel = level.collections || [];
+        if (!collectionsAtLevel.length) {
+          // Don’t render empty levels
+          return null;
+        }
 
-        <div className="au-collections-grid">
-          {collections.map((collection) => (
-            <Link
-              key={collection.id}
-              to={`/collections/${collection.handle}`}
-              className={`au-collection-card ${
-                collection.handle === activeCollection?.handle
-                  ? 'au-collection-card--active'
-                  : ''
-              }`}
-              prefetch="intent"
-              onClick={(e) => {
-                e.preventDefault();
-                handleCollectionClick(collection.handle);
-              }}
-            >
-              <div className="au-collection-media">
-                {collection.image ? (
-                  <img
-                    src={`${collection.image.url}&width=300`}
-                    alt={collection.image.altText || collection.title}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="au-collection-placeholder">
-                    <span>{collection.title?.charAt(0) || '?'}</span>
-                  </div>
-                )}
-              </div>
+        const isRoot = depth === 0;
 
-              <div className="au-collection-body">
-                <h3>{collection.title}</h3>
-                {collection.description && (
-                  <p className="au-collection-description">
-                    {collection.description}
-                  </p>
-                )}
-                <span className="au-collection-cta">Browse</span>
-              </div>
-            </Link>
-          ))}
+        // Parent collection for this level (for headings)
+        let parentTitle = null;
+        if (!isRoot && levels[depth - 1]) {
+          const parentLevel = levels[depth - 1];
+          if (
+            parentLevel.selectedIndex != null &&
+            parentLevel.selectedIndex < parentLevel.collections.length
+          ) {
+            parentTitle =
+              parentLevel.collections[parentLevel.selectedIndex]?.title || null;
+          }
+        }
 
-          {collections.length === 0 && (
-            <p className="au-empty-state">
-              No Audio collections are linked to the “audio” menu yet.
-            </p>
-          )}
-        </div>
-      </section>
+        let heading = 'Shop audio collections';
+        let subheading =
+          'Move between earbuds, headphones, speakers, surround systems, microphones, Rode and Pioneer gear, DJ equipment and more.';
+
+        if (!isRoot) {
+          heading = parentTitle
+            ? `${parentTitle} sub-collections`
+            : 'Sub-collections';
+          if (depth === 1) {
+            subheading = 'Select a sub-collection to refine further.';
+          } else {
+            subheading = 'Choose a sub-collection to go deeper.';
+          }
+        }
+
+        const sectionId = `au-collections-level${depth + 1}`;
+
+        return (
+          <section
+            key={sectionId}
+            className="au-collections"
+            id={sectionId}
+            ref={(el) => {
+              sectionRefs.current[depth] = el;
+            }}
+          >
+            <header className="au-collections-header">
+              <h2>{heading}</h2>
+              <p>{subheading}</p>
+            </header>
+
+            <div className="au-collections-grid">
+              {collectionsAtLevel.map((collection, index) => {
+                const isActive = level.selectedIndex === index;
+
+                return (
+                  <Link
+                    key={collection.id}
+                    to={`/collections/${collection.handle}`}
+                    className={`au-collection-card ${
+                      isActive ? 'au-collection-card--active' : ''
+                    }`}
+                    prefetch="intent"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Remember which depth was clicked; when the submenu for this
+                      // depth loads, the effect above will scroll to that section.
+                      lastClickRef.current = {depth};
+                      selectLevel(depth, index, {scrollToProducts: true});
+                    }}
+                  >
+                    <div className="au-collection-media">
+                      {collection.image ? (
+                        <img
+                          src={`${collection.image.url}&width=300`}
+                          alt={collection.image.altText || collection.title}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="au-collection-placeholder">
+                          <span>{collection.title?.charAt(0) || '?'}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="au-collection-body">
+                      <h3>{collection.title}</h3>
+                      {collection.description && (
+                        <p className="au-collection-description">
+                          {collection.description}
+                        </p>
+                      )}
+                      <span className="au-collection-cta">Browse</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {isRoot && collectionsAtLevel.length === 0 && (
+              <p className="au-empty-state">
+                No Audio collections are linked to the “audio” menu yet.
+              </p>
+            )}
+          </section>
+        );
+      })}
 
       {/* PRODUCTS SECTION */}
       {activeCollection && (
@@ -327,9 +418,7 @@ export default function AudioCategoryPage() {
                         <h3 className="au-product-title">{product.title}</h3>
                         <div className="au-product-meta">
                           <span className="au-product-price">
-                            {hasPrice
-                              ? `$${amountStr}`
-                              : 'Call for Price'}
+                            {hasPrice ? `$${amountStr}` : 'Call for Price'}
                           </span>
                           <span
                             className={`au-product-badge ${

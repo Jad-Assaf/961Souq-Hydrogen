@@ -1,8 +1,9 @@
 // app/routes/mobiles.jsx
-import React, {useState, useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import mobilesStyles from '~/styles/mobiles.css?url';
+import {useMenuHierarchy} from '~/lib/useMenuHierarchy';
 
 const MOBILES_MENU_HANDLE = 'mobiles'; // adjust if your menu handle is different
 
@@ -82,26 +83,65 @@ export async function loader({context}) {
 
 export default function MobilesCategoryPage() {
   const {menuTitle, collections} = useLoaderData();
-  const [selectedCollectionHandle, setSelectedCollectionHandle] = useState(
-    collections[0]?.handle || null,
-  );
-  const productsSectionRef = useRef(null);
 
-  const handleCollectionClick = (handle) => {
-    setSelectedCollectionHandle(handle);
-    if (productsSectionRef.current) {
-      productsSectionRef.current.scrollIntoView({
+  // Dynamic hierarchy using shared hook
+  const {
+    levels,
+    activeCollection,
+    activeProducts,
+    selectLevel,
+    productsSectionRef,
+  } = useMenuHierarchy(collections, {submenuPath: '/api/menu-submenu'});
+
+  // Auto-select first top-level collection on load (no scroll)
+  useEffect(() => {
+    if (!collections || collections.length === 0) return;
+    if (!levels || levels.length === 0) return;
+
+    const root = levels[0];
+    if (!root || root.collections.length === 0) return;
+
+    if (root.selectedIndex == null) {
+      selectLevel(0, 0, {scrollToProducts: false});
+    }
+  }, [collections, levels, selectLevel]);
+
+  // Smooth scroll between levels
+  const sectionRefs = useRef([]);
+  const lastClickRef = useRef(null);
+
+  useEffect(() => {
+    const lastClick = lastClickRef.current;
+    if (!lastClick) return;
+
+    const targetDepth = lastClick.depth + 1;
+
+    // If there is no deeper level yet, we’re still waiting for the submenu
+    // query to resolve. Do nothing and wait for the next levels update.
+    if (targetDepth >= levels.length) {
+      return;
+    }
+
+    const targetLevel = levels[targetDepth];
+
+    // If the next level exists but has no collections, either:
+    // - it’s still loading, or
+    // - there is no submenu and this was a leaf click.
+    // In the leaf case, the hook scrolls to products; we only handle
+    // real submenu sections here.
+    if (!targetLevel || !targetLevel.collections?.length) {
+      return;
+    }
+
+    const el = sectionRefs.current[targetDepth];
+    if (el) {
+      el.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       });
+      lastClickRef.current = null;
     }
-  };
-
-  const activeCollection =
-    collections.find((c) => c.handle === selectedCollectionHandle) ||
-    collections[0];
-
-  const activeProducts = activeCollection?.products?.nodes || [];
+  }, [levels]);
 
   return (
     <div className="mob-page">
@@ -183,65 +223,116 @@ export default function MobilesCategoryPage() {
         </div>
       </section>
 
-      {/* COLLECTION GRID */}
-      <section className="mob-collections">
-        <header className="mob-collections-header">
-          <h2>Shop mobile collections</h2>
-          <p>
-            Browse by brand, phone type, or accessory – from iPhone and Samsung
-            to chargers, power banks, and gaming-focused models.
-          </p>
-        </header>
+      {/* COLLECTION LEVELS (0, 1, 2, ... unlimited) */}
+      {levels.map((level, depth) => {
+        const collectionsAtLevel = level.collections || [];
+        if (!collectionsAtLevel.length) {
+          // Don’t render empty levels
+          return null;
+        }
 
-        <div className="mob-collections-grid">
-          {collections.map((collection) => (
-            <Link
-              key={collection.id}
-              to={`/collections/${collection.handle}`}
-              className={`mob-collection-card ${
-                collection.handle === activeCollection?.handle
-                  ? 'mob-collection-card--active'
-                  : ''
-              }`}
-              prefetch="intent"
-              onClick={(e) => {
-                e.preventDefault();
-                handleCollectionClick(collection.handle);
-              }}
-            >
-              <div className="mob-collection-media">
-                {collection.image ? (
-                  <img
-                    src={`${collection.image.url}&width=300`}
-                    alt={collection.image.altText || collection.title}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="mob-collection-placeholder">
-                    <span>{collection.title?.charAt(0) || '?'}</span>
-                  </div>
-                )}
-              </div>
+        const isRoot = depth === 0;
 
-              <div className="mob-collection-body">
-                <h3>{collection.title}</h3>
-                {collection.description && (
-                  <p className="mob-collection-description">
-                    {collection.description}
-                  </p>
-                )}
-                <span className="mob-collection-cta">Browse</span>
-              </div>
-            </Link>
-          ))}
+        // Parent collection for this level (for headings)
+        let parentTitle = null;
+        if (!isRoot && levels[depth - 1]) {
+          const parentLevel = levels[depth - 1];
+          if (
+            parentLevel.selectedIndex != null &&
+            parentLevel.selectedIndex < parentLevel.collections.length
+          ) {
+            parentTitle =
+              parentLevel.collections[parentLevel.selectedIndex]?.title || null;
+          }
+        }
 
-          {collections.length === 0 && (
-            <p className="mob-empty-state">
-              No Mobile collections are linked to the “mobiles” menu yet.
-            </p>
-          )}
-        </div>
-      </section>
+        let heading = 'Shop mobile collections';
+        let subheading =
+          'Browse by brand, phone type, or accessory – from iPhone and Samsung to chargers, power banks, and gaming-focused models.';
+
+        if (!isRoot) {
+          heading = parentTitle
+            ? `${parentTitle} sub-collections`
+            : 'Sub-collections';
+          if (depth === 1) {
+            subheading = 'Select a sub-collection to refine further.';
+          } else {
+            subheading = 'Choose a sub-collection to go deeper.';
+          }
+        }
+
+        const sectionId = `mob-collections-level${depth + 1}`;
+
+        return (
+          <section
+            key={sectionId}
+            className="mob-collections"
+            id={sectionId}
+            ref={(el) => {
+              sectionRefs.current[depth] = el;
+            }}
+          >
+            <header className="mob-collections-header">
+              <h2>{heading}</h2>
+              <p>{subheading}</p>
+            </header>
+
+            <div className="mob-collections-grid">
+              {collectionsAtLevel.map((collection, index) => {
+                const isActive = level.selectedIndex === index;
+
+                return (
+                  <Link
+                    key={collection.id}
+                    to={`/collections/${collection.handle}`}
+                    className={`mob-collection-card ${
+                      isActive ? 'mob-collection-card--active' : ''
+                    }`}
+                    prefetch="intent"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Remember which depth was clicked; when the submenu for this
+                      // depth loads, the effect above will scroll to that section.
+                      lastClickRef.current = {depth};
+                      selectLevel(depth, index, {scrollToProducts: true});
+                    }}
+                  >
+                    <div className="mob-collection-media">
+                      {collection.image ? (
+                        <img
+                          src={`${collection.image.url}&width=300`}
+                          alt={collection.image.altText || collection.title}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="mob-collection-placeholder">
+                          <span>{collection.title?.charAt(0) || '?'}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mob-collection-body">
+                      <h3>{collection.title}</h3>
+                      {collection.description && (
+                        <p className="mob-collection-description">
+                          {collection.description}
+                        </p>
+                      )}
+                      <span className="mob-collection-cta">Browse</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {isRoot && collectionsAtLevel.length === 0 && (
+              <p className="mob-empty-state">
+                No Mobile collections are linked to the “mobiles” menu yet.
+              </p>
+            )}
+          </section>
+        );
+      })}
 
       {/* PRODUCTS SECTION */}
       {activeCollection && (
@@ -300,9 +391,7 @@ export default function MobilesCategoryPage() {
                         <h3 className="mob-product-title">{product.title}</h3>
                         <div className="mob-product-meta">
                           <span className="mob-product-price">
-                            {hasPrice
-                              ? `$${amountStr}`
-                              : 'Call for Price'}
+                            {hasPrice ? `$${amountStr}` : 'Call for Price'}
                           </span>
                           <span
                             className={`mob-product-badge ${
