@@ -328,7 +328,7 @@ export default function AudioCategoryPage() {
                         <div className="au-product-meta">
                           <span className="au-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

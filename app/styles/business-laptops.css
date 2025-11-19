@@ -577,6 +577,7 @@ main {
     font-size: 0.95rem;
     font-weight: 500;
     color: #111827;
+    min-height: 110px;
 }
 
 .bl-product-meta {
@@ -589,7 +590,7 @@ main {
 .bl-product-price {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #111827;
+    color: #ff3636;
 }
 
 .bl-product-badge {

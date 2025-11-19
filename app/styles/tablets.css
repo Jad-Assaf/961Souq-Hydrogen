@@ -634,6 +634,7 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: #0f172a;
+    min-height: 110px;
 }
 
 .tab-product-meta {
@@ -646,7 +647,7 @@
 .tab-product-price {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #0f172a;
+    color: #ff3636;
 }
 
 /* badge */

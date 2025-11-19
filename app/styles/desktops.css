@@ -598,6 +598,7 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: #f9fafb;
+    min-height: 110px;
 }
 
 .d-product-meta {
@@ -610,7 +611,7 @@
 .d-product-price {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #e5e7eb;
+    color: #ff3636;
 }
 
 .d-product-badge {

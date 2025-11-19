@@ -315,7 +315,7 @@ export default function AccessoriesCategoryPage() {
                         <div className="acc-product-meta">
                           <span className="acc-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

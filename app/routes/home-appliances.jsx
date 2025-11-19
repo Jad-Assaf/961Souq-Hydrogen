@@ -297,7 +297,7 @@ export default function HomeAppliancesCategoryPage() {
                         <div className="ha-product-meta">
                           <span className="ha-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

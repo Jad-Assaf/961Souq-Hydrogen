@@ -42,7 +42,6 @@ const APPLE_MENU_QUERY = `#graphql
                 priceRange {
                   minVariantPrice {
                     amount
-                    currencyCode
                   }
                 }
               }
@@ -309,7 +308,7 @@ export default function AppleCategoryPage() {
                         <div className="apple-product-meta">
                           {minPrice && (
                             <span className="apple-product-price">
-                              {currency} {minPrice}
+                              ${minPrice}
                             </span>
                           )}
                           <span

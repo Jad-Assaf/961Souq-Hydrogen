@@ -284,7 +284,7 @@ export default function GamingCategoryPage() {
                         <div className="gaming-product-meta">
                           {minPrice && (
                             <span className="gaming-product-price">
-                              {currency} {minPrice}
+                              ${minPrice}
                             </span>
                           )}
                           <span

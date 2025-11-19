@@ -568,6 +568,7 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: #111827;
+    min-height: 110px;
 }
 
 .acc-product-meta {
@@ -580,7 +581,7 @@
 .acc-product-price {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #111827;
+    color: #ff3636;
 }
 
 /* badge */

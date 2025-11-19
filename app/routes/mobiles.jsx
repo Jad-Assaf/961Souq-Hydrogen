@@ -301,7 +301,7 @@ export default function MobilesCategoryPage() {
                         <div className="mob-product-meta">
                           <span className="mob-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

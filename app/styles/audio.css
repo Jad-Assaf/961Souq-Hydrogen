@@ -832,6 +832,7 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: #f9fafb;
+    min-height: 110px;
 }
 
 .au-product-meta {
@@ -844,7 +845,7 @@
 .au-product-price {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #f9fafb;
+    color: #ff3636;
 }
 
 /* badge */

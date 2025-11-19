@@ -258,7 +258,7 @@ export default function GamingLaptopsCategoryPage() {
                         <div className="gl-product-meta">
                           {minPrice && (
                             <span className="gl-product-price">
-                              {currency} {minPrice}
+                              ${minPrice}
                             </span>
                           )}
                           <span

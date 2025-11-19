@@ -295,7 +295,7 @@ export default function MonitorsCategoryPage() {
                         <div className="mon-product-meta">
                           <span className="mon-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

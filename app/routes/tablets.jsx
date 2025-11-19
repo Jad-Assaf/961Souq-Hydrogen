@@ -289,7 +289,7 @@ export default function TabletsCategoryPage() {
                         <div className="tab-product-meta">
                           <span className="tab-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

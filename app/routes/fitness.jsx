@@ -339,7 +339,7 @@ export default function FitnessCategoryPage() {
                         <div className="fit-product-meta">
                           <span className="fit-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

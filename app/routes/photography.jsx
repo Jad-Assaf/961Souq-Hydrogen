@@ -311,7 +311,7 @@ export default function PhotographyCategoryPage() {
                         <div className="ph-product-meta">
                           <span className="ph-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

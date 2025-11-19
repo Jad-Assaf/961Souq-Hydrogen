@@ -291,7 +291,7 @@ export default function NetworkingCategoryPage() {
                         <div className="nw-product-meta">
                           <span className="nw-product-price">
                             {hasPrice
-                              ? `${currency} ${amountStr}`
+                              ? `$${amountStr}`
                               : 'Call for Price'}
                           </span>
                           <span

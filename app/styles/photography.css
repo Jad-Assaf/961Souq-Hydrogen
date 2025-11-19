@@ -637,6 +637,7 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: #e5e7eb;
+    min-height: 110px;
 }
 
 .ph-product-meta {
@@ -649,7 +650,7 @@
 .ph-product-price {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #f9fafb;
+    color: #ff3636;
 }
 
 /* badge */

@@ -624,6 +624,7 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: #064e3b;
+    min-height: 110px;
 }
 
 .fit-product-meta {
@@ -636,7 +637,7 @@
 .fit-product-price {
     font-size: 0.9rem;
     font-weight: 500;
-    color: #111827;
+    color: #ff3636;
 }
 
 /* badge */
