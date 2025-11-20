@@ -293,7 +293,7 @@ function SearchPageSuggestions({predictive, query}) {
             {queries.map((item) => (
               <li key={item.text} className="suggestion-pill-item">
                 <a
-                  href={`/search-test?q=${encodeURIComponent(item.text)}`}
+                  href={`/search?q=${encodeURIComponent(item.text)}`}
                   className="suggestion-pill-link"
                 >
                   {item.text}
@@ -349,7 +349,7 @@ function SearchResultsPagination({query, pagination}) {
     if (query) params.set('q', query);
     if (cursor) params.set('cursor', cursor);
     if (direction) params.set('direction', direction);
-    return `/search-test?${params.toString()}`;
+    return `/search?${params.toString()}`;
   };
 
   return (

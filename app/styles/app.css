@@ -5339,10 +5339,11 @@ svg.icon.icon--full-color {
     max-width: 100%;
   }
 }
+
 @media (max-width: 1024px) {
   .search-bar-wrapper--open {
-      top: 0;
-    }
+    top: 0;
+  }
 }
 
 .search-overlay {
@@ -5434,6 +5435,8 @@ svg.icon.icon--full-color {
   backdrop-filter: blur(16px);
   transform-origin: top center;
   animation: searchDropdownIn 0.12s ease-out;
+  height: 75vh;
+  overflow-y: auto;
 }
 
 @keyframes searchDropdownIn {
@@ -5453,18 +5456,11 @@ svg.icon.icon--full-color {
 .suggestions-pro-col {
   display: flex;
   margin-top: 15px;
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-  }
+  flex-direction: column;
 }
 
 .suggestions-pro-col .suggestions-section {
-  width: 50%;
-
-  @media (max-width: 1024px) {
-    width: 100%;
-  }
+  width: 100%;
 }
 
 .suggestions-section--pills {
@@ -5578,18 +5574,9 @@ svg.icon.icon--full-color {
 }
 
 .suggestions-section+.suggestions-section {
-  border-left: 1px solid #f3f4f6;
-  padding-left: 0.75rem;
-  margin-left: 0.75rem;
-
-  @media (max-width: 1024px) {
-    border-top: 1px solid #f3f4f6;
-    padding-top: 0.75rem;
-    margin-top: 0.75rem;
-    border-left: none;
-    padding-left: 0;
-    margin-left: 0;
-  }
+  border-top: 1px solid #f3f4f6;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .suggestions-heading {
@@ -5611,9 +5598,10 @@ svg.icon.icon--full-color {
 
 .suggestions-list--grid {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.6rem;
+  flex-wrap: nowrap;
+  justify-content: start;
+  gap: 20px;
+  overflow-x: auto;
 }
 
 .suggestion-item+.suggestion-item {
@@ -5638,8 +5626,8 @@ svg.icon.icon--full-color {
 
 .suggestion-card {
   list-style: none;
-  flex: 1 1 130px;
-  max-width: 130px;
+  flex: 1 1 150px;
+  max-width: 150px;
 }
 
 .suggestion-card-link {
@@ -5655,6 +5643,8 @@ svg.icon.icon--full-color {
   background: #ffffff;
   transition: border-color 0.14s ease, background 0.14s ease,
     box-shadow 0.14s ease, transform 0.1s ease;
+  height: 180px;
+  width: 150px;
 }
 
 .suggestion-card-link:hover {
@@ -5664,8 +5654,8 @@ svg.icon.icon--full-color {
 }
 
 .suggestion-card-image {
-  width: 52px;
-  height: 52px;
+  width: 70%;
+  height: auto;
   object-fit: cover;
   border-radius: 0.65rem;
   background: #f3f4f6;
@@ -5770,7 +5760,7 @@ svg.icon.icon--full-color {
   aspect-ratio: 4 / 5;
   background: #fff;
   overflow: hidden;
-  padding-top: 10px;
+  padding: 25px 0;
 }
 
 .search-result-image {
@@ -5878,8 +5868,6 @@ svg.icon.icon--full-color {
   .search-suggestions {
     padding-inline: 0.75rem;
     max-width: 100%;
-    height: 75vh;
-    overflow-y: auto;
   }
 
   .suggestions-list--products {
