@@ -111,7 +111,6 @@ const SEARCH_AND_PREDICTIVE_QUERY = `#graphql
   }
 `;
 
-
 export async function loader({request, context}) {
   const {storefront} = context;
   const url = new URL(request.url);
@@ -201,8 +200,8 @@ export default function SearchTestRoute() {
         <h1 className="search-title">Search Results</h1>
       </div>
 
-      {/* Re-usable search bar with instant results */}
-      {/* <InstantSearchBar initialQuery={query} action="/search-test" /> */}
+      {/* If you want the bar on the results page too, uncomment: */}
+      {/* <InstantSearchBar initialQuery={query} action="/search" /> */}
 
       <SearchResultsGrid
         query={query}
@@ -387,6 +386,7 @@ function SearchResultsPagination({query, pagination}) {
 
 function ProductCard({product}) {
   const image = product.featuredImage;
+  const minVariant = product.priceRange?.minVariantPrice;
 
   return (
     <a href={`/products/${product.handle}`} className="search-result-card">
@@ -402,21 +402,24 @@ function ProductCard({product}) {
       )}
       <div className="search-result-info">
         <h3 className="search-result-title">{product.title}</h3>
-        {product.priceRange?.minVariantPrice && (
-          <p className="search-result-price">
-            {formatMoney(product.priceRange.minVariantPrice)}
-          </p>
+        {minVariant && (
+          <p className="search-result-price">{formatMoney(minVariant)}</p>
         )}
       </div>
     </a>
   );
 }
 
+/**
+ * Formats money or returns "Call for price" when amount is 0 / invalid.
+ */
 function formatMoney(price) {
-  if (!price) return '';
+  if (!price) return 'Call for price';
   const {amount, currencyCode} = price;
   const value = Number(amount);
-  if (Number.isNaN(value)) return `${amount} ${currencyCode}`;
+  if (!Number.isFinite(value) || value <= 0) {
+    return 'Call for price';
+  }
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: currencyCode || 'USD',

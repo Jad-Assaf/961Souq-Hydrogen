@@ -300,11 +300,16 @@ function InstantSuggestions({
   );
 }
 
+/**
+ * Formats money or returns "Call for price" when amount is 0 / invalid.
+ */
 function formatMoney(price) {
-  if (!price) return '';
+  if (!price) return 'Call for price';
   const {amount, currencyCode} = price;
   const value = Number(amount);
-  if (Number.isNaN(value)) return `${amount} ${currencyCode}`;
+  if (!Number.isFinite(value) || value <= 0) {
+    return 'Call for price';
+  }
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: currencyCode || 'USD',

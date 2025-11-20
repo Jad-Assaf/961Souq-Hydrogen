@@ -64,7 +64,6 @@ h2 {
   top: 0;
   z-index: 2;
   background: rgba(255, 255, 255, 1);
-  backdrop-filter: blur(25px);
   padding: 80px 5px 0;
   justify-content: flex-start;
 }
@@ -5602,6 +5601,10 @@ svg.icon.icon--full-color {
   justify-content: start;
   gap: 20px;
   overflow-x: auto;
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  padding: 20px;
+  border-radius: 20px;
 }
 
 .suggestion-item+.suggestion-item {
@@ -5728,8 +5731,12 @@ svg.icon.icon--full-color {
 .search-results-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: start;
   gap: 1.2rem;
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  padding: 20px;
+  border-radius: 20px;
 }
 
 /* product cards will define how many per row */
