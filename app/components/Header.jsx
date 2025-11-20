@@ -8,6 +8,7 @@ import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch fun
 import AlgoliaSearch from './StorefrontSearch';
 import {useWishlist} from '~/lib/WishlistContext';
 import { useOptimisticCart } from '@shopify/hydrogen';
+import { InstantSearchBar } from './InstantSearchBar';
 
 // import StorefrontSearch from './StorefrontSearch';
 
@@ -392,7 +393,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               height="47"
             />
           </NavLink>
-          <AlgoliaSearch />
+          <InstantSearchBar action="/search-test" />
+          {/* <AlgoliaSearch /> */}
           <div className="header-ctas">
             <NavLink
               prefetch="intent"
@@ -458,7 +460,16 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
 
                 return (
                   <div key={item.id} className="mobile-menu-item">
-                    <NavLink to={mobilePath} onClick={closeMobileMenu} style={{display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0'}}>
+                    <NavLink
+                      to={mobilePath}
+                      onClick={closeMobileMenu}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 0',
+                      }}
+                    >
                       {item.imageUrl && (
                         <div
                           style={{
