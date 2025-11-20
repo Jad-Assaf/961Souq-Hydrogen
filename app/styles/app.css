@@ -5890,11 +5890,12 @@ svg.icon.icon--full-color {
     padding-bottom: 0.25rem;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
+    height: 250px;
   }
 
   .suggestion-card {
-    flex: 0 0 130px;
-    max-width: 130px;
+    flex: 0 0 150px;
+    max-width: 150px;
     scroll-snap-align: start;
   }
 
