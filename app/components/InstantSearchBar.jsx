@@ -4,7 +4,7 @@ import {Form, useFetcher, useLocation} from '@remix-run/react';
 
 export function InstantSearchBar({
   initialQuery = '',
-  action = '/search-test',
+  action = '/search',
   placeholder = 'Search products & collections...',
 }) {
   const fetcher = useFetcher();

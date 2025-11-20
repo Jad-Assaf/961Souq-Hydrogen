@@ -393,7 +393,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               height="47"
             />
           </NavLink>
-          <InstantSearchBar action="/search-test" />
+          <InstantSearchBar action="/search" />
           {/* <AlgoliaSearch /> */}
           <div className="header-ctas">
             <NavLink
