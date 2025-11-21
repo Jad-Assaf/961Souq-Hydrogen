@@ -215,7 +215,7 @@ function InstantSuggestions({
       {/* Query suggestions as pills */}
       {queries.length > 0 && (
         <div className="suggestions-section suggestions-section--pills">
-          <p className="suggestions-heading">Suggestions</p>
+          {/* <p className="suggestions-heading">Suggestions</p> */}
           <ul className="suggestions-list suggestions-list--pills">
             {queries.map((item) => (
               <li key={item.text} className="suggestion-pill-item">

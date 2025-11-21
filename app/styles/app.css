@@ -5439,8 +5439,8 @@ svg.icon.icon--full-color {
   backdrop-filter: blur(16px);
   transform-origin: top center;
   animation: searchDropdownIn 0.12s ease-out;
-  height: 75vh;
-  overflow-y: auto;
+  height: 70vh;
+  overflow: auto;
 }
 
 @keyframes searchDropdownIn {
@@ -5498,7 +5498,7 @@ svg.icon.icon--full-color {
   color: #111827;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.35);
+  /* box-shadow: 0 4px 12px rgba(148, 163, 184, 0.35); */
   transition: background 0.15s ease, color 0.15s ease,
     box-shadow 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
 }
@@ -5508,7 +5508,7 @@ svg.icon.icon--full-color {
   color: #f9fafb;
   border-color: #0f172a;
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+  /* box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35); */
 }
 
 /* Products: one per row inside dropdown */
@@ -5885,8 +5885,8 @@ svg.icon.icon--full-color {
   }
 
   .suggestions-list--products {
-    max-height: 350px;
-    overflow-y: auto;
+    /* max-height: 350px;
+    overflow-y: auto; */
   }
 
   /* Collections: horizontal row, scrollable, title under image */
