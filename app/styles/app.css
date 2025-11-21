@@ -5607,7 +5607,7 @@ svg.icon.icon--full-color {
   flex-wrap: nowrap;
   justify-content: start;
   gap: 20px;
-  overflow-x: auto;
+  overflow: auto hidden;
   background: #fff;
   border: 1px solid rgba(226, 232, 240, 0.9);
   padding: 20px;
