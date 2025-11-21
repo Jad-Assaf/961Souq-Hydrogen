@@ -380,6 +380,13 @@ export default function AppleCategoryPage() {
                   const currency =
                     product.priceRange?.minVariantPrice?.currencyCode ?? '';
                   const isAvailable = product.availableForSale;
+                  const minPriceAmount = Number(
+                    product.priceRange?.minVariantPrice?.amount ?? 0,
+                  );
+                  const displayPrice =
+                    !Number.isFinite(minPriceAmount) || minPriceAmount <= 0
+                      ? 'Call for price'
+                      : `$${minPriceAmount}`;
 
                   return (
                     <Link
@@ -405,13 +412,9 @@ export default function AppleCategoryPage() {
                       <div className="apple-product-body">
                         <h3 className="apple-product-title">{product.title}</h3>
                         <div className="apple-product-meta">
-                          {minPrice && (
-                            <span className="apple-product-price">
-                              {currency
-                                ? `$${minPrice}`
-                                : `$${minPrice}`}
-                            </span>
-                          )}
+                          <span className="apple-product-price">
+                            {displayPrice}
+                          </span>
                           <span
                             className={`apple-product-badge ${
                               isAvailable

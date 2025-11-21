@@ -321,6 +321,13 @@ export default function GamingLaptopsCategoryPage() {
                   const imageUrl = product.featuredImage?.url
                     ? `${product.featuredImage.url}&width=300`
                     : null;
+                  const minPriceAmount = Number(
+                    product.priceRange?.minVariantPrice?.amount ?? 0,
+                  );
+                  const displayPrice =
+                    !Number.isFinite(minPriceAmount) || minPriceAmount <= 0
+                      ? 'Call for price'
+                      : `$${minPriceAmount}`;
 
                   return (
                     <Link
@@ -348,13 +355,9 @@ export default function GamingLaptopsCategoryPage() {
                       <div className="gl-product-body">
                         <h3 className="gl-product-title">{product.title}</h3>
                         <div className="gl-product-meta">
-                          {minPrice && (
-                            <span className="gl-product-price">
-                              {currency
-                                ? `$${minPrice}`
-                                : `$${minPrice}`}
-                            </span>
-                          )}
+                          <span className="gl-product-price">
+                            {displayPrice}
+                          </span>
                           <span
                             className={`gl-product-badge ${
                               isAvailable

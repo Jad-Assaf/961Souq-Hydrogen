@@ -348,6 +348,13 @@ export default function GamingCategoryPage() {
                   const currency =
                     product.priceRange?.minVariantPrice?.currencyCode ?? '';
                   const isAvailable = product.availableForSale;
+                  const minPriceAmount = Number(
+                    product.priceRange?.minVariantPrice?.amount ?? 0,
+                  );
+                  const displayPrice =
+                    !Number.isFinite(minPriceAmount) || minPriceAmount <= 0
+                      ? 'Call for price'
+                      : `$${minPriceAmount}`;
 
                   return (
                     <Link
@@ -375,13 +382,9 @@ export default function GamingCategoryPage() {
                           {product.title}
                         </h3>
                         <div className="gaming-product-meta">
-                          {minPrice && (
-                            <span className="gaming-product-price">
-                              {currency
-                                ? `$${minPrice}`
-                                : `$${minPrice}`}
-                            </span>
-                          )}
+                          <span className="gaming-product-price">
+                            {displayPrice}
+                          </span>
                           <span
                             className={`gaming-product-badge ${
                               isAvailable

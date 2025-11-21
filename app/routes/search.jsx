@@ -26,6 +26,7 @@ const SEARCH_AND_PREDICTIVE_QUERY = `#graphql
         VARIANTS_TITLE
         VENDOR
         VARIANTS_SKU
+        TAG
       ]
     ) {
       products {
@@ -71,6 +72,7 @@ const SEARCH_AND_PREDICTIVE_QUERY = `#graphql
         text
       }
     }
+
     search(
       query: $query
       types: [PRODUCT]
