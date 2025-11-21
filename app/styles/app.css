@@ -5352,6 +5352,11 @@ svg.icon.icon--full-color {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 1;
+  @media (min-width: 1025px) {
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 .search-form {
@@ -5468,12 +5473,13 @@ svg.icon.icon--full-color {
 
 .suggestions-list--pills {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.45rem;
   list-style: none;
   margin: 0;
-  padding: 0;
-  justify-content: center;
+  padding: 5px !important;
+  justify-content: start;
+  overflow-x: auto;
 }
 
 .suggestion-pill-item {
