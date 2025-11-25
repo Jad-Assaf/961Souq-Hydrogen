@@ -910,6 +910,77 @@ export default function Product() {
                 for package return. Please note that exchanges initiated without
                 prior authorization will not be accepted.
               </p>
+              <div class="policy-container">
+                <h3>Shipping Policy</h3>
+                <p>
+                  We offer nationwide shipping across Lebanon, facilitated by
+                  our dedicated delivery team servicing the Beirut district and
+                  through our partnership with Wakilni for orders beyond Beirut.
+                </p>
+                <p>
+                  Upon placing an order, we provide estimated shipping and
+                  delivery dates tailored to your item's availability and
+                  selected product options. For precise shipping details, kindly
+                  reach out to us through the contact information listed in our
+                  Contact Us section.
+                </p>
+                <p>
+                  Please be aware that shipping rates may vary depending on the
+                  destination.
+                </p>
+                <h3>Exchange Policy</h3>
+                <p>
+                  We operate a 3-day exchange policy, granting you 3 days from
+                  receipt of your item to initiate an exchange.
+                </p>
+                <p>
+                  To qualify for an exchange, your item must remain in its
+                  original condition, unworn or unused, with tags intact, and in
+                  its original unsealed packaging. Additionally, you will need
+                  to provide a receipt or proof of purchase.
+                </p>
+                <p>
+                  To initiate an exchange, please contact us at
+                  admin@961souq.com. Upon approval of your exchange request, we
+                  will furnish you with an exchange shipping label along with
+                  comprehensive instructions for package return. Please note
+                  that exchanges initiated without prior authorization will not
+                  be accepted.
+                </p>
+                <p>
+                  Should you encounter any damages or issues upon receiving your
+                  order, please inspect the item immediately and notify us
+                  promptly. We will swiftly address any defects, damages, or
+                  incorrect shipments to ensure your satisfaction.
+                </p>
+                <h3 style={{color: '#2172af'}}>
+                  Exceptions / Non-exchangeable Items
+                </h3>
+                <p>
+                  Certain items are exempt from our exchange policy, including{' '}
+                  <strong style={{color: '#2172af'}}>mobile phones</strong>,
+                  perishable goods (such as{' '}
+                  <strong style={{color: '#2172af'}}>headsets</strong>,{' '}
+                  <strong style={{color: '#2172af'}}>earphones</strong>, and{' '}
+                  <strong style={{color: '#2172af'}}>network card </strong>
+                  or <strong style={{color: '#2172af'}}>wifi routers</strong>
+                  ), custom-made products (such as{' '}
+                  <strong style={{color: '#2172af'}}>
+                    special orders
+                  </strong> or{' '}
+                  <strong style={{color: '#2172af'}}>personalized items</strong>
+                  ), and{' '}
+                  <strong style={{color: '#2172af'}}>pre-ordered goods</strong>.
+                  For queries regarding specific items, please reach out to us.
+                </p>
+                <p>
+                  Unfortunately, we are{' '}
+                  <strong style={{color: '#2172af'}}>
+                    unable to accommodate exchanges for sale items or gift
+                    cards.
+                  </strong>
+                </p>
+              </div>
             </div>
           )}
 
