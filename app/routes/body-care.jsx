@@ -244,7 +244,7 @@ export default function BodyCareShelfRoute() {
                           <div className="bcs-bottle-meta">
                             {price && (
                               <span className="bcs-bottle-price">
-                                {price.amount} {price.currencyCode}
+                                ${price.amount}0
                               </span>
                             )}
                             {!product.availableForSale && (
