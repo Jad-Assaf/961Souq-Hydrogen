@@ -446,7 +446,7 @@
     display: flex;
     align-items: flex-start;
     gap: 1.4rem;
-    padding: 0.6rem 0.3rem 0.3rem;
+    padding: 25px 0;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -622,7 +622,7 @@
     }
 
     .bcs-hero-illustration {
-        justify-self: flex-start;
+        justify-self: center;
     }
 
     .bcs-wall {
