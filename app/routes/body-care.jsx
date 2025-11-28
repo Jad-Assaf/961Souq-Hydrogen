@@ -224,7 +224,7 @@ export default function BodyCareShelfRoute() {
                           <div className="bcs-bottle-image-wrap">
                             {image?.url ? (
                               <img
-                                src={image.url}
+                                src={`${image.url}&width=300`}
                                 alt={image.altText || product.title}
                                 width={image.width || 400}
                                 height={image.height || 400}
