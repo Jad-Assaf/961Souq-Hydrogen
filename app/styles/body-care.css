@@ -66,10 +66,17 @@
 
 .bb-hero-glass .bb-hero-title {
     color: #f9fafb;
+    font-weight: 600;
 }
 
 .bb-hero-glass .bb-hero-sub {
-    color: rgba(226, 232, 240, 0.95);
+    color: rgba(204, 204, 204, 0.95);
+    font-style: italic;
+    font-weight: 200;
+    @media (max-width: 640px) {
+        font-size: 0.8rem;
+        letter-spacing: 0.1;
+    }
 }
 
 .bb-hero-glass .bb-hero-count,
@@ -92,11 +99,12 @@
     letter-spacing: -0.06em;
     text-transform: uppercase;
     color: #020617;
+    margin-bottom: 15px;
 }
 
 .bb-hero-sub {
     margin-top: 0.9rem;
-    font-size: 0.96rem;
+    font-size: 0.9rem;
     color: #4b5563;
     line-height: 1.2;
     max-width: 34rem;
@@ -112,8 +120,8 @@
 
 .bb-hero-count {
     font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
+    /* text-transform: uppercase; */
+    letter-spacing: 0.1em;
     color: #9ca3af;
 }
 
@@ -359,7 +367,7 @@
     position: sticky;
     top: 135px;
     margin-bottom: 30px;
-    z-index: 2;
+    z-index: 1;
 }
 
 .bb-filter-card {
@@ -558,7 +566,7 @@
 .bb-card-category {
     font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.1em;
     color: #6b7280;
 }
 

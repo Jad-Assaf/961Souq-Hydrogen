@@ -179,15 +179,12 @@ export default function BodyCareRoute() {
         <div className="bb-hero-left">
           <div className="bb-hero-glass">
             <p className="bb-hero-eyebrow">Health &amp; beauty · Body line</p>
-            <h1 className="bb-hero-title">
-              Body care,
-              <br />
-              in one wall.
-            </h1>
+            <h1 className="bb-hero-title">Cosmetics</h1>
             <p className="bb-hero-sub">
-              A focused view of body mist, spray and cream from the
-              health-beauty collection. Use the filters on the left to browse by
-              line.
+              Discover body mists, sprays, creams and more, curated in one place
+              and inspired by the kind of cosmetics you love from Bath & Body
+              Works and Sephora—so you can quickly find your next everyday
+              favorite.
             </p>
             <div className="bb-hero-meta">
               <span className="bb-hero-count">
