@@ -181,17 +181,18 @@ export async function loader({request, context}) {
   }
 
   try {
-    // 2) Load deferred & critical data in parallel
     const deferredData = await loadDeferredData({request, context});
     const criticalData = await loadCriticalData({request, context});
     const {storefront, env} = context;
 
-    // 3) Commit the session so the cart ID (and any other session data) is set as a cookie
     const session = context.session;
     const headers = new Headers();
     headers.append('Set-Cookie', await session.commit());
 
-    // 4) Return all data, with Set-Cookie on the response
+    // ↙ add these two lines
+    headers.set('X-Frame-Options', 'DENY');
+    headers.set('X-Content-Type-Options', 'nosniff');
+
     return data(
       {
         ...deferredData,
@@ -213,7 +214,11 @@ export async function loader({request, context}) {
     );
   } catch (error) {
     console.error('Loader error:', error);
-    throw new Response('Failed to load data', {status: 500});
+    // include headers on error responses too
+    return new Response('Failed to load data', {
+      status: 500,
+      headers: SECURITY_HEADERS,
+    });
   }
 }
 

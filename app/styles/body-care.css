@@ -22,6 +22,7 @@
 
 .bb-hero {
     max-width: 1180px;
+    height: 400px;
     margin: 0 auto 2.4rem;
     padding: 1.9rem 1.9rem 2.1rem;
     border-radius: 20px;
