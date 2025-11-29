@@ -1,5 +1,5 @@
 // app/routes/body-care.jsx
-import React from 'react';
+import React, {useMemo, useState} from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import bodyCareStyles from '~/styles/body-care.css?url';
@@ -104,13 +104,13 @@ export async function loader({context}) {
   return json({collection, menu});
 }
 
-export default function BodyCareShelfRoute() {
+export default function BodyCareRoute() {
   const {collection, menu} = useLoaderData();
 
   const collectionProducts = collection?.products?.nodes ?? [];
-
-  // Build shelves from subcollections in the menu
   const menuItems = menu?.items ?? [];
+
+  // Build "shelves" from subcollections in the menu
   const shelvesFromMenu = menuItems
     .filter(
       (item) =>
@@ -128,12 +128,6 @@ export default function BodyCareShelfRoute() {
     });
 
   let shelves = shelvesFromMenu;
-  let totalProductCount = shelves.reduce(
-    (sum, shelf) => sum + (shelf.products?.length ?? 0),
-    0,
-  );
-
-  // Fallback: if no subcollections / shelves, use the main collection as one shelf
   if (!shelves.length && collectionProducts.length) {
     shelves = [
       {
@@ -142,123 +136,262 @@ export default function BodyCareShelfRoute() {
         products: collectionProducts,
       },
     ];
-    totalProductCount = collectionProducts.length;
   }
 
-  const hasProducts = totalProductCount > 0;
+  // Flatten to a single list, keep shelf label as category
+  const productsWithShelf = [];
+  for (const shelf of shelves) {
+    for (const product of shelf.products ?? []) {
+      productsWithShelf.push({
+        ...product,
+        __shelfLabel: shelf.label,
+      });
+    }
+  }
+
+  const allCategories = Array.from(
+    new Set(productsWithShelf.map((p) => p.__shelfLabel)),
+  );
+
+  const [selectedCategories, setSelectedCategories] = useState([]);
+
+  const filteredProducts = useMemo(() => {
+    if (!selectedCategories.length) return productsWithShelf;
+    return productsWithShelf.filter((p) =>
+      selectedCategories.includes(p.__shelfLabel),
+    );
+  }, [productsWithShelf, selectedCategories]);
+
+  const productsCount = filteredProducts.length;
+  const hasProducts = productsWithShelf.length > 0;
+
+  function toggleCategory(label) {
+    setSelectedCategories((prev) =>
+      prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label],
+    );
+  }
 
   return (
-    <main className="bcs-page">
-      {/* HERO WITH BEAUTY ILLUSTRATION */}
-      <section className="bcs-hero">
-        <div className="bcs-hero-text">
-          <p className="bcs-eyebrow">Health &amp; Beauty · Body line</p>
-          <h1 className="bcs-title">
-            {collection.title || 'Body care shelf wall'}
-          </h1>
-          <p className="bcs-sub">
-            A shelf-style view of body splash, spray, and cream. Each row is a
-            sub-collection. Slide across the shelves to browse, then open any
-            product you like.
-          </p>
-          <span className="bcs-count">
-            {totalProductCount} item{totalProductCount === 1 ? '' : 's'}
-          </span>
-        </div>
-
-        <div className="bcs-hero-illustration" aria-hidden="true">
-          <div className="bcs-hero-beauty-scene">
-            <div className="bcs-beauty-orb bcs-beauty-orb--back" />
-            <div className="bcs-beauty-orb bcs-beauty-orb--front" />
-
-            <div className="bcs-beauty-bottle" />
-            <div className="bcs-beauty-tube" />
-            <div className="bcs-beauty-jar">
-              <div className="bcs-beauty-jar-lid" />
+    <main className="bb-page">
+      {/* HERO */}
+      {/* HERO */}
+      <section className="bb-hero">
+        <div className="bb-hero-left">
+          <div className="bb-hero-glass">
+            <p className="bb-hero-eyebrow">Health &amp; beauty · Body line</p>
+            <h1 className="bb-hero-title">
+              Body care,
+              <br />
+              in one wall.
+            </h1>
+            <p className="bb-hero-sub">
+              A focused view of body mist, spray and cream from the
+              health-beauty collection. Use the filters on the left to browse by
+              line.
+            </p>
+            <div className="bb-hero-meta">
+              <span className="bb-hero-count">
+                {productsWithShelf.length} item
+                {productsWithShelf.length === 1 ? '' : 's'}
+              </span>
+              {allCategories.length > 0 && (
+                <span className="bb-hero-tags">
+                  {allCategories.slice(0, 3).join(' · ')}
+                  {allCategories.length > 3 ? ' · more' : ''}
+                </span>
+              )}
             </div>
-
-            <span className="bcs-beauty-sparkle bcs-beauty-sparkle--one" />
-            <span className="bcs-beauty-sparkle bcs-beauty-sparkle--two" />
-            <span className="bcs-beauty-sparkle bcs-beauty-sparkle--three" />
           </div>
         </div>
+
+        {/* <div className="bb-hero-right" aria-hidden="true">
+          <div className="bb-hero-visual">
+            <div className="bb-hero-orb bb-hero-orb-back" />
+            <div className="bb-hero-orb bb-hero-orb-front" />
+
+            <div className="bb-hero-bottle" />
+            <div className="bb-hero-tube" />
+            <div className="bb-hero-jar">
+              <div className="bb-hero-jar-lid" />
+            </div>
+
+            <span className="bb-hero-sparkle bb-hero-sparkle-1" />
+            <span className="bb-hero-sparkle bb-hero-sparkle-2" />
+            <span className="bb-hero-sparkle bb-hero-sparkle-3" />
+          </div>
+        </div> */}
       </section>
 
       {!hasProducts ? (
-        <section className="bcs-empty">
-          <p className="bcs-empty-title">No body care items yet</p>
-          <p className="bcs-empty-text">
+        <section className="bb-empty">
+          <p className="bb-empty-title">No body care products</p>
+          <p className="bb-empty-text">
             The health-beauty collection does not contain products at the
             moment.
           </p>
         </section>
       ) : (
-        <section className="bcs-wall">
-          {shelves.map((shelf) => (
-            <div className="bcs-shelf" key={shelf.id}>
-              <div className="bcs-shelf-label-row">
-                <span className="bcs-shelf-label">{shelf.label}</span>
-                <span className="bcs-shelf-hint">Scroll horizontally</span>
+        <section className="bb-main">
+          {/* FILTER PANEL */}
+          {/* <div className="bb-filter">
+            <div className="bb-filter-card">
+              <p className="bb-filter-title">Filter by line</p>
+              <div className="bb-filter-chips">
+                {allCategories.map((label) => {
+                  const active = selectedCategories.includes(label);
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      className={
+                        'bb-filter-chip' +
+                        (active ? ' bb-filter-chip-active' : '')
+                      }
+                      onClick={() => toggleCategory(label)}
+                    >
+                      <span className="bb-filter-chip-dot" />
+                      <span className="bb-filter-chip-label">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="bcs-shelf-line" />
+              {selectedCategories.length > 0 && (
+                <button
+                  type="button"
+                  className="bb-filter-reset"
+                  onClick={() => setSelectedCategories([])}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
 
-              <div className="bcs-shelf-track">
-                <div className="bcs-shelf-scroll">
-                  {shelf.products.map((product, indexOnShelf) => {
-                    const image = product.featuredImage;
-                    const price = product.priceRange?.minVariantPrice;
+            <div className="bb-filter-note">
+              <p>
+                Products are grouped by subcollections in the{' '}
+                <strong>health-beauty</strong> menu.
+              </p>
+            </div>
+          </div> */}
 
+          {/* PRODUCTS GRID */}
+          <div className="bb-products">
+            <div className="bb-filter">
+              <div className="bb-filter-card">
+                <p className="bb-filter-title">Filter by line</p>
+                <div className="bb-filter-chips">
+                  {allCategories.map((label) => {
+                    const active = selectedCategories.includes(label);
                     return (
-                      <article
-                        key={product.id}
-                        className="bcs-bottle"
-                        style={{
-                          '--bcs-bottle-index': indexOnShelf,
-                        }}
+                      <button
+                        key={label}
+                        type="button"
+                        className={
+                          'bb-filter-chip' +
+                          (active ? ' bb-filter-chip-active' : '')
+                        }
+                        onClick={() => toggleCategory(label)}
                       >
-                        <Link
-                          to={`/products/${product.handle}`}
-                          className="bcs-bottle-inner"
-                        >
-                          <div className="bcs-bottle-image-wrap">
-                            {image?.url ? (
-                              <img
-                                src={`${image.url}&width=300`}
-                                alt={image.altText || product.title}
-                                width={image.width || 400}
-                                height={image.height || 400}
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="bcs-bottle-image-placeholder">
-                                No image
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="bcs-bottle-text">
-                            <h2 className="bcs-bottle-name">{product.title}</h2>
-                          </div>
-
-                          <div className="bcs-bottle-meta">
-                            {price && (
-                              <span className="bcs-bottle-price">
-                                ${price.amount}0
-                              </span>
-                            )}
-                            {!product.availableForSale && (
-                              <span className="bcs-bottle-badge">Sold out</span>
-                            )}
-                          </div>
-                        </Link>
-                      </article>
+                        <span className="bb-filter-chip-dot" />
+                        <span className="bb-filter-chip-label">{label}</span>
+                      </button>
                     );
                   })}
                 </div>
+
+                {selectedCategories.length > 0 && (
+                  <button
+                    type="button"
+                    className="bb-filter-reset"
+                    onClick={() => setSelectedCategories([])}
+                  >
+                    Clear filters
+                  </button>
+                )}
               </div>
             </div>
-          ))}
+            <div className="bb-products-header">
+              <div>
+                <p className="bb-products-count">
+                  {productsCount} product
+                  {productsCount === 1 ? '' : 's'}
+                </p>
+                {selectedCategories.length > 0 && (
+                  <p className="bb-products-filtered">
+                    Showing{' '}
+                    {selectedCategories.slice(0, 3).join(', ').toLowerCase()}
+                    {selectedCategories.length > 3 ? '…' : ''}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="bb-products-grid">
+              {filteredProducts.map((product, index) => {
+                const image = product.featuredImage;
+                const price = product.priceRange?.minVariantPrice;
+                const categoryLabel = product.__shelfLabel;
+
+                return (
+                  <article
+                    key={product.id}
+                    className="bb-card"
+                    style={{'--bb-card-index': index}}
+                  >
+                    <Link
+                      to={`/products/${product.handle}`}
+                      className="bb-card-inner"
+                    >
+                      <div className="bb-card-head">
+                        <span className="bb-card-category">
+                          {categoryLabel}
+                        </span>
+                        {price && (
+                          <span className="bb-card-price">
+                            ${price.amount}0
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="bb-card-image">
+                        {image?.url ? (
+                          <img
+                            src={image.url}
+                            alt={image.altText || product.title}
+                            width={image.width || 600}
+                            height={image.height || 600}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="bb-card-image-placeholder">
+                            No image
+                          </div>
+                        )}
+                      </div>
+                      <h2 className="bb-card-title">{product.title}</h2>
+
+                      <div className="bb-card-footer">
+                        <span
+                          className={
+                            'bb-card-badge' +
+                            (product.availableForSale
+                              ? ' bb-card-badge-available'
+                              : ' bb-card-badge-soldout')
+                          }
+                        >
+                          {product.availableForSale ? 'In stock' : 'Sold out'}
+                        </span>
+                        <span className="bb-card-cta">
+                          View product<span aria-hidden="true"> →</span>
+                        </span>
+                      </div>
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
         </section>
       )}
     </main>
