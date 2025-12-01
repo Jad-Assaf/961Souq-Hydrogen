@@ -190,13 +190,6 @@ export async function loader(args) {
     // },
     {
       desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/black-friday_f9ab4160-8d5f-49e9-8081-8a2306ee9d79.jpg?v=1764071567?quality=100',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/black-friday-mob.jpg?v=1764071136?quality=100',
-      link: '/black-november',
-    },
-    {
-      desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-banner.jpg?v=1758713478',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-mobile-banner.jpg?v=1758713478',
