@@ -5957,8 +5957,8 @@ svg.icon.icon--full-color {
 }
 
 .mcat-timeline__title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   color: #0f172a;
 }
 
@@ -5982,7 +5982,7 @@ svg.icon.icon--full-color {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 10px;
   border-radius: 999px;
   border: 1px solid #d1d5db;
   background: #f9fafb;
@@ -5998,7 +5998,7 @@ svg.icon.icon--full-color {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.8rem;
+  font-size: 14px;
   color: #111827;
 }
 

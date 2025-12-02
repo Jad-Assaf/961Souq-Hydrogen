@@ -359,7 +359,7 @@ export default function MobileCategoryTimeline({menu}) {
                           <div className="mcat-timeline__sublabel">
                             {entry.children
                               .map((child) => child.title)
-                              .slice(0, 3)
+                              .slice(0, 6)
                               .join(' • ')}
                             {entry.children.length > 3 ? ' …' : ''}
                           </div>
