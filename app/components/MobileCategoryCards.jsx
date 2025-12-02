@@ -374,7 +374,7 @@ export default function MobileCategoryTimeline({menu}) {
                     </div>
                   </Link>
 
-                  <button
+                  {/* <button
                     type="button"
                     className={
                       'mcat-timeline__pin' +
@@ -388,7 +388,7 @@ export default function MobileCategoryTimeline({menu}) {
                     aria-label={isPinned ? 'Unpin category' : 'Pin category'}
                   >
                     {isPinned ? '★' : '☆'}
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* First-level subcategories (chips) */}
