@@ -4,6 +4,7 @@ html {
   scrollbar-width: thin;
   scrollbar-gutter: stable both-edges;
   scroll-behavior: smooth !important;
+  -webkit-text-size-adjust: 100%;
 }
 
 
@@ -5352,6 +5353,7 @@ svg.icon.icon--full-color {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 1;
+
   @media (min-width: 1025px) {
     background: none;
     backdrop-filter: none;
@@ -5998,7 +6000,9 @@ svg.icon.icon--full-color {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 14px;
+  font-size: 16px;
+  /* <- important: 16+ to stop iOS zoom */
+  line-height: 1.2;
   color: #111827;
 }
 
