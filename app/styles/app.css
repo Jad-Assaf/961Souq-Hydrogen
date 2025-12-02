@@ -5939,3 +5939,368 @@ svg.icon.icon--full-color {
     justify-content: space-between;
   }
 }
+
+/* ================================
+   Mobile Category Timeline – stacked cards, nested drill-down, monochrome
+   ================================ */
+
+.mcat-timeline {
+  margin: 1.5rem 0 2rem;
+  padding: 0 14px;
+}
+
+.mcat-timeline__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.mcat-timeline__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.mcat-timeline__subtitle {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.mcat-timeline__counter {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+/* Search */
+.mcat-timeline__search {
+  margin-top: 0.8rem;
+}
+
+.mcat-timeline__search-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+}
+
+.mcat-timeline__search-icon {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.mcat-timeline__search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.8rem;
+  color: #111827;
+}
+
+.mcat-timeline__search-input::placeholder {
+  color: #9ca3af;
+}
+
+.mcat-timeline__search-clear {
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+  color: #9ca3af;
+}
+
+/* Pinned row */
+.mcat-timeline__pinned {
+  margin-top: 0.7rem;
+}
+
+.mcat-timeline__pinned-labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.mcat-timeline__pinned-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.mcat-timeline__pinned-clear {
+  border: none;
+  background: transparent;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  padding: 0;
+}
+
+.mcat-timeline__pinned-row {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mcat-timeline__pinned-row::-webkit-scrollbar {
+  display: none;
+}
+
+.mcat-timeline__pinned-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  font-size: 0.72rem;
+  color: #111827;
+  text-decoration: none;
+}
+
+.mcat-timeline__pinned-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #111827;
+}
+
+.mcat-timeline__pinned-text {
+  white-space: nowrap;
+}
+
+/* Track – stacked cards */
+.mcat-timeline__track {
+  margin-top: 0.9rem;
+}
+
+/* Each row */
+.mcat-timeline__row {
+  margin-bottom: 8px;
+}
+
+/* Card */
+.mcat-timeline__card {
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 8px 14px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.mcat-timeline__card--nested {
+  border-style: dashed;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+
+/* Main line inside card */
+.mcat-timeline__cardMain {
+  display: flex;
+  align-items: center;
+  padding: 9px 10px;
+  gap: 10px;
+}
+
+.mcat-timeline__cardMain--nested {
+  padding-top: 8px;
+}
+
+/* Marker */
+.mcat-timeline__marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    border-color 130ms ease-out,
+    background-color 130ms ease-out,
+    transform 130ms ease-out;
+}
+
+.mcat-timeline__marker--nested {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+.mcat-timeline__index {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Mono',
+    ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #374151;
+}
+
+/* Main clickable area */
+.mcat-timeline__itemMain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  text-decoration: none;
+}
+
+.mcat-timeline__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 130ms ease-out;
+}
+
+.mcat-timeline__name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mcat-timeline__sublabel {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.mcat-timeline__meta {
+  margin-top: 1px;
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.mcat-timeline__arrow {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.mcat-timeline__arrow--nestedLink {
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: #9ca3af;
+}
+
+/* Pin button */
+.mcat-timeline__pin {
+  border: none;
+  background: transparent;
+  font-size: 0.8rem;
+  color: #d1d5db;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.mcat-timeline__pin--active {
+  color: #111827;
+}
+
+/* Subcategory chips */
+.mcat-timeline__subchips {
+  padding: 0 10px 9px 50px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.mcat-timeline__subchips--nested {
+  padding-left: 46px;
+}
+
+.mcat-timeline__subchip {
+  text-decoration: none;
+  font-size: 0.8rem;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.mcat-timeline__subchip--nested {
+  cursor: pointer;
+}
+
+.mcat-timeline__subchip--active {
+  border-color: #111827;
+  background: #e5e7eb;
+}
+
+.mcat-timeline__subchip--more {
+  cursor: default;
+}
+
+/* Nested wrapper (open/close animations) */
+.mcat-timeline__nestedWrap {
+  margin-top: 4px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.mcat-timeline__nestedWrap--open {
+  max-height: 500px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mcat-timeline__nestedWrap--closing {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* Interaction states */
+.mcat-timeline__cardMain:hover .mcat-timeline__body,
+.mcat-timeline__cardMain:active .mcat-timeline__body {
+  transform: translateX(2px);
+}
+
+.mcat-timeline__cardMain:hover .mcat-timeline__marker,
+.mcat-timeline__cardMain:active .mcat-timeline__marker {
+  border-color: #111827;
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.mcat-timeline__cardMain:hover .mcat-timeline__arrow,
+.mcat-timeline__cardMain:active .mcat-timeline__arrow {
+  color: #111827;
+}
+
+.mcat-timeline__cardMain:hover .mcat-timeline__pin,
+.mcat-timeline__cardMain:active .mcat-timeline__pin {
+  color: #9ca3af;
+}
+
+/* Tiny screens */
+@media (max-width: 360px) {
+  .mcat-timeline {
+    padding: 0 10px;
+  }
+
+  .mcat-timeline__subchips {
+    padding-left: 46px;
+  }
+
+  .mcat-timeline__subchips--nested {
+    padding-left: 42px;
+  }
+}
