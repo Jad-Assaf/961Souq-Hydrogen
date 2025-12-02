@@ -342,9 +342,9 @@ export default function MobileCategoryTimeline({menu}) {
             >
               <div className="mcat-timeline__card">
                 <div className="mcat-timeline__cardMain">
-                  <div className="mcat-timeline__marker">
+                  {/* <div className="mcat-timeline__marker">
                     <span className="mcat-timeline__index">{indexLabel}</span>
-                  </div>
+                  </div> */}
 
                   <Link
                     to={entry.url}

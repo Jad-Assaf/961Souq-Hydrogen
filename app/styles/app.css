@@ -6097,6 +6097,7 @@ svg.icon.icon--full-color {
   background: #ffffff;
   box-shadow: 0 8px 14px rgba(15, 23, 42, 0.04);
   overflow: hidden;
+  padding: 10px;
 }
 
 .mcat-timeline__card--nested {
@@ -6168,8 +6169,8 @@ svg.icon.icon--full-color {
 }
 
 .mcat-timeline__name {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
   color: #0f172a;
 }
 
@@ -6212,10 +6213,10 @@ svg.icon.icon--full-color {
 
 /* Subcategory chips */
 .mcat-timeline__subchips {
-  padding: 0 10px 9px 50px;
+  padding: 0 10px 9px;
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 10px;
 }
 
 .mcat-timeline__subchips--nested {
@@ -6224,7 +6225,7 @@ svg.icon.icon--full-color {
 
 .mcat-timeline__subchip {
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 14px;
   padding: 3px 7px;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
