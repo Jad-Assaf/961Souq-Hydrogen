@@ -6356,8 +6356,6 @@ svg.icon.icon--full-color {
 }
 
 .mobile-category-card--active {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -6453,8 +6451,8 @@ svg.icon.icon--full-color {
   opacity: 0;
   transform: translateY(10px);
   transition:
-    opacity 250ms ease,
-    transform 250ms ease;
+    opacity 10ms ease,
+    transform 100ms ease;
 }
 
 .mobile-category-popup--open {
@@ -6556,7 +6554,7 @@ svg.icon.icon--full-color {
   position: relative;
   flex: 0 0 60vw;
   max-width: 420px;
-  height: 40vh;
+  height: 50vh;
   max-height: 520px;
   border-radius: 16px;
   overflow: hidden;
@@ -6566,7 +6564,6 @@ svg.icon.icon--full-color {
   background: #ffffff;
   /* white background */
   border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 
   display: flex;
   flex-direction: column;
@@ -6577,8 +6574,6 @@ svg.icon.icon--full-color {
 }
 
 .mobile-subcard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
   border-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -6598,7 +6593,7 @@ svg.icon.icon--full-color {
 
 /* TEXT AREA */
 .mobile-subcard-content {
-  padding: 10px 12px 12px;
+  padding: 50px 12px 12px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
