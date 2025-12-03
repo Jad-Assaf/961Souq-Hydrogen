@@ -598,8 +598,8 @@ export function ProductForm({
         {isComputerComponent && (
           <span className="computer-components-note">
             Due to high demand and limited stock, computer components may have
-            variable availability and prices. Please contact us via WhatsApp to confirm
-            stock before placing your order.
+            variable availability and prices. Please contact us via WhatsApp to
+            confirm stock before placing your order.
           </span>
         )}
 
@@ -786,9 +786,16 @@ export default function Product() {
               </li>
               <li>
                 <strong>Availability:</strong>{' '}
-                {selectedVariant?.availableForSale
-                  ? 'In Stock'
-                  : 'Out of Stock'}
+                {selectedVariant
+                  ? selectedVariant.quantityAvailable !== null &&
+                    selectedVariant.quantityAvailable !== undefined
+                    ? selectedVariant.quantityAvailable > 0
+                      ? `${selectedVariant.quantityAvailable} in stock`
+                      : 'Out of stock'
+                    : selectedVariant.availableForSale
+                    ? 'In stock'
+                    : 'Out of stock'
+                  : 'N/A'}
               </li>
               <li>
                 <strong>Product Type:</strong> {product.productType || 'N/A'}
@@ -1076,6 +1083,7 @@ export default function Product() {
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
+    quantityAvailable
     compareAtPrice {
       amount
       currencyCode
