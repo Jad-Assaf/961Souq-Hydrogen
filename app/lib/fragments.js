@@ -172,6 +172,8 @@ const MENU_FRAGMENT = `#graphql
     url
     resource {
       ... on Collection {
+        description
+        descriptionHtml
         image {
           src
           altText
@@ -210,7 +212,6 @@ const MENU_FRAGMENT = `#graphql
     }
   }
 `;
-
 
 export const HEADER_QUERY = `#graphql
   fragment Shop on Shop {
@@ -313,7 +314,6 @@ export const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   }
 `;
 
-
 export const RECENTLY_VIEWED_PRODUCTS_QUERY = `#graphql
   query RecentlyViewedProducts($handles: [String!]!) {
     products(first: 10, query: $handles) {
@@ -341,4 +341,3 @@ export const RECENTLY_VIEWED_PRODUCTS_QUERY = `#graphql
     }
   }
 `;
-
