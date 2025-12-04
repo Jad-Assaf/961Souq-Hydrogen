@@ -6238,7 +6238,7 @@ svg.icon.icon--full-color {
 
 /* TEXT AREA */
 .mobile-subcard-content {
-  padding: 50px 12px 12px;
+  padding: 30px 12px 12px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -6250,7 +6250,7 @@ svg.icon.icon--full-color {
   display: inline-flex;
   padding: 3px 8px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 12px;
   text-transform: capitalize;
   letter-spacing: 0.02em;
   background: rgba(0, 0, 0, 0.04);
@@ -6260,7 +6260,7 @@ svg.icon.icon--full-color {
 }
 
 .mobile-subcard-title {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 600;
   margin: 0;
   color: #111111;

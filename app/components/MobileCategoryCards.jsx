@@ -150,7 +150,7 @@ function getSubDescription(sub) {
     raw = `Shop ${sub.title}`;
   }
 
-  return truncate(raw, 60);
+  return truncate(raw, 100);
 }
 
 /**
