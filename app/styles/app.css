@@ -5975,11 +5975,12 @@ svg.icon.icon--full-color {
   max-height: 750px;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid #fff;
   background: radial-gradient(circle at top left, #2a2a2a 0, #000000 60%);
   scroll-snap-align: start;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  box-shadow: rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
 
   transition:
     transform 220ms ease,
@@ -6008,7 +6009,7 @@ svg.icon.icon--full-color {
   background-size: cover;
   background-position: center;
   filter: brightness(0.8);
-  transform: scale(1.03);
+  /* transform: scale(1.03); */
   transition:
     transform 400ms ease,
     filter 400ms ease;
@@ -6016,7 +6017,6 @@ svg.icon.icon--full-color {
 
 .mobile-category-card--active .mobile-category-card-bg {
   filter: brightness(1);
-  transform: scale(1.08);
 }
 
 /* DARK GRADIENT OVERLAY */
