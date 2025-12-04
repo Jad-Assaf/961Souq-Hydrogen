@@ -51,7 +51,7 @@ const CARD_IMAGES_BY_HANDLE = {
   'pc-parts':
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/components-img.jpg?v=1764771592',
   networking:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-img_449a877f-996e-4650-9c1f-047b3da1f843.jpg?v=1764773830',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-img_db522598-33f9-4008-9255-713c41dc6ee3.jpg?v=1764859926',
   'business-monitors':
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_de67b538-ca50-4e4f-b1c1-fd6772f951d2.jpg?v=1764771592',
   mobiles:
