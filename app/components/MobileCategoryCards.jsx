@@ -63,7 +63,7 @@ const CARD_IMAGES_BY_HANDLE = {
   accessories:
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/computer-accessories-img.jpg?v=1764773830',
   fitness:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-img.jpg?v=1764771592',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-img_8de77403-902c-4741-9d71-23f445738d8b.jpg?v=1764838128',
   photography:
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cameras-img.jpg?v=1764771592',
   'home-appliances':
@@ -272,19 +272,21 @@ export default function MobileCategoryCards({menu}) {
               <div className="mobile-category-card-overlay" />
               <div className="mobile-category-card-content">
                 {/* <div className="mobile-category-pill">Category</div> */}
-                <h3 className="mobile-category-title">{item.title}</h3>
-                <p className="mobile-category-subtitle">
-                  Tap to see sub-categories and start browsing.
-                </p>
-                {item.url ? (
-                  <Link
-                    to={normalizePath(item.url)}
-                    className="mobile-category-view-all"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    View all
-                  </Link>
-                ) : null}
+                <div className="desc-container">
+                  <h3 className="mobile-category-title">{item.title}</h3>
+                  <p className="mobile-category-subtitle">
+                    Tap to see sub-categories and start browsing.
+                  </p>
+                  {item.url ? (
+                    <Link
+                      to={normalizePath(item.url)}
+                      className="mobile-category-view-all"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      View all
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             </button>
           );
