@@ -17,7 +17,7 @@ export const meta = () => {
   });
 };
 
-export async function action({request, context}) {
+export async function action({request}) {
   const formData = await request.formData();
 
   const fullName = (formData.get('fullName') || '').toString().trim();
@@ -63,50 +63,9 @@ export async function action({request, context}) {
     return json({errors, fields}, {status: 400});
   }
 
-  // --- Email sending section (example using Resend HTTP API) ---
-
-  const RESEND_API_KEY =
-    (context.env && context.env.RESEND_API_KEY) || process.env.RESEND_API_KEY;
-  const STORE_EMAIL =
-    (context.env && context.env.STORE_HR_EMAIL) ||
-    process.env.STORE_HR_EMAIL ||
-    'careers@961souq.com';
-
-  if (!RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is not set in environment variables.');
-    return json(
-      {
-        errors: {
-          form: 'Your application could not be sent because email is not configured. Please contact us directly.',
-        },
-        fields,
-      },
-      {status: 500},
-    );
-  }
-
+  // Build the text that will be sent to Shopify's contact endpoint.
+  // Shopify will email this text to the store email configured in your admin.
   const resumeName = resumeFile.name || 'resume';
-  let attachments = [];
-
-  try {
-    // Try to attach the resume as a base64 file if possible
-    const arrayBuffer = await resumeFile.arrayBuffer();
-    const uint8 = new Uint8Array(arrayBuffer);
-    let binaryString = '';
-    for (let i = 0; i < uint8.length; i++) {
-      binaryString += String.fromCharCode(uint8[i]);
-    }
-    const base64Resume = btoa(binaryString);
-
-    attachments.push({
-      filename: resumeName,
-      content: base64Resume,
-    });
-  } catch (e) {
-    console.error('Failed to process resume attachment:', e);
-    // If this fails, we still send the email without attachment
-    attachments = [];
-  }
 
   const emailText = `
 New job application for 961Souq
@@ -115,7 +74,7 @@ Full name: ${fullName}
 Email: ${email}
 Phone: ${phone}
 Position: ${position}
-Location: ${location}
+Location: ${location || 'Not specified'}
 Preferred start date: ${startDate || 'Not specified'}
 Expected salary: ${expectedSalary || 'Not specified'}
 Years of experience: ${experienceYears || 'Not specified'}
@@ -124,31 +83,53 @@ Heard about us: ${heardAboutUs || 'Not specified'}
 Cover letter:
 ${coverLetter || 'Not provided'}
 
-Resume file name: ${resumeName}
-`;
+Resume file name (uploaded via careers form in Hydrogen):
+${resumeName}
+(Attachment is not included automatically in this email – please request the file from the candidate if needed.)
+`.trim();
 
-  const emailPayload = {
-    from: '961Souq Careers <no-reply@961souq.com>',
-    to: [STORE_EMAIL],
-    subject: `New job application: ${position} - ${fullName}`,
-    text: emailText,
-  };
+  // IMPORTANT:
+  // This must point to your Online Store contact endpoint (Liquid).
+  // Change this if your myshopify domain is different.
+  const SHOPIFY_CONTACT_URL =
+    process.env.SHOPIFY_CONTACT_URL || 'https://961souq.myshopify.com/contact';
 
-  if (attachments.length > 0) {
-    emailPayload.attachments = attachments;
+  const body = new URLSearchParams();
+  body.set('form_type', 'contact');
+  body.set('utf8', '✓');
+  body.set('contact[name]', fullName);
+  body.set('contact[email]', email);
+  body.set('contact[phone]', phone);
+  body.set('contact[body]', emailText);
+
+  let contactResponse;
+  try {
+    contactResponse = await fetch(SHOPIFY_CONTACT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    });
+  } catch (error) {
+    console.error('Error calling Shopify contact endpoint:', error);
+    return json(
+      {
+        errors: {
+          form: 'There was a network error sending your application. Please try again later or contact us directly.',
+        },
+        fields,
+      },
+      {status: 500},
+    );
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(emailPayload),
-  });
-
-  if (!response.ok) {
-    console.error('Resend email error:', await response.text());
+  if (!contactResponse.ok) {
+    console.error(
+      'Shopify contact endpoint returned non-OK status:',
+      contactResponse.status,
+      contactResponse.statusText,
+    );
     return json(
       {
         errors: {
@@ -160,6 +141,7 @@ Resume file name: ${resumeName}
     );
   }
 
+  // If everything went fine, show success.
   return json({success: true});
 }
 
