@@ -105,6 +105,8 @@ function CartEmpty({hidden = false}) {
         className="empty-cart-image"
         src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/ChatGPT_Image_Oct_18_2025_12_58_01_PM.png?v=1760781648"
         alt=""
+        width={324.797}
+        height={487.188}
       />
       <Link
         to="/collections/new-arrivals"
