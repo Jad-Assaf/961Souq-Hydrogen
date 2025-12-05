@@ -6317,8 +6317,8 @@ svg.icon.icon--full-color {
 /* + button */
 .product-info-plus {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 10px;
+  right: 10px;
   z-index: 1;
   width: 40px;
   height: 40px;
