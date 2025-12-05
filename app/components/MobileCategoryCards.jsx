@@ -352,6 +352,8 @@ export default function MobileCategoryCards({menu}) {
                               alt={sub.title || ''}
                               className="mobile-subcard-img"
                               loading="lazy"
+                              width={400}
+                              height={400}
                             />
                           </div>
                         )}

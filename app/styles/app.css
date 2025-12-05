@@ -5950,12 +5950,12 @@ svg.icon.icon--full-color {
 /* TOP SCROLLER: MAIN CARDS */
 .mobile-category-cards-scroll {
   display: flex;
-  gap: 12px;
+  gap: 20px;
   overflow-x: auto;
   padding: 0 16px 18px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  scroll-padding-left: 16px;
+  scroll-padding-left: 12px;
 }
 
 .mobile-category-cards-scroll::-webkit-scrollbar {
