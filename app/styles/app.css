@@ -6358,7 +6358,7 @@ svg.icon.icon--full-color {
 /* Modal container */
 .product-modal {
   width: 95vw;
-  height: 85vh;
+  height: 80vh;
   max-width: 980px;
   background: #fff;
   color: #0f172a;
@@ -6628,4 +6628,51 @@ svg.icon.icon--full-color {
   text-decoration: underline;
   align-self: flex-start;
   color: inherit;
+}
+
+/* Remove blue highlight/focus styles across this UI */
+.product-modal button,
+.product-modal a,
+.product-card button,
+.product-card a,
+.product-section button,
+.product-section a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Kill default focus rings + blue box-shadows */
+.product-modal button:focus,
+.product-modal button:focus-visible,
+.product-modal a:focus,
+.product-modal a:focus-visible,
+.product-card button:focus,
+.product-card button:focus-visible,
+.product-card a:focus,
+.product-card a:focus-visible,
+.product-section button:focus,
+.product-section button:focus-visible,
+.product-section a:focus,
+.product-section a:focus-visible,
+.product-info-plus:focus,
+.product-info-plus:focus-visible,
+.product-modal-close:focus,
+.product-modal-close:focus-visible,
+.product-modal-nav:focus,
+.product-modal-nav:focus-visible,
+.product-modal-thumb:focus,
+.product-modal-thumb:focus-visible,
+.product-modal .add-to-cart-button:focus,
+.product-modal .add-to-cart-button:focus-visible,
+.product-modal-view-link:focus,
+.product-modal-view-link:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Also prevent active/pressed blue glow in some browsers */
+.product-modal button:active,
+.product-card button:active,
+.product-section button:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
