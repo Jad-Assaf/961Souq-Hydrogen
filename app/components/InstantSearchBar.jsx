@@ -143,7 +143,7 @@ export function InstantSearchBar({
             placeholder={placeholder}
             className="search-input"
           />
-          <button type="submit" className="search-submit" name='search' value='search'>
+          <button type="submit" className="search-submit" name='search' value='search' aria-label="Search">
             <svg
               width="20px"
               height="20px"

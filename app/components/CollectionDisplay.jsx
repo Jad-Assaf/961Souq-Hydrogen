@@ -493,7 +493,7 @@ export function ProductItem({product}) {
           </div>
         )}
 
-        <h3 className="product-title">{product.title}</h3>
+        <p className="product-title">{product.title}</p>
 
         <div className="product-price">
           {selectedVariant?.price &&

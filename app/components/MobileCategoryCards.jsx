@@ -49,7 +49,7 @@ const CARD_IMAGES_BY_HANDLE = {
   desktops:
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/desktops-img.jpg?v=1764773830&width=300',
   'pc-parts':
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/components-img.jpg?v=1764771592&width=300',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/components-img_b69f7492-1c76-4569-89ba-22c3927cc919.jpg?v=1764944882&width=300',
   networking:
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-img_db522598-33f9-4008-9255-713c41dc6ee3.jpg?v=1764859926&width=300',
   'business-monitors':
