@@ -6284,20 +6284,26 @@ svg.icon.icon--full-color {
   justify-content: flex-start;
 }
 
-.product-section hr, .product-modal-description hr {
+.product-section hr,
+.product-modal-description hr {
   display: none;
 }
 
-.product-modal-description h2, .product-modal-description h3, .product-modal-description h4, .product-modal-description h5 {
+.product-modal-description h2,
+.product-modal-description h3,
+.product-modal-description h4,
+.product-modal-description h5 {
   color: #000;
   font-weight: 400 !important;
   font-size: 18px !important;
 }
+
 .product-modal-description strong {
   color: #000;
   font-weight: 600 !important;
-  
+
 }
+
 .product-modal .add-to-cart-button {
   background-color: #232323 !important;
   border-radius: 30px !important;
@@ -6314,8 +6320,8 @@ svg.icon.icon--full-color {
   top: 8px;
   right: 8px;
   z-index: 3;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   background: rgba(255, 255, 255, 0.96);
@@ -6329,12 +6335,6 @@ svg.icon.icon--full-color {
   transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
-.product-info-plus:hover {
-  transform: scale(1.06);
-  background: #ffffff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-}
-
 /* Overlay */
 .product-modal-overlay {
   position: fixed;
@@ -6343,7 +6343,7 @@ svg.icon.icon--full-color {
   background: rgba(0, 0, 0, 0.35);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 1.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6357,6 +6357,8 @@ svg.icon.icon--full-color {
 
 /* Modal container */
 .product-modal {
+  position: relative;
+  top: 20px;
   width: 95vw;
   height: 80vh;
   max-width: 980px;
@@ -6372,15 +6374,13 @@ svg.icon.icon--full-color {
   overflow-x: hidden;
 
   opacity: 0;
-  transform: translateY(10px) scale(0.985);
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transform: translateY(20px);
+  transition: all 1s ease;
 }
 
 .product-modal.visible {
   opacity: 1;
-  transform: translateY(0) scale(1);
-  position: relative;
-  top: 20px;
+  transform: translateY(0);
 }
 
 /* Close button */
