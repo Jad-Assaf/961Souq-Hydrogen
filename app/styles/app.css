@@ -6319,7 +6319,7 @@ svg.icon.icon--full-color {
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 3;
+  z-index: 1;
   width: 40px;
   height: 40px;
   border-radius: 999px;
