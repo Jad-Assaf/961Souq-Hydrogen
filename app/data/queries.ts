@@ -458,7 +458,7 @@ export const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               currencyCode
             }
           }
-          images(first: 10) {
+          images(first: 5) {
             nodes {
               url
               altText
