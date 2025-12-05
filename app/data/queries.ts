@@ -445,6 +445,7 @@ export const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
           id
           title
           handle
+          descriptionHtml
           priceRange {
             minVariantPrice {
               amount
@@ -457,7 +458,7 @@ export const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
               currencyCode
             }
           }
-          images(first: 2) {
+          images(first: 10) {
             nodes {
               url
               altText
