@@ -4,8 +4,8 @@ import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import bodyCareStyles from '~/styles/body-care.css?url';
 
-const BODY_CARE_COLLECTION_HANDLE = 'health-beauty';
-const BODY_CARE_MENU_HANDLE = 'health-beauty';
+const BODY_CARE_COLLECTION_HANDLE = 'cosmetics';
+const BODY_CARE_MENU_HANDLE = 'cosmetics';
 
 const BODY_CARE_SHELVES_QUERY = `#graphql
   query BodyCareShelves(
