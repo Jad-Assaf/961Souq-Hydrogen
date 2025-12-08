@@ -68,6 +68,8 @@ const CARD_IMAGES_BY_HANDLE = {
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cameras-img.jpg?v=1764771592&width=300',
   'home-appliances':
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances-img.jpg?v=1764773830&width=300',
+  cosmetics:
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/commerce-sephora-beauty-sale-istock-1658893205_2_copy.jpg?v=1765182025&width=300',
 };
 
 function getCardImage(handle) {
