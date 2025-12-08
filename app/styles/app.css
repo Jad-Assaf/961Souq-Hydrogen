@@ -6015,6 +6015,10 @@ svg.icon.icon--full-color {
     filter 400ms ease;
 }
 
+.mobile-category-card-bg img{
+  object-fit: cover;
+}
+
 .mobile-category-card--active .mobile-category-card-bg {
   filter: brightness(1);
 }
