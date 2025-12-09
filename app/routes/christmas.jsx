@@ -20,7 +20,7 @@ const CHRISTMAS_COLLECTION_QUERY = `#graphql
         url
         altText
       }
-      products(first: 12) {
+      products(first: 100) {
         nodes {
           id
           handle
@@ -691,7 +691,7 @@ export default function ChristmasPage() {
                 >
                   {product.featuredImage ? (
                     <img
-                      src={product.featuredImage.url}
+                      src={`${product.featuredImage.url}&width=300`}
                       alt={product.featuredImage.altText ?? product.title}
                       loading="lazy"
                     />

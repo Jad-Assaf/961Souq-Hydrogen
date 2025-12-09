@@ -18,8 +18,19 @@ body {
     background: var(--bg);
     color: #f9fafb;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
-        'Segoe UI', sans-serif;
+    'Segoe UI', sans-serif;
     overflow: hidden;
+}
+.search-form{
+    background-color: transparent;
+    border: 0;
+}
+.search-submit {
+    background-color: #fff;
+    color: #000;
+    svg path {
+        fill: #000 !important;
+    }
 }
 
 .christmas-page a {
@@ -507,7 +518,7 @@ body {
 .card-image-wrapper {
     position: relative;
     display: block;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 3;
     overflow: hidden;
 }
 
