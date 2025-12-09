@@ -893,7 +893,7 @@ p.home-colleciton-title {
 
 .home {
   margin: 10px auto 30px;
-  padding: 0px;
+  padding: 0px 5px;
   background-color: transparent;
   border-radius: 10px;
 }
@@ -1146,7 +1146,7 @@ button {
   .banner-slideshow {
     height: auto;
     max-height: unset !important;
-    margin-top: 42px !important;
+    margin-top: 55px !important;
   }
 
   .banner-slide {
@@ -6811,9 +6811,9 @@ svg.icon.icon--full-color {
   border-color: rgba(255, 255, 255, 0.55);
 }
 
-@media (max-width: 550px) {
+/* @media (max-width: 550px) {
   .banner-slideshow, .arrow-buttons {
     display: none !important;
   }
 
-}
+} */
