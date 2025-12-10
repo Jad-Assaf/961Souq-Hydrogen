@@ -180,15 +180,7 @@ async function loadCriticalData({context}) {
 export async function loader(args) {
   const userAgent = args.request.headers.get('user-agent') || '';
   const isMobile = /mobile/i.test(userAgent);
-  // Define banners (critical UI elements)
   const banners = [
-    // {
-    //   desktopImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/virtual-banner.jpg?v=1743674710',
-    //   mobileImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobile-virtual-banner.jpg?v=1743672861',
-    //   link: '/apple-virtual-showroom',
-    // },
     {
       desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-banner.jpg?v=1758713478',
@@ -212,24 +204,10 @@ export async function loader(args) {
     },
     {
       desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/back-to-school.jpg?v=1756984612',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/back-to-school-mobile.jpg?v=1756984612',
-      link: '/collections/back-to-school',
-    },
-    {
-      desktopImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-banner-1.jpg?v=1740146682',
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-mobile-banner-1.jpg?v=1740146682',
       link: '/collections/steelseries',
-    },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/rayban-banner-F1_98212271-ea73-4c38-b498-ba25125ddd74.jpg?v=1740054162',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/rayban-mobile-banner.jpg?v=1740053906',
-      link: '/collections/ray-ban-smart-glasses',
     },
     {
       desktopImageUrl:
@@ -244,20 +222,6 @@ export async function loader(args) {
       mobileImageUrl:
         'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dyson-mobile-banner.jpg?v=1740063424',
       link: '/collections/dyson-products',
-    },
-    // {
-    //   desktopImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-banner_0e0f39d5-b1ba-421e-bdaa-d1d6549226cb.jpg?v=1740222975',
-    //   mobileImageUrl:
-    //     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-mobile-banner_fa7314db-9154-4ae4-8abe-6c6772a34946.jpg?v=1740223327',
-    //   link: '/collections/apple',
-    // },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-banner.jpg?v=1728123476',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/google-pixel-mobilebanner.jpg?v=1728123476',
-      link: '/collections/google-products',
     },
   ];
 
@@ -581,14 +545,16 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
-      {beautyProducts && <TopProductSections collection={beautyProducts} />}
+      {beautyProducts && (
+        <TopProductSections collection={beautyProducts} />
+      )}
       <RelatedProductsFromHistory key={rpKey} />
 
       {isMobile ? (
         <>
           {header && (
             <>
-              <MobileCategoryCards menus={menus} />
+              <MobileCategoryCards menu={header.menu} />
               {/* <div className="instagram-reels-container">
                 <h1>Instagram Reels</h1>
                 <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />
