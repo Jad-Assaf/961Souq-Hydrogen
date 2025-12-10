@@ -8,6 +8,24 @@ function sha256Hash(value) {
   return sha256(cleaned);
 }
 
+function firstIp(value) {
+  if (!value) return '';
+  return value.split(',')[0].trim();
+}
+
+function getClientIpFromHeaders(request) {
+  const cf =
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('true-client-ip') ||
+    '';
+  const xReal = request.headers.get('x-real-ip') || '';
+  const xff = request.headers.get('x-forwarded-for') || '';
+  const clientIp = request.headers.get('client-ip') || '';
+
+  const raw = cf || xReal || xff || clientIp;
+  return firstIp(raw);
+}
+
 export async function action({request, context}) {
   if (request.method !== 'POST') {
     return json({error: 'Method Not Allowed'}, {status: 405});
@@ -17,17 +35,13 @@ export async function action({request, context}) {
     // 1. Get event data from the client
     const eventData = await request.json();
 
-    // 2. Attempt to get real IP/User‑Agent from request headers
-    const ipHeader =
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('client-ip') ||
-      request.headers.get('cf-connecting-ip') ||
-      request.socket?.remoteAddress ||
-      '';
+    // 2. Get real IP/User-Agent from request headers
+    const ipHeader = getClientIpFromHeaders(request);
     const userAgentHeader = request.headers.get('user-agent') || '';
 
     // 3. Hash email/phone if present
     const userData = eventData.user_data || {};
+
     if (userData.email) {
       userData.em = sha256Hash(userData.email);
       delete userData.email;
@@ -38,8 +52,13 @@ export async function action({request, context}) {
     }
 
     // 4. Override IP/UA with server readings (if available)
-    userData.client_ip_address = ipHeader || userData.client_ip_address;
-    userData.client_user_agent = userAgentHeader || userData.client_user_agent;
+    if (ipHeader) {
+      userData.client_ip_address = ipHeader;
+    }
+    if (userAgentHeader) {
+      userData.client_user_agent = userAgentHeader;
+    }
+
     eventData.user_data = userData;
 
     // 5. Final payload for Meta
@@ -51,6 +70,7 @@ export async function action({request, context}) {
     // 6. Read Pixel ID and Access Token from Oxygen env
     const pixelId = context.env.META_PIXEL_ID;
     const accessToken = context.env.META_ACCESS_TOKEN;
+
     if (!pixelId || !accessToken) {
       throw new Error(
         'Missing Meta Pixel credentials in environment variables',
@@ -66,6 +86,7 @@ export async function action({request, context}) {
         body: JSON.stringify(payload),
       },
     );
+
     const metaResult = await metaResponse.json();
 
     // 8. Respond to client

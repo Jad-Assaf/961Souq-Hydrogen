@@ -31,26 +31,20 @@ const getExternalId = () => {
   return anonId;
 };
 
-// --- Function to send PageView event via Conversions API (now including real IP)
-const trackPageViewCAPI = async (eventId, extraData) => {
-  // 1️⃣ fetch public IP
-  let clientIp = '';
-  try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const json = await res.json();
-    clientIp = json.ip || '';
-  } catch (err) {
-  }
-
-  // 2️⃣ build payload
+// --- Function to send PageView event via Conversions API
+// IMPORTANT: We no longer fetch IP client-side.
+// Your server should infer IP from the request and inject it into user_data.
+const trackPageViewCAPI = (eventId, extraData) => {
   const payload = {
     action_source: 'website',
     event_name: 'PageView',
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
+    // Meta supports event_source_url at top-level for web events
+    event_source_url: extraData.URL,
     user_data: {
       client_user_agent: navigator.userAgent,
-      client_ip_address: clientIp,
+      // client_ip_address intentionally omitted here
       fbp: extraData.fbp,
       fbc: extraData.fbc,
       external_id: extraData.external_id,
@@ -61,7 +55,6 @@ const trackPageViewCAPI = async (eventId, extraData) => {
     },
   };
 
-  // 3️⃣ send to your server endpoint
   fetch('/facebookConversions', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -114,6 +107,7 @@ const MetaPixel = ({pixelId}) => {
     }
 
     fbq('init', pixelId);
+
     const eventId = generateEventId();
     const fbp = getCookie('_fbp');
     const fbc = getCookie('_fbc');
