@@ -7,13 +7,13 @@ const API_URL = 'https://961souqs.myshopify.com/api/2025-04/graphql.json';
 const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
 
 /** Tuning */
-const SOURCE_LIMIT = 30; // how many history IDs to consider
-const OUTPUT_LIMIT = 30; // total cards to render at most
-const BATCH_SIZE = 8; // cards per “page”
+const SOURCE_LIMIT = 15; // how many history IDs to consider
+const OUTPUT_LIMIT = 24; // total cards to render at most
+const BATCH_SIZE = 6; // cards per “page”
 const CACHE_TTL_MS = 600 * 60 * 60 * 1000; // 6 hours? (Note: value is ~600h)
 const HARD_TIMEOUT_MS = 1800; // abort slow requests
 const SKELETON_HEIGHT = 400; // reserve container height
-const SKELETON_CARD_H = 375; // skeleton card height
+const SKELETON_CARD_H = 357; // skeleton card height
 
 export default function RelatedProductsFromHistory({currentProductId}) {
   const [heading, setHeading] = useState('');
