@@ -28,109 +28,8 @@ import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
 import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
-import { WishlistProvider } from './lib/WishlistContext';
+import {WishlistProvider} from './lib/WishlistContext';
 // import TikTokPixel from './components/TikTokPixel';
-
-/* -------------------- IP BLOCKING (added) -------------------- */
-const BLOCKED_IPS = new Set([
-  '185.187.93.210',
-  '185.142.40.248',
-  '185.217.84.230',
-  '78.108.169.25',
-  '45.67.99.13',
-  '185.160.227.197',
-  '185.134.178.144',
-  '2001:16a2:c078:ca7d:6060:b30d:ed55:ee56', // IPv6
-  '185.134.176.77',
-  '185.97.94.106',
-  '185.242.37.66',
-  '5.100.243.242',
-  '80.81.144.75',
-  '82.146.183.24',
-  '185.142.40.38',
-  '185.217.84.252',
-  '213.204.71.122',
-  '91.232.101.117',
-]);
-
-function getClientIpFromHeaders(headers) {
-  const cf = headers.get("cf-connecting-ip");
-  const tci = headers.get("true-client-ip");
-  const xri = headers.get("x-real-ip");
-  const xff = headers.get("x-forwarded-for");
-
-  const raw =
-    cf ||
-    tci ||
-    xri ||
-    (xff ? xff.split(",")[0].trim() : "") ||
-    "";
-
-  if (!raw) return null;
-
-  // Clean possible bracketed IPv6 or IPv4:port
-  const cleaned = raw.replace(/^\[|]$/g, "").trim().toLowerCase();
-  const maybeIpv4WithPort = cleaned.match(
-    /^(\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?$/
-  );
-  if (maybeIpv4WithPort) return maybeIpv4WithPort[1];
-  return cleaned;
-}
-
-function blockResponse(ip) {
-  const html = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="robots" content="noindex, nofollow" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Forbidden</title>
-  <style>
-    body{margin:0;min-height:100dvh;display:grid;place-items:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:#0b0b0b;color:#fff}
-    .card{max-width:680px;width:92%;border-radius:16px;padding:28px;background:#121212;border:1px solid #2a2a2a;box-shadow:0 6px 30px rgba(0,0,0,0.35)}
-    h1{font-size:28px;margin:0 0 12px}
-    p{opacity:0.9;line-height:1.55;margin:0}
-    .muted{opacity:0.65;margin-top:12px;font-size:14px}
-    code{background:#1e1e1e;border:1px solid #333;padding:2px 6px;border-radius:6px}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>403 — Access Forbidden</h1>
-    <p>Requests from your IP are not allowed.</p>
-    <p class="muted">IP: <code>${ip || "unknown"}</code></p>
-  </div>
-</body>
-</html>`;
-  return new Response(html, {
-    status: 403,
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store, no-cache, must-revalidate",
-    },
-  });
-}
-
-function maybeBlockIp(request) {
-  try {
-    let ip = getClientIpFromHeaders(request.headers);
-
-    // Dev-only override: simulate an IP via query or header
-    if (process.env.NODE_ENV !== 'production') {
-      const url = new URL(request.url);
-      const forced = url.searchParams.get('forceTestIp') || request.headers.get('x-test-ip');
-      if (forced) ip = forced.trim().toLowerCase();
-    }
-
-    if (ip && BLOCKED_IPS.has(ip)) {
-      return blockResponse(ip);
-    }
-  } catch (_) {
-    // If anything goes wrong, don't block by default
-  }
-  return null;
-}
-/* ------------------ END IP BLOCKING (added) ------------------ */
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -166,10 +65,6 @@ export function links() {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader({request, context}) {
-  // IP block (added)
-  const __blocked = maybeBlockIp(request);
-  if (__blocked) throw __blocked;
-
   // 1) Legacy URL redirect
   const url = new URL(request.url);
   const pathname = url.pathname;
