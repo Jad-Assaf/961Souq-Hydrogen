@@ -35,7 +35,6 @@ function normalizePath(url) {
 
 /**
  * Map collection handles to custom card images.
- * Fill these with whatever images you want per handle.
  */
 const CARD_IMAGES_BY_HANDLE = {
   apple:
@@ -79,18 +78,15 @@ function getCardImage(handle) {
 
 /**
  * Best image to use for a SUB collection card.
- * With your MENU_FRAGMENT it should be sub.resource.image.src.
  */
 function getSubcardImage(sub) {
   if (!sub) return null;
 
-  // 1) Direct image on the menu item (not in your query now, but safe to check)
   if (sub.image) {
     if (sub.image.url) return sub.image.url;
     if (sub.image.src) return sub.image.src;
   }
 
-  // 2) Image on the resource union (Collection/Product)
   const resource = sub.resource;
   if (resource) {
     if (resource.image) {
@@ -103,7 +99,6 @@ function getSubcardImage(sub) {
     }
   }
 
-  // 3) Fallback by handle (if menu children have no images in the query)
   const handle = getHandleFromUrl(sub.url || '');
   if (handle && CARD_IMAGES_BY_HANDLE[handle]) {
     return CARD_IMAGES_BY_HANDLE[handle];
@@ -131,8 +126,6 @@ function getSubDescription(sub) {
   const resource = sub.resource || null;
   let raw = '';
 
-  // If you ever extend HEADER_QUERY to include description / descriptionHtml,
-  // this will automatically start using it.
   if (resource) {
     if (
       typeof resource.description === 'string' &&
@@ -147,7 +140,6 @@ function getSubDescription(sub) {
     }
   }
 
-  // Fallback: generate a short phrase from the title.
   if (!raw && sub.title) {
     raw = `Shop ${sub.title}`;
   }
@@ -156,14 +148,67 @@ function getSubDescription(sub) {
 }
 
 /**
- * MobileCategoryCards
- * @param {{ menu: { items?: any[] } }} props
+ * Minimal meta for top-level groups coming from index.jsx "menus" object.
+ * This is not rebuilding the menus — just mapping labels/parent handles.
  */
-export default function MobileCategoryCards({menu}) {
-  const items = menu?.items || [];
+const TOP_META_BY_KEY = {
+  apple: {title: 'Apple', handle: 'apple'},
+  gaming: {title: 'Gaming', handle: 'gaming'},
+  laptops: {title: 'Laptops', handle: 'laptops'},
+  monitors: {title: 'Monitors', handle: 'business-monitors'},
+  mobiles: {title: 'Mobiles', handle: 'mobiles'},
+  tablets: {title: 'Tablets', handle: 'tablets'},
+  audio: {title: 'Audio', handle: 'audio'},
+  fitness: {title: 'Fitness', handle: 'fitness'},
+  cameras: {title: 'Cameras', handle: 'photography'},
+  homeAppliances: {title: 'Home Appliances', handle: 'home-appliances'},
+};
 
-  // Normalize top-level items: only ones that have a collection handle
+/**
+ * MobileCategoryCards
+ * @param {{
+ *   menus?: Record<string, any[]>,
+ *   menu?: { items?: any[] }
+ * }} props
+ */
+export default function MobileCategoryCards({menus, menu}) {
+  /**
+   * Source priority:
+   * 1) "menus" object from index.jsx (already built)
+   * 2) header.menu fallback (previous behavior)
+   */
   const topLevelCollections = useMemo(() => {
+    // 1) Use the pre-built grouped menus
+    if (menus && typeof menus === 'object') {
+      const keys = Object.keys(menus);
+
+      const groups = keys
+        .map((key) => {
+          const groupItems = Array.isArray(menus[key]) ? menus[key] : [];
+          const meta = TOP_META_BY_KEY[key] || {};
+
+          const handle = meta.handle || key;
+          const title =
+            meta.title ||
+            key.charAt(0).toUpperCase() + key.slice(1);
+
+          const url = `/collections/${handle}`;
+
+          return {
+            id: key,
+            title,
+            url,
+            handle,
+            items: groupItems,
+          };
+        })
+        .filter((g) => g.handle);
+
+      if (groups.length) return groups;
+    }
+
+    // 2) Fallback to header.menu items (old structure)
+    const items = menu?.items || [];
     return items
       .map((item) => {
         const handle = getHandleFromUrl(item.url || '');
@@ -173,14 +218,14 @@ export default function MobileCategoryCards({menu}) {
         };
       })
       .filter((item) => item.handle);
-  }, [items]);
+  }, [menus, menu]);
 
   const [activeHandle, setActiveHandle] = useState(
     topLevelCollections[0]?.handle || null,
   );
   const [popupOpen, setPopupOpen] = useState(false);
 
-  // Keep active handle in sync if menu changes
+  // Keep active handle in sync if the source changes
   useEffect(() => {
     if (!topLevelCollections.length) {
       setActiveHandle(null);
@@ -261,14 +306,19 @@ export default function MobileCategoryCards({menu}) {
               }
               onClick={() => handleCardClick(handle)}
             >
-              <div
-                className="mobile-category-card-bg"
-              >
-                <img src={bgImage} alt="" loading='lazy' width={300} height={500}/>
+              <div className="mobile-category-card-bg">
+                {bgImage ? (
+                  <img
+                    src={bgImage}
+                    alt=""
+                    loading="lazy"
+                    width={300}
+                    height={500}
+                  />
+                ) : null}
               </div>
               <div className="mobile-category-card-overlay" />
               <div className="mobile-category-card-content">
-                {/* <div className="mobile-category-pill">Category</div> */}
                 <div className="desc-container">
                   <h3 className="mobile-category-title">{item.title}</h3>
                   <p className="mobile-category-subtitle">
@@ -309,7 +359,6 @@ export default function MobileCategoryCards({menu}) {
             <>
               <div className="mobile-category-popup-header">
                 <div>
-                  {/* label removed as requested */}
                   <h4 className="mobile-category-subpanel-title">
                     {activeItem.title}
                   </h4>

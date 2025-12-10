@@ -581,16 +581,14 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
-      {beautyProducts && (
-        <TopProductSections collection={beautyProducts} />
-      )}
+      {beautyProducts && <TopProductSections collection={beautyProducts} />}
       <RelatedProductsFromHistory key={rpKey} />
 
       {isMobile ? (
         <>
           {header && (
             <>
-              <MobileCategoryCards menu={header.menu} />
+              <MobileCategoryCards menus={menus} />
               {/* <div className="instagram-reels-container">
                 <h1>Instagram Reels</h1>
                 <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />
