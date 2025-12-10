@@ -10,8 +10,8 @@ const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
 const SOURCE_LIMIT = 15; // how many history IDs to consider
 const OUTPUT_LIMIT = 24; // total cards to render at most
 const BATCH_SIZE = 6; // cards per “page”
-const CACHE_TTL_MS = 600 * 60 * 60 * 1000; // 6 hours? (Note: value is ~600h)
-const HARD_TIMEOUT_MS = 1800; // abort slow requests
+const CACHE_TTL_MS = 600 * 60 * 60 * 1000; // 6 hours
+const HARD_TIMEOUT_MS = 8000; // abort slow requests
 const SKELETON_HEIGHT = 400; // reserve container height
 const SKELETON_CARD_H = 357; // skeleton card height
 
@@ -23,12 +23,15 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   const [isBootstrapped, setIsBootstrapped] = useState(false);
 
   const [serverIds, setServerIds] = useState([]); // ids from cookie-based history
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // NEW: customer accounts (new) login state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // NEW: readiness flags to prevent multi-wave jitter
+  const [statusReady, setStatusReady] = useState(false);
+  const [historyReady, setHistoryReady] = useState(false);
 
   const sentinelRef = useRef(null);
   const loadingMoreRef = useRef(false);
 
-  // horizontal scroll ref + handler (for prev/next buttons)
   const rowRef = useRef(null);
   const scrollRow = useCallback((delta) => {
     const el = rowRef.current;
@@ -36,9 +39,16 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     el.scrollBy({left: delta, behavior: 'smooth'});
   }, []);
 
-  // ---- NEW: check if customer is logged in (new customer accounts) ----
+  // Keep ref in sync so fetch effect doesn't depend on isBootstrapped
+  const isBootstrappedRef = useRef(false);
+  useEffect(() => {
+    isBootstrappedRef.current = isBootstrapped;
+  }, [isBootstrapped]);
+
+  // ---- check if customer is logged in ----
   useEffect(() => {
     let abort = false;
+
     (async () => {
       try {
         const res = await fetch('/api/user/status', {
@@ -48,16 +58,20 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         if (!abort) setIsLoggedIn(Boolean(data?.loggedIn));
       } catch {
         if (!abort) setIsLoggedIn(false);
+      } finally {
+        if (!abort) setStatusReady(true);
       }
     })();
+
     return () => {
       abort = true;
     };
   }, []);
 
-  // ---- fetch per-user cookie history (expanded to products -> IDs) ----
+  // ---- fetch per-user cookie history ----
   useEffect(() => {
     let abort = false;
+
     (async () => {
       try {
         const res = await fetch(
@@ -72,31 +86,35 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         if (!abort) setServerIds(ids);
       } catch {
         if (!abort) setServerIds([]);
+      } finally {
+        if (!abort) setHistoryReady(true);
       }
     })();
+
     return () => {
       abort = true;
     };
   }, []);
 
-  // ---- read local history synchronously (client only) ----
+  // ---- read local history only after status is known ----
   const localIds = useMemo(() => {
     if (typeof window === 'undefined') return [];
-    // NEW: if logged in, ignore localStorage completely
+    if (!statusReady) return [];
     if (isLoggedIn) return [];
+
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
     const list = currentProductId
       ? viewed.filter((id) => id !== currentProductId)
       : viewed;
     return list.slice(0, SOURCE_LIMIT);
-  }, [currentProductId, isLoggedIn]);
+  }, [currentProductId, isLoggedIn, statusReady]);
 
   // ---- merge server + local sources for seed IDs ----
   const sourceIds = useMemo(() => {
     const merged = [...serverIds, ...localIds];
-    // unique, preserve order
     const seen = new Set();
     const out = [];
+
     for (const id of merged) {
       if (id && !seen.has(id) && id !== currentProductId) {
         seen.add(id);
@@ -106,9 +124,10 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     return out.slice(0, SOURCE_LIMIT);
   }, [serverIds, localIds, currentProductId]);
 
-  // ---- Bootstrap from cache ----
+  // ---- Bootstrap from cache (only after both sources ready) ----
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!statusReady || !historyReady) return;
 
     const contiguous = readContiguousCached(sourceIds);
     setHeading(sourceIds.length ? 'Based on items you viewed' : 'Random Items');
@@ -126,16 +145,21 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       setRendered([]);
       setIsBootstrapped(false);
     }
-  }, [sourceIds, currentProductId]);
+  }, [sourceIds, currentProductId, statusReady, historyReady]);
 
   // ---- Fetch data (history → recs OR random fallback) ----
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!statusReady || !historyReady) return;
+
     let aborted = false;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), HARD_TIMEOUT_MS);
 
     (async () => {
       setIsLoading(true);
+
+      const booted = isBootstrappedRef.current;
 
       if (!sourceIds.length) {
         const items = await fetchRandomProducts(controller.signal).catch(
@@ -146,7 +170,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
         const deduped = dedupe(items, currentProductId).slice(0, OUTPUT_LIMIT);
         setPool(deduped);
 
-        if (!isBootstrapped) {
+        if (!booted) {
           setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
           setIsBootstrapped(true);
         }
@@ -156,12 +180,13 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       }
 
       const firstId = sourceIds[0];
-      const hasValidFirst = hasValidCache(firstId);
-      if (!hasValidFirst) {
+
+      if (!hasValidCache(firstId)) {
         const first = await fetchRecommendationsForId(
           firstId,
           controller.signal,
         );
+
         if (!aborted && Array.isArray(first)) {
           writeCache(firstId, first);
           const contiguous = readContiguousCached(sourceIds);
@@ -170,25 +195,28 @@ export default function RelatedProductsFromHistory({currentProductId}) {
             OUTPUT_LIMIT,
           );
           setPool(deduped);
-          if (!isBootstrapped) {
+
+          if (!booted) {
             setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
             setIsBootstrapped(true);
           }
         }
       }
 
-      const remaining = sourceIds.slice(1).filter((id) => !hasValidCache(id));
+      // Fetch remaining with limited concurrency to reduce network jank
+      const remaining = sourceIds
+        .slice(1)
+        .filter((id) => id && !hasValidCache(id));
+
       if (remaining.length) {
-        const results = await Promise.allSettled(
-          remaining.map((id) =>
-            fetchRecommendationsForId(id, controller.signal),
-          ),
+        const results = await fetchRecsWithConcurrency(
+          remaining,
+          controller.signal,
+          3,
         );
-        results.forEach((res, idx) => {
-          const sourceId = remaining[idx];
-          if (res.status === 'fulfilled' && Array.isArray(res.value)) {
-            writeCache(sourceId, res.value);
-          }
+
+        results.forEach(({id, items}) => {
+          if (Array.isArray(items)) writeCache(id, items);
         });
       }
 
@@ -199,10 +227,12 @@ export default function RelatedProductsFromHistory({currentProductId}) {
           OUTPUT_LIMIT,
         );
         setPool(deduped);
-        if (!isBootstrapped && deduped.length) {
+
+        if (!isBootstrappedRef.current && deduped.length) {
           setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
           setIsBootstrapped(true);
         }
+
         setIsLoading(false);
       }
     })();
@@ -212,7 +242,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
       controller.abort();
       aborted = true;
     };
-  }, [sourceIds, currentProductId, isBootstrapped]);
+  }, [sourceIds, currentProductId, statusReady, historyReady]);
 
   // ---- infinite “load more” when reaching the end ----
   const loadMore = useCallback(() => {
@@ -255,7 +285,10 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     return () => io.disconnect();
   }, [rendered, pool, loadMore, sentinelIndex]);
 
-  const showSkeleton = !isBootstrapped && (isLoading || rendered.length === 0);
+  const showSkeleton =
+    !statusReady ||
+    !historyReady ||
+    (!isBootstrapped && (isLoading || rendered.length === 0));
 
   return (
     <div className="collection-section">
@@ -339,6 +372,7 @@ async function fetchRecommendationsForId(productId, signal) {
       }
     }
   `;
+
   const res = await fetch(API_URL, {
     method: 'POST',
     signal,
@@ -348,6 +382,7 @@ async function fetchRecommendationsForId(productId, signal) {
     },
     body: JSON.stringify({query, variables: {productId}}),
   });
+
   const json = await res.json();
   if (json?.errors) {
     console.error('GraphQL errors:', json.errors);
@@ -356,10 +391,36 @@ async function fetchRecommendationsForId(productId, signal) {
   return json?.data?.productRecommendations || [];
 }
 
+async function fetchRecsWithConcurrency(ids, signal, concurrency = 3) {
+  const results = [];
+  let index = 0;
+
+  async function worker() {
+    while (index < ids.length) {
+      const i = index++;
+      const id = ids[i];
+
+      try {
+        const items = await fetchRecommendationsForId(id, signal);
+        results.push({id, items});
+      } catch {
+        results.push({id, items: []});
+      }
+    }
+  }
+
+  const workers = Array.from({length: Math.min(concurrency, ids.length)}, () =>
+    worker(),
+  );
+
+  await Promise.all(workers);
+  return results;
+}
+
 async function fetchRandomProducts(signal) {
   const query = `
     query RandomProducts {
-      products(first: 100, sortKey: BEST_SELLING) {
+      products(first: 40, sortKey: BEST_SELLING) {
         nodes {
           id
           handle
@@ -370,6 +431,7 @@ async function fetchRandomProducts(signal) {
       }
     }
   `;
+
   const res = await fetch(API_URL, {
     method: 'POST',
     signal,
@@ -379,17 +441,21 @@ async function fetchRandomProducts(signal) {
     },
     body: JSON.stringify({query}),
   });
+
   const json = await res.json();
   if (json?.errors) {
     console.error('GraphQL errors (random):', json.errors);
     return [];
   }
+
   const nodes = json?.data?.products?.nodes || [];
   const arr = nodes.slice();
+
   for (let i = arr.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+
   return arr;
 }
 
@@ -398,6 +464,7 @@ async function fetchRandomProducts(signal) {
 function cacheKey(id) {
   return `recs:${id}`;
 }
+
 function hasValidCache(id) {
   try {
     const raw = sessionStorage.getItem(cacheKey(id));
@@ -408,6 +475,7 @@ function hasValidCache(id) {
     return false;
   }
 }
+
 function writeCache(id, items) {
   try {
     sessionStorage.setItem(
@@ -416,6 +484,7 @@ function writeCache(id, items) {
     );
   } catch {}
 }
+
 function readContiguousCached(ids) {
   const out = [];
   for (const id of ids) {
@@ -431,6 +500,7 @@ function readContiguousCached(ids) {
   }
   return out;
 }
+
 function readAllCached(ids) {
   const out = [];
   for (const id of ids) {
@@ -443,6 +513,7 @@ function readAllCached(ids) {
   }
   return out;
 }
+
 function dedupe(list, currentProductId) {
   const map = new Map();
   for (const p of list) {
@@ -463,7 +534,10 @@ function SkeletonRow({count = 8, fixedHeight = 400}) {
       <div className="collection-products-row">
         {Array.from({length: count}).map((_, i) => (
           <div key={i} className="product-item">
-            <div className="product-card skeleton" style={{height: 357}}>
+            <div
+              className="product-card skeleton"
+              style={{height: SKELETON_CARD_H}}
+            >
               <div className="skeleton-img" />
               <div className="skeleton-line" />
               <div className="skeleton-line short" />
@@ -473,35 +547,74 @@ function SkeletonRow({count = 8, fixedHeight = 400}) {
       </div>
 
       <style>{`
-        .product-card.skeleton { padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; box-sizing: border-box; }
-        .skeleton-img { width: 150px; height: 150px; border-radius: 8px; background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%); background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite; }
-        .skeleton-line { height: 12px; margin-top: 8px; border-radius: 6px; width: 80%; background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%); background-size: 400% 100%; animation: sh 1.1s ease-in-out infinite; }
+        .product-card.skeleton {
+          padding: 8px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+          box-sizing: border-box;
+        }
+        .skeleton-img {
+          width: 150px;
+          height: 150px;
+          border-radius: 8px;
+          background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
+          background-size: 400% 100%;
+          animation: sh 1.1s ease-in-out infinite;
+        }
+        .skeleton-line {
+          height: 12px;
+          margin-top: 8px;
+          border-radius: 6px;
+          width: 80%;
+          background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
+          background-size: 400% 100%;
+          animation: sh 1.1s ease-in-out infinite;
+        }
         .skeleton-line.short { width: 60%; }
-        @keyframes sh { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+        @keyframes sh {
+          0% { background-position: 100% 0; }
+          100% { background-position: -100% 0; }
+        }
       `}</style>
     </div>
   );
 }
 
+function addWidthParam(url, width) {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set('width', String(width));
+    return u.toString();
+  } catch {
+    // fallback for non-standard URLs
+    const joiner = url.includes('?') ? '&' : '?';
+    return `${url}${joiner}width=${width}`;
+  }
+}
+
 function RelatedProductCard({product, index, refProp}) {
   const firstPrice = product.priceRange?.minVariantPrice;
+  const imgUrl = addWidthParam(product.featuredImage?.url, 200);
+
   return (
-    <div
-      ref={refProp}
-      className="product-item"
-      style={{transitionDelay: `${index * 40}ms`}}
-    >
+    <div ref={refProp} className="product-item">
       <div className="product-card">
         <Link to={`/products/${encodeURIComponent(product.handle)}`}>
-          <img
-            src={`${product.featuredImage.url}&width=200`}
-            alt={product.featuredImage.altText || product.title}
-            width="150"
-            height="150"
-            loading={index < 2 ? 'eager' : 'lazy'}
-            fetchpriority={index < 2 ? 'high' : 'auto'}
-            decoding="async"
-          />
+          {product.featuredImage?.url ? (
+            <img
+              src={imgUrl}
+              alt={product.featuredImage.altText || product.title}
+              width="150"
+              height="150"
+              loading={index < 2 ? 'eager' : 'lazy'}
+              fetchpriority={index < 2 ? 'high' : 'auto'}
+              decoding="async"
+            />
+          ) : null}
+
           <div className="product-title">{product.title}</div>
           <div className="product-price">
             {firstPrice && Number(firstPrice.amount) > 0 ? (
@@ -529,6 +642,7 @@ const LeftArrowIcon = () => (
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
+
 const RightArrowIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
