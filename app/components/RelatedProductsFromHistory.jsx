@@ -3,14 +3,10 @@ import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
 import {Link} from '@remix-run/react';
 import {Money} from '@shopify/hydrogen';
 
-const API_URL = 'https://961souqs.myshopify.com/api/2025-04/graphql.json';
-const API_TOKEN = 'e00803cf918c262c99957f078d8b6d44';
-
 /** Tuning */
 const SOURCE_LIMIT = 15; // how many history IDs to consider
 const OUTPUT_LIMIT = 24; // total cards to render at most
 const BATCH_SIZE = 6; // cards per “page”
-const CACHE_TTL_MS = 600 * 60 * 60 * 1000; // 6 hours
 const HARD_TIMEOUT_MS = 8000; // abort slow requests
 const SKELETON_HEIGHT = 400; // reserve container height
 const SKELETON_CARD_H = 357; // skeleton card height
@@ -22,10 +18,10 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
 
-  const [serverIds, setServerIds] = useState([]); // ids from cookie-based history
+  const [serverIds, setServerIds] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // NEW: readiness flags to prevent multi-wave jitter
+  // readiness flags to reduce multi-wave jitter
   const [statusReady, setStatusReady] = useState(false);
   const [historyReady, setHistoryReady] = useState(false);
 
@@ -38,12 +34,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     if (!el) return;
     el.scrollBy({left: delta, behavior: 'smooth'});
   }, []);
-
-  // Keep ref in sync so fetch effect doesn't depend on isBootstrapped
-  const isBootstrappedRef = useRef(false);
-  useEffect(() => {
-    isBootstrappedRef.current = isBootstrapped;
-  }, [isBootstrapped]);
 
   // ---- check if customer is logged in ----
   useEffect(() => {
@@ -124,30 +114,7 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     return out.slice(0, SOURCE_LIMIT);
   }, [serverIds, localIds, currentProductId]);
 
-  // ---- Bootstrap from cache (only after both sources ready) ----
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!statusReady || !historyReady) return;
-
-    const contiguous = readContiguousCached(sourceIds);
-    setHeading(sourceIds.length ? 'Based on items you viewed' : 'Random Items');
-
-    if (contiguous.length) {
-      const deduped = dedupe(contiguous, currentProductId).slice(
-        0,
-        OUTPUT_LIMIT,
-      );
-      setPool(deduped);
-      setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
-      setIsBootstrapped(true);
-    } else {
-      setPool([]);
-      setRendered([]);
-      setIsBootstrapped(false);
-    }
-  }, [sourceIds, currentProductId, statusReady, historyReady]);
-
-  // ---- Fetch data (history → recs OR random fallback) ----
+  // ---- Fetch all recommendations via ONE server call ----
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!statusReady || !historyReady) return;
@@ -159,81 +126,49 @@ export default function RelatedProductsFromHistory({currentProductId}) {
     (async () => {
       setIsLoading(true);
 
-      const booted = isBootstrappedRef.current;
+      try {
+        const res = await fetch('/api/recommendations/from-history', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+          },
+          body: JSON.stringify({
+            sourceIds,
+            currentProductId,
+            sourceLimit: SOURCE_LIMIT,
+            outputLimit: OUTPUT_LIMIT,
+          }),
+        });
 
-      if (!sourceIds.length) {
-        const items = await fetchRandomProducts(controller.signal).catch(
-          () => [],
-        );
+        const data = await res.json().catch(() => ({}));
         if (aborted) return;
 
-        const deduped = dedupe(items, currentProductId).slice(0, OUTPUT_LIMIT);
-        setPool(deduped);
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const nextHeading =
+          typeof data?.heading === 'string'
+            ? data.heading
+            : sourceIds.length
+            ? 'Based on items you viewed'
+            : 'Random Items';
 
-        if (!booted) {
-          setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
-          setIsBootstrapped(true);
-        }
+        setHeading(nextHeading);
+        setPool(items);
 
-        setIsLoading(false);
-        return;
-      }
-
-      const firstId = sourceIds[0];
-
-      if (!hasValidCache(firstId)) {
-        const first = await fetchRecommendationsForId(
-          firstId,
-          controller.signal,
-        );
-
-        if (!aborted && Array.isArray(first)) {
-          writeCache(firstId, first);
-          const contiguous = readContiguousCached(sourceIds);
-          const deduped = dedupe(contiguous, currentProductId).slice(
-            0,
-            OUTPUT_LIMIT,
+        setRendered(items.slice(0, Math.min(BATCH_SIZE, items.length)));
+        setIsBootstrapped(true);
+      } catch {
+        if (!aborted) {
+          setHeading(
+            sourceIds.length ? 'Based on items you viewed' : 'Random Items',
           );
-          setPool(deduped);
-
-          if (!booted) {
-            setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
-            setIsBootstrapped(true);
-          }
+          setPool([]);
+          setRendered([]);
+          setIsBootstrapped(false);
         }
-      }
-
-      // Fetch remaining with limited concurrency to reduce network jank
-      const remaining = sourceIds
-        .slice(1)
-        .filter((id) => id && !hasValidCache(id));
-
-      if (remaining.length) {
-        const results = await fetchRecsWithConcurrency(
-          remaining,
-          controller.signal,
-          3,
-        );
-
-        results.forEach(({id, items}) => {
-          if (Array.isArray(items)) writeCache(id, items);
-        });
-      }
-
-      if (!aborted) {
-        const mergedAll = readAllCached(sourceIds);
-        const deduped = dedupe(mergedAll, currentProductId).slice(
-          0,
-          OUTPUT_LIMIT,
-        );
-        setPool(deduped);
-
-        if (!isBootstrappedRef.current && deduped.length) {
-          setRendered(deduped.slice(0, Math.min(BATCH_SIZE, deduped.length)));
-          setIsBootstrapped(true);
-        }
-
-        setIsLoading(false);
+      } finally {
+        if (!aborted) setIsLoading(false);
       }
     })();
 
@@ -358,171 +293,6 @@ export default function RelatedProductsFromHistory({currentProductId}) {
   );
 }
 
-/* ---------------- networking ---------------- */
-
-async function fetchRecommendationsForId(productId, signal) {
-  const query = `
-    query productRecommendations($productId: ID!) {
-      productRecommendations(productId: $productId) {
-        id
-        title
-        handle
-        featuredImage { url altText }
-        priceRange { minVariantPrice { amount currencyCode } }
-      }
-    }
-  `;
-
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    signal,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': API_TOKEN,
-    },
-    body: JSON.stringify({query, variables: {productId}}),
-  });
-
-  const json = await res.json();
-  if (json?.errors) {
-    console.error('GraphQL errors:', json.errors);
-    return [];
-  }
-  return json?.data?.productRecommendations || [];
-}
-
-async function fetchRecsWithConcurrency(ids, signal, concurrency = 3) {
-  const results = [];
-  let index = 0;
-
-  async function worker() {
-    while (index < ids.length) {
-      const i = index++;
-      const id = ids[i];
-
-      try {
-        const items = await fetchRecommendationsForId(id, signal);
-        results.push({id, items});
-      } catch {
-        results.push({id, items: []});
-      }
-    }
-  }
-
-  const workers = Array.from({length: Math.min(concurrency, ids.length)}, () =>
-    worker(),
-  );
-
-  await Promise.all(workers);
-  return results;
-}
-
-async function fetchRandomProducts(signal) {
-  const query = `
-    query RandomProducts {
-      products(first: 40, sortKey: BEST_SELLING) {
-        nodes {
-          id
-          handle
-          title
-          featuredImage { url altText }
-          priceRange { minVariantPrice { amount currencyCode } }
-        }
-      }
-    }
-  `;
-
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    signal,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': API_TOKEN,
-    },
-    body: JSON.stringify({query}),
-  });
-
-  const json = await res.json();
-  if (json?.errors) {
-    console.error('GraphQL errors (random):', json.errors);
-    return [];
-  }
-
-  const nodes = json?.data?.products?.nodes || [];
-  const arr = nodes.slice();
-
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = (Math.random() * (i + 1)) | 0;
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-
-  return arr;
-}
-
-/* ---------------- cache helpers ---------------- */
-
-function cacheKey(id) {
-  return `recs:${id}`;
-}
-
-function hasValidCache(id) {
-  try {
-    const raw = sessionStorage.getItem(cacheKey(id));
-    if (!raw) return false;
-    const parsed = JSON.parse(raw);
-    return parsed.expires > Date.now() && Array.isArray(parsed.items);
-  } catch {
-    return false;
-  }
-}
-
-function writeCache(id, items) {
-  try {
-    sessionStorage.setItem(
-      cacheKey(id),
-      JSON.stringify({items, expires: Date.now() + CACHE_TTL_MS}),
-    );
-  } catch {}
-}
-
-function readContiguousCached(ids) {
-  const out = [];
-  for (const id of ids) {
-    try {
-      const raw = sessionStorage.getItem(cacheKey(id));
-      if (!raw) break;
-      const parsed = JSON.parse(raw);
-      if (!(parsed.expires > Date.now() && Array.isArray(parsed.items))) break;
-      out.push(...parsed.items);
-    } catch {
-      break;
-    }
-  }
-  return out;
-}
-
-function readAllCached(ids) {
-  const out = [];
-  for (const id of ids) {
-    try {
-      const raw = sessionStorage.getItem(cacheKey(id));
-      if (!raw) continue;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed.items)) out.push(...parsed.items);
-    } catch {}
-  }
-  return out;
-}
-
-function dedupe(list, currentProductId) {
-  const map = new Map();
-  for (const p of list) {
-    if (!p || p.id === currentProductId) continue;
-    if (!map.has(p.id)) map.set(p.id, p);
-  }
-  return Array.from(map.values());
-}
-
 /* ---------------- UI ---------------- */
 
 function SkeletonRow({count = 8, fixedHeight = 400}) {
@@ -589,7 +359,6 @@ function addWidthParam(url, width) {
     u.searchParams.set('width', String(width));
     return u.toString();
   } catch {
-    // fallback for non-standard URLs
     const joiner = url.includes('?') ? '&' : '?';
     return `${url}${joiner}width=${width}`;
   }
