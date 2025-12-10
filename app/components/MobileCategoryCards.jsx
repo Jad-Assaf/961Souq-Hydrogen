@@ -149,7 +149,6 @@ function getSubDescription(sub) {
 
 /**
  * Minimal meta for top-level groups coming from index.jsx "menus" object.
- * This is not rebuilding the menus — just mapping labels/parent handles.
  */
 const TOP_META_BY_KEY = {
   apple: {title: 'Apple', handle: 'apple'},
@@ -174,11 +173,10 @@ const TOP_META_BY_KEY = {
 export default function MobileCategoryCards({menus, menu}) {
   /**
    * Source priority:
-   * 1) "menus" object from index.jsx (already built)
-   * 2) header.menu fallback (previous behavior)
+   * 1) "menus" object from index.jsx
+   * 2) header.menu fallback
    */
   const topLevelCollections = useMemo(() => {
-    // 1) Use the pre-built grouped menus
     if (menus && typeof menus === 'object') {
       const keys = Object.keys(menus);
 
@@ -189,8 +187,7 @@ export default function MobileCategoryCards({menus, menu}) {
 
           const handle = meta.handle || key;
           const title =
-            meta.title ||
-            key.charAt(0).toUpperCase() + key.slice(1);
+            meta.title || key.charAt(0).toUpperCase() + key.slice(1);
 
           const url = `/collections/${handle}`;
 
@@ -207,7 +204,6 @@ export default function MobileCategoryCards({menus, menu}) {
       if (groups.length) return groups;
     }
 
-    // 2) Fallback to header.menu items (old structure)
     const items = menu?.items || [];
     return items
       .map((item) => {
@@ -225,7 +221,6 @@ export default function MobileCategoryCards({menus, menu}) {
   );
   const [popupOpen, setPopupOpen] = useState(false);
 
-  // Keep active handle in sync if the source changes
   useEffect(() => {
     if (!topLevelCollections.length) {
       setActiveHandle(null);
@@ -286,6 +281,8 @@ export default function MobileCategoryCards({menus, menu}) {
   const handleClosePopup = () => {
     setPopupOpen(false);
   };
+
+  const activeScopeKey = activeHandle || 'category';
 
   return (
     <section className="mobile-category-cards-root">
@@ -385,21 +382,27 @@ export default function MobileCategoryCards({menus, menu}) {
 
               {hasSubCollections ? (
                 <div className="mobile-category-subcards-scroll">
-                  {activeItem.items.map((sub) => {
+                  {activeItem.items.map((sub, index) => {
                     const subHandle = getHandleFromUrl(sub.url || '');
                     const subImageUrl = getSubcardImage(sub);
                     const subDescription = getSubDescription(sub);
 
+                    const stableSubKey =
+                      sub.id || subHandle || sub.title || String(index);
+
+                    const scopedKey = `${activeScopeKey}-${stableSubKey}`;
+
                     return (
                       <Link
-                        key={sub.id || subHandle || sub.title}
+                        key={scopedKey}
                         to={normalizePath(sub.url)}
                         className="mobile-subcard"
                       >
                         {subImageUrl && (
                           <div className="mobile-subcard-image-wrapper">
                             <img
-                              src={`${subImageUrl}&width=400`}
+                              key={`${scopedKey}-img`}
+                              src={`${subImageUrl}&width=500`}
                               alt={sub.title || ''}
                               className="mobile-subcard-img"
                               loading="lazy"
