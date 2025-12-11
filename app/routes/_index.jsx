@@ -231,15 +231,15 @@ export async function loader(args) {
     args.context,
     'new-arrivals',
   );
-  const beautyProductsPromise = fetchCollectionByHandle(
+  const cosmeticsPromise = fetchCollectionByHandle(
     args.context,
-    'beauty-products',
+    'cosmetics',
   );
 
-  const [criticalData, newArrivals, beautyProducts] = await Promise.all([
+  const [criticalData, newArrivals, cosmetics] = await Promise.all([
     criticalDataPromise,
     newArrivalsPromise,
-    beautyProductsPromise,
+    cosmeticsPromise,
   ]);
 
   // Build a unique list of collection handles from your menus.
@@ -287,7 +287,7 @@ export async function loader(args) {
       banners,
       // sliderCollections: criticalData.sliderCollections,
       newArrivals,
-      beautyProducts,
+      cosmetics,
       topProducts: initialTopProducts,
       restTopProducts,
       isMobile,
@@ -436,7 +436,7 @@ export default function Homepage() {
     // sliderCollections,
     topProducts,
     newArrivals,
-    beautyProducts,
+    cosmetics,
     restTopProducts,
     isMobile,
   } = useLoaderData();
@@ -545,8 +545,8 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
-      {beautyProducts && (
-        <TopProductSections collection={beautyProducts} />
+      {cosmetics && (
+        <TopProductSections collection={cosmetics} />
       )}
       <RelatedProductsFromHistory key={rpKey} />
 
