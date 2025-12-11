@@ -468,6 +468,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                         alignItems: 'center',
                         gap: '10px',
                         padding: '10px 0',
+                        width: '100%',
                       }}
                     >
                       {item.imageUrl && (
