@@ -70,6 +70,7 @@ export default defineConfig({
        * @see https://vitejs.dev/config/dep-optimization-options
        */
       include: [
+        'typesense',
         'ts-easing',
         'fast-shallow-equal',
         'react-universal-interface',

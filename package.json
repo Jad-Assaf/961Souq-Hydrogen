@@ -71,6 +71,7 @@
     "remix-utils": "^8.7.0",
     "tailwind-merge": "^2.5.4",
     "three": "^0.175.0",
+    "typesense": "^2.1.0",
     "typographic-base": "^1.0.4",
     "yet-another-react-lightbox": "^3.21.6"
   },
