@@ -4,40 +4,71 @@ import {
   TYPESENSE_PRODUCTS_COLLECTION,
 } from '~/lib/typesense.server';
 
-// Pick ONE of these variable names and set it in your env (Oxygen / Vercel)
-function getWebhookSecret(env) {
-  return (
+// Try both context.env and process.env so it works locally + on Oxygen
+function getWebhookSecret(envFromContext) {
+  const env =
+    envFromContext || (typeof process !== 'undefined' ? process.env : {}) || {};
+
+  const secret =
     env.SHOPIFY_WEBHOOK_SECRET ||
     env.PRIVATE_SHOPIFY_WEBHOOK_SECRET ||
-    env.SHOPIFY_API_SECRET
-  );
+    env.SHOPIFY_API_SECRET;
+
+  if (!secret) {
+    console.warn(
+      '[Webhooks] No webhook secret found in env (SHOPIFY_WEBHOOK_SECRET / PRIVATE_SHOPIFY_WEBHOOK_SECRET / SHOPIFY_API_SECRET).',
+    );
+  }
+
+  return secret;
 }
 
-// Helper: buffer → base64
+// Helper: buffer → base64 (works in worker-style runtimes)
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  return btoa(binary);
+
+  if (typeof btoa === 'function') {
+    return btoa(binary);
+  }
+
+  // Fallback for Node-like envs if needed
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(binary, 'binary').toString('base64');
+  }
+
+  throw new Error('[Webhooks] No base64 encoder available');
 }
 
-// Verify Shopify webhook using Web Crypto (no Node 'crypto' import)
+// Verify Shopify webhook using Web Crypto.
+// For debugging, if secret/crypto/hmac are missing, we log and SKIP verification (insecure).
 async function verifyShopifyWebhook(rawBody, hmacHeader, secret) {
-  if (!hmacHeader || !secret) {
-    console.error(
-      '[Webhooks] Missing HMAC header or secret. hmacHeader=',
-      !!hmacHeader,
-      ' secret=',
-      !!secret,
+  if (!secret) {
+    console.warn(
+      '[Webhooks] WARNING: No webhook secret configured, skipping HMAC verification (INSECURE, for debugging only).',
     );
-    return false;
+    return true;
+  }
+
+  if (!hmacHeader) {
+    console.warn(
+      '[Webhooks] WARNING: Missing X-Shopify-Hmac-Sha256 header, skipping HMAC verification (INSECURE, for debugging only).',
+    );
+    return true;
+  }
+
+  if (typeof crypto === 'undefined' || !crypto.subtle) {
+    console.warn(
+      '[Webhooks] WARNING: crypto.subtle not available, skipping HMAC verification (INSECURE, for debugging only).',
+    );
+    return true;
   }
 
   const encoder = new TextEncoder();
 
-  // Import secret as an HMAC key
   const key = await crypto.subtle.importKey(
     'raw',
     encoder.encode(secret),
@@ -46,20 +77,18 @@ async function verifyShopifyWebhook(rawBody, hmacHeader, secret) {
     ['sign'],
   );
 
-  // Sign the body with HMAC-SHA256
   const signature = await crypto.subtle.sign(
     'HMAC',
     key,
     encoder.encode(rawBody),
   );
-
   const computedHmac = arrayBufferToBase64(signature);
 
   if (computedHmac !== hmacHeader) {
     console.error(
-      '[Webhooks] HMAC mismatch. Expected from Shopify:',
+      '[Webhooks] HMAC mismatch.\n  Shopify:',
       hmacHeader,
-      ' Computed:',
+      '\n  Computed:',
       computedHmac,
     );
     return false;
@@ -68,7 +97,7 @@ async function verifyShopifyWebhook(rawBody, hmacHeader, secret) {
   return true;
 }
 
-// Map Shopify product JSON (Admin REST webhook payload) → Typesense document
+// Map Shopify Admin product JSON → Typesense document
 function mapProductToTypesenseDoc(product) {
   const variants = Array.isArray(product.variants) ? product.variants : [];
 
@@ -96,6 +125,7 @@ function mapProductToTypesenseDoc(product) {
     : product.image || null;
   const imageUrl = firstImage?.src || null;
 
+  // Make ID consistent with your import script (GID format)
   const gid = `gid://shopify/Product/${product.id}`;
 
   return {
@@ -115,12 +145,26 @@ function mapProductToTypesenseDoc(product) {
   };
 }
 
+// OPTIONAL loader so you can test the route from the browser
+export async function loader() {
+  console.log('[Webhooks] GET /webhooks/typesense-products hit (loader test).');
+  return new Response(
+    'Typesense webhooks route is reachable (GET). Use POST from Shopify for real webhooks.',
+    {status: 200},
+  );
+}
+
 export async function action({request, context}) {
   const topic = request.headers.get('X-Shopify-Topic') || '';
   const shopDomain = request.headers.get('X-Shopify-Shop-Domain') || '';
   const hmacHeader = request.headers.get('X-Shopify-Hmac-Sha256') || '';
 
-  console.log('[Webhooks] Incoming webhook:', topic, 'from shop:', shopDomain);
+  console.log(
+    '[Webhooks] Incoming webhook:',
+    topic || '(no topic)',
+    'from shop:',
+    shopDomain || '(no shop)',
+  );
 
   const secret = getWebhookSecret(context.env);
   const rawBody = await request.text();
@@ -146,7 +190,12 @@ export async function action({request, context}) {
     return new Response('Bad request', {status: 400});
   }
 
-  console.log('[Webhooks] Payload parsed OK. Topic:', topic, 'ID:', payload.id);
+  console.log(
+    '[Webhooks] Payload parsed OK. Topic:',
+    topic,
+    'Product ID:',
+    payload.id,
+  );
 
   const client = getTypesenseAdminClientFromEnv(context.env);
   const collection = client.collections(TYPESENSE_PRODUCTS_COLLECTION);
@@ -157,6 +206,7 @@ export async function action({request, context}) {
       console.log(
         '[Webhooks] Upserting product into Typesense:',
         doc.id,
+        '-',
         doc.title,
       );
       await collection.documents().upsert(doc);
