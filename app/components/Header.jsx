@@ -377,7 +377,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           </SearchFormPredictive> */}
           {/* <SearchForm /> */}
 
-          <NavLink to="/" className={'desk-nav-logo'}>
+          <NavLink to="/" prefetch="intent" className={'desk-nav-logo'}>
             <img
               src={
                 isBlackNovember || isChristmas
