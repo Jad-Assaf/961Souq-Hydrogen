@@ -25,7 +25,15 @@ function arrayBufferToBase64(buffer) {
 
 // Verify Shopify webhook using Web Crypto (no Node 'crypto' import)
 async function verifyShopifyWebhook(rawBody, hmacHeader, secret) {
-  if (!hmacHeader || !secret) return false;
+  if (!hmacHeader || !secret) {
+    console.error(
+      '[Webhooks] Missing HMAC header or secret. hmacHeader=',
+      !!hmacHeader,
+      ' secret=',
+      !!secret,
+    );
+    return false;
+  }
 
   const encoder = new TextEncoder();
 
@@ -47,26 +55,32 @@ async function verifyShopifyWebhook(rawBody, hmacHeader, secret) {
 
   const computedHmac = arrayBufferToBase64(signature);
 
-  // Compare the computed HMAC with Shopify header
-  return computedHmac === hmacHeader;
+  if (computedHmac !== hmacHeader) {
+    console.error(
+      '[Webhooks] HMAC mismatch. Expected from Shopify:',
+      hmacHeader,
+      ' Computed:',
+      computedHmac,
+    );
+    return false;
+  }
+
+  return true;
 }
 
 // Map Shopify product JSON (Admin REST webhook payload) → Typesense document
 function mapProductToTypesenseDoc(product) {
   const variants = Array.isArray(product.variants) ? product.variants : [];
 
-  // Collect variant prices (if you want min price from variants)
   const prices = variants
     .map((v) => Number(v.price))
     .filter((v) => Number.isFinite(v) && v >= 0);
   const minPrice = prices.length ? Math.min(...prices) : 0;
 
-  // Collect variant SKUs
   const skus = variants
     .map((v) => v.sku)
     .filter((sku) => typeof sku === 'string' && sku.trim().length > 0);
 
-  // Tags in Admin REST webhook come as comma-separated string
   const tags =
     typeof product.tags === 'string'
       ? product.tags
@@ -82,9 +96,6 @@ function mapProductToTypesenseDoc(product) {
     : product.image || null;
   const imageUrl = firstImage?.src || null;
 
-  // IMPORTANT: make id format match your import script (Storefront API GID)
-  // Storefront product.id is "gid://shopify/Product/123456789"
-  // Admin webhook product.id is numeric (123456789)
   const gid = `gid://shopify/Product/${product.id}`;
 
   return {
@@ -95,10 +106,10 @@ function mapProductToTypesenseDoc(product) {
     vendor: product.vendor || '',
     product_type: product.product_type || '',
     tags,
-    sku: skus, // new sku field (string[])
+    sku: skus,
     price: minPrice,
     available: product.status === 'active',
-    collections: [], // cannot get collections from this webhook; keep empty or handle separately
+    collections: [],
     image: imageUrl,
     url: product.handle ? `/products/${product.handle}` : '',
   };
@@ -109,13 +120,21 @@ export async function action({request, context}) {
   const shopDomain = request.headers.get('X-Shopify-Shop-Domain') || '';
   const hmacHeader = request.headers.get('X-Shopify-Hmac-Sha256') || '';
 
+  console.log('[Webhooks] Incoming webhook:', topic, 'from shop:', shopDomain);
+
   const secret = getWebhookSecret(context.env);
   const rawBody = await request.text();
 
-  // Verify HMAC
-  const isValid = await verifyShopifyWebhook(rawBody, hmacHeader, secret);
+  let isValid = false;
+  try {
+    isValid = await verifyShopifyWebhook(rawBody, hmacHeader, secret);
+  } catch (err) {
+    console.error('[Webhooks] Error during HMAC verification:', err);
+    return new Response('Verification error', {status: 500});
+  }
+
   if (!isValid) {
-    console.error('Invalid Shopify webhook signature');
+    console.error('[Webhooks] Invalid Shopify webhook signature. Rejecting.');
     return new Response('Invalid signature', {status: 401});
   }
 
@@ -123,9 +142,11 @@ export async function action({request, context}) {
   try {
     payload = JSON.parse(rawBody);
   } catch (error) {
-    console.error('Invalid JSON in Shopify webhook', error);
+    console.error('[Webhooks] Invalid JSON in Shopify webhook:', error);
     return new Response('Bad request', {status: 400});
   }
+
+  console.log('[Webhooks] Payload parsed OK. Topic:', topic, 'ID:', payload.id);
 
   const client = getTypesenseAdminClientFromEnv(context.env);
   const collection = client.collections(TYPESENSE_PRODUCTS_COLLECTION);
@@ -133,29 +154,37 @@ export async function action({request, context}) {
   try {
     if (topic === 'products/create' || topic === 'products/update') {
       const doc = mapProductToTypesenseDoc(payload);
+      console.log(
+        '[Webhooks] Upserting product into Typesense:',
+        doc.id,
+        doc.title,
+      );
       await collection.documents().upsert(doc);
       console.log(
-        `[Typesense] Upserted product ${doc.id} from ${topic} (${shopDomain})`,
+        '[Webhooks] Successfully upserted product in Typesense:',
+        doc.id,
       );
     } else if (topic === 'products/delete') {
-      // Admin product delete webhook: payload.id is numeric
       const gid = `gid://shopify/Product/${payload.id}`;
+      console.log('[Webhooks] Deleting product from Typesense:', gid);
       await collection.documents(gid).delete();
       console.log(
-        `[Typesense] Deleted product ${gid} from ${topic} (${shopDomain})`,
+        '[Webhooks] Successfully deleted product from Typesense:',
+        gid,
       );
     } else if (topic === 'orders/create') {
-      // You mentioned you created an orders webhook – we just log it for now.
       console.log(
-        `[Typesense] Received orders/create webhook from ${shopDomain}, no Typesense update.`,
+        '[Webhooks] orders/create received (no Typesense update):',
+        payload.id,
       );
     } else {
-      console.log(`[Typesense] Ignored webhook topic: ${topic}`);
+      console.log('[Webhooks] Ignored webhook topic:', topic);
     }
   } catch (error) {
-    console.error('Error handling Typesense webhook:', error);
+    console.error('[Webhooks] Error handling Typesense webhook:', error);
     return new Response('Webhook handling error', {status: 500});
   }
 
+  console.log('[Webhooks] Completed OK for topic:', topic, 'ID:', payload.id);
   return new Response('OK', {status: 200});
 }
