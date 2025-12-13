@@ -276,9 +276,20 @@ function ProductCard({product}) {
       )}
       <div className="search-result-info">
         <h3 className="search-result-title">{product.title}</h3>
-        {typeof product.price === 'number' && (
-          <p className="search-result-price">${product.price.toFixed(2)}</p>
-        )}
+        {(() => {
+          const priceNum =
+            typeof product.price === 'number'
+              ? product.price
+              : Number(product.price);
+
+          if (!Number.isFinite(priceNum)) return null;
+
+          if (priceNum === 0) {
+            return <p className="search-result-price">Call for price</p>;
+          }
+
+          return <p className="search-result-price">${priceNum.toFixed(2)}</p>;
+        })()}
       </div>
     </a>
   );

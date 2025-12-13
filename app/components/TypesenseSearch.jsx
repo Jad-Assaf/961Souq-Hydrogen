@@ -150,14 +150,44 @@ function TypesenseSuggestions({searchTerm, products, isLoading, isOpen}) {
                       />
                     )}
                     <div className="suggestion-product-info">
-                      <span className="suggestion-product-title">
+                      <span
+                        className="suggestion-product-title"
+                        style={{marginBottom: '5px'}}
+                      >
                         {product.title}
                       </span>
-                      {typeof product.price === 'number' && (
-                        <span className="suggestion-product-price">
-                          ${product.price.toFixed(2)}
-                        </span>
-                      )}
+                      {(() => {
+                        const priceNum =
+                          typeof product.price === 'number'
+                            ? product.price
+                            : Number(product.price);
+
+                        if (!Number.isFinite(priceNum)) return null;
+
+                        if (priceNum === 0) {
+                          return (
+                            <p
+                              className="search-result-price"
+                              style={{fontSize: '14px', fontWeight: '400', color: '#555'}}
+                            >
+                              Call for price
+                            </p>
+                          );
+                        }
+
+                        return (
+                          <p
+                            className="search-result-price"
+                            style={{
+                              fontSize: '14px',
+                              fontWeight: '400',
+                              color: '#555',
+                            }}
+                          >
+                            ${priceNum.toFixed(2)}
+                          </p>
+                        );
+                      })()}
                     </div>
                   </a>
                 </li>
