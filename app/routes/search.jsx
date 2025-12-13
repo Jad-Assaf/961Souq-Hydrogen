@@ -1,240 +1,208 @@
-// app/routes/search-test.jsx
 import React from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
-// import searchTestStyles from '~/styles/search-test.css?url';
-import {InstantSearchBar} from '~/components/InstantSearchBar';
+import {
+  getTypesenseSearchClientFromEnv,
+  TYPESENSE_PRODUCTS_COLLECTION,
+} from '~/lib/typesense.server';
 
-const SEARCH_AND_PREDICTIVE_QUERY = `#graphql
-  query SearchAndPredictive(
-    $query: String!
-    $limit: Int!
-    $country: CountryCode
-    $language: LanguageCode
-    $searchAfter: String
-    $searchBefore: String
-    $searchFirst: Int
-    $searchLast: Int
-  ) @inContext(country: $country, language: $language) {
-    predictiveSearch(
-      query: $query
-      limit: $limit
-      limitScope: EACH
-      searchableFields: [
-        TITLE
-        PRODUCT_TYPE
-        VARIANTS_TITLE
-        VENDOR
-        VARIANTS_SKU
-        TAG
-      ]
-    ) {
-      products {
-        id
-        handle
-        title
-        availableForSale
-        featuredImage {
-          url
-          altText
-          width
-          height
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-      }
-      collections {
-        id
-        handle
-        title
-        image {
-          url
-          altText
-          width
-          height
-        }
-      }
-      pages {
-        id
-        handle
-        title
-      }
-      articles {
-        id
-        handle
-        title
-      }
-      queries {
-        text
-      }
-    }
+const PER_PAGE = 50;
 
-    search(
-      query: $query
-      types: [PRODUCT]
-      first: $searchFirst
-      last: $searchLast
-      after: $searchAfter
-      before: $searchBefore
-    ) {
-      edges {
-        cursor
-        node {
-          __typename
-          ... on Product {
-            id
-            handle
-            title
-            availableForSale
-            featuredImage {
-              url
-              altText
-              width
-              height
-            }
-            priceRange {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-          }
-        }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-      }
-    }
-  }
-`;
-
+/**
+ * Loader for `/search`.
+ * Adds pagination (50 products per page) using `?page=`.
+ */
 export async function loader({request, context}) {
-  const {storefront} = context;
   const url = new URL(request.url);
-  const query = (url.searchParams.get('q') || '').trim();
+  const originalQ = (url.searchParams.get('q') || '').trim();
+  const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
 
-  if (!query) {
+  function expandNumericTokens(original) {
+    const trimmed = original.trim();
+    if (!trimmed) return '';
+    const terms = trimmed.split(/\s+/);
+    const expanded = [];
+    for (const term of terms) {
+      if (/^\d+$/.test(term)) {
+        expanded.push(term);
+        expanded.push(`${term}gb`);
+      } else {
+        expanded.push(term);
+      }
+    }
+    return expanded.join(' ');
+  }
+
+  const q = expandNumericTokens(originalQ);
+
+  if (!q) {
+    return json({query: '', hits: [], found: 0, page: 1, perPage: PER_PAGE});
+  }
+
+  const client = getTypesenseSearchClientFromEnv(context.env);
+
+  const searchParams = {
+    q,
+    query_by: 'title,sku,handle,tags',
+    query_by_weights: '10,10,5,2',
+    per_page: PER_PAGE,
+    page,
+    prefix: true,
+    infix: 'always,fallback,always,always',
+    num_typos: '2,1,0,0',
+    min_len_1typo: 5,
+    min_len_2typo: 8,
+    typo_tokens_threshold: 1,
+    enable_typos_for_numerical_tokens: false,
+    enable_typos_for_alpha_numerical_tokens: false,
+    drop_tokens_threshold: 0,
+    exhaustive_search: true,
+    sort_by: '_text_match:desc,price:desc',
+    prioritize_exact_match: true,
+    prioritize_token_position: true,
+    prioritize_num_matching_fields: true,
+    text_match_type: 'max_score',
+    highlight_full_fields: 'title',
+  };
+
+  try {
+    const result = await client
+      .collections(TYPESENSE_PRODUCTS_COLLECTION)
+      .documents()
+      .search(searchParams);
+
+    // Supports normal + grouped responses (if group_by ever gets enabled)
+    const rawHits =
+      result.hits ||
+      (result.grouped_hits
+        ? result.grouped_hits.flatMap((g) => g.hits || [])
+        : []);
+
+    const hits =
+      rawHits.map(({document}) => ({
+        id: document.id,
+        title: document.title,
+        handle: document.handle,
+        vendor: document.vendor,
+        price: document.price,
+        image: document.image,
+        url: document.url,
+        available: document.available,
+      })) || [];
+
     return json({
-      query: '',
-      predictive: null,
-      searchResults: null,
-      pagination: null,
+      query: originalQ,
+      hits,
+      found: result.found ?? hits.length,
+      page,
+      perPage: PER_PAGE,
     });
+  } catch (error) {
+    console.error('Typesense search error:', error);
+    throw json({error: 'Search failed'}, {status: 500});
   }
-
-  const cursor = url.searchParams.get('cursor') || null;
-  const direction = url.searchParams.get('direction') || 'forward';
-
-  const {language, country} = storefront.i18n;
-  const pageSize = 24;
-
-  let searchAfter = null;
-  let searchBefore = null;
-  let searchFirst = pageSize;
-  let searchLast = null;
-
-  if (!cursor) {
-    searchAfter = null;
-    searchBefore = null;
-    searchFirst = pageSize;
-    searchLast = null;
-  } else if (direction === 'prev') {
-    searchAfter = null;
-    searchBefore = cursor;
-    searchFirst = null;
-    searchLast = pageSize;
-  } else {
-    searchAfter = cursor;
-    searchBefore = null;
-    searchFirst = pageSize;
-    searchLast = null;
-  }
-
-  const variables = {
-    query,
-    limit: 10,
-    language,
-    country,
-    searchAfter,
-    searchBefore,
-    searchFirst,
-    searchLast,
-  };
-
-  const data = await storefront.query(SEARCH_AND_PREDICTIVE_QUERY, {
-    variables,
-  });
-
-  const searchResults = data.search;
-  const edges = searchResults?.edges ?? [];
-  const pageInfo = searchResults?.pageInfo ?? {};
-
-  const startCursor = edges[0]?.cursor || null;
-  const endCursor = edges[edges.length - 1]?.cursor || null;
-
-  const pagination = {
-    hasNextPage: Boolean(pageInfo.hasNextPage),
-    hasPreviousPage: Boolean(pageInfo.hasPreviousPage),
-    nextCursor: pageInfo.hasNextPage ? endCursor : null,
-    prevCursor: pageInfo.hasPreviousPage ? startCursor : null,
-    pageSize,
-  };
-
-  return json({
-    query,
-    predictive: data.predictiveSearch,
-    searchResults,
-    pagination,
-  });
 }
 
-export default function SearchTestRoute() {
-  const {query, predictive, searchResults, pagination} = useLoaderData();
+export default function SearchRoute() {
+  const {query, hits, found, page, perPage} = useLoaderData();
 
   return (
     <div className="search-page">
+      <style>{`
+        .search-pagination {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin: 22px 0 8px;
+          padding: 10px 0;
+        }
+
+        .search-pagination-link {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 110px;
+          height: 40px;
+          padding: 0 14px;
+          border-radius: 999px;
+          border: 1px solid rgba(64, 137, 255, 0.43);
+          background: rgba(255, 255, 255, 1);
+          color: #000;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 600;
+          letter-spacing: 0.2px;
+          transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, opacity 140ms ease;
+          user-select: none;
+        }
+
+        .search-pagination-link:hover {
+          background: rgba(255, 255, 255, 0.10);
+          border-color: rgba(255, 255, 255, 0.22);
+          transform: translateY(-1px);
+        }
+
+        .search-pagination-link:active {
+          transform: translateY(0px);
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-pagination-link--disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+          pointer-events: none;
+        }
+
+        .search-pagination-status {
+          font-size: 13px;
+          color: #000;
+          padding: 0 4px;
+          text-align: center;
+          white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+          .search-pagination {
+            gap: 10px;
+          }
+          .search-pagination-link {
+            min-width: 96px;
+            height: 38px;
+            padding: 0 12px;
+            font-size: 13px;
+          }
+          .search-pagination-status {
+            font-size: 12px;
+          }
+        }
+      `}</style>
+
       <div className="search-header">
         <h1 className="search-title">Search Results</h1>
       </div>
 
-      {/* If you want the bar on the results page too, uncomment: */}
-      {/* <InstantSearchBar initialQuery={query} action="/search" /> */}
-
       <SearchResultsGrid
         query={query}
-        searchResults={searchResults}
-        searchTerm={query}
-        predictive={predictive}
-        pagination={pagination}
+        hits={hits}
+        found={found}
+        page={page}
+        perPage={perPage}
       />
     </div>
   );
 }
 
-function SearchResultsGrid({
-  query,
-  searchResults,
-  searchTerm,
-  predictive,
-  pagination,
-}) {
-  if (!searchTerm.trim() && !query) {
+function SearchResultsGrid({query, hits, found, page, perPage}) {
+  const trimmed = query?.trim();
+  if (!trimmed) {
     return (
       <div className="search-empty-state">
         Start typing to see search results.
       </div>
     );
   }
-
-  const hasProducts = Boolean(searchResults?.edges?.length);
-
-  if (!hasProducts && !predictive) {
-    if (!query) return null;
+  if (!hits.length) {
     return (
       <div className="search-results">
         <div className="search-empty-state">
@@ -244,159 +212,63 @@ function SearchResultsGrid({
     );
   }
 
+  const totalPages = Math.max(1, Math.ceil((found || 0) / perPage));
+  const makeHref = (p) => `/search?q=${encodeURIComponent(query)}&page=${p}`;
+
   return (
     <div className="search-results">
-      <SearchPageSuggestions predictive={predictive} query={query} />
+      <h2 className="search-results-heading">
+        Products matching <span>"{query}"</span> ({found})
+      </h2>
 
-      {hasProducts ? (
-        <>
-          <h2 className="search-results-heading">
-            Products matching <span>"{query}"</span>
-          </h2>
-          <div className="search-results-grid">
-            {searchResults.edges.map((edge) => {
-              const product = edge.node;
-              if (!product || product.__typename !== 'Product') return null;
-              return <ProductCard key={product.id} product={product} />;
-            })}
-          </div>
-          <SearchResultsPagination query={query} pagination={pagination} />
-        </>
-      ) : (
-        <div className="search-empty-state">
-          No products found for <strong>{query}</strong>.
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SearchPageSuggestions({predictive, query}) {
-  if (!predictive) return null;
-
-  const normalizedQuery = (query || '').trim().toLowerCase();
-  const queries =
-    predictive.queries?.filter(
-      (item) => item.text.trim().toLowerCase() !== normalizedQuery,
-    ) || [];
-
-  const hasQueries = queries.length > 0;
-  const hasCollections = predictive.collections?.length > 0;
-
-  if (!hasQueries && !hasCollections) return null;
-
-  return (
-    <section className="search-page-suggestions">
-      {hasQueries && (
-        <div className="search-page-suggestions-row">
-          <p className="search-page-suggestions-label">Suggestions</p>
-          <ul className="suggestions-list suggestions-list--pills">
-            {queries.map((item) => (
-              <li key={item.text} className="suggestion-pill-item">
-                <a
-                  href={`/search?q=${encodeURIComponent(item.text)}`}
-                  className="suggestion-pill-link"
-                >
-                  {item.text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {hasCollections && (
-        <div className="search-page-collections">
-          <p className="search-page-collections-heading">
-            Collections matching "{query}"
-          </p>
-          <ul className="suggestions-list suggestions-list--grid">
-            {predictive.collections.map((collection) => (
-              <li key={collection.id} className="suggestion-card">
-                <a
-                  href={`/collections/${collection.handle}`}
-                  className="suggestion-card-link"
-                >
-                  {collection.image?.url && (
-                    <img
-                      src={`${collection.image.url}&width=200`}
-                      alt={collection.image.altText || collection.title}
-                      className="suggestion-card-image"
-                      loading="lazy"
-                    />
-                  )}
-                  <span className="suggestion-card-title">
-                    {collection.title}
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function SearchResultsPagination({query, pagination}) {
-  if (!pagination) return null;
-
-  const {hasNextPage, hasPreviousPage, nextCursor, prevCursor} = pagination;
-
-  if (!hasNextPage && !hasPreviousPage) return null;
-
-  const buildUrl = (cursor, direction) => {
-    const params = new URLSearchParams();
-    if (query) params.set('q', query);
-    if (cursor) params.set('cursor', cursor);
-    if (direction) params.set('direction', direction);
-    return `/search?${params.toString()}`;
-  };
-
-  return (
-    <div className="search-pagination">
-      <div className="search-pagination-inner">
-        {hasPreviousPage ? (
-          <a
-            href={buildUrl(prevCursor, 'prev')}
-            className="search-pagination-button"
-          >
-            ← Previous
-          </a>
-        ) : (
-          <span className="search-pagination-button search-pagination-button--disabled">
-            ← Previous
-          </span>
-        )}
-
-        {hasNextPage ? (
-          <a
-            href={buildUrl(nextCursor, 'next')}
-            className="search-pagination-button"
-          >
-            Next →
-          </a>
-        ) : (
-          <span className="search-pagination-button search-pagination-button--disabled">
-            Next →
-          </span>
-        )}
+      <div className="search-results-grid">
+        {hits.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="search-pagination">
+          {page > 1 ? (
+            <a className="search-pagination-link" href={makeHref(page - 1)}>
+              Previous
+            </a>
+          ) : (
+            <span className="search-pagination-link search-pagination-link--disabled">
+              Previous
+            </span>
+          )}
+
+          <span className="search-pagination-status">
+            Page {page} of {totalPages}
+          </span>
+
+          {page < totalPages ? (
+            <a className="search-pagination-link" href={makeHref(page + 1)}>
+              Next
+            </a>
+          ) : (
+            <span className="search-pagination-link search-pagination-link--disabled">
+              Next
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 function ProductCard({product}) {
-  const image = product.featuredImage;
-  const minVariant = product.priceRange?.minVariantPrice;
-
   return (
-    <a href={`/products/${product.handle}`} className="search-result-card">
-      {image?.url && (
+    <a
+      href={product.url || `/products/${product.handle}`}
+      className="search-result-card"
+    >
+      {product.image && (
         <div className="search-result-image-wrapper">
           <img
-            src={`${image.url}&width=300`}
-            alt={image.altText || product.title}
+            src={`${product.image}&width=300`}
+            alt={product.title}
             className="search-result-image"
             loading="lazy"
           />
@@ -404,26 +276,10 @@ function ProductCard({product}) {
       )}
       <div className="search-result-info">
         <h3 className="search-result-title">{product.title}</h3>
-        {minVariant && (
-          <p className="search-result-price">{formatMoney(minVariant)}</p>
+        {typeof product.price === 'number' && (
+          <p className="search-result-price">${product.price.toFixed(2)}</p>
         )}
       </div>
     </a>
   );
-}
-
-/**
- * Formats money or returns "Call for price" when amount is 0 / invalid.
- */
-function formatMoney(price) {
-  if (!price) return 'Call for price';
-  const {amount, currencyCode} = price;
-  const value = Number(amount);
-  if (!Number.isFinite(value) || value <= 0) {
-    return 'Call for price';
-  }
-  return new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency: currencyCode || 'USD',
-  }).format(value);
 }

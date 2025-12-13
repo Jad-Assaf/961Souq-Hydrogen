@@ -9,6 +9,7 @@ import AlgoliaSearch from './StorefrontSearch';
 import {useWishlist} from '~/lib/WishlistContext';
 import { useOptimisticCart } from '@shopify/hydrogen';
 import { InstantSearchBar } from './InstantSearchBar';
+import { TypesenseSearch } from './TypesenseSearch';
 
 // import StorefrontSearch from './StorefrontSearch';
 
@@ -375,6 +376,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
             }}
           </SearchFormPredictive> */}
           {/* <SearchForm /> */}
+
           <NavLink to="/" className={'desk-nav-logo'}>
             <img
               src={
@@ -393,7 +395,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               height="47"
             />
           </NavLink>
-          <InstantSearchBar action="/search" />
+          <TypesenseSearch placeholder="Search Products" />
+          {/* <InstantSearchBar action="/search" /> */}
           {/* <AlgoliaSearch /> */}
           <div className="header-ctas">
             <NavLink

@@ -1,752 +1,429 @@
+// app/routes/search-test.jsx
+import React from 'react';
 import {json} from '@shopify/remix-oxygen';
-import {
-  useLoaderData,
-  useSearchParams,
-  useNavigate,
-  Link,
-} from '@remix-run/react';
-import {useState} from 'react';
-import {ProductItem} from '~/components/CollectionDisplay';
-import {getEmptyPredictiveSearchResult} from '~/lib/search';
-import '../styles/SearchPage.css';
+import {useLoaderData} from '@remix-run/react';
+// import searchTestStyles from '~/styles/search-test.css?url';
+import {InstantSearchBar} from '~/components/InstantSearchBar';
 
-// Same Filter UI from your collections
-import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
-
-/**
- * @type {import('@remix-run/react').MetaFunction}
- */
-export const meta = () => {
-  return [{title: `961Souq | Search`}];
-};
-
-/**
- * Helper: buildSearchQuery
- */
-function buildSearchQuery(rawTerm, isPredictive = false) {
-  const trimmed = rawTerm.trim();
-  if (!trimmed) return '';
-
-  if (isPredictive) {
-    const words = trimmed.split(/\s+/).filter(Boolean);
-    if (!words.length) return '';
-    const subQueries = words.map(
-      (w) => `(title:*${w}* OR variants.sku:*${w}*)`,
-    );
-    return subQueries.join(' AND ');
-  } else {
-    // Exact phrase for multi-word
-    if (trimmed.includes(' ')) {
-      return `"${trimmed}"`;
-    }
-    return trimmed;
-  }
-}
-
-/**
- * Priority logic
- */
-function getPriority(product) {
-  let priority = 0;
-
-  const vendorLower = product.vendor?.toLowerCase() || '';
-  if (vendorLower !== 'apple' && vendorLower !== 'samsung') {
-    priority += 1;
-  }
-  const favoredTypes = new Set(['mobile phones', 'watches', 'laptops']);
-  const typeLower = product.productType?.toLowerCase() || '';
-  if (!favoredTypes.has(typeLower)) {
-    priority += 1;
-  }
-  const tagsLower = product.tags?.map((t) => t.toLowerCase()) || [];
-  if (tagsLower.includes('accessories')) {
-    priority += 1;
-  }
-  return priority;
-}
-
-/**
- * LOADER
- */
-export async function loader({request, context}) {
-  const {storefront} = context;
-  const url = new URL(request.url);
-  const searchParams = url.searchParams;
-  const rawTerm = searchParams.get('q') || '';
-
-  // Check if predictive
-  const isPredictive = searchParams.has('predictive');
-  if (isPredictive) {
-    const query = buildSearchQuery(rawTerm, true);
-    const result = await predictiveSearch({request, context, query}).catch(
-      (error) => {
-        console.error('Predictive Search Error:', error);
-        return {
-          type: 'predictive',
-          term: '',
-          result: null,
-          error: error.message,
-        };
-      },
-    );
-    return json({
-      ...result,
-      vendors: [],
-      productTypes: [],
-      pageInfo: {},
-    });
-  }
-
-  // Otherwise: REGULAR search
-  const query = buildSearchQuery(rawTerm, false);
-  const prefix = searchParams.get('prefix') || null;
-
-  const after = searchParams.get('after') || null;
-  const before = searchParams.get('before') || null;
-
-  let first = 50;
-  let lastParam = null;
-  if (after) {
-    first = 50;
-  } else if (before) {
-    lastParam = 50;
-    first = null;
-  }
-
-  // Parse filters & sort
-  const productFilters = parseFilters(searchParams);
-  const {sortKey, reverse} = parseSort(searchParams);
-
-  // Extended GraphQL to retrieve productFilters data
-  const SEARCH_PRODUCTS_QUERY = `#graphql
-    query SearchProducts(
-      $query: String!,
-      $first: Int,
-      $last: Int,
-      $after: String,
-      $before: String,
-      $prefix: SearchPrefixQueryType,
-      $productFilters: [ProductFilter!],
-      $sortKey: SearchSortKeys,
-      $reverse: Boolean
+const SEARCH_AND_PREDICTIVE_QUERY = `#graphql
+  query SearchAndPredictive(
+    $query: String!
+    $limit: Int!
+    $country: CountryCode
+    $language: LanguageCode
+    $searchAfter: String
+    $searchBefore: String
+    $searchFirst: Int
+    $searchLast: Int
+  ) @inContext(country: $country, language: $language) {
+    predictiveSearch(
+      query: $query
+      limit: $limit
+      limitScope: EACH
+      searchableFields: [
+        TITLE
+        PRODUCT_TYPE
+        VARIANTS_TITLE
+        VENDOR
+        VARIANTS_SKU
+        TAG
+      ]
     ) {
-      search(
-        query: $query,
-        first: $first,
-        last: $last,
-        after: $after,
-        before: $before,
-        prefix: $prefix,
-        productFilters: $productFilters,
-        sortKey: $sortKey,
-        reverse: $reverse,
-        types: PRODUCT
-      ) {
-        edges {
-          node {
-            ... on Product {
-              id
-              title
-              handle
-              vendor
-              productType
-              tags
-              description
-              images(first: 3) {
-                nodes {
-                  url
-                  altText
-                }
-              }
-              priceRange {
-                minVariantPrice {
-                  amount
-                  currencyCode
-                }
-              }
-              variants(first: 1) {
-                nodes {
-                  id
-                  sku
-                  price {
-                    amount
-                    currencyCode
-                  }
-                  image {
-                    url
-                    altText
-                  }
-                  availableForSale
-                  compareAtPrice {
-                    amount
-                    currencyCode
-                  }
-                  selectedOptions {
-                    name
-                    value
-                  }
-                }
-              }
-            }
-          }
-        }
-        productFilters {
-          id
-          label
-          type
-          values {
-            id
-            label
-            count
-            input
-          }
-        }
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        totalCount
-      }
-    }
-  `;
-
-  const variables = {
-    query,
-    first,
-    last: lastParam,
-    after,
-    before,
-    prefix,
-    productFilters,
-    sortKey,
-    reverse,
-  };
-
-  let result;
-  try {
-    const data = await storefront.query(SEARCH_PRODUCTS_QUERY, {variables});
-    result = {type: 'regular', term: query, result: data.search};
-  } catch (error) {
-    console.error('Regular search error:', error);
-    result = {type: 'regular', term: query, result: null, error: error.message};
-  }
-
-  // Priority logic
-  if (result.result && result.result.edges) {
-    result.result.edges.sort(
-      (a, b) => getPriority(a.node) - getPriority(b.node),
-    );
-  }
-
-  return json({...result, vendors: [], productTypes: []});
-}
-
-/* ------------------------------------------------------------------
-   REACT COMPONENT with Filter UI
-------------------------------------------------------------------- */
-export default function SearchPage() {
-  const {result} = useLoaderData();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  // If no results
-  const edges = result?.edges || [];
-  if (!edges.length) {
-    return (
-      <div className="search">
-        <h1>Search Results</h1>
-        <p>No results found</p>
-      </div>
-    );
-  }
-
-  // filters from Shopify (for <FiltersDrawer> / <ShopifyFilterForm>)
-  const filters = result?.productFilters || [];
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // Pagination
-  const pageInfo = result?.pageInfo || {};
-  const hasNextPage = pageInfo.hasNextPage;
-  const hasPreviousPage = pageInfo.hasPreviousPage;
-
-  const goNext = () => {
-    if (!hasNextPage) return;
-    const params = new URLSearchParams(searchParams);
-    params.set('after', pageInfo.endCursor);
-    params.delete('before');
-    navigate(`/search?${params.toString()}`);
-  };
-
-  const goPrev = () => {
-    if (!hasPreviousPage) return;
-    const params = new URLSearchParams(searchParams);
-    params.set('before', pageInfo.startCursor);
-    params.delete('after');
-    navigate(`/search?${params.toString()}`);
-  };
-
-  return (
-    <div className="search">
-      <h1>Search Results</h1>
-
-      {/* Example: Sort By dropdown if desired */}
-      <SortDropdown />
-
-      {/* MOBILE: Filter Drawer button */}
-      <div className="lg:hidden mobile-filter-container">
-        <div className="my-4">
-          <button
-            onClick={() => setIsDrawerOpen(true)}
-            className="mobile-filter-btn"
-          >
-            Filters
-          </button>
-        </div>
-        <FiltersDrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          filters={filters}
-        />
-      </div>
-
-      {/* DESKTOP: Show filter form in a sidebar */}
-      <div style={{display: 'flex', gap: '1rem', width: '100%'}}>
-        <div className="hidden lg:block w-[15%]">
-          <ShopifyFilterForm filters={filters} />
-        </div>
-
-        {/* MAIN AREA */}
-        <div className="w-[85%] mobile-results-container">
-          <div className="search-results-grid">
-            {edges.map(({node: product}, idx) => (
-              <ProductItem product={product} index={idx} key={product.id} />
-            ))}
-          </div>
-
-          {/* Pagination controls */}
-          <div
-            style={{
-              marginTop: '1rem',
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '50px',
-            }}
-          >
-            {hasPreviousPage && (
-              <button
-                onClick={goPrev}
-                style={{
-                  backgroundColor: '#fff',
-                  cursor: 'pointer',
-                  padding: '5px 10px',
-                  border: '1px solid #d1d7db',
-                  borderRadius: '30px',
-                }}
-              >
-                ← Previous Page
-              </button>
-            )}
-            {hasNextPage && (
-              <button
-                onClick={goNext}
-                style={{
-                  backgroundColor: '#fff',
-                  cursor: 'pointer',
-                  padding: '5px 10px',
-                  border: '1px solid #d1d7db',
-                  borderRadius: '30px',
-                }}
-              >
-                Next Page →
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------
-   A simple "Sort By" dropdown – if you want sorting in the UI
-------------------------------------------------------------------- */
-function SortDropdown() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const currentSort = searchParams.get('sort') || 'default';
-
-  const handleSortChange = (e) => {
-    const newSort = e.target.value;
-    const params = new URLSearchParams(searchParams);
-    params.set('sort', newSort);
-    // reset pagination
-    params.delete('after');
-    params.delete('before');
-    navigate(`/search?${params.toString()}`);
-  };
-
-  return (
-    <div style={{marginBottom: '1rem'}}>
-      <label htmlFor="sort-select">Sort By: </label>
-      <select id="sort-select" value={currentSort} onChange={handleSortChange}>
-        <option value="default">Newest</option>
-        <option value="priceLowToHigh">Price: Low to High</option>
-        <option value="priceHighToLow">Price: High to Low</option>
-      </select>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------
-   parseFilters & parseSort 
-   (we fix productMetafield to avoid "Field is not defined" errors)
-------------------------------------------------------------------- */
-function parseFilters(searchParams) {
-  const filters = [];
-  for (const [key, val] of searchParams.entries()) {
-    if (!key.startsWith('filter.')) continue;
-    const field = key.replace('filter.', '');
-    let parsedValue;
-    try {
-      parsedValue = JSON.parse(val);
-    } catch {
-      parsedValue = val;
-    }
-
-    // The user might pass productMetafield structure like in your collections logic:
-    // e.g. ?filter.productMetafield={"productMetafield":{"namespace":"...","key":"...","value":"..."}}
-    // or simpler. We'll replicate the exact approach from your collections:
-    if (
-      field === 'productMetafield' &&
-      parsedValue &&
-      typeof parsedValue === 'object'
-    ) {
-      // if it has the shape { productMetafield: {...} }, extract that
-      if ('productMetafield' in parsedValue) {
-        parsedValue = parsedValue.productMetafield;
-      }
-      // ensure that "namespace", "key", and "value" exist if you truly need them
-      // otherwise, you can skip or throw an error
-      if (!parsedValue.namespace || !parsedValue.key || !parsedValue.value) {
-        // If it's missing something, skip it or fix it
-        // We'll just skip it:
-        console.warn('Skipping invalid productMetafield filter:', parsedValue);
-        continue;
-      }
-    }
-
-    filters.push({[field]: parsedValue});
-  }
-  return filters;
-}
-
-function parseSort(searchParams) {
-  const sortOption = searchParams.get('sort') || 'default';
-  const sortMapping = {
-    default: {sortKey: 'RELEVANCE', reverse: false},
-    priceLowToHigh: {sortKey: 'PRICE', reverse: false},
-    priceHighToLow: {sortKey: 'PRICE', reverse: true},
-  };
-  return sortMapping[sortOption] || sortMapping.default;
-}
-
-/* ------------------------------------------------------------------
-   REGULAR SEARCH STUB (unchanged)
-------------------------------------------------------------------- */
-async function regularSearch({request, context, after = null, before = null}) {
-  const {storefront} = context;
-  let first = null;
-  let last = null;
-  if (after) {
-    first = 50;
-  } else if (before) {
-    last = 50;
-  } else {
-    first = 50;
-  }
-  return {type: 'regular', result: null};
-}
-
-/* ------------------------------------------------------------------
-   PREDICTIVE SEARCH (unchanged)
-------------------------------------------------------------------- */
-const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment PredictiveArticle on Article {
-    __typename
-    id
-    title
-    handle
-    blog {
-      handle
-    }
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-`;
-const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
-  fragment PredictiveCollection on Collection {
-    __typename
-    id
-    title
-    handle
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-`;
-const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment PredictivePage on Page {
-    __typename
-    id
-    title
-    handle
-    trackingParameters
-  }
-`;
-const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
-  fragment PredictiveProduct on Product {
-    __typename
-    id
-    title
-    vendor
-    productType
-    tags
-    description
-    handle
-    trackingParameters
-    variants(first: 1) {
-      nodes {
+      products {
         id
-        sku
+        handle
+        title
+        availableForSale
+        featuredImage {
+          url
+          altText
+          width
+          height
+        }
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+      }
+      collections {
+        id
+        handle
+        title
         image {
           url
           altText
           width
           height
         }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-      }
-    }
-  }
-`;
-const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
-  fragment PredictiveQuery on SearchQuerySuggestion {
-    __typename
-    text
-    styledText
-    trackingParameters
-  }
-`;
-const PREDICTIVE_SEARCH_QUERY = `#graphql
-  query PredictiveSearch(
-    $country: CountryCode
-    $language: LanguageCode
-    $limitScope: PredictiveSearchLimitScope!
-    $term: String!
-    $types: [PredictiveSearchType!]
-  ) @inContext(country: $country, language: $language) {
-    predictiveSearch(
-      limitScope: $limitScope,
-      query: $term,
-      types: $types
-    ) {
-      articles {
-        ...PredictiveArticle
-      }
-      collections {
-        ...PredictiveCollection
       }
       pages {
-        ...PredictivePage
+        id
+        handle
+        title
       }
-      products {
-        ...PredictiveProduct
+      articles {
+        id
+        handle
+        title
       }
       queries {
-        ...PredictiveQuery
+        text
       }
     }
-  }
-  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
-  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
-`;
 
-async function predictiveSearch({request, context, query}) {
-  const {storefront} = context;
-  const url = new URL(request.url);
-  const searchParams = url.searchParams;
-
-  const prefixParam = searchParams.get('prefix');
-  let prefix = null;
-  if (prefixParam === 'true') {
-    prefix = 'LAST';
-  } else if (['LAST', 'ANY', 'NONE'].includes(prefixParam)) {
-    prefix = prefixParam;
-  }
-
-  const after = searchParams.get('after') || null;
-  const before = searchParams.get('before') || null;
-  let first = 24;
-  let lastParam = null;
-  if (after) {
-    first = 50;
-  } else if (before) {
-    lastParam = 50;
-    first = null;
-  }
-
-  const SEARCH_PRODUCTS_QUERY = `#graphql
-    query SearchProducts(
-      $query: String!,
-      $first: Int,
-      $last: Int,
-      $after: String,
-      $before: String,
-      $prefix: SearchPrefixQueryType
+    search(
+      query: $query
+      types: [PRODUCT]
+      first: $searchFirst
+      last: $searchLast
+      after: $searchAfter
+      before: $searchBefore
     ) {
-      search(
-        query: $query,
-        first: $first,
-        last: $last,
-        after: $after,
-        before: $before,
-        prefix: $prefix,
-        types: PRODUCT
-      ) {
-        edges {
-          node {
-            ... on Product {
-              id
-              title
-              handle
-              vendor
-              productType
-              tags
-              description
-              images(first: 3) {
-                nodes {
-                  url
-                  altText
-                }
-              }
-              priceRange {
-                minVariantPrice {
-                  amount
-                  currencyCode
-                }
-              }
-              variants(first: 1) {
-                nodes {
-                  id
-                  sku
-                  price {
-                    amount
-                    currencyCode
-                  }
-                  image {
-                    url
-                    altText
-                  }
-                  availableForSale
-                  compareAtPrice {
-                    amount
-                    currencyCode
-                  }
-                  selectedOptions {
-                    name
-                    value
-                  }
-                }
+      edges {
+        cursor
+        node {
+          __typename
+          ... on Product {
+            id
+            handle
+            title
+            availableForSale
+            featuredImage {
+              url
+              altText
+              width
+              height
+            }
+            priceRange {
+              minVariantPrice {
+                amount
+                currencyCode
               }
             }
           }
         }
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-        totalCount
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
       }
     }
-  `;
+  }
+`;
 
-  let data;
-  let errorMessage;
-  try {
-    data = await storefront.query(SEARCH_PRODUCTS_QUERY, {
-      variables: {
-        query,
-        prefix,
-        after,
-        before,
-        first,
-        last: lastParam,
-      },
+export async function loader({request, context}) {
+  const {storefront} = context;
+  const url = new URL(request.url);
+  const query = (url.searchParams.get('q') || '').trim();
+
+  if (!query) {
+    return json({
+      query: '',
+      predictive: null,
+      searchResults: null,
+      pagination: null,
     });
-  } catch (error) {
-    console.error('Predictive Search Error:', error);
-    errorMessage = error.message;
   }
 
-  if (!data?.search || errorMessage) {
-    return {
-      type: 'predictive',
-      term: query,
-      result: {
-        items: {products: []},
-        total: 0,
-      },
-      error: errorMessage || 'No data returned',
-    };
+  const cursor = url.searchParams.get('cursor') || null;
+  const direction = url.searchParams.get('direction') || 'forward';
+
+  const {language, country} = storefront.i18n;
+  const pageSize = 24;
+
+  let searchAfter = null;
+  let searchBefore = null;
+  let searchFirst = pageSize;
+  let searchLast = null;
+
+  if (!cursor) {
+    searchAfter = null;
+    searchBefore = null;
+    searchFirst = pageSize;
+    searchLast = null;
+  } else if (direction === 'prev') {
+    searchAfter = null;
+    searchBefore = cursor;
+    searchFirst = null;
+    searchLast = pageSize;
+  } else {
+    searchAfter = cursor;
+    searchBefore = null;
+    searchFirst = pageSize;
+    searchLast = null;
   }
 
-  const result = data.search;
-  if (result.edges) {
-    result.edges.sort((a, b) => getPriority(a.node) - getPriority(b.node));
-  }
-  const products = result.edges.map((edge) => edge.node);
-  return {
-    type: 'predictive',
-    term: query,
-    result: {
-      items: {products},
-      total: products.length,
-      pageInfo: result.pageInfo,
-    },
+  const variables = {
+    query,
+    limit: 10,
+    language,
+    country,
+    searchAfter,
+    searchBefore,
+    searchFirst,
+    searchLast,
   };
+
+  const data = await storefront.query(SEARCH_AND_PREDICTIVE_QUERY, {
+    variables,
+  });
+
+  const searchResults = data.search;
+  const edges = searchResults?.edges ?? [];
+  const pageInfo = searchResults?.pageInfo ?? {};
+
+  const startCursor = edges[0]?.cursor || null;
+  const endCursor = edges[edges.length - 1]?.cursor || null;
+
+  const pagination = {
+    hasNextPage: Boolean(pageInfo.hasNextPage),
+    hasPreviousPage: Boolean(pageInfo.hasPreviousPage),
+    nextCursor: pageInfo.hasNextPage ? endCursor : null,
+    prevCursor: pageInfo.hasPreviousPage ? startCursor : null,
+    pageSize,
+  };
+
+  return json({
+    query,
+    predictive: data.predictiveSearch,
+    searchResults,
+    pagination,
+  });
 }
 
-/* ------------------------------------------------------------------
-   TYPEDEFS
-------------------------------------------------------------------- */
+export default function SearchTestRoute() {
+  const {query, predictive, searchResults, pagination} = useLoaderData();
+
+  return (
+    <div className="search-page">
+      <div className="search-header">
+        <h1 className="search-title">Search Results</h1>
+      </div>
+
+      {/* If you want the bar on the results page too, uncomment: */}
+      {/* <InstantSearchBar initialQuery={query} action="/search" /> */}
+
+      <SearchResultsGrid
+        query={query}
+        searchResults={searchResults}
+        searchTerm={query}
+        predictive={predictive}
+        pagination={pagination}
+      />
+    </div>
+  );
+}
+
+function SearchResultsGrid({
+  query,
+  searchResults,
+  searchTerm,
+  predictive,
+  pagination,
+}) {
+  if (!searchTerm.trim() && !query) {
+    return (
+      <div className="search-empty-state">
+        Start typing to see search results.
+      </div>
+    );
+  }
+
+  const hasProducts = Boolean(searchResults?.edges?.length);
+
+  if (!hasProducts && !predictive) {
+    if (!query) return null;
+    return (
+      <div className="search-results">
+        <div className="search-empty-state">
+          No products found for <strong>{query}</strong>.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="search-results">
+      <SearchPageSuggestions predictive={predictive} query={query} />
+
+      {hasProducts ? (
+        <>
+          <h2 className="search-results-heading">
+            Products matching <span>"{query}"</span>
+          </h2>
+          <div className="search-results-grid">
+            {searchResults.edges.map((edge) => {
+              const product = edge.node;
+              if (!product || product.__typename !== 'Product') return null;
+              return <ProductCard key={product.id} product={product} />;
+            })}
+          </div>
+          <SearchResultsPagination query={query} pagination={pagination} />
+        </>
+      ) : (
+        <div className="search-empty-state">
+          No products found for <strong>{query}</strong>.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SearchPageSuggestions({predictive, query}) {
+  if (!predictive) return null;
+
+  const normalizedQuery = (query || '').trim().toLowerCase();
+  const queries =
+    predictive.queries?.filter(
+      (item) => item.text.trim().toLowerCase() !== normalizedQuery,
+    ) || [];
+
+  const hasQueries = queries.length > 0;
+  const hasCollections = predictive.collections?.length > 0;
+
+  if (!hasQueries && !hasCollections) return null;
+
+  return (
+    <section className="search-page-suggestions">
+      {hasQueries && (
+        <div className="search-page-suggestions-row">
+          <p className="search-page-suggestions-label">Suggestions</p>
+          <ul className="suggestions-list suggestions-list--pills">
+            {queries.map((item) => (
+              <li key={item.text} className="suggestion-pill-item">
+                <a
+                  href={`/search?q=${encodeURIComponent(item.text)}`}
+                  className="suggestion-pill-link"
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {hasCollections && (
+        <div className="search-page-collections">
+          <p className="search-page-collections-heading">
+            Collections matching "{query}"
+          </p>
+          <ul className="suggestions-list suggestions-list--grid">
+            {predictive.collections.map((collection) => (
+              <li key={collection.id} className="suggestion-card">
+                <a
+                  href={`/collections/${collection.handle}`}
+                  className="suggestion-card-link"
+                >
+                  {collection.image?.url && (
+                    <img
+                      src={`${collection.image.url}&width=200`}
+                      alt={collection.image.altText || collection.title}
+                      className="suggestion-card-image"
+                      loading="lazy"
+                    />
+                  )}
+                  <span className="suggestion-card-title">
+                    {collection.title}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function SearchResultsPagination({query, pagination}) {
+  if (!pagination) return null;
+
+  const {hasNextPage, hasPreviousPage, nextCursor, prevCursor} = pagination;
+
+  if (!hasNextPage && !hasPreviousPage) return null;
+
+  const buildUrl = (cursor, direction) => {
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (cursor) params.set('cursor', cursor);
+    if (direction) params.set('direction', direction);
+    return `/search?${params.toString()}`;
+  };
+
+  return (
+    <div className="search-pagination">
+      <div className="search-pagination-inner">
+        {hasPreviousPage ? (
+          <a
+            href={buildUrl(prevCursor, 'prev')}
+            className="search-pagination-button"
+          >
+            ← Previous
+          </a>
+        ) : (
+          <span className="search-pagination-button search-pagination-button--disabled">
+            ← Previous
+          </span>
+        )}
+
+        {hasNextPage ? (
+          <a
+            href={buildUrl(nextCursor, 'next')}
+            className="search-pagination-button"
+          >
+            Next →
+          </a>
+        ) : (
+          <span className="search-pagination-button search-pagination-button--disabled">
+            Next →
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProductCard({product}) {
+  const image = product.featuredImage;
+  const minVariant = product.priceRange?.minVariantPrice;
+
+  return (
+    <a href={`/products/${product.handle}`} className="search-result-card">
+      {image?.url && (
+        <div className="search-result-image-wrapper">
+          <img
+            src={`${image.url}&width=300`}
+            alt={image.altText || product.title}
+            className="search-result-image"
+            loading="lazy"
+          />
+        </div>
+      )}
+      <div className="search-result-info">
+        <h3 className="search-result-title">{product.title}</h3>
+        {minVariant && (
+          <p className="search-result-price">{formatMoney(minVariant)}</p>
+        )}
+      </div>
+    </a>
+  );
+}
+
 /**
- * @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs
- * @typedef {import('@shopify/remix-oxygen').ActionFunctionArgs} ActionFunctionArgs
- * @template T @typedef {import('@remix-run/react').MetaFunction<T>} MetaFunction
- * @typedef {import('~/lib/search').RegularSearchReturn} RegularSearchReturn
- * @typedef {import('~/lib/search').PredictiveSearchReturn} PredictiveSearchReturn
- * @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData
+ * Formats money or returns "Call for price" when amount is 0 / invalid.
  */
+function formatMoney(price) {
+  if (!price) return 'Call for price';
+  const {amount, currencyCode} = price;
+  const value = Number(amount);
+  if (!Number.isFinite(value) || value <= 0) {
+    return 'Call for price';
+  }
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: currencyCode || 'USD',
+  }).format(value);
+}
