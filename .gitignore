@@ -17,3 +17,4 @@ pnpm-lock.yaml
 /scripts
 app/scripts/typesense-import-products-from-shopify.js
 app/scripts/typesense-create-products-collection.js
+

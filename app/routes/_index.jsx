@@ -29,7 +29,7 @@ import VideosGallery from '~/components/VideosGallery';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 import {CategorySliderFromMenuMobile} from '~/components/CategorySliderFromMenuMobile';
 import MobileCategoryTiles from '~/components/MobileCategoryTiles';
-import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
+// import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileCategoryCards from '~/components/MobileCategoryCards';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
@@ -115,14 +115,29 @@ export const meta = ({data, matches}) => {
   });
 };
 
-export function shouldRevalidate({currentUrl, nextUrl}) {
-  return currentUrl.pathname !== nextUrl.pathname;
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}) {
+  // When navigating back to the homepage, keep cached loader data
+  // so it does not refetch + feel slow.
+  if (nextUrl?.pathname === '/' && currentUrl?.pathname !== '/') {
+    return false;
+  }
+
+  // Fallback to Remix default behavior when provided,
+  // otherwise preserve your previous logic.
+  return defaultShouldRevalidate ?? currentUrl.pathname !== nextUrl.pathname;
 }
 
-async function fetchCollectionByHandle(context, handle) {
+async function fetchCollectionByHandle(context, handle, cacheOverride) {
   const {collectionByHandle} = await context.storefront.query(
     GET_COLLECTION_BY_HANDLE_QUERY,
-    {variables: {handle}, cache: context.storefront.CacheShort()},
+    {
+      variables: {handle},
+      cache: cacheOverride || context.storefront.CacheShort(),
+    },
   );
   return collectionByHandle || null;
 }
@@ -225,15 +240,18 @@ export async function loader(args) {
     },
   ];
 
-  // Fire off critical queries concurrently so above‑the‑fold content is fast.
+  // Fire off critical queries concurrently so above-the-fold content is fast.
   const criticalDataPromise = loadCriticalData(args);
+
   const newArrivalsPromise = fetchCollectionByHandle(
     args.context,
     'new-arrivals',
+    args.context.storefront.CacheShort(),
   );
   const cosmeticsPromise = fetchCollectionByHandle(
     args.context,
     'cosmetics',
+    args.context.storefront.CacheShort(),
   );
 
   const [criticalData, newArrivals, cosmetics] = await Promise.all([
@@ -243,49 +261,65 @@ export async function loader(args) {
   ]);
 
   // Build a unique list of collection handles from your menus.
-  const menuHandles = [
-    ...appleMenu.map((item) => getHandleFromUrl(item.url)),
-    ...gamingMenu.map((item) => getHandleFromUrl(item.url)),
-    ...laptopsMenu.map((item) => getHandleFromUrl(item.url)),
-    ...monitorsMenu.map((item) => getHandleFromUrl(item.url)),
-    ...mobilesMenu.map((item) => getHandleFromUrl(item.url)),
-    ...tabletsMenu.map((item) => getHandleFromUrl(item.url)),
-    ...audioMenu.map((item) => getHandleFromUrl(item.url)),
-    ...fitnessMenu.map((item) => getHandleFromUrl(item.url)),
-    ...camerasMenu.map((item) => getHandleFromUrl(item.url)),
-    ...homeAppliancesMenu.map((item) => getHandleFromUrl(item.url)),
-  ];
-  const uniqueMenuHandles = [...new Set(menuHandles)];
+  // IMPORTANT: On mobile you are not rendering all the desktop sections,
+  // so skip preloading these collections entirely to avoid slowing down the homepage.
+  const menuHandles = isMobile
+    ? []
+    : [
+        ...appleMenu.map((item) => getHandleFromUrl(item.url)),
+        ...gamingMenu.map((item) => getHandleFromUrl(item.url)),
+        ...laptopsMenu.map((item) => getHandleFromUrl(item.url)),
+        ...monitorsMenu.map((item) => getHandleFromUrl(item.url)),
+        ...mobilesMenu.map((item) => getHandleFromUrl(item.url)),
+        ...tabletsMenu.map((item) => getHandleFromUrl(item.url)),
+        ...audioMenu.map((item) => getHandleFromUrl(item.url)),
+        ...fitnessMenu.map((item) => getHandleFromUrl(item.url)),
+        ...camerasMenu.map((item) => getHandleFromUrl(item.url)),
+        ...homeAppliancesMenu.map((item) => getHandleFromUrl(item.url)),
+      ];
 
-  // Fetch non‑critical collections concurrently.
-  const deferredTopProductsPromise = Promise.allSettled(
-    uniqueMenuHandles.map((handle) =>
-      fetchCollectionByHandle(args.context, handle),
-    ),
-  ).then((results) => {
-    const topProductsByHandle = {};
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value) {
-        topProductsByHandle[uniqueMenuHandles[index]] = result.value;
-      } else {
-        console.error(
-          `Failed to load collection for handle: ${uniqueMenuHandles[index]}`,
-        );
-      }
-    });
-    return topProductsByHandle;
-  });
+  const uniqueMenuHandles = [...new Set(menuHandles)].filter(Boolean);
+
+  // Fetch non-critical collections concurrently (desktop only).
+  // Use a longer cache here because these are homepage sections.
+  const deferredTopProductsPromise =
+    uniqueMenuHandles.length === 0
+      ? Promise.resolve({})
+      : Promise.allSettled(
+          uniqueMenuHandles.map((handle) =>
+            fetchCollectionByHandle(
+              args.context,
+              handle,
+              args.context.storefront.CacheLong(),
+            ),
+          ),
+        ).then((results) => {
+          const topProductsByHandle = {};
+          results.forEach((result, index) => {
+            if (result.status === 'fulfilled' && result.value) {
+              topProductsByHandle[uniqueMenuHandles[index]] = result.value;
+            } else {
+              console.error(
+                `Failed to load collection for handle: ${uniqueMenuHandles[index]}`,
+              );
+            }
+          });
+          return topProductsByHandle;
+        });
 
   // Prepare critical top products.
   const initialTopProducts = {};
 
-  // Wait for non‑critical data before returning.
+  // Wait for non-critical data before returning (keeps your current behavior unchanged).
   const restTopProducts = await deferredTopProductsPromise;
 
   return data(
     {
       banners,
       // sliderCollections: criticalData.sliderCollections,
+      title: criticalData.title,
+      description: criticalData.description,
+      url: criticalData.url,
       newArrivals,
       cosmetics,
       topProducts: initialTopProducts,
@@ -444,30 +478,24 @@ export default function Homepage() {
   const rootMatch = useMatches()[0];
   const header = rootMatch?.data?.header;
 
-  const [rpKey, setRpKey] = useState(0);
+  // RelatedProductsFromHistory temporarily disabled for testing performance
+  // const [rpKey, setRpKey] = useState(0);
 
-  useEffect(() => {
-    const bump = () => setRpKey((k) => k + 1);
+  // useEffect(() => {
+  //   const bump = () => setRpKey((k) => k + 1);
 
-    // BFCache restore + general refocus
-    const onPageShow = (e) => bump();
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') bump();
-    };
-    const onPopState = () => bump();
+  //   // Only bump when the page is restored from BFCache (back/forward cache),
+  //   // to avoid multiple remounts/jank during normal navigation/focus changes.
+  //   const onPageShow = (e) => {
+  //     if (e && e.persisted) bump();
+  //   };
 
-    window.addEventListener('pageshow', onPageShow);
-    window.addEventListener('focus', bump);
-    window.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('popstate', onPopState);
+  //   window.addEventListener('pageshow', onPageShow);
 
-    return () => {
-      window.removeEventListener('pageshow', onPageShow);
-      window.removeEventListener('focus', bump);
-      window.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('popstate', onPopState);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener('pageshow', onPageShow);
+  //   };
+  // }, []);
 
   const combinedTopProducts = {
     ...topProducts,
@@ -545,10 +573,10 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       {newArrivals && <TopProductSections collection={newArrivals} />}
-      {cosmetics && (
-        <TopProductSections collection={cosmetics} />
-      )}
-      <RelatedProductsFromHistory key={rpKey} />
+      {cosmetics && <TopProductSections collection={cosmetics} />}
+
+      {/* RelatedProductsFromHistory temporarily disabled for testing performance */}
+      {/* <RelatedProductsFromHistory key={rpKey} /> */}
 
       {isMobile ? (
         <>
@@ -604,7 +632,7 @@ export default function Homepage() {
         // </div>
         <>
           <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
-          {/* Desktop View: Original layout with multiple groups */}
+
           {/* Apple Group */}
           <CollectionCircles
             collections={appleMenu}
@@ -620,47 +648,6 @@ export default function Homepage() {
                 }
               />
             )}
-
-          {/* <VideosGallery
-            videos={[
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/fa446492aa194b0d9b6f9e2dd686111c.mp4',
-                href: '/products/air-cooling-mist-fan',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/a67b4e70a5b1452f959de8f4189ffc8f.mp4',
-                href: '/products/telesin-fun-shot-magnetic-phone-grip-with-light',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/a45eb2a3059e473985a7c76c47861f24.mp4',
-                href: '/collections/whoop-fitness-bands',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/d296bab182604700b7eba56640fc94d2.mp4',
-                href: '/products/fujifilm-instax-mini-41-instant-camera',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/375f6c7dacae4625af6cdcc6839bb668.mp4',
-                href: '/collections/karl-lagerfeld',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/34df6684f0b547f7904ab185d315a148.mp4',
-                href: '/products/asus-proart-p16-h7606-copilot-pc-16-touchscreen-ryzen-ai-9-hx-370-32gb-ram-1tb-ssd-rtx-4060-8gb',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/a04a6af8173e4759bbdcb11b218b43eb.mp4',
-                href: '/collections/garmin-smart-watch',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/333b871711e54a92835ced0296fe8f59.mp4',
-                href: '/products/fujifilm-instax-wide-evo™-hybrid-instant-camera',
-              },
-              {
-                src: 'https://cdn.shopify.com/videos/c/o/v/7cbd91e1e7be4f738941c9583dcaf3d1.mp4',
-                href: '/collections/ray-ban-smart-glasses',
-              },
-            ]}
-          /> */}
 
           {/* Gaming Group */}
           <CollectionCircles
@@ -807,6 +794,7 @@ export default function Homepage() {
             )}
         </>
       )}
+
       {/* <ScrollingSVGs /> */}
       <BrandSection brands={brandsData} />
     </div>
