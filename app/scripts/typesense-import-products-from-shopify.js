@@ -150,11 +150,18 @@ function mapProductToTypesenseDoc(product) {
   const collections =
     product.collections?.edges?.map((edge) => edge.node.handle) || [];
 
-  // NEW: collect all non-empty variant SKUs
+  // collect all non-empty variant SKUs
   const skus =
     product.variants?.edges
       ?.map((edge) => edge.node?.sku)
       .filter((sku) => typeof sku === 'string' && sku.trim().length > 0) || [];
+
+  // normalize URL: remove "www." if present
+  let url = product.onlineStoreUrl || `/products/${product.handle}`;
+  if (typeof url === 'string') {
+    // this turns https://www.961souq.com/... into https://961souq.com/...
+    url = url.replace('://www.', '://');
+  }
 
   return {
     id: product.id, // GID is fine as a string ID (must match what you use in webhooks)
@@ -167,9 +174,9 @@ function mapProductToTypesenseDoc(product) {
     price: isNaN(priceAmount) ? 0 : priceAmount,
     available: Boolean(product.availableForSale),
     collections,
-    sku: skus, // NEW: sku field as string[]
+    sku: skus,
     image: product.featuredImage?.url || '',
-    url: product.onlineStoreUrl || `/products/${product.handle}`,
+    url,
   };
 }
 
