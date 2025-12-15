@@ -4,7 +4,7 @@ import {json} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from '@remix-run/react';
 import christmasStyles from '~/styles/christmas.css?url';
 
-const CHRISTMAS_COLLECTION_HANDLE = 'all';
+const CHRISTMAS_COLLECTION_HANDLE = 'new-arrivals';
 
 const CHRISTMAS_COLLECTION_QUERY = `#graphql
   query ChristmasCollection(
@@ -34,6 +34,12 @@ const CHRISTMAS_COLLECTION_QUERY = `#graphql
             height
           }
           priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          compareAtPriceRange {
             minVariantPrice {
               amount
               currencyCode
@@ -130,6 +136,17 @@ function formatPrice(price) {
   }).format(amount);
 }
 
+function isDiscounted(compareAt, price) {
+  if (!compareAt || !price) return false;
+  if (compareAt.currencyCode !== price.currencyCode) return false;
+
+  const c = Number(compareAt.amount);
+  const p = Number(price.amount);
+  if (Number.isNaN(c) || Number.isNaN(p)) return false;
+
+  return c > p;
+}
+
 /* ------------------------------------------------------------------ */
 /* SIMPLE HIGH-PERFORMANCE SNOW – CANVAS ONLY                          */
 /* ------------------------------------------------------------------ */
@@ -154,7 +171,6 @@ function SnowCanvas({enabled}) {
   function getDeviceTier() {
     const cores = navigator.hardwareConcurrency || 4;
     const mem = navigator.deviceMemory || 4;
-    // 0 = low, 1 = mid, 2 = high
     if (cores <= 2 || mem <= 2) return 0;
     if (cores <= 4 || mem <= 4) return 1;
     return 2;
@@ -164,13 +180,9 @@ function SnowCanvas({enabled}) {
     const isMobile = width <= 768;
     const tier = getDeviceTier();
 
-    // DPR is the biggest lever for canvas performance
     const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
-
-    // FPS caps
     const fps = isMobile ? 24 : 30;
 
-    // Flake counts (kept intentionally low)
     let count = isMobile ? 28 : 60;
     if (tier === 0) count = isMobile ? 18 : 40;
     if (tier === 1) count = isMobile ? 24 : 50;
@@ -241,7 +253,6 @@ function SnowCanvas({enabled}) {
     if (!lastNowRef.current) lastNowRef.current = now;
     if (!lastFrameMsRef.current) lastFrameMsRef.current = now;
 
-    // FPS cap
     if (now - lastFrameMsRef.current < frameInterval) return;
 
     const dt = Math.min((now - lastNowRef.current) / 1000, 0.05);
@@ -391,10 +402,8 @@ export default function ChristmasPage() {
 
   return (
     <main className={`christmas-page ${snowOn ? 'snow-on' : 'snow-off'}`}>
-      {/* Simple canvas snow (no DOM flakes, no React per-frame renders) */}
       <SnowCanvas enabled={snowOn} />
 
-      {/* HERO */}
       <section className="christmas-hero">
         <div className="christmas-hero-left">
           <p className="christmas-badge">Holiday {targetYear}</p>
@@ -513,13 +522,12 @@ export default function ChristmasPage() {
         </div>
       </section>
 
-      {/* PRODUCT GRID */}
       <section className="christmas-grid-section">
         <div className="section-header">
           <h2>{collection?.title ?? 'Featured Christmas Picks'}</h2>
-          {collection?.description && (
+          {/* {collection?.description && (
             <p className="section-description">{collection.description}</p>
-          )}
+          )} */}
         </div>
 
         {products.length === 0 ? (
@@ -529,46 +537,62 @@ export default function ChristmasPage() {
           </p>
         ) : (
           <div className="christmas-product-grid">
-            {products.map((product) => (
-              <article key={product.id} className="christmas-product-card">
-                <Link
-                  to={`/products/${product.handle}`}
-                  className="card-image-wrapper"
-                >
-                  {product.featuredImage ? (
-                    <img
-                      src={`${product.featuredImage.url}&width=300`}
-                      alt={product.featuredImage.altText ?? product.title}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="card-image-placeholder">
-                      <span>{product.title.charAt(0)}</span>
+            {products.map((product) => {
+              const price = product.priceRange?.minVariantPrice;
+              const compareAt = product.compareAtPriceRange?.minVariantPrice;
+
+              const discounted = isDiscounted(compareAt, price);
+
+
+              return (
+                <article key={product.id} className="christmas-product-card">
+                  <Link
+                    to={`/products/${product.handle}`}
+                    className="card-image-wrapper"
+                  >
+                    {product.featuredImage ? (
+                      <img
+                        src={`${product.featuredImage.url}&width=300`}
+                        alt={product.featuredImage.altText ?? product.title}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="card-image-placeholder">
+                        <span>{product.title.charAt(0)}</span>
+                      </div>
+                    )}
+
+                    <div className="card-hover-layer">
+                      <span className="card-hover-label">View</span>
                     </div>
-                  )}
 
-                  <div className="card-hover-layer">
-                    <span className="card-hover-label">View</span>
+                    {!product.availableForSale && (
+                      <span className="product-badge sold-out">Sold out</span>
+                    )}
+                    <span className="product-badge festive">🎄 Gift idea</span>
+                  </Link>
+
+                  <div className="card-body">
+                    <h3 className="product-title">
+                      <Link to={`/products/${product.handle}`}>
+                        {product.title}
+                      </Link>
+                    </h3>
+
+                    <p className="product-price">
+                      <span className="price-current">
+                        {formatPrice(price)}
+                      </span>
+                      {discounted ? (
+                        <span className="price-compare">
+                          {formatPrice(compareAt)}
+                        </span>
+                      ) : null}
+                    </p>
                   </div>
-
-                  {!product.availableForSale && (
-                    <span className="product-badge sold-out">Sold out</span>
-                  )}
-                  <span className="product-badge festive">🎄 Gift idea</span>
-                </Link>
-
-                <div className="card-body">
-                  <h3 className="product-title">
-                    <Link to={`/products/${product.handle}`}>
-                      {product.title}
-                    </Link>
-                  </h3>
-                  <p className="product-price">
-                    {formatPrice(product.priceRange?.minVariantPrice)}
-                  </p>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
