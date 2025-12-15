@@ -574,7 +574,7 @@ export default function Homepage() {
 
       <BannerSlideshow banners={banners} />
       <MobileHeroGlassy
-        mobileImageSrc="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202512151315.jpg?v=1765797517"
+        mobileImageSrc="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202512151315.jpg?v=1765797517&width=400"
         alt="Holiday tech showcase"
         eyebrow="Holiday Drops"
         title="Upgrade Season Starts Now"

@@ -449,10 +449,6 @@ export default function ChristmasPage() {
             </Link>
           </div>
 
-          <p className="christmas-small-print">
-            Free gift wrapping on select items · Extended returns until
-            mid-January
-          </p>
 
           <div className="christmas-toggle-row">
             <button
