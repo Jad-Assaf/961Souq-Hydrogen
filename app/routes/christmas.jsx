@@ -581,11 +581,11 @@ export default function ChristmasPage() {
 
                     <p className="product-price">
                       <span className="price-current">
-                        {formatPrice(price)}
+                        {formatPrice(price)}.00
                       </span>
                       {discounted ? (
                         <span className="price-compare">
-                          {formatPrice(compareAt)}
+                          {formatPrice(compareAt)}.00
                         </span>
                       ) : null}
                     </p>
