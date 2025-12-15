@@ -39,37 +39,37 @@ function normalizePath(url) {
  */
 const CARD_IMAGES_BY_HANDLE = {
   apple:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-img.jpg?v=1764771592&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-img.jpg?v=1764771592&width=300',
   gaming:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-img.jpg?v=1764771592&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-img.jpg?v=1764771592&width=300',
   'gaming-laptops':
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-laptops-img.jpg?v=1764771592&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-laptops-img.jpg?v=1764771592&width=300',
   laptops:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/laptops-img.jpg?v=1764771592&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/laptops-img.jpg?v=1764771592&width=300',
   desktops:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/desktops-img.jpg?v=1764773830&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/desktops-img.jpg?v=1764773830&width=300',
   'pc-parts':
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/components-img_b69f7492-1c76-4569-89ba-22c3927cc919.jpg?v=1764944882&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/components-img_b69f7492-1c76-4569-89ba-22c3927cc919.jpg?v=1764944882&width=300',
   networking:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-img_db522598-33f9-4008-9255-713c41dc6ee3.jpg?v=1764859926&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-img_db522598-33f9-4008-9255-713c41dc6ee3.jpg?v=1764859926&width=300',
   'business-monitors':
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_de67b538-ca50-4e4f-b1c1-fd6772f951d2.jpg?v=1764771592&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_de67b538-ca50-4e4f-b1c1-fd6772f951d2.jpg?v=1764771592&width=300',
   mobiles:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobiles-img_80e26ae0-bd23-4621-99b3-bcb94a231a44.jpg?v=1764773830&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobiles-img_80e26ae0-bd23-4621-99b3-bcb94a231a44.jpg?v=1764773830&width=300',
   tablets:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tablets-img_8073b683-f3db-434f-8a11-220f7bf49b14.jpg?v=1764773830&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tablets-img_8073b683-f3db-434f-8a11-220f7bf49b14.jpg?v=1764773830&width=300',
   audio:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/audio-img.jpg?v=1764773830&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/audio-img.jpg?v=1764773830&width=300',
   accessories:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/computer-accessories-img.jpg?v=1764773830&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/computer-accessories-img.jpg?v=1764773830&width=300',
   fitness:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-img_8de77403-902c-4741-9d71-23f445738d8b.jpg?v=1764838128&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/garmin-img_8de77403-902c-4741-9d71-23f445738d8b.jpg?v=1764838128&width=300',
   photography:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cameras-img.jpg?v=1764771592&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/cameras-img.jpg?v=1764771592&width=300',
   'home-appliances':
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances-img.jpg?v=1764773830&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances-img.jpg?v=1764773830&width=300',
   cosmetics:
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/commerce-sephora-beauty-sale-istock-1658893205_2_copy.jpg?v=1765182025&width=250',
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/commerce-sephora-beauty-sale-istock-1658893205_2_copy.jpg?v=1765182025&width=300',
 };
 
 function getCardImage(handle) {
