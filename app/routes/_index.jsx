@@ -31,6 +31,7 @@ import {CategorySliderFromMenuMobile} from '~/components/CategorySliderFromMenuM
 import MobileCategoryTiles from '~/components/MobileCategoryTiles';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileCategoryCards from '~/components/MobileCategoryCards';
+import MobileHeroGlassy from '~/components/MobileHeroGlassy';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 // const MANUAL_MENU_HANDLES = [
@@ -572,6 +573,16 @@ export default function Homepage() {
       ></h1>
 
       <BannerSlideshow banners={banners} />
+      <MobileHeroGlassy
+        mobileImageSrc="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202512151315.jpg?v=1765797517"
+        alt="Holiday tech showcase"
+        eyebrow="Holiday Drops"
+        title="Latest Tech, Clean Deals"
+        subtitle="Premium picks across phones, laptops, audio, gaming, and smart home."
+        ctaText="Shop Now"
+        ctaTo="/christmas"
+      />
+
       {newArrivals && <TopProductSections collection={newArrivals} />}
       {cosmetics && <TopProductSections collection={cosmetics} />}
 

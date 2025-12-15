@@ -6632,3 +6632,146 @@ svg.icon.icon--full-color {
   box-shadow: none !important;
 }
 
+.mhg {
+  position: relative;
+  width: 100%;
+  /* "svh" behaves better on mobile browsers with dynamic address bars */
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+/* Background image wrapper */
+.mhg__bg {
+  position: absolute;
+  inset: 0;
+  display: none;
+  /* hidden by default (desktop) */
+}
+
+/* Only show the image on mobile */
+@media (max-width: 749px) {
+  .mhg__bg {
+    display: block;
+  }
+}
+
+.mhg__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Subtle overlay on top of the image (for readability) */
+@media (max-width: 749px) {
+  .mhg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom,
+        rgba(0, 0, 0, 0.35),
+        rgba(0, 0, 0, 0.55));
+  }
+    .banner-slideshow {
+      display: none !important;
+    }
+}
+
+/* Content container */
+.mhg__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  padding: 18px 18px 220px;
+}
+
+.mhg__content--bottom {
+  align-items: flex-end;
+}
+
+.mhg__content--center {
+  align-items: center;
+}
+
+/* Glassy panel */
+.mhg__glass {
+  width: min(560px, 92vw);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Typography */
+.mhg__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mhg__title {
+  margin: 0 0 8px;
+  font-size: 1.55rem;
+  line-height: 1.18;
+  font-weight: 700;
+  color: #fff;
+}
+
+.mhg__subtitle {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* CTA */
+.mhg__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+
+  text-decoration: none;
+  font-weight: 600;
+
+  color: #0b1220;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.mhg__cta:active {
+  transform: translateY(1px);
+}
+
+/* Desktop behavior:
+   Keep the section from forcing a full-screen block if you render it on desktop.
+   (Image is already hidden; this just makes the section compact.) */
+@media (min-width: 750px) {
+  .mhg {
+    display: none;
+  }
+
+  .mhg__content {
+    min-height: auto;
+    padding: 0;
+  }
+
+  .mhg__glass {
+    width: 100%;
+    border-radius: 18px;
+  }
+}
