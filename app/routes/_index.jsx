@@ -577,7 +577,7 @@ export default function Homepage() {
         mobileImageSrc="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202512151315.jpg?v=1765797517"
         alt="Holiday tech showcase"
         eyebrow="Holiday Drops"
-        title="Latest Tech, Clean Deals"
+        title="Upgrade Season Starts Now"
         subtitle="Premium picks across phones, laptops, audio, gaming, and smart home."
         ctaText="Shop Now"
         ctaTo="/christmas"

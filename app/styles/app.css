@@ -6638,6 +6638,7 @@ svg.icon.icon--full-color {
   /* "svh" behaves better on mobile browsers with dynamic address bars */
   min-height: 100svh;
   overflow: hidden;
+  border-radius: 10px;
 }
 
 /* Background image wrapper */
