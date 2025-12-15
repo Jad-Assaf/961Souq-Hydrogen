@@ -350,7 +350,7 @@ export default function MobileCategoryCards({menu}) {
                         {subImageUrl && (
                           <div className="mobile-subcard-image-wrapper">
                             <img
-                              src={`${subImageUrl}&width=400`}
+                              src={`${subImageUrl}&width=300`}
                               alt={sub.title || ''}
                               className="mobile-subcard-img"
                               loading="lazy"
