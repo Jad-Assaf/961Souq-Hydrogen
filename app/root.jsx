@@ -35,11 +35,11 @@ import {WishlistProvider} from './lib/WishlistContext';
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
  */
-export const shouldRevalidate = ({formMethod, currentUrl, nextUrl}) => {
+export const shouldRevalidate = ({formMethod, defaultShouldRevalidate}) => {
   if (formMethod && formMethod !== 'GET') return true;
-  if (currentUrl.toString() === nextUrl.toString()) return true;
-  return false;
+  return defaultShouldRevalidate;
 };
+
 
 const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 // const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
@@ -65,56 +65,47 @@ export function links() {
  * @param {LoaderFunctionArgs} args
  */
 export async function loader({request, context}) {
-  // 1) Legacy URL redirect
   const url = new URL(request.url);
-  const pathname = url.pathname;
-  const match = pathname.match(/^\/collections\/[^/]+\/products\/(.+)/);
-  const cart = await context.cart.get(); // includes totalQuantity
-  if (match) {
-    const productSlug = match[1];
-    return redirect(`/products/${productSlug}`, {status: 301});
-  }
+  const match = url.pathname.match(/^\/collections\/[^/]+\/products\/(.+)/);
+  if (match) return redirect(`/products/${match[1]}`, {status: 301});
 
-  try {
-    const deferredData = await loadDeferredData({request, context});
-    const criticalData = await loadCriticalData({request, context});
-    const {storefront, env} = context;
+  const {storefront, env, session, customerAccount} = context;
 
-    const session = context.session;
-    const headers = new Headers();
-    headers.append('Set-Cookie', await session.commit());
+  const [cart, isLoggedIn, header] = await Promise.all([
+    context.cart.get(),
+    customerAccount.isLoggedIn(),
+    storefront.query(HEADER_QUERY, {
+      variables: {headerMenuHandle: 'new-main-menu'},
+      cache: storefront.CacheLong(),
+    }),
+  ]);
 
-    // ↙ add these two lines
-    headers.set('X-Frame-Options', 'DENY');
-    headers.set('X-Content-Type-Options', 'nosniff');
+  if (header?.menu?.items) header.menu.items = processMenuItems(header.menu.items);
 
-    return data(
-      {
-        ...deferredData,
-        ...criticalData,
-        publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
-        shop: getShopAnalytics({
-          storefront,
-          publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
-        }),
-        consent: {
-          checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
-          storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-          country: storefront.i18n.country,
-          language: storefront.i18n.language,
-        },
-        cart,
+  const headers = new Headers();
+  headers.append('Set-Cookie', await session.commit());
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('X-Content-Type-Options', 'nosniff');
+
+  return data(
+    {
+      header,
+      cart,
+      isLoggedIn,
+      publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+      shop: getShopAnalytics({
+        storefront,
+        publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
+      }),
+      consent: {
+        checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+        storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
       },
-      {headers},
-    );
-  } catch (error) {
-    console.error('Loader error:', error);
-    // include headers on error responses too
-    return new Response('Failed to load data', {
-      status: 500,
-      headers: SECURITY_HEADERS,
-    });
-  }
+    },
+    {headers},
+  );
 }
 
 /**
