@@ -5,14 +5,14 @@ import {Link} from '@remix-run/react';
 function SnowCanvasInSection({enabled, containerRef, mobileOnly = true}) {
   const canvasRef = useRef(null);
   const rafRef = useRef(0);
-  const flakesRef = useRef([]);
   const ctxRef = useRef(null);
-  const spriteRef = useRef(null);
-  const sizeRef = useRef({w: 0, h: 0, dpr: 1});
+  const flakesRef = useRef([]);
   const runningRef = useRef(false);
-  const lastTimeRef = useRef(0);
-  const lastRenderRef = useRef(0);
-  const fpsRef = useRef(30);
+
+  const sizeRef = useRef({w: 0, h: 0, dpr: 1, fps: 24});
+  const lastNowRef = useRef(0);
+  const lastFrameMsRef = useRef(0);
+  const inViewRef = useRef(true);
 
   function prefersReducedMotion() {
     if (typeof window === 'undefined') return false;
@@ -24,75 +24,37 @@ function SnowCanvasInSection({enabled, containerRef, mobileOnly = true}) {
     return window.matchMedia?.('(max-width: 749px)')?.matches;
   }
 
-  function getPerfMultiplier() {
-    if (typeof navigator === 'undefined') return 1;
-    const cores = navigator.hardwareConcurrency || 4;
-    const mem = navigator.deviceMemory || 4;
-
-    if (cores <= 2 || mem <= 2) return 0.65;
-    if (cores <= 4 || mem <= 4) return 0.8;
-    return 1;
+  function getConfig(w) {
+    const isMobile = w <= 749;
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
+    const fps = isMobile ? 24 : 30;
+    const count = isMobile ? 18 : 40; // intentionally low for section snow
+    return {dpr, fps, count};
   }
 
-  function getFlakeCount(w, h) {
-    // tuned for a hero section (mobile-first)
-    const area = w * h;
-    let base = Math.round(area / 22000); // ~40-70 typical on mobile hero
-    base = Math.max(26, Math.min(base, 80));
-    return Math.max(18, Math.round(base * getPerfMultiplier()));
-  }
-
-  function makeSprite() {
-    const c = document.createElement('canvas');
-    c.width = 32;
-    c.height = 32;
-    const g = c.getContext('2d');
-    if (!g) return null;
-
-    const cx = 16;
-    const cy = 16;
-    const r = 10;
-
-    const grad = g.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0, 'rgba(255,255,255,0.95)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
-
-    g.fillStyle = grad;
-    g.beginPath();
-    g.arc(cx, cy, r, 0, Math.PI * 2);
-    g.fill();
-
-    return c;
-  }
-
-  function createFlake(w, h, randomY = true) {
-    const size = 6 + Math.random() * 10; // 6–16px
-    const vy = 28 + Math.random() * 70;
-    const vx = -10 + Math.random() * 20;
-    const alpha = 0.18 + Math.random() * 0.6;
-
+  function makeFlake(w, h, randomY = true) {
     return {
       x: Math.random() * w,
       y: randomY ? Math.random() * h : -Math.random() * h,
-      size,
-      vy,
-      vx,
-      alpha,
+      r: 0.7 + Math.random() * 1.6,
+      vy: 16 + Math.random() * 45,
+      vx: -6 + Math.random() * 12,
+      a: 0.12 + Math.random() * 0.42,
     };
   }
 
-  function resizeAndSync() {
+  function sync() {
     const container = containerRef.current;
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
     if (!container || !canvas || !ctx) return;
 
-    const w = container.clientWidth || 0;
-    const h = container.clientHeight || 0;
+    const w = Math.max(1, Math.floor(container.clientWidth || 0));
+    const h = Math.max(1, Math.floor(container.clientHeight || 0));
     if (!w || !h) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    sizeRef.current = {w, h, dpr};
+    const {dpr, fps, count} = getConfig(w);
+    sizeRef.current = {w, h, dpr, fps};
 
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
@@ -101,49 +63,60 @@ function SnowCanvasInSection({enabled, containerRef, mobileOnly = true}) {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    fpsRef.current = w <= 749 ? 30 : 45;
-
-    const targetCount = getFlakeCount(w, h);
-    const current = flakesRef.current;
-
-    if (current.length < targetCount) {
-      const add = targetCount - current.length;
-      for (let i = 0; i < add; i++) current.push(createFlake(w, h, true));
-    } else if (current.length > targetCount) {
-      flakesRef.current = current.slice(0, targetCount);
+    const arr = flakesRef.current;
+    if (arr.length < count) {
+      for (let i = arr.length; i < count; i++) arr.push(makeFlake(w, h, true));
+    } else if (arr.length > count) {
+      flakesRef.current = arr.slice(0, count);
     }
   }
 
-  function clearCanvas() {
+  function clear() {
     const ctx = ctxRef.current;
     const {w, h} = sizeRef.current;
     if (!ctx || !w || !h) return;
     ctx.clearRect(0, 0, w, h);
   }
 
-  function step(now) {
-    if (!runningRef.current) return;
+  function stop() {
+    runningRef.current = false;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
+    clear();
+  }
 
-    rafRef.current = requestAnimationFrame(step);
+  function start() {
+    if (runningRef.current) return;
+    sync();
+    lastNowRef.current = 0;
+    lastFrameMsRef.current = 0;
+    runningRef.current = true;
+    rafRef.current = requestAnimationFrame(draw);
+  }
+
+  function draw(now) {
+    if (!runningRef.current) return;
+    rafRef.current = requestAnimationFrame(draw);
+
+    if (!inViewRef.current) return;
 
     const ctx = ctxRef.current;
-    const sprite = spriteRef.current;
-    const {w, h} = sizeRef.current;
-    if (!ctx || !sprite || !w || !h) return;
+    const {w, h, fps} = sizeRef.current;
+    if (!ctx || !w || !h || !fps) return;
 
-    const targetFps = fpsRef.current || 30;
-    const frameInterval = 1000 / targetFps;
+    const frameInterval = 1000 / fps;
 
-    if (!lastTimeRef.current) lastTimeRef.current = now;
-    if (!lastRenderRef.current) lastRenderRef.current = now;
+    if (!lastNowRef.current) lastNowRef.current = now;
+    if (!lastFrameMsRef.current) lastFrameMsRef.current = now;
 
-    if (now - lastRenderRef.current < frameInterval) return;
+    if (now - lastFrameMsRef.current < frameInterval) return;
 
-    const dt = Math.min((now - lastTimeRef.current) / 1000, 0.05);
-    lastTimeRef.current = now;
-    lastRenderRef.current = now;
+    const dt = Math.min((now - lastNowRef.current) / 1000, 0.05);
+    lastNowRef.current = now;
+    lastFrameMsRef.current = now;
 
     ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#ffffff';
 
     const flakes = flakesRef.current;
     for (let i = 0; i < flakes.length; i++) {
@@ -152,15 +125,17 @@ function SnowCanvasInSection({enabled, containerRef, mobileOnly = true}) {
       f.y += f.vy * dt;
       f.x += f.vx * dt;
 
-      if (f.y > h + 24) {
-        f.y = -24;
+      if (f.y > h + 20) {
+        f.y = -20;
         f.x = Math.random() * w;
       }
-      if (f.x < -30) f.x = w + 30;
-      if (f.x > w + 30) f.x = -30;
+      if (f.x < -20) f.x = w + 20;
+      if (f.x > w + 20) f.x = -20;
 
-      ctx.globalAlpha = f.alpha;
-      ctx.drawImage(sprite, f.x, f.y, f.size, f.size);
+      ctx.globalAlpha = f.a;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.globalAlpha = 1;
@@ -179,61 +154,40 @@ function SnowCanvasInSection({enabled, containerRef, mobileOnly = true}) {
     if (!ctx) return;
 
     ctxRef.current = ctx;
-    spriteRef.current = makeSprite();
 
-    let ro;
     const container = containerRef.current;
+    if (!container) return;
+
+    // Only run when visible
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        inViewRef.current = !!entry?.isIntersecting;
+        if (inViewRef.current && enabled) start();
+        else stop();
+      },
+      {threshold: 0.05},
+    );
+    io.observe(container);
 
     function onResize() {
       if (mobileOnly && !isMobileNow()) {
-        runningRef.current = false;
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-        clearCanvas();
+        stop();
         return;
       }
-      resizeAndSync();
-    }
-
-    function onVisibility() {
-      if (document.hidden) {
-        runningRef.current = false;
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      } else {
-        if (enabled && (!mobileOnly || isMobileNow())) {
-          resizeAndSync();
-          lastTimeRef.current = 0;
-          lastRenderRef.current = 0;
-          runningRef.current = true;
-          rafRef.current = requestAnimationFrame(step);
-        }
-      }
+      sync();
     }
 
     window.addEventListener('resize', onResize, {passive: true});
-    document.addEventListener('visibilitychange', onVisibility);
 
-    if (container && typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(() => onResize());
-      ro.observe(container);
-    }
-
-    // start
-    resizeAndSync();
-    lastTimeRef.current = 0;
-    lastRenderRef.current = 0;
-    runningRef.current = true;
-    rafRef.current = requestAnimationFrame(step);
+    // initial
+    sync();
+    start();
 
     return () => {
+      io.disconnect();
       window.removeEventListener('resize', onResize);
-      document.removeEventListener('visibilitychange', onVisibility);
-      if (ro) ro.disconnect();
-      runningRef.current = false;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0;
-      clearCanvas();
+      stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, mobileOnly]);

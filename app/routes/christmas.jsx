@@ -137,155 +137,119 @@ function formatPrice(price) {
 function SnowCanvas({enabled}) {
   const canvasRef = useRef(null);
   const rafRef = useRef(0);
-  const flakesRef = useRef([]);
   const ctxRef = useRef(null);
-  const spriteRef = useRef(null);
+
+  const flakesRef = useRef([]);
   const sizeRef = useRef({w: 0, h: 0, dpr: 1});
   const runningRef = useRef(false);
-  const lastTimeRef = useRef(0);
-  const lastRenderRef = useRef(0);
-  const fpsRef = useRef(45);
+
+  const lastFrameMsRef = useRef(0);
+  const lastNowRef = useRef(0);
 
   function prefersReducedMotion() {
     if (typeof window === 'undefined') return false;
     return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   }
 
-  function getPerfMultiplier() {
-    if (typeof navigator === 'undefined') return 1;
+  function getDeviceTier() {
     const cores = navigator.hardwareConcurrency || 4;
     const mem = navigator.deviceMemory || 4;
-
-    // lower multiplier on modest devices
-    if (cores <= 4 || mem <= 4) return 0.75;
-    if (cores <= 2 || mem <= 2) return 0.6;
-    return 1;
+    // 0 = low, 1 = mid, 2 = high
+    if (cores <= 2 || mem <= 2) return 0;
+    if (cores <= 4 || mem <= 4) return 1;
+    return 2;
   }
 
-  function getFlakeCount(width) {
-    // base counts by viewport
-    let base = 110;
-    if (width <= 1024) base = 80;
-    if (width <= 768) base = 55;
-    if (width <= 480) base = 40;
+  function getConfig(width) {
+    const isMobile = width <= 768;
+    const tier = getDeviceTier();
 
-    const m = getPerfMultiplier();
-    return Math.max(24, Math.round(base * m));
+    // DPR is the biggest lever for canvas performance
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
+
+    // FPS caps
+    const fps = isMobile ? 24 : 30;
+
+    // Flake counts (kept intentionally low)
+    let count = isMobile ? 28 : 60;
+    if (tier === 0) count = isMobile ? 18 : 40;
+    if (tier === 1) count = isMobile ? 24 : 50;
+
+    return {dpr, fps, count};
   }
 
-  function getTargetFps(width) {
-    // cap FPS more aggressively on small screens
-    if (width <= 768) return 30;
-    return 45;
-  }
-
-  function makeSprite() {
-    const c = document.createElement('canvas');
-    c.width = 32;
-    c.height = 32;
-    const g = c.getContext('2d');
-    if (!g) return null;
-
-    const cx = 16;
-    const cy = 16;
-    const r = 10;
-
-    const grad = g.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0, 'rgba(255,255,255,0.95)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
-
-    g.fillStyle = grad;
-    g.beginPath();
-    g.arc(cx, cy, r, 0, Math.PI * 2);
-    g.fill();
-
-    return c;
-  }
-
-  function createFlake(w, h, randomY = true) {
-    const r = 0.9 + Math.random() * 2.8; // size factor
-    const size = r * 8; // pixels when drawn
-    const vy = 28 + Math.random() * 70; // fall speed
-    const vx = -10 + Math.random() * 20; // drift
-    const alpha = 0.18 + Math.random() * 0.6;
-
+  function makeFlake(w, h, randomY = true) {
     return {
       x: Math.random() * w,
       y: randomY ? Math.random() * h : -Math.random() * h,
-      size,
-      vy,
-      vx,
-      alpha,
+      r: 0.7 + Math.random() * 1.8,
+      vy: 18 + Math.random() * 55,
+      vx: -8 + Math.random() * 16,
+      a: 0.12 + Math.random() * 0.45,
     };
   }
 
-  function resizeAndSync() {
+  function syncSizeAndFlakes() {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
     const ctx = ctxRef.current;
-    if (!ctx) return;
+    if (!canvas || !ctx) return;
 
     const w = window.innerWidth || 0;
     const h = window.innerHeight || 0;
     if (!w || !h) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    sizeRef.current = {w, h, dpr};
+    const {dpr, fps, count} = getConfig(w);
+
+    sizeRef.current = {w, h, dpr, fps};
 
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
 
-    // scale drawing to CSS pixels
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    fpsRef.current = getTargetFps(w);
+    const arr = flakesRef.current;
 
-    const targetCount = getFlakeCount(w);
-    const current = flakesRef.current;
-
-    if (current.length < targetCount) {
-      const add = targetCount - current.length;
-      for (let i = 0; i < add; i++) current.push(createFlake(w, h, true));
-    } else if (current.length > targetCount) {
-      flakesRef.current = current.slice(0, targetCount);
+    if (arr.length < count) {
+      for (let i = arr.length; i < count; i++) arr.push(makeFlake(w, h, true));
+    } else if (arr.length > count) {
+      flakesRef.current = arr.slice(0, count);
     }
   }
 
-  function clearCanvas() {
+  function clear() {
     const ctx = ctxRef.current;
-    if (!ctx) return;
     const {w, h} = sizeRef.current;
-    if (!w || !h) return;
+    if (!ctx || !w || !h) return;
     ctx.clearRect(0, 0, w, h);
   }
 
-  function step(now) {
+  function draw(now) {
     if (!runningRef.current) return;
+    rafRef.current = requestAnimationFrame(draw);
 
-    rafRef.current = requestAnimationFrame(step);
-
-    const {w, h} = sizeRef.current;
     const ctx = ctxRef.current;
-    const sprite = spriteRef.current;
-    if (!ctx || !sprite || !w || !h) return;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
 
-    const targetFps = fpsRef.current || 45;
-    const frameInterval = 1000 / targetFps;
+    const {w, h, fps} = sizeRef.current;
+    if (!w || !h || !fps) return;
 
-    if (!lastTimeRef.current) lastTimeRef.current = now;
-    if (!lastRenderRef.current) lastRenderRef.current = now;
+    const frameInterval = 1000 / fps;
 
-    // render at capped FPS
-    if (now - lastRenderRef.current < frameInterval) return;
+    if (!lastNowRef.current) lastNowRef.current = now;
+    if (!lastFrameMsRef.current) lastFrameMsRef.current = now;
 
-    const dt = Math.min((now - lastTimeRef.current) / 1000, 0.05);
-    lastTimeRef.current = now;
-    lastRenderRef.current = now;
+    // FPS cap
+    if (now - lastFrameMsRef.current < frameInterval) return;
+
+    const dt = Math.min((now - lastNowRef.current) / 1000, 0.05);
+    lastNowRef.current = now;
+    lastFrameMsRef.current = now;
 
     ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#ffffff';
 
     const flakes = flakesRef.current;
     for (let i = 0; i < flakes.length; i++) {
@@ -294,16 +258,17 @@ function SnowCanvas({enabled}) {
       f.y += f.vy * dt;
       f.x += f.vx * dt;
 
-      // soft wrap / respawn
-      if (f.y > h + 24) {
-        f.y = -24;
+      if (f.y > h + 20) {
+        f.y = -20;
         f.x = Math.random() * w;
       }
-      if (f.x < -30) f.x = w + 30;
-      if (f.x > w + 30) f.x = -30;
+      if (f.x < -20) f.x = w + 20;
+      if (f.x > w + 20) f.x = -20;
 
-      ctx.globalAlpha = f.alpha;
-      ctx.drawImage(sprite, f.x, f.y, f.size, f.size);
+      ctx.globalAlpha = f.a;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.globalAlpha = 1;
@@ -311,8 +276,6 @@ function SnowCanvas({enabled}) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // Respect reduced motion
     if (prefersReducedMotion()) return;
 
     const canvas = canvasRef.current;
@@ -322,35 +285,27 @@ function SnowCanvas({enabled}) {
     if (!ctx) return;
 
     ctxRef.current = ctx;
-    spriteRef.current = makeSprite();
 
     function onResize() {
-      resizeAndSync();
+      syncSizeAndFlakes();
     }
 
     function onVisibility() {
       if (document.hidden) {
-        // pause
         runningRef.current = false;
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         rafRef.current = 0;
-      } else {
-        // resume (only if enabled)
-        if (enabled) {
-          resizeAndSync();
-          lastTimeRef.current = 0;
-          lastRenderRef.current = 0;
-          runningRef.current = true;
-          rafRef.current = requestAnimationFrame(step);
-        }
+      } else if (enabled) {
+        syncSizeAndFlakes();
+        lastNowRef.current = 0;
+        lastFrameMsRef.current = 0;
+        runningRef.current = true;
+        rafRef.current = requestAnimationFrame(draw);
       }
     }
 
     window.addEventListener('resize', onResize, {passive: true});
     document.addEventListener('visibilitychange', onVisibility);
-
-    // initial sizing
-    resizeAndSync();
 
     return () => {
       window.removeEventListener('resize', onResize);
@@ -358,7 +313,7 @@ function SnowCanvas({enabled}) {
       runningRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
-      clearCanvas();
+      clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -367,20 +322,19 @@ function SnowCanvas({enabled}) {
     if (typeof window === 'undefined') return;
     if (prefersReducedMotion()) return;
 
-    // toggle behavior
     if (!enabled) {
       runningRef.current = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
-      clearCanvas();
+      clear();
       return;
     }
 
-    resizeAndSync();
-    lastTimeRef.current = 0;
-    lastRenderRef.current = 0;
+    syncSizeAndFlakes();
+    lastNowRef.current = 0;
+    lastFrameMsRef.current = 0;
     runningRef.current = true;
-    rafRef.current = requestAnimationFrame(step);
+    rafRef.current = requestAnimationFrame(draw);
 
     return () => {
       runningRef.current = false;
@@ -390,7 +344,7 @@ function SnowCanvas({enabled}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  if (!enabled) return null;
+  if (!enabled || prefersReducedMotion()) return null;
 
   return <canvas ref={canvasRef} className="snow-canvas" aria-hidden="true" />;
 }
