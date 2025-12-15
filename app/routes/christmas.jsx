@@ -131,375 +131,268 @@ function formatPrice(price) {
 }
 
 /* ------------------------------------------------------------------ */
-/* SNOW SYSTEM – mouse/touch wave + flake–flake interaction only      */
+/* SIMPLE HIGH-PERFORMANCE SNOW – CANVAS ONLY                          */
 /* ------------------------------------------------------------------ */
 
-function createFlake(viewport) {
-  const width = viewport.width || 0;
-  const height = viewport.height || 0;
-  const size = 3 + Math.random() * 7; // 3–10px
+function SnowCanvas({enabled}) {
+  const canvasRef = useRef(null);
+  const rafRef = useRef(0);
+  const flakesRef = useRef([]);
+  const ctxRef = useRef(null);
+  const spriteRef = useRef(null);
+  const sizeRef = useRef({w: 0, h: 0, dpr: 1});
+  const runningRef = useRef(false);
+  const lastTimeRef = useRef(0);
+  const lastRenderRef = useRef(0);
+  const fpsRef = useRef(45);
 
-  return {
-    id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
-    x: Math.random() * width,
-    y: -Math.random() * height * 0.7,
-    // slower drift and fall
-    vx: (Math.random() - 0.5) * 18,
-    vy: 18 + Math.random() * 26,
-    size,
-    settled: false,
-    variant: 1 + Math.floor(Math.random() * 3), // 1, 2, or 3
-    rotation: Math.random() * 60 - 30, // -30..30 degrees
-    opacity: 0.6 + Math.random() * 0.4, // 0.6..1
-  };
-}
+  function prefersReducedMotion() {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  }
 
-// Slightly fewer flakes by default; mobile "lite" mode handled in loop
-function SnowField({enabled, maxFlakes = 100, initialCount = 40}) {
-  const [flakes, setFlakes] = useState([]);
-  const viewportRef = useRef({width: 0, height: 0});
-  const frameRef = useRef();
-  const lastTimeRef = useRef();
-  const pointerRef = useRef({
-    x: 0,
-    y: 0,
-    active: false,
-    type: 'mouse', // 'mouse' | 'touch'
-  });
+  function getPerfMultiplier() {
+    if (typeof navigator === 'undefined') return 1;
+    const cores = navigator.hardwareConcurrency || 4;
+    const mem = navigator.deviceMemory || 4;
 
-  // Track viewport size
+    // lower multiplier on modest devices
+    if (cores <= 4 || mem <= 4) return 0.75;
+    if (cores <= 2 || mem <= 2) return 0.6;
+    return 1;
+  }
+
+  function getFlakeCount(width) {
+    // base counts by viewport
+    let base = 110;
+    if (width <= 1024) base = 80;
+    if (width <= 768) base = 55;
+    if (width <= 480) base = 40;
+
+    const m = getPerfMultiplier();
+    return Math.max(24, Math.round(base * m));
+  }
+
+  function getTargetFps(width) {
+    // cap FPS more aggressively on small screens
+    if (width <= 768) return 30;
+    return 45;
+  }
+
+  function makeSprite() {
+    const c = document.createElement('canvas');
+    c.width = 32;
+    c.height = 32;
+    const g = c.getContext('2d');
+    if (!g) return null;
+
+    const cx = 16;
+    const cy = 16;
+    const r = 10;
+
+    const grad = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(cx, cy, r, 0, Math.PI * 2);
+    g.fill();
+
+    return c;
+  }
+
+  function createFlake(w, h, randomY = true) {
+    const r = 0.9 + Math.random() * 2.8; // size factor
+    const size = r * 8; // pixels when drawn
+    const vy = 28 + Math.random() * 70; // fall speed
+    const vx = -10 + Math.random() * 20; // drift
+    const alpha = 0.18 + Math.random() * 0.6;
+
+    return {
+      x: Math.random() * w,
+      y: randomY ? Math.random() * h : -Math.random() * h,
+      size,
+      vy,
+      vx,
+      alpha,
+    };
+  }
+
+  function resizeAndSync() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = ctxRef.current;
+    if (!ctx) return;
+
+    const w = window.innerWidth || 0;
+    const h = window.innerHeight || 0;
+    if (!w || !h) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    sizeRef.current = {w, h, dpr};
+
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+
+    // scale drawing to CSS pixels
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    fpsRef.current = getTargetFps(w);
+
+    const targetCount = getFlakeCount(w);
+    const current = flakesRef.current;
+
+    if (current.length < targetCount) {
+      const add = targetCount - current.length;
+      for (let i = 0; i < add; i++) current.push(createFlake(w, h, true));
+    } else if (current.length > targetCount) {
+      flakesRef.current = current.slice(0, targetCount);
+    }
+  }
+
+  function clearCanvas() {
+    const ctx = ctxRef.current;
+    if (!ctx) return;
+    const {w, h} = sizeRef.current;
+    if (!w || !h) return;
+    ctx.clearRect(0, 0, w, h);
+  }
+
+  function step(now) {
+    if (!runningRef.current) return;
+
+    rafRef.current = requestAnimationFrame(step);
+
+    const {w, h} = sizeRef.current;
+    const ctx = ctxRef.current;
+    const sprite = spriteRef.current;
+    if (!ctx || !sprite || !w || !h) return;
+
+    const targetFps = fpsRef.current || 45;
+    const frameInterval = 1000 / targetFps;
+
+    if (!lastTimeRef.current) lastTimeRef.current = now;
+    if (!lastRenderRef.current) lastRenderRef.current = now;
+
+    // render at capped FPS
+    if (now - lastRenderRef.current < frameInterval) return;
+
+    const dt = Math.min((now - lastTimeRef.current) / 1000, 0.05);
+    lastTimeRef.current = now;
+    lastRenderRef.current = now;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const flakes = flakesRef.current;
+    for (let i = 0; i < flakes.length; i++) {
+      const f = flakes[i];
+
+      f.y += f.vy * dt;
+      f.x += f.vx * dt;
+
+      // soft wrap / respawn
+      if (f.y > h + 24) {
+        f.y = -24;
+        f.x = Math.random() * w;
+      }
+      if (f.x < -30) f.x = w + 30;
+      if (f.x > w + 30) f.x = -30;
+
+      ctx.globalAlpha = f.alpha;
+      ctx.drawImage(sprite, f.x, f.y, f.size, f.size);
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    function updateViewport() {
-      viewportRef.current = {
-        width: window.innerWidth || 0,
-        height: window.innerHeight || 0,
-      };
+    // Respect reduced motion
+    if (prefersReducedMotion()) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d', {alpha: true, desynchronized: true});
+    if (!ctx) return;
+
+    ctxRef.current = ctx;
+    spriteRef.current = makeSprite();
+
+    function onResize() {
+      resizeAndSync();
     }
 
-    updateViewport();
-    window.addEventListener('resize', updateViewport, {passive: true});
+    function onVisibility() {
+      if (document.hidden) {
+        // pause
+        runningRef.current = false;
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
+      } else {
+        // resume (only if enabled)
+        if (enabled) {
+          resizeAndSync();
+          lastTimeRef.current = 0;
+          lastRenderRef.current = 0;
+          runningRef.current = true;
+          rafRef.current = requestAnimationFrame(step);
+        }
+      }
+    }
+
+    window.addEventListener('resize', onResize, {passive: true});
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // initial sizing
+    resizeAndSync();
 
     return () => {
-      window.removeEventListener('resize', updateViewport);
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', onVisibility);
+      runningRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+      clearCanvas();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Mouse + touch pointer (wave source)
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!enabled) return;
+    if (prefersReducedMotion()) return;
 
-    function handleMouseMove(event) {
-      pointerRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        active: true,
-        type: 'mouse',
-      };
-    }
-
-    function handleMouseLeave() {
-      pointerRef.current = {
-        ...pointerRef.current,
-        active: false,
-      };
-    }
-
-    function handleTouchMove(event) {
-      if (event.touches && event.touches.length > 0) {
-        const t = event.touches[0];
-        pointerRef.current = {
-          x: t.clientX,
-          y: t.clientY,
-          active: true,
-          type: 'touch',
-        };
-      }
-    }
-
-    function handleTouchEnd() {
-      pointerRef.current = {
-        ...pointerRef.current,
-        active: false,
-      };
-    }
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('touchstart', handleTouchMove, {passive: true});
-    window.addEventListener('touchmove', handleTouchMove, {passive: true});
-    window.addEventListener('touchend', handleTouchEnd);
-    window.addEventListener('touchcancel', handleTouchEnd);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-      window.removeEventListener('touchstart', handleTouchMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('touchcancel', handleTouchEnd);
-    };
-  }, [enabled]);
-
-  // Animation loop
-  useEffect(() => {
+    // toggle behavior
     if (!enabled) {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
-      frameRef.current = undefined;
-      lastTimeRef.current = undefined;
-      setFlakes([]);
+      runningRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+      clearCanvas();
       return;
     }
 
-    function ensureInitialFlakes(current, viewport) {
-      if (current.length > 0) return current;
-      if (!viewport.width || !viewport.height) return current;
-
-      const arr = [];
-      for (let i = 0; i < initialCount; i++) {
-        arr.push(createFlake(viewport));
-      }
-      return arr;
-    }
-
-    function loop(timestamp) {
-      if (!lastTimeRef.current) {
-        lastTimeRef.current = timestamp;
-      }
-      const dt = (timestamp - lastTimeRef.current) / 1000;
-      lastTimeRef.current = timestamp;
-
-      const viewport = viewportRef.current;
-      const {width, height} = viewport;
-      if (!width || !height) {
-        frameRef.current = requestAnimationFrame(loop);
-        return;
-      }
-
-      const isMobileViewport = width <= 768; // "lite" mode trigger
-
-      setFlakes((current) => {
-        let next = ensureInitialFlakes(current, viewport);
-        if (next.length === 0) {
-          const arr = [];
-          for (let i = 0; i < initialCount; i++) {
-            arr.push(createFlake(viewport));
-          }
-          next = arr;
-        }
-
-        const pointer = pointerRef.current;
-        const updated = [];
-
-        // 1) Integrate motion + mouse/touch wave + floor
-        for (const flake of next) {
-          const size = flake.size;
-          const radius = size * 0.5;
-
-          if (flake.settled) {
-            updated.push(flake);
-            continue;
-          }
-
-          let x = flake.x;
-          let y = flake.y;
-          let vx = flake.vx;
-          let vy = flake.vy;
-
-          // Base motion: fall + drift (slower)
-          y += vy * dt;
-          x += vx * dt;
-
-          // Small jitter for organic paths (reduced for smoother anim)
-          const jitter = 4;
-          vx += (Math.random() - 0.5) * jitter * dt;
-          const maxVx = 25;
-          if (vx > maxVx) vx = maxVx;
-          if (vx < -maxVx) vx = -maxVx;
-
-          // Pointer wave effect
-          if (pointer.active) {
-            const centerX = x + radius;
-            const centerY = y + radius;
-            const dx = centerX - pointer.x;
-            const dy = centerY - pointer.y;
-            const distSq = dx * dx + dy * dy;
-
-            if (distSq > 0) {
-              const isTouch = pointer.type === 'touch';
-              const influenceRadius = isTouch ? 190 : 130;
-              const influenceRadiusSq = influenceRadius * influenceRadius;
-
-              if (distSq < influenceRadiusSq) {
-                const dist = Math.sqrt(distSq) || 0.0001;
-                const strength = (influenceRadius - dist) / influenceRadius; // 0..1
-                const pushBase = isTouch ? 260 : 180;
-                const push = pushBase * strength * dt;
-                const nx = dx / dist;
-                const ny = dy / dist;
-
-                // Radial push away from pointer (wave)
-                x += nx * push;
-                y += ny * push * 0.5;
-                vx += nx * push * 0.9;
-                vy += ny * push * 0.4;
-              }
-            }
-          }
-
-          // Horizontal wrap
-          if (x < -20) x += width + 40;
-          if (x > width + 20) x -= width + 40;
-
-          // Floor: settle at bottom of viewport
-          if (y >= height - size) {
-            const settledFlake = {
-              ...flake,
-              x,
-              y: height - size,
-              vx,
-              vy,
-              settled: true,
-            };
-            updated.push(settledFlake);
-
-            // Spawn new flake from above
-            updated.push(createFlake(viewport));
-            continue;
-          }
-
-          updated.push({
-            ...flake,
-            x,
-            y,
-            vx,
-            vy,
-            settled: false,
-          });
-        }
-
-        // 2) Flake–flake soft separation (desktop / larger viewports only)
-        if (!isMobileViewport) {
-          const len = updated.length;
-          for (let i = 0; i < len; i++) {
-            for (let j = i + 1; j < len; j++) {
-              const a = updated[i];
-              const b = updated[j];
-
-              const ra = a.size * 0.5;
-              const rb = b.size * 0.5;
-              const ax = a.x + ra;
-              const ay = a.y + ra;
-              const bx = b.x + rb;
-              const by = b.y + rb;
-
-              const dx = bx - ax;
-              const dy = by - ay;
-              const minDist = ra + rb;
-              const distSq = dx * dx + dy * dy;
-
-              if (distSq > 0 && distSq < minDist * minDist) {
-                const dist = Math.sqrt(distSq) || 0.0001;
-                const overlap = minDist - dist;
-                const nx = dx / dist;
-                const ny = dy / dist;
-
-                const moveA = !a.settled;
-                const moveB = !b.settled;
-
-                if (moveA && moveB) {
-                  a.x -= nx * overlap * 0.5;
-                  b.x += nx * overlap * 0.5;
-                  a.y -= ny * overlap * 0.2;
-                  b.y += ny * overlap * 0.2;
-                } else if (moveA && !moveB) {
-                  a.x -= nx * overlap;
-                  a.y -= ny * overlap * 0.3;
-                } else if (!moveA && moveB) {
-                  b.x += nx * overlap;
-                  b.y += ny * overlap * 0.3;
-                }
-              }
-            }
-          }
-        }
-
-        // 3) Clamp to floor after separation & trim count
-        for (const flake of updated) {
-          if (flake.y > height - flake.size) {
-            flake.y = height - flake.size;
-          }
-        }
-
-        if (updated.length > maxFlakes) {
-          let excess = updated.length - maxFlakes;
-          const pruned = [];
-          for (const flake of updated) {
-            if (excess > 0 && flake.settled) {
-              excess -= 1;
-              continue;
-            }
-            pruned.push(flake);
-          }
-          return pruned;
-        }
-
-        return updated;
-      });
-
-      frameRef.current = requestAnimationFrame(loop);
-    }
-
-    frameRef.current = requestAnimationFrame(loop);
+    resizeAndSync();
+    lastTimeRef.current = 0;
+    lastRenderRef.current = 0;
+    runningRef.current = true;
+    rafRef.current = requestAnimationFrame(step);
 
     return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
-      frameRef.current = undefined;
-      lastTimeRef.current = undefined;
+      runningRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
     };
-  }, [enabled, initialCount, maxFlakes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
   if (!enabled) return null;
 
-  return (
-    <div className="snow-layer" aria-hidden="true">
-      {flakes.map((flake) => {
-        const baseStyle = flake.settled
-          ? {
-              left: `${flake.x}px`,
-              bottom: 0,
-            }
-          : {
-              left: `${flake.x}px`,
-              top: `${flake.y}px`,
-            };
-
-        const style = {
-          ...baseStyle,
-          width: `${flake.size}px`,
-          height: `${flake.size}px`,
-          opacity: flake.opacity,
-          transform: `rotate(${flake.rotation}deg)`,
-        };
-
-        return (
-          <div
-            key={flake.id}
-            className={`snowflake snowflake-v${flake.variant}${
-              flake.settled ? ' snowflake-settled' : ''
-            }`}
-            style={style}
-          />
-        );
-      })}
-    </div>
-  );
+  return <canvas ref={canvasRef} className="snow-canvas" aria-hidden="true" />;
 }
 
 /* ------------------------------------------------------------------ */
@@ -544,8 +437,8 @@ export default function ChristmasPage() {
 
   return (
     <main className={`christmas-page ${snowOn ? 'snow-on' : 'snow-off'}`}>
-      {/* Snowfield – behind content, interactive with pointer/touch */}
-      <SnowField enabled={snowOn} />
+      {/* Simple canvas snow (no DOM flakes, no React per-frame renders) */}
+      <SnowCanvas enabled={snowOn} />
 
       {/* HERO */}
       <section className="christmas-hero">
@@ -632,7 +525,6 @@ export default function ChristmasPage() {
             <div className="orbit-ring orbit-ring-outer" />
             <div className="orbit-ring orbit-ring-inner" />
 
-            {/* rotating track, icons stay upright */}
             <div className="orbit-track">
               <div className="orbit-product orbit-product-1">
                 <div className="orbit-product-inner">

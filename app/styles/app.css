@@ -6639,6 +6639,27 @@ svg.icon.icon--full-color {
   min-height: 100svh;
   overflow: hidden;
   border-radius: 10px;
+  isolation: isolate;
+}
+
+/* snow sits above image, below overlay + text */
+.mhg__snow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* your existing overlay should be above snow */
+.mhg::before {
+  z-index: 2;
+}
+
+/* content above everything */
+.mhg__content {
+  z-index: 3;
 }
 
 /* Background image wrapper */
@@ -6646,6 +6667,7 @@ svg.icon.icon--full-color {
   position: absolute;
   inset: 0;
   display: none;
+  z-index: 0;
   /* hidden by default (desktop) */
 }
 
