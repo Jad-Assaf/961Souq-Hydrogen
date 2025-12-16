@@ -598,8 +598,8 @@ export function ProductForm({
         {isComputerComponent && (
           <span className="computer-components-note">
             Due to high demand and limited stock, computer components may have
-            variable availability and prices. Please contact us via WhatsApp to confirm
-            stock before placing your order.
+            variable availability and prices. Please contact us via WhatsApp to
+            confirm stock before placing your order.
           </span>
         )}
 
@@ -633,6 +633,7 @@ export default function Product() {
   const descriptionRef = useRef(null);
   const shippingRef = useRef(null);
   const warrantyRef = useRef(null);
+  const location = useLocation();
 
   // Safeguard
   if (!product) {
@@ -869,6 +870,8 @@ export default function Product() {
           },
         })) || [];
 
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
+
   return (
     <div className="product">
       <div className="ProductPageTop">
@@ -955,12 +958,14 @@ export default function Product() {
                 </div>
 
                 <div className="ai-modal__footer">
-                  <p> WhatsApp:&nbsp;
+                  <p>
+                    {' '}
+                    WhatsApp:&nbsp;
                     <a
-                      href="https://wa.me/96171888036"
+                      href={whatsappShareUrl}
                       target="_blank"
-                      aria-label="Whatsapp Link"
-                      className="ai-modal__contact"
+                      rel="noopener noreferrer"
+                      aria-label="Share on WhatsApp"
                     >
                       +961 71 888 036
                     </a>
