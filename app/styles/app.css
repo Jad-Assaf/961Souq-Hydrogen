@@ -6807,7 +6807,7 @@ svg.icon.icon--full-color {
 
   margin-bottom: 14px;
   border-radius: 40px;
-  padding: 10px 24px;
+  padding: 10px 18px;
   position: relative;
   overflow: hidden;
 
@@ -6904,6 +6904,40 @@ svg.icon.icon--full-color {
       rgba(0, 214, 255, 0.95),
       rgba(124, 92, 255, 0.65));
   box-shadow: 0 0 18px rgba(0, 214, 255, 0.28);
+  animation: aiDotPulse 2s ease-in-out infinite;
+  will-change: transform, box-shadow, opacity;
+}
+
+@keyframes aiDotPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.75;
+    box-shadow:
+      0 0 10px rgba(0, 214, 255, 0.18),
+      0 0 18px rgba(124, 92, 255, 0.12);
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+    box-shadow:
+      0 0 18px rgba(0, 214, 255, 0.38),
+      0 0 28px rgba(124, 92, 255, 0.22);
+  }
+
+  100% {
+    transform: scale(0.9);
+    opacity: 0.75;
+    box-shadow:
+      0 0 10px rgba(0, 214, 255, 0.18),
+      0 0 18px rgba(124, 92, 255, 0.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-summary__dot {
+    animation: none !important;
+  }
 }
 
 .ai-summary__title {
@@ -7234,8 +7268,14 @@ svg.icon.icon--full-color {
   padding: 12px 14px 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.10);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
+}
+
+.ai-modal__footer p, .ai-modal__footer a {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .ai-modal__secondary {

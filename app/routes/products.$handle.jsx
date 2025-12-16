@@ -955,6 +955,16 @@ export default function Product() {
                 </div>
 
                 <div className="ai-modal__footer">
+                  <p> WhatsApp:&nbsp;
+                    <a
+                      href="https://wa.me/96171888036"
+                      target="_blank"
+                      aria-label="Whatsapp Link"
+                      className="ai-modal__contact"
+                    >
+                      +961 71 888 036
+                    </a>
+                  </p>
                   <button
                     type="button"
                     className="ai-modal__secondary"
