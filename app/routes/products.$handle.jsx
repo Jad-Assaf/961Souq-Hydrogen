@@ -886,8 +886,8 @@ export default function Product() {
           <div className="ai-summary">
             <div className="ai-summary__header">
               <div className="ai-summary__badge">
+                <span className="ai-summary__title">ChatGPT Summary</span>
                 <span className="ai-summary__dot" aria-hidden="true" />
-                <span className="ai-summary__title">AI Summary</span>
               </div>
 
               <button
@@ -896,7 +896,9 @@ export default function Product() {
                 onClick={openAiSummaryModal}
                 disabled={aiSummaryStatus === 'loading'}
               >
-                {aiSummaryStatus === 'loading' ? 'Generating…' : 'Generate summary'}
+                {aiSummaryStatus === 'loading'
+                  ? 'Generating…'
+                  : 'Generate summary'}
               </button>
             </div>
           </div>
@@ -905,7 +907,7 @@ export default function Product() {
               <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="ai-modal__header">
                   <div className="ai-modal__left">
-                    <span className="ai-modal__chip">AI Summary</span>
+                    <span className="ai-modal__chip">ChatGPT Summary</span>
                     <span className="ai-modal__status">
                       {aiSummaryStatus === 'loading'
                         ? 'Generating'
