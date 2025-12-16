@@ -39,12 +39,10 @@ async function shopifyAdminGraphQL({shopDomain, adminToken, query, variables}) {
 }
 
 function extractOutputText(openaiJson) {
-  // Newer Responses API often provides this convenience field:
   if (typeof openaiJson?.output_text === 'string' && openaiJson.output_text) {
     return openaiJson.output_text.trim();
   }
 
-  // Fallback: parse output array
   const out = openaiJson?.output;
   if (!Array.isArray(out)) return '';
 
@@ -52,9 +50,18 @@ function extractOutputText(openaiJson) {
   for (const item of out) {
     const content = item?.content;
     if (!Array.isArray(content)) continue;
+
     for (const block of content) {
+      // Common block types seen in Responses API
       if (block?.type === 'output_text' && typeof block?.text === 'string') {
         text += block.text;
+      } else if (block?.type === 'text' && typeof block?.text === 'string') {
+        text += block.text;
+      } else if (
+        block?.type === 'message' &&
+        typeof block?.content === 'string'
+      ) {
+        text += block.content;
       }
     }
   }
@@ -75,7 +82,7 @@ export async function action({request, context}) {
     const openaiKey = context.env.OPENAI_API_KEY;
 
     // IMPORTANT:
-    // This MUST be your *.myshopify.com domain for Admin API calls.
+    // PUBLIC_STORE_DOMAIN should be your *.myshopify.com domain for Admin API calls.
     const adminShopDomain = normalizeShopDomain(
       context.env.PUBLIC_STORE_DOMAIN,
     );
@@ -92,7 +99,7 @@ export async function action({request, context}) {
       return json(
         {
           error:
-            'Missing SHOPIFY_ADMIN_DOMAIN (set it to something like yourstore.myshopify.com)',
+            'Missing PUBLIC_STORE_DOMAIN (set it to yourstore.myshopify.com, not the custom domain).',
           stage: 'env',
         },
         {status: 500},
@@ -100,7 +107,7 @@ export async function action({request, context}) {
     }
     if (!adminToken) {
       return json(
-        {error: 'Missing SHOPIFY_ADMIN_API_ACCESS_TOKEN', stage: 'env'},
+        {error: 'Missing ADMIN_API_TOKEN', stage: 'env'},
         {status: 500},
       );
     }
@@ -128,7 +135,7 @@ export async function action({request, context}) {
     const existing = readMf?.product?.metafield?.value?.trim() || '';
     if (existing) return json({summary: existing, cached: true});
 
-    // 2) Fetch product content via Storefront (trusted source)
+    // 2) Fetch product content via Storefront
     const sfQuery = `#graphql
       query ProductForSummary($id: ID!) {
         product(id: $id) {
@@ -155,12 +162,17 @@ export async function action({request, context}) {
       );
     }
 
+    // Trim input so we don’t waste tokens on huge descriptions
     const trimmedDescription =
-      description.length > 8000 ? description.slice(0, 8000) : description;
+      description.length > 6000 ? description.slice(0, 6000) : description;
 
     // 3) OpenAI call
+    // Key changes:
+    // - max_output_tokens increased a lot
+    // - reasoning effort minimal
     const payload = {
       model: 'gpt-5-nano',
+      reasoning: {effort: 'minimal'},
       instructions:
         'Write a concise, neutral e-commerce summary. No prices, no warranty, no emojis, no exaggerated claims. Keep it easy to scan.',
       input: `Product: ${title}
@@ -169,8 +181,8 @@ Brand/Vendor: ${vendor}
 Description:
 ${trimmedDescription}
 
-Write a single short paragraph (2–3 sentences). Max 350 characters.`,
-      max_output_tokens: 180,
+Write 3–4 short sentences. Max 450 characters.`,
+      max_output_tokens: 900,
     };
 
     const openaiRes = await fetch('https://api.openai.com/v1/responses', {
@@ -199,10 +211,31 @@ Write a single short paragraph (2–3 sentences). Max 350 characters.`,
       );
     }
 
+    // If the model ended incomplete, return the reason + usage (this is your exact case)
+    if (openaiJson?.status === 'incomplete') {
+      console.error('OpenAI incomplete:', {
+        incomplete_details: openaiJson?.incomplete_details,
+        usage: openaiJson?.usage,
+      });
+      return json(
+        {
+          error: 'OpenAI returned status=incomplete (token budget issue).',
+          stage: 'openai_incomplete',
+          incomplete_details: openaiJson?.incomplete_details || null,
+          usage: openaiJson?.usage || null,
+        },
+        {status: 502},
+      );
+    }
+
     let summary = extractOutputText(openaiJson).replace(/\s+/g, ' ').trim();
 
     if (!summary) {
-      console.error('Empty OpenAI output:', openaiJson);
+      console.error('Empty OpenAI output:', {
+        status: openaiJson?.status,
+        usage: openaiJson?.usage,
+        output: openaiJson?.output,
+      });
       return json(
         {error: 'Empty summary from model', stage: 'openai_parse'},
         {status: 502},

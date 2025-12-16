@@ -648,92 +648,173 @@ export default function Product() {
   const [activeTab, setActiveTab] = useState('description');
 
   // ------------------------------
-  // AI SUMMARY (added)
+  // AI SUMMARY (modal version)
   // ------------------------------
   const initialAiSummary = (product?.metafieldAiSummary?.value || '').trim();
   const [aiSummary, setAiSummary] = useState(initialAiSummary);
-  const [aiSummaryVisible, setAiSummaryVisible] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiSummaryDisplay, setAiSummaryDisplay] = useState('');
   const [aiSummaryStatus, setAiSummaryStatus] = useState('idle'); // idle | loading | typing | done | error
-  const aiTypingTimerRef = useRef(null);
 
-  function prefersReducedMotion() {
+  const aiTypingTimerRef = useRef(null);
+  const aiOpenDelayRef = useRef(null);
+
+  const prefersReducedMotion = React.useCallback(() => {
     if (typeof window === 'undefined') return true;
     return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-  }
+  }, []);
 
-  function stopTyping() {
+  const stopTyping = React.useCallback(() => {
     if (aiTypingTimerRef.current) {
       clearInterval(aiTypingTimerRef.current);
       aiTypingTimerRef.current = null;
     }
-  }
+  }, []);
 
-  function startTyping(text) {
+  const clearAiOpenDelay = React.useCallback(() => {
+    if (aiOpenDelayRef.current) {
+      clearTimeout(aiOpenDelayRef.current);
+      aiOpenDelayRef.current = null;
+    }
+  }, []);
+
+  const startTyping = React.useCallback(
+    (text) => {
+      stopTyping();
+
+      const clean = (text || '').trim();
+      if (!clean) {
+        setAiSummaryDisplay('');
+        setAiSummaryStatus('done');
+        return;
+      }
+
+      if (prefersReducedMotion()) {
+        setAiSummaryDisplay(clean);
+        setAiSummaryStatus('done');
+        return;
+      }
+
+      setAiSummaryDisplay('');
+      setAiSummaryStatus('typing');
+
+      let i = 0;
+      aiTypingTimerRef.current = setInterval(() => {
+        i += 2;
+        const next = clean.slice(0, i);
+        setAiSummaryDisplay(next);
+
+        if (i >= clean.length) {
+          stopTyping();
+          setAiSummaryStatus('done');
+        }
+      }, 14);
+    },
+    [prefersReducedMotion, stopTyping],
+  );
+
+  const closeAiSummaryModal = React.useCallback(() => {
+    clearAiOpenDelay();
+    stopTyping();
+    setAiModalOpen(false);
+    setAiSummaryDisplay('');
+    setAiSummaryStatus('idle');
+  }, [clearAiOpenDelay, stopTyping]);
+
+  const openAiSummaryModal = React.useCallback(async () => {
+    clearAiOpenDelay();
     stopTyping();
 
-    const clean = (text || '').trim();
-    if (!clean) {
-      setAiSummaryDisplay('');
-      setAiSummaryStatus('done');
-      return;
-    }
-
-    if (prefersReducedMotion()) {
-      setAiSummaryDisplay(clean);
-      setAiSummaryStatus('done');
-      return;
-    }
-
+    setAiModalOpen(true);
     setAiSummaryDisplay('');
-    setAiSummaryStatus('typing');
+    setAiSummaryStatus('loading');
 
-    let i = 0;
-    aiTypingTimerRef.current = setInterval(() => {
-      i += 2;
-      const next = clean.slice(0, i);
-      setAiSummaryDisplay(next);
-
-      if (i >= clean.length) {
-        stopTyping();
-        setAiSummaryStatus('done');
-      }
-    }, 14);
-  }
-
-  async function handleAiSummaryClick() {
-    setAiSummaryVisible(true);
-
-    // If we already have summary (from metafield or previously fetched), just “type it out”
-    if (aiSummary && aiSummary.trim()) {
-      startTyping(aiSummary);
-      return;
-    }
+    // Always show a small “Generating…” phase even if cached
+    const minDelay = 520 + Math.floor(Math.random() * 260);
+    const started = Date.now();
 
     try {
-      setAiSummaryStatus('loading');
+      let summaryText = (aiSummary || '').trim();
 
-      const res = await fetch('/api/product-summary', {
-        method: 'POST',
-        headers: {'content-type': 'application/json'},
-        body: JSON.stringify({productId: product.id}),
-      });
+      // Only call the API if we truly do not have it yet
+      if (!summaryText) {
+        const res = await fetch('/api/product-summary', {
+          method: 'POST',
+          headers: {'content-type': 'application/json'},
+          body: JSON.stringify({productId: product.id}),
+        });
 
-      const data = await res.json().catch(() => ({}));
+        const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
-        throw new Error(data?.error || 'Failed to generate summary');
+        if (!res.ok) {
+          throw new Error(data?.error || 'Failed to generate summary');
+        }
+
+        summaryText = (data?.summary || '').trim();
+        setAiSummary(summaryText);
       }
 
-      const summaryText = (data?.summary || '').trim();
-      setAiSummary(summaryText);
+      const elapsed = Date.now() - started;
+      const remaining = Math.max(0, minDelay - elapsed);
+
+      await new Promise((resolve) => {
+        aiOpenDelayRef.current = setTimeout(resolve, remaining);
+      });
+      aiOpenDelayRef.current = null;
+
+      // Always re-type every open
       startTyping(summaryText);
     } catch (e) {
+      clearAiOpenDelay();
       stopTyping();
       setAiSummaryStatus('error');
       setAiSummaryDisplay('');
     }
-  }
+  }, [aiSummary, product?.id, clearAiOpenDelay, stopTyping, startTyping]);
+
+  // lock scroll + close on ESC when modal is open
+  useEffect(() => {
+    if (!aiModalOpen) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') closeAiSummaryModal();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [aiModalOpen, closeAiSummaryModal]);
+
+  // Reset AI state when product changes
+  useEffect(() => {
+    clearAiOpenDelay();
+    stopTyping();
+
+    const fresh = (product?.metafieldAiSummary?.value || '').trim();
+    setAiSummary(fresh);
+    setAiModalOpen(false);
+    setAiSummaryDisplay('');
+    setAiSummaryStatus('idle');
+  }, [
+    product?.id,
+    product?.metafieldAiSummary?.value,
+    clearAiOpenDelay,
+    stopTyping,
+  ]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearAiOpenDelay();
+      stopTyping();
+    };
+  }, [clearAiOpenDelay, stopTyping]);
 
   // -------- Effects --------
 
@@ -762,25 +843,6 @@ export default function Product() {
       setSubtotal(price * quantity);
     }
   }, [quantity, selectedVariant]);
-
-  // Reset on product change
-  useEffect(() => {
-    setSelectedVariant(product.selectedVariant);
-    setQuantity(1);
-
-    // AI SUMMARY reset (added)
-    stopTyping();
-    const fresh = (product?.metafieldAiSummary?.value || '').trim();
-    setAiSummary(fresh);
-    setAiSummaryVisible(false);
-    setAiSummaryDisplay('');
-    setAiSummaryStatus('idle');
-  }, [product]);
-
-  // Cleanup typing on unmount (added)
-  useEffect(() => {
-    return () => stopTyping();
-  }, []);
 
   // -------- Locals --------
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
@@ -819,47 +881,89 @@ export default function Product() {
           selectedVariantImage={selectedVariant?.image}
         />
         <div className="product-main">
-          {/* AI SUMMARY UI (added) */}
+          <h1>{title}</h1>
+          {/* AI SUMMARY (button + modal) */}
           <div className="ai-summary">
-            <div className="ai-summary-header">
-              <span className="ai-summary-label">Quick summary</span>
+            <div className="ai-summary__header">
+              <div className="ai-summary__badge">
+                <span className="ai-summary__dot" aria-hidden="true" />
+                <span className="ai-summary__title">AI Summary</span>
+              </div>
+
               <button
                 type="button"
-                className="ai-summary-btn"
-                onClick={handleAiSummaryClick}
+                className="ai-summary__action"
+                onClick={openAiSummaryModal}
                 disabled={aiSummaryStatus === 'loading'}
               >
-                {aiSummaryStatus === 'loading'
-                  ? 'Generating...'
-                  : aiSummary && aiSummary.trim()
-                  ? 'Show'
-                  : 'Summarize'}
+                {aiSummaryStatus === 'loading' ? 'Generating…' : 'Generate summary'}
               </button>
             </div>
-
-            {aiSummaryVisible && (
-              <div className="ai-summary-body">
-                {aiSummaryStatus === 'error' ? (
-                  <p className="ai-summary-error">
-                    Could not generate the summary. Please try again.
-                  </p>
-                ) : (
-                  <p className="ai-summary-text">
-                    {aiSummaryStatus === 'loading'
-                      ? 'Working...'
-                      : aiSummaryDisplay || ''}
-                    {aiSummaryStatus === 'typing' && (
-                      <span className="ai-summary-cursor" aria-hidden="true">
-                        ▍
-                      </span>
-                    )}
-                  </p>
-                )}
-              </div>
-            )}
           </div>
+          {aiModalOpen && (
+            <div className="ai-modal-overlay" onClick={closeAiSummaryModal}>
+              <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="ai-modal__header">
+                  <div className="ai-modal__left">
+                    <span className="ai-modal__chip">AI Summary</span>
+                    <span className="ai-modal__status">
+                      {aiSummaryStatus === 'loading'
+                        ? 'Generating'
+                        : aiSummaryStatus === 'typing'
+                        ? 'Writing'
+                        : aiSummaryStatus === 'done'
+                        ? 'Ready'
+                        : aiSummaryStatus === 'error'
+                        ? 'Error'
+                        : ''}
+                    </span>
+                  </div>
 
-          <h1>{title}</h1>
+                  <button
+                    type="button"
+                    className="ai-modal__close"
+                    onClick={closeAiSummaryModal}
+                    aria-label="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="ai-modal__body" aria-live="polite">
+                  {aiSummaryStatus === 'error' ? (
+                    <p className="ai-modal__error">
+                      Could not generate the summary. Please try again.
+                    </p>
+                  ) : aiSummaryStatus === 'loading' ? (
+                    <div className="ai-modal__skeleton" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  ) : (
+                    <p className="ai-modal__text">
+                      {aiSummaryDisplay || ''}
+                      {aiSummaryStatus === 'typing' && (
+                        <span className="ai-modal__cursor" aria-hidden="true">
+                          ▍
+                        </span>
+                      )}
+                    </p>
+                  )}
+                </div>
+
+                <div className="ai-modal__footer">
+                  <button
+                    type="button"
+                    className="ai-modal__secondary"
+                    onClick={closeAiSummaryModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="price-container">
             <small
               className={`product-price ${
@@ -887,7 +991,6 @@ export default function Product() {
                 </small>
               )}
           </div>
-
           <div className="quantity-selector">
             <p>Quantity</p>
             <button onClick={decrementQuantity} className="quantity-btn">
@@ -905,7 +1008,6 @@ export default function Product() {
               currency: selectedVariant?.price?.currencyCode || 'USD',
             })}
           </div>
-
           <ProductForm
             product={product}
             selectedVariant={selectedVariant}
@@ -915,7 +1017,6 @@ export default function Product() {
             variants={variants}
             quantity={quantity}
           />
-
           <hr className="productPage-hr" />
           <div className="product-details">
             <ul>
