@@ -3,7 +3,7 @@ import '../styles/MobileAppPopup.css';
 
 const SHOW_DELAY_MS = 1000;
 const ANIM_MS = 220; // keep in sync with CSS --appPopupDur
-const DISMISS_DAYS = 0; // set to 0 if you want it to show every time
+const DISMISS_DAYS = 1; // set to 0 if you want it to show every time
 
 function isLikelyMobile() {
   if (typeof window === 'undefined') return false;
