@@ -647,6 +647,94 @@ export default function Product() {
   const [subtotal, setSubtotal] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
 
+  // ------------------------------
+  // AI SUMMARY (added)
+  // ------------------------------
+  const initialAiSummary = (product?.metafieldAiSummary?.value || '').trim();
+  const [aiSummary, setAiSummary] = useState(initialAiSummary);
+  const [aiSummaryVisible, setAiSummaryVisible] = useState(false);
+  const [aiSummaryDisplay, setAiSummaryDisplay] = useState('');
+  const [aiSummaryStatus, setAiSummaryStatus] = useState('idle'); // idle | loading | typing | done | error
+  const aiTypingTimerRef = useRef(null);
+
+  function prefersReducedMotion() {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  }
+
+  function stopTyping() {
+    if (aiTypingTimerRef.current) {
+      clearInterval(aiTypingTimerRef.current);
+      aiTypingTimerRef.current = null;
+    }
+  }
+
+  function startTyping(text) {
+    stopTyping();
+
+    const clean = (text || '').trim();
+    if (!clean) {
+      setAiSummaryDisplay('');
+      setAiSummaryStatus('done');
+      return;
+    }
+
+    if (prefersReducedMotion()) {
+      setAiSummaryDisplay(clean);
+      setAiSummaryStatus('done');
+      return;
+    }
+
+    setAiSummaryDisplay('');
+    setAiSummaryStatus('typing');
+
+    let i = 0;
+    aiTypingTimerRef.current = setInterval(() => {
+      i += 2;
+      const next = clean.slice(0, i);
+      setAiSummaryDisplay(next);
+
+      if (i >= clean.length) {
+        stopTyping();
+        setAiSummaryStatus('done');
+      }
+    }, 14);
+  }
+
+  async function handleAiSummaryClick() {
+    setAiSummaryVisible(true);
+
+    // If we already have summary (from metafield or previously fetched), just “type it out”
+    if (aiSummary && aiSummary.trim()) {
+      startTyping(aiSummary);
+      return;
+    }
+
+    try {
+      setAiSummaryStatus('loading');
+
+      const res = await fetch('/api/product-summary', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({productId: product.id}),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to generate summary');
+      }
+
+      const summaryText = (data?.summary || '').trim();
+      setAiSummary(summaryText);
+      startTyping(summaryText);
+    } catch (e) {
+      stopTyping();
+      setAiSummaryStatus('error');
+      setAiSummaryDisplay('');
+    }
+  }
+
   // -------- Effects --------
 
   // Pixel / analytics
@@ -679,7 +767,20 @@ export default function Product() {
   useEffect(() => {
     setSelectedVariant(product.selectedVariant);
     setQuantity(1);
+
+    // AI SUMMARY reset (added)
+    stopTyping();
+    const fresh = (product?.metafieldAiSummary?.value || '').trim();
+    setAiSummary(fresh);
+    setAiSummaryVisible(false);
+    setAiSummaryDisplay('');
+    setAiSummaryStatus('idle');
   }, [product]);
+
+  // Cleanup typing on unmount (added)
+  useEffect(() => {
+    return () => stopTyping();
+  }, []);
 
   // -------- Locals --------
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
@@ -718,6 +819,46 @@ export default function Product() {
           selectedVariantImage={selectedVariant?.image}
         />
         <div className="product-main">
+          {/* AI SUMMARY UI (added) */}
+          <div className="ai-summary">
+            <div className="ai-summary-header">
+              <span className="ai-summary-label">Quick summary</span>
+              <button
+                type="button"
+                className="ai-summary-btn"
+                onClick={handleAiSummaryClick}
+                disabled={aiSummaryStatus === 'loading'}
+              >
+                {aiSummaryStatus === 'loading'
+                  ? 'Generating...'
+                  : aiSummary && aiSummary.trim()
+                  ? 'Show'
+                  : 'Summarize'}
+              </button>
+            </div>
+
+            {aiSummaryVisible && (
+              <div className="ai-summary-body">
+                {aiSummaryStatus === 'error' ? (
+                  <p className="ai-summary-error">
+                    Could not generate the summary. Please try again.
+                  </p>
+                ) : (
+                  <p className="ai-summary-text">
+                    {aiSummaryStatus === 'loading'
+                      ? 'Working...'
+                      : aiSummaryDisplay || ''}
+                    {aiSummaryStatus === 'typing' && (
+                      <span className="ai-summary-cursor" aria-hidden="true">
+                        ▍
+                      </span>
+                    )}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
           <h1>{title}</h1>
           <div className="price-container">
             <small
@@ -1241,6 +1382,11 @@ const PRODUCT_FRAGMENT = `#graphql
       value
     }
     metafieldVat: metafield(namespace: "custom", key: "vat") {
+      value
+    }
+
+    # AI SUMMARY (added)
+    metafieldAiSummary: metafield(namespace: "custom", key: "ai_summary") {
       value
     }
   }
