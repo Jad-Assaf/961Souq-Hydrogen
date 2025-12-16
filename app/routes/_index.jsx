@@ -32,6 +32,7 @@ import MobileCategoryTiles from '~/components/MobileCategoryTiles';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileCategoryCards from '~/components/MobileCategoryCards';
 import MobileHeroGlassy from '~/components/MobileHeroGlassy';
+import MobileAppPopup from '~/components/MobileAppPopup';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 // const MANUAL_MENU_HANDLES = [
@@ -566,7 +567,7 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      {/* <MobileAppPopup /> */}
+      <MobileAppPopup />
       <h1
         className="home-h1"
         aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"
@@ -578,7 +579,7 @@ export default function Homepage() {
         alt="Holiday tech showcase"
         eyebrow="Holiday Drops"
         title="Upgrade Season Starts Now"
-        subtitle="Premium picks across phones, laptops, audio, gaming, and smart home."
+        subtitle="Premium picks across phones, laptops, audio, gaming, and more."
         ctaText="Shop Now"
         ctaTo="/christmas"
       />
