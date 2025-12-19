@@ -8,6 +8,14 @@ export default function RelatedProductsRow({products}) {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
+  const scrollRow = (offset) => {
+    if (!rowRef.current) return;
+    rowRef.current.scrollBy({
+      left: offset,
+      behavior: 'smooth',
+    });
+  };
+
   return (
     <div className="collection-section">
       <h2>You May Also Like</h2>
@@ -15,7 +23,7 @@ export default function RelatedProductsRow({products}) {
         <button className="home-prev-button" onClick={() => scrollRow(-600)}>
           <LeftArrowIcon />
         </button>
-        <div className="collection-products-row">
+        <div className="collection-products-row" ref={rowRef}>
           {products.map((product, index) => (
             <RelatedProductItem
               key={product.id}

@@ -9,6 +9,14 @@ export default function RecentlyViewedProducts({currentProductId}) {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
+  const scrollRow = (offset) => {
+    if (!rowRef.current) return;
+    rowRef.current.scrollBy({
+      left: offset,
+      behavior: 'smooth',
+    });
+  };
+
   useEffect(() => {
     // Update the viewed products list in localStorage
     if (typeof window !== 'undefined' && currentProductId) {
@@ -126,7 +134,7 @@ export default function RecentlyViewedProducts({currentProductId}) {
           <button className="home-prev-button" onClick={() => scrollRow(-600)}>
             <LeftArrowIcon />
           </button>
-          <div className="collection-products-row">
+          <div className="collection-products-row" ref={rowRef}>
             {products.map((product, index) => (
               <RecentlyViewedProductItem
                 key={product.id}
