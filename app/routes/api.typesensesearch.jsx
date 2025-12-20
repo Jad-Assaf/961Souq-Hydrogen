@@ -3,7 +3,7 @@ import {
   getTypesenseSearchClientFromEnv,
   TYPESENSE_PRODUCTS_COLLECTION,
 } from '~/lib/typesense.server';
-import {generateSearchSuggestions} from './api.search-suggestions';
+import {generateSearchSuggestions} from '~/lib/search-suggestions.server';
 
 /**
  * Loader for `/api/typesensesearch`.
