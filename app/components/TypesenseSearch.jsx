@@ -12,6 +12,7 @@ export function TypesenseSearch({
   const [isOpen, setIsOpen] = useState(false);
   const debounceRef = useRef(null);
   const lastTermRef = useRef(initialQuery.trim());
+  const cachedDataRef = useRef({}); // Cache results to prevent duplicate requests
 
   // Keep input in sync with URL query
   useEffect(() => {
@@ -34,7 +35,7 @@ export function TypesenseSearch({
     }
   }, [isOpen]);
 
-  // Debounced predictive search
+  // Debounced predictive search - FIXED to prevent infinite loops
   useEffect(() => {
     const term = searchTerm.trim();
     if (!term) {
@@ -42,32 +43,76 @@ export function TypesenseSearch({
       setIsOpen(false);
       return;
     }
-    if (term === lastTermRef.current) return;
+    
+    // CRITICAL: Don't refetch if we already have data for this exact term
+    if (term === lastTermRef.current && cachedDataRef.current[term]) {
+      return; // Already have data, STOP HERE
+    }
+    
+    // CRITICAL: Don't refetch if fetcher is already loading this term
+    if (fetcher.state === 'loading' && lastTermRef.current === term) {
+      return; // Already loading, STOP HERE
+    }
+    
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
+      // FINAL CHECK: Don't make request if we have data
+      if (cachedDataRef.current[term]) {
+        lastTermRef.current = term;
+        return;
+      }
+      // FINAL CHECK: Don't make request if already loading
+      if (fetcher.state === 'loading') {
+        return;
+      }
       lastTermRef.current = term;
       const params = new URLSearchParams();
       params.set('q', term);
       params.set('perPage', '20');
       fetcher.load(`/api/typesensesearch?${params.toString()}`);
-    }, 250);
+    }, 300); // Increased debounce to 300ms
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [searchTerm, fetcher]);
+  }, [searchTerm]); // REMOVED fetcher from dependencies - this was causing the loop!
 
-  const products = fetcher.data?.hits || [];
-  const isLoading = fetcher.state === 'loading';
+  // Cache fetcher data when it arrives
+  useEffect(() => {
+    if (fetcher.data && lastTermRef.current && !cachedDataRef.current[lastTermRef.current]) {
+      cachedDataRef.current[lastTermRef.current] = fetcher.data;
+    }
+  }, [fetcher.data]);
+
+  // Use cached data if available, otherwise use fetcher data
+  const currentTerm = searchTerm.trim();
+  const cachedData = cachedDataRef.current[currentTerm];
+  const data = cachedData || fetcher.data || {};
+  
+  const products = data.hits || [];
+  const suggestions = data.suggestions || [];
+  const isLoading = fetcher.state === 'loading' && !cachedData;
 
   function handleFocus() {
     const term = searchTerm.trim();
     if (!term) return;
     setIsOpen(true);
-    if (!products.length || lastTermRef.current !== term) {
+    
+    // CRITICAL: Check cache first - NEVER refetch if we have data
+    if (cachedDataRef.current[term]) {
+      return; // STOP - we have data
+    }
+    
+    // CRITICAL: Don't fetch if already loading
+    if (fetcher.state === 'loading' && lastTermRef.current === term) {
+      return; // STOP - already loading
+    }
+    
+    // Only fetch if we truly don't have data and aren't loading
+    if (lastTermRef.current !== term && !cachedDataRef.current[term]) {
       lastTermRef.current = term;
       const params = new URLSearchParams();
       params.set('q', term);
-      params.set('perPage', '10');
+      params.set('perPage', '20');
       fetcher.load(`/api/typesensesearch?${params.toString()}`);
     }
   }
@@ -87,20 +132,28 @@ export function TypesenseSearch({
         }`}
       >
         <Form method="get" action={action} className="search-form">
-          <input
-            type="search"
-            name="q"
-            value={searchTerm}
-            autoComplete="off"
-            onChange={(e) => {
-              const value = e.target.value;
-              setSearchTerm(value);
-              setIsOpen(!!value.trim());
-            }}
-            onFocus={handleFocus}
-            placeholder={placeholder}
-            className="search-input"
-          />
+          <div className="search-input-wrapper">
+            <input
+              type="search"
+              name="q"
+              value={searchTerm}
+              autoComplete="off"
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchTerm(value);
+                setIsOpen(!!value.trim());
+              }}
+              onFocus={handleFocus}
+              placeholder={placeholder}
+              className="search-input"
+            />
+            {/* <span className="search-ai-badge" title="AI-Powered Search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+              <span className="search-ai-text">AI</span>
+            </span> */}
+          </div>
           <button type="submit" className="search-submit" aria-label="Search">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path
@@ -115,21 +168,74 @@ export function TypesenseSearch({
         <TypesenseSuggestions
           searchTerm={searchTerm}
           products={products}
+          suggestions={suggestions}
           isLoading={isLoading}
           isOpen={isOpen}
+          onSuggestionClick={(suggestion) => {
+            setSearchTerm(suggestion);
+            setIsOpen(true);
+            lastTermRef.current = '';
+            // Trigger search with new suggestion
+            const params = new URLSearchParams();
+            params.set('q', suggestion);
+            params.set('perPage', '20');
+            fetcher.load(`/api/typesensesearch?${params.toString()}`);
+          }}
         />
       </div>
     </>
   );
 }
 
-function TypesenseSuggestions({searchTerm, products, isLoading, isOpen}) {
+function TypesenseSuggestions({
+  searchTerm,
+  products,
+  suggestions,
+  isLoading,
+  isOpen,
+  onSuggestionClick,
+}) {
   const trimmed = searchTerm.trim();
   const hasProducts = products && products.length > 0;
-  if (!isOpen || !trimmed || !hasProducts) return null;
+  const hasSuggestions = Array.isArray(suggestions) && suggestions.length > 0;
+
+
+  if (!isOpen || !trimmed) return null;
+
+  // Show suggestions even if no products (when 0 results)
+  const shouldShow = hasProducts || hasSuggestions || isLoading;
+
+  if (!shouldShow) return null;
+
   return (
     <div className="search-suggestions">
       {isLoading && <div className="search-suggestions-status">Searching…</div>}
+      
+      {/* Did you mean section - always shown when suggestions are available */}
+      {hasSuggestions && (
+        <div className="suggestions-section suggestions-section--did-you-mean">
+          <p className="suggestions-heading">AI Suggestions</p>
+          <ul className="suggestions-list suggestions-list--queries">
+            {suggestions.map((suggestion, index) => (
+              <li key={index} className="suggestion-query-item">
+                <button
+                  type="button"
+                  className="suggestion-query-link"
+                  onClick={() => onSuggestionClick?.(suggestion)}
+                  onMouseDown={(e) => {
+                    // Prevent input blur when clicking
+                    e.preventDefault();
+                  }}
+                >
+                  {suggestion}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Products section */}
       <div className="suggestions-pro-col">
         {hasProducts && (
           <div className="suggestions-section">

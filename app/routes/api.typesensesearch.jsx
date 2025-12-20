@@ -3,6 +3,7 @@ import {
   getTypesenseSearchClientFromEnv,
   TYPESENSE_PRODUCTS_COLLECTION,
 } from '~/lib/typesense.server';
+import {generateSearchSuggestions} from './api.search-suggestions';
 
 /**
  * Loader for `/api/typesensesearch`.
@@ -86,14 +87,26 @@ export async function loader({request, context}) {
         available: document.available,
       })) || [];
 
+    const found = result.found ?? hits.length;
+
+    // Fetch GPT-powered suggestions (always, not just when 0 results)
+    let suggestions = [];
+    if (originalQ) {
+      try {
+        suggestions = await generateSearchSuggestions(originalQ, context);
+      } catch (suggestError) {
+        // Don't fail the whole request if suggestions fail
+      }
+    }
+
     return json({
       hits,
-      found: result.found ?? hits.length,
+      found,
       page,
       perPage,
+      suggestions: Array.isArray(suggestions) ? suggestions : [],
     });
   } catch (error) {
-    console.error('Typesense search error:', error);
     return json({error: 'Search failed'}, {status: 500});
   }
 }
