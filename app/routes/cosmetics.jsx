@@ -339,6 +339,7 @@ export default function BodyCareRoute() {
                     <Link
                       to={`/products/${product.handle}`}
                       className="bb-card-inner"
+                      target="_blank"
                     >
                       <div className="bb-card-head">
                         <span className="bb-card-category">

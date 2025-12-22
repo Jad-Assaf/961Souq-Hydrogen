@@ -362,6 +362,7 @@ export default function GamingCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="gaming-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="gaming-product-media">
                         {product.featuredImage ? (

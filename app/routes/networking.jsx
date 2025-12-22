@@ -361,6 +361,7 @@ export default function NetworkingCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="nw-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="nw-product-media">
                         {imageUrl ? (

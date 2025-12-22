@@ -358,6 +358,7 @@ export default function HomeAppliancesCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="ha-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="ha-product-media">
                         {imageUrl ? (

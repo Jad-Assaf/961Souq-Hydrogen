@@ -374,6 +374,7 @@ export default function PhotographyCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="ph-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="ph-product-media">
                         {imageUrl ? (

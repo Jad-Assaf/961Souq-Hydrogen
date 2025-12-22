@@ -362,6 +362,7 @@ export default function DesktopsCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="d-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="d-product-media">
                         {imageUrl ? (

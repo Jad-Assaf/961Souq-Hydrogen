@@ -408,6 +408,7 @@ export default function FitnessCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="fit-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="fit-product-media">
                         {imageUrl ? (

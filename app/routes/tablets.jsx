@@ -358,6 +358,7 @@ export default function TabletsCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="tab-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="tab-product-media">
                         {imageUrl ? (

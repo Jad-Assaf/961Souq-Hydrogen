@@ -370,6 +370,7 @@ export default function MobilesCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="mob-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="mob-product-media">
                         {imageUrl ? (

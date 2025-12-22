@@ -397,6 +397,7 @@ export default function AudioCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="au-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="au-product-media">
                         {imageUrl ? (

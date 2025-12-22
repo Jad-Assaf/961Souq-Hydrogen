@@ -363,6 +363,7 @@ export default function PcPartsCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="pp-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="pp-product-media">
                         {imageUrl ? (

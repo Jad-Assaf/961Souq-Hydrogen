@@ -394,6 +394,7 @@ export default function AppleCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="apple-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="apple-product-media">
                         {product.featuredImage ? (

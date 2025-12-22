@@ -354,6 +354,7 @@ export default function BusinessLaptopsCategoryPage() {
                       to={`/products/${product.handle}`}
                       className="bl-product-card"
                       prefetch="intent"
+                      target="_blank"
                     >
                       <div className="bl-product-media">
                         {imageUrl ? (
