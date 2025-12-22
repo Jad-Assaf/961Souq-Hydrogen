@@ -889,7 +889,7 @@ export default function Product() {
           <div className="ai-summary">
             <div className="ai-summary__header">
               <div className="ai-summary__badge">
-                <span className="ai-summary__title">ChatGPT Summary</span>
+                <span className="ai-summary__title">AI Summary</span>
                 <span className="ai-summary__dot" aria-hidden="true" />
               </div>
 
@@ -910,7 +910,7 @@ export default function Product() {
               <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="ai-modal__header">
                   <div className="ai-modal__left">
-                    <span className="ai-modal__chip">ChatGPT Summary</span>
+                    <span className="ai-modal__chip">AI Summary</span>
                     <span className="ai-modal__status">
                       {aiSummaryStatus === 'loading'
                         ? 'Generating'

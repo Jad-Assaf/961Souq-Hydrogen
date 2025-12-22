@@ -234,10 +234,30 @@ function richTextToHtml(richText) {
 export default function ProductFAQ({productId, productType}) {
   const [openIndex, setOpenIndex] = useState(null);
   const [question, setQuestion] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [faqs, setFaqs] = useState([]);
+  const [userLoaded, setUserLoaded] = useState(false);
+
+  // Fetch user info and auto-populate if logged in
+  useEffect(() => {
+    async function fetchUserInfo() {
+      try {
+        const res = await fetch('/api/user-status');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.loggedIn) {
+          if (data.fullName) setName(data.fullName);
+          if (data.email) setEmail(data.email);
+        }
+        setUserLoaded(true);
+      } catch {}
+    }
+    fetchUserInfo();
+  }, []);
 
   // Fetch user-submitted FAQs from metafield
   useEffect(() => {
@@ -247,8 +267,23 @@ export default function ProductFAQ({productId, productType}) {
         const res = await fetch(`/api/get-faq-questions?productId=${encodeURIComponent(productId)}`);
         if (!res.ok) return;
         const data = await res.json();
-        if (Array.isArray(data.faqs)) setFaqs(data.faqs);
-      } catch {}
+        if (Array.isArray(data.faqs)) {
+          const processedFaqs = data.faqs.map((faq) => ({
+            question: faq.question,
+            answer: faq.answer
+              ? richTextToHtml(
+                  typeof faq.answer === 'string' ? faq.answer : (typeof faq.answer === 'object' ? faq.answer : '')
+                )
+              : '<em>Awaiting answer from support</em>',
+            name: faq.name && faq.name !== 'Anonymous' && faq.name.trim() ? faq.name.trim() : '',
+            email: faq.email || null,
+          }));
+          console.log('[FAQ] Initial load -', processedFaqs.length, 'FAQs');
+          setFaqs(processedFaqs);
+        }
+      } catch (err) {
+        console.error('[FAQ] Error fetching FAQs:', err);
+      }
     }
     fetchQuestions();
   }, [productId]);
@@ -258,10 +293,14 @@ export default function ProductFAQ({productId, productType}) {
     ...faqs.map(faq => ({
       question: faq.question,
       answer: faq.answer
-        ? richTextToHtml(
-            typeof faq.answer === 'string' ? faq.answer : (typeof faq.answer === 'object' ? faq.answer : '')
-          )
+        ? (typeof faq.answer === 'string' && faq.answer.includes('<') 
+            ? faq.answer 
+            : richTextToHtml(
+                typeof faq.answer === 'string' ? faq.answer : (typeof faq.answer === 'object' ? faq.answer : '')
+              ))
         : '<em>Awaiting answer from support</em>',
+      name: faq.name && faq.name !== 'Anonymous' && faq.name.trim() ? faq.name.trim() : '',
+      email: faq.email || null,
     })),
   ];
   if (!allFaqs.length && !productId) return null;
@@ -272,22 +311,166 @@ export default function ProductFAQ({productId, productType}) {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
+    // Use the name/email from form, or from logged-in user, or 'Anonymous'
+    const userName = (name && name.trim()) || 'Anonymous';
+    const userEmail = (email && email.trim()) || null;
+    
+    console.log('[FAQ] Submitting with:', { userName, userEmail, formName: name, formEmail: email });
+
     try {
-      const res = await fetch('/api/admin-create-faq', {
+      // Capitalize the question
+      const capitalizedQuestion = question.trim().charAt(0).toUpperCase() + question.trim().slice(1);
+      
+      // First, get AI answer
+      const aiRes = await fetch('/api/ai-answer-faq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, question }),
+        body: JSON.stringify({ 
+          productId, 
+          question: capitalizedQuestion,
+          name: userName,
+          email: userEmail,
+        }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setSubmitted(true);
-        setQuestion('');
-        setFaqs((prev) => [...prev, { question, answer: '' }]);
-      } else {
-        setError(data.error || 'Something went wrong.');
+
+      const aiData = await aiRes.json();
+      
+      if (!aiRes.ok || !aiData.success) {
+        setError(aiData.error || 'Failed to get AI answer. Please try again.');
+        setLoading(false);
+        return;
       }
-    } catch {
+
+      // Save FAQ with AI answer
+      const saveRes = await fetch('/api/admin-create-faq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          productId, 
+          question: capitalizedQuestion,
+          answer: aiData.answer,
+          name: userName,
+          email: userEmail,
+        }),
+      });
+
+      const saveData = await saveRes.json();
+      
+      if (saveRes.ok && saveData.success) {
+        // Process the AI answer for display
+        const processedAnswer = typeof aiData.answer === 'string' 
+          ? aiData.answer 
+          : (typeof aiData.answer === 'object' 
+              ? richTextToHtml(aiData.answer) 
+              : String(aiData.answer));
+        
+        // Immediately add the new FAQ to the list (optimistic update)
+        const newFaq = { 
+          question: capitalizedQuestion, 
+          answer: processedAnswer,
+          name: userName !== 'Anonymous' && userName.trim() ? userName.trim() : '',
+          email: userEmail || null,
+        };
+        
+        console.log('[FAQ] Adding new FAQ optimistically:', {
+          question: newFaq.question,
+          hasAnswer: !!newFaq.answer,
+          name: newFaq.name || 'Anonymous',
+          email: newFaq.email || 'none',
+        });
+        
+        // Immediately add the new FAQ to the list (optimistic update)
+        // Use a function to ensure we're working with the latest state
+        setFaqs((prev) => {
+          // Check if this FAQ already exists (avoid duplicates)
+          const exists = prev.some(f => f.question.toLowerCase() === capitalizedQuestion.toLowerCase());
+          if (exists) {
+            console.log('[FAQ] FAQ already exists, updating instead');
+            // Update existing FAQ
+            return prev.map(f => 
+              f.question.toLowerCase() === capitalizedQuestion.toLowerCase() 
+                ? newFaq 
+                : f
+            );
+          }
+          console.log('[FAQ] Adding new FAQ to list, total FAQs:', prev.length + 1);
+          // Add new FAQ to the END of the list
+          return [...prev, newFaq];
+        });
+        
+        // Clear the form immediately for better UX
+        setQuestion('');
+        setSubmitted(true);
+        
+        // Refresh from server after a delay to sync with saved data
+        // Use a longer delay to ensure server has processed the FAQ
+        setTimeout(async () => {
+          try {
+            const refreshRes = await fetch(`/api/get-faq-questions?productId=${encodeURIComponent(productId)}`);
+            if (refreshRes.ok) {
+              const refreshData = await refreshRes.json();
+              if (Array.isArray(refreshData.faqs)) {
+                // Process server FAQs
+                const processedFaqs = refreshData.faqs.map((serverFaq) => ({
+                  question: serverFaq.question,
+                  answer: serverFaq.answer
+                    ? richTextToHtml(
+                        typeof serverFaq.answer === 'string' ? serverFaq.answer : (typeof serverFaq.answer === 'object' ? serverFaq.answer : '')
+                      )
+                    : '<em>Awaiting answer from support</em>',
+                  name: serverFaq.name && serverFaq.name !== 'Anonymous' && serverFaq.name.trim() ? serverFaq.name.trim() : '',
+                  email: serverFaq.email || null,
+                }));
+                
+                console.log('[FAQ] Refreshing FAQs from server:', processedFaqs.length, 'FAQs');
+                console.log('[FAQ] Server FAQs with names:', processedFaqs.map(f => ({ q: f.question.substring(0, 20), name: f.name || 'no name' })));
+                
+                // Merge: Keep optimistic update if server doesn't have it yet, otherwise use server data
+                setFaqs((currentFaqs) => {
+                  const serverMap = new Map(processedFaqs.map(f => [f.question.toLowerCase(), f]));
+                  const currentMap = new Map(currentFaqs.map(f => [f.question.toLowerCase(), f]));
+                  
+                  // Add all server FAQs
+                  processedFaqs.forEach(serverFaq => {
+                    currentMap.set(serverFaq.question.toLowerCase(), serverFaq);
+                  });
+                  
+                  // Keep any current FAQs that aren't in server yet (optimistic updates)
+                  currentFaqs.forEach(currentFaq => {
+                    if (!serverMap.has(currentFaq.question.toLowerCase())) {
+                      currentMap.set(currentFaq.question.toLowerCase(), currentFaq);
+                    }
+                  });
+                  
+                  return Array.from(currentMap.values());
+                });
+              }
+            }
+          } catch (err) {
+            console.error('Failed to refresh FAQs:', err);
+          }
+        }, 3000);
+      } else {
+        // Handle duplicate question error
+        if (saveRes.status === 409 || saveData.duplicate) {
+          setError('A similar question already exists. Please check the FAQ section above or ask a different question.');
+          // Scroll to FAQs
+          setTimeout(() => {
+            const faqSection = document.querySelector('.faq-list');
+            if (faqSection) {
+              faqSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
+        } else if (saveRes.status === 429) {
+          setError('Too many requests. Please try again after 1 hour.');
+        } else {
+          setError(saveData.error || 'Failed to save FAQ. Please try again.');
+        }
+      }
+    } catch (err) {
       setError('Failed to submit. Please try again.');
+      console.error('FAQ submit error:', err);
     } finally {
       setLoading(false);
     }
@@ -295,7 +478,7 @@ export default function ProductFAQ({productId, productType}) {
 
   return (
     <section className="product-faq">
-      <h2>Frequently Asked Questions</h2>
+      <h2>Ask AI</h2>
       <div className="faq-list">
         {allFaqs.length > 0 ? (
           allFaqs.map((item, idx) => (
@@ -306,6 +489,11 @@ export default function ProductFAQ({productId, productType}) {
               <h3 className="faq-question" onClick={() => handleClick(idx)}>
                 {item.question}
               </h3>
+              {item.name && (
+                <p style={{fontSize: '0.85rem', color: '#666', margin: '0.25rem 0', fontStyle: 'italic'}}>
+                  Asked by {item.name}
+                </p>
+              )}
               <div className="faq-answer-wrapper">
                 <div
                   className="faq-answer"
@@ -320,24 +508,71 @@ export default function ProductFAQ({productId, productType}) {
       </div>
       {productId && (
         <div className="faq-ask">
-          <h3>Have a question?</h3>
+          <h3>Ask AI a Question</h3>
           {submitted ? (
-            <p className="faq-thanks">Thanks! We’ll notify you once it’s answered.</p>
+            <p className="faq-thanks">Thanks! Your question has been answered by AI.</p>
           ) : (
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
                 name="question"
                 className="faq-input"
-                placeholder="Type your question here"
+                placeholder="Type your question here (Arabic or English)"
                 required
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
                 disabled={loading}
               />
+              <div style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem'}}>
+                <input
+                  type="text"
+                  name="name"
+                  className="faq-input"
+                  style={{flex: 1}}
+                  placeholder="Your name (optional)"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  disabled={loading}
+                />
+                <input
+                  type="email"
+                  name="email"
+                  className="faq-input"
+                  style={{flex: 1}}
+                  placeholder="Your email (optional)"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
               <button type="submit" className="faq-submit" disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit Question'}
+                {loading ? (
+                  <span style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                    <span className="ai-thinking-dots">
+                      <span></span><span></span><span></span>
+                    </span>
+                    AI is thinking...
+                  </span>
+                ) : 'Ask Question'}
               </button>
+              {loading && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  background: '#f0f9ff',
+                  borderRadius: '8px',
+                  border: '1px solid #bae6fd',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem'
+                }}>
+                  <div className="ai-thinking-spinner"></div>
+                  <div>
+                    <p style={{margin: 0, fontWeight: 500, color: '#0369a1'}}>AI is analyzing your question...</p>
+                    <p style={{margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#0284c7'}}>Searching product description for the answer</p>
+                  </div>
+                </div>
+              )}
               {error && <p className="faq-error" style={{color: 'red'}}>{error}</p>}
             </form>
           )}
