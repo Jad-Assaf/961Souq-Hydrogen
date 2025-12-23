@@ -7704,8 +7704,8 @@ svg.icon.icon--full-color {
 
 .product-chat-modal {
   width: min(860px, 96vw);
-  min-height: 80vh;
-  max-height: 80vh;
+  min-height: 85vh;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
 }
@@ -7719,7 +7719,7 @@ svg.icon.icon--full-color {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 75vh;
+  height: 77vh;
 }
 
 .product-chat-messages {
