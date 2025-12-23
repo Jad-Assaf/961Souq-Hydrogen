@@ -7817,6 +7817,9 @@ svg.icon.icon--full-color {
   border-color: rgba(0, 214, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(0, 214, 255, 0.18);
 }
+.product-chat-input-row textarea::placeholder {
+  line-height: 35px;
+}
 
 .product-chat-input-row button {
   border: none;

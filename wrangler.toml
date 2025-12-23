@@ -1,0 +1,6 @@
+name = "961-souq"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "AI_TOKEN_TRACKING"
+id = "9e1e068abc464a1a93780921d761f457"

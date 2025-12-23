@@ -4,10 +4,11 @@ import {json} from '@shopify/remix-oxygen';
 const DEFAULT_MAX_OUTPUT = 80; // Reduced from 150 to save tokens
 
 // Server-side token tracking using IP + User-Agent fingerprint
-// This persists across sessions and can't be cleared by the client
-const tokenTrackingMap = new Map();
+// Uses Cloudflare KV for persistent storage, falls back to in-memory Map if KV not available
+const tokenTrackingMap = new Map(); // Fallback for local dev
 const DAILY_TOKEN_LIMIT = 200; // Server-side limit
 const TOKEN_RESET_HOURS = 24;
+const KV_NAMESPACE_NAME = 'AI_TOKEN_TRACKING'; // KV namespace name (configure in wrangler.toml)
 
 function getClientFingerprint(request) {
   // Get IP address (check multiple headers for accuracy)
@@ -42,20 +43,61 @@ function getClientFingerprint(request) {
   return fingerprint;
 }
 
-function checkTokenLimit(fingerprint, requestedTokens) {
+async function getTokenUsageFromKV(kv, fingerprint) {
+  if (!kv) return null;
+  
+  try {
+    const data = await kv.get(fingerprint);
+    if (!data) return null;
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('[Token Tracking] Error reading from KV:', err);
+    return null;
+  }
+}
+
+async function setTokenUsageInKV(kv, fingerprint, data) {
+  if (!kv) return false;
+  
+  try {
+    // Store with expiration (24 hours)
+    const ttl = TOKEN_RESET_HOURS * 60 * 60; // seconds
+    await kv.put(fingerprint, JSON.stringify(data), { expirationTtl: ttl });
+    return true;
+  } catch (err) {
+    console.error('[Token Tracking] Error writing to KV:', err);
+    return false;
+  }
+}
+
+async function checkTokenLimit(fingerprint, requestedTokens, kv = null) {
   const now = Date.now();
-  const record = tokenTrackingMap.get(fingerprint);
+  let record = null;
+  
+  // Try KV first (persistent storage)
+  if (kv) {
+    record = await getTokenUsageFromKV(kv, fingerprint);
+  } else {
+    // Fallback to in-memory Map
+    record = tokenTrackingMap.get(fingerprint);
+  }
   
   // Reset if it's been more than 24 hours
   if (!record || now > record.resetTime) {
     const resetTime = now + (TOKEN_RESET_HOURS * 60 * 60 * 1000);
-    tokenTrackingMap.set(fingerprint, { 
+    const newRecord = { 
       tokens: requestedTokens, 
       resetTime: resetTime
-    });
+    };
+    
+    if (kv) {
+      await setTokenUsageInKV(kv, fingerprint, newRecord);
+    } else {
+      tokenTrackingMap.set(fingerprint, newRecord);
+    }
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[Token Tracking] New/Reset entry for ${fingerprint.substring(0, 50)}: ${requestedTokens}/${DAILY_TOKEN_LIMIT} tokens`);
+      console.log(`[Token Tracking] New/Reset entry for ${fingerprint.substring(0, 50)}: ${requestedTokens}/${DAILY_TOKEN_LIMIT} tokens (${kv ? 'KV' : 'Memory'})`);
     }
     
     return { allowed: true, remaining: DAILY_TOKEN_LIMIT - requestedTokens };
@@ -71,8 +113,15 @@ function checkTokenLimit(fingerprint, requestedTokens) {
   
   record.tokens = newTotal;
   
+  // Update storage
+  if (kv) {
+    await setTokenUsageInKV(kv, fingerprint, record);
+  } else {
+    tokenTrackingMap.set(fingerprint, record);
+  }
+  
   if (process.env.NODE_ENV === 'development') {
-    console.log(`[Token Tracking] Updated ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens (remaining: ${DAILY_TOKEN_LIMIT - newTotal})`);
+    console.log(`[Token Tracking] Updated ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens (remaining: ${DAILY_TOKEN_LIMIT - newTotal}) (${kv ? 'KV' : 'Memory'})`);
   }
   
   return { allowed: true, remaining: DAILY_TOKEN_LIMIT - newTotal };
@@ -138,16 +187,20 @@ export async function action({request, context}) {
     return json({error: 'Missing OPENAI_API_KEY'}, {status: 500});
   }
 
-  // Cleanup old token tracking entries periodically
+  // Cleanup old token tracking entries periodically (only for in-memory fallback)
   cleanupTokenTracking();
 
   const body = await request.json().catch(() => ({}));
   const {productId, messages = [], context: ctxPayload, maxOutputTokens, messageTooLong, productUrl, inputTokens} = body;
   
+  // Get KV namespace from environment (Cloudflare Workers)
+  // KV namespace can be accessed via context.env.KV_NAMESPACE_NAME or context.env.AI_TOKEN_TRACKING
+  const kv = context.env?.AI_TOKEN_TRACKING || context.env?.[KV_NAMESPACE_NAME] || null;
+  
   // Server-side token limit check using IP + User-Agent fingerprint
   const fingerprint = getClientFingerprint(request);
   const estimatedTokens = typeof inputTokens === 'number' ? inputTokens : 50; // Default estimate
-  const tokenCheck = checkTokenLimit(fingerprint, estimatedTokens);
+  const tokenCheck = await checkTokenLimit(fingerprint, estimatedTokens, kv);
   
   if (!tokenCheck.allowed) {
     if (process.env.NODE_ENV === 'development') {
@@ -179,7 +232,7 @@ export async function action({request, context}) {
   // Note: We still track tokens for "message too long" responses (they use minimal tokens)
   if (messageTooLong) {
     // Still check token limit (messageTooLong responses use ~10 tokens)
-    const messageTooLongTokenCheck = checkTokenLimit(fingerprint, 10);
+    const messageTooLongTokenCheck = await checkTokenLimit(fingerprint, 10, kv);
     
     if (!messageTooLongTokenCheck.allowed) {
       return json({
