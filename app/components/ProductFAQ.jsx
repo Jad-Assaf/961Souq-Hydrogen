@@ -1,8 +1,8 @@
 import React, {useEffect, useState, useCallback} from 'react';
 
-const DAILY_TOKEN_LIMIT = 200;
-const MAX_INPUT_TOKENS = 100;
-const MAX_OUTPUT_TOKENS = 150;
+const DAILY_TOKEN_LIMIT = 100;
+const MAX_INPUT_TOKENS = 50;
+const MAX_OUTPUT_TOKENS = 100;
 
 function estimateTokens(text) {
   if (!text) return 0;
@@ -196,6 +196,7 @@ const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => 
           maxOutputTokens: MAX_OUTPUT_TOKENS,
           messageTooLong: true,
           productUrl,
+          inputTokens: inputTokens,
         }),
       });
 
@@ -219,15 +220,17 @@ const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => 
       return;
     }
 
+    // Client-side check (server will enforce the real limit)
     const todayUsage = dailyTokensUsed + inputTokens;
     if (todayUsage > DAILY_TOKEN_LIMIT) {
-      setError('Daily limit reached.');
+      setError('Daily limit reached. Please try again tomorrow.');
       return;
     }
 
     const newMessages = [...messages, {role: 'user', content: input.trim()}];
     setMessages(newMessages);
     setInput('');
+    // Still track client-side for UX, but server enforces the real limit
     persistTokenUsage(todayUsage);
     setLoading(true);
     setError('');
@@ -245,12 +248,21 @@ const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => 
           context: productContext,
           maxOutputTokens: MAX_OUTPUT_TOKENS,
           productUrl,
+          inputTokens: inputTokens,
         }),
       });
 
       const data = await res.json();
-      if (!res.ok || !data?.answer) {
-        setError(data?.error || 'Could not get a response.');
+      if (!res.ok) {
+        if (data?.limitReached) {
+          setError('Daily limit reached. Please try again tomorrow.');
+        } else {
+          setError(data?.error || 'Could not get a response.');
+        }
+        return;
+      }
+      if (!data?.answer) {
+        setError('Could not get a response.');
         return;
       }
 
