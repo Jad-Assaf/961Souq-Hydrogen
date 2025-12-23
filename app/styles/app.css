@@ -7738,7 +7738,7 @@ svg.icon.icon--full-color {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 6px 6px 0;
+  padding: 6px 6px 100px;
 }
 
 .product-chat-empty {
@@ -7794,10 +7794,12 @@ svg.icon.icon--full-color {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  position: relative;
-  bottom: 5px;
+  position: fixed;
+  bottom: 0px;
   width: 100%;
   padding: 10px;
+  background-color: #00000063;
+  backdrop-filter: blur(20px);
 }
 
 .product-chat-token-row {
