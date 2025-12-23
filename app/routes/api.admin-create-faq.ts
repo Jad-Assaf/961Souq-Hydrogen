@@ -38,15 +38,14 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   return { allowed: true };
 }
 
-// Clean up old entries periodically
-setInterval(() => {
+function cleanupRateLimitEntries() {
   const now = Date.now();
   for (const [ip, record] of rateLimitMap.entries()) {
     if (now > record.resetTime) {
       rateLimitMap.delete(ip);
     }
   }
-}, RATE_LIMIT_WINDOW * 2);
+}
 
 function normalizeQuestion(question: string): string {
   return question.toLowerCase().trim().replace(/[^\w\s\u0600-\u06FF]/g, '');
@@ -79,7 +78,6 @@ function questionsAreSimilar(q1: string, q2: string, threshold = 0.7): boolean {
 
 async function publishMetaobject(faqId: string, shop: string, adminToken: string, apiVersion: string): Promise<void> {
   try {
-    console.log('[FAQ CREATE] Attempting to publish metaobject:', faqId);
     const publishRes = await fetch(
       `https://${shop}/admin/api/${apiVersion}/graphql.json`,
       {
@@ -103,26 +101,10 @@ async function publishMetaobject(faqId: string, shop: string, adminToken: string
     );
 
     const publishData = await publishRes.json();
-    console.log('[FAQ CREATE] Publish response:', {
-      hasData: !!publishData?.data,
-      hasMetaobject: !!publishData?.data?.metaobjectPublish?.metaobject,
-      status: publishData?.data?.metaobjectPublish?.metaobject?.status,
-      hasErrors: !!publishData?.data?.metaobjectPublish?.userErrors?.length,
-      errors: publishData?.data?.metaobjectPublish?.userErrors,
-    });
     
-    if (publishData?.data?.metaobjectPublish?.userErrors?.length) {
-      console.warn('[FAQ CREATE] Failed to publish metaobject (but it was created):', JSON.stringify(publishData.data.metaobjectPublish.userErrors, null, 2));
-      // Don't fail the whole request if publish fails - the FAQ is still created
-    } else if (publishData?.data?.metaobjectPublish?.metaobject) {
-      const publishedStatus = publishData.data.metaobjectPublish.metaobject.status;
-      console.log('[FAQ CREATE] FAQ published successfully! Status:', publishedStatus);
-    } else {
-      console.warn('[FAQ CREATE] Unexpected publish response:', JSON.stringify(publishData, null, 2));
-    }
+    if (publishData?.data?.metaobjectPublish?.userErrors?.length) return;
   } catch (publishError) {
-    console.warn('[FAQ CREATE] Error publishing metaobject (but it was created):', publishError);
-    // Don't fail the whole request if publish fails
+    return;
   }
 }
 
@@ -140,10 +122,10 @@ export const action = async ({ request, context }) => {
   /* -----------------------------------------------------------------
    *  Rate limiting
    * ----------------------------------------------------------------- */
+  cleanupRateLimitEntries();
   const clientIP = getClientIP(request);
   const rateLimitCheck = checkRateLimit(clientIP);
   if (!rateLimitCheck.allowed) {
-    console.warn('[FAQ CREATE] Rate limit exceeded for IP:', clientIP);
     const retryAfterMinutes = rateLimitCheck.retryAfter || 60;
     return new Response(
       JSON.stringify({ 
@@ -171,14 +153,12 @@ export const action = async ({ request, context }) => {
     /* ---------------------------------------------------------------
      *  Parse and validate body
      * --------------------------------------------------------------- */
-    console.log('[FAQ CREATE] Starting FAQ creation...');
     const body = await request.json();
     
     const { productId, question, answer = '', name = 'Anonymous', email = null } = body;
 
     // Validate question length
     if (!productId || !question) {
-      console.error('[FAQ CREATE] Validation failed - missing productId or question');
       return new Response(
         JSON.stringify({ error: 'Missing productId or question' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } },
@@ -192,12 +172,6 @@ export const action = async ({ request, context }) => {
         { status: 400, headers: { 'Content-Type': 'application/json' } },
       );
     }
-
-    console.log('[FAQ CREATE] Request validated:', {
-      productId,
-      questionLength: trimmedQuestion.length,
-      answerLength: (answer || '').length,
-    });
 
     /* ---------------------------------------------------------------
      *  Check for duplicate questions
@@ -249,10 +223,6 @@ export const action = async ({ request, context }) => {
       for (const field of node.fields) {
         if (field.key === 'faq_question') {
           if (questionsAreSimilar(trimmedQuestion, field.value)) {
-            console.log('[FAQ CREATE] Duplicate question detected:', {
-              existing: field.value,
-              new: trimmedQuestion,
-            });
             return new Response(
               JSON.stringify({ 
                 error: 'A similar question already exists. Please check the FAQ section above.',
@@ -292,18 +262,10 @@ export const action = async ({ request, context }) => {
     // If they don't exist, they'll be ignored (but won't cause errors)
     if (name && name.trim() && name !== 'Anonymous') {
       fields.push({ key: 'faq_name', value: name.trim() });
-      console.log('[FAQ CREATE] Adding name field:', name.trim());
     }
     if (email && email.trim()) {
       fields.push({ key: 'faq_email', value: email.trim() });
-      console.log('[FAQ CREATE] Adding email field');
     }
-
-    console.log('[FAQ CREATE] Fields prepared:', {
-      questionLength: trimmedQuestion.length,
-      answerLength: answerValue.length,
-      answerIsJson: true,
-    });
 
     /* ---------------------------------------------------------------
      *  1. Create FAQ metaobject
@@ -331,12 +293,6 @@ export const action = async ({ request, context }) => {
     );
 
     const createFaqData = await createFaqRes.json();
-    console.log('[FAQ CREATE] Metaobject creation response:', {
-      hasData: !!createFaqData?.data,
-      hasMetaobject: !!createFaqData?.data?.metaobjectCreate?.metaobject,
-      faqId: createFaqData?.data?.metaobjectCreate?.metaobject?.id,
-      hasErrors: !!createFaqData?.data?.metaobjectCreate?.userErrors?.length,
-    });
     
     // Check for user errors and try different formats
     if (createFaqData?.data?.metaobjectCreate?.userErrors?.length) {
@@ -356,8 +312,6 @@ export const action = async ({ request, context }) => {
       
       // Try retrying with different formats
       if (hasAnswerFormatError || hasStatusError) {
-        console.log('[FAQ CREATE] Format error detected, trying alternative formats...');
-        
         // Try 1: Remove status, use JSON-encoded string (double-encoded)
         // Include name and email in retry attempts
         const retryFields1 = [
@@ -373,7 +327,6 @@ export const action = async ({ request, context }) => {
           retryFields1.push({ key: 'faq_email', value: email.trim() });
         }
         
-        console.log('[FAQ CREATE] Attempt 1: JSON-encoded string format');
         const retryRes1 = await fetch(
           `https://${SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json`,
           {
@@ -398,17 +351,13 @@ export const action = async ({ request, context }) => {
         
         const retryData1 = await retryRes1.json();
         if (!retryData1?.data?.metaobjectCreate?.userErrors?.length) {
-          console.log('[FAQ CREATE] Success with JSON-encoded string format!');
           createFaqData.data = retryData1.data;
           const retryFaqId = retryData1.data.metaobjectCreate.metaobject.id;
           if (retryFaqId) {
             await publishMetaobject(retryFaqId, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
           }
         } else {
-          console.error('[FAQ CREATE] Attempt 1 failed:', JSON.stringify(retryData1.data.metaobjectCreate.userErrors, null, 2));
-          
           // Try 2: Plain text (maybe it's actually a text field, not JSON)
-          console.log('[FAQ CREATE] Attempt 2: Plain text format');
           const retryFields2 = [
             { key: 'faq_question', value: trimmedQuestion },
             { key: 'faq_answer', value: answer || '' }, // Plain text
@@ -441,22 +390,18 @@ export const action = async ({ request, context }) => {
                     fields: retryFields2,
                   },
                 }),
-            },
-          );
+              },
+            );
           
           const retryData2 = await retryRes2.json();
           if (!retryData2?.data?.metaobjectCreate?.userErrors?.length) {
-            console.log('[FAQ CREATE] Success with plain text format!');
             createFaqData.data = retryData2.data;
             const retryFaqId2 = retryData2.data.metaobjectCreate.metaobject.id;
             if (retryFaqId2) {
               await publishMetaobject(retryFaqId2, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
             }
           } else {
-            console.error('[FAQ CREATE] Attempt 2 failed:', JSON.stringify(retryData2.data.metaobjectCreate.userErrors, null, 2));
-            
             // Try 3: Shopify Rich Text format (correct structure)
-            console.log('[FAQ CREATE] Attempt 3: Shopify Rich Text format');
             const richTextAnswer = JSON.stringify({
               type: 'root',
               children: [
@@ -509,14 +454,12 @@ export const action = async ({ request, context }) => {
             
             const retryData3 = await retryRes3.json();
             if (!retryData3?.data?.metaobjectCreate?.userErrors?.length) {
-              console.log('[FAQ CREATE] Success with Rich Text format!');
               createFaqData.data = retryData3.data;
               const retryFaqId3 = retryData3.data.metaobjectCreate.metaobject.id;
               if (retryFaqId3) {
                 await publishMetaobject(retryFaqId3, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
               }
             } else {
-              console.error('[FAQ CREATE] All format attempts failed:', JSON.stringify(retryData3.data.metaobjectCreate.userErrors, null, 2));
               return new Response(
                 JSON.stringify({ 
                   error: retryData3.data.metaobjectCreate.userErrors[0].message || 'Failed to create FAQ - all format attempts failed',
@@ -532,7 +475,6 @@ export const action = async ({ request, context }) => {
           }
         }
       } else {
-        console.error('[FAQ CREATE] Metaobject creation user errors:', JSON.stringify(errors, null, 2));
         return new Response(
           JSON.stringify({ 
             error: errMsg || 'Failed to create FAQ metaobject',
@@ -549,7 +491,6 @@ export const action = async ({ request, context }) => {
     const faqId = createFaqData?.data?.metaobjectCreate?.metaobject?.id;
 
     if (!faqId) {
-      console.error('[FAQ CREATE] No FAQ ID returned. Full response:', JSON.stringify(createFaqData, null, 2));
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create FAQ metaobject - no ID returned',
@@ -561,10 +502,7 @@ export const action = async ({ request, context }) => {
         }
       );
     }
-    console.log('[FAQ CREATE] FAQ created successfully with ID:', faqId);
-    
     // Always try to publish the metaobject to make it active
-    console.log('[FAQ CREATE] Attempting to publish FAQ...');
     await publishMetaobject(faqId, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
 
     /* ---------------------------------------------------------------
@@ -576,24 +514,15 @@ export const action = async ({ request, context }) => {
     // NEW APPROACH: Each FAQ stores its own product reference in the `faq_product` field.
     // We query FAQs by filtering metaobjects where faq_product = productId.
     // This eliminates race conditions entirely since each FAQ creation is independent.
-    
-    console.log('[FAQ CREATE] FAQ created with product reference stored in faq_product field.');
-    console.log('[FAQ CREATE] No need to update product metafield - FAQs are queried by product reference field.');
 
     /* ---------------------------------------------------------------
      *  Success 🎉
      * --------------------------------------------------------------- */
-    console.log('[FAQ CREATE] FAQ creation completed successfully!');
     return new Response(JSON.stringify({ success: true, faqId }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('[FAQ CREATE] Exception caught:', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      errorType: error?.constructor?.name,
-    });
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',

@@ -1,21 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { algoliasearch } from 'algoliasearch';
 
-// Lazy initialization to avoid global scope issues in Cloudflare Workers
-let searchClient = null;
-
-function getSearchClient() {
-  if (typeof window === 'undefined') {
-    return null; // Don't initialize on server
-  }
-  if (!searchClient) {
-    searchClient = algoliasearch(
-      'J1G0XS6JMY',
-      'd79ceb9a07d6afa035dfda887d8f2f93',
-    );
-  }
-  return searchClient;
-}
+const searchClient = algoliasearch(
+  'J1G0XS6JMY',
+  'd79ceb9a07d6afa035dfda887d8f2f93',
+);
 
 const SearchContext = createContext();
 
@@ -51,16 +40,8 @@ export function SearchProvider({ children }) {
     setIsLoading(true);
 
     try {
-      // Lazy initialize search client
-      const client = getSearchClient();
-      if (!client) {
-        setSearchResults([]);
-        setIsLoading(false);
-        return;
-      }
-
       // Use the search method directly on searchClient
-      const response = await client.search([
+      const response = await searchClient.search([
         {
           indexName: 'shopify_products',
           query: query.trim(),
@@ -95,9 +76,6 @@ export function SearchProvider({ children }) {
     }
   }, [currentQuery, performSearch]);
 
-  // Lazy initialize searchClient only when needed
-  const client = useMemo(() => getSearchClient(), []);
-
   const value = {
     searchResults,
     isLoading,
@@ -106,7 +84,7 @@ export function SearchProvider({ children }) {
     setSearchInput,
     performSearch,
     setInitialQuery,
-    searchClient: client,
+    searchClient,
   };
 
   return (
