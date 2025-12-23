@@ -1,7 +1,7 @@
 import '../styles/ProductPage.css';
-import React, {Suspense, useEffect, useRef, useState} from 'react';
-import {redirect} from '@shopify/remix-oxygen';
-import {Await, useLoaderData, useLocation} from '@remix-run/react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+import { redirect } from '@shopify/remix-oxygen';
+import { Await, useLoaderData, useLocation } from '@remix-run/react';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -11,23 +11,24 @@ import {
   CartForm,
   VariantSelector,
 } from '@shopify/hydrogen';
-import {getVariantUrl} from '~/lib/variants';
-import {ProductPrice} from '~/components/ProductPrice';
-import {ProductImages} from '~/components/ProductImage'; // We'll update ProductImage.jsx to handle media.
-import {AddToCartButton} from '~/components/AddToCartButton';
-import {useAside} from '~/components/Aside';
-import {CSSTransition} from 'react-transition-group';
-import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
+import { getVariantUrl } from '~/lib/variants';
+import { ProductPrice } from '~/components/ProductPrice';
+import { ProductImages } from '~/components/ProductImage'; // We'll update ProductImage.jsx to handle media.
+import { AddToCartButton } from '~/components/AddToCartButton';
+import { useAside } from '~/components/Aside';
+import { CSSTransition } from 'react-transition-group';
+import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
-import {ProductMetafields} from '~/components/Metafields';
+import { ProductMetafields } from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
-import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
-import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
+import { trackAddToCart, trackViewContent } from '~/lib/metaPixelEvents';
+import { trackAddToCartGA } from '~/lib/googleAnalyticsEvents';
 import ProductFAQ from '~/components/ProductFAQ';
 import WishlistButton from '~/components/WishlistButton';
+import AskAIButton from '~/components/AskAIButton';
 
 // ---------------- SEO & Meta
-export const meta = ({data}) => {
+export const meta = ({ data }) => {
   const product = data?.product;
   const variants = product.variants || [];
   const currentVariant = variants[0] || {};
@@ -69,8 +70,8 @@ export const meta = ({data}) => {
     title: truncate(formattedTitle, 60),
     description: truncate(
       product?.seoDescription ||
-        product?.description ||
-        'Discover this product.',
+      product?.description ||
+      'Discover this product.',
       150,
     ),
     url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
@@ -156,19 +157,19 @@ export const meta = ({data}) => {
         })),
         aggregateRating: product?.metafields?.spr?.reviews
           ? {
-              '@type': 'AggregateRating',
-              ratingValue: parseFloat(
-                product.metafields.spr.reviews
-                  .split('"ratingValue": "')[1]
-                  ?.split('"')[0] || 0,
-              ),
-              ratingCount: parseInt(
-                product.metafields.spr.reviews
-                  .split('"reviewCount": "')[1]
-                  ?.split('"')[0] || 0,
-                10,
-              ),
-            }
+            '@type': 'AggregateRating',
+            ratingValue: parseFloat(
+              product.metafields.spr.reviews
+                .split('"ratingValue": "')[1]
+                ?.split('"')[0] || 0,
+            ),
+            ratingCount: parseInt(
+              product.metafields.spr.reviews
+                .split('"reviewCount": "')[1]
+                ?.split('"')[0] || 0,
+              10,
+            ),
+          }
           : undefined,
       },
       {
@@ -200,16 +201,16 @@ export async function loader(args) {
   return await loadCriticalData(args);
 }
 
-async function loadCriticalData({context, params, request}) {
-  const {handle} = params;
-  const {storefront} = context;
+async function loadCriticalData({ context, params, request }) {
+  const { handle } = params;
+  const { storefront } = context;
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
 
   // Fetch product data
-  const {product} = await storefront.query(PRODUCT_QUERY, {
+  const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: {
       handle,
       selectedOptions: getSelectedProductOptions(request) || [],
@@ -217,11 +218,11 @@ async function loadCriticalData({context, params, request}) {
   });
 
   if (!product) {
-    throw new Response('Product not found', {status: 404});
+    throw new Response('Product not found', { status: 404 });
   }
 
-  const {product: fullProduct} = await storefront.query(VARIANTS_QUERY, {
-    variables: {handle /* …country/language… */},
+  const { product: fullProduct } = await storefront.query(VARIANTS_QUERY, {
+    variables: { handle /* …country/language… */ },
   });
 
   // Select the first variant as the default if applicable
@@ -247,7 +248,7 @@ async function loadCriticalData({context, params, request}) {
   let relatedProducts = [];
 
   if (product?.id) {
-    const {productRecommendations} = await storefront.query(
+    const { productRecommendations } = await storefront.query(
       RECOMMENDED_PRODUCTS_QUERY,
       {
         variables: {
@@ -273,22 +274,22 @@ async function loadCriticalData({context, params, request}) {
   };
 }
 
-function loadDeferredData({context, params}) {
-  const {storefront} = context;
+function loadDeferredData({ context, params }) {
+  const { storefront } = context;
 
   const variants = storefront
     .query(VARIANTS_QUERY, {
-      variables: {handle: params.handle},
+      variables: { handle: params.handle },
     })
     .catch((error) => {
       console.error(error);
       return null;
     });
 
-  return {variants};
+  return { variants };
 }
 
-function redirectToFirstVariant({product, request}) {
+function redirectToFirstVariant({ product, request }) {
   const url = new URL(request.url);
   const firstVariant = product.variants.nodes[0];
 
@@ -299,7 +300,7 @@ function redirectToFirstVariant({product, request}) {
       selectedOptions: firstVariant.selectedOptions,
       searchParams: new URLSearchParams(url.search),
     }),
-    {status: 302},
+    { status: 302 },
   );
 }
 
@@ -308,7 +309,7 @@ function redirectToFirstVariant({product, request}) {
 // -----------------------------------------------------
 
 function isValueAvailable(allVariants, selectedOptions, optionName, val) {
-  const updated = {...selectedOptions, [optionName]: val};
+  const updated = { ...selectedOptions, [optionName]: val };
 
   // Find any in-stock variant that fully matches updated
   return Boolean(
@@ -350,7 +351,7 @@ export function ProductForm({
   quantity = 1,
 }) {
   const location = useLocation();
-  const {open} = useAside();
+  const { open } = useAside();
   const isComputerComponent =
     Array.isArray(product?.tags) &&
     product.tags.includes('computer components');
@@ -360,7 +361,7 @@ export function ProductForm({
   // ------------------------------
   const [selectedOptions, setSelectedOptions] = useState(() => {
     if (selectedVariant?.selectedOptions) {
-      return selectedVariant.selectedOptions.reduce((acc, {name, value}) => {
+      return selectedVariant.selectedOptions.reduce((acc, { name, value }) => {
         acc[name] = value;
         return acc;
       }, {});
@@ -383,7 +384,7 @@ export function ProductForm({
   useEffect(() => {
     if (!selectedVariant?.selectedOptions) return;
     setSelectedOptions(
-      selectedVariant.selectedOptions.reduce((acc, {name, value}) => {
+      selectedVariant.selectedOptions.reduce((acc, { name, value }) => {
         acc[name] = value;
         return acc;
       }, {}),
@@ -395,7 +396,7 @@ export function ProductForm({
   // ------------------------------
   function handleOptionChange(optionName, chosenVal) {
     // Build the new options object
-    const newOptions = {...selectedOptions, [optionName]: chosenVal};
+    const newOptions = { ...selectedOptions, [optionName]: chosenVal };
 
     // Attempt to find or “snap” to a variant
     const found = pickOrSnapVariant(
@@ -407,7 +408,7 @@ export function ProductForm({
 
     if (found) {
       // Normalize to the found variant’s full options
-      const normalized = found.selectedOptions.reduce((acc, {name, value}) => {
+      const normalized = found.selectedOptions.reduce((acc, { name, value }) => {
         acc[name] = value;
         return acc;
       }, {});
@@ -429,8 +430,8 @@ export function ProductForm({
   const safeQuantity = Math.max(Number(quantity) || 1, 1);
 
   // Subcomponent to render each option row
-  const ProductOptions = ({option}) => {
-    const {name, values} = option;
+  const ProductOptions = ({ option }) => {
+    const { name, values } = option;
     const currentValue = selectedOptions[name];
 
     return (
@@ -439,7 +440,7 @@ export function ProductForm({
           {name}: <span className="OptionValue">{currentValue}</span>
         </h5>
         <div className="product-options-grid">
-          {values.map(({value, variant}) => {
+          {values.map(({ value, variant }) => {
             const canPick = isValueAvailable(
               variants,
               selectedOptions,
@@ -473,7 +474,7 @@ export function ProductForm({
                     alt={value}
                     width="50"
                     height="50"
-                    style={{objectFit: 'cover'}}
+                    style={{ objectFit: 'cover' }}
                     onContextMenu={(e) => e.preventDefault()}
                   />
                 ) : (
@@ -560,7 +561,7 @@ export function ProductForm({
         options={product.options.filter((o) => o.values.length > 1)}
         variants={variants}
       >
-        {({option}) => <ProductOptions key={option.name} option={option} />}
+        {({ option }) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
 
       <div className="product-form">
@@ -584,7 +585,7 @@ export function ProductForm({
           }}
           lines={
             selectedVariant
-              ? [{merchandiseId: selectedVariant.id, quantity: safeQuantity}]
+              ? [{ merchandiseId: selectedVariant.id, quantity: safeQuantity }]
               : []
           }
           contentId={product.id}
@@ -592,8 +593,8 @@ export function ProductForm({
           {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
             ? 'Call For Price'
             : selectedVariant?.availableForSale
-            ? 'Add to cart'
-            : 'Sold out'}
+              ? 'Add to cart'
+              : 'Sold out'}
         </AddToCartButton>
         {isComputerComponent && (
           <span className="computer-components-note">
@@ -628,7 +629,7 @@ export function ProductForm({
 //                   Main Product
 // -----------------------------------------------------
 export default function Product() {
-  const {product, relatedProducts} = useLoaderData();
+  const { product, relatedProducts } = useLoaderData();
   const variants = product.variants;
   const descriptionRef = useRef(null);
   const shippingRef = useRef(null);
@@ -742,8 +743,8 @@ export default function Product() {
       if (!summaryText) {
         const res = await fetch('/api/product-summary', {
           method: 'POST',
-          headers: {'content-type': 'application/json'},
-          body: JSON.stringify({productId: product.id}),
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ productId: product.id }),
         });
 
         const data = await res.json().catch(() => ({}));
@@ -833,9 +834,9 @@ export default function Product() {
 
     fetch('/api/track/view', {
       method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({handle: product.handle}),
-    }).catch(() => {});
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ handle: product.handle }),
+    }).catch(() => { });
   }, [product?.handle]);
 
   // Subtotal
@@ -851,7 +852,7 @@ export default function Product() {
   const decrementQuantity = () =>
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const {title, descriptionHtml} = product;
+  const { title, descriptionHtml } = product;
 
   const hasDiscount =
     selectedVariant?.compareAtPrice &&
@@ -865,11 +866,11 @@ export default function Product() {
     product.media?.edges && product.media.edges.length > 0
       ? product.media.edges
       : product.images?.edges?.map((edge) => ({
-          node: {
-            __typename: 'MediaImage',
-            image: edge.node,
-          },
-        })) || [];
+        node: {
+          __typename: 'MediaImage',
+          image: edge.node,
+        },
+      })) || [];
 
   const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
 
@@ -886,8 +887,8 @@ export default function Product() {
         />
         <div className="product-main">
           <h1>{title}</h1>
-          {/* AI SUMMARY (button + modal) */}
-          <div className="ai-summary">
+          {/* AI SUMMARY (button + modal) - COMMENTED OUT */}
+          {/* <div className="ai-summary">
             <div className="ai-summary__header">
               <div className="ai-summary__badge">
                 <span className="ai-summary__title">AI Summary</span>
@@ -981,17 +982,19 @@ export default function Product() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
+
+          {/* Ask AI Button Component */}
+          <AskAIButton productId={product.id} productFAQRef={productFAQRef} />
           <div className="price-container">
             <small
-              className={`product-price ${
-                Number(selectedVariant.price.amount) > 0 &&
-                selectedVariant.compareAtPrice &&
-                parseFloat(selectedVariant.compareAtPrice.amount) >
+              className={`product-price ${Number(selectedVariant.price.amount) > 0 &&
+                  selectedVariant.compareAtPrice &&
+                  parseFloat(selectedVariant.compareAtPrice.amount) >
                   parseFloat(selectedVariant.price.amount)
                   ? 'discounted'
                   : ''
-              }`}
+                }`}
             >
               {Number(selectedVariant.price.amount) === 0 ? (
                 <span>Call For Price!</span>
@@ -1003,7 +1006,7 @@ export default function Product() {
             {Number(selectedVariant.price.amount) > 0 &&
               selectedVariant.compareAtPrice &&
               parseFloat(selectedVariant.compareAtPrice.amount) >
-                parseFloat(selectedVariant.price.amount) && (
+              parseFloat(selectedVariant.price.amount) && (
                 <small className="discountedPrice">
                   <Money data={selectedVariant.compareAtPrice} />
                 </small>
@@ -1050,10 +1053,10 @@ export default function Product() {
                   ? 'N/A'
                   : typeof selectedVariant.quantityAvailable === 'number' &&
                     selectedVariant.quantityAvailable > 0
-                  ? `${selectedVariant.quantityAvailable} in stock`
-                  : selectedVariant.availableForSale
-                  ? 'In Stock'
-                  : 'Out of Stock'}
+                    ? `${selectedVariant.quantityAvailable} in stock`
+                    : selectedVariant.availableForSale
+                      ? 'In Stock'
+                      : 'Out of Stock'}
               </li>
 
               <li>
@@ -1080,37 +1083,22 @@ export default function Product() {
         <>
           <div className="tabs">
             <button
-              className={`tab-button ${
-                activeTab === 'description' ? 'active' : ''
-              }`}
+              className={`tab-button ${activeTab === 'description' ? 'active' : ''
+                }`}
               onClick={() => setActiveTab('description')}
             >
               Description
             </button>
             <button
-              className="tab-button ask-ai-button"
-              onClick={() => {
-                if (productFAQRef.current?.openChat) {
-                  productFAQRef.current.openChat();
-                } else {
-                  console.warn('ProductFAQ ref not available');
-                }
-              }}
-            >
-              Ask AI
-            </button>
-            <button
-              className={`tab-button ${
-                activeTab === 'shipping' ? 'active' : ''
-              }`}
+              className={`tab-button ${activeTab === 'shipping' ? 'active' : ''
+                }`}
               onClick={() => setActiveTab('shipping')}
             >
               Shipping & Exchange
             </button>
             <button
-              className={`tab-button ${
-                activeTab === 'warranty' ? 'active' : ''
-              }`}
+              className={`tab-button ${activeTab === 'warranty' ? 'active' : ''
+                }`}
               onClick={() => setActiveTab('warranty')}
             >
               Warranty
@@ -1119,10 +1107,100 @@ export default function Product() {
 
           {activeTab === 'description' && (
             <div className="product-section">
-              <div dangerouslySetInnerHTML={{__html: descriptionHtml || ''}} />
+              <div className="ai-summary">
+                <div className="ai-summary__header">
+                  <button
+                    type="button"
+                    className="ai-summary__action"
+                    onClick={openAiSummaryModal}
+                    disabled={aiSummaryStatus === 'loading'}
+                  >
+                    {aiSummaryStatus === 'loading'
+                      ? 'Generating…'
+                      : 'Generate summary'}
+                  </button>
+                </div>
+              </div>
+              {aiModalOpen && (
+                <div className="ai-modal-overlay" onClick={closeAiSummaryModal}>
+                  <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="ai-modal__header">
+                      <div className="ai-modal__left">
+                        <span className="ai-modal__chip">AI Summary</span>
+                        <span className="ai-modal__status">
+                          {aiSummaryStatus === 'loading'
+                            ? 'Generating'
+                            : aiSummaryStatus === 'typing'
+                              ? 'Writing'
+                              : aiSummaryStatus === 'done'
+                                ? 'Ready'
+                                : aiSummaryStatus === 'error'
+                                  ? 'Error'
+                                  : ''}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="ai-modal__close"
+                        onClick={closeAiSummaryModal}
+                        aria-label="Close"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="ai-modal__body" aria-live="polite">
+                      {aiSummaryStatus === 'error' ? (
+                        <p className="ai-modal__error">
+                          Could not generate the summary. Please try again.
+                        </p>
+                      ) : aiSummaryStatus === 'loading' ? (
+                        <div className="ai-modal__skeleton" aria-hidden="true">
+                          <span />
+                          <span />
+                          <span />
+                        </div>
+                      ) : (
+                        <p className="ai-modal__text">
+                          {aiSummaryDisplay || ''}
+                          {aiSummaryStatus === 'typing' && (
+                            <span className="ai-modal__cursor" aria-hidden="true">
+                              ▍
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="ai-modal__footer">
+                      <p>
+                        {' '}
+                        WhatsApp:&nbsp;
+                        <a
+                          href={whatsappShareUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Share on WhatsApp"
+                        >
+                          +961 71 888 036
+                        </a>
+                      </p>
+                      <button
+                        type="button"
+                        className="ai-modal__secondary"
+                        onClick={closeAiSummaryModal}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div dangerouslySetInnerHTML={{ __html: descriptionHtml || '' }} />
 
               {product.metafieldOfficialProductLink?.value && (
-                <p style={{marginTop: '1.5rem'}}>
+                <p style={{ marginTop: '1.5rem' }}>
                   <a
                     className="official-product-link"
                     href={product.metafieldOfficialProductLink.value}
@@ -1222,29 +1300,29 @@ export default function Product() {
                   promptly. We will swiftly address any defects, damages, or
                   incorrect shipments to ensure your satisfaction.
                 </p>
-                <h3 style={{color: '#2172af'}}>
+                <h3 style={{ color: '#2172af' }}>
                   Exceptions / Non-exchangeable Items
                 </h3>
                 <p>
                   Certain items are exempt from our exchange policy, including{' '}
-                  <strong style={{color: '#2172af'}}>mobile phones</strong>,
+                  <strong style={{ color: '#2172af' }}>mobile phones</strong>,
                   perishable goods (such as{' '}
-                  <strong style={{color: '#2172af'}}>headsets</strong>,{' '}
-                  <strong style={{color: '#2172af'}}>earphones</strong>, and{' '}
-                  <strong style={{color: '#2172af'}}>network card </strong>
-                  or <strong style={{color: '#2172af'}}>wifi routers</strong>
+                  <strong style={{ color: '#2172af' }}>headsets</strong>,{' '}
+                  <strong style={{ color: '#2172af' }}>earphones</strong>, and{' '}
+                  <strong style={{ color: '#2172af' }}>network card </strong>
+                  or <strong style={{ color: '#2172af' }}>wifi routers</strong>
                   ), custom-made products (such as{' '}
-                  <strong style={{color: '#2172af'}}>
+                  <strong style={{ color: '#2172af' }}>
                     special orders
                   </strong> or{' '}
-                  <strong style={{color: '#2172af'}}>personalized items</strong>
+                  <strong style={{ color: '#2172af' }}>personalized items</strong>
                   ), and{' '}
-                  <strong style={{color: '#2172af'}}>pre-ordered goods</strong>.
+                  <strong style={{ color: '#2172af' }}>pre-ordered goods</strong>.
                   For queries regarding specific items, please reach out to us.
                 </p>
                 <p>
                   Unfortunately, we are{' '}
-                  <strong style={{color: '#2172af'}}>
+                  <strong style={{ color: '#2172af' }}>
                     unable to accommodate exchanges for sale items or gift
                     cards.
                   </strong>
@@ -1323,14 +1401,6 @@ export default function Product() {
               },
             ],
           }}
-        />
-        
-        {/* Always render ProductFAQ (hidden) so ref works */}
-        <ProductFAQ
-          ref={productFAQRef}
-          productId={product.id}
-          productType={product.productType}
-          hideLauncher={true}
         />
       </div>
 

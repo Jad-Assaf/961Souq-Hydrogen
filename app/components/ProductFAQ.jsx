@@ -115,6 +115,18 @@ const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => 
     }
   }, [messages, chatKey, productId]);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (messagesContainerRef.current && isOpen) {
@@ -316,13 +328,50 @@ const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => 
                 )}
                 {messages.map((msg, idx) => {
                   // Parse markdown-style links [text](url) and convert to clickable links
+                  // Also handle plain WhatsApp URLs that might appear as text
                   const parseLinks = (text) => {
+                    if (!text) return [text];
+                    
                     const parts = [];
                     let lastIndex = 0;
-                    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-                    let match;
+                    const matches = [];
                     
-                    while ((match = linkRegex.exec(text)) !== null) {
+                    // First, find all markdown links [text](url)
+                    const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+                    let match;
+                    while ((match = markdownLinkRegex.exec(text)) !== null) {
+                      matches.push({
+                        index: match.index,
+                        length: match[0].length,
+                        text: match[1],
+                        url: match[2],
+                        type: 'markdown'
+                      });
+                    }
+                    
+                    // Also find plain WhatsApp URLs that might appear as text
+                    const whatsappUrlRegex = /https?:\/\/wa\.me\/[^\s\)]+/g;
+                    while ((match = whatsappUrlRegex.exec(text)) !== null) {
+                      // Only add if not already in a markdown link
+                      const isInMarkdown = matches.some(m => 
+                        match.index >= m.index && match.index < m.index + m.length
+                      );
+                      if (!isInMarkdown) {
+                        matches.push({
+                          index: match.index,
+                          length: match[0].length,
+                          text: 'WhatsApp',
+                          url: match[0],
+                          type: 'url'
+                        });
+                      }
+                    }
+                    
+                    // Sort matches by index
+                    matches.sort((a, b) => a.index - b.index);
+                    
+                    // Build parts array
+                    matches.forEach((match) => {
                       // Add text before the link
                       if (match.index > lastIndex) {
                         parts.push(text.slice(lastIndex, match.index));
@@ -331,7 +380,7 @@ const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => 
                       parts.push(
                         <a
                           key={match.index}
-                          href={match[2]}
+                          href={match.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
@@ -340,15 +389,17 @@ const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => 
                             fontWeight: 600,
                           }}
                         >
-                          {match[1]}
+                          {match.text}
                         </a>
                       );
-                      lastIndex = match.index + match[0].length;
-                    }
+                      lastIndex = match.index + match.length;
+                    });
+                    
                     // Add remaining text
                     if (lastIndex < text.length) {
                       parts.push(text.slice(lastIndex));
                     }
+                    
                     return parts.length > 0 ? parts : [text];
                   };
                   
