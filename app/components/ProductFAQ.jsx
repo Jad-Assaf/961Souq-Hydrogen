@@ -1,583 +1,398 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 
-// src/components/ProductFAQ.jsx
-const faqByProductType = {
-  Laptops: [
-    {
-      question:
-        'What is the difference between a gaming laptop and a business laptop?',
-      answer: `
-  Gaming laptops are engineered for graphics-intensive workloads and prioritize high-end GPUs, advanced cooling systems, and often higher-refresh-rate displays (120 Hz and above) to deliver smooth frame rates in the latest titles. They tend to be heavier and thicker to accommodate powerful components and thermal solutions. Business laptops (sometimes called ultrabooks or professional laptops), on the other hand, focus on portability, battery endurance, and reliability.<br>
-   You’ll find slimmer profiles, longer-lasting batteries (8–12 hours of mixed use), spill-resistant keyboards, and enterprise-grade security features such as TPM chips, fingerprint scanners, and optional smart-card readers. While a gaming laptop trades mobility for performance, a business model trades peak frame rates and RGB lighting for lightweight build, quiet operation, and secure remote-management capabilities.`,
-    },
-    {
-      question: 'How does the CPU affect specific tasks?',
-      answer: `
-  The CPU—your system’s “brain”—executes all general computing instructions. For everyday tasks like web browsing, email, and document editing, a quad-core processor with moderate clock speeds (2.0–3.0 GHz base) is more than sufficient. When you dive into more demanding workloads—such as compiling large codebases, running multiple virtual machines, data analysis, or video transcoding—a higher core/thread count (6–8 cores or more) and higher turbo frequencies make a marked difference. More cores allow the CPU to juggle parallel tasks simultaneously, reducing build times in development environments or speeding up batch-export jobs in creative applications. Faster single-core performance improves responsiveness, so look for CPUs with a strong combination of core count and per-core speed for the best all-around experience.`,
-    },
-    {
-      question: 'Why is the GPU important for performance?',
-      answer: `
-  The GPU (graphics processing unit) is specialized for parallel compute and rendering tasks. In gaming, a dedicated GPU with its own high-speed VRAM delivers higher frame rates, better visual detail, and support for features like real-time ray tracing. Beyond gaming, GPUs accelerate workloads such as 3D modeling, CAD, video editing (effects and encoding), and even machine-learning inference. An integrated GPU (built into the CPU) shares system memory and is fine for basic video playback and office graphics, but it cannot match the throughput of a discrete GPU when it comes to processing large textures, complex shaders, or parallel data streams. If your workflow involves any form of hardware-accelerated rendering or compute, a dedicated GPU can slash render times and provide smoother previews in creative software.`,
-    },
-    {
-      question: 'What role does RAM play?',
-      answer: `
-  RAM (random-access memory) serves as the CPU and GPU’s short-term workspace, storing active data and instructions. When you open applications, load files, or browse the web, those assets are cached in RAM. If you run out of RAM, your system resorts to slower storage (SSD or HDD), causing noticeable lag and stuttering. For light productivity—email, spreadsheets, light web multitasking—8 GB may suffice. For heavier multitasking (20+ browser tabs, virtual machines, large Photoshop files) or professional apps (video editing, 3D rendering), 16–32 GB is recommended. Furthermore, on systems with integrated graphics, faster RAM speeds (e.g., 3200 MHz vs. 2666 MHz) can meaningfully improve graphical performance because the GPU draws from system memory.`,
-    },
-    {
-      question: 'What is the difference between HDD, SSD, and NVMe storage?',
-      answer: `
-      <ul>
-        <li>HDD (Hard Disk Drive) uses spinning magnetic platters and a read/write head—it's affordable with high capacities but much slower (100–150 MB/s) and more prone to mechanical failure.</li>
-        
-        <li>SSD (Solid State Drive) uses NAND flash chips with a SATA interface, delivering 5–10× the speed of an HDD (up to ~550 MB/s), no moving parts for greater durability, and lower power draw.</li>
-        
-        <li>NVMe (Non-Volatile Memory Express) is a protocol over PCIe lanes, allowing SSDs to reach 2–7× the speed of SATA-SSDs (1,500–3,500 MB/s+).</li>
-        </ul>
-        NVMe drives offer the highest throughput and lowest latency, ideal for heavy workloads like video editing or large file transfers.
-        `,
-    },
-    {
-      question: 'How do screen sizes impact usability?',
-      answer: `
-        Laptop screens typically range from 13″ to 17″ diagonally, each offering different trade-offs. 
-        <ul>
-        <li>13″–14″: Highly portable and lightweight (sub-1.3 kg), ideal for frequent travelers and students, but less screen real estate for side-by-side windows.  </li>
-        <li>15″: The most popular compromise, delivering a comfortable balance between productivity space and manageable weight (around 1.6–2.0 kg).  </li>
-        <li>16″–17″: Suited for gaming, content creation, or detailed work, offering expansive workspace and often higher resolutions, but add bulk and reduce battery life due to larger backlights.  </li>
-        </ul>
-        Also consider resolution (Full HD, QHD, 4K), panel type (IPS for color accuracy, OLED for contrast), and refresh rate (60 Hz vs. 120/144 Hz+) based on your priorities.`,
-    },
-    {
-      question: 'What warranty coverage applies?',
-      answer: `
-        Standard laptops include a one-year manufacturer warranty covering defects in materials and workmanship, effective from the delivery date. This warranty typically covers hardware failures not caused by user damage. Some models offer extended-warranty plans (two or three years), such extended warranties will always be stated in the top section of the product page. Warranty claims generally require a valid proof of purchase and the device’s serial number.`,
-    },
-    {
-      question: 'Are VAT charges included in the price?',
-      answer: `
-        All displayed laptop prices include Value-Added Tax (VAT) by default, unless explicitly noted otherwise on the product page. Any additional fees—such as shipping, or handling will be clearly itemized during checkout. If a product is VAT-exempt, that exception will be stated alongside the price.`,
-    },
-  ],
-  'Mobile Phones': [
-    {
-      question: 'What battery life can I expect from this smartphone?',
-      answer: `
-        Most modern smartphones feature batteries between 3 000 mAh and 5 000 mAh. Under mixed use (calls, browsing, streaming, light gaming), you can expect 10–18 hours of runtime. Heavy tasks—like GPS navigation or 3D gaming—will shorten that considerably. Battery life also depends on screen brightness, background apps, and network conditions.`,
-    },
-    {
-      question: 'How much storage do I need and is it expandable?',
-      answer: `
-        Storage tiers commonly start at 64 GB and go up to 512 GB or more. If you store lots of photos, videos, or games, aim for 128 GB+. Some phones support microSD cards (up to 1 TB) for extra space; others offer dual-SIM trays with a hybrid slot where one SIM can be swapped for a card.`,
-    },
-    {
-      question: 'What should I know about the camera system?',
-      answer: `
-        Smartphones often combine multiple lenses: wide, ultra-wide, and telephoto. Sensor size and pixel size affect low-light performance, while aperture (f-number) controls depth of field. Look for features like optical image stabilization (OIS), phase-detect autofocus (PDAF), and software modes (night, portrait). More megapixels don’t always mean better pictures—sensor quality and image processing matter most.`,
-    },
-    {
-      question: 'Which network bands and connectivity options are supported?',
-      answer: `
-        Most phones cover GSM, LTE bands (e.g., B3, B7, B20 in Lebanon) and increasingly 5G n78. They also include Wi-Fi 5/6, Bluetooth 5.x, NFC for contactless payments, and GPS/GLONASS/Galileo for mapping. Always check the “Specs” tab for exact band support to ensure compatibility with your carrier.`,
-    },
-    {
-      question: 'How are software updates and OS support handled?',
-      answer: `
-        iOS devices generally receive major OS updates for 5+ years, while Android models promise 2–3 years of OS updates plus 3–4 years of security patches. After that window, security risks increase. If longevity is critical, verify the update policy on the product page before buying.`,
-    },
-    {
-      question: 'Does this phone support fast charging or wireless charging?',
-      answer: `
-        Fast-charge rates vary—commonly 18 W to 65 W—reaching 50% battery in 20–30 minutes. Some phones also offer wireless charging (Qi standard) at 7.5 W–15 W, plus reverse wireless charging to top up accessories. Chargers may be sold separately—check the “In the box” section.`,
-    },
-    {
-      question: 'What SIM configurations are available (dual-SIM, eSIM)?',
-      answer: `
-        Many phones support dual-SIM via two nano-SIM slots or one nano-SIM + eSIM. eSIM lets you activate a carrier plan digitally without a physical card. Hybrid trays force a choice between a second SIM or memory card if you need expandable storage.`,
-    },
-    {
-      question: 'Is this phone water- and dust-resistant?',
-      answer: `
-        Look for an IP rating, like IP67 (dust-tight, 1 m water for 30 min) or IP68 (dust-tight, 1.5 m+ water). That rating ensures protection against accidental spills, rain, and brief submersion.`,
-    },
-    {
-      question:
-        'What is the difference between LCD, OLED, and AMOLED displays?',
-      answer: `
-          <ul>
-              <li>LCD (IPS) panels use a backlight behind liquid crystals; they offer accurate colors and wide viewing angles but can’t produce true blacks.  </li>
-              <li>OLED panels light each pixel independently, giving perfect blacks and high contrast, but can suffer burn-in over many years.  </li>
-              <li>AMOLED is a variation of OLED with faster refresh and lower power draw on dark content. All deliver vibrant colors—just trade off contrast, power efficiency, and longevity.</li>
-          </ul
-          `,
-    },
-    {
-      question: 'What warranty coverage applies?',
-      answer: `
-        Smartphones include a Limited Manufacturer warranty against defects in materials and workmanship. So unless stated otherwise, the warranty only covers manufacturing defects.`,
-    },
-    {
-      question: 'Are VAT charges included in the price?',
-      answer: `
-        All smartphone prices include VAT by default; any VAT-exclusive pricing will be clearly noted on the individual product page. Additional fees, like shipping, are itemized at checkout.`,
-    },
-  ],
-  'Monitors & Smart Display': [
-    {
-      question: 'What panel types are available and how do they differ?',
-      answer: `
-      <ul>
-        <li>IPS (In-Plane Switching): Offers the widest viewing angles and the most accurate color reproduction, making it ideal for photo/video editing and general productivity.  </li>
-        <li>VA (Vertical Alignment): Delivers higher contrast ratios and deeper blacks than IPS but with narrower viewing angles; great for media consumption.  </li>
-        <li>TN (Twisted Nematic): Typically the fastest in response time, often used in budget or esports-focused models, but with more limited color and viewing angles.</li>
-      </ul>`,
-    },
-    {
-      question: 'Which resolutions and aspect ratios should I consider?',
-      answer: `
-      <ul>
-<li>Common resolutions include Full HD (1920×1080), QHD (2560×1440), and 4K UHD (3840×2160).  </li>
-<li>Aspect ratios are usually 16:9 (standard widescreen) or 21:9 (ultrawide).  </li>
-<li>Higher resolutions give sharper text and more workspace, while ultrawide screens let you view multiple windows side by side without a multi-monitor setup.</li>
-</ul>`,
-    },
-    {
-      question: 'How do refresh rate and response time impact performance?',
-      answer: `
-      <ul>
-<li>Refresh rate (60 Hz–240 Hz+) determines how many times per second the display redraws—higher rates yield smoother motion in gaming and scrolling.  </li>
-<li>Response time (1–8 ms) is how quickly a pixel changes color; lower values reduce motion blur in fast-moving scenes.  </li>
-<li>If you don’t play fast-paced games, a 60–75 Hz, 4–5 ms monitor is usually sufficient.</li>
-</ul>`,
-    },
-    {
-      question: 'What is HDR and why might I need it?',
-      answer: `
-      <ul>
-<li>HDR (High Dynamic Range) enables a wider range between the darkest and brightest parts of an image for more lifelike contrast and color.  </li>
-<li>Look for a VESA DisplayHDR certification (e.g., 400, 600) to ensure true HDR performance.  </li>
-<li>HDR is most beneficial for HDR-enabled video content and gaming that supports it.</li>
-</ul>`,
-    },
-    {
-      question: 'Which connectivity ports are supported?',
-      answer: `
-      <ul>
-<li>Most monitors include a combination of HDMI and DisplayPort—HDMI is ubiquitous, while DisplayPort often supports higher refresh rates/resolutions.  </li>
-<li>You may also find USB-C (with DisplayPort Alt Mode and Power Delivery), USB-A downstream ports, and a 3.5 mm audio jack.  </li>
-<li>Check the “Specs” tab to confirm compatibility with your PC or laptop.</li>
-</ul>`,
-    },
-    {
-      question: 'Do these monitors include built-in speakers or USB hubs?',
-      answer: `
-Some models feature integrated stereo speakers—convenient but generally lower fidelity than external speakers.  
-Many professional and ultrawide monitors include a USB hub (USB-A or USB-C) to connect peripherals directly through the monitor for cleaner cable management.`,
-    },
-    {
-      question: 'What mounting and stand adjustability options are available?',
-      answer: `
-Look for VESA 75×75 or 100×100 compatibility if you plan to use a wall or arm mount.  
-Factory stands may offer tilt, swivel, pivot (portrait mode), and height adjustment—handy for ergonomic setups.`,
-    },
-    {
-      question: 'How do brightness and contrast ratio affect image quality?',
-      answer: `
-Brightness (measured in nits) affects visibility in bright rooms; 250–350 nits is standard, while 400+ is better for HDR.  
-Contrast ratio (e.g., 1000:1) is the brightness difference between white and black; higher ratios yield deeper blacks and more vivid images.`,
-    },
-    {
-      question: 'What is color gamut and why is calibration important?',
-      answer: `
-      <ul>
-<li>Color gamut (sRGB, Adobe RGB, DCI-P3) indicates the range of displayable colors.  </li>
-<li>Monitors covering 99%+ of sRGB are fine for general use; wider gamuts suit photo/video professionals.  </li>
-<li>Calibration (via software or hardware calibrator) ensures color accuracy, crucial for content creation.</li>
-</ul>`,
-    },
-    {
-      question: 'How much power do these monitors consume?',
-      answer: `
-      <ul>
-<li>Typical power draw ranges from 20 W (small/IPS models) to 50 W+ (large/4K/HDR monitors).  </li>
-<li>Energy-saving modes and automatic brightness adjustment can reduce usage.  </li>
-<li>Check the energy-star or EPEAT rating for efficiency details.</li>
-</ul>`,
-    },
-    {
-      question: 'What warranty coverage applies?',
-      answer: `
-All monitors include a one-year manufacturer warranty covering defects in materials and workmanship, unless an extended plan (two- or three-year) is explicitly offered on the product page.`,
-    },
-    {
-      question: 'Are VAT charges included in the price?',
-      answer: `
-All monitor prices include VAT (value-added tax) by default; any VAT-exclusive pricing will be clearly noted on the individual product page.`,
-    },
-  ],
-};
+const DAILY_TOKEN_LIMIT = 200;
+const MAX_INPUT_TOKENS = 100;
+const MAX_OUTPUT_TOKENS = 150;
 
-function richTextToHtml(richText) {
-  if (!richText || typeof richText === 'string') return richText || '';
-  if (typeof richText === 'object' && richText.type === 'root' && Array.isArray(richText.children)) {
-    return richText.children.map(child => {
-      if (child.type === 'paragraph') {
-        return `<p>${child.children.map(grand => grand.value || '').join('')}</p>`;
-      }
-      return '';
-    }).join('');
-  }
-  return '';
+function estimateTokens(text) {
+  if (!text) return 0;
+  return Math.ceil(text.trim().length / 4); // rough estimate
 }
 
-export default function ProductFAQ({productId, productType}) {
-  const [openIndex, setOpenIndex] = useState(null);
-  const [question, setQuestion] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+function storageKeys(productId) {
+  const base = productId || 'global';
+  return {
+    chat: `aiChat_${base}`,
+    tokens: 'aiChatTokens_global', // Global token limit across all products
+  };
+}
+
+const ProductFAQ = React.forwardRef(({productId, hideLauncher = false}, ref) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [contextLoaded, setContextLoaded] = useState(false);
+  const [contextError, setContextError] = useState('');
+  const [productContext, setProductContext] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [faqs, setFaqs] = useState([]);
-  const [userLoaded, setUserLoaded] = useState(false);
+  const [dailyTokensUsed, setDailyTokensUsed] = useState(0);
+  const messagesEndRef = React.useRef(null);
+  const messagesContainerRef = React.useRef(null);
 
-  // Fetch user info and auto-populate if logged in
-  useEffect(() => {
-    async function fetchUserInfo() {
-      try {
-        const res = await fetch('/api/user-status');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.loggedIn) {
-          if (data.fullName) setName(data.fullName);
-          if (data.email) setEmail(data.email);
-        }
-        setUserLoaded(true);
-      } catch {}
-    }
-    fetchUserInfo();
-  }, []);
+  const {chat: chatKey, tokens: tokenKey} = storageKeys(productId);
 
-  // Fetch user-submitted FAQs from metafield
-  useEffect(() => {
-    if (!productId) return;
-    async function fetchQuestions() {
-      try {
-        const res = await fetch(`/api/get-faq-questions?productId=${encodeURIComponent(productId)}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (Array.isArray(data.faqs)) {
-          const processedFaqs = data.faqs.map((faq) => ({
-            question: faq.question,
-            answer: faq.answer
-              ? richTextToHtml(
-                  typeof faq.answer === 'string' ? faq.answer : (typeof faq.answer === 'object' ? faq.answer : '')
-                )
-              : '<em>Awaiting answer from support</em>',
-            name: faq.name && faq.name !== 'Anonymous' && faq.name.trim() ? faq.name.trim() : '',
-            email: faq.email || null,
-          }));
-          console.log('[FAQ] Initial load -', processedFaqs.length, 'FAQs');
-          setFaqs(processedFaqs);
-        }
-      } catch (err) {
-        console.error('[FAQ] Error fetching FAQs:', err);
-      }
-    }
-    fetchQuestions();
-  }, [productId]);
-
-  const allFaqs = [
-    ...(faqByProductType[productType] || []),
-    ...faqs.map(faq => ({
-      question: faq.question,
-      answer: faq.answer
-        ? (typeof faq.answer === 'string' && faq.answer.includes('<') 
-            ? faq.answer 
-            : richTextToHtml(
-                typeof faq.answer === 'string' ? faq.answer : (typeof faq.answer === 'object' ? faq.answer : '')
-              ))
-        : '<em>Awaiting answer from support</em>',
-      name: faq.name && faq.name !== 'Anonymous' && faq.name.trim() ? faq.name.trim() : '',
-      email: faq.email || null,
-    })),
-  ];
-  if (!allFaqs.length && !productId) return null;
-
-  const handleClick = (idx) => setOpenIndex(openIndex === idx ? null : idx);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    // Use the name/email from form, or from logged-in user, or 'Anonymous'
-    const userName = (name && name.trim()) || 'Anonymous';
-    const userEmail = (email && email.trim()) || null;
-    
-    console.log('[FAQ] Submitting with:', { userName, userEmail, formName: name, formEmail: email });
-
+  const fetchContext = useCallback(async () => {
+    if (!productId || contextLoaded || productContext) return;
+    setContextError('');
     try {
-      // Capitalize the question
-      const capitalizedQuestion = question.trim().charAt(0).toUpperCase() + question.trim().slice(1);
+      const res = await fetch(`/api/product-context?productId=${encodeURIComponent(productId)}`);
+      if (!res.ok) {
+        setContextError('Unable to load product context.');
+        return;
+      }
+      const data = await res.json();
+      if (data?.description) {
+        setProductContext(data);
+        setContextLoaded(true);
+      } else {
+        setContextError('Product details unavailable.');
+      }
+    } catch (err) {
+      console.error('Context fetch failed', err);
+      setContextError('Unable to load product context.');
+    }
+  }, [productContext, contextLoaded, productId]);
+
+  const openChat = useCallback(() => {
+    setIsOpen(true);
+    fetchContext();
+  }, [fetchContext]);
+
+  // Expose openChat function to parent via ref
+  React.useImperativeHandle(ref, () => ({
+    openChat,
+  }), [openChat]);
+
+  // Load persisted chat (per product) and token usage (global)
+  useEffect(() => {
+    if (!productId) {
+      setMessages([]);
+      return;
+    }
+    
+    try {
+      // Load chat history for this specific product
+      const saved = localStorage.getItem(chatKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setMessages(parsed);
+        }
+      } else {
+        // Clear messages if no saved chat for this product
+        setMessages([]);
+      }
+      // Load global token usage (shared across all products)
+      const tokenData = localStorage.getItem(tokenKey);
+      if (tokenData) {
+        const parsed = JSON.parse(tokenData);
+        const today = new Date().toDateString();
+        if (parsed.date === today && typeof parsed.used === 'number') {
+          setDailyTokensUsed(parsed.used);
+        } else {
+          // Reset if it's a new day
+          setDailyTokensUsed(0);
+        }
+      } else {
+        setDailyTokensUsed(0);
+      }
+    } catch (err) {
+      console.error('Failed to read chat history', err);
+      setMessages([]);
+      setDailyTokensUsed(0);
+    }
+  }, [productId, chatKey, tokenKey]);
+
+  // Persist chat and token usage
+  useEffect(() => {
+    if (!productId || messages.length === 0) return;
+    
+    try {
+      localStorage.setItem(chatKey, JSON.stringify(messages));
+    } catch (err) {
+      console.error('Failed to persist chat history', err);
+    }
+  }, [messages, chatKey, productId]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesContainerRef.current && isOpen) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        const container = messagesContainerRef.current;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [messages, loading, isOpen]);
+
+  const persistTokenUsage = useCallback(
+    (nextUsage) => {
+      const today = new Date().toDateString();
+      setDailyTokensUsed(nextUsage);
+      try {
+        localStorage.setItem(tokenKey, JSON.stringify({date: today, used: nextUsage}));
+      } catch (err) {
+        console.error('Failed to persist token usage', err);
+      }
+    },
+    [tokenKey],
+  );
+
+  const closeChat = () => {
+    setIsOpen(false);
+    setError('');
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    if (!productId) {
+      setError('Missing product.');
+      return;
+    }
+    if (!productContext) {
+      setError('Loading product info, try again.');
+      fetchContext();
+      return;
+    }
+
+    const inputTokens = estimateTokens(input);
+    
+    // Check if message is too long
+    if (inputTokens > MAX_INPUT_TOKENS) {
+      // Send a special message to the API to have the LLM respond that the message is too long
+      const newMessages = [...messages, {role: 'user', content: input.trim()}];
+      setMessages(newMessages);
+      setInput('');
+      setLoading(true);
+      setError('');
+
+      try {
+      // Get current page URL for WhatsApp link
+      const productUrl = window.location.href;
       
-      // First, get AI answer
-      const aiRes = await fetch('/api/ai-answer-faq', {
+      const res = await fetch('/api/ai-answer-faq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          productId, 
-          question: capitalizedQuestion,
-          name: userName,
-          email: userEmail,
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          productId,
+          messages: newMessages,
+          context: productContext,
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          messageTooLong: true,
+          productUrl,
         }),
       });
 
-      const aiData = await aiRes.json();
-      
-      if (!aiRes.ok || !aiData.success) {
-        setError(aiData.error || 'Failed to get AI answer. Please try again.');
+        const data = await res.json();
+        if (!res.ok || !data?.answer) {
+          setError(data?.error || 'Could not get a response.');
+          return;
+        }
+
+        const assistantMessage = {
+          role: 'assistant',
+          content: data.answer,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      } catch (err) {
+        console.error('Chat send failed', err);
+        setError('Something went wrong. Try again.');
+      } finally {
         setLoading(false);
+      }
+      return;
+    }
+
+    const todayUsage = dailyTokensUsed + inputTokens;
+    if (todayUsage > DAILY_TOKEN_LIMIT) {
+      setError('Daily limit reached.');
+      return;
+    }
+
+    const newMessages = [...messages, {role: 'user', content: input.trim()}];
+    setMessages(newMessages);
+    setInput('');
+    persistTokenUsage(todayUsage);
+    setLoading(true);
+    setError('');
+
+    try {
+      // Get current page URL for WhatsApp link
+      const productUrl = window.location.href;
+      
+      const res = await fetch('/api/ai-answer-faq', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          productId,
+          messages: newMessages,
+          context: productContext,
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          productUrl,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data?.answer) {
+        setError(data?.error || 'Could not get a response.');
         return;
       }
 
-      // Save FAQ with AI answer
-      const saveRes = await fetch('/api/admin-create-faq', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          productId, 
-          question: capitalizedQuestion,
-          answer: aiData.answer,
-          name: userName,
-          email: userEmail,
-        }),
-      });
-
-      const saveData = await saveRes.json();
-      
-      if (saveRes.ok && saveData.success) {
-        // Process the AI answer for display
-        const processedAnswer = typeof aiData.answer === 'string' 
-          ? aiData.answer 
-          : (typeof aiData.answer === 'object' 
-              ? richTextToHtml(aiData.answer) 
-              : String(aiData.answer));
-        
-        // Immediately add the new FAQ to the list (optimistic update)
-        const newFaq = { 
-          question: capitalizedQuestion, 
-          answer: processedAnswer,
-          name: userName !== 'Anonymous' && userName.trim() ? userName.trim() : '',
-          email: userEmail || null,
-        };
-        
-        console.log('[FAQ] Adding new FAQ optimistically:', {
-          question: newFaq.question,
-          hasAnswer: !!newFaq.answer,
-          name: newFaq.name || 'Anonymous',
-          email: newFaq.email || 'none',
-        });
-        
-        // Immediately add the new FAQ to the list (optimistic update)
-        // Use a function to ensure we're working with the latest state
-        setFaqs((prev) => {
-          // Check if this FAQ already exists (avoid duplicates)
-          const exists = prev.some(f => f.question.toLowerCase() === capitalizedQuestion.toLowerCase());
-          if (exists) {
-            console.log('[FAQ] FAQ already exists, updating instead');
-            // Update existing FAQ
-            return prev.map(f => 
-              f.question.toLowerCase() === capitalizedQuestion.toLowerCase() 
-                ? newFaq 
-                : f
-            );
-          }
-          console.log('[FAQ] Adding new FAQ to list, total FAQs:', prev.length + 1);
-          // Add new FAQ to the END of the list
-          return [...prev, newFaq];
-        });
-        
-        // Clear the form immediately for better UX
-        setQuestion('');
-        setSubmitted(true);
-        
-        // Refresh from server after a delay to sync with saved data
-        // Use a longer delay to ensure server has processed the FAQ
-        setTimeout(async () => {
-          try {
-            const refreshRes = await fetch(`/api/get-faq-questions?productId=${encodeURIComponent(productId)}`);
-            if (refreshRes.ok) {
-              const refreshData = await refreshRes.json();
-              if (Array.isArray(refreshData.faqs)) {
-                // Process server FAQs
-                const processedFaqs = refreshData.faqs.map((serverFaq) => ({
-                  question: serverFaq.question,
-                  answer: serverFaq.answer
-                    ? richTextToHtml(
-                        typeof serverFaq.answer === 'string' ? serverFaq.answer : (typeof serverFaq.answer === 'object' ? serverFaq.answer : '')
-                      )
-                    : '<em>Awaiting answer from support</em>',
-                  name: serverFaq.name && serverFaq.name !== 'Anonymous' && serverFaq.name.trim() ? serverFaq.name.trim() : '',
-                  email: serverFaq.email || null,
-                }));
-                
-                console.log('[FAQ] Refreshing FAQs from server:', processedFaqs.length, 'FAQs');
-                console.log('[FAQ] Server FAQs with names:', processedFaqs.map(f => ({ q: f.question.substring(0, 20), name: f.name || 'no name' })));
-                
-                // Merge: Keep optimistic update if server doesn't have it yet, otherwise use server data
-                setFaqs((currentFaqs) => {
-                  const serverMap = new Map(processedFaqs.map(f => [f.question.toLowerCase(), f]));
-                  const currentMap = new Map(currentFaqs.map(f => [f.question.toLowerCase(), f]));
-                  
-                  // Add all server FAQs
-                  processedFaqs.forEach(serverFaq => {
-                    currentMap.set(serverFaq.question.toLowerCase(), serverFaq);
-                  });
-                  
-                  // Keep any current FAQs that aren't in server yet (optimistic updates)
-                  currentFaqs.forEach(currentFaq => {
-                    if (!serverMap.has(currentFaq.question.toLowerCase())) {
-                      currentMap.set(currentFaq.question.toLowerCase(), currentFaq);
-                    }
-                  });
-                  
-                  return Array.from(currentMap.values());
-                });
-              }
-            }
-          } catch (err) {
-            console.error('Failed to refresh FAQs:', err);
-          }
-        }, 3000);
-      } else {
-        // Handle duplicate question error
-        if (saveRes.status === 409 || saveData.duplicate) {
-          setError('A similar question already exists. Please check the FAQ section above or ask a different question.');
-          // Scroll to FAQs
-          setTimeout(() => {
-            const faqSection = document.querySelector('.faq-list');
-            if (faqSection) {
-              faqSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 100);
-        } else if (saveRes.status === 429) {
-          setError('Too many requests. Please try again after 1 hour.');
-        } else {
-          setError(saveData.error || 'Failed to save FAQ. Please try again.');
-        }
-      }
+      const assistantMessage = {
+        role: 'assistant',
+        content: data.answer,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
-      setError('Failed to submit. Please try again.');
-      console.error('FAQ submit error:', err);
+      console.error('Chat send failed', err);
+      setError('Something went wrong. Try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(e);
+    }
+  };
+
+  if (!productId) return null;
+
   return (
-    <section className="product-faq">
-      <h2>Ask AI</h2>
-      <div className="faq-list">
-        {allFaqs.length > 0 ? (
-          allFaqs.map((item, idx) => (
-            <div
-              key={idx}
-              className={`faq-item ${openIndex === idx ? 'open' : ''}`}
-            >
-              <h3 className="faq-question" onClick={() => handleClick(idx)}>
-                {item.question}
-              </h3>
-              {item.name && (
-                <p style={{fontSize: '0.85rem', color: '#666', margin: '0.25rem 0', fontStyle: 'italic'}}>
-                  Asked by {item.name}
-                </p>
-              )}
-              <div className="faq-answer-wrapper">
-                <div
-                  className="faq-answer"
-                  dangerouslySetInnerHTML={{__html: item.answer}}
-                />
-              </div>
+    <>
+      {!hideLauncher && (
+        <div className="ai-summary product-chat-launcher">
+          <div className="ai-summary__header">
+            <div className="ai-summary__badge">
+              <span className="ai-summary__title">Ask AI</span>
+              <span className="ai-summary__dot" aria-hidden="true" />
             </div>
-          ))
-        ) : (
-          <p>No answered questions yet. Be the first to ask!</p>
-        )}
-      </div>
-      {productId && (
-        <div className="faq-ask">
-          <h3>Ask AI a Question</h3>
-          {submitted ? (
-            <p className="faq-thanks">Thanks! Your question has been answered by AI.</p>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="question"
-                className="faq-input"
-                placeholder="Type your question here (Arabic or English)"
-                required
-                value={question}
-                onChange={e => setQuestion(e.target.value)}
-                disabled={loading}
-              />
-              <div style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem'}}>
-                <input
-                  type="text"
-                  name="name"
-                  className="faq-input"
-                  style={{flex: 1}}
-                  placeholder="Your name (optional)"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  disabled={loading}
-                />
-                <input
-                  type="email"
-                  name="email"
-                  className="faq-input"
-                  style={{flex: 1}}
-                  placeholder="Your email (optional)"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <button type="submit" className="faq-submit" disabled={loading}>
-                {loading ? (
-                  <span style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-                    <span className="ai-thinking-dots">
-                      <span></span><span></span><span></span>
-                    </span>
-                    AI is thinking...
-                  </span>
-                ) : 'Ask Question'}
-              </button>
-              {loading && (
-                <div style={{
-                  marginTop: '1rem',
-                  padding: '1rem',
-                  background: '#f0f9ff',
-                  borderRadius: '8px',
-                  border: '1px solid #bae6fd',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem'
-                }}>
-                  <div className="ai-thinking-spinner"></div>
-                  <div>
-                    <p style={{margin: 0, fontWeight: 500, color: '#0369a1'}}>AI is analyzing your question...</p>
-                    <p style={{margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#0284c7'}}>Searching product description for the answer</p>
-                  </div>
-                </div>
-              )}
-              {error && <p className="faq-error" style={{color: 'red'}}>{error}</p>}
-            </form>
-          )}
+            <button type="button" className="ai-summary__action" onClick={openChat}>
+              Ask about this product
+            </button>
+          </div>
         </div>
       )}
-    </section>
+
+      {isOpen && (
+        <div className="ai-modal-overlay product-chat-overlay" onClick={closeChat}>
+          <div className="ai-modal product-chat-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="ai-modal__header product-chat-modal__header">
+              <div className="ai-modal__left">
+                <span className="ai-modal__chip">Ask AI</span>
+                <span className="ai-modal__status">
+                  {contextError
+                    ? 'No context'
+                    : !contextLoaded
+                    ? 'Loading'
+                    : loading
+                    ? 'Thinking'
+                    : 'Ready'}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="ai-modal__close"
+                onClick={closeChat}
+                aria-label="Close Ask AI"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="product-chat-body">
+              <div className="product-chat-messages" ref={messagesContainerRef} aria-live="polite">
+                {messages.length === 0 && (
+                  <div className="product-chat-empty">
+                    <p>Ask Any question about this product.</p>
+                    {contextError && <p className="product-chat-error">{contextError}</p>}
+                  </div>
+                )}
+                {messages.map((msg, idx) => {
+                  // Parse markdown-style links [text](url) and convert to clickable links
+                  const parseLinks = (text) => {
+                    const parts = [];
+                    let lastIndex = 0;
+                    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+                    let match;
+                    
+                    while ((match = linkRegex.exec(text)) !== null) {
+                      // Add text before the link
+                      if (match.index > lastIndex) {
+                        parts.push(text.slice(lastIndex, match.index));
+                      }
+                      // Add the link
+                      parts.push(
+                        <a
+                          key={match.index}
+                          href={match[2]}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: 'rgba(0, 214, 255, 0.9)',
+                            textDecoration: 'underline',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {match[1]}
+                        </a>
+                      );
+                      lastIndex = match.index + match[0].length;
+                    }
+                    // Add remaining text
+                    if (lastIndex < text.length) {
+                      parts.push(text.slice(lastIndex));
+                    }
+                    return parts.length > 0 ? parts : [text];
+                  };
+                  
+                  return (
+                    <div key={idx} className={`product-chat-bubble ${msg.role}`}>
+                      <span className="product-chat-role">{msg.role === 'assistant' ? 'AI' : 'You'}</span>
+                      <p>{parseLinks(msg.content)}</p>
+                    </div>
+                  );
+                })}
+                {loading && (
+                  <div className="product-chat-bubble assistant">
+                    <span className="product-chat-role">AI</span>
+                    <p>Thinking...</p>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <form className="product-chat-input" onSubmit={handleSend}>
+                <div className="product-chat-input-row">
+                  <textarea
+                    rows={3}
+                    placeholder="Type your question here..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={loading || !!contextError}
+                    maxLength={1200}
+                  />
+                  <button type="submit" disabled={loading || !input.trim() || !!contextError}>
+                    {loading ? 'Sending…' : 'Send'}
+                  </button>
+                </div>
+                {error && <p className="product-chat-error">{error}</p>}
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
-}
+});
+
+ProductFAQ.displayName = 'ProductFAQ';
+
+export default ProductFAQ;

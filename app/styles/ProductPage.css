@@ -302,6 +302,117 @@ h4 {
     background-color: #fff;
 }
 
+.ask-ai-section {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg,
+        rgba(14, 18, 28, 0.95),
+        rgba(20, 25, 40, 0.90));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.ask-ai-section::before,
+.ask-ai-section::after {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    pointer-events: none;
+    filter: blur(40px);
+    opacity: 0.4;
+    z-index: 0;
+}
+
+.ask-ai-section::before {
+    background:
+        radial-gradient(circle at 20% 30%, rgba(0, 214, 255, 0.25), transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(124, 92, 255, 0.20), transparent 60%);
+    animation: aiAuroraDriftA 12s ease-in-out infinite;
+}
+
+.ask-ai-section::after {
+    background:
+        radial-gradient(circle at 30% 70%, rgba(124, 92, 255, 0.15), transparent 65%),
+        radial-gradient(circle at 70% 80%, rgba(0, 214, 255, 0.18), transparent 65%);
+    animation: aiAuroraDriftB 15s ease-in-out infinite;
+}
+
+.ask-ai-section > * {
+    position: relative;
+    z-index: 1;
+}
+
+.ask-ai-button {
+    position: relative;
+    background: linear-gradient(135deg,
+        rgba(0, 214, 255, 0.20),
+        rgba(124, 92, 255, 0.18)) !important;
+    border: 1px solid rgba(0, 214, 255, 0.30) !important;
+    border-radius: 8px !important;
+    color: #000 !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 214, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding-right: 32px !important;
+}
+
+.ask-ai-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+        rgba(0, 214, 255, 0.15),
+        rgba(124, 92, 255, 0.12));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+    border-radius: 8px;
+}
+
+.ask-ai-button::after {
+    content: '✨';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    filter: drop-shadow(0 0 4px rgba(0, 214, 255, 0.6));
+    z-index: 1;
+    pointer-events: none;
+}
+
+.ask-ai-button > * {
+    position: relative;
+    z-index: 1;
+}
+
+.ask-ai-button:hover {
+    background: linear-gradient(135deg,
+        rgba(0, 214, 255, 0.30),
+        rgba(124, 92, 255, 0.25)) !important;
+    border-color: rgba(0, 214, 255, 0.50) !important;
+    box-shadow: 0 4px 16px rgba(0, 214, 255, 0.25),
+        0 0 20px rgba(124, 92, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+.ask-ai-button:hover::before {
+    opacity: 1;
+}
+
+.ask-ai-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 214, 255, 0.2);
+}
+
 .ProductPageBottom {
     width: 100%;
 }

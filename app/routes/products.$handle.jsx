@@ -647,6 +647,7 @@ export default function Product() {
   const [quantity, setQuantity] = useState(1);
   const [subtotal, setSubtotal] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
+  const productFAQRef = React.useRef(null);
 
   // ------------------------------
   // AI SUMMARY (modal version)
@@ -1087,10 +1088,16 @@ export default function Product() {
               Description
             </button>
             <button
-              className={`tab-button ${activeTab === 'faq' ? 'active' : ''}`}
-              onClick={() => setActiveTab('faq')}
+              className="tab-button ask-ai-button"
+              onClick={() => {
+                if (productFAQRef.current?.openChat) {
+                  productFAQRef.current.openChat();
+                } else {
+                  console.warn('ProductFAQ ref not available');
+                }
+              }}
             >
-              Q & A
+              Ask AI
             </button>
             <button
               className={`tab-button ${
@@ -1130,11 +1137,8 @@ export default function Product() {
           )}
 
           {activeTab === 'faq' && (
-            <div className="product-section">
-              <ProductFAQ
-                productId={product.id}
-                productType={product.productType}
-              />
+            <div className="product-section ask-ai-section">
+              {/* Section content can go here if needed */}
             </div>
           )}
 
@@ -1319,6 +1323,14 @@ export default function Product() {
               },
             ],
           }}
+        />
+        
+        {/* Always render ProductFAQ (hidden) so ref works */}
+        <ProductFAQ
+          ref={productFAQRef}
+          productId={product.id}
+          productType={product.productType}
+          hideLauncher={true}
         />
       </div>
 

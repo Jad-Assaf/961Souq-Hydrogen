@@ -1,5 +1,7 @@
-// app/routes/api.ai-answer-faq.jsx
+// AI product chat endpoint
 import {json} from '@shopify/remix-oxygen';
+
+const DEFAULT_MAX_OUTPUT = 150;
 
 function extractOutputText(openaiJson) {
   if (typeof openaiJson?.output_text === 'string' && openaiJson.output_text) {
@@ -31,263 +33,258 @@ function extractOutputText(openaiJson) {
   return text.trim();
 }
 
-// Hardcoded warranty and shipping policy content (matches product page tabs)
-const WARRANTY_POLICY = `Operational Warranty Terms and Conditions
-
-Warranty Coverage:
-This warranty applies to All Products, purchased from 961 Souq. The warranty covers defects in materials and workmanship under normal use for the period specified at the time of purchase.
-
-What is Covered:
-During the warranty period, 961 Souq will repair or replace, at no charge, any parts that are found to be defective due to faulty materials or poor workmanship. This warranty is valid only for the original purchaser and is non-transferable.
-
-What is Not Covered:
-This warranty does not cover:
-- Any Physical Damage, damage due to misuse, abuse, accidents, modifications, or unauthorized repairs.
-- Wear and tear from regular usage, including cosmetic damage like scratches or dents.
-- Damage caused by power surges, lightning strikes, or electrical malfunctions.
-- Products with altered or removed serial numbers.
-- Software-related issues
-
-Warranty Claim Process:
-To make a claim under this warranty:
-1. Contact admin@961souq.com with proof of purchase and a detailed description of the issue.
-2. 961 Souq will assess the product and, if deemed defective, repair or replace the item at no cost.
-
-Limitations and Exclusions:
-This warranty is limited to repair or replacement. 961 Souq will not be liable for any indirect, consequential, or incidental damages, including loss of data or loss of profits.`;
-
-const SHIPPING_POLICY = `Shipping Policy:
-We offer shipping across all Lebanon, facilitated by our dedicated delivery team servicing the Beirut district and through our partnership with Wakilni for orders beyond Beirut.
-
-Upon placing an order, we provide estimated shipping and delivery dates tailored to your item's availability and selected product options. For precise shipping details, kindly reach out to us through the contact information listed in our Contact Us section.
-
-Please be aware that shipping rates may vary depending on the destination.
-
-Exchange Policy:
-We operate a 3-day exchange policy, granting you 3 days from receipt of your item to initiate an exchange.
-
-To qualify for an exchange, your item must remain in its original condition, unworn or unused, with tags intact, and in its original sealed packaging. Additionally, you will need to provide a receipt or proof of purchase.
-
-To initiate an exchange, please contact us at admin@961souq.com. Upon approval of your exchange request, we will furnish you with an exchange shipping label along with comprehensive instructions for package return. Please note that exchanges initiated without prior authorization will not be accepted.
-
-Should you encounter any damages or issues upon receiving your order, please inspect the item immediately and notify us promptly. We will swiftly address any defects, damages, or incorrect shipments to ensure your satisfaction.
-
-Exceptions / Non-exchangeable Items:
-Certain items are exempt from our exchange policy, including mobile phones, perishable goods (such as headsets, earphones, and network card or wifi routers), custom-made products (such as special orders or personalized items), and pre-ordered goods. For queries regarding specific items, please reach out to us.
-
-Unfortunately, we are unable to accommodate exchanges for sale items or gift cards.`;
+async function fetchProductContext(productId, context) {
+  if (context?.description) return context;
+  return null;
+}
 
 export async function action({request, context}) {
   if (request.method !== 'POST') {
     return json({error: 'Method not allowed'}, {status: 405});
   }
 
-  try {
-    const body = await request.json().catch(() => ({}));
-    const {productId, question, name, email} = body;
+  const openaiKey = context.env.OPENAI_API_KEY;
+  if (!openaiKey) {
+    return json({error: 'Missing OPENAI_API_KEY'}, {status: 500});
+  }
 
-    if (!productId || !question) {
-      return json(
-        {error: 'Missing productId or question'},
-        {status: 400},
-      );
-    }
+  const body = await request.json().catch(() => ({}));
+  const {productId, messages = [], context: ctxPayload, maxOutputTokens, messageTooLong, productUrl} = body;
 
-    const openaiKey = context.env.OPENAI_API_KEY;
-    if (!openaiKey) {
-      return json(
-        {error: 'Missing OPENAI_API_KEY', stage: 'env'},
-        {status: 500},
-      );
-    }
+  if (!productId) {
+    return json({error: 'Missing productId'}, {status: 400});
+  }
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return json({error: 'No messages provided'}, {status: 400});
+  }
 
-    // Fetch product data from Storefront API including price
-    const PRODUCT_QUERY = `#graphql
-      query ProductForFAQ($id: ID!) {
-        product(id: $id) {
-          id
-          title
-          vendor
-          description
-          descriptionHtml
-          productType
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-            maxVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-        }
-      }
-    `;
+  const productContext = await fetchProductContext(productId, ctxPayload);
+  if (!productContext) {
+    return json({error: 'Missing product context'}, {status: 400});
+  }
 
-    const {product} = await context.storefront.query(PRODUCT_QUERY, {
-      variables: {id: productId},
-    });
+  const userLang = /[\u0600-\u06FF]/.test(messages[messages.length - 1]?.content || '')
+    ? 'Arabic'
+    : 'English';
 
-    if (!product) {
-      return json(
-        {error: 'Product not found'},
-        {status: 404},
-      );
-    }
+  // If message is too long, respond accordingly
+  if (messageTooLong) {
+    const systemPrompt = [
+      'You are an AI product assistant.',
+      `The user just sent a message that exceeds the 100 token limit.`,
+      `Politely inform them that their message is too long and ask them to shorten it.`,
+      `Respond in ${userLang}.`,
+      'Be brief and friendly.',
+    ].join(' ');
 
-    const title = product?.title || '';
-    const vendor = product?.vendor || '';
-    const description = (product?.description || '').trim();
-    const descriptionHtml = (product?.descriptionHtml || '').trim();
-    
-    // Extract price information
-    const minPrice = product?.priceRange?.minVariantPrice?.amount || null;
-    const maxPrice = product?.priceRange?.maxVariantPrice?.amount || null;
-    const currencyCode = product?.priceRange?.minVariantPrice?.currencyCode || 'USD';
-    const priceInfo = minPrice && maxPrice
-      ? (minPrice === maxPrice 
-          ? `${minPrice} ${currencyCode}` 
-          : `${minPrice} - ${maxPrice} ${currencyCode}`)
-      : null;
-    
-    // Use hardcoded warranty and shipping policies (matching product page tabs)
-    const warrantyInfo = WARRANTY_POLICY;
-    const shippingInfo = SHIPPING_POLICY;
-
-    if (!description && !descriptionHtml) {
-      return json(
-        {error: 'Product has no description to answer from'},
-        {status: 400},
-      );
-    }
-
-    // Use HTML description if available, otherwise plain text
-    // Strip HTML tags for cleaner input, but keep the content
-    const productDescription = descriptionHtml
-      ? descriptionHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-      : description;
-
-    // Trim input to avoid token limits
-    const trimmedDescription =
-      productDescription.length > 8000
-        ? productDescription.slice(0, 8000)
-        : productDescription;
-    
-    // Build additional context for price, warranty, and shipping
-    let additionalContext = '';
-    if (priceInfo) {
-      additionalContext += `\n\nPrice: ${priceInfo}`;
-    }
-    if (warrantyInfo) {
-      additionalContext += `\n\nWarranty Information: ${warrantyInfo}`;
-    }
-    if (shippingInfo) {
-      additionalContext += `\n\nShipping Information: ${shippingInfo}`;
-    }
-
-    // Detect question language
-    const isArabic = /[\u0600-\u06FF]/.test(question);
-    const questionLanguage = isArabic ? 'Arabic' : 'English';
-
-    // Call GPT-5-nano to answer the question
-    const whatsappLink = 'https://wa.me/96171888036';
-    
-    // Detect if question is about price, warranty, or shipping
-    const questionLower = question.toLowerCase();
-    const isPriceQuestion = /price|cost|how much|كم|السعر|الثمن/.test(questionLower);
-    const isWarrantyQuestion = /warranty|guarantee|ضمان/.test(questionLower);
-    const isShippingQuestion = /shipping|delivery|shipped|الشحن|التوصيل/.test(questionLower);
-    
-    // Build context-aware instructions
-    let contextInstructions = `Answer the user's question about this product using information from:
-- Product description (always available)
-`;
-    
-    if (isPriceQuestion && priceInfo) {
-      contextInstructions += `- Product price: ${priceInfo} (use this for price questions)\n`;
-    }
-    if (isWarrantyQuestion && warrantyInfo) {
-      contextInstructions += `- Warranty information (use this for warranty questions)\n`;
-    }
-    if (isShippingQuestion && shippingInfo) {
-      contextInstructions += `- Shipping information (use this for shipping questions)\n`;
-    }
-    
-    contextInstructions += `\nAnswer in ${questionLanguage} (same language as the question). Be concise (2-4 sentences). If the specific information is not available in the provided sources, direct them to WhatsApp: ${whatsappLink} instead of offering generic help.`;
-    
-    const payload = {
+    const chatPayload = {
       model: 'gpt-5-nano',
       reasoning: {effort: 'minimal'},
-      instructions: contextInstructions,
-      input: `Product: ${title} | Brand: ${vendor} | Type: ${product.productType || 'N/A'}
-
-Description: ${trimmedDescription}${additionalContext}
-
-Question (${questionLanguage}): ${question}
-
-Answer in ${questionLanguage} based on the available information. If the specific information is missing, provide WhatsApp link: ${whatsappLink}`,
-      max_output_tokens: 800,
+      instructions: systemPrompt,
+      input: 'User: [Message too long]\n\nAssistant:',
+      max_output_tokens: 50,
     };
 
-    const openaiRes = await fetch('https://api.openai.com/v1/responses', {
+    try {
+      const aiRes = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${openaiKey}`,
+        },
+        body: JSON.stringify(chatPayload),
+      });
+
+      const aiData = await aiRes.json().catch(() => null);
+      
+      if (!aiRes.ok) {
+        const msg = aiData?.error?.message || `OpenAI API error (${aiRes.status})`;
+        return json({error: msg}, {status: 502});
+      }
+
+      let answer = extractOutputText(aiData);
+      if (!answer) {
+        // Fallback message
+        answer = userLang === 'Arabic' 
+          ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى أقل من 100 رمز.'
+          : 'Your message is too long. Please shorten it to under 100 tokens.';
+      }
+
+      // Add WhatsApp link
+      const whatsappNumber = '+96171888036';
+      const productPageUrl = productUrl || 'https://961souq.com';
+      const whatsappMessage = encodeURIComponent(`Hi, I have a question about: ${productContext?.title || 'this product'}\n${productPageUrl}`);
+      const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`;
+      
+      const contactInfo = userLang === 'Arabic' 
+        ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
+        : `\n\nContact support: [WhatsApp](${whatsappLink})`;
+      
+      return json({success: true, answer: answer + contactInfo});
+    } catch (err) {
+      const fallbackMsg = userLang === 'Arabic' 
+        ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى أقل من 100 رمز.'
+        : 'Your message is too long. Please shorten it to under 100 tokens.';
+      
+      // Add WhatsApp link
+      const whatsappNumber = '+96171888036';
+      const productPageUrl = productUrl || 'https://961souq.com';
+      const whatsappMessage = encodeURIComponent(`Hi, I have a question about: ${productContext?.title || 'this product'}\n${productPageUrl}`);
+      const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`;
+      
+      const contactInfo = userLang === 'Arabic' 
+        ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
+        : `\n\nContact support: [WhatsApp](${whatsappLink})`;
+      
+      return json({success: true, answer: fallbackMsg + contactInfo});
+    }
+  }
+
+  const systemPrompt = [
+    'You are an AI product assistant for 961 Souq.',
+    'CRITICAL RULES:',
+    '1. ONLY answer questions about: this specific product, shipping, warranty, or contact information. NOTHING ELSE.',
+    '2. If asked about anything else (other products, general questions, unrelated topics), politely decline and redirect to product/shipping/warranty/contact topics only.',
+    '3. NEVER give definitive answers. Always state that the user should verify with customer support for accurate information.',
+    '4. Keep responses SHORT (2-3 sentences maximum). Use complete sentences only. Never write unfinished sentences.',
+    '5. Always end with: "For accurate information, please contact our customer support team."',
+    `6. Respond in ${userLang}.`,
+    '7. Be helpful but cautious - you are providing general guidance, not definitive answers.',
+  ].join(' ');
+
+  // Trim description to avoid token limits (keep first 2000 chars)
+  const description = productContext.description || '';
+  const trimmedDescription = description.length > 2000 
+    ? description.slice(0, 2000) + '...' 
+    : description;
+
+  const contextSummary = [
+    `Title: ${productContext.title || ''}`,
+    productContext.vendor ? `Vendor: ${productContext.vendor}` : '',
+    productContext.type ? `Type: ${productContext.type}` : '',
+    productContext.price ? `Price: ${productContext.price}` : '',
+    productContext.warranty ? `Warranty: ${productContext.warranty}` : '',
+    productContext.shipping ? `Shipping: ${productContext.shipping}` : '',
+    `Description: ${trimmedDescription}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  // Convert chat messages to conversation format for /v1/responses endpoint
+  const conversationHistory = messages
+    .map((m) => {
+      const role = m.role === 'assistant' ? 'Assistant' : 'User';
+      return `${role}: ${m.content}`;
+    })
+    .join('\n\n');
+
+  const fullInput = `Product context:\n${contextSummary}\n\nConversation:\n${conversationHistory}\n\nAssistant:`;
+
+  const chatPayload = {
+    model: 'gpt-5-nano',
+    reasoning: {effort: 'minimal'},
+    instructions: systemPrompt,
+    input: fullInput,
+    max_output_tokens:
+      typeof maxOutputTokens === 'number' ? maxOutputTokens : DEFAULT_MAX_OUTPUT,
+  };
+
+  try {
+    const aiRes = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
-        'content-type': 'application/json',
+        'Content-Type': 'application/json',
         authorization: `Bearer ${openaiKey}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(chatPayload),
     });
 
-    const openaiJson = await openaiRes.json().catch(() => null);
-
-    if (!openaiRes.ok) {
+    const aiData = await aiRes.json().catch(() => null);
+    
+    if (!aiRes.ok) {
       const msg =
-        openaiJson?.error?.message || `OpenAI API error (${openaiRes.status})`;
+        aiData?.error?.message || `OpenAI API error (${aiRes.status})`;
+      console.error('[AI FAQ] OpenAI error', {
+        status: aiRes.status,
+        message: aiData?.error?.message,
+        type: aiData?.error?.type,
+        code: aiData?.error?.code,
+        raw: aiData,
+      });
       return json(
         {
           error: msg,
           stage: 'openai',
-          openaiStatus: openaiRes.status,
-          openaiCode: openaiJson?.error?.code || null,
+          openaiStatus: aiRes.status,
+          openaiCode: aiData?.error?.code || null,
         },
         {status: 502},
       );
     }
 
-    if (openaiJson?.status === 'incomplete') {
-      return json(
-        {
-          error: 'OpenAI returned status=incomplete (token budget issue).',
-          stage: 'openai_incomplete',
-          incomplete_details: openaiJson?.incomplete_details || null,
-          usage: openaiJson?.usage || null,
-        },
-        {status: 502},
-      );
+    // Extract answer from /v1/responses format (even if incomplete)
+    let answer = extractOutputText(aiData);
+    
+    // Check for incomplete status (token budget issue)
+    // But still try to return partial answer if available
+    if (aiData?.status === 'incomplete') {
+      if (answer) {
+        // We have a partial answer, return it (it might be truncated)
+        console.warn('[AI FAQ] OpenAI incomplete but returning partial answer', {
+          incomplete_details: aiData?.incomplete_details,
+          usage: aiData?.usage,
+          answerLength: answer.length,
+        });
+        return json({success: true, answer, truncated: true});
+      } else {
+        // No answer extracted, return error
+        console.error('[AI FAQ] OpenAI incomplete with no extractable answer', {
+          incomplete_details: aiData?.incomplete_details,
+          usage: aiData?.usage,
+          raw: aiData,
+        });
+        return json(
+          {
+            error: 'OpenAI returned status=incomplete (token budget issue).',
+            stage: 'openai_incomplete',
+            incomplete_details: aiData?.incomplete_details || null,
+            usage: aiData?.usage || null,
+          },
+          {status: 502},
+        );
+      }
     }
-
-    let answer = extractOutputText(openaiJson).replace(/\s+/g, ' ').trim();
-
+    
     if (!answer) {
-      return json(
-        {error: 'Empty answer from model', stage: 'openai_parse'},
-        {status: 502},
-      );
+      console.error('[AI FAQ] Empty answer from OpenAI', {
+        httpStatus: aiRes.status,
+        raw: aiData,
+        responseStatus: aiData?.status,
+        usage: aiData?.usage,
+        output: aiData?.output,
+      });
+      return json({error: 'Empty response from AI'}, {status: 502});
     }
 
-    return json({
-      success: true,
-      answer,
-      question,
-      name: name || 'Anonymous',
-      email: email || null,
+    // Generate WhatsApp link with product URL
+    const whatsappNumber = '+96171888036';
+    const productPageUrl = productUrl || (productContext?.handle ? `https://961souq.com/products/${productContext.handle}` : 'https://961souq.com');
+    const whatsappMessage = encodeURIComponent(`Hi, I have a question about: ${productContext?.title || 'this product'}\n${productPageUrl}`);
+    const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`;
+    
+    // Add contact info and WhatsApp link to the answer
+    const contactInfo = userLang === 'Arabic' 
+      ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
+      : `\n\nContact support: [WhatsApp](${whatsappLink})`;
+    
+    const finalAnswer = answer + contactInfo;
+
+    return json({success: true, answer: finalAnswer});
+  } catch (err) {
+    console.error('[AI FAQ] Exception while calling OpenAI', {
+      error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
     });
-  } catch (error) {
-    return json(
-      {error: 'Internal server error', details: error.message},
-      {status: 500},
-    );
+    return json({error: 'Failed to contact AI'}, {status: 500});
   }
 }
-
