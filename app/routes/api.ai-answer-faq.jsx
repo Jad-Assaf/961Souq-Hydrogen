@@ -4,11 +4,11 @@ import {json} from '@shopify/remix-oxygen';
 const DEFAULT_MAX_OUTPUT = 80; // Reduced from 150 to save tokens
 
 // Server-side token tracking using IP + User-Agent fingerprint
-// Uses Cloudflare KV for persistent storage, falls back to in-memory Map if KV not available
+// Uses Cloudflare Cache API for persistent storage (available in all Workers)
 const tokenTrackingMap = new Map(); // Fallback for local dev
 const DAILY_TOKEN_LIMIT = 200; // Server-side limit
 const TOKEN_RESET_HOURS = 24;
-const KV_NAMESPACE_NAME = 'AI_TOKEN_TRACKING'; // KV namespace name (configure in wrangler.toml)
+const CACHE_NAME = 'ai-token-tracking'; // Cache name for token storage
 
 function getClientFingerprint(request) {
   // Get IP address (check multiple headers for accuracy)
@@ -43,40 +43,73 @@ function getClientFingerprint(request) {
   return fingerprint;
 }
 
-async function getTokenUsageFromKV(kv, fingerprint) {
-  if (!kv) return null;
+function getCacheKey(fingerprint) {
+  // Cache API requires fully-qualified URLs as keys
+  // Use a custom scheme or convert to a valid URL
+  return `https://token-tracking.local/${encodeURIComponent(fingerprint)}`;
+}
+
+async function getTokenUsageFromCache(cache, fingerprint) {
+  if (!cache) {
+    console.log('[Token Tracking] Cache not available, skipping cache read');
+    return null;
+  }
   
   try {
-    const data = await kv.get(fingerprint);
-    if (!data) return null;
-    return JSON.parse(data);
+    console.log('[Token Tracking] Reading from Cache for fingerprint:', fingerprint.substring(0, 50));
+    const cacheKey = getCacheKey(fingerprint);
+    const cached = await cache.match(cacheKey);
+    if (!cached) {
+      console.log('[Token Tracking] Cache read result: No data');
+      return null;
+    }
+    const data = await cached.json();
+    console.log('[Token Tracking] Cache read result: Found data');
+    return data;
   } catch (err) {
-    console.error('[Token Tracking] Error reading from KV:', err);
+    console.error('[Token Tracking] Error reading from Cache:', err);
     return null;
   }
 }
 
-async function setTokenUsageInKV(kv, fingerprint, data) {
-  if (!kv) return false;
+async function setTokenUsageInCache(cache, fingerprint, data) {
+  if (!cache) {
+    console.log('[Token Tracking] Cache not available, skipping cache write');
+    return false;
+  }
   
   try {
     // Store with expiration (24 hours)
     const ttl = TOKEN_RESET_HOURS * 60 * 60; // seconds
-    await kv.put(fingerprint, JSON.stringify(data), { expirationTtl: ttl });
+    const cacheKey = getCacheKey(fingerprint);
+    console.log('[Token Tracking] Writing to Cache for fingerprint:', fingerprint.substring(0, 50));
+    
+    // Create a response with the data and cache headers
+    const response = new Response(JSON.stringify(data), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': `public, max-age=${ttl}`,
+      },
+    });
+    
+    // Store in cache with expiration
+    await cache.put(cacheKey, response);
+    console.log('[Token Tracking] Cache write successful');
     return true;
   } catch (err) {
-    console.error('[Token Tracking] Error writing to KV:', err);
+    console.error('[Token Tracking] Error writing to Cache:', err);
+    console.error('[Token Tracking] Cache error details:', err.message, err.stack);
     return false;
   }
 }
 
-async function checkTokenLimit(fingerprint, requestedTokens, kv = null) {
+async function checkTokenLimit(fingerprint, requestedTokens, cache = null) {
   const now = Date.now();
   let record = null;
   
-  // Try KV first (persistent storage)
-  if (kv) {
-    record = await getTokenUsageFromKV(kv, fingerprint);
+  // Try Cache API first (persistent storage)
+  if (cache) {
+    record = await getTokenUsageFromCache(cache, fingerprint);
   } else {
     // Fallback to in-memory Map
     record = tokenTrackingMap.get(fingerprint);
@@ -90,39 +123,33 @@ async function checkTokenLimit(fingerprint, requestedTokens, kv = null) {
       resetTime: resetTime
     };
     
-    if (kv) {
-      await setTokenUsageInKV(kv, fingerprint, newRecord);
+    if (cache) {
+      await setTokenUsageInCache(cache, fingerprint, newRecord);
     } else {
       tokenTrackingMap.set(fingerprint, newRecord);
     }
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Token Tracking] New/Reset entry for ${fingerprint.substring(0, 50)}: ${requestedTokens}/${DAILY_TOKEN_LIMIT} tokens (${kv ? 'KV' : 'Memory'})`);
-    }
+    console.log(`[Token Tracking] New/Reset entry for ${fingerprint.substring(0, 50)}: ${requestedTokens}/${DAILY_TOKEN_LIMIT} tokens (${cache ? 'Cache' : 'Memory'})`);
     
     return { allowed: true, remaining: DAILY_TOKEN_LIMIT - requestedTokens };
   }
   
   const newTotal = record.tokens + requestedTokens;
   if (newTotal > DAILY_TOKEN_LIMIT) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Token Tracking] Limit exceeded for ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens`);
-    }
+    console.log(`[Token Tracking] Limit exceeded for ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens`);
     return { allowed: false, remaining: 0 };
   }
   
   record.tokens = newTotal;
   
   // Update storage
-  if (kv) {
-    await setTokenUsageInKV(kv, fingerprint, record);
+  if (cache) {
+    await setTokenUsageInCache(cache, fingerprint, record);
   } else {
     tokenTrackingMap.set(fingerprint, record);
   }
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[Token Tracking] Updated ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens (remaining: ${DAILY_TOKEN_LIMIT - newTotal}) (${kv ? 'KV' : 'Memory'})`);
-  }
+  console.log(`[Token Tracking] Updated ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens (remaining: ${DAILY_TOKEN_LIMIT - newTotal}) (${cache ? 'Cache' : 'Memory'})`);
   
   return { allowed: true, remaining: DAILY_TOKEN_LIMIT - newTotal };
 }
@@ -178,12 +205,15 @@ async function fetchProductContext(productId, context) {
 }
 
 export async function action({request, context}) {
+  console.log('[AI FAQ] Request received:', request.method, new Date().toISOString());
+  
   if (request.method !== 'POST') {
     return json({error: 'Method not allowed'}, {status: 405});
   }
 
   const openaiKey = context.env.OPENAI_API_KEY;
   if (!openaiKey) {
+    console.error('[AI FAQ] Missing OPENAI_API_KEY');
     return json({error: 'Missing OPENAI_API_KEY'}, {status: 500});
   }
 
@@ -193,14 +223,28 @@ export async function action({request, context}) {
   const body = await request.json().catch(() => ({}));
   const {productId, messages = [], context: ctxPayload, maxOutputTokens, messageTooLong, productUrl, inputTokens} = body;
   
-  // Get KV namespace from environment (Cloudflare Workers)
-  // KV namespace can be accessed via context.env.KV_NAMESPACE_NAME or context.env.AI_TOKEN_TRACKING
-  const kv = context.env?.AI_TOKEN_TRACKING || context.env?.[KV_NAMESPACE_NAME] || null;
+  // Get Cache API (available in all Cloudflare Workers)
+  // Cache is available via global caches API
+  let cache = null;
+  try {
+    // Use global caches API available in Cloudflare Workers
+    if (typeof caches !== 'undefined') {
+      cache = await caches.open(CACHE_NAME);
+      console.log('[Token Tracking] Cache API Available:', !!cache);
+    } else {
+      console.log('[Token Tracking] Cache API not available (caches undefined)');
+    }
+  } catch (err) {
+    console.log('[Token Tracking] Cache API error, using memory fallback:', err.message);
+  }
   
   // Server-side token limit check using IP + User-Agent fingerprint
   const fingerprint = getClientFingerprint(request);
+  console.log('[Token Tracking] Fingerprint:', fingerprint.substring(0, 80));
   const estimatedTokens = typeof inputTokens === 'number' ? inputTokens : 50; // Default estimate
-  const tokenCheck = await checkTokenLimit(fingerprint, estimatedTokens, kv);
+  console.log('[Token Tracking] Estimated tokens:', estimatedTokens);
+  const tokenCheck = await checkTokenLimit(fingerprint, estimatedTokens, cache);
+  console.log('[Token Tracking] Token check result:', tokenCheck.allowed ? 'Allowed' : 'Blocked', 'Remaining:', tokenCheck.remaining);
   
   if (!tokenCheck.allowed) {
     if (process.env.NODE_ENV === 'development') {
@@ -232,7 +276,7 @@ export async function action({request, context}) {
   // Note: We still track tokens for "message too long" responses (they use minimal tokens)
   if (messageTooLong) {
     // Still check token limit (messageTooLong responses use ~10 tokens)
-    const messageTooLongTokenCheck = await checkTokenLimit(fingerprint, 10, kv);
+    const messageTooLongTokenCheck = await checkTokenLimit(fingerprint, 10, cache);
     
     if (!messageTooLongTokenCheck.allowed) {
       return json({
