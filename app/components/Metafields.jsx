@@ -13,7 +13,7 @@ export function ProductMetafields({ metafieldCondition, metafieldWarranty, metaf
           )}
           {metafieldVat?.value && <li>VAT: {metafieldVat.value}</li>}
           <li>
-            Including VAT
+            Excluding VAT
           </li>
         </ul>
       </div>

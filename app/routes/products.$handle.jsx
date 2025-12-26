@@ -999,7 +999,7 @@ export default function Product() {
               {Number(selectedVariant.price.amount) === 0 ? (
                 <span>Call For Price!</span>
               ) : (
-                <span style={{display: 'flex'}}><Money data={selectedVariant.price} /> &nbsp; TTC </span>
+                <span style={{display: 'flex'}}><Money data={selectedVariant.price} /> &nbsp; HT </span>
               )} 
             </small>
 
