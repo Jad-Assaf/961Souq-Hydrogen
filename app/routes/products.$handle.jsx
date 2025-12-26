@@ -999,8 +999,8 @@ export default function Product() {
               {Number(selectedVariant.price.amount) === 0 ? (
                 <span>Call For Price!</span>
               ) : (
-                <Money data={selectedVariant.price} />
-              )}
+                <span style={{display: 'flex'}}><Money data={selectedVariant.price} /> &nbsp; TTC </span>
+              )} 
             </small>
 
             {Number(selectedVariant.price.amount) > 0 &&
@@ -1008,7 +1008,7 @@ export default function Product() {
               parseFloat(selectedVariant.compareAtPrice.amount) >
               parseFloat(selectedVariant.price.amount) && (
                 <small className="discountedPrice">
-                  <Money data={selectedVariant.compareAtPrice} />
+                  <Money data={selectedVariant.compareAtPrice} /> 
                 </small>
               )}
           </div>
