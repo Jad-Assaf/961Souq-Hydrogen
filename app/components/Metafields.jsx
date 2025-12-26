@@ -12,9 +12,9 @@ export function ProductMetafields({ metafieldCondition, metafieldWarranty, metaf
             <li>Shipping: {metafieldShipping.value}</li>
           )}
           {metafieldVat?.value && <li>VAT: {metafieldVat.value}</li>}
-          <li>
+          {/* <li>
             Excluding VAT
-          </li>
+          </li> */}
         </ul>
       </div>
     );

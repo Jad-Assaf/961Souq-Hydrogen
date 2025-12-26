@@ -988,27 +988,31 @@ export default function Product() {
           <AskAIButton productId={product.id} productFAQRef={productFAQRef} />
           <div className="price-container">
             <small
-              className={`product-price ${Number(selectedVariant.price.amount) > 0 &&
-                  selectedVariant.compareAtPrice &&
-                  parseFloat(selectedVariant.compareAtPrice.amount) >
+              className={`product-price ${
+                Number(selectedVariant.price.amount) > 0 &&
+                selectedVariant.compareAtPrice &&
+                parseFloat(selectedVariant.compareAtPrice.amount) >
                   parseFloat(selectedVariant.price.amount)
                   ? 'discounted'
                   : ''
-                }`}
+              }`}
             >
               {Number(selectedVariant.price.amount) === 0 ? (
                 <span>Call For Price!</span>
               ) : (
-                <span style={{display: 'flex'}}><Money data={selectedVariant.price} /> &nbsp; HT </span>
-              )} 
+                <span style={{display: 'flex', alignItems: 'center'}}>
+                  <Money data={selectedVariant.price} /> &nbsp; HT{' '} &nbsp;
+                  <span style={{fontSize: '16px', fontStyle: 'italic', fontWeight: '500'}}>(Excluding VAT)</span>
+                </span>
+              )}
             </small>
 
             {Number(selectedVariant.price.amount) > 0 &&
               selectedVariant.compareAtPrice &&
               parseFloat(selectedVariant.compareAtPrice.amount) >
-              parseFloat(selectedVariant.price.amount) && (
+                parseFloat(selectedVariant.price.amount) && (
                 <small className="discountedPrice">
-                  <Money data={selectedVariant.compareAtPrice} /> 
+                  <Money data={selectedVariant.compareAtPrice} />
                 </small>
               )}
           </div>
@@ -1053,10 +1057,10 @@ export default function Product() {
                   ? 'N/A'
                   : typeof selectedVariant.quantityAvailable === 'number' &&
                     selectedVariant.quantityAvailable > 0
-                    ? `${selectedVariant.quantityAvailable} in stock`
-                    : selectedVariant.availableForSale
-                      ? 'In Stock'
-                      : 'Out of Stock'}
+                  ? `${selectedVariant.quantityAvailable} in stock`
+                  : selectedVariant.availableForSale
+                  ? 'In Stock'
+                  : 'Out of Stock'}
               </li>
 
               <li>
@@ -1083,22 +1087,25 @@ export default function Product() {
         <>
           <div className="tabs">
             <button
-              className={`tab-button ${activeTab === 'description' ? 'active' : ''
-                }`}
+              className={`tab-button ${
+                activeTab === 'description' ? 'active' : ''
+              }`}
               onClick={() => setActiveTab('description')}
             >
               Description
             </button>
             <button
-              className={`tab-button ${activeTab === 'shipping' ? 'active' : ''
-                }`}
+              className={`tab-button ${
+                activeTab === 'shipping' ? 'active' : ''
+              }`}
               onClick={() => setActiveTab('shipping')}
             >
               Shipping & Exchange
             </button>
             <button
-              className={`tab-button ${activeTab === 'warranty' ? 'active' : ''
-                }`}
+              className={`tab-button ${
+                activeTab === 'warranty' ? 'active' : ''
+              }`}
               onClick={() => setActiveTab('warranty')}
             >
               Warranty
@@ -1123,7 +1130,10 @@ export default function Product() {
               </div>
               {aiModalOpen && (
                 <div className="ai-modal-overlay" onClick={closeAiSummaryModal}>
-                  <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="ai-modal"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="ai-modal__header">
                       <div className="ai-modal__left">
                         <span className="ai-modal__chip">AI Summary</span>
@@ -1131,12 +1141,12 @@ export default function Product() {
                           {aiSummaryStatus === 'loading'
                             ? 'Generating'
                             : aiSummaryStatus === 'typing'
-                              ? 'Writing'
-                              : aiSummaryStatus === 'done'
-                                ? 'Ready'
-                                : aiSummaryStatus === 'error'
-                                  ? 'Error'
-                                  : ''}
+                            ? 'Writing'
+                            : aiSummaryStatus === 'done'
+                            ? 'Ready'
+                            : aiSummaryStatus === 'error'
+                            ? 'Error'
+                            : ''}
                         </span>
                       </div>
 
@@ -1165,7 +1175,10 @@ export default function Product() {
                         <p className="ai-modal__text">
                           {aiSummaryDisplay || ''}
                           {aiSummaryStatus === 'typing' && (
-                            <span className="ai-modal__cursor" aria-hidden="true">
+                            <span
+                              className="ai-modal__cursor"
+                              aria-hidden="true"
+                            >
                               ▍
                             </span>
                           )}
@@ -1197,10 +1210,10 @@ export default function Product() {
                   </div>
                 </div>
               )}
-              <div dangerouslySetInnerHTML={{ __html: descriptionHtml || '' }} />
+              <div dangerouslySetInnerHTML={{__html: descriptionHtml || ''}} />
 
               {product.metafieldOfficialProductLink?.value && (
-                <p style={{ marginTop: '1.5rem' }}>
+                <p style={{marginTop: '1.5rem'}}>
                   <a
                     className="official-product-link"
                     href={product.metafieldOfficialProductLink.value}
@@ -1300,29 +1313,29 @@ export default function Product() {
                   promptly. We will swiftly address any defects, damages, or
                   incorrect shipments to ensure your satisfaction.
                 </p>
-                <h3 style={{ color: '#2172af' }}>
+                <h3 style={{color: '#2172af'}}>
                   Exceptions / Non-exchangeable Items
                 </h3>
                 <p>
                   Certain items are exempt from our exchange policy, including{' '}
-                  <strong style={{ color: '#2172af' }}>mobile phones</strong>,
+                  <strong style={{color: '#2172af'}}>mobile phones</strong>,
                   perishable goods (such as{' '}
-                  <strong style={{ color: '#2172af' }}>headsets</strong>,{' '}
-                  <strong style={{ color: '#2172af' }}>earphones</strong>, and{' '}
-                  <strong style={{ color: '#2172af' }}>network card </strong>
-                  or <strong style={{ color: '#2172af' }}>wifi routers</strong>
+                  <strong style={{color: '#2172af'}}>headsets</strong>,{' '}
+                  <strong style={{color: '#2172af'}}>earphones</strong>, and{' '}
+                  <strong style={{color: '#2172af'}}>network card </strong>
+                  or <strong style={{color: '#2172af'}}>wifi routers</strong>
                   ), custom-made products (such as{' '}
-                  <strong style={{ color: '#2172af' }}>
+                  <strong style={{color: '#2172af'}}>
                     special orders
                   </strong> or{' '}
-                  <strong style={{ color: '#2172af' }}>personalized items</strong>
+                  <strong style={{color: '#2172af'}}>personalized items</strong>
                   ), and{' '}
-                  <strong style={{ color: '#2172af' }}>pre-ordered goods</strong>.
+                  <strong style={{color: '#2172af'}}>pre-ordered goods</strong>.
                   For queries regarding specific items, please reach out to us.
                 </p>
                 <p>
                   Unfortunately, we are{' '}
-                  <strong style={{ color: '#2172af' }}>
+                  <strong style={{color: '#2172af'}}>
                     unable to accommodate exchanges for sale items or gift
                     cards.
                   </strong>
