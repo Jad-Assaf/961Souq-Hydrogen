@@ -1069,7 +1069,7 @@ export default function Product() {
             metafieldCondition={product.metafieldCondition}
             metafieldWarranty={product.metafieldWarranty}
             metafieldShipping={product.metafieldShipping}
-            metafieldVat={product.metafieldVat}
+            // metafieldVat={product.metafieldVat}
           />
           <p className="productPageDisclaimer">
             Product images are for reference only. The actual item may differ in
