@@ -17,13 +17,14 @@ export default {
    */
   async fetch(request, env, executionContext) {
     try {
-      // Quick geo-block: deny requests we can identify as coming from China.
+      // Quick geo-block: deny requests we can identify as coming from blocked countries.
+      const blockedCountries = new Set(['CN', 'IL']);
       const countryCode =
         request.cf?.country ||
         request.headers.get('cf-ipcountry') ||
         request.headers.get('x-country-code');
 
-      if (countryCode && countryCode.toUpperCase() === 'CN') {
+      if (countryCode && blockedCountries.has(countryCode.toUpperCase())) {
         return new Response('Access denied', {status: 403});
       }
 
