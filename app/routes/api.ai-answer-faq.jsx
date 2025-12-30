@@ -332,11 +332,8 @@ export async function action({request, context}) {
         .replace(/https?:\/\/wa\.me\/[^\s\)]+/gi, '')
         .trim();
 
-      // Add WhatsApp link
-      const whatsappNumber = '+96171888036';
-      const productPageUrl = productUrl || 'https://961souq.com';
-      const whatsappMessage = encodeURIComponent(`Hi, I have a question about: ${productContext?.title || 'this product'}\n${productPageUrl}`);
-      const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`;
+      // Add WhatsApp link (simple, no prefilled text to avoid URL noise)
+      const whatsappLink = 'https://wa.me/96171888036';
       
       const contactInfo = userLang === 'Arabic' 
         ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
@@ -348,11 +345,8 @@ export async function action({request, context}) {
         ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى حوالي ٨٠ كلمة أو أقل.'
         : 'Your message is too long. Please shorten it to about 80 words or fewer.';
       
-      // Add WhatsApp link
-      const whatsappNumber = '+96171888036';
-      const productPageUrl = productUrl || 'https://961souq.com';
-      const whatsappMessage = encodeURIComponent(`Hi, I have a question about: ${productContext?.title || 'this product'}\n${productPageUrl}`);
-      const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`;
+      // Add WhatsApp link (simple, no prefilled text to avoid URL noise)
+      const whatsappLink = 'https://wa.me/96171888036';
       
       const contactInfo = userLang === 'Arabic' 
         ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
@@ -371,9 +365,10 @@ export async function action({request, context}) {
     '4. DO NOT include any WhatsApp links, contact links, URLs, or contact instructions in your response. The system will add contact information automatically.',
     '5. Never write unfinished sentences. Use complete sentences only.',
     `6. Respond in ${userLang}.`,
-    '7. If the user asks about price or cost, treat the price in context as excluding VAT. Present BOTH: "Price (excl. VAT): <amount>" and "Price (incl. 11% VAT): <amount x 1.11>". Never describe an ex-VAT price as including VAT. Always remind them to confirm pricing with a support agent.',
-    '8. If the user asks for specs/details/features, provide the available specifications from context; do not refuse. Keep it concise but include the key points.',
-    '9. Answer the question directly without adding unrelated disclaimers.',
+    '7. If the user asks about price or cost and a positive price is available, treat the price as excluding VAT. Present BOTH: "Price (excl. VAT): <amount>" and "Price (incl. 11% VAT): <amount x 1.11>". Never describe an ex-VAT price as including VAT. Always remind them to confirm pricing with a support agent.',
+    '8. If the price is missing or 0, clearly say "Call for price" and remind the user to confirm pricing with a support agent. Do NOT fabricate VAT numbers when price is missing/zero.',
+    '9. If the user asks for specs/details/features, provide the available specifications from context; do not refuse. Keep it concise but include the key points.',
+    '10. Answer the question directly without adding unrelated disclaimers.',
   ].join(' ');
 
   const description = productContext.description || '';
@@ -383,9 +378,10 @@ export async function action({request, context}) {
   // Derive VAT math if we can safely parse a single price
   const rawPrice = productContext.price || '';
   const priceRangeLike = rawPrice.includes('-');
-  const numericPriceMatch = rawPrice.match(/(\d+(?:\.\d+)?)/);
+  const numericPriceMatch = rawPrice.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
   const basePrice = numericPriceMatch && !priceRangeLike ? Number(numericPriceMatch[1]) : null;
-  const vatPrice = Number.isFinite(basePrice) ? Number((basePrice * 1.11).toFixed(2)) : null;
+  const hasValidPrice = Number.isFinite(basePrice) && basePrice > 0;
+  const vatPrice = hasValidPrice ? Number((basePrice * 1.11).toFixed(2)) : null;
 
   // Minimize context - only include essential info
   let contextSummary = [
@@ -397,11 +393,13 @@ export async function action({request, context}) {
     .filter(Boolean)
     .join('\n');
   
-  if (Number.isFinite(basePrice)) {
+  if (hasValidPrice) {
     contextSummary += `\nPrice shown (excl. VAT): ${basePrice}`;
     contextSummary += `\nPrice incl. 11% VAT: ${vatPrice}`;
+    contextSummary += `\nPrice note: Website prices are displayed excluding VAT. Present excl. VAT first, then 11% VAT included.`;
+  } else {
+    contextSummary += `\nPrice note: Price unavailable/0. Respond with "Call for price" and remind to confirm pricing with a support agent. Do NOT calculate VAT when price is missing/zero.`;
   }
-  contextSummary += `\nPrice note: Website prices are displayed excluding VAT. Present excl. VAT first, then 11% VAT included.`;
   
   // Add shipping/warranty only if explicitly asked about
   const lastMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
@@ -512,11 +510,8 @@ export async function action({request, context}) {
       return json({error: 'Empty response from AI'}, {status: 502});
     }
 
-    // Generate WhatsApp link with product URL
-    const whatsappNumber = '+96171888036';
-    const productPageUrl = productUrl || (productContext?.handle ? `https://961souq.com/products/${productContext.handle}` : 'https://961souq.com');
-    const whatsappMessage = encodeURIComponent(`Hi, I have a question about: ${productContext?.title || 'this product'}\n${productPageUrl}`);
-    const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`;
+    // Generate WhatsApp link (simple, no prefilled text to avoid URL noise)
+    const whatsappLink = 'https://wa.me/96171888036';
     
     // Remove any WhatsApp links that the LLM might have added
     const cleanedAnswer = answer
