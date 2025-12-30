@@ -10,7 +10,6 @@ export function TypesenseSearch({
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [isOpen, setIsOpen] = useState(false);
-  const debounceRef = useRef(null);
   const lastTermRef = useRef(initialQuery.trim());
   const cachedDataRef = useRef({}); // Cache results to prevent duplicate requests
 
@@ -35,11 +34,10 @@ export function TypesenseSearch({
     }
   }, [isOpen]);
 
-  // Debounced predictive search - FIXED to prevent infinite loops
+  // Predictive search without debounce
   useEffect(() => {
     const term = searchTerm.trim();
     if (!term) {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
       setIsOpen(false);
       return;
     }
@@ -54,26 +52,16 @@ export function TypesenseSearch({
       return; // Already loading, STOP HERE
     }
     
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      // FINAL CHECK: Don't make request if we have data
-      if (cachedDataRef.current[term]) {
-        lastTermRef.current = term;
-        return;
-      }
-      // FINAL CHECK: Don't make request if already loading
-      if (fetcher.state === 'loading') {
-        return;
-      }
+    // FINAL CHECK: Don't make request if we have data
+    if (cachedDataRef.current[term]) {
       lastTermRef.current = term;
-      const params = new URLSearchParams();
-      params.set('q', term);
-      params.set('perPage', '20');
-      fetcher.load(`/api/typesensesearch?${params.toString()}`);
-    }, 300); // Increased debounce to 300ms
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+      return;
+    }
+    lastTermRef.current = term;
+    const params = new URLSearchParams();
+    params.set('q', term);
+    params.set('perPage', '20');
+    fetcher.load(`/api/typesensesearch?${params.toString()}`);
   }, [searchTerm]); // REMOVED fetcher from dependencies - this was causing the loop!
 
   // Cache fetcher data when it arrives
