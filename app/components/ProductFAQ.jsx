@@ -30,6 +30,7 @@ const ProductFAQ = React.forwardRef(
     const [dailyTokensUsed, setDailyTokensUsed] = useState(0);
     const messagesEndRef = React.useRef(null);
     const messagesContainerRef = React.useRef(null);
+    const inputRef = React.useRef(null);
 
     const {chat: chatKey, tokens: tokenKey} = storageKeys(productId);
 
@@ -170,14 +171,21 @@ const ProductFAQ = React.forwardRef(
 
     const handleSend = async (e) => {
       e.preventDefault();
+      const focusInput = () => {
+        if (inputRef.current) {
+          inputRef.current.focus({preventScroll: true});
+        }
+      };
       if (!input.trim()) return;
       if (!productId) {
         setError('Missing product.');
+        focusInput();
         return;
       }
       if (!productContext) {
         setError('Loading product info, try again.');
         fetchContext();
+        focusInput();
         return;
       }
 
@@ -229,6 +237,7 @@ const ProductFAQ = React.forwardRef(
           setError('Something went wrong. Try again.');
         } finally {
           setLoading(false);
+          focusInput();
         }
         return;
       }
@@ -289,6 +298,7 @@ const ProductFAQ = React.forwardRef(
         setError('Something went wrong. Try again.');
       } finally {
         setLoading(false);
+        focusInput();
       }
     };
 
@@ -526,7 +536,8 @@ const ProductFAQ = React.forwardRef(
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    disabled={loading || !!contextError}
+                    disabled={!!contextError}
+                    ref={inputRef}
                     maxLength={1200}
                   />
                   <button

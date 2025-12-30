@@ -1,12 +1,12 @@
 // AI product chat endpoint
 import {json} from '@shopify/remix-oxygen';
 
-const DEFAULT_MAX_OUTPUT = 80; // Reduced from 150 to save tokens
+const DEFAULT_MAX_OUTPUT = 200; // Allow fuller answers to avoid truncation
 
 // Server-side token tracking using IP + User-Agent fingerprint
 // Uses Cloudflare Cache API for persistent storage (available in all Workers)
 const tokenTrackingMap = new Map(); // Fallback for local dev
-const DAILY_TOKEN_LIMIT = 200; // Server-side limit
+const DAILY_TOKEN_LIMIT = 2000; // Server-side limit
 const TOKEN_RESET_HOURS = 24;
 const CACHE_NAME = 'ai-token-tracking'; // Cache name for token storage
 
@@ -514,11 +514,14 @@ export async function action({request, context}) {
     const whatsappLink = 'https://wa.me/96171888036';
     
     // Remove any WhatsApp links that the LLM might have added
-    const cleanedAnswer = answer
+    let cleanedAnswer = answer
       .replace(/\[?واتساب\]?\([^)]+\)/gi, '') // Remove Arabic WhatsApp links
       .replace(/\[?WhatsApp\]?\([^)]+\)/gi, '') // Remove English WhatsApp links
       .replace(/https?:\/\/wa\.me\/[^\s\)]+/gi, '') // Remove plain WhatsApp URLs
       .trim();
+    
+    // Remove trailing empty bullet markers that can occur on truncation
+    cleanedAnswer = cleanedAnswer.replace(/\n-\s*$/g, '').trim();
     
     // Add contact info and WhatsApp link to the answer (only if not already present)
     const hasWhatsAppLink = cleanedAnswer.toLowerCase().includes('whatsapp') || 
