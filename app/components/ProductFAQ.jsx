@@ -351,6 +351,10 @@ const ProductFAQ = React.forwardRef(
                 >
                   ✕
                 </button>
+                <span className="ai-modal__disclaimer" style={{position: 'absolute', top: '48px', fontSize: '12px', fontStyle: 'italic', color: 'grey'}}>
+                  AI can make mistakes. Always confirm details with a support
+                  agent.
+                </span>
               </div>
 
               <div className="product-chat-body">

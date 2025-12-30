@@ -367,11 +367,12 @@ export async function action({request, context}) {
     'CRITICAL RULES:',
     '1. ONLY answer questions about: this specific product, shipping, warranty, or contact information. NOTHING ELSE.',
     '2. If asked about anything else (other products, general questions, unrelated topics), politely decline and redirect to product/shipping/warranty/contact topics only.',
-    '3. Keep responses SHORT (1-2 sentences maximum). Be direct and concise. Do NOT add phrases like "please verify with customer support" or "contact support for details" - the system will add contact info automatically.',
+    '3. Keep responses SHORT (1-2 sentences maximum). Be direct and concise.',
     '4. DO NOT include any WhatsApp links, contact links, URLs, or contact instructions in your response. The system will add contact information automatically.',
     '5. Never write unfinished sentences. Use complete sentences only.',
     `6. Respond in ${userLang}.`,
-    '7. Answer the question directly without adding disclaimers or verification reminders.',
+    '7. If the user asks about price or cost, always state that prices exclude VAT and provide the price including 11% VAT. Also remind them to confirm pricing with a support agent.',
+    '8. Answer the question directly without adding unrelated disclaimers.',
   ].join(' ');
 
   // Aggressively trim description to reduce tokens (keep first 800 chars)
