@@ -17,6 +17,16 @@ export default {
    */
   async fetch(request, env, executionContext) {
     try {
+      // Quick geo-block: deny requests we can identify as coming from China.
+      const countryCode =
+        request.cf?.country ||
+        request.headers.get('cf-ipcountry') ||
+        request.headers.get('x-country-code');
+
+      if (countryCode && countryCode.toUpperCase() === 'CN') {
+        return new Response('Access denied', {status: 403});
+      }
+
       const appLoadContext = await createAppLoadContext(
         request,
         env,
