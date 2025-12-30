@@ -491,7 +491,7 @@ export function ProductForm({
 
   // Possibly build a WhatsApp link
   const isProductPage = location.pathname.includes('/products/');
-  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=${encodeURIComponent(
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96181960961&text=${encodeURIComponent(
     `Hi, I'd like to buy ${product.title} https://961souq.com${location.pathname}`,
   )}`;
 
@@ -872,7 +872,7 @@ export default function Product() {
         },
       })) || [];
 
-  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96181960961&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
 
   return (
     <div className="product">
@@ -969,7 +969,7 @@ export default function Product() {
                       rel="noopener noreferrer"
                       aria-label="Share on WhatsApp"
                     >
-                      +961 71 888 036
+                      +961 81 860 961
                     </a>
                   </p>
                   <button
@@ -1196,7 +1196,7 @@ export default function Product() {
                           rel="noopener noreferrer"
                           aria-label="Share on WhatsApp"
                         >
-                          +961 71 888 036
+                          +961 81 860 961
                         </a>
                       </p>
                       <button

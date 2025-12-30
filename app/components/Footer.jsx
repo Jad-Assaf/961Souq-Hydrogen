@@ -74,7 +74,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                   </i>{' '}
                   <a href="tel:+9611888031">+961 1 888 031</a>
                 </li>
-                <li>
+                {/* <li>
                   <i className="fab fa-whatsapp">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -86,13 +86,13 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     </svg>
                   </i>{' '}
                   <a
-                    href="https://wa.me/96171888036"
+                    href="https://wa.me/96181960961"
                     target="_blank"
                     aria-label="Whatsapp Link"
                   >
-                    +961 71 888 036
+                    +961 81 860 961
                   </a>
-                </li>
+                </li> */}
                 <li>
                   <i className="fab fa-whatsapp">
                     <svg
