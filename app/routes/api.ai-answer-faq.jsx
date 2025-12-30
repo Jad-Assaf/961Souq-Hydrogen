@@ -6,7 +6,7 @@ const DEFAULT_MAX_OUTPUT = 200; // Allow fuller answers to avoid truncation
 // Server-side token tracking using IP + User-Agent fingerprint
 // Uses Cloudflare Cache API for persistent storage (available in all Workers)
 const tokenTrackingMap = new Map(); // Fallback for local dev
-const DAILY_TOKEN_LIMIT = 2000; // Server-side limit
+const DAILY_TOKEN_LIMIT = 200; // Server-side limit
 const TOKEN_RESET_HOURS = 24;
 const CACHE_NAME = 'ai-token-tracking'; // Cache name for token storage
 
