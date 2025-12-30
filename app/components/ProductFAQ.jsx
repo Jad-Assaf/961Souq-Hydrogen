@@ -299,6 +299,17 @@ const ProductFAQ = React.forwardRef(
       }
     };
 
+    const handleClearChat = () => {
+      setMessages([]);
+      setInput('');
+      setError('');
+      try {
+        localStorage.removeItem(chatKey);
+      } catch (err) {
+        console.error('Failed to clear chat history', err);
+      }
+    };
+
     if (!productId) return null;
 
     return (
@@ -343,14 +354,50 @@ const ProductFAQ = React.forwardRef(
                       : 'Ready'}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="ai-modal__close"
-                  onClick={closeChat}
-                  aria-label="Close Ask AI"
-                >
-                  ✕
-                </button>
+                <div className="ai-modal__actions" style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                  <button
+                    type="button"
+                    className="ai-modal__clear"
+                    onClick={handleClearChat}
+                    disabled={loading || messages.length === 0}
+                    aria-label="Clear chat"
+                    title="Clear chat"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(0,0,0,0.1)',
+                      background: 'linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%)',
+                      color: '#444',
+                      fontSize: '16px',
+                      cursor: loading || messages.length === 0 ? 'not-allowed' : 'pointer',
+                      opacity: loading || messages.length === 0 ? 0.5 : 1,
+                      transition: 'transform 120ms ease, box-shadow 120ms ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (loading || messages.length === 0) return;
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.boxShadow = '';
+                    }}
+                  >
+                    🗑️
+                  </button>
+                  <button
+                    type="button"
+                    className="ai-modal__close"
+                    onClick={closeChat}
+                    aria-label="Close Ask AI"
+                  >
+                    ✕
+                  </button>
+                </div>
                 <span className="ai-modal__disclaimer" style={{position: 'absolute', top: '48px', fontSize: '12px', fontStyle: 'italic', color: 'grey'}}>
                   AI can make mistakes. Always confirm details with a support
                   agent.

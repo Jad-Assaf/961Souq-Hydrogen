@@ -286,8 +286,8 @@ export async function action({request, context}) {
     }
     const systemPrompt = [
       'You are an AI product assistant.',
-      `The user just sent a message that exceeds the 100 token limit.`,
-      `Politely inform them that their message is too long and ask them to shorten it.`,
+      `The user just sent a message that exceeds the short-message limit (~80 words).`,
+      `Politely inform them that their message is too long and ask them to shorten it to about 80 words or fewer.`,
       `Respond in ${userLang}.`,
       'Be brief and friendly.',
     ].join(' ');
@@ -321,8 +321,8 @@ export async function action({request, context}) {
       if (!answer) {
         // Fallback message
         answer = userLang === 'Arabic' 
-          ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى أقل من 100 رمز.'
-          : 'Your message is too long. Please shorten it to under 100 tokens.';
+          ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى حوالي ٨٠ كلمة أو أقل.'
+          : 'Your message is too long. Please shorten it to about 80 words or fewer.';
       }
 
       // Remove any WhatsApp links that the LLM might have added
@@ -345,8 +345,8 @@ export async function action({request, context}) {
       return json({success: true, answer: cleanedAnswer + contactInfo});
     } catch (err) {
       const fallbackMsg = userLang === 'Arabic' 
-        ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى أقل من 100 رمز.'
-        : 'Your message is too long. Please shorten it to under 100 tokens.';
+        ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى حوالي ٨٠ كلمة أو أقل.'
+        : 'Your message is too long. Please shorten it to about 80 words or fewer.';
       
       // Add WhatsApp link
       const whatsappNumber = '+96171888036';
@@ -365,24 +365,30 @@ export async function action({request, context}) {
   const systemPrompt = [
     'You are an AI product assistant for 961 Souq.',
     'CRITICAL RULES:',
-    '1. ONLY answer questions about: this specific product, shipping, warranty, or contact information. NOTHING ELSE.',
-    '2. If asked about anything else (other products, general questions, unrelated topics), politely decline and redirect to product/shipping/warranty/contact topics only.',
-    '3. Keep responses SHORT (1-2 sentences maximum). Be direct and concise.',
+    '1. ONLY answer questions about this specific product (including specs/details/features), shipping, or warranty. NOTHING ELSE.',
+    '2. If asked about anything else (other products, general questions, unrelated topics), politely decline and redirect to product/shipping/warranty only.',
+    '3. Keep responses concise (one short paragraph or a few brief bullet points) while still providing the requested product specs/details when asked.',
     '4. DO NOT include any WhatsApp links, contact links, URLs, or contact instructions in your response. The system will add contact information automatically.',
     '5. Never write unfinished sentences. Use complete sentences only.',
     `6. Respond in ${userLang}.`,
-    '7. If the user asks about price or cost, always state that prices exclude VAT and provide the price including 11% VAT. Also remind them to confirm pricing with a support agent.',
-    '8. Answer the question directly without adding unrelated disclaimers.',
+    '7. If the user asks about price or cost, treat the price in context as excluding VAT. Present BOTH: "Price (excl. VAT): <amount>" and "Price (incl. 11% VAT): <amount x 1.11>". Never describe an ex-VAT price as including VAT. Always remind them to confirm pricing with a support agent.',
+    '8. If the user asks for specs/details/features, provide the available specifications from context; do not refuse. Keep it concise but include the key points.',
+    '9. Answer the question directly without adding unrelated disclaimers.',
   ].join(' ');
 
-  // Aggressively trim description to reduce tokens (keep first 800 chars)
   const description = productContext.description || '';
-  const trimmedDescription = description.length > 800 
-    ? description.slice(0, 800) + '...' 
-    : description;
+  // Use full description provided by product-context loader (already capped upstream)
+  const trimmedDescription = description;
+
+  // Derive VAT math if we can safely parse a single price
+  const rawPrice = productContext.price || '';
+  const priceRangeLike = rawPrice.includes('-');
+  const numericPriceMatch = rawPrice.match(/(\d+(?:\.\d+)?)/);
+  const basePrice = numericPriceMatch && !priceRangeLike ? Number(numericPriceMatch[1]) : null;
+  const vatPrice = Number.isFinite(basePrice) ? Number((basePrice * 1.11).toFixed(2)) : null;
 
   // Minimize context - only include essential info
-  const contextSummary = [
+  let contextSummary = [
     `Title: ${productContext.title || ''}`,
     productContext.vendor ? `Vendor: ${productContext.vendor}` : '',
     productContext.price ? `Price: ${productContext.price}` : '',
@@ -390,6 +396,12 @@ export async function action({request, context}) {
   ]
     .filter(Boolean)
     .join('\n');
+  
+  if (Number.isFinite(basePrice)) {
+    contextSummary += `\nPrice shown (excl. VAT): ${basePrice}`;
+    contextSummary += `\nPrice incl. 11% VAT: ${vatPrice}`;
+  }
+  contextSummary += `\nPrice note: Website prices are displayed excluding VAT. Present excl. VAT first, then 11% VAT included.`;
   
   // Add shipping/warranty only if explicitly asked about
   const lastMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
