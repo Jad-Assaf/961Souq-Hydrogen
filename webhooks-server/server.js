@@ -133,6 +133,12 @@ async function shopifyAdminGraphQL({shopDomain, adminToken, query, variables}) {
   return data.data;
 }
 
+function normalizeStatus(status) {
+  const raw = typeof status === 'string' ? status.trim().toUpperCase() : '';
+  if (raw === 'ACTIVE' || raw === 'ARCHIVED' || raw === 'DRAFT') return raw;
+  return 'ACTIVE';
+}
+
 function buildMacarabiaProductInput(product) {
   const variants = Array.isArray(product.variants) ? product.variants : [];
   const images = Array.isArray(product.images) ? product.images : [];
@@ -171,40 +177,21 @@ function buildMacarabiaProductInput(product) {
     );
 
   return {
-    title: product.title || '',
-    bodyHtml: product.body_html || '',
-    vendor: product.vendor || '',
-    productType: product.product_type || '',
-    tags,
-    handle: product.handle || undefined,
-    status: product.status || 'active',
-    options: optionNames.length ? optionNames : undefined,
-    metafields: metafieldInputs.length ? metafieldInputs : undefined,
-    variants: variants.map((variant) => ({
-      sku: variant.sku || undefined,
-      price: variant.price != null ? String(variant.price) : undefined,
-      compareAtPrice:
-        variant.compare_at_price != null
-          ? String(variant.compare_at_price)
-          : undefined,
-      inventoryManagement: variant.inventory_management || undefined,
-      inventoryPolicy: variant.inventory_policy || undefined,
-      inventoryQuantity:
-        typeof variant.inventory_quantity === 'number'
-          ? variant.inventory_quantity
-          : undefined,
-      weight: typeof variant.weight === 'number' ? variant.weight : undefined,
-      weightUnit: variant.weight_unit || undefined,
-      barcode: variant.barcode || undefined,
-      title: variant.title || undefined,
-      option1: variant.option1 || undefined,
-      option2: variant.option2 || undefined,
-      option3: variant.option3 || undefined,
-    })),
-    images: images
-      .map((image) => image?.src)
-      .filter(Boolean)
-      .map((src) => ({src})),
+    productInput: {
+      title: product.title || '',
+      descriptionHtml: product.body_html || '',
+      vendor: product.vendor || '',
+      productType: product.product_type || '',
+      tags,
+      handle: product.handle || undefined,
+      status: normalizeStatus(product.status),
+    },
+    meta: {
+      optionNames,
+      metafieldInputs,
+      variants,
+      images,
+    },
   };
 }
 
@@ -259,12 +246,20 @@ async function findMacarabiaProductIdBySku(skus) {
 }
 
 async function syncProductToMacarabia(product, topic) {
-  if (!MACARABIA_SHOP_DOMAIN || !MACARABIA_ADMIN_API_TOKEN) return;
+  if (!MACARABIA_SHOP_DOMAIN || !MACARABIA_ADMIN_API_TOKEN) {
+    console.warn('[Macarabia] Missing env, skipping sync.');
+    return;
+  }
 
   const handle = product?.handle || '';
   const skus = Array.isArray(product?.variants)
     ? product.variants.map((variant) => variant?.sku).filter(Boolean)
     : [];
+  console.log('[Macarabia] Sync start:', {
+    topic,
+    handle,
+    skusCount: skus.length,
+  });
 
   if (topic === 'products/delete') {
     const deleteId =
@@ -274,6 +269,7 @@ async function syncProductToMacarabia(product, topic) {
       console.log('[Macarabia] No matching product to delete.');
       return;
     }
+    console.log('[Macarabia] Deleting product:', deleteId);
 
     const mutation = `#graphql
       mutation ProductDelete($input: ProductDeleteInput!) {
@@ -300,12 +296,13 @@ async function syncProductToMacarabia(product, topic) {
     return;
   }
 
-  const input = buildMacarabiaProductInput(product);
+  const {productInput, meta} = buildMacarabiaProductInput(product);
   const existingId =
     (await findMacarabiaProductIdByHandle(handle)) ||
     (await findMacarabiaProductIdBySku(skus));
 
   if (existingId) {
+    console.log('[Macarabia] Updating product:', existingId);
     const mutation = `#graphql
       mutation ProductUpdate($input: ProductInput!) {
         productUpdate(input: $input) {
@@ -323,16 +320,18 @@ async function syncProductToMacarabia(product, topic) {
       shopDomain: MACARABIA_SHOP_DOMAIN,
       adminToken: MACARABIA_ADMIN_API_TOKEN,
       query: mutation,
-      variables: {input: {id: existingId, ...input}},
+      variables: {input: {id: existingId, ...productInput}},
     });
     const errors = data?.productUpdate?.userErrors || [];
     if (errors.length) {
       throw new Error(errors.map((e) => e.message).join('; '));
     }
+    await syncMacarabiaMetafields(existingId, meta);
     console.log('[Macarabia] Updated product:', existingId);
     return;
   }
 
+  console.log('[Macarabia] Creating product with handle:', handle);
   const mutation = `#graphql
     mutation ProductCreate($input: ProductInput!) {
       productCreate(input: $input) {
@@ -350,13 +349,55 @@ async function syncProductToMacarabia(product, topic) {
     shopDomain: MACARABIA_SHOP_DOMAIN,
     adminToken: MACARABIA_ADMIN_API_TOKEN,
     query: mutation,
-    variables: {input},
+    variables: {input: productInput},
   });
   const errors = data?.productCreate?.userErrors || [];
   if (errors.length) {
     throw new Error(errors.map((e) => e.message).join('; '));
   }
-  console.log('[Macarabia] Created product:', data?.productCreate?.product?.id);
+  const createdId = data?.productCreate?.product?.id;
+  await syncMacarabiaMetafields(createdId, meta);
+  console.log('[Macarabia] Created product:', createdId);
+}
+
+async function syncMacarabiaMetafields(productId, meta) {
+  if (!productId) return;
+  const metafields = meta?.metafieldInputs || [];
+  if (!metafields.length) return;
+
+  const mutation = `#graphql
+    mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $metafields) {
+        metafields {
+          id
+          namespace
+          key
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyAdminGraphQL({
+    shopDomain: MACARABIA_SHOP_DOMAIN,
+    adminToken: MACARABIA_ADMIN_API_TOKEN,
+    query: mutation,
+    variables: {
+      metafields: metafields.map((metafield) => ({
+        ownerId: productId,
+        ...metafield,
+      })),
+    },
+  });
+
+  const errors = data?.metafieldsSet?.userErrors || [];
+  if (errors.length) {
+    throw new Error(errors.map((e) => e.message).join('; '));
+  }
+  console.log('[Macarabia] Metafields synced:', metafields.length);
 }
 
 // Map Shopify Admin product JSON → Typesense doc (matches your existing schema)
