@@ -129,6 +129,7 @@ function mapProductToTypesenseDoc(product) {
     sku: skus,
     price: minPrice,
     available: product.status === 'active',
+    status: typeof product.status === 'string' ? product.status : 'active',
     collections: [], // Admin payload doesn’t include collections by default
     image: imageUrl,
     url: product.handle ? `/products/${product.handle}` : '',

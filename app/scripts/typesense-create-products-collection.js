@@ -190,6 +190,19 @@ async function recreateProductsCollection() {
       {
         facet: true,
         index: true,
+        infix: false,
+        locale: '',
+        name: 'status',
+        optional: true,
+        sort: false,
+        stem: false,
+        stem_dictionary: '',
+        store: true,
+        type: 'string',
+      },
+      {
+        facet: true,
+        index: true,
         infix: true, // partial matching on collections
         locale: '',
         name: 'collections',

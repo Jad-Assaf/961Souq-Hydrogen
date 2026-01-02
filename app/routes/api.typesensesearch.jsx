@@ -67,6 +67,7 @@ export async function loader({request, context}) {
     prioritize_num_matching_fields: true,
     text_match_type: 'max_score',
     highlight_full_fields: 'title',
+    filter_by: 'status:=active',
   };
 
   try {

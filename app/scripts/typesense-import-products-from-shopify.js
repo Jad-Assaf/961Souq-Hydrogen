@@ -36,9 +36,12 @@ const TYPESENSE_PRODUCTS_COLLECTION = 'products';
 /**
  * 2. Setup Shopify Storefront API config
  */
+const ADMIN_API_VERSION = process.env.SHOPIFY_ADMIN_API_VERSION || '2025-07';
 const sfDomain = process.env.SHOPIFY_STOREFRONT_DOMAIN;
 const sfToken = process.env.SHOPIFY_STOREFRONT_TOKEN;
 const sfVersion = process.env.SHOPIFY_STOREFRONT_API_VERSION || '2025-01';
+const adminToken = process.env.ADMIN_API_TOKEN;
+const adminShopDomain = normalizeShopDomain(process.env.PUBLIC_STORE_DOMAIN);
 
 if (!sfDomain || !sfToken) {
   console.error(
@@ -47,7 +50,20 @@ if (!sfDomain || !sfToken) {
   process.exit(1);
 }
 
+if (!adminShopDomain || !adminToken) {
+  console.error(
+    'Missing PUBLIC_STORE_DOMAIN or ADMIN_API_TOKEN in .env for Admin API status fetch',
+  );
+  process.exit(1);
+}
+
 const STOREFRONT_ENDPOINT = `https://${sfDomain}/api/${sfVersion}/graphql.json`;
+const ADMIN_ENDPOINT = `https://${adminShopDomain}/admin/api/${ADMIN_API_VERSION}/graphql.json`;
+
+function normalizeShopDomain(raw) {
+  if (!raw) return '';
+  return raw.replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
 
 /**
  * 3. GraphQL query to fetch products in pages of 250
@@ -100,6 +116,17 @@ const PRODUCTS_QUERY = `
   }
 `;
 
+const ADMIN_PRODUCTS_STATUS_QUERY = `
+  query ProductStatuses($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on Product {
+        id
+        status
+      }
+    }
+  }
+`;
+
 /**
  * Helper to call the Storefront API
  */
@@ -138,10 +165,50 @@ async function fetchProductsPage(cursor) {
   };
 }
 
+async function fetchAdminStatuses(ids) {
+  if (!ids.length) return {};
+
+  const res = await fetch(ADMIN_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': adminToken,
+    },
+    body: JSON.stringify({
+      query: ADMIN_PRODUCTS_STATUS_QUERY,
+      variables: {ids},
+    }),
+  });
+
+  const json = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const text = json ? JSON.stringify(json) : '(no response body)';
+    throw new Error(
+      `Admin API error: ${res.status} ${res.statusText} - ${text}`,
+    );
+  }
+
+  if (json?.errors?.length) {
+    throw new Error(json.errors[0].message || 'Admin API errors');
+  }
+
+  const nodes = json?.data?.nodes || [];
+  const statusById = {};
+
+  for (const node of nodes) {
+    if (node?.id && node?.status) {
+      statusById[node.id] = node.status;
+    }
+  }
+
+  return statusById;
+}
+
 /**
  * Map Shopify product → Typesense document structure according to our schema.
  */
-function mapProductToTypesenseDoc(product) {
+function mapProductToTypesenseDoc(product, statusById) {
   const priceAmount =
     product.priceRange?.minVariantPrice?.amount != null
       ? parseFloat(product.priceRange.minVariantPrice.amount)
@@ -163,6 +230,10 @@ function mapProductToTypesenseDoc(product) {
     url = url.replace('://www.', '://');
   }
 
+  const rawStatus = statusById?.[product.id];
+  const normalizedStatus =
+    typeof rawStatus === 'string' ? rawStatus.toLowerCase() : 'active';
+
   return {
     id: product.id, // GID is fine as a string ID (must match what you use in webhooks)
     title: product.title || '',
@@ -173,6 +244,7 @@ function mapProductToTypesenseDoc(product) {
     tags: product.tags || [],
     price: isNaN(priceAmount) ? 0 : priceAmount,
     available: Boolean(product.availableForSale),
+    status: normalizedStatus,
     collections,
     sku: skus,
     image: product.featuredImage?.url || '',
@@ -200,7 +272,11 @@ async function main() {
     }
 
     const products = edges.map((e) => e.node);
-    const docs = products.map(mapProductToTypesenseDoc);
+    const productIds = products.map((product) => product.id).filter(Boolean);
+    const statusById = await fetchAdminStatuses(productIds);
+    const docs = products.map((product) =>
+      mapProductToTypesenseDoc(product, statusById),
+    );
 
     console.log(
       `Importing ${docs.length} products into Typesense (page ${page})...`,
