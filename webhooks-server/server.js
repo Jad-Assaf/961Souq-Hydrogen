@@ -609,7 +609,6 @@ async function syncProductToMacarabia(product, topic) {
   await syncMacarabiaCategory(createdId, categoryId, categoryFullName);
   await syncMacarabiaInventoryCosts(inventoryCosts);
   await syncMacarabiaInventoryQuantities(variantsPayload);
-  const createdNumericId = gidToNumericId(createdId);
   await syncMacarabiaVariantImages(createdNumericId, variantImageMap);
   await removeMacarabiaDefaultVariantIfNeeded(createdNumericId);
   await publishMacarabiaProductToAllChannels(createdId);
