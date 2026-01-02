@@ -13,6 +13,10 @@ const TYPESENSE_PORT = Number(process.env.TYPESENSE_PORT || 443);
 const TYPESENSE_PROTOCOL = process.env.TYPESENSE_PROTOCOL || 'https';
 const TYPESENSE_ADMIN_API_KEY = process.env.TYPESENSE_ADMIN_API_KEY;
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
+const MACARABIA_SHOP_DOMAIN = process.env.MACARABIA_SHOP_DOMAIN;
+const MACARABIA_ADMIN_API_TOKEN = process.env.MACARABIA_ADMIN_API_TOKEN;
+const MACARABIA_ADMIN_API_VERSION =
+  process.env.MACARABIA_ADMIN_API_VERSION || '2025-07';
 
 if (!TYPESENSE_HOST || !TYPESENSE_ADMIN_API_KEY) {
   console.error(
@@ -24,6 +28,12 @@ if (!TYPESENSE_HOST || !TYPESENSE_ADMIN_API_KEY) {
 if (!SHOPIFY_WEBHOOK_SECRET) {
   console.warn(
     '[Startup] WARNING: SHOPIFY_WEBHOOK_SECRET not set, HMAC checks will still run but will always fail.',
+  );
+}
+
+if (!MACARABIA_SHOP_DOMAIN || !MACARABIA_ADMIN_API_TOKEN) {
+  console.warn(
+    '[Startup] MACARABIA_SHOP_DOMAIN or MACARABIA_ADMIN_API_TOKEN not set. Product sync will be skipped.',
   );
 }
 
@@ -43,6 +53,11 @@ const typesenseClient = new Typesense.Client({
 const TYPESENSE_PRODUCTS_COLLECTION = 'products';
 
 // ----- Helpers -----
+function normalizeShopDomain(raw) {
+  if (!raw) return '';
+  return raw.replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
 // Verify Shopify HMAC
 function verifyShopifyHmac(rawBody, hmacHeader) {
   if (!SHOPIFY_WEBHOOK_SECRET) {
@@ -85,6 +100,263 @@ function verifyShopifyHmac(rawBody, hmacHeader) {
   }
 
   return valid;
+}
+
+async function shopifyAdminGraphQL({shopDomain, adminToken, query, variables}) {
+  const normalizedDomain = normalizeShopDomain(shopDomain);
+  const res = await fetch(
+    `https://${normalizedDomain}/admin/api/${MACARABIA_ADMIN_API_VERSION}/graphql.json`,
+    {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-shopify-access-token': adminToken,
+      },
+      body: JSON.stringify({query, variables}),
+    },
+  );
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const msg =
+      data?.errors?.[0]?.message ||
+      data?.error ||
+      `Shopify Admin API error (${res.status})`;
+    throw new Error(msg);
+  }
+
+  if (data?.errors?.length) {
+    throw new Error(data.errors[0].message || 'Shopify Admin API error');
+  }
+
+  return data.data;
+}
+
+function buildMacarabiaProductInput(product) {
+  const variants = Array.isArray(product.variants) ? product.variants : [];
+  const images = Array.isArray(product.images) ? product.images : [];
+  const options = Array.isArray(product.options) ? product.options : [];
+  const metafields = Array.isArray(product.metafields)
+    ? product.metafields
+    : [];
+
+  const tags =
+    typeof product.tags === 'string'
+      ? product.tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : Array.isArray(product.tags)
+      ? product.tags
+      : [];
+
+  const optionNames = options
+    .map((option) => option?.name)
+    .filter((name) => typeof name === 'string' && name.trim().length > 0);
+
+  const metafieldInputs = metafields
+    .map((metafield) => ({
+      namespace: metafield?.namespace,
+      key: metafield?.key,
+      type: metafield?.type,
+      value: metafield?.value,
+    }))
+    .filter(
+      (metafield) =>
+        typeof metafield.namespace === 'string' &&
+        typeof metafield.key === 'string' &&
+        typeof metafield.type === 'string' &&
+        metafield.value != null,
+    );
+
+  return {
+    title: product.title || '',
+    bodyHtml: product.body_html || '',
+    vendor: product.vendor || '',
+    productType: product.product_type || '',
+    tags,
+    handle: product.handle || undefined,
+    status: product.status || 'active',
+    options: optionNames.length ? optionNames : undefined,
+    metafields: metafieldInputs.length ? metafieldInputs : undefined,
+    variants: variants.map((variant) => ({
+      sku: variant.sku || undefined,
+      price: variant.price != null ? String(variant.price) : undefined,
+      compareAtPrice:
+        variant.compare_at_price != null
+          ? String(variant.compare_at_price)
+          : undefined,
+      inventoryManagement: variant.inventory_management || undefined,
+      inventoryPolicy: variant.inventory_policy || undefined,
+      inventoryQuantity:
+        typeof variant.inventory_quantity === 'number'
+          ? variant.inventory_quantity
+          : undefined,
+      weight: typeof variant.weight === 'number' ? variant.weight : undefined,
+      weightUnit: variant.weight_unit || undefined,
+      barcode: variant.barcode || undefined,
+      title: variant.title || undefined,
+      option1: variant.option1 || undefined,
+      option2: variant.option2 || undefined,
+      option3: variant.option3 || undefined,
+    })),
+    images: images
+      .map((image) => image?.src)
+      .filter(Boolean)
+      .map((src) => ({src})),
+  };
+}
+
+async function findMacarabiaProductIdByHandle(handle) {
+  if (!handle) return null;
+  const query = `#graphql
+    query ProductByHandle($handle: String!) {
+      productByHandle(handle: $handle) {
+        id
+      }
+    }
+  `;
+  const data = await shopifyAdminGraphQL({
+    shopDomain: MACARABIA_SHOP_DOMAIN,
+    adminToken: MACARABIA_ADMIN_API_TOKEN,
+    query,
+    variables: {handle},
+  });
+  return data?.productByHandle?.id || null;
+}
+
+async function findMacarabiaProductIdBySku(skus) {
+  const usableSkus = Array.isArray(skus)
+    ? skus.filter((sku) => typeof sku === 'string' && sku.trim())
+    : [];
+  for (const sku of usableSkus) {
+    const query = `#graphql
+      query ProductBySku($query: String!) {
+        productVariants(first: 1, query: $query) {
+          edges {
+            node {
+              id
+              product {
+                id
+              }
+            }
+          }
+        }
+      }
+    `;
+    const data = await shopifyAdminGraphQL({
+      shopDomain: MACARABIA_SHOP_DOMAIN,
+      adminToken: MACARABIA_ADMIN_API_TOKEN,
+      query,
+      variables: {query: `sku:${sku}`},
+    });
+    const productId =
+      data?.productVariants?.edges?.[0]?.node?.product?.id || null;
+    if (productId) return productId;
+  }
+  return null;
+}
+
+async function syncProductToMacarabia(product, topic) {
+  if (!MACARABIA_SHOP_DOMAIN || !MACARABIA_ADMIN_API_TOKEN) return;
+
+  const handle = product?.handle || '';
+  const skus = Array.isArray(product?.variants)
+    ? product.variants.map((variant) => variant?.sku).filter(Boolean)
+    : [];
+
+  if (topic === 'products/delete') {
+    const deleteId =
+      (await findMacarabiaProductIdByHandle(handle)) ||
+      (await findMacarabiaProductIdBySku(skus));
+    if (!deleteId) {
+      console.log('[Macarabia] No matching product to delete.');
+      return;
+    }
+
+    const mutation = `#graphql
+      mutation ProductDelete($input: ProductDeleteInput!) {
+        productDelete(input: $input) {
+          deletedProductId
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+    const data = await shopifyAdminGraphQL({
+      shopDomain: MACARABIA_SHOP_DOMAIN,
+      adminToken: MACARABIA_ADMIN_API_TOKEN,
+      query: mutation,
+      variables: {input: {id: deleteId}},
+    });
+    const errors = data?.productDelete?.userErrors || [];
+    if (errors.length) {
+      throw new Error(errors.map((e) => e.message).join('; '));
+    }
+    console.log('[Macarabia] Deleted product:', deleteId);
+    return;
+  }
+
+  const input = buildMacarabiaProductInput(product);
+  const existingId =
+    (await findMacarabiaProductIdByHandle(handle)) ||
+    (await findMacarabiaProductIdBySku(skus));
+
+  if (existingId) {
+    const mutation = `#graphql
+      mutation ProductUpdate($input: ProductInput!) {
+        productUpdate(input: $input) {
+          product {
+            id
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+    const data = await shopifyAdminGraphQL({
+      shopDomain: MACARABIA_SHOP_DOMAIN,
+      adminToken: MACARABIA_ADMIN_API_TOKEN,
+      query: mutation,
+      variables: {input: {id: existingId, ...input}},
+    });
+    const errors = data?.productUpdate?.userErrors || [];
+    if (errors.length) {
+      throw new Error(errors.map((e) => e.message).join('; '));
+    }
+    console.log('[Macarabia] Updated product:', existingId);
+    return;
+  }
+
+  const mutation = `#graphql
+    mutation ProductCreate($input: ProductInput!) {
+      productCreate(input: $input) {
+        product {
+          id
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+  const data = await shopifyAdminGraphQL({
+    shopDomain: MACARABIA_SHOP_DOMAIN,
+    adminToken: MACARABIA_ADMIN_API_TOKEN,
+    query: mutation,
+    variables: {input},
+  });
+  const errors = data?.productCreate?.userErrors || [];
+  if (errors.length) {
+    throw new Error(errors.map((e) => e.message).join('; '));
+  }
+  console.log('[Macarabia] Created product:', data?.productCreate?.product?.id);
 }
 
 // Map Shopify Admin product JSON → Typesense doc (matches your existing schema)
@@ -210,11 +482,21 @@ app.post(
         );
         await collection.documents().upsert(doc);
         console.log('[Webhooks] Upsert success:', doc.id);
+        try {
+          await syncProductToMacarabia(payload, topic);
+        } catch (syncErr) {
+          console.error('[Macarabia] Sync error:', syncErr.message);
+        }
       } else if (topic === 'products/delete') {
         const gid = `gid://shopify/Product/${payload.id}`;
         console.log('[Webhooks] Deleting product from Typesense:', gid);
         await collection.documents(gid).delete();
         console.log('[Webhooks] Delete success:', gid);
+        try {
+          await syncProductToMacarabia(payload, topic);
+        } catch (syncErr) {
+          console.error('[Macarabia] Sync error:', syncErr.message);
+        }
       } else {
         console.log('[Webhooks] Ignored topic:', topic);
       }

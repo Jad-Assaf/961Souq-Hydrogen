@@ -57,6 +57,14 @@ function extractOutputText(openaiJson) {
   return text.trim();
 }
 
+function cleanSuggestionText(text) {
+  if (!text) return '';
+  return text
+    .replace(/\s*\((?:[^)]*(corrected|original|same)\b[^)]*)\)/gi, '')
+    .replace(/\s+corrected\s+as\s+.+$/i, '')
+    .trim();
+}
+
 // Common stop words to filter out
 const STOP_WORDS = new Set([
   'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
@@ -340,7 +348,7 @@ export async function generateSearchSuggestions(originalQuery, context) {
     const payload = {
       model: 'gpt-5-nano',
       reasoning: {effort: 'minimal'},
-      instructions: `Correct spelling errors in the query to match product names. Return 6 corrected queries, one per line. Do NOT return the original query.`,
+      instructions: `Correct spelling errors in the query to match product names. Return 6 corrected queries, one per line. Do NOT return the original query. Return only the corrected query text with no extra words or explanations.`,
       input: `"${originalQuery}" Products: ${spellingTerms}`,
       max_output_tokens: 60,
     };
@@ -382,6 +390,7 @@ export async function generateSearchSuggestions(originalQuery, context) {
         // Remove "(duplicate)" or similar text
         .map((line) => line.replace(/\s*\(duplicate\)/gi, '').trim())
         .map((line) => line.replace(/\s*\(.*?duplicate.*?\)/gi, '').trim())
+        .map((line) => cleanSuggestionText(line))
         .filter((s) => s && s.length >= 2 && s.length < 50)
         .filter(filterSuggestion) // Filter out stop words and colors
         .filter((s) => {
@@ -405,7 +414,9 @@ export async function generateSearchSuggestions(originalQuery, context) {
     const cleanedSuggestions = allSuggestions.map(s => {
       if (!s.term) return null;
       // Remove "(duplicate)" text
-      const cleaned = s.term.replace(/\s*\(duplicate\)/gi, '').trim();
+      const cleaned = cleanSuggestionText(
+        s.term.replace(/\s*\(duplicate\)/gi, '').trim(),
+      );
       return cleaned ? {...s, term: cleaned, normalized: cleaned.toLowerCase().trim()} : null;
     }).filter(Boolean);
 
@@ -482,4 +493,3 @@ export async function generateSearchSuggestions(originalQuery, context) {
     return [];
   }
 }
-
