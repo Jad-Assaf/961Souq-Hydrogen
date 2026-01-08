@@ -1,5 +1,12 @@
 import {flattenConnection} from '@shopify/hydrogen';
 
+const MERCHANT_CENTER_SETTINGS = {
+  title: '961Souq',
+  description: 'Product feed for Google Merchant Center',
+  countryCode: 'LB',
+  defaultBrand: '961Souq',
+};
+
 /**
  * The main loader for the Merchant Center feed route.
  * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
@@ -20,13 +27,20 @@ export async function loader({request, context: {storefront}}) {
   // Generate the Merchant Center feed (RSS)
   const feedXml = generateMerchantCenterFeed({products, baseUrl});
 
-  return new Response(feedXml, {
-    headers: {
-      'Content-Type': 'application/xml',
-      // Adjust caching as desired
-      'Cache-Control': `max-age=${60 * 60}`, // 1 hour
-    },
+  const headers = new Headers({
+    'Content-Type': 'application/xml',
+    // Adjust caching as desired
+    'Cache-Control': `max-age=${60 * 60}`, // 1 hour
+    Vary: 'Accept-Encoding',
   });
+
+  const acceptEncoding = request.headers.get('accept-encoding') || '';
+  if (acceptEncoding.includes('gzip')) {
+    headers.set('Content-Encoding', 'gzip');
+    return new Response(gzipEncode(feedXml), {headers});
+  }
+
+  return new Response(feedXml, {headers});
 }
 
 /**
@@ -78,9 +92,9 @@ function generateMerchantCenterFeed({products, baseUrl}) {
   return `<?xml version="1.0"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
   <channel>
-    <title>Your Store Title</title>
+    <title>${xmlEncode(MERCHANT_CENTER_SETTINGS.title)}</title>
     <link>${baseUrl}</link>
-    <description>Your store feed for Google Merchant Center</description>
+    <description>${xmlEncode(MERCHANT_CENTER_SETTINGS.description)}</description>
     ${allItems
       .map(({product, variant}) =>
         renderProductVariantItem(product, variant, baseUrl),
@@ -97,14 +111,15 @@ function renderProductVariantItem(product, variant, baseUrl) {
   // Parse numeric IDs or just use the GraphQL GIDs
   const productId = parseGid(product.id); // e.g. 'gid://shopify/Product/12345' -> '12345'
   const variantId = parseGid(variant.id); // e.g. 'gid://shopify/ProductVariant/67890' -> '67890'
-  const combinedId = `${productId}_${variantId}`;
+  const merchantCenterId = `shopify_${MERCHANT_CENTER_SETTINGS.countryCode}_${productId}_${variantId}`;
+  const itemGroupId = `shopify_${MERCHANT_CENTER_SETTINGS.countryCode}_${productId}`;
 
   // Price from the variant
   const price = variant?.priceV2?.amount || '0.00';
   const currencyCode = variant?.priceV2?.currencyCode || 'USD';
 
   // Brand fallback (if your store uses 'vendor', use that; otherwise hardcode or fetch from Metafields)
-  const brand = product.vendor || 'YourBrand';
+  const brand = product.vendor || MERCHANT_CENTER_SETTINGS.defaultBrand;
 
   // Images: first one is <g:image_link>, additional are <g:additional_image_link>
   const allImages = product?.images?.nodes || [];
@@ -128,11 +143,13 @@ function renderProductVariantItem(product, variant, baseUrl) {
 
   return `
     <item>
-      <g:id>shopify_US_${xmlEncode(combinedId)}</g:id>
-      <!-- Updated <g:title> to reflect combined title -->
+      <g:id>${xmlEncode(merchantCenterId)}</g:id>
+      <g:item_group_id>${xmlEncode(itemGroupId)}</g:item_group_id>
       <g:title>${xmlEncode(combinedTitle)}</g:title>
       <g:description>${xmlEncode(cleanDescription)}</g:description>
-      <g:link>${baseUrl}/products/${xmlEncode(product.handle)}</g:link>
+      <g:link>${baseUrl}/products/${xmlEncode(
+    product.handle,
+  )}?variant=${xmlEncode(variantId)}</g:link>
       ${firstImageUrl ? `<g:image_link>${firstImageUrl}</g:image_link>` : ''}
       ${additionalImageTags}
       <g:condition>new</g:condition>
@@ -161,6 +178,17 @@ function xmlEncode(string) {
     /[&<>'"]/g,
     (char) => `&#${char.charCodeAt(0)};`,
   );
+}
+
+/**
+ * Gzip-encode text using the Web CompressionStream API.
+ */
+function gzipEncode(text) {
+  const stream = new CompressionStream('gzip');
+  const writer = stream.writable.getWriter();
+  writer.write(new TextEncoder().encode(text));
+  writer.close();
+  return stream.readable;
 }
 
 /**
