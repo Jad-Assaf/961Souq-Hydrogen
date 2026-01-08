@@ -5,6 +5,8 @@ const MERCHANT_CENTER_SETTINGS = {
   description: 'Product feed for Google Merchant Center',
   countryCode: 'LB',
   defaultBrand: '961Souq',
+  itemsPerFeed: 3000,
+  queryPageSize: 250,
 };
 
 /**
@@ -12,16 +14,22 @@ const MERCHANT_CENTER_SETTINGS = {
  * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
  */
 export async function loader({request, context: {storefront}}) {
-  let baseUrl = new URL(request.url).origin;
+  const url = new URL(request.url);
+  let baseUrl = url.origin;
 
   // Remove "www." from the base URL if it exists
   baseUrl = baseUrl.replace(/\/\/www\./, '//');
 
-  // Fetch all products you want in your feed:
-  const products = await fetchAllResources({
+  const page = parsePositiveInt(url.searchParams.get('page')) || 1;
+  const startIndex = (page - 1) * MERCHANT_CENTER_SETTINGS.itemsPerFeed;
+
+  // Fetch products for the requested feed page:
+  const products = await fetchResourcePage({
     storefront,
     query: PRODUCTS_QUERY,
     field: 'products',
+    startIndex,
+    limit: MERCHANT_CENTER_SETTINGS.itemsPerFeed,
   });
 
   // Generate the Merchant Center feed (RSS)
@@ -31,48 +39,63 @@ export async function loader({request, context: {storefront}}) {
     'Content-Type': 'application/xml',
     // Adjust caching as desired
     'Cache-Control': `max-age=${60 * 60}`, // 1 hour
-    Vary: 'Accept-Encoding',
   });
 
-  const acceptEncoding = request.headers.get('accept-encoding') || '';
-  if (acceptEncoding.includes('gzip')) {
-    headers.set('Content-Encoding', 'gzip');
-    return new Response(gzipEncode(feedXml), {headers});
+  const wantsGzip = url.searchParams.get('gzip') === '1';
+  if (wantsGzip) {
+    const gzippedBody = gzipEncode(feedXml);
+    if (gzippedBody) {
+      headers.set('Content-Encoding', 'gzip');
+      return new Response(gzippedBody, {headers});
+    }
   }
 
   return new Response(feedXml, {headers});
 }
 
 /**
- * Fetch all pages of data until we hit the limit or no more results.
+ * Fetch one page of resources (offset + limit) by walking cursors.
  */
-async function fetchAllResources({storefront, query, field}) {
-  const MAX_URLS_PER_PAGE = 250;
-  const GOOGLE_SITEMAP_LIMIT = 50000;
-
-  let allNodes = [];
+async function fetchResourcePage({
+  storefront,
+  query,
+  field,
+  startIndex,
+  limit,
+}) {
+  const pageSize = MERCHANT_CENTER_SETTINGS.queryPageSize;
+  const endIndex = startIndex + limit;
+  let collected = [];
   let nextPageCursor = null;
+  let seen = 0;
 
   do {
     const response = await storefront.query(query, {
       variables: {
-        first: MAX_URLS_PER_PAGE,
+        first: pageSize,
         after: nextPageCursor,
       },
+      cache: storefront.CacheLong(),
     });
 
     const connection = response?.[field];
     if (!connection) break;
 
     const nodes = flattenConnection(connection);
-    allNodes = allNodes.concat(nodes);
+    const nextSeen = seen + nodes.length;
 
+    if (nextSeen > startIndex && collected.length < limit) {
+      const sliceStart = Math.max(0, startIndex - seen);
+      collected = collected.concat(nodes.slice(sliceStart));
+    }
+
+    seen = nextSeen;
     nextPageCursor = connection.pageInfo.hasNextPage
       ? connection.pageInfo.endCursor
       : null;
-  } while (nextPageCursor && allNodes.length < GOOGLE_SITEMAP_LIMIT);
+  } while (nextPageCursor && seen < endIndex && collected.length < limit);
 
-  return allNodes.slice(0, GOOGLE_SITEMAP_LIMIT);
+  return collected.slice(0, limit);
 }
 
 /**
@@ -145,6 +168,7 @@ function renderProductVariantItem(product, variant, baseUrl) {
     <item>
       <g:id>${xmlEncode(merchantCenterId)}</g:id>
       <g:item_group_id>${xmlEncode(itemGroupId)}</g:item_group_id>
+      <!-- Updated <g:title> to reflect combined title -->
       <g:title>${xmlEncode(combinedTitle)}</g:title>
       <g:description>${xmlEncode(cleanDescription)}</g:description>
       <g:link>${baseUrl}/products/${xmlEncode(
@@ -181,14 +205,19 @@ function xmlEncode(string) {
 }
 
 /**
+ * Ensure a positive integer from a query string.
+ */
+function parsePositiveInt(value) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) || parsed <= 0 ? null : parsed;
+}
+
+/**
  * Gzip-encode text using the Web CompressionStream API.
  */
 function gzipEncode(text) {
-  const stream = new CompressionStream('gzip');
-  const writer = stream.writable.getWriter();
-  writer.write(new TextEncoder().encode(text));
-  writer.close();
-  return stream.readable;
+  if (typeof CompressionStream === 'undefined') return null;
+  return new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
 }
 
 /**
