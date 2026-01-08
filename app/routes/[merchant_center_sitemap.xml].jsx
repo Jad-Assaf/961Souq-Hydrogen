@@ -168,7 +168,6 @@ function renderProductVariantItem(product, variant, baseUrl) {
     <item>
       <g:id>${xmlEncode(merchantCenterId)}</g:id>
       <g:item_group_id>${xmlEncode(itemGroupId)}</g:item_group_id>
-      <!-- Updated <g:title> to reflect combined title -->
       <g:title>${xmlEncode(combinedTitle)}</g:title>
       <g:description>${xmlEncode(cleanDescription)}</g:description>
       <g:link>${baseUrl}/products/${xmlEncode(
