@@ -1001,7 +1001,7 @@ export default function Product() {
                 <span>Call For Price!</span>
               ) : (
                 <span style={{display: 'flex', alignItems: 'center'}}>
-                  <Money data={selectedVariant.price} /> &nbsp; HT &nbsp;
+                  <Money data={selectedVariant.price} /> &nbsp; {product.metafieldVat?.value === 'Excluding VAT' ? 'HT' : 'TTC'} &nbsp;
                 </span>
               )}
             </small>
@@ -1077,7 +1077,7 @@ export default function Product() {
           <span
             style={{fontSize: '14px', fontStyle: 'italic', fontWeight: '300'}}
           >
-            Excluding VAT
+            {product.metafieldVat?.value === 'Excluding VAT' ? 'Excluding VAT' : 'Including VAT'}
           </span>
           <p className="productPageDisclaimer">
             Product images are for reference only. The actual item may differ in
