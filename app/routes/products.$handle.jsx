@@ -1010,7 +1010,12 @@ export default function Product() {
                 <span>Call For Price!</span>
               ) : (
                 <span style={{display: 'flex', alignItems: 'center'}}>
-                  <Money data={selectedVariant.price} /> &nbsp; {product.metafieldVat?.value === 'Excluding VAT' ? 'HT' : 'TTC'} &nbsp;
+                  <Money data={selectedVariant.price} />
+                  {product.metafieldVat?.value === 'Excluding VAT' && (
+                    <>
+                      &nbsp; HT &nbsp;
+                    </>
+                  )}
                 </span>
               )}
             </small>
@@ -1083,11 +1088,13 @@ export default function Product() {
             metafieldShipping={product.metafieldShipping}
             // metafieldVat={product.metafieldVat}
           />
-          <span
-            style={{fontSize: '14px', fontStyle: 'italic', fontWeight: '300'}}
-          >
-            {product.metafieldVat?.value === 'Excluding VAT' ? 'Excluding VAT' : 'Including VAT'}
-          </span>
+          {product.metafieldVat?.value === 'Excluding VAT' && (
+            <span
+              style={{fontSize: '14px', fontStyle: 'italic', fontWeight: '300'}}
+            >
+              Excluding VAT
+            </span>
+          )}
           <p className="productPageDisclaimer">
             Product images are for reference only. The actual item may differ in
             appearance & colour. Please refer to the product code, SKU, and
