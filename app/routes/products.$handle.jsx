@@ -821,6 +821,15 @@ export default function Product() {
 
   // -------- Effects --------
 
+  // Reset selectedVariant, quantity, and subtotal when product changes
+  useEffect(() => {
+    if (product?.selectedVariant) {
+      setSelectedVariant(product.selectedVariant);
+      setQuantity(1);
+      setSubtotal(0);
+    }
+  }, [product?.id, product?.handle, product?.selectedVariant?.id]);
+
   // Pixel / analytics
   useEffect(() => {
     trackViewContent(product);
