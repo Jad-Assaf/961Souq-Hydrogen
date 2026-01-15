@@ -75,6 +75,7 @@ export default async function handleRequest(
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
       'https://*.respond.io',
+      'https://www.merchant-center-analytics.goog',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -117,6 +118,7 @@ export default async function handleRequest(
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
       'https://*.respond.io',
+      'https://www.merchant-center-analytics.goog',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -160,6 +162,7 @@ export default async function handleRequest(
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
       'https://*.respond.io',
+      'https://www.merchant-center-analytics.goog',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -206,6 +209,7 @@ export default async function handleRequest(
       'https://staticxx.facebook.com',
       'https://*.respond.io',
       'data:',
+      'https://www.merchant-center-analytics.goog',
     ],
     mediaSrc: [
       "'self'",
@@ -236,6 +240,7 @@ export default async function handleRequest(
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
       'https://*.respond.io',
+      'https://www.merchant-center-analytics.goog',
     ],
   });
 
