@@ -51,6 +51,10 @@ export function PageLayout({
       {/* <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} /> */}
       <MenuNavbar menu={header.menu} />
       <MobileBottomNavigation cart={cart} />
+      <script
+        id="respondio__widget"
+        src="https://cdn.respond.io/webchat/widget/widget.js?cId=234b5a8193ec31661f3dbaa97fb8063"
+      ></script>
       {/* <CollapsibleVerticalHeader header={header} /> */}
       {header && (
         <Header
