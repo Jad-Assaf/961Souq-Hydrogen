@@ -29,6 +29,7 @@ import MetaPixel from './components/MetaPixel';
 import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
+import RespondIOWidget from './components/RespondIOWidget';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -408,6 +409,9 @@ export function Layout({children}) {
         <InstantScrollRestoration />
         {/* <ScrollRestoration nonce={nonce} /> */}
         {nonce ? <Scripts nonce={nonce} /> : <Scripts />}
+        {/* This site is converting visitors into subscribers and customers with https://respond.io */}
+        <RespondIOWidget />
+        {/* https://respond.io */}
       </body>
     </html>
   );
