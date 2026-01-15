@@ -7090,7 +7090,7 @@ svg.icon.icon--full-color {
   }
 
   .banner-slideshow {
-    display: none !important;
+    /* display: none !important; */
   }
 }
 
