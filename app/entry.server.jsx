@@ -74,6 +74,7 @@ export default async function handleRequest(
       'https://www.google-analytics.com',
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
+      'https://*.respond.io',
     ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
@@ -115,6 +116,7 @@ export default async function handleRequest(
       'https://www.meta.com',
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
+      'https://*.respond.io',
     ],
     frameSrc: [
       "'self'", // Allow frames from the same origin
@@ -157,6 +159,7 @@ export default async function handleRequest(
       'https://www.google-analytics.com',
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
+      'https://*.respond.io',
     ],
     imgSrc: [
       "'self' blob:", // Allow images from the same origin
@@ -201,6 +204,7 @@ export default async function handleRequest(
       'https://www.google-analytics.com',
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
+      'https://*.respond.io',
     ],
     mediaSrc: [
       "'self'",
@@ -230,6 +234,7 @@ export default async function handleRequest(
       'https://connect.facebook.net',
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
+      'https://*.respond.io',
     ],
   });
 

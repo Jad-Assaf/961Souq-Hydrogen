@@ -323,6 +323,13 @@ export function Layout({children}) {
         ) : null}
         <MetaPixel pixelId={PIXEL_ID} />
         {/* <TikTokPixel pixelId={TIKTOK_PIXEL_ID} /> */}
+        {nonce ? (
+          <script
+            id="respondio__widget"
+            nonce={nonce}
+            src="https://cdn.respond.io/webchat/widget/widget.js?cId=234b5a8193ec31661f3dbaa97fb8063"
+          ></script>
+        ) : null}
         <style
           dangerouslySetInnerHTML={{
             __html: `
