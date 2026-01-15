@@ -410,7 +410,7 @@ export function Layout({children}) {
         {/* <ScrollRestoration nonce={nonce} /> */}
         {nonce ? <Scripts nonce={nonce} /> : <Scripts />}
         {/* This site is converting visitors into subscribers and customers with https://respond.io */}
-        <RespondIOWidget />
+        {/* <RespondIOWidget /> */}
         {/* https://respond.io */}
       </body>
     </html>
