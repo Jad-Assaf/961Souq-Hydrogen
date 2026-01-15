@@ -205,6 +205,7 @@ export default async function handleRequest(
       'https://graph.facebook.com',
       'https://staticxx.facebook.com',
       'https://*.respond.io',
+      'data:',
     ],
     mediaSrc: [
       "'self'",
