@@ -109,7 +109,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     target="_blank"
                     aria-label="Whatsapp Link"
                   >
-                    +961 81 860 861
+                    +961 81 960 961
                   </a>
                 </li>
                 <li>
