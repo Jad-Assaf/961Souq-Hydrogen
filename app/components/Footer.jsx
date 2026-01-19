@@ -86,11 +86,11 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     </svg>
                   </i>{' '}
                   <a
-                    href="https://wa.me/96171888036"
+                    href="https://wa.me/15558301649"
                     target="_blank"
                     aria-label="Whatsapp Link"
                   >
-                    +961 71 888 036
+                    Customer Support
                   </a>
                 </li> */}
                 <li>
@@ -105,11 +105,11 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     </svg>
                   </i>{' '}
                   <a
-                    href="https://wa.me/96171888036"
+                    href="https://wa.me/15558301649"
                     target="_blank"
                     aria-label="Whatsapp Link"
                   >
-                    +961 71 888 036
+                    Customer Support
                   </a>
                 </li>
                 <li>
