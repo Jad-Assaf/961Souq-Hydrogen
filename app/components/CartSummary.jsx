@@ -43,7 +43,7 @@ export function CartSummary({cart, layout}) {
     if (subtotal) message += `Subtotal: $${subtotal} ${currency}\n`;
 
     const encoded = encodeURIComponent(message.trim());
-    const whatsappNumber = '96181960961';
+    const whatsappNumber = '96171888036';
     return `https://wa.me/${whatsappNumber}?text=${encoded}`;
   }, [cart]);
 
@@ -168,7 +168,7 @@ export default function CartCheckoutActions({
           <span className="alert-message">
             We apologize for any inconvenience! Your order is above $10000.
             Please contact sales to proceed.{' '}
-            <a className="cart-err-msg-link" href="https://wa.me/96181960961">
+            <a className="cart-err-msg-link" href="https://wa.me/96171888036">
               +961 70 888 036
             </a>
           </span>
