@@ -36,7 +36,7 @@ export default function ContactUs() {
           <p>
             <strong>Whatsapp:</strong>{' '}
             <a
-              href="https://wa.me/15558301649"
+              href="https://wa.me/9613963961"
               aria-label="Whatsapp Link"
               target="_blank"
             >
