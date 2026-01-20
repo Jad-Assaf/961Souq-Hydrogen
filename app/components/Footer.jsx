@@ -181,7 +181,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
           </div>
         </div>
         <div className="copyright">
-          <p>© 2025, 961Souq All rights reserved.</p>
+          <p>© 2026, 961Souq All rights reserved.</p>
           <div>
             <svg
               className="icon icon--full-color"
