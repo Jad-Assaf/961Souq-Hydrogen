@@ -86,7 +86,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     </svg>
                   </i>{' '}
                   <a
-                    href="https://wa.me/9613963961"
+                    href="https://wa.me/96171888036"
                     target="_blank"
                     aria-label="Whatsapp Link"
                   >
@@ -105,7 +105,7 @@ export const Footer = ({ shopMenu, policiesMenu }) => {
                     </svg>
                   </i>{' '}
                   <a
-                    href="https://wa.me/9613963961"
+                    href="https://wa.me/96171888036"
                     target="_blank"
                     aria-label="Whatsapp Link"
                   >
