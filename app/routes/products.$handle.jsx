@@ -201,12 +201,39 @@ export async function loader(args) {
   return await loadCriticalData(args);
 }
 
+function getCleanProductUrl(requestUrl) {
+  const url = new URL(requestUrl);
+
+  if (!url.search) return null;
+
+  const params = new URLSearchParams(url.search);
+  let removed = false;
+
+  for (const key of Array.from(params.keys())) {
+    if (key.startsWith('pr_')) {
+      params.delete(key);
+      removed = true;
+    }
+  }
+
+  if (!removed) return null;
+
+  url.search = params.toString() ? `?${params.toString()}` : '';
+
+  return url.toString();
+}
+
 async function loadCriticalData({ context, params, request }) {
   const { handle } = params;
   const { storefront } = context;
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
+  }
+
+  const cleanUrl = getCleanProductUrl(request.url);
+  if (cleanUrl) {
+    return redirect(cleanUrl, { status: 301 });
   }
 
   // Fetch product data
