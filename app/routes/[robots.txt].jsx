@@ -129,6 +129,27 @@ Disallow: /*/*?*ls%3D*%3Fls%3D*
 Disallow: /*/*?*ls%3d*%3fls%3d*
 Disallow: /search
 Disallow: /search/?*
+Disallow: /Search
+Disallow: /Whishlist
+Disallow: /wishlist
+Disallow: /products/gift-voucher
+Disallow: /collections/most-sold-products
+Disallow: /apple
+Disallow: /gaming
+Disallow: /gaming-laptops
+Disallow: /laptops
+Disallow: /desktops
+Disallow: /pc-parts
+Disallow: /networking
+Disallow: /monitors
+Disallow: /mobiles
+Disallow: /tablets
+Disallow: /audio
+Disallow: /accessories
+Disallow: /fitness
+Disallow: /photography
+Disallow: /home-appliances
+Disallow: /cosmetics
 Disallow: /apple-app-site-association
 Disallow: /.well-known/shopify/monorail
 ${sitemapUrl ? `Sitemap: ${sitemapUrl}` : ''}`;
