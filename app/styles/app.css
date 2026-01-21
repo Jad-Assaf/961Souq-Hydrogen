@@ -2667,7 +2667,7 @@ aside .cart-or {
   border-radius: 5px;
   justify-content: center;
   align-items: center;
-  z-index: 10;
+  z-index: 0;
   box-shadow: inset 0px 0px 20px 0px #c6c6c6;
 }
 
