@@ -102,6 +102,11 @@ Disallow: /*?utm_medium=
 Disallow: /*?utm_campaign=
 Disallow: /*?utm_content=
 Disallow: /products/*?pr_prod_strat*
+Disallow: /*?*pr_prod_strat=*
+Disallow: /*?*pr_rec_id=*
+Disallow: /*?*pr_rec_pid=*
+Disallow: /*?*pr_ref_pid=*
+Disallow: /*?*pr_seq=*
 Disallow: /collections/*?sort
 Disallow: /collections/*?*&sort
 Disallow: /collections/*sort_by*
