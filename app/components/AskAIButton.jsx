@@ -1,12 +1,11 @@
 import React from 'react';
 import ProductFAQ from './ProductFAQ';
 
-export default function AskAIButton({ productId, productFAQRef }) {
+export default function AskAIButton({productId, productFAQRef}) {
   return (
     <>
       <div className="ai-summary product-chat-launcher">
         <div className="ai-summary__header">
-
           <button
             type="button"
             className="ai-summary__action"
@@ -33,4 +32,3 @@ export default function AskAIButton({ productId, productFAQRef }) {
     </>
   );
 }
-

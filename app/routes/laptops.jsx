@@ -377,9 +377,7 @@ export default function BusinessLaptopsCategoryPage() {
                         <div className="bl-product-meta">
                           {minPrice && (
                             <span className="bl-product-price">
-                              {currency
-                                ? `$${minPrice}`
-                                : `$${minPrice}`}
+                              {currency ? `$${minPrice}` : `$${minPrice}`}
                             </span>
                           )}
                           <span

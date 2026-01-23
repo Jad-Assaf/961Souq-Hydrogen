@@ -16,12 +16,12 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
-  
+
   // Add cancel method like lodash debounce
-  debounced.cancel = function() {
+  debounced.cancel = function () {
     clearTimeout(timeout);
   };
-  
+
   return debounced;
 }
 
@@ -74,7 +74,8 @@ export function Hit({hit}) {
 
 function CustomSearchInput({setShowHits}) {
   const navigate = useNavigate();
-  const {performSearch, currentQuery, searchInput, setSearchInput} = useSearch();
+  const {performSearch, currentQuery, searchInput, setSearchInput} =
+    useSearch();
 
   // debounce the search calls
   const debouncedSearch = useRef(

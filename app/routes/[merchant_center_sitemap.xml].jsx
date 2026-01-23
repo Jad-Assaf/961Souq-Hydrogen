@@ -117,7 +117,9 @@ function generateMerchantCenterFeed({products, baseUrl}) {
   <channel>
     <title>${xmlEncode(MERCHANT_CENTER_SETTINGS.title)}</title>
     <link>${baseUrl}</link>
-    <description>${xmlEncode(MERCHANT_CENTER_SETTINGS.description)}</description>
+    <description>${xmlEncode(
+      MERCHANT_CENTER_SETTINGS.description,
+    )}</description>
     ${allItems
       .map(({product, variant}) =>
         renderProductVariantItem(product, variant, baseUrl),

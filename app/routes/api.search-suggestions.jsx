@@ -13,5 +13,3 @@ export async function loader({request, context}) {
   const suggestions = await generateSearchSuggestions(originalQuery, context);
   return json({suggestions});
 }
-
-

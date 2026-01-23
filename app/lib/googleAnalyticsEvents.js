@@ -15,9 +15,7 @@ export const generateEventId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  return (
-    Date.now().toString(36) + Math.random().toString(36).substr(2, 9)
-  );
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 };
 
 /**
@@ -105,11 +103,12 @@ export const trackSearchGA = (query) => {
  */
 export const trackInitiateCheckoutGA = (cart) => {
   if (typeof window.gtag === 'function') {
-    const items = cart.items?.map((item) => ({
-      item_id: parseGid(item.variantId),
-      price: item.price,
-      quantity: item.quantity,
-    })) || [];
+    const items =
+      cart.items?.map((item) => ({
+        item_id: parseGid(item.variantId),
+        price: item.price,
+        quantity: item.quantity,
+      })) || [];
     const value = parseFloat(cart.cost?.totalAmount?.amount) || 0;
     const currency = cart.cost?.totalAmount?.currencyCode || 'USD';
 

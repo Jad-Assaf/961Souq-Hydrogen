@@ -7,9 +7,9 @@ import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
 import AlgoliaSearch from './StorefrontSearch';
 import {useWishlist} from '~/lib/WishlistContext';
-import { useOptimisticCart } from '@shopify/hydrogen';
-import { InstantSearchBar } from './InstantSearchBar';
-import { TypesenseSearch } from './TypesenseSearch';
+import {useOptimisticCart} from '@shopify/hydrogen';
+import {InstantSearchBar} from './InstantSearchBar';
+import {TypesenseSearch} from './TypesenseSearch';
 
 // import StorefrontSearch from './StorefrontSearch';
 
@@ -83,7 +83,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
         )
       : 0);
 
-
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
     if (!isMobileMenuOpen) setActiveSubmenu(null);
@@ -148,8 +147,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400';
   const BLACK_NOVEMBER_LOGO =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-white_6a233cc8-9b7b-415c-b352-84aac4668966.png?v=1762774820';
-
-
 
   /* --------- AUTOMATIC PLACEHOLDER TYPING REMOVED --------- */
 

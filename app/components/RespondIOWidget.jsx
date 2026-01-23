@@ -48,4 +48,3 @@ const RespondIOWidget = () => {
 };
 
 export default RespondIOWidget;
-

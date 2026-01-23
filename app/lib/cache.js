@@ -21,7 +21,7 @@ export function getCache(key) {
  */
 export function setCache(key, value, ttl) {
   const expiry = Date.now() + ttl;
-  cache.set(key, { value, expiry });
+  cache.set(key, {value, expiry});
 }
 
 export default cache;

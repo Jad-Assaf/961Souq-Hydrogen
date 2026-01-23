@@ -217,7 +217,7 @@ const ProductFAQ = React.forwardRef(
               maxOutputTokens: MAX_OUTPUT_TOKENS,
               messageTooLong: true,
               productUrl,
-              inputTokens: inputTokens,
+              inputTokens,
             }),
           });
 
@@ -270,7 +270,7 @@ const ProductFAQ = React.forwardRef(
             context: productContext,
             maxOutputTokens: MAX_OUTPUT_TOKENS,
             productUrl,
-            inputTokens: inputTokens,
+            inputTokens,
           }),
         });
 
@@ -364,7 +364,10 @@ const ProductFAQ = React.forwardRef(
                       : 'Ready'}
                   </span>
                 </div>
-                <div className="ai-modal__actions" style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                <div
+                  className="ai-modal__actions"
+                  style={{display: 'flex', gap: '8px', alignItems: 'center'}}
+                >
                   <button
                     type="button"
                     className="ai-modal__clear"
@@ -380,17 +383,22 @@ const ProductFAQ = React.forwardRef(
                       height: '32px',
                       borderRadius: '6px',
                       border: '1px solid rgba(0,0,0,0.1)',
-                      background: 'linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%)',
+                      background:
+                        'linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%)',
                       color: '#444',
                       fontSize: '16px',
-                      cursor: loading || messages.length === 0 ? 'not-allowed' : 'pointer',
+                      cursor:
+                        loading || messages.length === 0
+                          ? 'not-allowed'
+                          : 'pointer',
                       opacity: loading || messages.length === 0 ? 0.5 : 1,
                       transition: 'transform 120ms ease, box-shadow 120ms ease',
                     }}
                     onMouseEnter={(e) => {
                       if (loading || messages.length === 0) return;
                       e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
+                      e.currentTarget.style.boxShadow =
+                        '0 2px 6px rgba(0,0,0,0.12)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = '';
@@ -408,7 +416,16 @@ const ProductFAQ = React.forwardRef(
                     ✕
                   </button>
                 </div>
-                <span className="ai-modal__disclaimer" style={{position: 'absolute', top: '48px', fontSize: '12px', fontStyle: 'italic', color: 'grey'}}>
+                <span
+                  className="ai-modal__disclaimer"
+                  style={{
+                    position: 'absolute',
+                    top: '48px',
+                    fontSize: '12px',
+                    fontStyle: 'italic',
+                    color: 'grey',
+                  }}
+                >
                   AI can make mistakes. Always confirm details with a support
                   agent.
                 </span>

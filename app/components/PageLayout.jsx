@@ -4,7 +4,7 @@ import {Aside} from '~/components/Aside';
 import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {Footer} from './Footer';
-import { CollapsibleVerticalHeader } from './CollapsibleVerticalHeader';
+import {CollapsibleVerticalHeader} from './CollapsibleVerticalHeader';
 import MobileBottomNavigation from './MobileBottomNavigation';
 import MenuNavbar from './MenuNavbar';
 
@@ -66,6 +66,7 @@ export function PageLayout({
         target="_blank"
         className="whatsapp-float"
         aria-label="Chat on WhatsApp"
+        rel="noreferrer"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 175.216 175.552">
           <defs>

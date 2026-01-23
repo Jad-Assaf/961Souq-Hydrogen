@@ -1,12 +1,12 @@
-import type { Storefront } from "@shopify/hydrogen";
-import type { ProductQuery } from "storefrontapi.generated";
-import { PRODUCT_QUERY, VARIANTS_QUERY } from "~/data/queries";
+import type {Storefront} from '@shopify/hydrogen';
+import type {ProductQuery} from 'storefrontapi.generated';
+import {PRODUCT_QUERY, VARIANTS_QUERY} from '~/data/queries';
 
 export let getProductData = async (
   storefront: Storefront,
   productHandle: string,
 ) => {
-  let { product, shop } = await storefront.query<ProductQuery>(PRODUCT_QUERY, {
+  let {product, shop} = await storefront.query<ProductQuery>(PRODUCT_QUERY, {
     variables: {
       handle: productHandle,
       selectedOptions: [],

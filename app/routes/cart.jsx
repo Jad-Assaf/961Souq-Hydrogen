@@ -22,9 +22,9 @@ export async function loader({context}) {
   // Fetch new arrivals using the helper function below.
   const newArrivals = await fetchCollectionByHandle(context, 'new-arrivals');
 
-  return ({
+  return {
     newArrivals,
-  });
+  };
 }
 
 /**
@@ -190,18 +190,18 @@ export default function Cart() {
   return (
     <div className="cart">
       <h1>Cart</h1>
-        <Await
-          resolve={rootData.cart}
-          errorElement={<div>An error occurred</div>}
-        >
-          {(cart) => {
-            return (
-              <>
-                <CartMain layout="page" cart={cart} />
-              </>
-            );
-          }}
-        </Await>
+      <Await
+        resolve={rootData.cart}
+        errorElement={<div>An error occurred</div>}
+      >
+        {(cart) => {
+          return (
+            <>
+              <CartMain layout="page" cart={cart} />
+            </>
+          );
+        }}
+      </Await>
       {/* Render the New Arrivals section */}
       {newArrivals && (
         <section className="new-arrivals-section">

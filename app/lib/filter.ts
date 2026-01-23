@@ -1,7 +1,7 @@
-import type { Location, useLocation } from "@remix-run/react";
-import type { ProductFilter } from "@shopify/hydrogen/storefront-api-types";
-import { FILTER_URL_PREFIX } from "./const";
-import React from "react";
+import type {Location, useLocation} from '@remix-run/react';
+import type {ProductFilter} from '@shopify/hydrogen/storefront-api-types';
+import {FILTER_URL_PREFIX} from './const';
+import React from 'react';
 
 export type AppliedFilter = {
   label: string;
@@ -9,12 +9,12 @@ export type AppliedFilter = {
 };
 
 export type SortParam =
-  | "price-low-high"
-  | "price-high-low"
-  | "best-selling"
-  | "newest"
-  | "featured"
-  | "relevance";
+  | 'price-low-high'
+  | 'price-high-low'
+  | 'best-selling'
+  | 'newest'
+  | 'featured'
+  | 'relevance';
 
 export function getAppliedFilterLink(
   filter: AppliedFilter,
@@ -32,13 +32,12 @@ export function getAppliedFilterLink(
 export function getSortLink(
   sort: SortParam,
   params: URLSearchParams,
-  location: Location
+  location: Location,
 ) {
   const newParams = new URLSearchParams(params);
   newParams.set('sort', sort);
   return `${location.pathname}?${newParams.toString()}`;
 }
-
 
 export function getFilterLink(
   rawInput: string | ProductFilter,
@@ -55,7 +54,7 @@ export function filterInputToParams(
   params: URLSearchParams,
 ) {
   const input =
-    typeof rawInput === "string"
+    typeof rawInput === 'string'
       ? (JSON.parse(rawInput) as ProductFilter)
       : rawInput;
 
@@ -63,7 +62,7 @@ export function filterInputToParams(
     if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))) {
       return;
     }
-    if (key === "price") {
+    if (key === 'price') {
       // For price, we want to overwrite
       params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
     } else {

@@ -8,8 +8,7 @@ export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
   const scroll = (direction) => {
     if (!sliderRef.current) return;
     const {clientWidth} = sliderRef.current;
-    const amount =
-      direction === 'left' ? -clientWidth * 1 : clientWidth * 1;
+    const amount = direction === 'left' ? -clientWidth * 1 : clientWidth * 1;
     sliderRef.current.scrollBy({left: amount, behavior: 'smooth'});
   };
 

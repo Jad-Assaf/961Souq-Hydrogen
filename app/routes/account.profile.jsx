@@ -20,7 +20,7 @@ export const meta = () => {
 export async function loader({context}) {
   await context.customerAccount.handleAuthStatus();
 
-  return ({});
+  return {};
 }
 
 /**
@@ -30,7 +30,7 @@ export async function action({request, context}) {
   const {customerAccount} = context;
 
   if (request.method !== 'PUT') {
-    return ({error: 'Method not allowed'}, {status: 405});
+    return {error: 'Method not allowed'}, {status: 405};
   }
 
   const form = await request.formData();
@@ -65,10 +65,10 @@ export async function action({request, context}) {
       throw new Error('Customer profile update failed.');
     }
 
-    return ({
+    return {
       error: null,
       customer: data?.customerUpdate?.customer,
-    });
+    };
   } catch (error) {
     return data(
       {error: error.message, customer: null},
@@ -125,7 +125,11 @@ export default function AccountProfile() {
         ) : (
           <br />
         )}
-        <button type="submit" disabled={state !== 'idle'} className='address-btn profile-update-btn'>
+        <button
+          type="submit"
+          disabled={state !== 'idle'}
+          className="address-btn profile-update-btn"
+        >
           {state !== 'idle' ? 'Updating' : 'Update'}
         </button>
       </Form>

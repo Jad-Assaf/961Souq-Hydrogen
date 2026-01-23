@@ -3,7 +3,7 @@ import React, {useRef} from 'react';
 import {Link} from '@remix-run/react';
 // import '../styles/HomeSliderWithMoreHeight.css';
 
-export  function CategorySliderFromMenu({menu}) {
+export function CategorySliderFromMenu({menu}) {
   if (!menu?.items?.length) return null;
 
   /* ---------------------------------------------

@@ -35,7 +35,7 @@ export async function loader({request, context}) {
     throw Error('Customer orders not found');
   }
 
-  return ({customer: data.customer});
+  return {customer: data.customer};
 }
 
 export default function Orders() {
@@ -87,7 +87,7 @@ function OrderItem({order}) {
     <>
       <fieldset>
         <Link to={`/account/orders/${btoa(order.id)}`}>
-          <strong className='order-number'>#{order.number}</strong>
+          <strong className="order-number">#{order.number}</strong>
         </Link>
         <p>{new Date(order.processedAt).toDateString()}</p>
         <p>{order.financialStatus}</p>

@@ -1,7 +1,7 @@
 import '../styles/ProductPage.css';
-import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { redirect } from '@shopify/remix-oxygen';
-import { Await, useLoaderData, useLocation } from '@remix-run/react';
+import React, {Suspense, useEffect, useRef, useState} from 'react';
+import {redirect} from '@shopify/remix-oxygen';
+import {Await, useLoaderData, useLocation} from '@remix-run/react';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -11,24 +11,24 @@ import {
   CartForm,
   VariantSelector,
 } from '@shopify/hydrogen';
-import { getVariantUrl } from '~/lib/variants';
-import { ProductPrice } from '~/components/ProductPrice';
-import { ProductImages } from '~/components/ProductImage'; // We'll update ProductImage.jsx to handle media.
-import { AddToCartButton } from '~/components/AddToCartButton';
-import { useAside } from '~/components/Aside';
-import { CSSTransition } from 'react-transition-group';
-import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/fragments';
+import {getVariantUrl} from '~/lib/variants';
+import {ProductPrice} from '~/components/ProductPrice';
+import {ProductImages} from '~/components/ProductImage'; // We'll update ProductImage.jsx to handle media.
+import {AddToCartButton} from '~/components/AddToCartButton';
+import {useAside} from '~/components/Aside';
+import {CSSTransition} from 'react-transition-group';
+import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
-import { ProductMetafields } from '~/components/Metafields';
+import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
-import { trackAddToCart, trackViewContent } from '~/lib/metaPixelEvents';
-import { trackAddToCartGA } from '~/lib/googleAnalyticsEvents';
+import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
+import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 import ProductFAQ from '~/components/ProductFAQ';
 import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
 
 // ---------------- SEO & Meta
-export const meta = ({ data }) => {
+export const meta = ({data}) => {
   const product = data?.product;
   const variants = product.variants || [];
   const currentVariant = variants[0] || {};
@@ -70,8 +70,8 @@ export const meta = ({ data }) => {
     title: truncate(formattedTitle, 60),
     description: truncate(
       product?.seoDescription ||
-      product?.description ||
-      'Discover this product.',
+        product?.description ||
+        'Discover this product.',
       150,
     ),
     url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
@@ -157,19 +157,19 @@ export const meta = ({ data }) => {
         })),
         aggregateRating: product?.metafields?.spr?.reviews
           ? {
-            '@type': 'AggregateRating',
-            ratingValue: parseFloat(
-              product.metafields.spr.reviews
-                .split('"ratingValue": "')[1]
-                ?.split('"')[0] || 0,
-            ),
-            ratingCount: parseInt(
-              product.metafields.spr.reviews
-                .split('"reviewCount": "')[1]
-                ?.split('"')[0] || 0,
-              10,
-            ),
-          }
+              '@type': 'AggregateRating',
+              ratingValue: parseFloat(
+                product.metafields.spr.reviews
+                  .split('"ratingValue": "')[1]
+                  ?.split('"')[0] || 0,
+              ),
+              ratingCount: parseInt(
+                product.metafields.spr.reviews
+                  .split('"reviewCount": "')[1]
+                  ?.split('"')[0] || 0,
+                10,
+              ),
+            }
           : undefined,
       },
       {
@@ -223,9 +223,9 @@ function getCleanProductUrl(requestUrl) {
   return url.toString();
 }
 
-async function loadCriticalData({ context, params, request }) {
-  const { handle } = params;
-  const { storefront } = context;
+async function loadCriticalData({context, params, request}) {
+  const {handle} = params;
+  const {storefront} = context;
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
@@ -233,11 +233,11 @@ async function loadCriticalData({ context, params, request }) {
 
   const cleanUrl = getCleanProductUrl(request.url);
   if (cleanUrl) {
-    return redirect(cleanUrl, { status: 301 });
+    return redirect(cleanUrl, {status: 301});
   }
 
   // Fetch product data
-  const { product } = await storefront.query(PRODUCT_QUERY, {
+  const {product} = await storefront.query(PRODUCT_QUERY, {
     variables: {
       handle,
       selectedOptions: getSelectedProductOptions(request) || [],
@@ -245,11 +245,11 @@ async function loadCriticalData({ context, params, request }) {
   });
 
   if (!product) {
-    throw new Response('Product not found', { status: 404 });
+    throw new Response('Product not found', {status: 404});
   }
 
-  const { product: fullProduct } = await storefront.query(VARIANTS_QUERY, {
-    variables: { handle /* …country/language… */ },
+  const {product: fullProduct} = await storefront.query(VARIANTS_QUERY, {
+    variables: {handle /* …country/language… */},
   });
 
   // Select the first variant as the default if applicable
@@ -275,7 +275,7 @@ async function loadCriticalData({ context, params, request }) {
   let relatedProducts = [];
 
   if (product?.id) {
-    const { productRecommendations } = await storefront.query(
+    const {productRecommendations} = await storefront.query(
       RECOMMENDED_PRODUCTS_QUERY,
       {
         variables: {
@@ -301,22 +301,22 @@ async function loadCriticalData({ context, params, request }) {
   };
 }
 
-function loadDeferredData({ context, params }) {
-  const { storefront } = context;
+function loadDeferredData({context, params}) {
+  const {storefront} = context;
 
   const variants = storefront
     .query(VARIANTS_QUERY, {
-      variables: { handle: params.handle },
+      variables: {handle: params.handle},
     })
     .catch((error) => {
       console.error(error);
       return null;
     });
 
-  return { variants };
+  return {variants};
 }
 
-function redirectToFirstVariant({ product, request }) {
+function redirectToFirstVariant({product, request}) {
   const url = new URL(request.url);
   const firstVariant = product.variants.nodes[0];
 
@@ -327,7 +327,7 @@ function redirectToFirstVariant({ product, request }) {
       selectedOptions: firstVariant.selectedOptions,
       searchParams: new URLSearchParams(url.search),
     }),
-    { status: 302 },
+    {status: 302},
   );
 }
 
@@ -336,7 +336,7 @@ function redirectToFirstVariant({ product, request }) {
 // -----------------------------------------------------
 
 function isValueAvailable(allVariants, selectedOptions, optionName, val) {
-  const updated = { ...selectedOptions, [optionName]: val };
+  const updated = {...selectedOptions, [optionName]: val};
 
   // Find any in-stock variant that fully matches updated
   return Boolean(
@@ -378,7 +378,7 @@ export function ProductForm({
   quantity = 1,
 }) {
   const location = useLocation();
-  const { open } = useAside();
+  const {open} = useAside();
   const isComputerComponent =
     Array.isArray(product?.tags) &&
     product.tags.includes('computer components');
@@ -388,7 +388,7 @@ export function ProductForm({
   // ------------------------------
   const [selectedOptions, setSelectedOptions] = useState(() => {
     if (selectedVariant?.selectedOptions) {
-      return selectedVariant.selectedOptions.reduce((acc, { name, value }) => {
+      return selectedVariant.selectedOptions.reduce((acc, {name, value}) => {
         acc[name] = value;
         return acc;
       }, {});
@@ -411,7 +411,7 @@ export function ProductForm({
   useEffect(() => {
     if (!selectedVariant?.selectedOptions) return;
     setSelectedOptions(
-      selectedVariant.selectedOptions.reduce((acc, { name, value }) => {
+      selectedVariant.selectedOptions.reduce((acc, {name, value}) => {
         acc[name] = value;
         return acc;
       }, {}),
@@ -423,7 +423,7 @@ export function ProductForm({
   // ------------------------------
   function handleOptionChange(optionName, chosenVal) {
     // Build the new options object
-    const newOptions = { ...selectedOptions, [optionName]: chosenVal };
+    const newOptions = {...selectedOptions, [optionName]: chosenVal};
 
     // Attempt to find or “snap” to a variant
     const found = pickOrSnapVariant(
@@ -435,7 +435,7 @@ export function ProductForm({
 
     if (found) {
       // Normalize to the found variant’s full options
-      const normalized = found.selectedOptions.reduce((acc, { name, value }) => {
+      const normalized = found.selectedOptions.reduce((acc, {name, value}) => {
         acc[name] = value;
         return acc;
       }, {});
@@ -457,8 +457,8 @@ export function ProductForm({
   const safeQuantity = Math.max(Number(quantity) || 1, 1);
 
   // Subcomponent to render each option row
-  const ProductOptions = ({ option }) => {
-    const { name, values } = option;
+  const ProductOptions = ({option}) => {
+    const {name, values} = option;
     const currentValue = selectedOptions[name];
 
     return (
@@ -467,7 +467,7 @@ export function ProductForm({
           {name}: <span className="OptionValue">{currentValue}</span>
         </h5>
         <div className="product-options-grid">
-          {values.map(({ value, variant }) => {
+          {values.map(({value, variant}) => {
             const canPick = isValueAvailable(
               variants,
               selectedOptions,
@@ -501,7 +501,7 @@ export function ProductForm({
                     alt={value}
                     width="50"
                     height="50"
-                    style={{ objectFit: 'cover' }}
+                    style={{objectFit: 'cover'}}
                     onContextMenu={(e) => e.preventDefault()}
                   />
                 ) : (
@@ -600,7 +600,7 @@ export function ProductForm({
         options={product.options.filter((o) => o.values.length > 1)}
         variants={variants}
       >
-        {({ option }) => <ProductOptions key={option.name} option={option} />}
+        {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
 
       <div className="product-form">
@@ -638,8 +638,8 @@ export function ProductForm({
           {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
             ? 'Call For Price'
             : selectedVariant?.availableForSale
-              ? 'Add to cart'
-              : 'Sold out'}
+            ? 'Add to cart'
+            : 'Sold out'}
         </AddToCartButton>
         {isComputerComponent && (
           <span className="computer-components-note">
@@ -674,7 +674,7 @@ export function ProductForm({
 //                   Main Product
 // -----------------------------------------------------
 export default function Product() {
-  const { product, relatedProducts } = useLoaderData();
+  const {product, relatedProducts} = useLoaderData();
   const variants = product.variants;
   const descriptionRef = useRef(null);
   const shippingRef = useRef(null);
@@ -788,8 +788,8 @@ export default function Product() {
       if (!summaryText) {
         const res = await fetch('/api/product-summary', {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ productId: product.id }),
+          headers: {'content-type': 'application/json'},
+          body: JSON.stringify({productId: product.id}),
         });
 
         const data = await res.json().catch(() => ({}));
@@ -888,9 +888,9 @@ export default function Product() {
 
     fetch('/api/track/view', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ handle: product.handle }),
-    }).catch(() => { });
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({handle: product.handle}),
+    }).catch(() => {});
   }, [product?.handle]);
 
   // Subtotal
@@ -906,7 +906,7 @@ export default function Product() {
   const decrementQuantity = () =>
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const { title, descriptionHtml } = product;
+  const {title, descriptionHtml} = product;
 
   const hasDiscount =
     selectedVariant?.compareAtPrice &&
@@ -920,11 +920,11 @@ export default function Product() {
     product.media?.edges && product.media.edges.length > 0
       ? product.media.edges
       : product.images?.edges?.map((edge) => ({
-        node: {
-          __typename: 'MediaImage',
-          image: edge.node,
-        },
-      })) || [];
+          node: {
+            __typename: 'MediaImage',
+            image: edge.node,
+          },
+        })) || [];
 
   const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
 
@@ -1057,9 +1057,7 @@ export default function Product() {
                 <span style={{display: 'flex', alignItems: 'center'}}>
                   <Money data={selectedVariant.price} />
                   {product.metafieldVat?.value === 'Excluding VAT' && (
-                    <>
-                      &nbsp; HT &nbsp;
-                    </>
+                    <>&nbsp; HT &nbsp;</>
                   )}
                 </span>
               )}
@@ -1283,7 +1281,7 @@ export default function Product() {
                     className="official-product-link"
                     href={product.metafieldOfficialProductLink.value}
                     target="_blank"
-                    rel="noopener"
+                    rel="noopener noreferrer"
                   >
                     View official product page
                   </a>
@@ -1335,7 +1333,7 @@ export default function Product() {
                 for package return. Please note that exchanges initiated without
                 prior authorization will not be accepted.
               </p>
-              <div class="policy-container">
+              <div className="policy-container">
                 <h3>Shipping Policy</h3>
                 <p>
                   We offer nationwide shipping across Lebanon, facilitated by

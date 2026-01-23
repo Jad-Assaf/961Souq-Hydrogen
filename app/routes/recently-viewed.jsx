@@ -250,7 +250,6 @@ export default function RecentlyViewedPage() {
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preselect, API_URL, API_TOKEN, isLoggedIn]);
 
   // When a product is selected, load its related products
@@ -414,7 +413,8 @@ export default function RecentlyViewedPage() {
                   image: selected?.featuredImage
                     ? {
                         url: selected.featuredImage.url,
-                        altText: selected.featuredImage.altText || selected.title,
+                        altText:
+                          selected.featuredImage.altText || selected.title,
                       }
                     : null,
                   selectedOptions: [],
@@ -667,7 +667,7 @@ function ProductCard({product, index = 0}) {
             width="150"
             height="150"
             loading={index < 2 ? 'eager' : 'lazy'}
-            fetchpriority={index < 2 ? 'high' : 'auto'}
+            fetchPriority={index < 2 ? 'high' : 'auto'}
             decoding="async"
           />
           <div className="product-title">{product.title || 'Product'}</div>

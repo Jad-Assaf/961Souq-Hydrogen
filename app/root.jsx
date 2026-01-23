@@ -41,7 +41,6 @@ export const shouldRevalidate = ({formMethod, defaultShouldRevalidate}) => {
   return defaultShouldRevalidate;
 };
 
-
 const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 // const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
 
@@ -81,7 +80,8 @@ export async function loader({request, context}) {
     }),
   ]);
 
-  if (header?.menu?.items) header.menu.items = processMenuItems(header.menu.items);
+  if (header?.menu?.items)
+    header.menu.items = processMenuItems(header.menu.items);
 
   const headers = new Headers();
   headers.append('Set-Cookie', await session.commit());

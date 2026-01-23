@@ -39,6 +39,7 @@ export default function ContactUs() {
               href="https://wa.me/96171888036"
               aria-label="Whatsapp Link"
               target="_blank"
+              rel="noreferrer"
             >
               Customer Support
             </a>
@@ -49,6 +50,7 @@ export default function ContactUs() {
               href="https://maps.app.goo.gl/wKNzrfSVrLm7srkB7"
               target="_blank"
               title="961Souq Store Location"
+              rel="noreferrer"
             >
               961Souq - Zalka High Way Facing white Tower hotel Ground Floor,
               Zalka, Lebanon.

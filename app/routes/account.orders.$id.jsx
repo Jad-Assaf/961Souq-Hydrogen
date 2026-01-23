@@ -1,28 +1,28 @@
-import { redirect } from '@shopify/remix-oxygen';
-import { useLoaderData } from '@remix-run/react';
-import { Money, Image, flattenConnection } from '@shopify/hydrogen';
-import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery';
+import {redirect} from '@shopify/remix-oxygen';
+import {useLoaderData} from '@remix-run/react';
+import {Money, Image, flattenConnection} from '@shopify/hydrogen';
+import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
 
 /**
  * @type {MetaFunction<typeof loader>}
  */
-export const meta = ({ data }) => {
-  return [{ title: `Order ${data?.order?.name}` }];
+export const meta = ({data}) => {
+  return [{title: `Order ${data?.order?.name}`}];
 };
 
 /**
  * @param {LoaderFunctionArgs}
  */
-export async function loader({ params, context }) {
+export async function loader({params, context}) {
   if (!params.id) {
     return redirect('/account/orders');
   }
 
   const orderId = atob(params.id);
-  const { data, errors } = await context.customerAccount.query(
+  const {data, errors} = await context.customerAccount.query(
     CUSTOMER_ORDER_QUERY,
     {
-      variables: { orderId },
+      variables: {orderId},
     },
   );
 
@@ -30,7 +30,7 @@ export async function loader({ params, context }) {
     throw new Error('Order not found');
   }
 
-  const { order } = data;
+  const {order} = data;
 
   const lineItems = flattenConnection(order.lineItems);
   const discountApplications = flattenConnection(order.discountApplications);
@@ -47,13 +47,13 @@ export async function loader({ params, context }) {
     firstDiscount?.__typename === 'PricingPercentageValue' &&
     firstDiscount?.percentage;
 
-  return ({
+  return {
     order,
     lineItems,
     discountValue,
     discountPercentage,
     fulfillmentStatus,
-  });
+  };
 }
 
 export default function OrderRoute() {
@@ -141,15 +141,13 @@ export default function OrderRoute() {
             </div>
           </div> */}
         </div>
-        <div className='shipping-container'>
+        <div className="shipping-container">
           <h3>Shipping Address</h3>
           {order?.shippingAddress ? (
             <address>
               <p>{order.shippingAddress.name}</p>
               {order.shippingAddress.formatted ? (
-                <p>
-                  {order.shippingAddress.formatted.join(', ')}
-                </p>
+                <p>{order.shippingAddress.formatted.join(', ')}</p>
               ) : (
                 ' '
               )}
@@ -181,7 +179,7 @@ export default function OrderRoute() {
 /**
  * @param {{lineItem: OrderLineItemFullFragment}}
  */
-function OrderLineRow({ lineItem }) {
+function OrderLineRow({lineItem}) {
   return (
     <div key={lineItem.id} className="line-item">
       {/* Product Details */}
@@ -203,9 +201,7 @@ function OrderLineRow({ lineItem }) {
       </div>
 
       {/* Quantity */}
-      <div className="line-item-quantity">
-        {lineItem.quantity}
-      </div>
+      <div className="line-item-quantity">{lineItem.quantity}</div>
 
       {/* Total Discount */}
       <div className="line-item-discount">

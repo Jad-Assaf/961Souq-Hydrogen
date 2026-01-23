@@ -24,7 +24,7 @@ export const meta = () => {
 export async function loader({context}) {
   await context.customerAccount.handleAuthStatus();
 
-  return ({});
+  return {};
 }
 
 /**
@@ -292,12 +292,12 @@ function NewAddressForm() {
       defaultAddress={null}
     >
       {({stateForMethod}) => (
-        <div className='address-btn-container'>
+        <div className="address-btn-container">
           <button
             disabled={stateForMethod('POST') !== 'idle'}
             formMethod="POST"
             type="submit"
-            className='address-btn'
+            className="address-btn"
           >
             {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
           </button>
@@ -322,12 +322,12 @@ function ExistingAddresses({addresses, defaultAddress}) {
           defaultAddress={defaultAddress}
         >
           {({stateForMethod}) => (
-            <div className='address-btn-container'>
+            <div className="address-btn-container">
               <button
                 disabled={stateForMethod('PUT') !== 'idle'}
                 formMethod="PUT"
                 type="submit"
-                className='address-btn'
+                className="address-btn"
               >
                 {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
               </button>
@@ -335,7 +335,7 @@ function ExistingAddresses({addresses, defaultAddress}) {
                 disabled={stateForMethod('DELETE') !== 'idle'}
                 formMethod="DELETE"
                 type="submit"
-                className='address-btn'
+                className="address-btn"
               >
                 {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
               </button>
@@ -496,7 +496,7 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             type="tel"
           />
         </div>
-        <div className='set-default-adrs'>
+        <div className="set-default-adrs">
           <input
             defaultChecked={isDefaultAddress}
             id="defaultAddress"

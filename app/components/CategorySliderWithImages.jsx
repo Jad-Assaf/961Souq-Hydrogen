@@ -1,8 +1,11 @@
-import { Link } from "@remix-run/react";
-import React, { useEffect, useState, useRef } from "react";
-import "../styles/HomeSlider.css";
+import {Link} from '@remix-run/react';
+import React, {useEffect, useState, useRef} from 'react';
+import '../styles/HomeSlider.css';
 
-export const CategorySliderWithImages = ({ handles, fetchCollectionsByHandles }) => {
+export const CategorySliderWithImages = ({
+  handles,
+  fetchCollectionsByHandles,
+}) => {
   const [collections, setCollections] = useState([]);
 
   useEffect(() => {
@@ -26,12 +29,12 @@ export const CategorySliderWithImages = ({ handles, fetchCollectionsByHandles })
   );
 };
 
-function CategoryItemWithImage({ collection }) {
+function CategoryItemWithImage({collection}) {
   const ref = useRef(null);
 
   const handleIntersection = ([entry]) => {
     if (entry.isIntersecting) {
-      entry.target.classList.add("in-view");
+      entry.target.classList.add('in-view');
     }
   };
 

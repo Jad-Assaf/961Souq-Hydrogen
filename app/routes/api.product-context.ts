@@ -51,7 +51,11 @@ export async function loader({request, context}: LoaderFunctionArgs) {
       });
     }
 
-    const description = (product?.descriptionHtml || product?.description || '').replace(/<[^>]*>/g, ' ');
+    const description = (
+      product?.descriptionHtml ||
+      product?.description ||
+      ''
+    ).replace(/<[^>]*>/g, ' ');
     const trimmedDescription =
       description.length > 8000 ? description.slice(0, 8000) : description;
 
@@ -84,9 +88,12 @@ export async function loader({request, context}: LoaderFunctionArgs) {
     );
   } catch (err) {
     console.error('Context fetch failed', err);
-    return new Response(JSON.stringify({error: 'Failed to load product context'}), {
-      status: 500,
-      headers: {'Content-Type': 'application/json'},
-    });
+    return new Response(
+      JSON.stringify({error: 'Failed to load product context'}),
+      {
+        status: 500,
+        headers: {'Content-Type': 'application/json'},
+      },
+    );
   }
 }

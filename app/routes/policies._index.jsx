@@ -1,5 +1,5 @@
 import {useLoaderData, Link, data} from '@remix-run/react';
-import "../styles/Policies.css"
+import '../styles/Policies.css';
 /**
  * @param {LoaderFunctionArgs}
  */
@@ -11,7 +11,7 @@ export async function loader({context}) {
     throw new Response('No policies found', {status: 404});
   }
 
-  return ({policies});
+  return {policies};
 }
 
 export default function Policies() {
@@ -21,7 +21,7 @@ export default function Policies() {
   return (
     <div className="policies">
       <h1>Policies</h1>
-      <div className='policy-index-container'>
+      <div className="policy-index-container">
         {policies.map((policy) => {
           if (!policy) return null;
           return (

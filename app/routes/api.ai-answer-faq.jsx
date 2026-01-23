@@ -15,31 +15,37 @@ function getClientFingerprint(request) {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
   const cfConnectingIP = request.headers.get('cf-connecting-ip'); // Cloudflare
-  let ip = cfConnectingIP || (forwarded?.split(',')[0]?.trim()) || realIP || 'unknown';
-  
+  let ip =
+    cfConnectingIP || forwarded?.split(',')[0]?.trim() || realIP || 'unknown';
+
   // Normalize localhost IPs for consistency
-  if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost' || ip === '::ffff:127.0.0.1') {
+  if (
+    ip === '127.0.0.1' ||
+    ip === '::1' ||
+    ip === 'localhost' ||
+    ip === '::ffff:127.0.0.1'
+  ) {
     ip = 'localhost';
   }
-  
+
   // Get User-Agent for additional uniqueness
   const userAgent = request.headers.get('user-agent') || 'unknown';
-  
+
   // Normalize User-Agent to first 50 chars (more stable, less variation)
   // Remove version numbers that might change
   const normalizedUA = userAgent
     .substring(0, 50)
     .replace(/\d+\.\d+/g, 'X.X') // Replace version numbers
     .replace(/\s+/g, '-'); // Normalize whitespace
-  
+
   // Create a stable fingerprint: IP + normalized User-Agent
   const fingerprint = `${ip}-${normalizedUA}`;
-  
+
   // Debug logging (remove in production if needed)
   if (process.env.NODE_ENV === 'development') {
     console.log('[Token Tracking] Fingerprint:', fingerprint.substring(0, 80));
   }
-  
+
   return fingerprint;
 }
 
@@ -54,9 +60,12 @@ async function getTokenUsageFromCache(cache, fingerprint) {
     console.log('[Token Tracking] Cache not available, skipping cache read');
     return null;
   }
-  
+
   try {
-    console.log('[Token Tracking] Reading from Cache for fingerprint:', fingerprint.substring(0, 50));
+    console.log(
+      '[Token Tracking] Reading from Cache for fingerprint:',
+      fingerprint.substring(0, 50),
+    );
     const cacheKey = getCacheKey(fingerprint);
     const cached = await cache.match(cacheKey);
     if (!cached) {
@@ -77,13 +86,16 @@ async function setTokenUsageInCache(cache, fingerprint, data) {
     console.log('[Token Tracking] Cache not available, skipping cache write');
     return false;
   }
-  
+
   try {
     // Store with expiration (24 hours)
     const ttl = TOKEN_RESET_HOURS * 60 * 60; // seconds
     const cacheKey = getCacheKey(fingerprint);
-    console.log('[Token Tracking] Writing to Cache for fingerprint:', fingerprint.substring(0, 50));
-    
+    console.log(
+      '[Token Tracking] Writing to Cache for fingerprint:',
+      fingerprint.substring(0, 50),
+    );
+
     // Create a response with the data and cache headers
     const response = new Response(JSON.stringify(data), {
       headers: {
@@ -91,14 +103,18 @@ async function setTokenUsageInCache(cache, fingerprint, data) {
         'Cache-Control': `public, max-age=${ttl}`,
       },
     });
-    
+
     // Store in cache with expiration
     await cache.put(cacheKey, response);
     console.log('[Token Tracking] Cache write successful');
     return true;
   } catch (err) {
     console.error('[Token Tracking] Error writing to Cache:', err);
-    console.error('[Token Tracking] Cache error details:', err.message, err.stack);
+    console.error(
+      '[Token Tracking] Cache error details:',
+      err.message,
+      err.stack,
+    );
     return false;
   }
 }
@@ -106,7 +122,7 @@ async function setTokenUsageInCache(cache, fingerprint, data) {
 async function checkTokenLimit(fingerprint, requestedTokens, cache = null) {
   const now = Date.now();
   let record = null;
-  
+
   // Try Cache API first (persistent storage)
   if (cache) {
     record = await getTokenUsageFromCache(cache, fingerprint);
@@ -114,44 +130,63 @@ async function checkTokenLimit(fingerprint, requestedTokens, cache = null) {
     // Fallback to in-memory Map
     record = tokenTrackingMap.get(fingerprint);
   }
-  
+
   // Reset if it's been more than 24 hours
   if (!record || now > record.resetTime) {
-    const resetTime = now + (TOKEN_RESET_HOURS * 60 * 60 * 1000);
-    const newRecord = { 
-      tokens: requestedTokens, 
-      resetTime: resetTime
+    const resetTime = now + TOKEN_RESET_HOURS * 60 * 60 * 1000;
+    const newRecord = {
+      tokens: requestedTokens,
+      resetTime,
     };
-    
+
     if (cache) {
       await setTokenUsageInCache(cache, fingerprint, newRecord);
     } else {
       tokenTrackingMap.set(fingerprint, newRecord);
     }
-    
-    console.log(`[Token Tracking] New/Reset entry for ${fingerprint.substring(0, 50)}: ${requestedTokens}/${DAILY_TOKEN_LIMIT} tokens (${cache ? 'Cache' : 'Memory'})`);
-    
-    return { allowed: true, remaining: DAILY_TOKEN_LIMIT - requestedTokens };
+
+    console.log(
+      `[Token Tracking] New/Reset entry for ${fingerprint.substring(
+        0,
+        50,
+      )}: ${requestedTokens}/${DAILY_TOKEN_LIMIT} tokens (${
+        cache ? 'Cache' : 'Memory'
+      })`,
+    );
+
+    return {allowed: true, remaining: DAILY_TOKEN_LIMIT - requestedTokens};
   }
-  
+
   const newTotal = record.tokens + requestedTokens;
   if (newTotal > DAILY_TOKEN_LIMIT) {
-    console.log(`[Token Tracking] Limit exceeded for ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens`);
-    return { allowed: false, remaining: 0 };
+    console.log(
+      `[Token Tracking] Limit exceeded for ${fingerprint.substring(
+        0,
+        50,
+      )}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens`,
+    );
+    return {allowed: false, remaining: 0};
   }
-  
+
   record.tokens = newTotal;
-  
+
   // Update storage
   if (cache) {
     await setTokenUsageInCache(cache, fingerprint, record);
   } else {
     tokenTrackingMap.set(fingerprint, record);
   }
-  
-  console.log(`[Token Tracking] Updated ${fingerprint.substring(0, 50)}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens (remaining: ${DAILY_TOKEN_LIMIT - newTotal}) (${cache ? 'Cache' : 'Memory'})`);
-  
-  return { allowed: true, remaining: DAILY_TOKEN_LIMIT - newTotal };
+
+  console.log(
+    `[Token Tracking] Updated ${fingerprint.substring(
+      0,
+      50,
+    )}: ${newTotal}/${DAILY_TOKEN_LIMIT} tokens (remaining: ${
+      DAILY_TOKEN_LIMIT - newTotal
+    }) (${cache ? 'Cache' : 'Memory'})`,
+  );
+
+  return {allowed: true, remaining: DAILY_TOKEN_LIMIT - newTotal};
 }
 
 // Cleanup old entries periodically (to prevent memory leaks)
@@ -205,8 +240,12 @@ async function fetchProductContext(productId, context) {
 }
 
 export async function action({request, context}) {
-  console.log('[AI FAQ] Request received:', request.method, new Date().toISOString());
-  
+  console.log(
+    '[AI FAQ] Request received:',
+    request.method,
+    new Date().toISOString(),
+  );
+
   if (request.method !== 'POST') {
     return json({error: 'Method not allowed'}, {status: 405});
   }
@@ -221,8 +260,16 @@ export async function action({request, context}) {
   cleanupTokenTracking();
 
   const body = await request.json().catch(() => ({}));
-  const {productId, messages = [], context: ctxPayload, maxOutputTokens, messageTooLong, productUrl, inputTokens} = body;
-  
+  const {
+    productId,
+    messages = [],
+    context: ctxPayload,
+    maxOutputTokens,
+    messageTooLong,
+    productUrl,
+    inputTokens,
+  } = body;
+
   // Get Cache API (available in all Cloudflare Workers)
   // Cache is available via global caches API
   let cache = null;
@@ -232,28 +279,43 @@ export async function action({request, context}) {
       cache = await caches.open(CACHE_NAME);
       console.log('[Token Tracking] Cache API Available:', !!cache);
     } else {
-      console.log('[Token Tracking] Cache API not available (caches undefined)');
+      console.log(
+        '[Token Tracking] Cache API not available (caches undefined)',
+      );
     }
   } catch (err) {
-    console.log('[Token Tracking] Cache API error, using memory fallback:', err.message);
+    console.log(
+      '[Token Tracking] Cache API error, using memory fallback:',
+      err.message,
+    );
   }
-  
+
   // Server-side token limit check using IP + User-Agent fingerprint
   const fingerprint = getClientFingerprint(request);
   console.log('[Token Tracking] Fingerprint:', fingerprint.substring(0, 80));
   const estimatedTokens = typeof inputTokens === 'number' ? inputTokens : 50; // Default estimate
   console.log('[Token Tracking] Estimated tokens:', estimatedTokens);
   const tokenCheck = await checkTokenLimit(fingerprint, estimatedTokens, cache);
-  console.log('[Token Tracking] Token check result:', tokenCheck.allowed ? 'Allowed' : 'Blocked', 'Remaining:', tokenCheck.remaining);
-  
+  console.log(
+    '[Token Tracking] Token check result:',
+    tokenCheck.allowed ? 'Allowed' : 'Blocked',
+    'Remaining:',
+    tokenCheck.remaining,
+  );
+
   if (!tokenCheck.allowed) {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[Token Tracking] Request blocked for ${fingerprint.substring(0, 50)}`);
+      console.log(
+        `[Token Tracking] Request blocked for ${fingerprint.substring(0, 50)}`,
+      );
     }
-    return json({
-      error: 'Daily token limit reached. Please try again tomorrow.',
-      limitReached: true,
-    }, {status: 429});
+    return json(
+      {
+        error: 'Daily token limit reached. Please try again tomorrow.',
+        limitReached: true,
+      },
+      {status: 429},
+    );
   }
 
   if (!productId) {
@@ -268,7 +330,9 @@ export async function action({request, context}) {
     return json({error: 'Missing product context'}, {status: 400});
   }
 
-  const userLang = /[\u0600-\u06FF]/.test(messages[messages.length - 1]?.content || '')
+  const userLang = /[\u0600-\u06FF]/.test(
+    messages[messages.length - 1]?.content || '',
+  )
     ? 'Arabic'
     : 'English';
 
@@ -276,13 +340,20 @@ export async function action({request, context}) {
   // Note: We still track tokens for "message too long" responses (they use minimal tokens)
   if (messageTooLong) {
     // Still check token limit (messageTooLong responses use ~10 tokens)
-    const messageTooLongTokenCheck = await checkTokenLimit(fingerprint, 10, cache);
-    
+    const messageTooLongTokenCheck = await checkTokenLimit(
+      fingerprint,
+      10,
+      cache,
+    );
+
     if (!messageTooLongTokenCheck.allowed) {
-      return json({
-        error: 'Daily token limit reached. Please try again tomorrow.',
-        limitReached: true,
-      }, {status: 429});
+      return json(
+        {
+          error: 'Daily token limit reached. Please try again tomorrow.',
+          limitReached: true,
+        },
+        {status: 429},
+      );
     }
     const systemPrompt = [
       'You are an AI product assistant.',
@@ -311,18 +382,20 @@ export async function action({request, context}) {
       });
 
       const aiData = await aiRes.json().catch(() => null);
-      
+
       if (!aiRes.ok) {
-        const msg = aiData?.error?.message || `OpenAI API error (${aiRes.status})`;
+        const msg =
+          aiData?.error?.message || `OpenAI API error (${aiRes.status})`;
         return json({error: msg}, {status: 502});
       }
 
       let answer = extractOutputText(aiData);
       if (!answer) {
         // Fallback message
-        answer = userLang === 'Arabic' 
-          ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى حوالي ٨٠ كلمة أو أقل.'
-          : 'Your message is too long. Please shorten it to about 80 words or fewer.';
+        answer =
+          userLang === 'Arabic'
+            ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى حوالي ٨٠ كلمة أو أقل.'
+            : 'Your message is too long. Please shorten it to about 80 words or fewer.';
       }
 
       // Remove any WhatsApp links that the LLM might have added
@@ -334,24 +407,27 @@ export async function action({request, context}) {
 
       // Add WhatsApp link (simple, no prefilled text to avoid URL noise)
       const whatsappLink = 'https://wa.me/96171888036';
-      
-      const contactInfo = userLang === 'Arabic' 
-        ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
-        : `\n\nContact support: [WhatsApp](${whatsappLink})`;
-      
+
+      const contactInfo =
+        userLang === 'Arabic'
+          ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
+          : `\n\nContact support: [WhatsApp](${whatsappLink})`;
+
       return json({success: true, answer: cleanedAnswer + contactInfo});
     } catch (err) {
-      const fallbackMsg = userLang === 'Arabic' 
-        ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى حوالي ٨٠ كلمة أو أقل.'
-        : 'Your message is too long. Please shorten it to about 80 words or fewer.';
-      
+      const fallbackMsg =
+        userLang === 'Arabic'
+          ? 'رسالتك طويلة جداً. يرجى تقصيرها إلى حوالي ٨٠ كلمة أو أقل.'
+          : 'Your message is too long. Please shorten it to about 80 words or fewer.';
+
       // Add WhatsApp link (simple, no prefilled text to avoid URL noise)
       const whatsappLink = 'https://wa.me/96171888036';
-      
-      const contactInfo = userLang === 'Arabic' 
-        ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
-        : `\n\nContact support: [WhatsApp](${whatsappLink})`;
-      
+
+      const contactInfo =
+        userLang === 'Arabic'
+          ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
+          : `\n\nContact support: [WhatsApp](${whatsappLink})`;
+
       return json({success: true, answer: fallbackMsg + contactInfo});
     }
   }
@@ -379,7 +455,8 @@ export async function action({request, context}) {
   const rawPrice = productContext.price || '';
   const priceRangeLike = rawPrice.includes('-');
   const numericPriceMatch = rawPrice.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
-  const basePrice = numericPriceMatch && !priceRangeLike ? Number(numericPriceMatch[1]) : null;
+  const basePrice =
+    numericPriceMatch && !priceRangeLike ? Number(numericPriceMatch[1]) : null;
   const hasValidPrice = Number.isFinite(basePrice) && basePrice > 0;
   const vatPrice = hasValidPrice ? Number((basePrice * 1.11).toFixed(2)) : null;
 
@@ -392,7 +469,7 @@ export async function action({request, context}) {
   ]
     .filter(Boolean)
     .join('\n');
-  
+
   if (hasValidPrice) {
     contextSummary += `\nPrice shown (excl. VAT): ${basePrice}`;
     contextSummary += `\nPrice incl. 11% VAT: ${vatPrice}`;
@@ -400,17 +477,26 @@ export async function action({request, context}) {
   } else {
     contextSummary += `\nPrice note: Price unavailable/0. Respond with "Call for price" and remind to confirm pricing with a support agent. Do NOT calculate VAT when price is missing/zero.`;
   }
-  
+
   // Add shipping/warranty only if explicitly asked about
-  const lastMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
-  const needsShipping = lastMessage.includes('shipping') || lastMessage.includes('delivery');
-  const needsWarranty = lastMessage.includes('warranty') || lastMessage.includes('guarantee');
-  
+  const lastMessage =
+    messages[messages.length - 1]?.content?.toLowerCase() || '';
+  const needsShipping =
+    lastMessage.includes('shipping') || lastMessage.includes('delivery');
+  const needsWarranty =
+    lastMessage.includes('warranty') || lastMessage.includes('guarantee');
+
   if (needsShipping && productContext.shipping) {
-    contextSummary += `\nShipping: ${productContext.shipping.substring(0, 200)}`;
+    contextSummary += `\nShipping: ${productContext.shipping.substring(
+      0,
+      200,
+    )}`;
   }
   if (needsWarranty && productContext.warranty) {
-    contextSummary += `\nWarranty: ${productContext.warranty.substring(0, 200)}`;
+    contextSummary += `\nWarranty: ${productContext.warranty.substring(
+      0,
+      200,
+    )}`;
   }
 
   // Convert chat messages to conversation format - only keep last 3 exchanges to reduce tokens
@@ -430,7 +516,9 @@ export async function action({request, context}) {
     instructions: systemPrompt,
     input: fullInput,
     max_output_tokens:
-      typeof maxOutputTokens === 'number' ? maxOutputTokens : DEFAULT_MAX_OUTPUT,
+      typeof maxOutputTokens === 'number'
+        ? maxOutputTokens
+        : DEFAULT_MAX_OUTPUT,
   };
 
   try {
@@ -444,7 +532,7 @@ export async function action({request, context}) {
     });
 
     const aiData = await aiRes.json().catch(() => null);
-    
+
     if (!aiRes.ok) {
       const msg =
         aiData?.error?.message || `OpenAI API error (${aiRes.status})`;
@@ -468,17 +556,20 @@ export async function action({request, context}) {
 
     // Extract answer from /v1/responses format (even if incomplete)
     let answer = extractOutputText(aiData);
-    
+
     // Check for incomplete status (token budget issue)
     // But still try to return partial answer if available
     if (aiData?.status === 'incomplete') {
       if (answer) {
         // We have a partial answer, return it (it might be truncated)
-        console.warn('[AI FAQ] OpenAI incomplete but returning partial answer', {
-          incomplete_details: aiData?.incomplete_details,
-          usage: aiData?.usage,
-          answerLength: answer.length,
-        });
+        console.warn(
+          '[AI FAQ] OpenAI incomplete but returning partial answer',
+          {
+            incomplete_details: aiData?.incomplete_details,
+            usage: aiData?.usage,
+            answerLength: answer.length,
+          },
+        );
         return json({success: true, answer, truncated: true});
       } else {
         // No answer extracted, return error
@@ -498,7 +589,7 @@ export async function action({request, context}) {
         );
       }
     }
-    
+
     if (!answer) {
       console.error('[AI FAQ] Empty answer from OpenAI', {
         httpStatus: aiRes.status,
@@ -512,34 +603,37 @@ export async function action({request, context}) {
 
     // Generate WhatsApp link (simple, no prefilled text to avoid URL noise)
     const whatsappLink = 'https://wa.me/96171888036';
-    
+
     // Remove any WhatsApp links that the LLM might have added
     let cleanedAnswer = answer
       .replace(/\[?واتساب\]?\([^)]+\)/gi, '') // Remove Arabic WhatsApp links
       .replace(/\[?WhatsApp\]?\([^)]+\)/gi, '') // Remove English WhatsApp links
       .replace(/https?:\/\/wa\.me\/[^\s\)]+/gi, '') // Remove plain WhatsApp URLs
       .trim();
-    
+
     // Remove trailing empty bullet markers that can occur on truncation
     cleanedAnswer = cleanedAnswer.replace(/\n-\s*$/g, '').trim();
-    
+
     // Add contact info and WhatsApp link to the answer (only if not already present)
-    const hasWhatsAppLink = cleanedAnswer.toLowerCase().includes('whatsapp') || 
-                           cleanedAnswer.includes('واتساب') ||
-                           cleanedAnswer.includes('wa.me');
-    
+    const hasWhatsAppLink =
+      cleanedAnswer.toLowerCase().includes('whatsapp') ||
+      cleanedAnswer.includes('واتساب') ||
+      cleanedAnswer.includes('wa.me');
+
     if (!hasWhatsAppLink) {
-      const contactInfo = userLang === 'Arabic' 
-        ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
-        : `\n\nContact support: [WhatsApp](${whatsappLink})`;
+      const contactInfo =
+        userLang === 'Arabic'
+          ? `\n\nللتواصل مع فريق الدعم: [واتساب](${whatsappLink})`
+          : `\n\nContact support: [WhatsApp](${whatsappLink})`;
       const finalAnswer = cleanedAnswer + contactInfo;
       return json({success: true, answer: finalAnswer});
     }
-    
+
     // If LLM already mentioned WhatsApp, just add our link
-    const contactInfo = userLang === 'Arabic' 
-      ? `\n\n[واتساب](${whatsappLink})`
-      : `\n\n[WhatsApp](${whatsappLink})`;
+    const contactInfo =
+      userLang === 'Arabic'
+        ? `\n\n[واتساب](${whatsappLink})`
+        : `\n\n[WhatsApp](${whatsappLink})`;
     const finalAnswer = cleanedAnswer + contactInfo;
 
     return json({success: true, answer: finalAnswer});

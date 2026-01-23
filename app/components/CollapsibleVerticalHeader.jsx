@@ -80,7 +80,7 @@ export function CollapsibleVerticalHeader({header}) {
                   alt={item.altText || item.title}
                   width="40"
                   height="40"
-                  loading='lazy'
+                  loading="lazy"
                 />
               )}
             </span>
@@ -200,5 +200,3 @@ export function CollapsibleVerticalHeader({header}) {
     </div>
   );
 }
-
-

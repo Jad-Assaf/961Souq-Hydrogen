@@ -4,10 +4,10 @@ import {
   NavLink as RemixNavLink,
   type NavLinkProps as RemixNavLinkProps,
   useRouteLoaderData,
-} from "@remix-run/react";
-import { useThemeSettings } from "@weaverse/hydrogen";
-import { forwardRef } from "react";
-import type { RootLoader } from "../root";
+} from '@remix-run/react';
+import {useThemeSettings} from '@weaverse/hydrogen';
+import {forwardRef} from 'react';
+import type {RootLoader} from '../root';
 
 type LinkProps = RemixLinkProps | RemixNavLinkProps;
 
@@ -28,22 +28,22 @@ type LinkProps = RemixLinkProps | RemixNavLinkProps;
  */
 export let Link = forwardRef(
   (props: LinkProps | RemixNavLinkProps, ref: React.Ref<HTMLAnchorElement>) => {
-    let { to, className, ...resOfProps } = props;
-    let rootData = useRouteLoaderData<RootLoader>("root");
-    let { enableViewTransition } = useThemeSettings();
+    let {to, className, ...resOfProps} = props;
+    let rootData = useRouteLoaderData<RootLoader>('root');
+    let {enableViewTransition} = useThemeSettings();
     let selectedLocale = rootData?.selectedLocale;
 
     let toWithLocale = to;
 
-    if (typeof toWithLocale === "string" && selectedLocale?.pathPrefix) {
+    if (typeof toWithLocale === 'string' && selectedLocale?.pathPrefix) {
       if (!toWithLocale.toLowerCase().startsWith(selectedLocale.pathPrefix)) {
         toWithLocale = `${selectedLocale.pathPrefix}${to}`;
       }
     }
 
     if (
-      typeof className === "function" ||
-      typeof resOfProps.children === "function"
+      typeof className === 'function' ||
+      typeof resOfProps.children === 'function'
     ) {
       return (
         <RemixNavLink

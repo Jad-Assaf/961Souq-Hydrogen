@@ -41,17 +41,17 @@ export function TypesenseSearch({
       setIsOpen(false);
       return;
     }
-    
+
     // CRITICAL: Don't refetch if we already have data for this exact term
     if (term === lastTermRef.current && cachedDataRef.current[term]) {
       return; // Already have data, STOP HERE
     }
-    
+
     // CRITICAL: Don't refetch if fetcher is already loading this term
     if (fetcher.state === 'loading' && lastTermRef.current === term) {
       return; // Already loading, STOP HERE
     }
-    
+
     // FINAL CHECK: Don't make request if we have data
     if (cachedDataRef.current[term]) {
       lastTermRef.current = term;
@@ -66,7 +66,11 @@ export function TypesenseSearch({
 
   // Cache fetcher data when it arrives
   useEffect(() => {
-    if (fetcher.data && lastTermRef.current && !cachedDataRef.current[lastTermRef.current]) {
+    if (
+      fetcher.data &&
+      lastTermRef.current &&
+      !cachedDataRef.current[lastTermRef.current]
+    ) {
       cachedDataRef.current[lastTermRef.current] = fetcher.data;
     }
   }, [fetcher.data]);
@@ -75,7 +79,7 @@ export function TypesenseSearch({
   const currentTerm = searchTerm.trim();
   const cachedData = cachedDataRef.current[currentTerm];
   const data = cachedData || fetcher.data || {};
-  
+
   const products = data.hits || [];
   const suggestions = data.suggestions || [];
   const isLoading = fetcher.state === 'loading' && !cachedData;
@@ -84,17 +88,17 @@ export function TypesenseSearch({
     const term = searchTerm.trim();
     if (!term) return;
     setIsOpen(true);
-    
+
     // CRITICAL: Check cache first - NEVER refetch if we have data
     if (cachedDataRef.current[term]) {
       return; // STOP - we have data
     }
-    
+
     // CRITICAL: Don't fetch if already loading
     if (fetcher.state === 'loading' && lastTermRef.current === term) {
       return; // STOP - already loading
     }
-    
+
     // Only fetch if we truly don't have data and aren't loading
     if (lastTermRef.current !== term && !cachedDataRef.current[term]) {
       lastTermRef.current = term;
@@ -187,7 +191,6 @@ function TypesenseSuggestions({
   const hasProducts = products && products.length > 0;
   const hasSuggestions = Array.isArray(suggestions) && suggestions.length > 0;
 
-
   if (!isOpen || !trimmed) return null;
 
   // Show suggestions even if no products (when 0 results)
@@ -198,7 +201,7 @@ function TypesenseSuggestions({
   return (
     <div className="search-suggestions">
       {isLoading && <div className="search-suggestions-status">Searching…</div>}
-      
+
       {/* Did you mean section - always shown when suggestions are available */}
       {hasSuggestions && (
         <div className="suggestions-section suggestions-section--did-you-mean">
@@ -262,7 +265,11 @@ function TypesenseSuggestions({
                           return (
                             <p
                               className="search-result-price"
-                              style={{fontSize: '14px', fontWeight: '400', color: '#555'}}
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: '400',
+                                color: '#555',
+                              }}
                             >
                               Call for price
                             </p>

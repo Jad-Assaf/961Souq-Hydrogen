@@ -379,7 +379,7 @@ function RelatedProductCard({product, index, refProp}) {
               width="150"
               height="150"
               loading={index < 2 ? 'eager' : 'lazy'}
-              fetchpriority={index < 2 ? 'high' : 'auto'}
+              fetchPriority={index < 2 ? 'high' : 'auto'}
               decoding="async"
             />
           ) : null}

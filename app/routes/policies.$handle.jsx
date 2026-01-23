@@ -1,5 +1,5 @@
 import {Link, useLoaderData} from '@remix-run/react';
-import "../styles/Policies.css"
+import '../styles/Policies.css';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -37,7 +37,7 @@ export async function loader({params, context}) {
     throw new Response('Could not find the policy', {status: 404});
   }
 
-  return ({policy});
+  return {policy};
 }
 
 export default function Policy() {
@@ -49,11 +49,16 @@ export default function Policy() {
       <br />
       <br />
       <div>
-        <Link className='back-policy' to="/policies">← Back to Policies</Link>
+        <Link className="back-policy" to="/policies">
+          ← Back to Policies
+        </Link>
       </div>
       <br />
       <h1>{policy.title}</h1>
-      <div className='policy-container' dangerouslySetInnerHTML={{__html: policy.body}} />
+      <div
+        className="policy-container"
+        dangerouslySetInnerHTML={{__html: policy.body}}
+      />
     </div>
   );
 }

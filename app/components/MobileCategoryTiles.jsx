@@ -114,7 +114,6 @@ export default function MobileCategoryTiles({
       const valid = arr.filter((s) => allowedSlugs.has(s));
       if (valid.length) setOpenSlugs(new Set(valid));
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey, allowedSlugs]);
 
   // Persist whenever openSlugs changes

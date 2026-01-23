@@ -3,7 +3,7 @@ import {
   MEDIA_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_VARIANT_FRAGMENT,
-} from "~/data/fragments";
+} from '~/data/fragments';
 
 export let SHOP_QUERY = `#graphql
   query shopQuery($country: CountryCode, $language: LanguageCode)
@@ -428,7 +428,6 @@ export let VARIANTS_QUERY = `#graphql
   }
   ${PRODUCT_VARIANT_FRAGMENT}
 ` as const;
-
 
 export const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   query GetCollectionByHandle($handle: String!) {

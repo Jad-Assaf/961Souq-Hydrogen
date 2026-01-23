@@ -255,4 +255,3 @@ recreateProductsCollection().catch((err) => {
   console.error('Fatal error creating collection:', err);
   process.exit(1);
 });
- 

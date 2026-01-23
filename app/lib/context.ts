@@ -1,10 +1,10 @@
-import { createHydrogenContext } from "@shopify/hydrogen";
-import { WeaverseClient } from "@weaverse/hydrogen";
-import { CART_QUERY_FRAGMENT } from "~/data/fragments";
-import { AppSession } from "~/lib/session";
-import { getLocaleFromRequest } from "~/lib/utils";
-import { components } from "~/weaverse/components";
-import { themeSchema } from "~/weaverse/schema.server";
+import {createHydrogenContext} from '@shopify/hydrogen';
+import {WeaverseClient} from '@weaverse/hydrogen';
+import {CART_QUERY_FRAGMENT} from '~/data/fragments';
+import {AppSession} from '~/lib/session';
+import {getLocaleFromRequest} from '~/lib/utils';
+import {components} from '~/weaverse/components';
+import {themeSchema} from '~/weaverse/schema.server';
 
 /**
  * The context implementation is separate from server.ts
@@ -19,12 +19,12 @@ export async function createAppLoadContext(
    * Open a cache instance in the worker and a custom session instance.
    */
   if (!env?.SESSION_SECRET) {
-    throw new Error("SESSION_SECRET environment variable is not set");
+    throw new Error('SESSION_SECRET environment variable is not set');
   }
 
   const waitUntil = executionContext.waitUntil.bind(executionContext);
   const [cache, session] = await Promise.all([
-    caches.open("hydrogen"),
+    caches.open('hydrogen'),
     AppSession.init(request, [env.SESSION_SECRET]),
   ]);
 

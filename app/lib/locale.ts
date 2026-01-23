@@ -1,4 +1,4 @@
-import type { Locale } from "./type";
+import type {Locale} from './type';
 
 export function getCountryUrlPath({
   countryLocale,
@@ -9,7 +9,7 @@ export function getCountryUrlPath({
   pathWithoutLocale: string;
   defaultLocalePrefix: string;
 }) {
-  let countryPrefixPath = "";
+  let countryPrefixPath = '';
   const countryLocalePrefix = `${countryLocale.language}-${countryLocale.country}`;
 
   if (countryLocalePrefix !== defaultLocalePrefix) {

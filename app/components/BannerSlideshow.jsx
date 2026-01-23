@@ -127,7 +127,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
                     className="banner-image"
                     loading="eager"
                     decoding="async"
-                    fetchpriority="high"
+                    fetchPriority="high"
                     width={640}
                     height={300}
                   />
@@ -165,7 +165,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
                     className="banner-image"
                     loading="eager"
                     decoding="async"
-                    fetchpriority="high"
+                    fetchPriority="high"
                     width={1500}
                     height={300}
                   />

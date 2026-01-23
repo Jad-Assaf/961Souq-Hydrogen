@@ -261,10 +261,14 @@ export default function MobileCategoryCards({menu}) {
               }
               onClick={() => handleCardClick(handle)}
             >
-              <div
-                className="mobile-category-card-bg"
-              >
-                <img src={bgImage} alt="" loading='lazy' width={300} height={500}/>
+              <div className="mobile-category-card-bg">
+                <img
+                  src={bgImage}
+                  alt=""
+                  loading="lazy"
+                  width={300}
+                  height={500}
+                />
               </div>
               <div className="mobile-category-card-overlay" />
               <div className="mobile-category-card-content">

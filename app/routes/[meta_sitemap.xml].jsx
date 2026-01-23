@@ -175,7 +175,6 @@ function renderProductVariantItem(product, variant, baseUrl) {
   `;
 }
 
-
 /**
  * Parse numeric ID out of the Shopify global ID (e.g. "gid://shopify/Product/12345" -> "12345").
  */

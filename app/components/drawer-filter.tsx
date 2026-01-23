@@ -7,35 +7,35 @@ import {
   MenuItem,
   MenuItems,
   Transition,
-} from "@headlessui/react";
-import { CaretDown, Sliders } from "@phosphor-icons/react";
+} from '@headlessui/react';
+import {CaretDown, Sliders} from '@phosphor-icons/react';
 import {
   Link,
   useLocation,
   useNavigate,
   useSearchParams,
-} from "@remix-run/react";
+} from '@remix-run/react';
 import type {
   Filter,
   ProductFilter,
-} from "@shopify/hydrogen/storefront-api-types";
-import clsx from "clsx";
-import type { SyntheticEvent } from "react";
-import React, { useState, useEffect, useCallback } from "react";
-import Button from "./button";
-import { Checkbox } from "./checkbox";
-import { IconCaretDown, IconCaretRight } from "./icons";
-import { FILTER_URL_PREFIX } from "../lib/const";
-import type { AppliedFilter, SortParam } from "../lib/filter";
-import { getAppliedFilterLink, getFilterLink, getSortLink } from "../lib/filter";
-import { Drawer, useDrawer } from "./drawer";
-import { Input } from "./input";
+} from '@shopify/hydrogen/storefront-api-types';
+import clsx from 'clsx';
+import type {SyntheticEvent} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
+import Button from './button';
+import {Checkbox} from './checkbox';
+import {IconCaretDown, IconCaretRight} from './icons';
+import {FILTER_URL_PREFIX} from '../lib/const';
+import type {AppliedFilter, SortParam} from '../lib/filter';
+import {getAppliedFilterLink, getFilterLink, getSortLink} from '../lib/filter';
+import {Drawer, useDrawer} from './drawer';
+import {Input} from './input';
 
 type DrawerFilterProps = {
   productNumber?: number;
   filters: Filter[];
   appliedFilters?: AppliedFilter[];
-  collections?: Array<{ handle: string; title: string }>;
+  collections?: Array<{handle: string; title: string}>;
   showSearchSort?: boolean;
   numberInRow?: number;
   onLayoutChange: (number: number) => void;
@@ -45,7 +45,7 @@ function ListItemFilter({
   option,
   appliedFilters,
 }: {
-  option: Filter["values"][0];
+  option: Filter['values'][0];
   appliedFilters: AppliedFilter[];
 }) {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ function ListItemFilter({
 
   const isChecked = useCallback(() => {
     return appliedFilters.some(
-      (filter) => JSON.stringify(filter.filter) === option.input
+      (filter) => JSON.stringify(filter.filter) === option.input,
     );
   }, [appliedFilters, option.input]);
 
@@ -65,26 +65,30 @@ function ListItemFilter({
   }, [appliedFilters, isChecked]);
 
   const handleCheckedChange = (checked: boolean) => {
-  setChecked(checked);
+    setChecked(checked);
 
-  // Clean up 'direction' and 'cursor' parameters
-  const updatedParams = new URLSearchParams(params.toString());
-  updatedParams.delete('direction');
-  updatedParams.delete('cursor');
+    // Clean up 'direction' and 'cursor' parameters
+    const updatedParams = new URLSearchParams(params.toString());
+    updatedParams.delete('direction');
+    updatedParams.delete('cursor');
 
-  if (checked) {
-    const link = getFilterLink(option.input as string, updatedParams, location);
-    navigate(link);
-  } else {
-    const filter = appliedFilters.find(
-      (filter) => JSON.stringify(filter.filter) === option.input
-    );
-    if (filter) {
-      const link = getAppliedFilterLink(filter, updatedParams, location);
+    if (checked) {
+      const link = getFilterLink(
+        option.input as string,
+        updatedParams,
+        location,
+      );
       navigate(link);
+    } else {
+      const filter = appliedFilters.find(
+        (filter) => JSON.stringify(filter.filter) === option.input,
+      );
+      if (filter) {
+        const link = getAppliedFilterLink(filter, updatedParams, location);
+        navigate(link);
+      }
     }
-  }
-};
+  };
 
   return (
     <div className="flex gap-2">
@@ -103,17 +107,19 @@ export function FiltersDrawer({
   appliedFilters = [],
   collections = [], // Add collections to props
   onRemoveFilter,
-}: Omit<DrawerFilterProps, "children"> & { onRemoveFilter: (filter: AppliedFilter) => void }) {
+}: Omit<DrawerFilterProps, 'children'> & {
+  onRemoveFilter: (filter: AppliedFilter) => void;
+}) {
   const [params] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const filterMarkup = (filter: Filter, option: Filter["values"][0]) => {
+  const filterMarkup = (filter: Filter, option: Filter['values'][0]) => {
     switch (filter.type) {
-      case "PRICE_RANGE": {
+      case 'PRICE_RANGE': {
         let priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
         let price = priceFilter
-          ? (JSON.parse(priceFilter) as ProductFilter["price"])
+          ? (JSON.parse(priceFilter) as ProductFilter['price'])
           : undefined;
         let min = price?.min ? Number(price.min) : undefined;
         let max = price?.max ? Number(price.max) : undefined;
@@ -127,7 +133,7 @@ export function FiltersDrawer({
   };
 
   return (
-    <div className="text-sm" style={{ position: "sticky", top: "0" }}>
+    <div className="text-sm" style={{position: 'sticky', top: '0'}}>
       {/* Collections Menu */}
       {collections.length > 0 && (
         <div className="collections-menu mb-[20px]">
@@ -149,11 +155,14 @@ export function FiltersDrawer({
               <MenuItems className="origin-top-left absolute mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                 {collections.map((collection) => (
                   <MenuItem key={collection.handle}>
-                    {({ active }) => (
+                    {({active}) => (
                       <button
-                        className={`${active ? "bg-gray-100" : ""
-                          } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
-                        onClick={() => navigate(`/collections/${collection.handle}`)}
+                        className={`${
+                          active ? 'bg-gray-100' : ''
+                        } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                        onClick={() =>
+                          navigate(`/collections/${collection.handle}`)
+                        }
                       >
                         {collection.title}
                       </button>
@@ -168,7 +177,7 @@ export function FiltersDrawer({
 
       {/* Applied Filters */}
       {appliedFilters.length > 0 ? (
-        <div className="applied-filters mb-4" style={{ minHeight: "100px" }}>
+        <div className="applied-filters mb-4" style={{minHeight: '100px'}}>
           <h3 className="font-semibold text-lg mb-2">Applied Filters:</h3>
           <div className="flex flex-wrap gap-2">
             {appliedFilters.map((filter, index) => {
@@ -178,8 +187,11 @@ export function FiltersDrawer({
                 if (parsedFilter && parsedFilter.value) {
                   displayLabel = parsedFilter.value;
                 }
-              } catch { }
-              displayLabel = displayLabel.replace(/^["'](.+(?=["']$))["']$/, "$1");
+              } catch {}
+              displayLabel = displayLabel.replace(
+                /^["'](.+(?=["']$))["']$/,
+                '$1',
+              );
 
               return (
                 <div
@@ -192,8 +204,19 @@ export function FiltersDrawer({
                     onClick={() => onRemoveFilter(filter)}
                     className="ml-1 text-gray-500 hover:text-gray-700"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -210,7 +233,7 @@ export function FiltersDrawer({
           key={filter.id}
           className="w-full pt-[20px] border-t border-[#d1d5db]"
         >
-          {({ open }) => (
+          {({open}) => (
             <>
               <DisclosureButton className="flex w-full justify-between items-center mb-2">
                 <span className="text-sm">{filter.label}</span>
@@ -223,9 +246,7 @@ export function FiltersDrawer({
               <DisclosurePanel>
                 <ul className="space-y-5">
                   {filter.values?.map((option) => (
-                    <li key={option.id}>
-                      {filterMarkup(filter, option)}
-                    </li>
+                    <li key={option.id}>{filterMarkup(filter, option)}</li>
                   ))}
                 </ul>
               </DisclosurePanel>
@@ -239,7 +260,7 @@ export function FiltersDrawer({
 
 const PRICE_RANGE_FILTER_DEBOUNCE = 500;
 
-function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
+function PriceRangeFilter({max, min}: {max?: number; min?: number}) {
   const location = useLocation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -264,9 +285,15 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
 
     // Only apply the min price filter if it's a valid number
     if (minPrice !== undefined && !isNaN(minPrice)) {
-      updatedParams.set(`${FILTER_URL_PREFIX}price`, JSON.stringify({ min: minPrice, max: maxPrice }));
+      updatedParams.set(
+        `${FILTER_URL_PREFIX}price`,
+        JSON.stringify({min: minPrice, max: maxPrice}),
+      );
     } else if (maxPrice !== undefined && !isNaN(maxPrice)) {
-      updatedParams.set(`${FILTER_URL_PREFIX}price`, JSON.stringify({ max: maxPrice }));
+      updatedParams.set(
+        `${FILTER_URL_PREFIX}price`,
+        JSON.stringify({max: maxPrice}),
+      );
     } else {
       updatedParams.delete(`${FILTER_URL_PREFIX}price`);
     }
@@ -292,7 +319,7 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
             className="price-filter-input"
             name="minPrice"
             type="number"
-            value={minPrice ?? ""}
+            value={minPrice ?? ''}
             placeholder="From"
             onChange={onChangeMin}
           />
@@ -303,7 +330,7 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
             className="price-filter-input"
             name="maxPrice"
             type="number"
-            value={maxPrice ?? ""}
+            value={maxPrice ?? ''}
             placeholder="To"
             onChange={onChangeMax}
           />
@@ -330,19 +357,19 @@ function PriceRangeFilter({ max, min }: { max?: number; min?: number }) {
 export function DrawerFilter({
   filters,
   numberInRow,
-  onLayoutChange = () => { }, // Default to a no-op function
+  onLayoutChange = () => {}, // Default to a no-op function
   appliedFilters = [],
   productNumber = 0,
   showSearchSort = false,
   isDesktop = false,
-}: DrawerFilterProps & { isDesktop: boolean }) {
-  const { openDrawer, isOpen, closeDrawer } = useDrawer();
+}: DrawerFilterProps & {isDesktop: boolean}) {
+  const {openDrawer, isOpen, closeDrawer} = useDrawer();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const location = useLocation();
 
   const handleRemoveFilter = (filter: AppliedFilter) => {
-    console.log("Removing filter:", filter);
+    console.log('Removing filter:', filter);
     const updatedParams = new URLSearchParams(params.toString());
 
     // Use the getAppliedFilterLink utility function instead
@@ -351,7 +378,10 @@ export function DrawerFilter({
   };
 
   return (
-    <div className="py-4 bg-white sticky sm:relative top-0 w-[50%] max-w-[1200px] m-auto" style={{zIndex: '4'}}>
+    <div
+      className="py-4 bg-white sticky sm:relative top-0 w-[50%] max-w-[1200px] m-auto"
+      style={{zIndex: '4'}}
+    >
       <div className="gap-4 md:gap-8 flex w-full items-center justify-between">
         <div className="flex gap-2 justify-between flex-row-reverse m-auto w-11/12 rounded-3xl">
           <SortMenu showSearchSort={showSearchSort} />
@@ -397,34 +427,35 @@ export default function SortMenu({
   const [params] = useSearchParams();
   const location = useLocation();
   const [screenWidth, setScreenWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1500 // Default to a large screen width on the server
+    typeof window !== 'undefined' ? window.innerWidth : 1500, // Default to a large screen width on the server
   );
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const handleResize = () => setScreenWidth(window.innerWidth);
-      window.addEventListener("resize", handleResize);
+      window.addEventListener('resize', handleResize);
 
-      return () => window.removeEventListener("resize", handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }
   }, []);
 
-  const productSortItems: { label: string; key: SortParam }[] = [
-    { label: "Featured", key: "featured" },
-    { label: "Price: Low - High", key: "price-low-high" },
-    { label: "Price: High - Low", key: "price-high-low" },
-    { label: "Best Selling", key: "best-selling" },
-    { label: "Newest", key: "newest" },
+  const productSortItems: {label: string; key: SortParam}[] = [
+    {label: 'Featured', key: 'featured'},
+    {label: 'Price: Low - High', key: 'price-low-high'},
+    {label: 'Price: High - Low', key: 'price-high-low'},
+    {label: 'Best Selling', key: 'best-selling'},
+    {label: 'Newest', key: 'newest'},
   ];
 
-  const searchSortItems: { label: string; key: SortParam }[] = [
-    { label: "Price: Low - High", key: "price-low-high" },
-    { label: "Price: High - Low", key: "price-high-low" },
-    { label: "Relevance", key: "relevance" },
+  const searchSortItems: {label: string; key: SortParam}[] = [
+    {label: 'Price: Low - High', key: 'price-low-high'},
+    {label: 'Price: High - Low', key: 'price-high-low'},
+    {label: 'Relevance', key: 'relevance'},
   ];
 
   const items = showSearchSort ? searchSortItems : productSortItems;
-  const activeItem = items.find((item) => item.key === params.get("sort")) || items[0];
+  const activeItem =
+    items.find((item) => item.key === params.get('sort')) || items[0];
 
   const handleSort = (sortKey: SortParam) => {
     const newUrl = getSortLink(sortKey, params, location);
@@ -435,7 +466,9 @@ export default function SortMenu({
     <Menu as="div" className="relative z-10">
       <MenuButton className="flex items-center gap-1.5 h-10 border border-gray-300 px-4 py-2.5 rounded-full">
         <span className="font-medium">
-          {typeof window !== "undefined" && screenWidth > 550 ? `Sort by: ${activeItem.label}` : "Sort"}
+          {typeof window !== 'undefined' && screenWidth > 550
+            ? `Sort by: ${activeItem.label}`
+            : 'Sort'}
         </span>
         <CaretDown />
       </MenuButton>
@@ -449,8 +482,8 @@ export default function SortMenu({
               <button
                 onClick={() => handleSort(item.key)}
                 className={clsx(
-                  "block w-full text-left text-base hover:underline underline-offset-4 fltr-btn",
-                  activeItem.key === item.key ? "font-bold" : "font-normal"
+                  'block w-full text-left text-base hover:underline underline-offset-4 fltr-btn',
+                  activeItem.key === item.key ? 'font-bold' : 'font-normal',
                 )}
               >
                 {item.label}

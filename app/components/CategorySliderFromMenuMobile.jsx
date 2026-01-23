@@ -56,7 +56,10 @@ export function CategorySliderFromMenuMobile({menu}) {
         };
 
         return (
-          <section key={parent.id} className="category-group sliderWithMoreHeight">
+          <section
+            key={parent.id}
+            className="category-group sliderWithMoreHeight"
+          >
             <div className="slide-con" style={{position: 'relative'}}>
               {/* <p className="parent-title button-85">{parent.title}</p> */}
               <div
@@ -93,7 +96,6 @@ export function CategorySliderFromMenuMobile({menu}) {
                   );
                 })}
               </div>
-
             </div>
           </section>
         );

@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 
-export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] }) {
+export default function InstagramReelsCarousel({
+  reelIds = [],
+  productUrls = [],
+}) {
   const [current, setCurrent] = useState(0);
   const scriptLoaded = useRef(false);
-  const outerRef = useRef(null);   // <— scrollable element
+  const outerRef = useRef(null); // <— scrollable element
 
   /* 1 ▸ load Instagram embed.js once */
   useEffect(() => {
@@ -32,15 +35,26 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
   }, [current]);
 
   /* Handlers */
-  const prev = () => setCurrent(i => (i - 1 + reelIds.length) % reelIds.length);
-  const next = () => setCurrent(i => (i + 1) % reelIds.length);
+  const prev = () =>
+    setCurrent((i) => (i - 1 + reelIds.length) % reelIds.length);
+  const next = () => setCurrent((i) => (i + 1) % reelIds.length);
 
   return (
     <div className="carousel-wrapper">
-      <button onClick={prev} className="home-prev-button" aria-label="Previous reel">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" strokeWidth="2"
-             strokeLinecap="round" strokeLinejoin="round">
+      <button
+        onClick={prev}
+        className="home-prev-button"
+        aria-label="Previous reel"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
@@ -61,10 +75,20 @@ export default function InstagramReelsCarousel({ reelIds = [], productUrls = [] 
         </div>
       </div>
 
-      <button onClick={next} className="home-next-button" aria-label="Next reel">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" strokeWidth="2"
-             strokeLinecap="round" strokeLinejoin="round">
+      <button
+        onClick={next}
+        className="home-next-button"
+        aria-label="Next reel"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>

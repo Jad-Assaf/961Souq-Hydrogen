@@ -170,9 +170,7 @@ function CartLineRemoveButton({lineIds, disabled}) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button className="bin-button">
-       Remove Item
-      </button>
+      <button className="bin-button">Remove Item</button>
     </CartForm>
   );
 }

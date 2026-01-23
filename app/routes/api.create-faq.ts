@@ -1,20 +1,23 @@
-import type { ActionFunctionArgs } from '@shopify/remix-oxygen';
+import type {ActionFunctionArgs} from '@shopify/remix-oxygen';
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({request, context}: ActionFunctionArgs) => {
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    return new Response(JSON.stringify({error: 'Method not allowed'}), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
     });
   }
 
   try {
-    const { productId, question } = await request.json();
+    const {productId, question} = await request.json();
     if (!productId || !question) {
-      return new Response(JSON.stringify({ error: 'Missing productId or question' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({error: 'Missing productId or question'}),
+        {
+          status: 400,
+          headers: {'Content-Type': 'application/json'},
+        },
+      );
     }
 
     // 1. Fetch the current metafield value
@@ -28,9 +31,12 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         }
       }
     `;
-    const { product } = await (context.storefront as any).query(GET_METAFIELD_QUERY, {
-      variables: { id: productId },
-    });
+    const {product} = await (context.storefront as any).query(
+      GET_METAFIELD_QUERY,
+      {
+        variables: {id: productId},
+      },
+    );
 
     let questions: string[] = [];
     let metafieldId: string | undefined = undefined;
@@ -71,25 +77,28 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     };
     if (metafieldId) input['id'] = metafieldId;
 
-    const result = await (context.storefront as any).mutate(UPDATE_METAFIELD_MUTATION, {
-      variables: { input },
-    });
+    const result = await (context.storefront as any).mutate(
+      UPDATE_METAFIELD_MUTATION,
+      {
+        variables: {input},
+      },
+    );
 
     if (result?.metafieldsSet?.userErrors?.length) {
       return new Response(
-        JSON.stringify({ error: result.metafieldsSet.userErrors[0].message }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({error: result.metafieldsSet.userErrors[0].message}),
+        {status: 500, headers: {'Content-Type': 'application/json'}},
       );
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({success: true}), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({error: 'Internal server error'}), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
     });
   }
-}; 
+};

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function CategoriesMenu({ menuData, currentPath }) {
+export function CategoriesMenu({menuData, currentPath}) {
   if (!menuData?.items) return null;
 
   return (
@@ -15,21 +15,26 @@ export function CategoriesMenu({ menuData, currentPath }) {
             <li key={item.id} className="menu-item nav-links">
               <Link
                 to={item.url}
-                className={`block py-2 ${isActive ? 'font-bold text-primary' : 'text-gray-700'}`}
+                className={`block py-2 ${
+                  isActive ? 'font-bold text-primary' : 'text-gray-700'
+                }`}
               >
                 {item.title}
               </Link>
 
               {hasChildren && (
-                <ul className={`ml-4 space-y-1 ${isActive ? 'block' : 'hidden'}`}>
+                <ul
+                  className={`ml-4 space-y-1 ${isActive ? 'block' : 'hidden'}`}
+                >
                   {item.items.map((subItem) => (
                     <li key={subItem.id}>
                       <Link
                         to={subItem.url}
-                        className={`block py-1 text-sm ${currentPath.includes(subItem.url)
+                        className={`block py-1 text-sm ${
+                          currentPath.includes(subItem.url)
                             ? 'font-semibold text-primary'
                             : 'text-gray-600'
-                          }`}
+                        }`}
                       >
                         {subItem.title}
                       </Link>

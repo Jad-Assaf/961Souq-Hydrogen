@@ -1,9 +1,8 @@
 import {sha256} from 'js-sha256';
 
-const ENDPOINT =
-  'https://business-api.tiktok.com/open_api/v1.3/event/track/';
+const ENDPOINT = 'https://business-api.tiktok.com/open_api/v1.3/event/track/';
 const PIXEL_ID = process.env.TIKTOK_PIXEL_ID!;
-const TOKEN    = process.env.TIKTOK_ACCESS_TOKEN!;
+const TOKEN = process.env.TIKTOK_ACCESS_TOKEN!;
 
 const hash = (v?: string) => (v ? sha256(v.trim().toLowerCase()) : undefined);
 

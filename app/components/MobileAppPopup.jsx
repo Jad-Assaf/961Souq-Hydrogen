@@ -203,7 +203,9 @@ const MobileAppPopup = () => {
 
           <p id="appPopupTitle" className="appPopupTitle">
             Try our New and Updated <br />{' '}
-            <span style={{display: 'block', marginTop: '10px'}}>Mobile App!</span>
+            <span style={{display: 'block', marginTop: '10px'}}>
+              Mobile App!
+            </span>
           </p>
 
           <button

@@ -4,13 +4,12 @@ import {
   DialogTitle,
   Transition,
   TransitionChild,
-} from "@headlessui/react";
-import { useLocation } from "@remix-run/react";
-import clsx from "clsx";
-import React from "react";
-import { Fragment, useEffect, useState } from "react";
-import { IconCaretLeft, IconX } from "~/components/icons";
-import { cn } from "~/lib/cn";
+} from '@headlessui/react';
+import {useLocation} from '@remix-run/react';
+import clsx from 'clsx';
+import React, {Fragment, useEffect, useState} from 'react';
+import {IconCaretLeft, IconX} from '~/components/icons';
+import {cn} from '~/lib/cn';
 
 /**
  * Drawer component that opens on user click.
@@ -21,35 +20,35 @@ import { cn } from "~/lib/cn";
  * @param children - react children node.
  */
 const DRAWER_HEADER_SPACING = {
-  sm: "px-4",
-  md: "px-5",
-  lg: "px-6",
+  sm: 'px-4',
+  md: 'px-5',
+  lg: 'px-6',
 };
 
 export function Drawer({
   heading,
   open,
   onClose,
-  openFrom = "right",
+  openFrom = 'right',
   children,
   isBackMenu = false,
   bordered = false,
-  spacing = "md",
+  spacing = 'md',
 }: {
   heading?: string;
   open: boolean;
   onClose: () => void;
-  openFrom: "right" | "left" | "top" | "bottom";
+  openFrom: 'right' | 'left' | 'top' | 'bottom';
   isBackMenu?: boolean;
   bordered?: boolean;
-  spacing?: "sm" | "md" | "lg";
+  spacing?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
 }) {
   let offScreen = {
-    right: "translate-x-full",
-    left: "-translate-x-full",
-    top: "-translate-y-full",
-    bottom: "translate-y-full",
+    right: 'translate-x-full',
+    left: '-translate-x-full',
+    top: '-translate-y-full',
+    bottom: 'translate-y-full',
   };
 
   return (
@@ -70,12 +69,15 @@ export function Drawer({
           <div className="absolute inset-0 overflow-hidden">
             <div
               className={clsx(
-                "fixed inset-y-0 flex",
-                openFrom === "right" && "right-0 max-w-full",
-                openFrom === "top" && "overflow-hidden w-screen",
-                openFrom === "bottom" && "overflow-hidden w-screen bottom-0",
+                'fixed inset-y-0 flex',
+                openFrom === 'right' && 'right-0 max-w-full',
+                openFrom === 'top' && 'overflow-hidden w-screen',
+                openFrom === 'bottom' && 'overflow-hidden w-screen bottom-0',
               )}
-              style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(15px)'}}
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                backdropFilter: 'blur(15px)',
+              }}
             >
               <TransitionChild
                 as={Fragment}
@@ -88,24 +90,24 @@ export function Drawer({
               >
                 <DialogPanel
                   className={cn(
-                    "text-left align-middle transition-transform transform shadow-xl bg-background overflow-y-auto",
-                    openFrom === "bottom"
-                      ? "w-screen max-h-[80vh] rounded-t-lg fixed bottom-0" // Limit height and stick to bottom
-                      : "max-w-lg h-screen-dynamic",
-                    openFrom === "top" && "h-fit w-screen"
+                    'text-left align-middle transition-transform transform shadow-xl bg-background overflow-y-auto',
+                    openFrom === 'bottom'
+                      ? 'w-screen max-h-[80vh] rounded-t-lg fixed bottom-0' // Limit height and stick to bottom
+                      : 'max-w-lg h-screen-dynamic',
+                    openFrom === 'top' && 'h-fit w-screen',
                   )}
                 >
-                  {openFrom !== "top" && (
+                  {openFrom !== 'top' && (
                     <header
                       className={clsx(
-                        "top-0 flex items-center h-nav",
+                        'top-0 flex items-center h-nav',
                         DRAWER_HEADER_SPACING[spacing],
                         isBackMenu
-                          ? "justify-start gap-4"
+                          ? 'justify-start gap-4'
                           : heading
-                            ? "justify-between"
-                            : "justify-end",
-                        bordered && "border-b",
+                          ? 'justify-between'
+                          : 'justify-end',
+                        bordered && 'border-b',
                       )}
                     >
                       {isBackMenu && (
@@ -153,7 +155,7 @@ Drawer.Title = DialogTitle;
 
 export function useDrawer(openDefault = false) {
   let [isOpen, setIsOpen] = useState(openDefault);
-  let { pathname } = useLocation();
+  let {pathname} = useLocation();
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (isOpen) {

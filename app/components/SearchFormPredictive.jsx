@@ -21,8 +21,8 @@ export function SearchFormPredictive({
   /** Reset the input value and blur the input */
   function resetInput(event) {
     if (inputRef.current) {
-     inputRef.current.blur();
-     inputRef.current.value = '';
+      inputRef.current.blur();
+      inputRef.current.value = '';
     }
   }
 

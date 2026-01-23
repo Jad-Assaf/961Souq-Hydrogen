@@ -22,7 +22,7 @@ export async function loader({context}) {
     });
 
     if (errors) return json({loggedIn: false});
-    
+
     const customer = data?.customer;
     if (!customer?.id) {
       return json({loggedIn: false});
@@ -34,9 +34,10 @@ export async function loader({context}) {
       firstName: customer.firstName || null,
       lastName: customer.lastName || null,
       email: customer.emailAddress?.emailAddress || null,
-      fullName: customer.firstName && customer.lastName
-        ? `${customer.firstName} ${customer.lastName}`
-        : customer.firstName || customer.lastName || null,
+      fullName:
+        customer.firstName && customer.lastName
+          ? `${customer.firstName} ${customer.lastName}`
+          : customer.firstName || customer.lastName || null,
     });
   } catch {
     return json({loggedIn: false});

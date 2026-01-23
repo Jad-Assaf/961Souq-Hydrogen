@@ -9,7 +9,7 @@
  */
 
 // Simple in-memory rate limiting (IP-based)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const rateLimitMap = new Map<string, {count: number; resetTime: number}>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX = 5; // 5 requests per minute per IP
 const RATE_LIMIT_COOLDOWN = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -20,22 +20,22 @@ function getClientIP(request: Request): string {
   return forwarded?.split(',')[0]?.trim() || realIP || 'unknown';
 }
 
-function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+function checkRateLimit(ip: string): {allowed: boolean; retryAfter?: number} {
   const now = Date.now();
   const record = rateLimitMap.get(ip);
 
   if (!record || now > record.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return { allowed: true };
+    rateLimitMap.set(ip, {count: 1, resetTime: now + RATE_LIMIT_WINDOW});
+    return {allowed: true};
   }
 
   if (record.count >= RATE_LIMIT_MAX) {
     const retryAfter = Math.ceil((record.resetTime - now) / 1000 / 60); // minutes until reset
-    return { allowed: false, retryAfter };
+    return {allowed: false, retryAfter};
   }
 
   record.count++;
-  return { allowed: true };
+  return {allowed: true};
 }
 
 function cleanupRateLimitEntries() {
@@ -48,35 +48,43 @@ function cleanupRateLimitEntries() {
 }
 
 function normalizeQuestion(question: string): string {
-  return question.toLowerCase().trim().replace(/[^\w\s\u0600-\u06FF]/g, '');
+  return question
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s\u0600-\u06FF]/g, '');
 }
 
 function questionsAreSimilar(q1: string, q2: string, threshold = 0.7): boolean {
   const n1 = normalizeQuestion(q1);
   const n2 = normalizeQuestion(q2);
-  
+
   // Exact match
   if (n1 === n2) return true;
-  
+
   // Check if one contains the other (for short questions)
   if (n1.length < 20 || n2.length < 20) {
     if (n1.includes(n2) || n2.includes(n1)) return true;
   }
-  
+
   // Simple word overlap check
-  const words1 = new Set(n1.split(/\s+/).filter(w => w.length > 2));
-  const words2 = new Set(n2.split(/\s+/).filter(w => w.length > 2));
-  
+  const words1 = new Set(n1.split(/\s+/).filter((w) => w.length > 2));
+  const words2 = new Set(n2.split(/\s+/).filter((w) => w.length > 2));
+
   if (words1.size === 0 || words2.size === 0) return false;
-  
-  const intersection = new Set([...words1].filter(w => words2.has(w)));
+
+  const intersection = new Set([...words1].filter((w) => words2.has(w)));
   const union = new Set([...words1, ...words2]);
-  
+
   const similarity = intersection.size / union.size;
   return similarity >= threshold;
 }
 
-async function publishMetaobject(faqId: string, shop: string, adminToken: string, apiVersion: string): Promise<void> {
+async function publishMetaobject(
+  faqId: string,
+  shop: string,
+  adminToken: string,
+  apiVersion: string,
+): Promise<void> {
   try {
     const publishRes = await fetch(
       `https://${shop}/admin/api/${apiVersion}/graphql.json`,
@@ -101,21 +109,21 @@ async function publishMetaobject(faqId: string, shop: string, adminToken: string
     );
 
     const publishData = await publishRes.json();
-    
+
     if (publishData?.data?.metaobjectPublish?.userErrors?.length) return;
   } catch (publishError) {
     return;
   }
 }
 
-export const action = async ({ request, context }) => {
+export const action = async ({request, context}) => {
   /* -----------------------------------------------------------------
    *  Accept POST only
    * ----------------------------------------------------------------- */
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    return new Response(JSON.stringify({error: 'Method not allowed'}), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
     });
   }
 
@@ -128,24 +136,24 @@ export const action = async ({ request, context }) => {
   if (!rateLimitCheck.allowed) {
     const retryAfterMinutes = rateLimitCheck.retryAfter || 60;
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: `Too many requests. Please try again after 1 hour.`,
         rateLimited: true,
-        retryAfter: retryAfterMinutes
+        retryAfter: retryAfterMinutes,
       }),
-      { status: 429, headers: { 'Content-Type': 'application/json' } },
+      {status: 429, headers: {'Content-Type': 'application/json'}},
     );
   }
 
   /* -----------------------------------------------------------------
    *  Read secrets from context.env (not process.env)
    * ----------------------------------------------------------------- */
-  const { ADMIN_API_TOKEN, PUBLIC_STORE_DOMAIN: SHOP } = context.env;
+  const {ADMIN_API_TOKEN, PUBLIC_STORE_DOMAIN: SHOP} = context.env;
 
   if (!ADMIN_API_TOKEN || !SHOP) {
     return new Response(
-      JSON.stringify({ error: 'Admin API credentials not set' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
+      JSON.stringify({error: 'Admin API credentials not set'}),
+      {status: 500, headers: {'Content-Type': 'application/json'}},
     );
   }
 
@@ -154,22 +162,30 @@ export const action = async ({ request, context }) => {
      *  Parse and validate body
      * --------------------------------------------------------------- */
     const body = await request.json();
-    
-    const { productId, question, answer = '', name = 'Anonymous', email = null } = body;
+
+    const {
+      productId,
+      question,
+      answer = '',
+      name = 'Anonymous',
+      email = null,
+    } = body;
 
     // Validate question length
     if (!productId || !question) {
       return new Response(
-        JSON.stringify({ error: 'Missing productId or question' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
+        JSON.stringify({error: 'Missing productId or question'}),
+        {status: 400, headers: {'Content-Type': 'application/json'}},
       );
     }
 
     const trimmedQuestion = question.trim();
     if (trimmedQuestion.length < 5) {
       return new Response(
-        JSON.stringify({ error: 'Question is too short. Please provide more details.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
+        JSON.stringify({
+          error: 'Question is too short. Please provide more details.',
+        }),
+        {status: 400, headers: {'Content-Type': 'application/json'}},
       );
     }
 
@@ -177,7 +193,7 @@ export const action = async ({ request, context }) => {
      *  Check for duplicate questions
      * --------------------------------------------------------------- */
     const SHOPIFY_ADMIN_API_VERSION = '2025-01';
-    
+
     // Fetch all FAQ metaobjects and filter by product to check for duplicates
     const getExistingFaqsRes = await fetch(
       `https://${SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json`,
@@ -209,27 +225,30 @@ export const action = async ({ request, context }) => {
 
     const existingFaqsData = await getExistingFaqsRes.json();
     const allFaqs = existingFaqsData?.data?.metaobjects?.nodes || [];
-    
+
     // Filter FAQs that belong to this product
     const productFaqs = allFaqs.filter((faq: any) => {
-      const productField = faq.fields?.find((f: any) => f.key === 'faq_product');
+      const productField = faq.fields?.find(
+        (f: any) => f.key === 'faq_product',
+      );
       return productField?.value === productId;
     });
-    
+
     // Check for similar questions
     for (const node of productFaqs) {
       if (!node?.fields) continue;
-      
+
       for (const field of node.fields) {
         if (field.key === 'faq_question') {
           if (questionsAreSimilar(trimmedQuestion, field.value)) {
             return new Response(
-              JSON.stringify({ 
-                error: 'A similar question already exists. Please check the FAQ section above.',
+              JSON.stringify({
+                error:
+                  'A similar question already exists. Please check the FAQ section above.',
                 duplicate: true,
                 existingQuestion: field.value,
               }),
-              { status: 409, headers: { 'Content-Type': 'application/json' } },
+              {status: 409, headers: {'Content-Type': 'application/json'}},
             );
           }
         }
@@ -251,20 +270,20 @@ export const action = async ({ request, context }) => {
       answerValue = JSON.stringify(answer);
     }
 
-    const fields: Array<{ key: string; value: string }> = [
-      { key: 'faq_question', value: trimmedQuestion },
-      { key: 'faq_answer', value: answerValue },
-      { key: 'faq_product', value: productId }, // Store product reference in FAQ itself
+    const fields: Array<{key: string; value: string}> = [
+      {key: 'faq_question', value: trimmedQuestion},
+      {key: 'faq_answer', value: answerValue},
+      {key: 'faq_product', value: productId}, // Store product reference in FAQ itself
     ];
 
     // Add name and email if provided
     // Note: These fields need to exist in your metaobject definition
     // If they don't exist, they'll be ignored (but won't cause errors)
     if (name && name.trim() && name !== 'Anonymous') {
-      fields.push({ key: 'faq_name', value: name.trim() });
+      fields.push({key: 'faq_name', value: name.trim()});
     }
     if (email && email.trim()) {
-      fields.push({ key: 'faq_email', value: email.trim() });
+      fields.push({key: 'faq_email', value: email.trim()});
     }
 
     /* ---------------------------------------------------------------
@@ -293,40 +312,45 @@ export const action = async ({ request, context }) => {
     );
 
     const createFaqData = await createFaqRes.json();
-    
+
     // Check for user errors and try different formats
     if (createFaqData?.data?.metaobjectCreate?.userErrors?.length) {
       const errors = createFaqData.data.metaobjectCreate.userErrors;
       const errMsg = errors[0].message;
-      
+
       // Check if it's a format error for faq_answer
-      const hasAnswerFormatError = errors.some((e: any) => 
-        (e.field?.includes('faq_answer') || e.message?.toLowerCase().includes('format') || 
-         e.message?.toLowerCase().includes('schema') || e.message?.toLowerCase().includes('invalid json'))
+      const hasAnswerFormatError = errors.some(
+        (e: any) =>
+          e.field?.includes('faq_answer') ||
+          e.message?.toLowerCase().includes('format') ||
+          e.message?.toLowerCase().includes('schema') ||
+          e.message?.toLowerCase().includes('invalid json'),
       );
-      
+
       // Check if status field error
-      const hasStatusError = errors.some((e: any) => 
-        e.field?.includes('status') || e.message?.toLowerCase().includes('status')
+      const hasStatusError = errors.some(
+        (e: any) =>
+          e.field?.includes('status') ||
+          e.message?.toLowerCase().includes('status'),
       );
-      
+
       // Try retrying with different formats
       if (hasAnswerFormatError || hasStatusError) {
         // Try 1: Remove status, use JSON-encoded string (double-encoded)
         // Include name and email in retry attempts
         const retryFields1 = [
-          { key: 'faq_question', value: trimmedQuestion },
-          { key: 'faq_answer', value: JSON.stringify(answer || '') }, // JSON-encoded string
-          { key: 'faq_product', value: productId }, // Always include product reference
+          {key: 'faq_question', value: trimmedQuestion},
+          {key: 'faq_answer', value: JSON.stringify(answer || '')}, // JSON-encoded string
+          {key: 'faq_product', value: productId}, // Always include product reference
         ];
         // Add name and email if provided
         if (name && name.trim() && name !== 'Anonymous') {
-          retryFields1.push({ key: 'faq_name', value: name.trim() });
+          retryFields1.push({key: 'faq_name', value: name.trim()});
         }
         if (email && email.trim()) {
-          retryFields1.push({ key: 'faq_email', value: email.trim() });
+          retryFields1.push({key: 'faq_email', value: email.trim()});
         }
-        
+
         const retryRes1 = await fetch(
           `https://${SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json`,
           {
@@ -335,42 +359,47 @@ export const action = async ({ request, context }) => {
               'X-Shopify-Access-Token': ADMIN_API_TOKEN,
               'Content-Type': 'application/json',
             },
-                body: JSON.stringify({
-                  query: `mutation CreateMetaobject($fields: [MetaobjectFieldInput!]!) {
+            body: JSON.stringify({
+              query: `mutation CreateMetaobject($fields: [MetaobjectFieldInput!]!) {
                     metaobjectCreate(metaobject: { type: "faq", fields: $fields }) {
                       metaobject { id }
                       userErrors { field message }
                     }
                   }`,
-                  variables: {
-                    fields: retryFields1,
-                  },
-                }),
+              variables: {
+                fields: retryFields1,
+              },
+            }),
           },
         );
-        
+
         const retryData1 = await retryRes1.json();
         if (!retryData1?.data?.metaobjectCreate?.userErrors?.length) {
           createFaqData.data = retryData1.data;
           const retryFaqId = retryData1.data.metaobjectCreate.metaobject.id;
           if (retryFaqId) {
-            await publishMetaobject(retryFaqId, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
+            await publishMetaobject(
+              retryFaqId,
+              SHOP,
+              ADMIN_API_TOKEN,
+              SHOPIFY_ADMIN_API_VERSION,
+            );
           }
         } else {
           // Try 2: Plain text (maybe it's actually a text field, not JSON)
           const retryFields2 = [
-            { key: 'faq_question', value: trimmedQuestion },
-            { key: 'faq_answer', value: answer || '' }, // Plain text
-            { key: 'faq_product', value: productId }, // Always include product reference
+            {key: 'faq_question', value: trimmedQuestion},
+            {key: 'faq_answer', value: answer || ''}, // Plain text
+            {key: 'faq_product', value: productId}, // Always include product reference
           ];
           // Add name and email if provided
           if (name && name.trim() && name !== 'Anonymous') {
-            retryFields2.push({ key: 'faq_name', value: name.trim() });
+            retryFields2.push({key: 'faq_name', value: name.trim()});
           }
           if (email && email.trim()) {
-            retryFields2.push({ key: 'faq_email', value: email.trim() });
+            retryFields2.push({key: 'faq_email', value: email.trim()});
           }
-          
+
           const retryRes2 = await fetch(
             `https://${SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json`,
             {
@@ -379,26 +408,31 @@ export const action = async ({ request, context }) => {
                 'X-Shopify-Access-Token': ADMIN_API_TOKEN,
                 'Content-Type': 'application/json',
               },
-                body: JSON.stringify({
-                  query: `mutation CreateMetaobject($fields: [MetaobjectFieldInput!]!) {
+              body: JSON.stringify({
+                query: `mutation CreateMetaobject($fields: [MetaobjectFieldInput!]!) {
                     metaobjectCreate(metaobject: { type: "faq", fields: $fields }) {
                       metaobject { id }
                       userErrors { field message }
                     }
                   }`,
-                  variables: {
-                    fields: retryFields2,
-                  },
-                }),
-              },
-            );
-          
+                variables: {
+                  fields: retryFields2,
+                },
+              }),
+            },
+          );
+
           const retryData2 = await retryRes2.json();
           if (!retryData2?.data?.metaobjectCreate?.userErrors?.length) {
             createFaqData.data = retryData2.data;
             const retryFaqId2 = retryData2.data.metaobjectCreate.metaobject.id;
             if (retryFaqId2) {
-              await publishMetaobject(retryFaqId2, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
+              await publishMetaobject(
+                retryFaqId2,
+                SHOP,
+                ADMIN_API_TOKEN,
+                SHOPIFY_ADMIN_API_VERSION,
+              );
             }
           } else {
             // Try 3: Shopify Rich Text format (correct structure)
@@ -416,20 +450,20 @@ export const action = async ({ request, context }) => {
                 },
               ],
             });
-            
+
             const retryFields3 = [
-              { key: 'faq_question', value: trimmedQuestion },
-              { key: 'faq_answer', value: richTextAnswer },
-              { key: 'faq_product', value: productId }, // Always include product reference
+              {key: 'faq_question', value: trimmedQuestion},
+              {key: 'faq_answer', value: richTextAnswer},
+              {key: 'faq_product', value: productId}, // Always include product reference
             ];
             // Add name and email if provided
             if (name && name.trim() && name !== 'Anonymous') {
-              retryFields3.push({ key: 'faq_name', value: name.trim() });
+              retryFields3.push({key: 'faq_name', value: name.trim()});
             }
             if (email && email.trim()) {
-              retryFields3.push({ key: 'faq_email', value: email.trim() });
+              retryFields3.push({key: 'faq_email', value: email.trim()});
             }
-            
+
             const retryRes3 = await fetch(
               `https://${SHOP}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/graphql.json`,
               {
@@ -451,66 +485,79 @@ export const action = async ({ request, context }) => {
                 }),
               },
             );
-            
+
             const retryData3 = await retryRes3.json();
             if (!retryData3?.data?.metaobjectCreate?.userErrors?.length) {
               createFaqData.data = retryData3.data;
-              const retryFaqId3 = retryData3.data.metaobjectCreate.metaobject.id;
+              const retryFaqId3 =
+                retryData3.data.metaobjectCreate.metaobject.id;
               if (retryFaqId3) {
-                await publishMetaobject(retryFaqId3, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
+                await publishMetaobject(
+                  retryFaqId3,
+                  SHOP,
+                  ADMIN_API_TOKEN,
+                  SHOPIFY_ADMIN_API_VERSION,
+                );
               }
             } else {
               return new Response(
-                JSON.stringify({ 
-                  error: retryData3.data.metaobjectCreate.userErrors[0].message || 'Failed to create FAQ - all format attempts failed',
+                JSON.stringify({
+                  error:
+                    retryData3.data.metaobjectCreate.userErrors[0].message ||
+                    'Failed to create FAQ - all format attempts failed',
                   userErrors: retryData3.data.metaobjectCreate.userErrors,
-                  hint: 'Please check your metaobject definition. The faq_answer field type might need to be changed in Shopify Admin.'
-                }), 
+                  hint: 'Please check your metaobject definition. The faq_answer field type might need to be changed in Shopify Admin.',
+                }),
                 {
                   status: 500,
-                  headers: { 'Content-Type': 'application/json' },
-                }
+                  headers: {'Content-Type': 'application/json'},
+                },
               );
             }
           }
         }
       } else {
         return new Response(
-          JSON.stringify({ 
+          JSON.stringify({
             error: errMsg || 'Failed to create FAQ metaobject',
-            userErrors: errors
-          }), 
+            userErrors: errors,
+          }),
           {
             status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          }
+            headers: {'Content-Type': 'application/json'},
+          },
         );
       }
     }
-    
+
     const faqId = createFaqData?.data?.metaobjectCreate?.metaobject?.id;
 
     if (!faqId) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'Failed to create FAQ metaobject - no ID returned',
-          response: createFaqData
-        }), 
+          response: createFaqData,
+        }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
+          headers: {'Content-Type': 'application/json'},
+        },
       );
     }
     // Always try to publish the metaobject to make it active
-    await publishMetaobject(faqId, SHOP, ADMIN_API_TOKEN, SHOPIFY_ADMIN_API_VERSION);
+    await publishMetaobject(
+      faqId,
+      SHOP,
+      ADMIN_API_TOKEN,
+      SHOPIFY_ADMIN_API_VERSION,
+    );
 
     /* ---------------------------------------------------------------
      *  2. NO LONGER NEEDED: Product metafield update
      * --------------------------------------------------------------- */
     // OLD APPROACH (REMOVED): We used to maintain a list of FAQ references in the product metafield.
     // This caused race conditions when multiple FAQs were created simultaneously.
-    // 
+    //
     // NEW APPROACH: Each FAQ stores its own product reference in the `faq_product` field.
     // We query FAQs by filtering metaobjects where faq_product = productId.
     // This eliminates race conditions entirely since each FAQ creation is independent.
@@ -518,20 +565,20 @@ export const action = async ({ request, context }) => {
     /* ---------------------------------------------------------------
      *  Success 🎉
      * --------------------------------------------------------------- */
-    return new Response(JSON.stringify({ success: true, faqId }), {
+    return new Response(JSON.stringify({success: true, faqId}), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error)
-      }), 
+        details: error instanceof Error ? error.message : String(error),
+      }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: {'Content-Type': 'application/json'},
+      },
     );
   }
 };

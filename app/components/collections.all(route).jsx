@@ -2,10 +2,10 @@ import {useLoaderData, Link} from '@remix-run/react';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import { AddToCartButton } from '~/components/AddToCartButton';
-import { useAside } from '~/components/Aside';
-import React, { memo, useEffect, useRef, useState } from 'react';
-import { truncateText } from '~/components/CollectionDisplay';
+import {AddToCartButton} from '~/components/AddToCartButton';
+import {useAside} from '~/components/Aside';
+import React, {memo, useEffect, useRef, useState} from 'react';
+import {truncateText} from '~/components/CollectionDisplay';
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -24,7 +24,7 @@ export async function loader(args) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return ({...deferredData, ...criticalData});
+  return {...deferredData, ...criticalData};
 }
 
 /**

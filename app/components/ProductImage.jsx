@@ -1,9 +1,9 @@
 import '../styles/ProductImage.css';
-import { useEffect, useState, useRef } from 'react';
+import {useEffect, useState, useRef} from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
 import 'yet-another-react-lightbox/styles.css';
-import { useSwipeable } from 'react-swipeable';
+import {useSwipeable} from 'react-swipeable';
 
 const LeftArrowIcon = () => (
   <svg
@@ -33,7 +33,7 @@ const RightArrowIcon = () => (
   </svg>
 );
 
-export function ProductImages({ media, selectedVariantImage }) {
+export function ProductImages({media, selectedVariantImage}) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -52,7 +52,7 @@ export function ProductImages({ media, selectedVariantImage }) {
 
   // Preload ALL images on mount (if they are MediaImage type)
   useEffect(() => {
-    media.forEach(({ node }) => {
+    media.forEach(({node}) => {
       if (node.__typename === 'MediaImage' && node.image?.url) {
         preloadImage(node.image.url);
       }
@@ -78,7 +78,7 @@ export function ProductImages({ media, selectedVariantImage }) {
   // Update selected index if variant image is selected
   useEffect(() => {
     if (selectedVariantImage) {
-      const variantImageIndex = media.findIndex(({ node }) => {
+      const variantImageIndex = media.findIndex(({node}) => {
         return (
           node.__typename === 'MediaImage' &&
           node.image?.url === selectedVariantImage.url
@@ -137,14 +137,14 @@ export function ProductImages({ media, selectedVariantImage }) {
 
   const doPrevImage = () => {
     setSelectedIndex((prevIndex) =>
-      prevIndex === 0 ? media.length - 1 : prevIndex - 1
+      prevIndex === 0 ? media.length - 1 : prevIndex - 1,
     );
     setIsVariantSelected(false);
   };
 
   const doNextImage = () => {
     setSelectedIndex((prevIndex) =>
-      prevIndex === media.length - 1 ? 0 : prevIndex + 1
+      prevIndex === media.length - 1 ? 0 : prevIndex + 1,
     );
     setIsVariantSelected(false);
   };
@@ -178,21 +178,21 @@ export function ProductImages({ media, selectedVariantImage }) {
       thumbSrc = 'https://img.icons8.com/3d-fluency/94/3d-rotate.png';
       isVideo = true;
     }
-    return { thumbSrc, altText, isVideo };
+    return {thumbSrc, altText, isVideo};
   };
 
-  const lightboxSlides = media.map(({ node }) => {
+  const lightboxSlides = media.map(({node}) => {
     if (node.__typename === 'MediaImage') {
-      return { src: node.image.url };
+      return {src: node.image.url};
     } else if (node.__typename === 'ExternalVideo') {
-      return { src: node.embedUrl };
+      return {src: node.embedUrl};
     } else if (node.__typename === 'Video') {
       const vidSource = node.sources?.[0]?.url;
-      return { src: vidSource || '' };
+      return {src: vidSource || ''};
     } else if (node.__typename === 'Model3d') {
-      return { src: '' };
+      return {src: ''};
     }
-    return { src: '' };
+    return {src: ''};
   });
 
   const selectedMedia = media[selectedIndex]?.node;
@@ -260,7 +260,7 @@ export function ProductImages({ media, selectedVariantImage }) {
                 src={`${selectedMedia.image.url}&width=600`}
                 alt={selectedMedia.image.altText || 'Product Image'}
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
                 decoding="async"
                 onLoad={() => setIsImageLoaded(true)}
                 width="562.5px"
