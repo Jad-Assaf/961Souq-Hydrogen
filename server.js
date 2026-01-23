@@ -26,27 +26,27 @@ export default {
 
       if (countryCode && blockedCountries.has(countryCode.toUpperCase())) {
         const blockedPage = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Access Restricted</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1724; color: #f5f7fa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 24px;}
-    .card {max-width: 520px; background: #111e2f; border: 1px solid #23344a; border-radius: 16px; padding: 24px 28px; box-shadow: 0 14px 40px rgba(0,0,0,0.35);}
-    h1 {margin: 0 0 12px; font-size: 24px; letter-spacing: 0.4px;}
-    p {margin: 0 0 10px; line-height: 1.5;}
-    .muted {color: #95a3b8;}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Access Restricted</h1>
-    <p>Our store is not available in your region right now.</p>
-    <p class="muted">If you believe this is an error, please contact support and include your country code: ${countryCode.toUpperCase()}.</p>
-  </div>
-</body>
-</html>`;
+            <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <title>Access Restricted</title>
+              <meta name="viewport" content="width=device-width,initial-scale=1">
+              <style>
+                body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1724; color: #f5f7fa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 24px;}
+                .card {max-width: 520px; background: #111e2f; border: 1px solid #23344a; border-radius: 16px; padding: 24px 28px; box-shadow: 0 14px 40px rgba(0,0,0,0.35);}
+                h1 {margin: 0 0 12px; font-size: 24px; letter-spacing: 0.4px;}
+                p {margin: 0 0 10px; line-height: 1.5;}
+                .muted {color: #95a3b8;}
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <h1>Access Restricted</h1>
+                <p>Our store is not available in your region right now.</p>
+                <p class="muted">If you believe this is an error, please contact support and include your country code: ${countryCode.toUpperCase()}.</p>
+              </div>
+            </body>
+            </html>`;
         return new Response(blockedPage, {
           status: 403,
           headers: {'Content-Type': 'text/html; charset=utf-8'},

@@ -1,6 +1,5 @@
 import React, {useRef} from 'react';
 import {useInView} from 'react-intersection-observer';
-import '../styles/BrandsSection.css';
 
 export default function BrandSection({brands}) {
   const {ref, inView} = useInView({

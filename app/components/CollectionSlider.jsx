@@ -1,6 +1,5 @@
 import {Link} from '@remix-run/react';
 import React from 'react';
-import '../styles/HomeSlider.css';
 
 export const CategorySlider = ({sliderCollections}) => {
   return (
