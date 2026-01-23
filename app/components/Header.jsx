@@ -683,7 +683,7 @@ function WishListIcon() {
       <g
         id="SVGRepo_tracerCarrier"
         strokeLinecap="round"
-        stroke-linejoin="round"
+        strokeLinejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
         {' '}
@@ -710,7 +710,7 @@ function UserIcon() {
       <g
         id="SVGRepo_tracerCarrier"
         strokeLinecap="round"
-        stroke-linejoin="round"
+        strokeLinejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
         {' '}
@@ -760,7 +760,7 @@ function CartIcon() {
       <g
         id="SVGRepo_tracerCarrier"
         strokeLinecap="round"
-        stroke-linejoin="round"
+        strokeLinejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
         {' '}
