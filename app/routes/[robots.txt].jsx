@@ -17,6 +17,7 @@ export async function loader({request, context}) {
       'Content-Type': 'text/plain',
 
       'Cache-Control': `max-age=${60 * 60 * 24}`,
+      'X-Robots-Tag': 'noindex, nofollow',
     },
   });
 }
