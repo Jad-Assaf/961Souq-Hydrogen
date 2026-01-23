@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import '../styles/MobileAppPopup.css';
 
 const SHOW_DELAY_MS = 1000;
 const ANIM_MS = 220; // keep in sync with CSS --appPopupDur

@@ -57,6 +57,185 @@ h2 {
   }
 }
 
+:root {
+  --appPopupDur: 220ms;
+  --appPopupEase: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --appPopupBlue: #2172af;
+}
+
+/* Root */
+.appPopupRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Overlay */
+.appPopupOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  /* backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px); */
+  opacity: 0;
+  transition: opacity var(--appPopupDur) ease;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+}
+
+/* Dialog */
+.appPopupDialog {
+  position: relative;
+  width: min(92vw, 360px);
+  border-radius: 18px;
+
+  /* glassy card */
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  transition:
+    opacity var(--appPopupDur) ease,
+    transform var(--appPopupDur) var(--appPopupEase);
+
+  overflow: hidden;
+  height: 300px;
+}
+
+/* Open/Closed states */
+.appPopupRoot.is-open .appPopupOverlay {
+  opacity: 1;
+}
+
+.appPopupRoot.is-open .appPopupDialog {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.appPopupRoot.is-closed {
+  pointer-events: none;
+}
+
+.appPopupRoot.is-closed .appPopupDialog,
+.appPopupRoot.is-closed .appPopupOverlay {
+  pointer-events: none;
+}
+
+/* Content */
+.appPopupContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 18px 18px;
+  text-align: center;
+  height: 100%;
+  justify-content: space-around;
+}
+
+.appPopupLogo {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgb(255, 255, 255);
+  padding: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.appPopupDivider {
+  width: 72%;
+  height: 2px;
+  background: linear-gradient(to right,
+      rgba(33, 114, 175, 0),
+      rgba(33, 114, 175, 1),
+      rgba(33, 114, 175, 0));
+  border-radius: 999px;
+}
+
+.appPopupTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.appPopupSub {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(11, 27, 42, 0.65);
+}
+
+/* CTA */
+.appPopupCta {
+  width: min(260px, 100%);
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--appPopupBlue);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(33, 114, 175, 0.35);
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+
+.appPopupCta:active {
+  transform: translateY(1px) scale(0.99);
+  filter: brightness(0.98);
+  box-shadow: 0 10px 22px rgba(33, 114, 175, 0.28);
+}
+
+/* Close button */
+.appPopupClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgb(255, 255, 255);
+  color: #0b1b2a;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.appPopupClose:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.appPopupClose:focus-visible,
+.appPopupCta:focus-visible {
+  outline: 3px solid rgba(33, 114, 175, 0.35);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .appPopupOverlay,
+  .appPopupDialog {
+    transition: none;
+  }
+}
+
 /* Container + backdrop */
 .nav-bar-container {
   display: flex;
