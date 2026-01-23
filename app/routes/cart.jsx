@@ -45,9 +45,13 @@ export async function action({request, context}) {
   let result;
 
   switch (action) {
-    case CartForm.ACTIONS.LinesAdd:
-      result = await cart.addLines(inputs.lines);
+    case CartForm.ACTIONS.LinesAdd: {
+      const lines = Array.isArray(inputs?.lines)
+        ? inputs.lines.map(({selectedVariant, product, ...line}) => line)
+        : [];
+      result = await cart.addLines(lines);
       break;
+    }
     case CartForm.ACTIONS.LinesUpdate:
       result = await cart.updateLines(inputs.lines);
       break;

@@ -91,6 +91,18 @@ function ProductQuickViewModal({
 }) {
   const overlayRef = useRef(null);
   const [modalImageIndex, setModalImageIndex] = useState(0);
+  const selectedVariantForCart = selectedVariant
+    ? {
+        id: selectedVariant.id,
+        title: selectedVariant.title,
+        image: selectedVariant.image,
+        selectedOptions: selectedVariant.selectedOptions ?? [],
+        product: {
+          title: product?.title,
+          handle: product?.handle,
+        },
+      }
+    : null;
 
   // Reset slideshow index when opening or product changes
   useEffect(() => {
@@ -314,14 +326,15 @@ function ProductQuickViewModal({
                   openCart('cart');
                 }}
                 lines={
-                  selectedVariant
+                  selectedVariantForCart
                     ? [
                         {
-                          merchandiseId: selectedVariant.id,
+                          merchandiseId: selectedVariantForCart.id,
                           quantity: 1,
+                          selectedVariant: selectedVariantForCart,
                           product: {
                             ...product,
-                            selectedVariant,
+                            selectedVariant: selectedVariantForCart,
                             handle: product.handle,
                           },
                         },

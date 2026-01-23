@@ -580,6 +580,18 @@ export function ProductForm({
     selectedVariant.availableForSale &&
     Number(selectedVariant?.price?.amount) > 0
   );
+  const selectedVariantForCart = selectedVariant
+    ? {
+        id: selectedVariant.id,
+        title: selectedVariant.title,
+        image: selectedVariant.image,
+        selectedOptions: selectedVariant.selectedOptions ?? [],
+        product: {
+          title: product?.title,
+          handle: product?.handle,
+        },
+      }
+    : null;
 
   return (
     <>
@@ -611,8 +623,14 @@ export function ProductForm({
             }
           }}
           lines={
-            selectedVariant
-              ? [{ merchandiseId: selectedVariant.id, quantity: safeQuantity }]
+            selectedVariantForCart
+              ? [
+                  {
+                    merchandiseId: selectedVariantForCart.id,
+                    quantity: safeQuantity,
+                    selectedVariant: selectedVariantForCart,
+                  },
+                ]
               : []
           }
           contentId={product.id}

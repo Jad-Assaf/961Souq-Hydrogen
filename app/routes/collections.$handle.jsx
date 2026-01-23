@@ -690,6 +690,18 @@ const ProductItem = ({product, index, numberInRow}) => {
 function ProductForm({product, selectedVariant, setSelectedVariant}) {
   const {open} = useAside();
   const hasVariants = product.variants.nodes.length > 1;
+  const selectedVariantForCart = selectedVariant
+    ? {
+        id: selectedVariant.id,
+        title: selectedVariant.title,
+        image: selectedVariant.image,
+        selectedOptions: selectedVariant.selectedOptions ?? [],
+        product: {
+          title: product?.title,
+          handle: product?.handle,
+        },
+      }
+    : null;
 
   return (
     <div className="product-form">
@@ -709,15 +721,16 @@ function ProductForm({product, selectedVariant, setSelectedVariant}) {
           }
         }}
         lines={
-          selectedVariant && !hasVariants
+          selectedVariantForCart && !hasVariants
             ? [
                 {
-                  merchandiseId: selectedVariant.id,
+                  merchandiseId: selectedVariantForCart.id,
                   quantity: 1,
                   attributes: [],
+                  selectedVariant: selectedVariantForCart,
                   product: {
                     ...product,
-                    selectedVariant,
+                    selectedVariant: selectedVariantForCart,
                     handle: product.handle,
                   },
                 },

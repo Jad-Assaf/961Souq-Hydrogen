@@ -405,7 +405,25 @@ export default function RecentlyViewedPage() {
           (() => {
             const firstPrice = selected?.priceRange?.minVariantPrice;
             const hasPrice = firstPrice && Number(firstPrice.amount) > 0;
-            const firstVariantId = selected?.variants?.nodes?.[0]?.id || null;
+            const firstVariant = selected?.variants?.nodes?.[0] || null;
+            const firstVariantId = firstVariant?.id || null;
+            const optimisticVariant = firstVariant
+              ? {
+                  id: firstVariant.id,
+                  title: selected?.title,
+                  image: selected?.featuredImage
+                    ? {
+                        url: selected.featuredImage.url,
+                        altText: selected.featuredImage.altText || selected.title,
+                      }
+                    : null,
+                  selectedOptions: [],
+                  product: {
+                    title: selected?.title,
+                    handle: selected?.handle,
+                  },
+                }
+              : null;
 
             const inStock =
               (selected?.availableForSale ?? true) &&
@@ -508,7 +526,11 @@ export default function RecentlyViewedPage() {
                           action={CartForm.ACTIONS.LinesAdd}
                           inputs={{
                             lines: [
-                              {merchandiseId: firstVariantId, quantity: 1},
+                              {
+                                merchandiseId: firstVariantId,
+                                quantity: 1,
+                                selectedVariant: optimisticVariant,
+                              },
                             ],
                           }}
                         >

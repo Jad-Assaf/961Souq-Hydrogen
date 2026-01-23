@@ -37,6 +37,32 @@ const WISHLIST_THUMBS_QUERY = `#graphql
   }
 `;
 
+function extractHandle(url) {
+  if (!url) return null;
+  const match = url.match(/\/products\/([^/?#]+)/);
+  return match ? match[1] : null;
+}
+
+function buildWishlistOptimisticVariant(item) {
+  if (!item?.variantId) return null;
+  const handle = item.handle || extractHandle(item.url);
+  return {
+    id: item.variantId,
+    title: item.title || 'Item',
+    image: item.image
+      ? {
+          url: item.image,
+          altText: item.title || 'Item',
+        }
+      : null,
+    selectedOptions: [],
+    product: {
+      title: item.title || 'Item',
+      handle,
+    },
+  };
+}
+
 export async function action({request, context}) {
   const {storefront} = context;
 
@@ -147,7 +173,11 @@ export default function WishlistPage() {
     () =>
       items
         .filter((i) => i.variantId)
-        .map((i) => ({merchandiseId: i.variantId, quantity: 1})),
+        .map((i) => ({
+          merchandiseId: i.variantId,
+          quantity: 1,
+          selectedVariant: buildWishlistOptimisticVariant(i),
+        })),
     [items],
   );
 
@@ -298,7 +328,13 @@ export default function WishlistPage() {
                     route="/cart"
                     action={CartForm.ACTIONS.LinesAdd}
                     inputs={{
-                      lines: [{merchandiseId: item.variantId, quantity: 1}],
+                      lines: [
+                        {
+                          merchandiseId: item.variantId,
+                          quantity: 1,
+                          selectedVariant: buildWishlistOptimisticVariant(item),
+                        },
+                      ],
                     }}
                   >
                     <button type="submit" className="wishlist-add-btn">

@@ -85,6 +85,19 @@ export function ProductForm({
   const safeQuantity =
     typeof quantity === 'number' && quantity > 0 ? quantity : 1;
 
+  const selectedVariantForCart = updatedVariant
+    ? {
+        id: updatedVariant.id,
+        title: updatedVariant.title,
+        image: updatedVariant.image,
+        selectedOptions: updatedVariant.selectedOptions ?? [],
+        product: {
+          title: product?.title,
+          handle: product?.handle,
+        },
+      }
+    : null;
+
   // Check if we're on the product page
   const isProductPage = location.pathname.includes('/products/');
 
@@ -177,8 +190,14 @@ export function ProductForm({
             open('cart');
           }}
           lines={
-            updatedVariant
-              ? [{merchandiseId: updatedVariant.id, quantity: safeQuantity}]
+            selectedVariantForCart
+              ? [
+                  {
+                    merchandiseId: selectedVariantForCart.id,
+                    quantity: safeQuantity,
+                    selectedVariant: selectedVariantForCart,
+                  },
+                ]
               : []
           }
           contentId={product.id}

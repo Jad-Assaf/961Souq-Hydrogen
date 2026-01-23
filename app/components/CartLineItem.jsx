@@ -15,19 +15,37 @@ import {truncateText} from './CollectionDisplay';
  */
 export function CartLineItem({layout, line}) {
   const {id, merchandise} = line;
-  const {product, title, image, selectedOptions} = merchandise;
-  const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
+  const product = merchandise?.product ?? {};
+  const title = merchandise?.title;
+  const image = merchandise?.image;
+  const selectedOptions = merchandise?.selectedOptions ?? [];
+  const lineItemUrl = useVariantUrl(product.handle || '', selectedOptions);
   const {close} = useAside();
+  const imageWidth = image?.width ?? 600;
+  const imageHeight = image?.height ?? 600;
+  const imageUrl = image?.url || '';
+  const imageAlt = title || product.title || 'Cart item';
+  const linePrice = line?.cost?.totalAmount;
 
   return (
     <li key={id} className="cart-line">
-      {image && (
-        <img
-          src={`${image.url}${image.url.includes('?') ? '&' : '?'}quality=15`}
-          alt={title}
-          loading="lazy"
-        />
-      )}
+      <div
+        className="cart-line-image-wrap"
+        style={{aspectRatio: imageWidth / imageHeight}}
+      >
+        {imageUrl ? (
+          <img
+            src={`${imageUrl}${imageUrl.includes('?') ? '&' : '?'}quality=15`}
+            alt={imageAlt}
+            loading="lazy"
+            width={imageWidth}
+            height={imageHeight}
+            className="cart-line-image"
+          />
+        ) : (
+          <div className="cart-line-image-placeholder" aria-hidden="true" />
+        )}
+      </div>
 
       <div className="cart-item-details">
         <Link
@@ -45,7 +63,11 @@ export function CartLineItem({layout, line}) {
             </strong>
           </p>
         </Link>
-        <ProductPrice price={line?.cost?.totalAmount} />
+        {linePrice ? (
+          <ProductPrice price={linePrice} />
+        ) : (
+          <div className="cart-price-skeleton" aria-hidden="true" />
+        )}
         <ul>
           {selectedOptions
             .filter((option) => option.value.toLowerCase() !== 'default title')

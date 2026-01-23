@@ -453,9 +453,45 @@ p.home-colleciton-title {
   }
 }
 
-.cart-line img {
+.cart-line-image-wrap {
   width: 30%;
   max-width: 200px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #eef3f9;
+  background-image: linear-gradient(90deg, #eef3f9 0%, #e4edf7 50%, #eef3f9 100%);
+  background-size: 200% 100%;
+  animation: cart-image-shimmer 1.2s ease-in-out infinite;
+  display: flex;
+  align-items: stretch;
+}
+
+.cart-line-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.cart-line-image-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.cart-price-skeleton {
+  width: 110px;
+  height: 16px;
+  border-radius: 999px;
+  background-color: #eef3f9;
+  background-image: linear-gradient(90deg, #eef3f9 0%, #e4edf7 50%, #eef3f9 100%);
+  background-size: 200% 100%;
+  animation: cart-image-shimmer 1.2s ease-in-out infinite;
+}
+
+aside .cart-price-skeleton {
+  width: 90px;
+  height: 14px;
 }
 
 .cart-item-details {
@@ -1076,31 +1112,92 @@ aside .go-to-cart {
 }
 
 .empty-cart {
-  width: 95%;
-  max-width: 1500px;
-  margin: auto;
-}
-
-.empty-cart-link {
-  color: #000;
-}
-
-.empty-cart-link {
+  width: min(92%, 520px);
+  margin: 40px auto;
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
   text-align: center;
-  padding: 8px;
-  position: relative;
-  bottom: 22px;
-  width: 75%;
-  background-color: #ffffff72 !important;
-  backdrop-filter: blur(10px);
-  box-shadow: 2px 2px 16px #2aa4ff26, inset 5px 3px 5px 0px rgb(88 88 88 / 54%), inset -4px -5px 8px 0px rgb(255 255 255);
-  left: 12.5%;
-  border-radius: 30px;
-  border: 1px solid #2171af96;
-  font-weight: 500;
-  font-size: 16px;
-  z-index: 1;
+  border-radius: 20px;
+  background: linear-gradient(155deg, #f7fafc 0%, #ffffff 55%, #f2f6fb 100%);
+  border: 1px solid #e3e8ef;
+  box-shadow: 0 12px 30px rgba(20, 40, 70, 0.12);
+}
+
+aside .empty-cart {
+  width: min(90%, 360px);
+  margin: 24px auto;
+  padding: 22px 18px;
+}
+
+.empty-cart-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f7fc;
+  box-shadow: inset 0 0 0 1px #e3e8ef;
+}
+
+aside .empty-cart-icon {
+  width: 80px;
+  height: 80px;
+}
+
+.empty-cart-icon svg {
+  width: 64px;
+  height: 64px;
   display: block;
+}
+
+.empty-cart-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.empty-cart-title {
+  margin: 0;
+  color: #13233a;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.empty-cart-subtitle {
+  margin: 0;
+  color: #4b5b70;
+  font-size: 14px;
+  max-width: 28ch;
+}
+
+.empty-cart-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: #2172af;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border: 1px solid #2172af;
+  box-shadow: 0 6px 18px rgba(33, 114, 175, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.empty-cart-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(33, 114, 175, 0.3);
+  background: #1b5f91;
+}
+
+.empty-cart-link:active {
+  transform: translateY(0);
 }
 
 @keyframes fadeIn {
@@ -1676,19 +1773,6 @@ aside li {
 
 .overlay.expanded aside {
   transform: translateX(calc(var(--aside-width) * -1));
-}
-
-.empty-cart-image {
-  display: none;
-}
-
-aside .empty-cart-image {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-top: 20px;
-  border-radius: 10px;
-  border: 1px solid #2172af7d;
 }
 
 .bin-button {
@@ -2392,11 +2476,25 @@ aside .cart-line a {
   color: #000 !important;
 }
 
-aside .cart-line img {
+aside .cart-line-image-wrap {
   width: 75px;
-  height: auto;
-  display: block;
   margin-right: 0.75rem;
+}
+
+@keyframes cart-image-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-line-image-wrap,
+  .cart-price-skeleton {
+    animation: none;
+  }
 }
 
 aside li.cart-line div {
