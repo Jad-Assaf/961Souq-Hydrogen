@@ -202,7 +202,6 @@ export async function loadCriticalData({context, params, request}) {
     collectionData = await storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
-        first: pageBy,
         filters: filters.length ? filters : undefined,
         sortKey,
         reverse,
@@ -220,7 +219,6 @@ export async function loadCriticalData({context, params, request}) {
       collectionData = await storefront.query(COLLECTION_QUERY, {
         variables: {
           handle,
-          first: pageBy,
           sortKey,
           reverse,
           ...paginationVariables,
@@ -502,7 +500,7 @@ export default function Collection() {
                           to={buildPageLink({
                             page: currentPage - 1,
                             cursor: pageInfo.startCursor,
-                            direction: 'prev',
+                            direction: 'previous',
                           })}
                         >
                           « Prev
@@ -525,7 +523,7 @@ export default function Collection() {
                                 n < currentPage
                                   ? pageInfo.startCursor
                                   : pageInfo.endCursor,
-                              direction: n < currentPage ? 'prev' : 'next',
+                              direction: n < currentPage ? 'previous' : 'next',
                             })}
                           >
                             {n}
