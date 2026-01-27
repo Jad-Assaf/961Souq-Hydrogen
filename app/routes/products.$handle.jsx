@@ -395,7 +395,7 @@ export function ProductForm({
     }
     // If no initial variant, fallback to the first option value
     return product.options.reduce((acc, option) => {
-      acc[option.name] = option.values[0]?.value || '';
+      acc[option.name] = option.optionValues?.[0]?.name || '';
       return acc;
     }, {});
   });
@@ -518,7 +518,7 @@ export function ProductForm({
 
   // Possibly build a WhatsApp link
   const isProductPage = location.pathname.includes('/products/');
-  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=${encodeURIComponent(
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96181960961&text=${encodeURIComponent(
     `Hi, I'd like to buy ${product.title} https://961souq.com${location.pathname}`,
   )}`;
 
@@ -597,7 +597,9 @@ export function ProductForm({
     <>
       <VariantSelector
         handle={product.handle}
-        options={product.options.filter((o) => o.values.length > 1)}
+        options={product.options.filter(
+          (option) => (option.optionValues ?? []).length > 1,
+        )}
         variants={variants}
       >
         {({option}) => <ProductOptions key={option.name} option={option} />}
@@ -926,7 +928,7 @@ export default function Product() {
           },
         })) || [];
 
-  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96171888036&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
+  const whatsappShareUrl = `https://api.whatsapp.com/send?phone=96181960961&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
 
   return (
     <div className="product">
@@ -1631,7 +1633,9 @@ const PRODUCT_FRAGMENT = `#graphql
 
     options {
       name
-      values
+      optionValues {
+        name
+      }
     }
     selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
       ...ProductVariant
