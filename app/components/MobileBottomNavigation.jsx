@@ -83,7 +83,7 @@ export default function MobileBottomNavigation({cart}) {
 
       <NavLink
         prefetch="intent"
-        to="https://wa.me/96181960961"
+        to="https://wa.me/9613276879"
         className="nav-item"
         target="_blank"
         aria-label="Contact us on Whatsapp"
