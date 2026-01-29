@@ -1492,6 +1492,19 @@ button {
   transition: all 0.1s ease;
 }
 
+.product-free-shipping {
+  align-items: center;
+  display: flex;
+  justify-content: space-evenly;
+  width: 80%;
+  margin: 5px auto;
+  span{
+    font-size: 14px;
+    color: #232323;
+    font-weight: 500;
+  }
+}
+
 .product-card:hover .product-price {
   color: #ff4529;
 }

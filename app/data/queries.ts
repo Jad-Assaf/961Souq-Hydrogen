@@ -444,6 +444,7 @@ export const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
           id
           title
           handle
+          tags
           descriptionHtml
           priceRange {
             minVariantPrice {

@@ -59,7 +59,7 @@ export const TopProductSections = ({collection}) => {
         </div>
       </div>
 
-      <ProductRow products={filteredProducts} />
+      <ProductRow products={filteredProducts} showFreeShippingTags />
     </div>
   );
 };
