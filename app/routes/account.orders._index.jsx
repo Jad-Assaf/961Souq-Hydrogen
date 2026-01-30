@@ -43,9 +43,17 @@ export default function Orders() {
   const {customer} = useLoaderData();
   const {orders} = customer;
   return (
-    <div className="orders">
-      {orders.nodes.length ? <OrdersTable orders={orders} /> : <EmptyOrders />}
-    </div>
+    <section className="account-panel">
+      <div className="account-panel-header">
+        <div>
+          <h2>Orders</h2>
+          <p>Track shipments, returns, and invoices.</p>
+        </div>
+      </div>
+      <div className="account-panel-body">
+        {orders.nodes.length ? <OrdersTable orders={orders} /> : <EmptyOrders />}
+      </div>
+    </section>
   );
 }
 
@@ -54,26 +62,24 @@ export default function Orders() {
  */
 function OrdersTable({orders}) {
   return (
-    <div className="acccount-orders">
-      {orders?.nodes.length ? (
-        <PaginatedResourceSection connection={orders}>
-          {({node: order}) => <OrderItem key={order.id} order={order} />}
-        </PaginatedResourceSection>
-      ) : (
-        <EmptyOrders />
-      )}
+    <div className="account-orders">
+      <PaginatedResourceSection
+        connection={orders}
+        resourcesClassName="account-order-list"
+      >
+        {({node: order}) => <OrderItem key={order.id} order={order} />}
+      </PaginatedResourceSection>
     </div>
   );
 }
 
 function EmptyOrders() {
   return (
-    <div>
-      <p>You haven&apos;t placed any orders yet.</p>
-      <br />
-      <p>
-        <Link to="/collections">Start Shopping →</Link>
-      </p>
+    <div className="account-empty">
+      <p>You have not placed any orders yet.</p>
+      <Link className="account-link" to="/collections">
+        Start shopping
+      </Link>
     </div>
   );
 }
@@ -84,19 +90,29 @@ function EmptyOrders() {
 function OrderItem({order}) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   return (
-    <>
-      <fieldset>
-        <Link to={`/account/orders/${btoa(order.id)}`}>
-          <strong className="order-number">#{order.number}</strong>
+    <article className="account-order-card">
+      <div className="account-order-main">
+        <Link
+          className="account-order-number"
+          to={`/account/orders/${btoa(order.id)}`}
+        >
+          Order #{order.number}
         </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
-        <p>{order.financialStatus}</p>
-        {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
+        <div className="account-order-meta">
+          <span>{new Date(order.processedAt).toLocaleDateString()}</span>
+          <span className="status-pill">{order.financialStatus}</span>
+          {fulfillmentStatus && (
+            <span className="status-pill is-muted">{fulfillmentStatus}</span>
+          )}
+        </div>
+      </div>
+      <div className="account-order-total">
         <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
-      </fieldset>
-      <br />
-    </>
+        <Link className="account-link" to={`/account/orders/${btoa(order.id)}`}>
+          View details
+        </Link>
+      </div>
+    </article>
   );
 }
 

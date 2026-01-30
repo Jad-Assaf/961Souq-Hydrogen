@@ -87,53 +87,58 @@ export default function AccountProfile() {
   const customer = action?.customer ?? account?.customer;
 
   return (
-    <div className="account-profile">
-      <h2>My profile</h2>
-      <br />
-      <Form method="PUT">
-        <legend>Personal information</legend>
-        <fieldset>
-          <label htmlFor="firstName">First name</label>
-          <input
-            id="firstName"
-            name="firstName"
-            type="text"
-            autoComplete="given-name"
-            placeholder="First name"
-            aria-label="First name"
-            defaultValue={customer.firstName ?? ''}
-            minLength={2}
-          />
-          <label htmlFor="lastName">Last name</label>
-          <input
-            id="lastName"
-            name="lastName"
-            type="text"
-            autoComplete="family-name"
-            placeholder="Last name"
-            aria-label="Last name"
-            defaultValue={customer.lastName ?? ''}
-            minLength={2}
-          />
-        </fieldset>
+    <section className="account-panel">
+      <div className="account-panel-header">
+        <div>
+          <h2>Profile</h2>
+          <p>Update your name and contact preferences.</p>
+        </div>
+      </div>
+      <Form className="account-form" method="PUT">
+        <div className="account-form-grid">
+          <label className="account-field" htmlFor="firstName">
+            <span>First name</span>
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              autoComplete="given-name"
+              placeholder="First name"
+              aria-label="First name"
+              defaultValue={customer.firstName ?? ''}
+              minLength={2}
+            />
+          </label>
+          <label className="account-field" htmlFor="lastName">
+            <span>Last name</span>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              autoComplete="family-name"
+              placeholder="Last name"
+              aria-label="Last name"
+              defaultValue={customer.lastName ?? ''}
+              minLength={2}
+            />
+          </label>
+        </div>
         {action?.error ? (
-          <p>
-            <mark>
-              <small>{action.error}</small>
-            </mark>
-          </p>
-        ) : (
-          <br />
-        )}
-        <button
-          type="submit"
-          disabled={state !== 'idle'}
-          className="address-btn profile-update-btn"
-        >
-          {state !== 'idle' ? 'Updating' : 'Update'}
-        </button>
+          <div className="account-alert">
+            <small>{action.error}</small>
+          </div>
+        ) : null}
+        <div className="account-form-actions">
+          <button
+            type="submit"
+            disabled={state !== 'idle'}
+            className="account-button"
+          >
+            {state !== 'idle' ? 'Updating' : 'Update profile'}
+          </button>
+        </div>
       </Form>
-    </div>
+    </section>
   );
 }
 

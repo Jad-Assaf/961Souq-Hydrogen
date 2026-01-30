@@ -246,27 +246,34 @@ export default function Addresses() {
   const {defaultAddress, addresses} = customer;
 
   return (
-    <div className="account-addresses">
-      <h2>Addresses</h2>
-      <br />
-      {!addresses.nodes.length ? (
-        <p>You have no addresses saved.</p>
-      ) : (
+    <section className="account-panel account-addresses">
+      <div className="account-panel-header">
         <div>
-          <div>
-            <legend>Create address</legend>
-            <NewAddressForm />
-          </div>
-          <br />
-          <hr />
-          <br />
-          <ExistingAddresses
-            addresses={addresses}
-            defaultAddress={defaultAddress}
-          />
+          <h2>Addresses</h2>
+          <p>Manage delivery addresses for faster checkout.</p>
         </div>
-      )}
-    </div>
+      </div>
+      <div className="account-addresses-grid">
+        <div className="account-address-block">
+          <h3>New address</h3>
+          <p>Add a new delivery destination.</p>
+          <NewAddressForm />
+        </div>
+        <div className="account-address-block">
+          <h3>Saved addresses</h3>
+          {addresses.nodes.length ? (
+            <ExistingAddresses
+              addresses={addresses}
+              defaultAddress={defaultAddress}
+            />
+          ) : (
+            <div className="account-empty">
+              <p>You have no saved addresses yet.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -292,12 +299,12 @@ function NewAddressForm() {
       defaultAddress={null}
     >
       {({stateForMethod}) => (
-        <div className="address-btn-container">
+        <div className="account-form-actions">
           <button
             disabled={stateForMethod('POST') !== 'idle'}
             formMethod="POST"
             type="submit"
-            className="address-btn"
+            className="account-button"
           >
             {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
           </button>
@@ -312,8 +319,7 @@ function NewAddressForm() {
  */
 function ExistingAddresses({addresses, defaultAddress}) {
   return (
-    <div>
-      <legend>Existing addresses</legend>
+    <div className="account-address-list">
       {addresses.nodes.map((address) => (
         <AddressForm
           key={address.id}
@@ -322,12 +328,12 @@ function ExistingAddresses({addresses, defaultAddress}) {
           defaultAddress={defaultAddress}
         >
           {({stateForMethod}) => (
-            <div className="address-btn-container">
+            <div className="account-form-actions">
               <button
                 disabled={stateForMethod('PUT') !== 'idle'}
                 formMethod="PUT"
                 type="submit"
-                className="address-btn"
+                className="account-button"
               >
                 {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
               </button>
@@ -335,7 +341,7 @@ function ExistingAddresses({addresses, defaultAddress}) {
                 disabled={stateForMethod('DELETE') !== 'idle'}
                 formMethod="DELETE"
                 type="submit"
-                className="address-btn"
+                className="account-button account-button--ghost"
               >
                 {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
               </button>
@@ -364,11 +370,11 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
   const error = action?.error?.[addressId];
   const isDefaultAddress = defaultAddress?.id === addressId;
   return (
-    <Form id={addressId}>
-      <fieldset>
-        <input type="hidden" name="addressId" defaultValue={addressId} />
-        <div>
-          <label htmlFor="firstName">First name*</label>
+    <Form className="account-address-card" id={addressId}>
+      <input type="hidden" name="addressId" defaultValue={addressId} />
+      <div className="account-form-grid">
+        <label className="account-field" htmlFor="firstName">
+          <span>First name</span>
           <input
             aria-label="First name"
             autoComplete="given-name"
@@ -379,9 +385,9 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             required
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="lastName">Last name*</label>
+        </label>
+        <label className="account-field" htmlFor="lastName">
+          <span>Last name</span>
           <input
             aria-label="Last name"
             autoComplete="family-name"
@@ -392,9 +398,9 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             required
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="company">Company</label>
+        </label>
+        <label className="account-field" htmlFor="company">
+          <span>Company</span>
           <input
             aria-label="Company"
             autoComplete="organization"
@@ -404,22 +410,22 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             placeholder="Company"
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="address1">Address line*</label>
+        </label>
+        <label className="account-field" htmlFor="address1">
+          <span>Address line</span>
           <input
             aria-label="Address line 1"
             autoComplete="address-line1"
             defaultValue={address?.address1 ?? ''}
             id="address1"
             name="address1"
-            placeholder="Address line 1*"
+            placeholder="Address line 1"
             required
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="address2">Address line 2</label>
+        </label>
+        <label className="account-field" htmlFor="address2">
+          <span>Address line 2</span>
           <input
             aria-label="Address line 2"
             autoComplete="address-line2"
@@ -429,9 +435,9 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             placeholder="Address line 2"
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="city">City*</label>
+        </label>
+        <label className="account-field" htmlFor="city">
+          <span>City</span>
           <input
             aria-label="City"
             autoComplete="address-level2"
@@ -442,9 +448,9 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             required
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="zoneCode">State / Province*</label>
+        </label>
+        <label className="account-field" htmlFor="zoneCode">
+          <span>State / Province</span>
           <input
             aria-label="State/Province"
             autoComplete="address-level1"
@@ -455,9 +461,9 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             required
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="zip">Zip / Postal Code*</label>
+        </label>
+        <label className="account-field" htmlFor="zip">
+          <span>Zip / Postal Code</span>
           <input
             aria-label="Zip"
             autoComplete="postal-code"
@@ -468,9 +474,9 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             required
             type="text"
           />
-        </div>
-        <div>
-          <label htmlFor="territoryCode">Country Code*</label>
+        </label>
+        <label className="account-field" htmlFor="territoryCode">
+          <span>Country code</span>
           <input
             aria-label="territoryCode"
             autoComplete="country"
@@ -482,9 +488,9 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             type="text"
             maxLength={2}
           />
-        </div>
-        <div>
-          <label htmlFor="phoneNumber">Phone</label>
+        </label>
+        <label className="account-field" htmlFor="phoneNumber">
+          <span>Phone</span>
           <input
             aria-label="Phone Number"
             autoComplete="tel"
@@ -495,20 +501,25 @@ export function AddressForm({addressId, address, defaultAddress, children}) {
             pattern="^\+?[1-9]\d{3,14}$"
             type="tel"
           />
+        </label>
+      </div>
+      <label className="account-toggle" htmlFor="defaultAddress">
+        <input
+          defaultChecked={isDefaultAddress}
+          id="defaultAddress"
+          name="defaultAddress"
+          type="checkbox"
+        />
+        <span>Set as default address</span>
+      </label>
+      {error ? (
+        <div className="account-alert">
+          <small>{error}</small>
         </div>
-        <div className="set-default-adrs">
-          <input
-            defaultChecked={isDefaultAddress}
-            id="defaultAddress"
-            name="defaultAddress"
-            type="checkbox"
-          />
-          <label htmlFor="defaultAddress">Set as default address</label>
-        </div>
-        {children({
-          stateForMethod: (method) => (formMethod === method ? state : 'idle'),
-        })}
-      </fieldset>
+      ) : null}
+      {children({
+        stateForMethod: (method) => (formMethod === method ? state : 'idle'),
+      })}
     </Form>
   );
 }
