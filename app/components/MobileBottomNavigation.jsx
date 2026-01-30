@@ -68,6 +68,8 @@ export default function MobileBottomNavigation({cart}) {
         to="/account"
         className="nav-item"
         aria-label="User Account Button"
+        target="_blank"
+        rel="noreferrer noopener"
       >
         <UserIcon />
       </NavLink>

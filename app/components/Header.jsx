@@ -401,6 +401,8 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               to="/account"
               className="sign-in-link mobile-user-icon"
               aria-label="Account"
+              target="_blank"
+              rel="noreferrer noopener"
             >
               <UserIcon />
             </NavLink>
