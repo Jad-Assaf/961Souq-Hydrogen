@@ -120,9 +120,14 @@ export default function BodyCareRoute() {
     .map((item, index) => {
       const shelfCollection = item.resource;
       const products = shelfCollection.products?.nodes ?? [];
+      const shelfId =
+        shelfCollection.handle ||
+        shelfCollection.id ||
+        item.id ||
+        `shelf-${index}`;
       return {
-        id: item.id || shelfCollection.id || `shelf-${index}`,
-        label: item.title || shelfCollection.title,
+        id: shelfId,
+        label: item.title || shelfCollection.title || 'Collection',
         products,
       };
     });
@@ -138,19 +143,47 @@ export default function BodyCareRoute() {
     ];
   }
 
-  // Flatten to a single list, keep shelf label as category
-  const productsWithShelf = [];
+  const categoryMap = new Map();
   for (const shelf of shelves) {
-    for (const product of shelf.products ?? []) {
-      productsWithShelf.push({
-        ...product,
-        __shelfLabel: shelf.label,
-      });
+    if (shelf?.id && !categoryMap.has(shelf.id)) {
+      categoryMap.set(shelf.id, shelf.label);
     }
   }
+  const allCategories = Array.from(categoryMap, ([id, label]) => ({
+    id,
+    label,
+  }));
 
-  const allCategories = Array.from(
-    new Set(productsWithShelf.map((p) => p.__shelfLabel)),
+  // Flatten to a single list, de-duping products while preserving shelf ids
+  const productMap = new Map();
+  for (const shelf of shelves) {
+    const shelfId = shelf?.id;
+    if (!shelfId) continue;
+    const shelfLabel = shelf.label;
+    for (const product of shelf.products ?? []) {
+      if (!product?.id) continue;
+      const existing = productMap.get(product.id);
+      if (!existing) {
+        productMap.set(product.id, {
+          ...product,
+          __shelfIds: [shelfId],
+          __shelfLabels: {[shelfId]: shelfLabel},
+        });
+        continue;
+      }
+      if (!existing.__shelfIds.includes(shelfId)) {
+        existing.__shelfIds.push(shelfId);
+      }
+      if (!existing.__shelfLabels[shelfId]) {
+        existing.__shelfLabels[shelfId] = shelfLabel;
+      }
+    }
+  }
+  const productsWithShelf = Array.from(productMap.values());
+
+  const allCategoryLabels = allCategories.map((category) => category.label);
+  const categoryLabelById = new Map(
+    allCategories.map((category) => [category.id, category.label]),
   );
 
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -158,16 +191,18 @@ export default function BodyCareRoute() {
   const filteredProducts = useMemo(() => {
     if (!selectedCategories.length) return productsWithShelf;
     return productsWithShelf.filter((p) =>
-      selectedCategories.includes(p.__shelfLabel),
+      p.__shelfIds?.some((id) => selectedCategories.includes(id)),
     );
   }, [productsWithShelf, selectedCategories]);
 
   const productsCount = filteredProducts.length;
   const hasProducts = productsWithShelf.length > 0;
 
-  function toggleCategory(label) {
+  function toggleCategory(categoryId) {
     setSelectedCategories((prev) =>
-      prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label],
+      prev.includes(categoryId)
+        ? prev.filter((x) => x !== categoryId)
+        : [...prev, categoryId],
     );
   }
 
@@ -193,8 +228,8 @@ export default function BodyCareRoute() {
               </span>
               {allCategories.length > 0 && (
                 <span className="bb-hero-tags">
-                  {allCategories.slice(0, 3).join(' · ')}
-                  {allCategories.length > 3 ? ' · more' : ''}
+                  {allCategoryLabels.slice(0, 3).join(' · ')}
+                  {allCategoryLabels.length > 3 ? ' · more' : ''}
                 </span>
               )}
             </div>
@@ -278,20 +313,22 @@ export default function BodyCareRoute() {
               <div className="bb-filter-card">
                 <p className="bb-filter-title">Filter by line</p>
                 <div className="bb-filter-chips">
-                  {allCategories.map((label) => {
-                    const active = selectedCategories.includes(label);
+                  {allCategories.map((category) => {
+                    const active = selectedCategories.includes(category.id);
                     return (
                       <button
-                        key={label}
+                        key={category.id}
                         type="button"
                         className={
                           'bb-filter-chip' +
                           (active ? ' bb-filter-chip-active' : '')
                         }
-                        onClick={() => toggleCategory(label)}
+                        onClick={() => toggleCategory(category.id)}
                       >
                         <span className="bb-filter-chip-dot" />
-                        <span className="bb-filter-chip-label">{label}</span>
+                        <span className="bb-filter-chip-label">
+                          {category.label}
+                        </span>
                       </button>
                     );
                   })}
@@ -317,18 +354,27 @@ export default function BodyCareRoute() {
                 {selectedCategories.length > 0 && (
                   <p className="bb-products-filtered">
                     Showing{' '}
-                    {selectedCategories.slice(0, 3).join(', ').toLowerCase()}
-                    {selectedCategories.length > 3 ? '…' : ''}
-                  </p>
-                )}
-              </div>
+                  {selectedCategories
+                    .map((id) => categoryLabelById.get(id))
+                    .filter(Boolean)
+                    .slice(0, 3)
+                    .join(', ')
+                    .toLowerCase()}
+                  {selectedCategories.length > 3 ? '…' : ''}
+                </p>
+              )}
             </div>
+          </div>
 
             <div className="bb-products-grid">
               {filteredProducts.map((product, index) => {
                 const image = product.featuredImage;
                 const price = product.priceRange?.minVariantPrice;
-                const categoryLabel = product.__shelfLabel;
+                const categoryLabel =
+                  selectedCategories.length === 1
+                    ? product.__shelfLabels?.[selectedCategories[0]] ||
+                      product.__shelfLabels?.[product.__shelfIds?.[0]]
+                    : product.__shelfLabels?.[product.__shelfIds?.[0]];
 
                 return (
                   <article
