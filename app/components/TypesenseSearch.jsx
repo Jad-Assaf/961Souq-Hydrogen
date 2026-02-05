@@ -5,6 +5,7 @@ export function TypesenseSearch({
   initialQuery = '',
   action = '/search',
   placeholder = 'Search products...',
+  autoFocus = false,
 }) {
   const fetcher = useFetcher();
   const location = useLocation();
@@ -129,6 +130,7 @@ export function TypesenseSearch({
               type="search"
               name="q"
               value={searchTerm}
+              autoFocus={autoFocus}
               autoComplete="off"
               onChange={(e) => {
                 const value = e.target.value;

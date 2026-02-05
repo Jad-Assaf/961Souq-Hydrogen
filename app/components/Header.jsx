@@ -1,15 +1,8 @@
 import {useEffect, useState, useRef, useMemo} from 'react';
 import {Link, NavLink, useLocation} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
-import {Image} from '@shopify/hydrogen-react';
-import {SearchFormPredictive, SEARCH_ENDPOINT} from './SearchFormPredictive';
-import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import {trackSearch} from '~/lib/metaPixelEvents'; // Import the trackSearch function
-import AlgoliaSearch from './StorefrontSearch';
 import {useWishlist} from '~/lib/WishlistContext';
 import {useOptimisticCart} from '@shopify/hydrogen';
-import {InstantSearchBar} from './InstantSearchBar';
-import {TypesenseSearch} from './TypesenseSearch';
 
 // import StorefrontSearch from './StorefrontSearch';
 
@@ -38,6 +31,82 @@ function getCartCount(cart) {
   }
 
   return 0;
+}
+
+function LazyTypesenseSearch({
+  placeholder = 'Search Products',
+  action = '/search',
+}) {
+  const [SearchComponent, setSearchComponent] = useState(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [pendingQuery, setPendingQuery] = useState('');
+  const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
+
+  useEffect(() => {
+    if (!shouldLoad || SearchComponent) return;
+    let cancelled = false;
+
+    import('./TypesenseSearch')
+      .then((mod) => {
+        if (cancelled) return;
+        setSearchComponent(() => mod.TypesenseSearch);
+      })
+      .catch((error) => {
+        console.error('Failed to load search', error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldLoad, SearchComponent]);
+
+  const handleActivate = () => {
+    if (!shouldLoad) {
+      setShouldAutoFocus(true);
+      setShouldLoad(true);
+    }
+  };
+
+  if (SearchComponent) {
+    return (
+      <SearchComponent
+        initialQuery={pendingQuery}
+        action={action}
+        placeholder={placeholder}
+        autoFocus={shouldAutoFocus}
+      />
+    );
+  }
+
+  return (
+    <div className="search-bar-wrapper">
+      <form method="get" action={action} className="search-form">
+        <div className="search-input-wrapper">
+          <input
+            type="search"
+            name="q"
+            value={pendingQuery}
+            autoComplete="off"
+            onChange={(e) => setPendingQuery(e.target.value)}
+            onFocus={handleActivate}
+            onClick={handleActivate}
+            placeholder={placeholder}
+            className="search-input"
+          />
+        </div>
+        <button type="submit" className="search-submit" aria-label="Search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M11 3C6.582 3 3 6.582 3 11s3.582 8 8 8c1.85 0 3.552-.628 4.906-1.682l3.387 3.387c.39.39 1.024.39 1.414 0 .39-.39.39-1.024 0-1.414l-3.387-3.387A7.938 7.938 0 0 0 19 11c0-4.418-3.582-8-8-8Zm-6 8a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z"
+              fill="#fff"
+            />
+          </svg>
+        </button>
+      </form>
+    </div>
+  );
 }
 
 function getMobileMenuPath(url) {
@@ -392,7 +461,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
               height="47"
             />
           </NavLink>
-          <TypesenseSearch placeholder="Search Products" />
+          <LazyTypesenseSearch placeholder="Search Products" />
           {/* <InstantSearchBar action="/search" /> */}
           {/* <AlgoliaSearch /> */}
           <div className="header-ctas">
