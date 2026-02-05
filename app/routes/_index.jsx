@@ -22,13 +22,9 @@ import {
 // import ScrollingSVGs from '~/components/ScrollingSVGs';
 import {
   GET_HOMEPAGE_COLLECTION_QUERY,
-  GET_SIMPLE_COLLECTION_QUERY,
+  GET_HOMEPAGE_COLLECTION_MOBILE_QUERY,
 } from '../data/queries.ts';
-import {CategorySliderWithMoreHeight} from '~/components/CollectionSliderWithMoreHeight';
-import VideosGallery from '~/components/VideosGallery';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
-import {CategorySliderFromMenuMobile} from '~/components/CategorySliderFromMenuMobile';
-import MobileCategoryTiles from '~/components/MobileCategoryTiles';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileCategoryCards from '~/components/MobileCategoryCards';
 import MobileAppPopup from '~/components/MobileAppPopup';
@@ -132,27 +128,23 @@ export function shouldRevalidate({
   return defaultShouldRevalidate ?? currentUrl.pathname !== nextUrl.pathname;
 }
 
-async function fetchCollectionByHandle(context, handle, cacheOverride) {
+async function fetchCollectionByHandle(
+  context,
+  handle,
+  cacheOverride,
+  options = {},
+) {
+  const query = options.mobile
+    ? GET_HOMEPAGE_COLLECTION_MOBILE_QUERY
+    : GET_HOMEPAGE_COLLECTION_QUERY;
   const {collectionByHandle} = await context.storefront.query(
-    GET_HOMEPAGE_COLLECTION_QUERY,
+    query,
     {
       variables: {handle},
       cache: cacheOverride || context.storefront.CacheShort(),
     },
   );
   return collectionByHandle || null;
-}
-
-async function fetchCollectionsByHandles(context, handles) {
-  const collectionPromises = handles.map(async (handle) => {
-    const {collectionByHandle} = await context.storefront.query(
-      GET_SIMPLE_COLLECTION_QUERY,
-      {variables: {handle}, cache: context.storefront.CacheLong()},
-    );
-    return collectionByHandle || null;
-  });
-  const collections = await Promise.all(collectionPromises);
-  return collections.filter(Boolean);
 }
 
 const getHandleFromUrl = (url) => {
@@ -248,11 +240,13 @@ export async function loader(args) {
     args.context,
     'new-arrivals',
     args.context.storefront.CacheShort(),
+    {mobile: isMobile},
   );
   const cosmeticsPromise = fetchCollectionByHandle(
     args.context,
     'cosmetics',
     args.context.storefront.CacheShort(),
+    {mobile: isMobile},
   );
 
   const [criticalData, newArrivals, cosmetics] = await Promise.all([
@@ -297,6 +291,7 @@ export async function loader(args) {
               args.context,
               handle,
               args.context.storefront.CacheLong(),
+              {mobile: false},
             ),
           ),
         ).then((results) => {
@@ -499,6 +494,37 @@ function TopProductPlaceholder({title, handle, count = 6}) {
   );
 }
 
+function LazyMount({children, rootMargin = '200px'}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const targetRef = useRef(null);
+
+  useEffect(() => {
+    if (isVisible) return;
+    const node = targetRef.current;
+    if (!node) return;
+
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {rootMargin, threshold: 0},
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isVisible, rootMargin]);
+
+  return <div ref={targetRef}>{isVisible ? children : null}</div>;
+}
+
 export default function Homepage() {
   const {
     banners,
@@ -586,29 +612,6 @@ export default function Homepage() {
       });
   };
 
-  const menus = {
-    apple: appleMenu,
-    gaming: gamingMenu,
-    laptops: laptopsMenu,
-    monitors: monitorsMenu,
-    mobiles: mobilesMenu,
-    tablets: tabletsMenu,
-    audio: audioMenu,
-    fitness: fitnessMenu,
-    cameras: camerasMenu,
-    homeAppliances: homeAppliancesMenu,
-  };
-  const menuKeys = Object.keys(menus);
-  const [selectedMenu, setSelectedMenu] = useState(menuKeys[0]);
-  const [selectedCollection, setSelectedCollection] = useState(
-    menus[menuKeys[0]][0],
-  );
-  useEffect(() => {
-    const nextCollection = menus[selectedMenu][0];
-    setSelectedCollection(nextCollection);
-    ensureCollectionLoaded(getHandleFromUrl(nextCollection?.url || ''));
-  }, [selectedMenu]);
-
   // Desktop state: original multiple-groups.
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
   const [selectedGaming, setSelectedGaming] = useState(gamingMenu[0]);
@@ -622,24 +625,6 @@ export default function Homepage() {
   const [selectedHomeAppliances, setSelectedHomeAppliances] = useState(
     homeAppliancesMenu[0],
   );
-
-  // First, at the top of your component (in the mobile branch section),
-  // add:
-  const [fade, setFade] = useState(false);
-
-  const handleMenuClick = (menuKey) => {
-    // Fade out current content
-    setFade(true);
-    // After the fade-out duration, update the menu
-    setTimeout(() => {
-      setSelectedMenu(menuKey);
-      const nextCollection = menus[menuKey][0];
-      setSelectedCollection(nextCollection);
-      ensureCollectionLoaded(getHandleFromUrl(nextCollection?.url || ''));
-      // Fade in the new content
-      setFade(false);
-    }, 300); // 300ms transition duration
-  };
 
   const buildSelectHandler = (setFn) => (item) => {
     setFn(item);
@@ -719,7 +704,9 @@ export default function Homepage() {
         <>
           {header && (
             <>
-              <MobileCategoryCards menu={header.menu} />
+              <LazyMount>
+                <MobileCategoryCards menu={header.menu} />
+              </LazyMount>
               {/* <div className="instagram-reels-container">
                 <h1>Instagram Reels</h1>
                 <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />

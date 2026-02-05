@@ -89,6 +89,12 @@ const RightArrowIcon = () => (
   </svg>
 );
 
+function addWidthParam(url, width) {
+  if (!url) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}width=${width}`;
+}
+
 function ProductQuickViewModal({
   product,
   images,
@@ -537,23 +543,33 @@ export function ProductItem({product, showFreeShippingTags}) {
               <p>Sold Out</p>
             </div>
             <div className="imageWrapper">
-              <img
-                src={images[currentImageIndex]?.url}
-                alt={product.title}
-                srcSet={`
-                  ${images[currentImageIndex]?.url}&width=250 300w,
-                  ${images[currentImageIndex]?.url}&width=250 600w,
-                  ${images[currentImageIndex]?.url}&width=250 1200w
-                `}
-                sizes="(min-width: 45em) 20vw, 40vw"
-                width={180}
-                height={180}
-                loading="lazy"
-                className={`product-image image${fadeIn ? ' loaded' : ''}${
-                  firstLoad ? ' no-transition' : ''
-                }`}
-                onContextMenu={(e) => e.preventDefault()}
-              />
+              {(() => {
+                const imageUrl = images[currentImageIndex]?.url || '';
+                const src = addWidthParam(imageUrl, 320);
+                const srcSet = imageUrl
+                  ? `${addWidthParam(imageUrl, 200)} 200w, ${addWidthParam(
+                      imageUrl,
+                      320,
+                    )} 320w, ${addWidthParam(imageUrl, 480)} 480w`
+                  : undefined;
+
+                return (
+                  <img
+                    src={src}
+                    alt={product.title}
+                    srcSet={srcSet}
+                    sizes="200px"
+                    width={180}
+                    height={180}
+                    loading="lazy"
+                    decoding="async"
+                    className={`product-image image${fadeIn ? ' loaded' : ''}${
+                      firstLoad ? ' no-transition' : ''
+                    }`}
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
+                );
+              })()}
             </div>
           </div>
         )}

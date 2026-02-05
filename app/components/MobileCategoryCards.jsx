@@ -1,5 +1,5 @@
 // app/components/MobileCategoryCards.jsx
-import React, {useMemo, useState, useEffect, useRef} from 'react';
+import React, {useMemo, useState, useEffect, useRef, useCallback} from 'react';
 import {Link} from '@remix-run/react';
 
 function getHandleFromUrl(url = '') {
@@ -75,6 +75,12 @@ const CARD_IMAGES_BY_HANDLE = {
 function getCardImage(handle) {
   if (!handle) return null;
   return CARD_IMAGES_BY_HANDLE[handle] || null;
+}
+
+function addWidthParam(url, width) {
+  if (!url) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}width=${width}`;
 }
 
 /**
@@ -175,6 +181,25 @@ export default function MobileCategoryCards({menu}) {
       .filter((item) => item.handle);
   }, [items]);
 
+  const topLevelByHandle = useMemo(() => {
+    const map = new Map();
+    topLevelCollections.forEach((item) => {
+      if (item.handle) map.set(item.handle, item);
+    });
+    return map;
+  }, [topLevelCollections]);
+
+  const topLevelCards = useMemo(() => {
+    return topLevelCollections.map((item) => {
+      const bgImage = getCardImage(item.handle);
+      return {
+        ...item,
+        bgImage,
+        bgImageSrc: addWidthParam(bgImage, 360),
+      };
+    });
+  }, [topLevelCollections]);
+
   const [activeHandle, setActiveHandle] = useState(
     topLevelCollections[0]?.handle || null,
   );
@@ -226,30 +251,48 @@ export default function MobileCategoryCards({menu}) {
   }, [popupOpen]);
 
   const activeItem = useMemo(
-    () => topLevelCollections.find((i) => i.handle === activeHandle) || null,
-    [topLevelCollections, activeHandle],
+    () => (activeHandle ? topLevelByHandle.get(activeHandle) || null : null),
+    [topLevelByHandle, activeHandle],
   );
 
   const hasSubCollections =
     !!activeItem && Array.isArray(activeItem.items) && activeItem.items.length;
 
-  const handleCardClick = (handle) => {
+  const subCards = useMemo(() => {
+    if (!hasSubCollections) return [];
+    return activeItem.items.map((sub) => {
+      const subHandle = getHandleFromUrl(sub.url || '');
+      const subImageUrl = getSubcardImage(sub);
+      const subDescription = getSubDescription(sub);
+
+      return {
+        id: sub.id || subHandle || sub.title,
+        handle: subHandle,
+        title: sub.title,
+        url: sub.url,
+        imageSrc: addWidthParam(subImageUrl, 320),
+        description: subDescription,
+      };
+    });
+  }, [activeItem, hasSubCollections]);
+
+  const handleCardClick = useCallback((handle) => {
     setActiveHandle(handle);
     setPopupOpen(true);
-  };
+  }, []);
 
-  const handleClosePopup = () => {
+  const handleClosePopup = useCallback(() => {
     setPopupOpen(false);
-  };
+  }, []);
 
   return (
     <section className="mobile-category-cards-root">
       {/* TOP LEVEL: MAIN CATEGORY CARDS */}
       <div className="mobile-category-cards-scroll">
-        {topLevelCollections.map((item) => {
+        {topLevelCards.map((item) => {
           const handle = item.handle;
           const isActive = handle === activeHandle;
-          const bgImage = getCardImage(handle);
+          const bgImageSrc = item.bgImageSrc;
 
           return (
             <button
@@ -263,9 +306,10 @@ export default function MobileCategoryCards({menu}) {
             >
               <div className="mobile-category-card-bg">
                 <img
-                  src={bgImage}
+                  src={bgImageSrc}
                   alt=""
                   loading="lazy"
+                  decoding="async"
                   width={300}
                   height={500}
                 />
@@ -340,24 +384,21 @@ export default function MobileCategoryCards({menu}) {
 
               {hasSubCollections ? (
                 <div className="mobile-category-subcards-scroll">
-                  {activeItem.items.map((sub) => {
-                    const subHandle = getHandleFromUrl(sub.url || '');
-                    const subImageUrl = getSubcardImage(sub);
-                    const subDescription = getSubDescription(sub);
-
+                  {subCards.map((sub) => {
                     return (
                       <Link
-                        key={sub.id || subHandle || sub.title}
+                        key={sub.id}
                         to={normalizePath(sub.url)}
                         className="mobile-subcard"
                       >
-                        {subImageUrl && (
+                        {sub.imageSrc && (
                           <div className="mobile-subcard-image-wrapper">
                             <img
-                              src={`${subImageUrl}&width=400`}
+                              src={sub.imageSrc}
                               alt={sub.title || ''}
                               className="mobile-subcard-img"
                               loading="lazy"
+                              decoding="async"
                               width={400}
                               height={400}
                             />
@@ -365,9 +406,9 @@ export default function MobileCategoryCards({menu}) {
                         )}
                         <div className="mobile-subcard-content">
                           <h5 className="mobile-subcard-title">{sub.title}</h5>
-                          {subDescription ? (
+                          {sub.description ? (
                             <div className="mobile-subcard-pill">
-                              {subDescription}
+                              {sub.description}
                             </div>
                           ) : null}
                         </div>
