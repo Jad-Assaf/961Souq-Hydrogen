@@ -2,7 +2,7 @@ import React, {useEffect, useState, useCallback} from 'react';
 
 const DAILY_TOKEN_LIMIT = 100;
 const MAX_INPUT_TOKENS = 50;
-const MAX_OUTPUT_TOKENS = 100;
+const MAX_OUTPUT_TOKENS = 200;
 
 function estimateTokens(text) {
   if (!text) return 0;

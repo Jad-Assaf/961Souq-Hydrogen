@@ -1,7 +1,7 @@
 // AI product chat endpoint
 import {json} from '@shopify/remix-oxygen';
 
-const DEFAULT_MAX_OUTPUT = 200; // Allow fuller answers to avoid truncation
+const DEFAULT_MAX_OUTPUT = 500; // Allow fuller answers to avoid truncation
 
 // Server-side token tracking using IP + User-Agent fingerprint
 // Uses Cloudflare Cache API for persistent storage (available in all Workers)
@@ -234,6 +234,59 @@ function extractOutputText(openaiJson) {
   return text.trim();
 }
 
+function normalizeText(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isStoreQuestion(text) {
+  if (!text) return false;
+  const storeRegex =
+    /\b(physical store|store|shop|showroom|branch|address|location)\b/i;
+  const zalkaRegex = /\b(zalka|zalqa|white tower)\b/i;
+  const arabicRegex = /(متجر|محل|فرع|عنوان|موقع|زلقا|زلقه|وين|أين)/;
+  return storeRegex.test(text) || zalkaRegex.test(text) || arabicRegex.test(text);
+}
+
+function isWhoQuestion(text) {
+  if (!text) return false;
+  const whoRegex =
+    /\b(who are you|who're you|who r u|who r you|what are you|what is this)\b/i;
+  const arabicRegex = /(مين انت|من انت|انت مين|شو انت|مين حضرتك)/;
+  return whoRegex.test(text) || arabicRegex.test(text);
+}
+
+function isPriceQuestion(text) {
+  if (!text) return false;
+  const priceRegex =
+    /\b(price|cost|how much|expensive|cheap|worth it|good price|value)\b/i;
+  const arabicRegex = /(سعر|تكلفة|بكم|غالي|رخيص|قيمة|سعره)/;
+  return priceRegex.test(text) || arabicRegex.test(text);
+}
+
+function pickWhoStyleSeed() {
+  const seeds = [
+    'foggy lantern',
+    'midnight echo',
+    'desert breeze',
+    'quiet lighthouse',
+    'velvet shadow',
+    'silver compass',
+    'old atlas',
+    'soft thunder',
+  ];
+  const idx = Math.floor(Math.random() * seeds.length);
+  return seeds[idx];
+}
+
+function buildClarificationAnswer(userLang) {
+  return userLang === 'Arabic'
+    ? 'لم أفهم سؤالك تماماً. هل يمكنك توضيحه؟'
+    : 'I’m not sure I understood. Could you clarify your question?';
+}
+
 async function fetchProductContext(productId, context) {
   if (context?.description) return context;
   return null;
@@ -325,16 +378,23 @@ export async function action({request, context}) {
     return json({error: 'No messages provided'}, {status: 400});
   }
 
+  const lastUserMessage = messages[messages.length - 1]?.content || '';
+  const userLang = /[\u0600-\u06FF]/.test(lastUserMessage)
+    ? 'Arabic'
+    : 'English';
+
+  if (isStoreQuestion(lastUserMessage)) {
+    const storeAnswer =
+      userLang === 'Arabic'
+        ? 'نعم، لدينا متجر فعلي في زلقا مقابل فندق وايت تاور. الموقع: https://maps.app.goo.gl/beEks2WXnSpxFd4E7'
+        : 'Yes, we have a physical store in Zalka, facing the White Tower Hotel. Location: https://maps.app.goo.gl/beEks2WXnSpxFd4E7';
+    return json({success: true, answer: storeAnswer});
+  }
+
   const productContext = await fetchProductContext(productId, ctxPayload);
   if (!productContext) {
     return json({error: 'Missing product context'}, {status: 400});
   }
-
-  const userLang = /[\u0600-\u06FF]/.test(
-    messages[messages.length - 1]?.content || '',
-  )
-    ? 'Arabic'
-    : 'English';
 
   // If message is too long, respond accordingly
   // Note: We still track tokens for "message too long" responses (they use minimal tokens)
@@ -432,26 +492,52 @@ export async function action({request, context}) {
     }
   }
 
+  const recentUserMessages = messages.filter((m) => m.role === 'user');
+  const recentUserWithoutCurrent = recentUserMessages.slice(0, -1);
+  const identityFollowup =
+    recentUserWithoutCurrent.slice(-3).some((m) => isWhoQuestion(m.content)) ||
+    false;
+  const identityMode = isWhoQuestion(lastUserMessage) || identityFollowup;
+  const whoStyleSeed = identityMode ? pickWhoStyleSeed() : '';
+
   const systemPrompt = [
     'You are an AI product assistant for 961 Souq.',
     'CRITICAL RULES:',
-    '1. ONLY answer questions about this specific product (including specs/details/features), shipping, or warranty. NOTHING ELSE.',
-    '2. If asked about anything else (other products, general questions, unrelated topics), politely decline and redirect to product/shipping/warranty only.',
+    '1. ONLY answer questions about this specific product (including specs/details/features), shipping, warranty, our physical store location, or who you are when asked. NOTHING ELSE.',
+    '2. If asked about anything else (other products, general questions, unrelated topics), politely decline and redirect to product/shipping/warranty/store or a brief "who are you" reply only.',
     '3. Keep responses concise (one short paragraph or a few brief bullet points) while still providing the requested product specs/details when asked.',
-    '4. DO NOT include any WhatsApp links, contact links, URLs, or contact instructions in your response. The system will add contact information automatically.',
+    '4. DO NOT include any WhatsApp links, contact links, or contact instructions in your response. Only include the physical store location link when explicitly asked about the store.',
     '5. Never write unfinished sentences. Use complete sentences only.',
     `6. Respond in ${userLang}.`,
     '7. If the user asks about price or cost and a positive price is available, treat the price as excluding VAT. Present BOTH: "Price (excl. VAT): <amount>" and "Price (incl. 11% VAT): <amount x 1.11>". Never describe an ex-VAT price as including VAT. Always remind them to confirm pricing with a support agent.',
     '8. If the price is missing or 0, clearly say "Call for price" and remind the user to confirm pricing with a support agent. Do NOT fabricate VAT numbers when price is missing/zero.',
     '9. If the user asks for specs/details/features, provide the available specifications from context; do not refuse. Keep it concise but include the key points.',
-    '10. Answer the question directly without adding unrelated disclaimers.',
+    '10. If asked whether the product is good for the listed price, give a brief value assessment based on the available details, but DO NOT advise buying or not buying.',
+    '11. If the request is unclear, ask a brief clarification question instead of repeating yourself.',
+    '12. Never repeat your previous response verbatim. If the user asks something new, answer the newest question with fresh wording and relevant details.',
+    '13. Only mention price when the user explicitly asks about price or value.',
+    '14. Answer the question directly without adding unrelated disclaimers.',
   ].join(' ');
+
+  const identityPrompt = identityMode
+    ? [
+        'WHO-ARE-YOU MODE:',
+        'Reply with playful, mystic, and humorous evasiveness.',
+        'Do NOT claim a real identity or say you are an AI.',
+        'If the user asks a follow-up about your previous "who are you" reply, continue that thread and clarify lightly without breaking the mystic tone.',
+        'Use different imagery than your last reply and avoid repeating sentences.',
+        whoStyleSeed ? `Style seed: ${whoStyleSeed}.` : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : '';
 
   const description = productContext.description || '';
   // Use full description provided by product-context loader (already capped upstream)
   const trimmedDescription = description;
 
   // Derive VAT math if we can safely parse a single price
+  const needsPrice = isPriceQuestion(lastUserMessage);
   const rawPrice = productContext.price || '';
   const priceRangeLike = rawPrice.includes('-');
   const numericPriceMatch = rawPrice.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
@@ -464,18 +550,20 @@ export async function action({request, context}) {
   let contextSummary = [
     `Title: ${productContext.title || ''}`,
     productContext.vendor ? `Vendor: ${productContext.vendor}` : '',
-    productContext.price ? `Price: ${productContext.price}` : '',
+    needsPrice && productContext.price ? `Price: ${productContext.price}` : '',
     `Description: ${trimmedDescription}`,
   ]
     .filter(Boolean)
     .join('\n');
 
-  if (hasValidPrice) {
-    contextSummary += `\nPrice shown (excl. VAT): ${basePrice}`;
-    contextSummary += `\nPrice incl. 11% VAT: ${vatPrice}`;
-    contextSummary += `\nPrice note: Website prices are displayed excluding VAT. Present excl. VAT first, then 11% VAT included.`;
-  } else {
-    contextSummary += `\nPrice note: Price unavailable/0. Respond with "Call for price" and remind to confirm pricing with a support agent. Do NOT calculate VAT when price is missing/zero.`;
+  if (needsPrice) {
+    if (hasValidPrice) {
+      contextSummary += `\nPrice shown (excl. VAT): ${basePrice}`;
+      contextSummary += `\nPrice incl. 11% VAT: ${vatPrice}`;
+      contextSummary += `\nPrice note: Website prices are displayed excluding VAT. Present excl. VAT first, then 11% VAT included.`;
+    } else {
+      contextSummary += `\nPrice note: Price unavailable/0. Respond with "Call for price" and remind to confirm pricing with a support agent. Do NOT calculate VAT when price is missing/zero.`;
+    }
   }
 
   // Add shipping/warranty only if explicitly asked about
@@ -508,7 +596,9 @@ export async function action({request, context}) {
     })
     .join('\n\n');
 
-  const fullInput = `Product context:\n${contextSummary}\n\nConversation:\n${conversationHistory}\n\nAssistant:`;
+  const fullInput = `Product context:\n${contextSummary}\n\n${
+    identityPrompt ? `${identityPrompt}\n\n` : ''
+  }Conversation:\n${conversationHistory}\n\nAssistant:`;
 
   const chatPayload = {
     model: 'gpt-5-nano',
@@ -613,6 +703,55 @@ export async function action({request, context}) {
 
     // Remove trailing empty bullet markers that can occur on truncation
     cleanedAnswer = cleanedAnswer.replace(/\n-\s*$/g, '').trim();
+
+    const lastAssistantMessage =
+      messages.slice().reverse().find((m) => m.role === 'assistant')?.content ||
+      '';
+    const prevUserMessage =
+      messages.slice(0, -1).reverse().find((m) => m.role === 'user')?.content ||
+      '';
+    const shouldRetryForRepetition =
+      normalizeText(cleanedAnswer) &&
+      normalizeText(cleanedAnswer) === normalizeText(lastAssistantMessage) &&
+      normalizeText(lastUserMessage) !== normalizeText(prevUserMessage);
+
+    if (shouldRetryForRepetition) {
+      const retryPayload = {
+        ...chatPayload,
+        instructions:
+          systemPrompt +
+          ' IMPORTANT: Your last response repeated the previous answer. Answer the most recent user question with different wording and new relevant details. Do not reuse the same sentences.',
+      };
+      const retryRes = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${openaiKey}`,
+        },
+        body: JSON.stringify(retryPayload),
+      });
+
+      const retryData = await retryRes.json().catch(() => null);
+      if (retryRes.ok) {
+        const retryAnswer = extractOutputText(retryData);
+        if (retryAnswer) {
+          cleanedAnswer = retryAnswer
+            .replace(/\[?واتساب\]?\([^)]+\)/gi, '')
+            .replace(/\[?WhatsApp\]?\([^)]+\)/gi, '')
+            .replace(/https?:\/\/wa\.me\/[^\s\)]+/gi, '')
+            .trim()
+            .replace(/\n-\s*$/g, '')
+            .trim();
+        }
+      }
+    }
+
+    if (
+      normalizeText(cleanedAnswer) === normalizeText(lastAssistantMessage) ||
+      !cleanedAnswer
+    ) {
+      cleanedAnswer = buildClarificationAnswer(userLang);
+    }
 
     // Add contact info and WhatsApp link to the answer (only if not already present)
     const hasWhatsAppLink =
