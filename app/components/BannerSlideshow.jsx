@@ -78,6 +78,7 @@ export function BannerSlideshow({banners, interval = 10000}) {
   if (!deviceBanners.length) return null;
 
   const slide = deviceBanners[current];
+  const isFirstSlide = current === 0;
 
   /* -------------------------------------------------------------
    * 3)  RENDER
@@ -125,9 +126,9 @@ export function BannerSlideshow({banners, interval = 10000}) {
                     src={`${slide.mobileImageUrl}&width=640`}
                     alt={slide.alt || `Banner ${current + 1}`}
                     className="banner-image"
-                    loading="eager"
+                    loading={isFirstSlide ? 'eager' : 'lazy'}
                     decoding="async"
-                    fetchPriority="high"
+                    fetchpriority={isFirstSlide ? 'high' : 'auto'}
                     width={640}
                     height={300}
                   />
@@ -163,9 +164,9 @@ export function BannerSlideshow({banners, interval = 10000}) {
                     src={`${slide.desktopImageUrl}&width=1500`}
                     alt={slide.alt || `Banner ${current + 1}`}
                     className="banner-image"
-                    loading="eager"
+                    loading={isFirstSlide ? 'eager' : 'lazy'}
                     decoding="async"
-                    fetchPriority="high"
+                    fetchpriority={isFirstSlide ? 'high' : 'auto'}
                     width={1500}
                     height={300}
                   />

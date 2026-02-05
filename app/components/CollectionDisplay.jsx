@@ -102,6 +102,7 @@ function ProductQuickViewModal({
   isOpen,
   isClosing,
   isLoadingDetails,
+  onRequestMoreImages,
   onClose,
   onAfterClose,
   openCart,
@@ -191,11 +192,17 @@ function ProductQuickViewModal({
 
   const nextImage = () => {
     if (!images.length) return;
+    if (typeof onRequestMoreImages === 'function') {
+      onRequestMoreImages();
+    }
     setModalImageIndex((i) => (i + 1) % images.length);
   };
 
   const prevImage = () => {
     if (!images.length) return;
+    if (typeof onRequestMoreImages === 'function') {
+      onRequestMoreImages();
+    }
     setModalImageIndex((i) => (i - 1 + images.length) % images.length);
   };
 
@@ -270,7 +277,12 @@ function ProductQuickViewModal({
                           className={`product-modal-thumb ${
                             idx === modalImageIndex ? 'active' : ''
                           }`}
-                          onClick={() => setModalImageIndex(idx)}
+                          onClick={() => {
+                            if (typeof onRequestMoreImages === 'function') {
+                              onRequestMoreImages();
+                            }
+                            setModalImageIndex(idx);
+                          }}
                           aria-label={`Image ${idx + 1}`}
                         >
                           <img
@@ -396,6 +408,8 @@ export function ProductItem({product, showFreeShippingTags}) {
 
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [quickViewLoading, setQuickViewLoading] = useState(false);
+  const [quickViewFullLoaded, setQuickViewFullLoaded] = useState(false);
+  const [quickViewFullLoading, setQuickViewFullLoading] = useState(false);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
@@ -460,6 +474,7 @@ export function ProductItem({product, showFreeShippingTags}) {
       .then((data) => {
         if (data?.product) {
           setQuickViewProduct(data.product);
+          setQuickViewFullLoaded(Boolean(data.isFull));
         }
       })
       .catch((error) => {
@@ -469,6 +484,36 @@ export function ProductItem({product, showFreeShippingTags}) {
         setQuickViewLoading(false);
       });
   }, [product?.handle, quickViewLoading, quickViewProduct]);
+
+  const ensureQuickViewFullLoaded = useCallback(() => {
+    if (quickViewFullLoaded || quickViewFullLoading) return;
+    if (!product?.handle) return;
+
+    setQuickViewFullLoading(true);
+    fetch(
+      `/api/home-product?handle=${encodeURIComponent(
+        product.handle,
+      )}&full=1`,
+    )
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load product: ${product.handle}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.product) {
+          setQuickViewProduct(data.product);
+          setQuickViewFullLoaded(true);
+        }
+      })
+      .catch((error) => {
+        console.error('Quick view full product fetch failed', error);
+      })
+      .finally(() => {
+        setQuickViewFullLoading(false);
+      });
+  }, [product?.handle, quickViewFullLoaded, quickViewFullLoading]);
 
   const handleMouseEnter = () => images.length > 1 && setCurrentImageIndex(1);
   const handleMouseLeave = () => setCurrentImageIndex(0);
@@ -622,6 +667,7 @@ export function ProductItem({product, showFreeShippingTags}) {
         isOpen={isModalOpen}
         isClosing={isModalClosing}
         isLoadingDetails={quickViewLoading && !quickViewProduct}
+        onRequestMoreImages={ensureQuickViewFullLoaded}
         onClose={closeModal}
         onAfterClose={finalizeClose}
         openCart={open}

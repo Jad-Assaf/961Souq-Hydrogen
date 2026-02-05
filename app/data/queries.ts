@@ -652,6 +652,46 @@ export const GET_HOME_PRODUCT_QUERY = `#graphql
   }
 `;
 
+export const GET_HOME_PRODUCT_MOBILE_QUERY = `#graphql
+  query GetHomeProductMobileByHandle($handle: String!) {
+    product(handle: $handle) {
+      id
+      title
+      handle
+      descriptionHtml
+      tags
+      images(first: 3) {
+        nodes {
+          url
+          altText
+        }
+      }
+      variants(first: 10) {
+        nodes {
+          id
+          availableForSale
+          price {
+            amount
+            currencyCode
+          }
+          compareAtPrice {
+            amount
+            currencyCode
+          }
+          selectedOptions {
+            name
+            value
+          }
+          image {
+            url
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_SIMPLE_COLLECTION_QUERY = `#graphql
   query GetSimpleCollection($handle: String!) {
     collectionByHandle(handle: $handle) {

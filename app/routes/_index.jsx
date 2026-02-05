@@ -840,7 +840,9 @@ export default function Homepage() {
       )}
 
       {/* <ScrollingSVGs /> */}
-      <BrandSection brands={brandsData} />
+      <LazyMount>
+        <BrandSection brands={brandsData} />
+      </LazyMount>
     </div>
   );
 }

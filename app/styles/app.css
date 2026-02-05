@@ -4738,6 +4738,29 @@ svg.icon.icon--full-color {
   border-radius: 999px;
 }
 
+.mobile-category-show-more {
+  display: flex;
+  justify-content: center;
+  padding: 0 16px 12px;
+}
+
+.mobile-category-show-more-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.mobile-category-show-more-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
 /* MAIN CATEGORY CARD */
 .mobile-category-card {
   position: relative;

@@ -1,15 +1,26 @@
 import {json} from '@shopify/remix-oxygen';
-import {GET_HOME_PRODUCT_QUERY} from '~/data/queries';
+import {
+  GET_HOME_PRODUCT_MOBILE_QUERY,
+  GET_HOME_PRODUCT_QUERY,
+} from '~/data/queries';
 
 export async function loader({request, context}) {
   const url = new URL(request.url);
   const handle = url.searchParams.get('handle');
+  const forceFull = url.searchParams.get('full') === '1';
 
   if (!handle) {
     return json({error: 'Missing handle'}, {status: 400});
   }
 
-  const {product} = await context.storefront.query(GET_HOME_PRODUCT_QUERY, {
+  const userAgent = request.headers.get('user-agent') || '';
+  const isMobile = /mobile/i.test(userAgent);
+  const shouldUseMobileQuery = isMobile && !forceFull;
+  const query = shouldUseMobileQuery
+    ? GET_HOME_PRODUCT_MOBILE_QUERY
+    : GET_HOME_PRODUCT_QUERY;
+
+  const {product} = await context.storefront.query(query, {
     variables: {handle},
     cache: context.storefront.CacheLong(),
   });
@@ -19,7 +30,7 @@ export async function loader({request, context}) {
   }
 
   return json(
-    {handle, product},
+    {handle, product, isFull: !shouldUseMobileQuery},
     {
       headers: {
         'Oxygen-Cache-Control':

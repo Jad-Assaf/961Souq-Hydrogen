@@ -167,6 +167,7 @@ function getSubDescription(sub) {
  */
 export default function MobileCategoryCards({menu}) {
   const items = menu?.items || [];
+  const INITIAL_CARD_COUNT = 6;
 
   // Normalize top-level items: only ones that have a collection handle
   const topLevelCollections = useMemo(() => {
@@ -200,6 +201,7 @@ export default function MobileCategoryCards({menu}) {
     });
   }, [topLevelCollections]);
 
+  const [showAllCards, setShowAllCards] = useState(false);
   const [activeHandle, setActiveHandle] = useState(
     topLevelCollections[0]?.handle || null,
   );
@@ -285,11 +287,18 @@ export default function MobileCategoryCards({menu}) {
     setPopupOpen(false);
   }, []);
 
+  const visibleCards = useMemo(() => {
+    if (showAllCards) return topLevelCards;
+    return topLevelCards.slice(0, INITIAL_CARD_COUNT);
+  }, [topLevelCards, showAllCards]);
+
+  const canShowMore = topLevelCards.length > INITIAL_CARD_COUNT;
+
   return (
     <section className="mobile-category-cards-root">
       {/* TOP LEVEL: MAIN CATEGORY CARDS */}
       <div className="mobile-category-cards-scroll">
-        {topLevelCards.map((item) => {
+        {visibleCards.map((item) => {
           const handle = item.handle;
           const isActive = handle === activeHandle;
           const bgImageSrc = item.bgImageSrc;
@@ -337,6 +346,17 @@ export default function MobileCategoryCards({menu}) {
           );
         })}
       </div>
+      {canShowMore && !showAllCards && (
+        <div className="mobile-category-show-more">
+          <button
+            type="button"
+            className="mobile-category-show-more-btn"
+            onClick={() => setShowAllCards(true)}
+          >
+            Show more categories
+          </button>
+        </div>
+      )}
 
       {/* POPUP OVERLAY: SUB-COLLECTIONS */}
       <div
