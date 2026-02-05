@@ -1,7 +1,5 @@
 // src/root.jsx
 import appStyles from '~/styles/app.css?url';
-import fontCriticalStyles from '~/styles/fonts-critical.css?url';
-import fontDeferredStyles from '~/styles/fonts-deferred.css?url';
 import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {redirect} from '@shopify/remix-oxygen';
@@ -48,12 +46,6 @@ const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 export function links() {
   return [
     // {rel: 'stylesheet', href: appStyles},
-    {rel: 'stylesheet', href: fontCriticalStyles},
-    {
-      rel: 'stylesheet',
-      href: fontDeferredStyles,
-      media: '(min-width: 769px)',
-    },
     // {rel: 'stylesheet', href: footerStyles},
     // {rel: 'stylesheet', href: productStyles},
     // {rel: 'stylesheet', href: productImgStyles},
