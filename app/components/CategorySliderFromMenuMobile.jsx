@@ -81,7 +81,7 @@ export function CategorySliderFromMenuMobile({menu}) {
                         <img
                           src={`${src}${
                             src.includes('?') ? '&' : '?'
-                          }width=300`}
+                          }width=250`}
                           alt={itemTitle(item)}
                           className="category-imgg"
                           loading="lazy"

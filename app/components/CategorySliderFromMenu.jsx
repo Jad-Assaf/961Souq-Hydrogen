@@ -64,7 +64,7 @@ export function CategorySliderFromMenu({menu}) {
               <div className="category-container" key={item.id}>
                 <Link to={path(item)} aria-label={title(item)}>
                   <img
-                    src={`${src}${src.includes('?') ? '&' : '?'}width=300`}
+                    src={`${src}${src.includes('?') ? '&' : '?'}width=250`}
                     alt={title(item)}
                     className="category-imgg"
                     loading="lazy"
