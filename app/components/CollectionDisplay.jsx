@@ -95,6 +95,7 @@ function ProductQuickViewModal({
   selectedVariant,
   isOpen,
   isClosing,
+  isLoadingDetails,
   onClose,
   onAfterClose,
   openCart,
@@ -315,6 +316,8 @@ function ProductQuickViewModal({
                 className="product-modal-description"
                 dangerouslySetInnerHTML={{__html: descriptionHtml}}
               />
+            ) : isLoadingDetails ? (
+              <p className="product-modal-description">Loading details...</p>
             ) : (
               <p className="product-modal-description">
                 No description available for this product.
@@ -385,6 +388,9 @@ export function ProductItem({product, showFreeShippingTags}) {
   const {open} = useAside();
   const revalidator = useRevalidator();
 
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [quickViewLoading, setQuickViewLoading] = useState(false);
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
@@ -393,12 +399,15 @@ export function ProductItem({product, showFreeShippingTags}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalClosing, setIsModalClosing] = useState(false);
 
-  const images = product.images?.nodes || [];
+  const displayProduct = quickViewProduct || product;
+  const images = displayProduct.images?.nodes || [];
 
   useEffect(() => {
-    const soldOut = !product.variants?.nodes?.some((v) => v.availableForSale);
+    const soldOut = !displayProduct.variants?.nodes?.some(
+      (v) => v.availableForSale,
+    );
     setIsSoldOut(soldOut);
-  }, [product]);
+  }, [displayProduct]);
 
   useEffect(() => {
     if (firstLoad && currentImageIndex === 0) {
@@ -414,13 +423,13 @@ export function ProductItem({product, showFreeShippingTags}) {
   }, [currentImageIndex, firstLoad]);
 
   const selectedVariant =
-    product.variants?.nodes?.find((v) => v.availableForSale) ||
-    product.variants?.nodes?.[0] ||
+    displayProduct.variants?.nodes?.find((v) => v.availableForSale) ||
+    displayProduct.variants?.nodes?.[0] ||
     null;
 
   const showFreeShipping =
     showFreeShippingTags &&
-    (product.tags || []).some((tag) =>
+    (displayProduct.tags || []).some((tag) =>
       FREE_SHIPPING_TAGS.has(tag.toLowerCase().trim()),
     );
 
@@ -430,6 +439,31 @@ export function ProductItem({product, showFreeShippingTags}) {
     Number(selectedVariant?.price?.amount) > 0
   );
 
+  const ensureQuickViewLoaded = useCallback(() => {
+    if (quickViewProduct || quickViewLoading) return;
+    if (!product?.handle) return;
+
+    setQuickViewLoading(true);
+    fetch(`/api/home-product?handle=${encodeURIComponent(product.handle)}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load product: ${product.handle}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.product) {
+          setQuickViewProduct(data.product);
+        }
+      })
+      .catch((error) => {
+        console.error('Quick view product fetch failed', error);
+      })
+      .finally(() => {
+        setQuickViewLoading(false);
+      });
+  }, [product?.handle, quickViewLoading, quickViewProduct]);
+
   const handleMouseEnter = () => images.length > 1 && setCurrentImageIndex(1);
   const handleMouseLeave = () => setCurrentImageIndex(0);
 
@@ -438,9 +472,10 @@ export function ProductItem({product, showFreeShippingTags}) {
       e.preventDefault();
       e.stopPropagation();
     }
+    ensureQuickViewLoaded();
     setIsModalClosing(false);
     setIsModalOpen(true);
-  }, []);
+  }, [ensureQuickViewLoaded]);
 
   const closeModal = useCallback(() => {
     setIsModalClosing(true);
@@ -565,11 +600,12 @@ export function ProductItem({product, showFreeShippingTags}) {
       </Link>
 
       <ProductQuickViewModal
-        product={product}
+        product={displayProduct}
         images={images}
         selectedVariant={selectedVariant}
         isOpen={isModalOpen}
         isClosing={isModalClosing}
+        isLoadingDetails={quickViewLoading && !quickViewProduct}
         onClose={closeModal}
         onAfterClose={finalizeClose}
         openCart={open}

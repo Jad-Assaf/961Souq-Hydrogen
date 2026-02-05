@@ -1,4 +1,4 @@
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {data, useLoaderData, useMatches} from '@remix-run/react';
 import {BannerSlideshow} from '../components/BannerSlideshow';
 // import {CategorySlider} from '~/components/CollectionSlider';
@@ -21,7 +21,7 @@ import {
 // import MobileAppPopup from '~/components/MobileAppPopup';
 // import ScrollingSVGs from '~/components/ScrollingSVGs';
 import {
-  GET_COLLECTION_BY_HANDLE_QUERY,
+  GET_HOMEPAGE_COLLECTION_QUERY,
   GET_SIMPLE_COLLECTION_QUERY,
 } from '../data/queries.ts';
 import {CategorySliderWithMoreHeight} from '~/components/CollectionSliderWithMoreHeight';
@@ -134,7 +134,7 @@ export function shouldRevalidate({
 
 async function fetchCollectionByHandle(context, handle, cacheOverride) {
   const {collectionByHandle} = await context.storefront.query(
-    GET_COLLECTION_BY_HANDLE_QUERY,
+    GET_HOMEPAGE_COLLECTION_QUERY,
     {
       variables: {handle},
       cache: cacheOverride || context.storefront.CacheShort(),
@@ -267,19 +267,24 @@ export async function loader(args) {
   const menuHandles = isMobile
     ? []
     : [
-        ...appleMenu.map((item) => getHandleFromUrl(item.url)),
-        ...gamingMenu.map((item) => getHandleFromUrl(item.url)),
-        ...laptopsMenu.map((item) => getHandleFromUrl(item.url)),
-        ...monitorsMenu.map((item) => getHandleFromUrl(item.url)),
-        ...mobilesMenu.map((item) => getHandleFromUrl(item.url)),
-        ...tabletsMenu.map((item) => getHandleFromUrl(item.url)),
-        ...audioMenu.map((item) => getHandleFromUrl(item.url)),
-        ...fitnessMenu.map((item) => getHandleFromUrl(item.url)),
-        ...camerasMenu.map((item) => getHandleFromUrl(item.url)),
-        ...homeAppliancesMenu.map((item) => getHandleFromUrl(item.url)),
-      ];
+        appleMenu[0],
+        gamingMenu[0],
+        laptopsMenu[0],
+        monitorsMenu[0],
+        mobilesMenu[0],
+        tabletsMenu[0],
+        audioMenu[0],
+        fitnessMenu[0],
+        camerasMenu[0],
+        homeAppliancesMenu[0],
+      ].map((item) => getHandleFromUrl(item?.url || ''));
 
-  const uniqueMenuHandles = [...new Set(menuHandles)].filter(Boolean);
+  const excludedHandles = new Set(
+    [newArrivals?.handle, cosmetics?.handle].filter(Boolean),
+  );
+  const uniqueMenuHandles = [...new Set(menuHandles)].filter(
+    (handle) => handle && !excludedHandles.has(handle),
+  );
 
   // Fetch non-critical collections concurrently (desktop only).
   // Use a longer cache here because these are homepage sections.
@@ -465,6 +470,35 @@ const brandsData = [
   },
 ];
 
+function TopProductPlaceholder({title, handle, count = 6}) {
+  return (
+    <div className="collection-section">
+      <div className="collection-header">
+        <p className="home-colleciton-title">{title}</p>
+        <div className="collection-header-right">
+          {handle ? (
+            <a className="view-all-link" href={`/collections/${handle}`}>
+              View All
+            </a>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="collection-products-row">
+        {Array.from({length: count}).map((_, index) => (
+          <div key={index} className="product-item">
+            <div className="product-card skeleton product-card--placeholder">
+              <div className="skeleton-img skeleton-img--card" />
+              <div className="skeleton-block skeleton-block--title" />
+              <div className="skeleton-block skeleton-block--price" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Homepage() {
   const {
     banners,
@@ -475,6 +509,12 @@ export default function Homepage() {
     restTopProducts,
     isMobile,
   } = useLoaderData();
+
+  const restTopProductsSafe =
+    restTopProducts && typeof restTopProducts === 'object' ? restTopProducts : {};
+  const [onDemandTopProducts, setOnDemandTopProducts] = useState({});
+  const [loadingHandles, setLoadingHandles] = useState({});
+  const inflightCollectionsRef = useRef(new Set());
 
   const rootMatch = useMatches()[0];
   const header = rootMatch?.data?.header;
@@ -501,7 +541,50 @@ export default function Homepage() {
   const combinedTopProducts = {
     ...topProducts,
   };
-  const fullTopProducts = {...combinedTopProducts, ...restTopProducts};
+  const fullTopProducts = {
+    ...combinedTopProducts,
+    ...restTopProductsSafe,
+    ...onDemandTopProducts,
+  };
+
+  const ensureCollectionLoaded = (handle) => {
+    if (!handle) return;
+    if (fullTopProducts[handle]) return;
+    if (inflightCollectionsRef.current.has(handle)) return;
+
+    inflightCollectionsRef.current.add(handle);
+    setLoadingHandles((prev) => {
+      if (prev[handle]) return prev;
+      return {...prev, [handle]: true};
+    });
+    fetch(`/api/home-collection?handle=${encodeURIComponent(handle)}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load collection: ${handle}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.collection) {
+          setOnDemandTopProducts((prev) => ({
+            ...prev,
+            [handle]: data.collection,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error('Homepage on-demand collection fetch failed', error);
+      })
+      .finally(() => {
+        inflightCollectionsRef.current.delete(handle);
+        setLoadingHandles((prev) => {
+          if (!prev[handle]) return prev;
+          const next = {...prev};
+          delete next[handle];
+          return next;
+        });
+      });
+  };
 
   const menus = {
     apple: appleMenu,
@@ -521,7 +604,9 @@ export default function Homepage() {
     menus[menuKeys[0]][0],
   );
   useEffect(() => {
-    setSelectedCollection(menus[selectedMenu][0]);
+    const nextCollection = menus[selectedMenu][0];
+    setSelectedCollection(nextCollection);
+    ensureCollectionLoaded(getHandleFromUrl(nextCollection?.url || ''));
   }, [selectedMenu]);
 
   // Desktop state: original multiple-groups.
@@ -548,10 +633,60 @@ export default function Homepage() {
     // After the fade-out duration, update the menu
     setTimeout(() => {
       setSelectedMenu(menuKey);
-      setSelectedCollection(menus[menuKey][0]);
+      const nextCollection = menus[menuKey][0];
+      setSelectedCollection(nextCollection);
+      ensureCollectionLoaded(getHandleFromUrl(nextCollection?.url || ''));
       // Fade in the new content
       setFade(false);
     }, 300); // 300ms transition duration
+  };
+
+  const buildSelectHandler = (setFn) => (item) => {
+    setFn(item);
+    ensureCollectionLoaded(getHandleFromUrl(item?.url || ''));
+  };
+
+  const handleAppleSelect = buildSelectHandler(setSelectedApple);
+  const handleGamingSelect = buildSelectHandler(setSelectedGaming);
+  const handleLaptopsSelect = buildSelectHandler(setSelectedLaptops);
+  const handleMonitorsSelect = buildSelectHandler(setSelectedMonitors);
+  const handleMobilesSelect = buildSelectHandler(setSelectedMobiles);
+  const handleTabletsSelect = buildSelectHandler(setSelectedTablets);
+  const handleAudioSelect = buildSelectHandler(setSelectedAudio);
+  const handleFitnessSelect = buildSelectHandler(setSelectedFitness);
+  const handleCamerasSelect = buildSelectHandler(setSelectedCameras);
+  const handleHomeAppliancesSelect =
+    buildSelectHandler(setSelectedHomeAppliances);
+
+  const renderCollectionSection = ({
+    menu,
+    selectedItem,
+    onSelect,
+    fallbackTitle,
+  }) => {
+    const handle = getHandleFromUrl(selectedItem?.url || '');
+    const collection = handle ? fullTopProducts[handle] : null;
+    const isLoading = handle ? !!loadingHandles[handle] : false;
+    const title = selectedItem?.title || fallbackTitle || 'Collection';
+
+    return (
+      <>
+        <CollectionCircles
+          collections={menu}
+          selectedCollection={selectedItem}
+          onCollectionSelect={onSelect}
+        />
+        {selectedItem && collection ? (
+          <TopProductSections key={handle} collection={collection} />
+        ) : isLoading ? (
+          <TopProductPlaceholder
+            key={`${handle}-placeholder`}
+            title={title}
+            handle={handle}
+          />
+        ) : null}
+      </>
+    );
   };
 
   // const reelIds = ['DLIFKQtNTvj', 'DLmgJDxM93m', 'DLaGHiLt0cs', 'DLCs7TsMe0a', 'DKrX0cCsLDQ', 'DKeZDnjsasA'];
@@ -636,164 +771,84 @@ export default function Homepage() {
           <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
 
           {/* Apple Group */}
-          <CollectionCircles
-            collections={appleMenu}
-            selectedCollection={selectedApple}
-            onCollectionSelect={setSelectedApple}
-          />
-          {selectedApple &&
-            fullTopProducts[getHandleFromUrl(selectedApple.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedApple.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedApple.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: appleMenu,
+            selectedItem: selectedApple,
+            onSelect: handleAppleSelect,
+            fallbackTitle: 'Apple',
+          })}
 
           {/* Gaming Group */}
-          <CollectionCircles
-            collections={gamingMenu}
-            selectedCollection={selectedGaming}
-            onCollectionSelect={setSelectedGaming}
-          />
-          {selectedGaming &&
-            fullTopProducts[getHandleFromUrl(selectedGaming.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedGaming.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedGaming.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: gamingMenu,
+            selectedItem: selectedGaming,
+            onSelect: handleGamingSelect,
+            fallbackTitle: 'Gaming',
+          })}
 
           {/* Laptops Group */}
-          <CollectionCircles
-            collections={laptopsMenu}
-            selectedCollection={selectedLaptops}
-            onCollectionSelect={setSelectedLaptops}
-          />
-          {selectedLaptops &&
-            fullTopProducts[getHandleFromUrl(selectedLaptops.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedLaptops.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedLaptops.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: laptopsMenu,
+            selectedItem: selectedLaptops,
+            onSelect: handleLaptopsSelect,
+            fallbackTitle: 'Laptops',
+          })}
 
           {/* Monitors Group */}
-          <CollectionCircles
-            collections={monitorsMenu}
-            selectedCollection={selectedMonitors}
-            onCollectionSelect={setSelectedMonitors}
-          />
-          {selectedMonitors &&
-            fullTopProducts[getHandleFromUrl(selectedMonitors.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedMonitors.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedMonitors.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: monitorsMenu,
+            selectedItem: selectedMonitors,
+            onSelect: handleMonitorsSelect,
+            fallbackTitle: 'Monitors',
+          })}
 
           {/* Mobiles Group */}
-          <CollectionCircles
-            collections={mobilesMenu}
-            selectedCollection={selectedMobiles}
-            onCollectionSelect={setSelectedMobiles}
-          />
-          {selectedMobiles &&
-            fullTopProducts[getHandleFromUrl(selectedMobiles.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedMobiles.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedMobiles.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: mobilesMenu,
+            selectedItem: selectedMobiles,
+            onSelect: handleMobilesSelect,
+            fallbackTitle: 'Mobiles',
+          })}
 
           {/* Tablets Group */}
-          <CollectionCircles
-            collections={tabletsMenu}
-            selectedCollection={selectedTablets}
-            onCollectionSelect={setSelectedTablets}
-          />
-          {selectedTablets &&
-            fullTopProducts[getHandleFromUrl(selectedTablets.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedTablets.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedTablets.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: tabletsMenu,
+            selectedItem: selectedTablets,
+            onSelect: handleTabletsSelect,
+            fallbackTitle: 'Tablets',
+          })}
 
           {/* Audio Group */}
-          <CollectionCircles
-            collections={audioMenu}
-            selectedCollection={selectedAudio}
-            onCollectionSelect={setSelectedAudio}
-          />
-          {selectedAudio &&
-            fullTopProducts[getHandleFromUrl(selectedAudio.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedAudio.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedAudio.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: audioMenu,
+            selectedItem: selectedAudio,
+            onSelect: handleAudioSelect,
+            fallbackTitle: 'Audio',
+          })}
 
           {/* Fitness Group */}
-          <CollectionCircles
-            collections={fitnessMenu}
-            selectedCollection={selectedFitness}
-            onCollectionSelect={setSelectedFitness}
-          />
-          {selectedFitness &&
-            fullTopProducts[getHandleFromUrl(selectedFitness.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedFitness.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedFitness.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: fitnessMenu,
+            selectedItem: selectedFitness,
+            onSelect: handleFitnessSelect,
+            fallbackTitle: 'Fitness',
+          })}
 
           {/* Cameras Group */}
-          <CollectionCircles
-            collections={camerasMenu}
-            selectedCollection={selectedCameras}
-            onCollectionSelect={setSelectedCameras}
-          />
-          {selectedCameras &&
-            fullTopProducts[getHandleFromUrl(selectedCameras.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedCameras.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedCameras.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: camerasMenu,
+            selectedItem: selectedCameras,
+            onSelect: handleCamerasSelect,
+            fallbackTitle: 'Cameras',
+          })}
 
           {/* Home Appliances Group */}
-          <CollectionCircles
-            collections={homeAppliancesMenu}
-            selectedCollection={selectedHomeAppliances}
-            onCollectionSelect={setSelectedHomeAppliances}
-          />
-          {selectedHomeAppliances &&
-            fullTopProducts[getHandleFromUrl(selectedHomeAppliances.url)] && (
-              <TopProductSections
-                key={getHandleFromUrl(selectedHomeAppliances.url)}
-                collection={
-                  fullTopProducts[getHandleFromUrl(selectedHomeAppliances.url)]
-                }
-              />
-            )}
+          {renderCollectionSection({
+            menu: homeAppliancesMenu,
+            selectedItem: selectedHomeAppliances,
+            onSelect: handleHomeAppliancesSelect,
+            fallbackTitle: 'Home Appliances',
+          })}
         </>
       )}
 

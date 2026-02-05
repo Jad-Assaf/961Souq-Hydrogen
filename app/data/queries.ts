@@ -488,6 +488,108 @@ export const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
   }
 `;
 
+export const GET_HOMEPAGE_COLLECTION_QUERY = `#graphql
+  query GetHomepageCollectionByHandle($handle: String!) {
+    collectionByHandle(handle: $handle) {
+      id
+      title
+      handle
+      image {
+        url
+        altText
+      }
+      products(first: 10) {
+        nodes {
+          id
+          title
+          handle
+          tags
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          compareAtPriceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 2) {
+            nodes {
+              url
+              altText
+            }
+          }
+          variants(first: 5) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              selectedOptions {
+                name
+                value
+              }
+              image {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const GET_HOME_PRODUCT_QUERY = `#graphql
+  query GetHomeProductByHandle($handle: String!) {
+    product(handle: $handle) {
+      id
+      title
+      handle
+      descriptionHtml
+      tags
+      images(first: 8) {
+        nodes {
+          url
+          altText
+        }
+      }
+      variants(first: 50) {
+        nodes {
+          id
+          availableForSale
+          price {
+            amount
+            currencyCode
+          }
+          compareAtPrice {
+            amount
+            currencyCode
+          }
+          selectedOptions {
+            name
+            value
+          }
+          image {
+            url
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_SIMPLE_COLLECTION_QUERY = `#graphql
   query GetSimpleCollection($handle: String!) {
     collectionByHandle(handle: $handle) {
