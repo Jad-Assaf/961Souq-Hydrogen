@@ -144,7 +144,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     location.pathname === '/christmas' || location.pathname === '/christmas/';
 
   const DEFAULT_LOGO =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=200';
   const BLACK_NOVEMBER_LOGO =
     'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-white_6a233cc8-9b7b-415c-b352-84aac4668966.png?v=1762774820';
 
