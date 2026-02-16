@@ -18,7 +18,7 @@ export default {
   async fetch(request, env, executionContext) {
     try {
       // Quick IP block for abusive sources.
-      const blockedIps = new Set(['185.6.148.130']);
+      const blockedIps = new Set(['185.206.200.143']);
       const forwardedFor = request.headers.get('x-forwarded-for') || '';
       const ipCandidates = [
         request.headers.get('oxygen-buyer-ip') || '',
