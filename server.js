@@ -21,6 +21,7 @@ export default {
       const blockedIps = new Set(['185.6.148.130']);
       const forwardedFor = request.headers.get('x-forwarded-for') || '';
       const ipCandidates = [
+        request.headers.get('oxygen-buyer-ip') || '',
         request.headers.get('cf-connecting-ip') || '',
         request.headers.get('true-client-ip') || '',
         request.headers.get('x-real-ip') || '',
@@ -41,6 +42,10 @@ export default {
         .filter(Boolean);
 
       if (normalizedIps.some((ip) => blockedIps.has(ip))) {
+        console.log('[IP Block] Blocked request', {
+          path: new URL(request.url).pathname,
+          matchedIp: normalizedIps.find((ip) => blockedIps.has(ip)),
+        });
         return new Response('Forbidden', {status: 403});
       }
 
