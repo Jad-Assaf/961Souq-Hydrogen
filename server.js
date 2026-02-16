@@ -17,6 +17,33 @@ export default {
    */
   async fetch(request, env, executionContext) {
     try {
+      // Quick IP block for abusive sources.
+      const blockedIps = new Set(['185.6.148.130']);
+      const forwardedFor = request.headers.get('x-forwarded-for') || '';
+      const ipCandidates = [
+        request.headers.get('cf-connecting-ip') || '',
+        request.headers.get('true-client-ip') || '',
+        request.headers.get('x-real-ip') || '',
+        request.headers.get('client-ip') || '',
+        ...forwardedFor
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ];
+
+      const normalizedIps = ipCandidates
+        .map((ip) =>
+          ip
+            .replace(/^::ffff:/, '')
+            .replace(/^\[|\]$/g, '')
+            .replace(/:\d+$/, ''),
+        )
+        .filter(Boolean);
+
+      if (normalizedIps.some((ip) => blockedIps.has(ip))) {
+        return new Response('Forbidden', {status: 403});
+      }
+
       // Quick geo-block: deny requests we can identify as coming from blocked countries.
       const blockedCountries = new Set(['CN', 'IL']);
       const countryCode =
