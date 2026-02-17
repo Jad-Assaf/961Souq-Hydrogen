@@ -41,6 +41,8 @@ export const shouldRevalidate = ({formMethod, defaultShouldRevalidate}) => {
 };
 
 const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
+const GOOGLE_ANALYTICS_ID = 'G-CB623RXLSE';
+const GOOGLE_ADS_ID = 'AW-378354284';
 // const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
 
 export function links() {
@@ -283,36 +285,74 @@ export function Layout({children}) {
         {nonce ? (
           <>
             <script
-              defer
-              nonce={nonce}
-              src="https://www.googletagmanager.com/gtag/js?id=G-CB623RXLSE"
-            ></script>
-            <script
-              defer
               nonce={nonce}
               dangerouslySetInnerHTML={{
                 __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-CB623RXLSE');
-        `,
-              }}
-            ></script>
-            <script
-              defer
-              nonce={nonce}
-              src="https://www.googletagmanager.com/gtag/js?id=AW-378354284"
-            ></script>
-            <script
-              defer
-              nonce={nonce}
-              dangerouslySetInnerHTML={{
-                __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'AW-378354284');
+          (function () {
+            var gtagIds = ['${GOOGLE_ANALYTICS_ID}', '${GOOGLE_ADS_ID}'];
+            var initialized = false;
+            var interactionEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
+
+            function removeInteractionListeners() {
+              for (var i = 0; i < interactionEvents.length; i++) {
+                window.removeEventListener(interactionEvents[i], onFirstInteraction);
+              }
+            }
+
+            function initializeAnalytics() {
+              if (initialized) return;
+              initialized = true;
+
+              removeInteractionListeners();
+
+              window.dataLayer = window.dataLayer || [];
+              window.gtag = window.gtag || function () {
+                window.dataLayer.push(arguments);
+              };
+
+              window.gtag('js', new Date());
+              for (var i = 0; i < gtagIds.length; i++) {
+                window.gtag('config', gtagIds[i]);
+              }
+
+              var script = document.createElement('script');
+              script.async = true;
+              script.src =
+                'https://www.googletagmanager.com/gtag/js?id=' +
+                encodeURIComponent(gtagIds[0]);
+              document.head.appendChild(script);
+            }
+
+            function onFirstInteraction() {
+              initializeAnalytics();
+            }
+
+            function addInteractionListeners() {
+              for (var i = 0; i < interactionEvents.length; i++) {
+                window.addEventListener(interactionEvents[i], onFirstInteraction, {
+                  once: true,
+                  passive: true,
+                });
+              }
+            }
+
+            function scheduleAnalyticsInit() {
+              if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(initializeAnalytics, {timeout: 4000});
+                return;
+              }
+
+              window.setTimeout(initializeAnalytics, 2500);
+            }
+
+            addInteractionListeners();
+
+            if (document.readyState === 'complete') {
+              scheduleAnalyticsInit();
+            } else {
+              window.addEventListener('load', scheduleAnalyticsInit, {once: true});
+            }
+          })();
         `,
               }}
             ></script>

@@ -28,7 +28,13 @@ import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileCategoryCards from '~/components/MobileCategoryCards';
 import MobileAppPopup from '~/components/MobileAppPopup';
+import montserratRegularFont from '~/styles/fonts/Montserrat-Regular.ttf?url';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
+
+const HOMEPAGE_HERO_DESKTOP =
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-banner.jpg?v=1758713478';
+const HOMEPAGE_HERO_MOBILE =
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-mobile-banner.jpg?v=1758713478';
 
 // const MANUAL_MENU_HANDLES = [
 //   'apple',
@@ -51,6 +57,30 @@ import MobileAppPopup from '~/components/MobileAppPopup';
 /**
  * Custom hook to detect mobile viewport (below 1024px)
  */
+export function links() {
+  return [
+    {
+      rel: 'preload',
+      as: 'image',
+      href: `${HOMEPAGE_HERO_DESKTOP}&width=1500`,
+      media: '(min-width: 768px)',
+    },
+    {
+      rel: 'preload',
+      as: 'image',
+      href: `${HOMEPAGE_HERO_MOBILE}&width=640`,
+      media: '(max-width: 767px)',
+    },
+    {
+      rel: 'preload',
+      as: 'font',
+      href: montserratRegularFont,
+      type: 'font/ttf',
+      crossOrigin: 'anonymous',
+    },
+  ];
+}
+
 /**
  * @type {MetaFunction}
  */
@@ -190,10 +220,8 @@ export async function loader(args) {
   const isMobile = /mobile/i.test(userAgent);
   const banners = [
     {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-banner.jpg?v=1758713478',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-mobile-banner.jpg?v=1758713478',
+      desktopImageUrl: HOMEPAGE_HERO_DESKTOP,
+      mobileImageUrl: HOMEPAGE_HERO_MOBILE,
       link: '/collections/apple-iphone-17',
     },
     {
