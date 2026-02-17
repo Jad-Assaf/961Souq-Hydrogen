@@ -17,7 +17,10 @@ import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
  * @type {import('@remix-run/react').MetaFunction}
  */
 export const meta = () => {
-  return [{title: `961Souq | Search`}];
+  return [
+    {title: `961Souq | Search`},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
 };
 
 /**

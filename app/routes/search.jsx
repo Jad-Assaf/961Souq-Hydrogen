@@ -9,6 +9,16 @@ import {
 const PER_PAGE = 50;
 
 /**
+ * @type {MetaFunction}
+ */
+export const meta = () => {
+  return [
+    {title: '961Souq | Search'},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
+};
+
+/**
  * Loader for `/search`.
  * Adds pagination (50 products per page) using `?page=`.
  */

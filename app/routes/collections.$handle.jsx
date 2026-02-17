@@ -46,7 +46,7 @@ export const meta = ({data}) => {
       22,
     ),
     url: `https://961souq.com/collections/${collection?.handle || ''}`,
-    image:
+    media:
       collection?.image?.url ||
       'https://961souq.com/default-collection-image.jpg',
     jsonLd: [

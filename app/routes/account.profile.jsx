@@ -11,7 +11,10 @@ import {
  * @type {MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Profile'}];
+  return [
+    {title: 'Profile'},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
 };
 
 /**

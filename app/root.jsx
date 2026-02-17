@@ -54,9 +54,6 @@ export function links() {
     {rel: 'preconnect', href: 'https://cdn.shopify.com'},
     {rel: 'preconnect', href: 'https://shop.app'},
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
-    {rel: 'alternate', hrefLang: 'en-LB', href: 'https://961souq.com/'},
-    {rel: 'alternate', hrefLang: 'en', href: 'https://961souq.com/'},
-    {rel: 'alternate', hrefLang: 'x-default', href: 'https://961souq.com/'},
   ];
 }
 

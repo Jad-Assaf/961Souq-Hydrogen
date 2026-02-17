@@ -5,6 +5,16 @@ import {useLoaderData} from '@remix-run/react';
 // import searchTestStyles from '~/styles/search-test.css?url';
 import {InstantSearchBar} from '~/components/InstantSearchBar';
 
+/**
+ * @type {MetaFunction}
+ */
+export const meta = () => {
+  return [
+    {title: '961Souq | Search'},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
+};
+
 const SEARCH_AND_PREDICTIVE_QUERY = `#graphql
   query SearchAndPredictive(
     $query: String!

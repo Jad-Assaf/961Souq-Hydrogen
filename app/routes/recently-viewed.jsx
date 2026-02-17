@@ -4,6 +4,16 @@ import {Link, useSearchParams, useLoaderData} from '@remix-run/react';
 import {Money, CartForm} from '@shopify/hydrogen';
 import {json} from '@shopify/remix-oxygen';
 
+/**
+ * @type {MetaFunction}
+ */
+export const meta = () => {
+  return [
+    {title: '961Souq | Recently Viewed'},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
+};
+
 export async function loader({context}) {
   const {PUBLIC_STOREFRONT_API_TOKEN, PUBLIC_STORE_DOMAIN} = context.env;
   return json({

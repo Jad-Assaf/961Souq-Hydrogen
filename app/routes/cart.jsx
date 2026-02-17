@@ -8,7 +8,10 @@ import {TopProductSections} from '~/components/TopProductSections';
  * @type {MetaFunction}
  */
 export const meta = () => {
-  return [{title: `961Souq | Cart`}];
+  return [
+    {title: `961Souq | Cart`},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
 };
 
 /**

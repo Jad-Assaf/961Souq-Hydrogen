@@ -5,7 +5,7 @@ import '../styles/Policies.css';
  * @type {MetaFunction<typeof loader>}
  */
 export const meta = ({data}) => {
-  return [{title: `Hydrogen | ${data?.policy.title ?? ''}`}];
+  return [{title: `961Souq | ${data?.policy.title ?? ''}`}];
 };
 
 /**

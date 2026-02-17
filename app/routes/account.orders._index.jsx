@@ -11,7 +11,10 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
  * @type {MetaFunction}
  */
 export const meta = () => {
-  return [{title: 'Orders'}];
+  return [
+    {title: 'Orders'},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
 };
 
 /**

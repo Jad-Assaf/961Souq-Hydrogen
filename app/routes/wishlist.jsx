@@ -5,6 +5,16 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {useWishlist} from '~/lib/WishlistContext';
 import {json} from '@shopify/remix-oxygen';
 
+/**
+ * @type {MetaFunction}
+ */
+export const meta = () => {
+  return [
+    {title: '961Souq | Wishlist'},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
+};
+
 /* -------------------------------------------
    Server: fetch product thumbs + prices
 ------------------------------------------- */

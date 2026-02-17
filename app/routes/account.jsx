@@ -7,6 +7,16 @@ export function shouldRevalidate() {
 }
 
 /**
+ * @type {MetaFunction}
+ */
+export const meta = () => {
+  return [
+    {title: '961Souq | Account'},
+    {name: 'robots', content: 'noindex, nofollow'},
+  ];
+};
+
+/**
  * @param {LoaderFunctionArgs}
  */
 export async function loader({context}) {
