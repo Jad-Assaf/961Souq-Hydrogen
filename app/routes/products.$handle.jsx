@@ -382,6 +382,11 @@ export function ProductForm({
   const isComputerComponent =
     Array.isArray(product?.tags) &&
     product.tags.includes('computer components');
+  const isPreOrderProduct =
+    Array.isArray(product?.tags) &&
+    product.tags.some(
+      (tag) => typeof tag === 'string' && tag.trim().toLowerCase() === 'pre order',
+    );
 
   // ------------------------------
   // Initialize local selectedOptions
@@ -640,7 +645,9 @@ export function ProductForm({
           {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
             ? 'Call For Price'
             : selectedVariant?.availableForSale
-            ? 'Add to cart'
+            ? isPreOrderProduct
+              ? 'Pre-order'
+              : 'Add to cart'
             : 'Sold out'}
         </AddToCartButton>
         {isComputerComponent && (

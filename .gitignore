@@ -47,6 +47,7 @@ app/lib/seo.server.ts
 app/lib/session.ts
 app/lib/tiktokEvents.server.ts
 app/lib/viewedHandlesCookie.server.js
+app/routes/dev.sku-tools.jsx
 app/routes/tiktok-event.ts
 app/styles/BannerSlideshow.css
 app/styles/BrandsSection.css
