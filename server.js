@@ -22,6 +22,7 @@ export default {
         '185.206.200.143',
         '216.152.186.212',
         '185.206.200.212',
+        '185.206.200.188',
       ]);
       const forwardedFor = request.headers.get('x-forwarded-for') || '';
       const ipCandidates = [
