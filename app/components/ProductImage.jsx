@@ -260,7 +260,7 @@ export function ProductImages({media, selectedVariantImage}) {
                 src={`${selectedMedia.image.url}&width=600`}
                 alt={selectedMedia.image.altText || 'Product Image'}
                 loading="eager"
-                fetchPriority="high"
+                fetchpriority="high"
                 decoding="async"
                 onLoad={() => setIsImageLoaded(true)}
                 width="562.5px"

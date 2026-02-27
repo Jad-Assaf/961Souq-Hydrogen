@@ -19,7 +19,7 @@
 .policy h5,
 .policy a,
 .policies strong {
-    color: #2172af;
+    color: #03072c;
 }
 
 .policy-index-container {
@@ -36,23 +36,23 @@
     flex-direction: column;
     margin-bottom: .5rem;
     padding: 5px 15px;
-    border: 1px solid #2172af;
+    border: 1px solid #03072c;
     border-radius: 5px;
     transition: all 0.3s ease;
 }
 
 .policies fieldset:hover {
-    background-color: #2172af;
+    background-color: #03072c;
 }
 .policies fieldset:hover a {
     color: #fff;
 }
 
 .back-policy {
-    border: 1px solid #2172af;
+    border: 1px solid #03072c;
     padding: 10px 15px;
     border-radius: 5px;
-    color: #2172af;
+    color: #03072c;
 }
 
 .policy h3,

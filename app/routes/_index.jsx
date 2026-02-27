@@ -1,6 +1,6 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import {data, useLoaderData, useMatches} from '@remix-run/react';
-import {BannerSlideshow} from '../components/BannerSlideshow';
+import MosaicHero from '~/components/MosaicHero';
 // import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
 import BrandSection from '~/components/BrandsSection';
@@ -23,18 +23,13 @@ import {
 import {
   GET_HOMEPAGE_COLLECTION_QUERY,
   GET_HOMEPAGE_COLLECTION_MOBILE_QUERY,
+  GET_SIMPLE_COLLECTION_QUERY,
 } from '../data/queries.ts';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
-import MobileCategoryCards from '~/components/MobileCategoryCards';
 import MobileAppPopup from '~/components/MobileAppPopup';
 import montserratRegularFont from '~/styles/fonts/Montserrat-Regular.ttf?url';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
-
-const HOMEPAGE_HERO_DESKTOP =
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-banner.jpg?v=1758713478';
-const HOMEPAGE_HERO_MOBILE =
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-17-pro-mobile-banner.jpg?v=1758713478';
 
 // const MANUAL_MENU_HANDLES = [
 //   'apple',
@@ -59,18 +54,6 @@ const HOMEPAGE_HERO_MOBILE =
  */
 export function links() {
   return [
-    {
-      rel: 'preload',
-      as: 'image',
-      href: `${HOMEPAGE_HERO_DESKTOP}&width=1500`,
-      media: '(min-width: 768px)',
-    },
-    {
-      rel: 'preload',
-      as: 'image',
-      href: `${HOMEPAGE_HERO_MOBILE}&width=640`,
-      media: '(max-width: 767px)',
-    },
     {
       rel: 'preload',
       as: 'font',
@@ -177,6 +160,17 @@ async function fetchCollectionByHandle(
   return collectionByHandle || null;
 }
 
+async function fetchSimpleCollectionByHandle(context, handle, cacheOverride) {
+  const {collectionByHandle} = await context.storefront.query(
+    GET_SIMPLE_COLLECTION_QUERY,
+    {
+      variables: {handle},
+      cache: cacheOverride || context.storefront.CacheLong(),
+    },
+  );
+  return collectionByHandle || null;
+}
+
 const getHandleFromUrl = (url) => {
   const parts = url.split('/collections/');
   if (parts.length < 2) return '';
@@ -218,47 +212,16 @@ async function loadCriticalData({context}) {
 export async function loader(args) {
   const userAgent = args.request.headers.get('user-agent') || '';
   const isMobile = /mobile/i.test(userAgent);
-  const banners = [
-    {
-      desktopImageUrl: HOMEPAGE_HERO_DESKTOP,
-      mobileImageUrl: HOMEPAGE_HERO_MOBILE,
-      link: '/collections/apple-iphone-17',
-    },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-air-banner.jpg?v=1758713477',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/iphone-air-mobile-banner.jpg?v=1758713478',
-      link: '/collections/apple-iphone-17',
-    },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/IPHONE-17_1.jpg?v=1758548805',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/IPHONE-17-MOBILE-BANNER_1.jpg?v=1758548805',
-      link: '/collections/apple-iphone-17',
-    },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-banner-1.jpg?v=1740146682',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/steelseries-mobile-banner-1.jpg?v=1740146682',
-      link: '/collections/steelseries',
-    },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-banner_895451dd-e1a6-41ac-ae3d-0aad653a89d3.jpg?v=1740045077',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/jbl-mobile-banner-2.jpg?v=1740045077',
-      link: '/collections/jbl-collection',
-    },
-    {
-      desktopImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dyson-banner.jpg?v=1740063425',
-      mobileImageUrl:
-        'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dyson-mobile-banner.jpg?v=1740063424',
-      link: '/collections/dyson-products',
-    },
+  const heroCollectionHandles = [
+    'apple',
+    'mobiles',
+    'gaming',
+    'gaming-laptops',
+    'desktops',
+    'monitors',
+    'tablets',
+    'networking',
+    'accessories',
   ];
 
   // Fire off critical queries concurrently so above-the-fold content is fast.
@@ -276,12 +239,32 @@ export async function loader(args) {
     args.context.storefront.CacheShort(),
     {mobile: isMobile},
   );
+  const heroCollectionsPromise = Promise.allSettled(
+    heroCollectionHandles.map((handle) =>
+      fetchSimpleCollectionByHandle(
+        args.context,
+        handle,
+        args.context.storefront.CacheLong(),
+      ),
+    ),
+  ).then((results) => {
+    const collectionsByHandle = {};
+    results.forEach((result, index) => {
+      const handle = heroCollectionHandles[index];
+      if (result.status === 'fulfilled' && result.value) {
+        collectionsByHandle[handle] = result.value;
+      }
+    });
+    return collectionsByHandle;
+  });
 
-  const [criticalData, newArrivals, cosmetics] = await Promise.all([
-    criticalDataPromise,
-    newArrivalsPromise,
-    cosmeticsPromise,
-  ]);
+  const [criticalData, newArrivals, cosmetics, heroCollections] =
+    await Promise.all([
+      criticalDataPromise,
+      newArrivalsPromise,
+      cosmeticsPromise,
+      heroCollectionsPromise,
+    ]);
 
   // Build a unique list of collection handles from your menus.
   // IMPORTANT: On mobile you are not rendering all the desktop sections,
@@ -344,13 +327,13 @@ export async function loader(args) {
 
   return data(
     {
-      banners,
       // sliderCollections: criticalData.sliderCollections,
       title: criticalData.title,
       description: criticalData.description,
       url: criticalData.url,
       newArrivals,
       cosmetics,
+      heroCollections,
       topProducts: initialTopProducts,
       restTopProducts,
       isMobile,
@@ -555,23 +538,47 @@ function LazyMount({children, rootMargin = '200px'}) {
 
 export default function Homepage() {
   const {
-    banners,
     // sliderCollections,
     topProducts,
     newArrivals,
     cosmetics,
+    heroCollections,
     restTopProducts,
     isMobile,
   } = useLoaderData();
 
-  const restTopProductsSafe =
-    restTopProducts && typeof restTopProducts === 'object' ? restTopProducts : {};
+  const restTopProductsSafe = useMemo(
+    () =>
+      restTopProducts && typeof restTopProducts === 'object'
+        ? restTopProducts
+        : {},
+    [restTopProducts],
+  );
   const [onDemandTopProducts, setOnDemandTopProducts] = useState({});
   const [loadingHandles, setLoadingHandles] = useState({});
   const inflightCollectionsRef = useRef(new Set());
 
   const rootMatch = useMatches()[0];
   const header = rootMatch?.data?.header;
+  const mobileLevelOneCollections = useMemo(() => {
+    const items = header?.menu?.items || [];
+    const seenHandles = new Set();
+
+    return items
+      .map((item) => {
+        const handle =
+          item?.resource?.handle || getHandleFromUrl(item?.url || '');
+        if (!handle || seenHandles.has(handle)) return null;
+        seenHandles.add(handle);
+
+        return {
+          id: item?.id || handle,
+          handle,
+          title: item?.resource?.title || item?.title || handle,
+        };
+      })
+      .filter((item) => item && item.handle !== 'cosmetics');
+  }, [header]);
 
   // RelatedProductsFromHistory temporarily disabled for testing performance
   // const [rpKey, setRpKey] = useState(0);
@@ -592,53 +599,71 @@ export default function Homepage() {
   //   };
   // }, []);
 
-  const combinedTopProducts = {
-    ...topProducts,
-  };
-  const fullTopProducts = {
-    ...combinedTopProducts,
-    ...restTopProductsSafe,
-    ...onDemandTopProducts,
-  };
+  const fullTopProducts = useMemo(
+    () => ({
+      ...(topProducts || {}),
+      ...restTopProductsSafe,
+      ...onDemandTopProducts,
+    }),
+    [topProducts, restTopProductsSafe, onDemandTopProducts],
+  );
 
-  const ensureCollectionLoaded = (handle) => {
-    if (!handle) return;
-    if (fullTopProducts[handle]) return;
-    if (inflightCollectionsRef.current.has(handle)) return;
+  const ensureCollectionLoaded = useCallback(
+    (handle) => {
+      if (!handle) return;
+      if (fullTopProducts[handle]) return;
+      if (inflightCollectionsRef.current.has(handle)) return;
 
-    inflightCollectionsRef.current.add(handle);
-    setLoadingHandles((prev) => {
-      if (prev[handle]) return prev;
-      return {...prev, [handle]: true};
-    });
-    fetch(`/api/home-collection?handle=${encodeURIComponent(handle)}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to load collection: ${handle}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (data?.collection) {
-          setOnDemandTopProducts((prev) => ({
-            ...prev,
-            [handle]: data.collection,
-          }));
-        }
-      })
-      .catch((error) => {
-        console.error('Homepage on-demand collection fetch failed', error);
-      })
-      .finally(() => {
-        inflightCollectionsRef.current.delete(handle);
-        setLoadingHandles((prev) => {
-          if (!prev[handle]) return prev;
-          const next = {...prev};
-          delete next[handle];
-          return next;
-        });
+      inflightCollectionsRef.current.add(handle);
+      setLoadingHandles((prev) => {
+        if (prev[handle]) return prev;
+        return {...prev, [handle]: true};
       });
-  };
+      fetch(`/api/home-collection?handle=${encodeURIComponent(handle)}`)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Failed to load collection: ${handle}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data?.collection) {
+            setOnDemandTopProducts((prev) => ({
+              ...prev,
+              [handle]: data.collection,
+            }));
+          }
+        })
+        .catch((error) => {
+          console.error('Homepage on-demand collection fetch failed', error);
+        })
+        .finally(() => {
+          inflightCollectionsRef.current.delete(handle);
+          setLoadingHandles((prev) => {
+            if (!prev[handle]) return prev;
+            const next = {...prev};
+            delete next[handle];
+            return next;
+          });
+        });
+    },
+    [fullTopProducts],
+  );
+
+  useEffect(() => {
+    if (!isMobile || !mobileLevelOneCollections.length) return;
+
+    mobileLevelOneCollections.forEach(({handle}) => {
+      if (!fullTopProducts[handle]) {
+        ensureCollectionLoaded(handle);
+      }
+    });
+  }, [
+    isMobile,
+    mobileLevelOneCollections,
+    fullTopProducts,
+    ensureCollectionLoaded,
+  ]);
 
   // Desktop state: original multiple-groups.
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
@@ -720,7 +745,7 @@ export default function Homepage() {
         aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"
       ></h1>
 
-      <BannerSlideshow banners={banners} />
+      <MosaicHero collections={heroCollections} isMobile={isMobile} />
 
       {newArrivals && <TopProductSections collection={newArrivals} />}
       {cosmetics && <TopProductSections collection={cosmetics} />}
@@ -730,18 +755,23 @@ export default function Homepage() {
 
       {isMobile ? (
         <>
-          {header && (
-            <>
-              <LazyMount>
-                <MobileCategoryCards menu={header.menu} />
-              </LazyMount>
-              {/* <div className="instagram-reels-container">
-                <h1>Instagram Reels</h1>
-                <InstagramReelsCarousel reelIds={reelIds} productUrls={productUrls} />
-              </div> */}
-              {/* <CategorySliderFromMenuMobile menu={header.menu} /> */}
-            </>
-          )}
+          {mobileLevelOneCollections.map(({id, handle, title}) => {
+            const collection = fullTopProducts[handle];
+
+            return collection ? (
+              <TopProductSections
+                key={`mobile-${id}`}
+                collection={collection}
+              />
+            ) : (
+              <TopProductPlaceholder
+                key={`mobile-${id}-placeholder`}
+                title={title}
+                handle={handle}
+                count={4}
+              />
+            );
+          })}
         </>
       ) : (
         // <div>

@@ -77,6 +77,10 @@ export default async function handleRequest(
       'https://*.respond.io',
       'https://www.merchant-center-analytics.goog',
     ],
+    styleSrc: [
+      "'self'",
+      'https://fonts.googleapis.com',
+    ],
     connectSrc: [
       "'self'", // Allow scripts from the same origin
       'https://www.clarity.ms', // Allow scripts from clarity.ms

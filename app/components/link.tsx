@@ -6,7 +6,7 @@ import {
   useRouteLoaderData,
 } from '@remix-run/react';
 import {useThemeSettings} from '@weaverse/hydrogen';
-import {forwardRef} from 'react';
+import {forwardRef, type Ref} from 'react';
 import type {RootLoader} from '../root';
 
 type LinkProps = RemixLinkProps | RemixNavLinkProps;
@@ -27,7 +27,7 @@ type LinkProps = RemixLinkProps | RemixNavLinkProps;
  * Ultimately, it is up to you to decide how to implement this behavior.
  */
 export let Link = forwardRef(
-  (props: LinkProps | RemixNavLinkProps, ref: React.Ref<HTMLAnchorElement>) => {
+  (props: LinkProps | RemixNavLinkProps, ref: Ref<HTMLAnchorElement>) => {
     let {to, className, ...resOfProps} = props;
     let rootData = useRouteLoaderData<RootLoader>('root');
     let {enableViewTransition} = useThemeSettings();
@@ -48,7 +48,7 @@ export let Link = forwardRef(
       return (
         <RemixNavLink
           ref={ref}
-          unstable_viewTransition={enableViewTransition}
+          viewTransition={enableViewTransition}
           to={toWithLocale}
           className={className}
           {...resOfProps}
@@ -60,7 +60,7 @@ export let Link = forwardRef(
       // @ts-ignore
       <RemixLink
         ref={ref}
-        unstable_viewTransition={enableViewTransition}
+        viewTransition={enableViewTransition}
         to={toWithLocale}
         className={className}
         {...resOfProps}

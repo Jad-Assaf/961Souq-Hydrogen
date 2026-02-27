@@ -1,29 +1,23 @@
 import '../styles/ProductPage.css';
-import React, {Suspense, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {redirect} from '@shopify/remix-oxygen';
-import {Await, useLoaderData, useLocation} from '@remix-run/react';
+import {useLoaderData, useLocation} from '@remix-run/react';
 import {
   getSelectedProductOptions,
   Analytics,
-  useOptimisticVariant,
   Money,
   getSeoMeta,
-  CartForm,
   VariantSelector,
 } from '@shopify/hydrogen';
-import {getVariantUrl} from '~/lib/variants';
-import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImages} from '~/components/ProductImage'; // We'll update ProductImage.jsx to handle media.
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-import {CSSTransition} from 'react-transition-group';
 import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
 import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
 import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
-import ProductFAQ from '~/components/ProductFAQ';
 import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
 
@@ -248,17 +242,8 @@ async function loadCriticalData({context, params, request}) {
     throw new Response('Product not found', {status: 404});
   }
 
-  const {product: fullProduct} = await storefront.query(VARIANTS_QUERY, {
-    variables: {handle /* …country/language… */},
-  });
-
   // Select the first variant as the default if applicable
   const firstVariant = product.variants.nodes[0];
-  const firstVariantIsDefault = Boolean(
-    firstVariant.selectedOptions.find(
-      (option) => option.name === 'Title' && option.value === 'Default Title',
-    ),
-  );
 
   // If there's no valid selectedVariant, just assign the firstVariant.
   if (!product.selectedVariant) {
@@ -269,9 +254,6 @@ async function loadCriticalData({context, params, request}) {
   const firstImage = product.images?.edges?.[0]?.node?.url || null;
 
   // Fetch related products
-  // Fetch the collection from the product
-  const collection = product?.collections?.edges?.[0]?.node;
-
   let relatedProducts = [];
 
   if (product?.id) {
@@ -291,44 +273,14 @@ async function loadCriticalData({context, params, request}) {
     product: {
       ...product,
       // overwrite `variants` with the plain array of nodes
-      variants: fullProduct.variants.nodes,
+      variants: product.variants.nodes,
       firstImage,
       seoTitle: product.seo?.title || product.title,
       seoDescription: product.seo?.description || product.description,
-      variantPrice: firstVariant.price || product.priceRange.minVariantPrice,
+      variantPrice: firstVariant?.price || product.priceRange.minVariantPrice,
     },
     relatedProducts,
   };
-}
-
-function loadDeferredData({context, params}) {
-  const {storefront} = context;
-
-  const variants = storefront
-    .query(VARIANTS_QUERY, {
-      variables: {handle: params.handle},
-    })
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
-
-  return {variants};
-}
-
-function redirectToFirstVariant({product, request}) {
-  const url = new URL(request.url);
-  const firstVariant = product.variants.nodes[0];
-
-  return redirect(
-    getVariantUrl({
-      pathname: `/products/${encodeURIComponent(product.handle)}`,
-      handle: product.handle,
-      selectedOptions: firstVariant.selectedOptions,
-      searchParams: new URLSearchParams(url.search),
-    }),
-    {status: 302},
-  );
 }
 
 // -----------------------------------------------------
@@ -371,7 +323,7 @@ function pickOrSnapVariant(allVariants, newOptions, optionName, chosenVal) {
 
 export function ProductForm({
   product,
-  onAddToCart,
+  onAddToCart = () => {},
   selectedVariant,
   onVariantChange,
   variants = [],
@@ -382,11 +334,6 @@ export function ProductForm({
   const isComputerComponent =
     Array.isArray(product?.tags) &&
     product.tags.includes('computer components');
-  const isPreOrderProduct =
-    Array.isArray(product?.tags) &&
-    product.tags.some(
-      (tag) => typeof tag === 'string' && tag.trim().toLowerCase() === 'pre order',
-    );
 
   // ------------------------------
   // Initialize local selectedOptions
@@ -481,24 +428,30 @@ export function ProductForm({
             );
             const isActive = currentValue === value;
             const isColorOption = name.toLowerCase() === 'color';
-            const variantImage = isColorOption && variant?.image?.url;
+            const fallbackVariant = isColorOption
+              ? variants.find((candidate) =>
+                  candidate?.selectedOptions?.every((so) => {
+                    if (so.name === name) return so.value === value;
+                    return selectedOptions[so.name] === so.value;
+                  }),
+                )
+              : null;
+            const variantImage =
+              isColorOption &&
+              (variant?.image?.url || fallbackVariant?.image?.url);
+            const optionClassName = [
+              'product-options-item',
+              isActive ? 'is-active' : '',
+              canPick ? '' : 'is-unavailable',
+            ]
+              .filter(Boolean)
+              .join(' ');
 
             return (
               <button
                 key={name + value}
                 onClick={() => handleOptionChange(name, value)}
-                className={`product-options-item ${isActive ? 'active' : ''}`}
-                style={{
-                  opacity: canPick ? 1 : 0.3,
-                  border: isActive
-                    ? '1px solid #2172af'
-                    : '1px solid transparent',
-                  borderRadius: '5px',
-                  transition: 'all 0.3s ease-in-out',
-                  backgroundColor: isActive ? '#e6f2ff' : '#f0f0f0',
-                  boxShadow: isActive ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
-                  transform: isActive ? 'scale(0.98)' : 'scale(1)',
-                }}
+                className={optionClassName}
               >
                 {variantImage ? (
                   <img
@@ -506,7 +459,7 @@ export function ProductForm({
                     alt={value}
                     width="50"
                     height="50"
-                    style={{objectFit: 'cover'}}
+                    className="product-options-image"
                     onContextMenu={(e) => e.preventDefault()}
                   />
                 ) : (
@@ -606,6 +559,7 @@ export function ProductForm({
           (option) => (option.optionValues ?? []).length > 1,
         )}
         variants={variants}
+        selectedVariant={selectedVariant}
       >
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
@@ -645,9 +599,7 @@ export function ProductForm({
           {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
             ? 'Call For Price'
             : selectedVariant?.availableForSale
-            ? isPreOrderProduct
-              ? 'Pre-order'
-              : 'Add to cart'
+            ? 'Add to cart'
             : 'Sold out'}
         </AddToCartButton>
         {isComputerComponent && (
@@ -685,22 +637,13 @@ export function ProductForm({
 export default function Product() {
   const {product, relatedProducts} = useLoaderData();
   const variants = product.variants;
-  const descriptionRef = useRef(null);
-  const shippingRef = useRef(null);
-  const warrantyRef = useRef(null);
   const location = useLocation();
-
-  // Safeguard
-  if (!product) {
-    return <div>Loading product data...</div>;
-  }
 
   // -------- State (before effects) --------
   const [selectedVariant, setSelectedVariant] = useState(
     product.selectedVariant,
   );
   const [quantity, setQuantity] = useState(1);
-  const [subtotal, setSubtotal] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
   const productFAQRef = React.useRef(null);
 
@@ -875,14 +818,13 @@ export default function Product() {
 
   // -------- Effects --------
 
-  // Reset selectedVariant, quantity, and subtotal when product changes
+  // Reset selected variant and quantity when product changes
   useEffect(() => {
     if (product?.selectedVariant) {
       setSelectedVariant(product.selectedVariant);
       setQuantity(1);
-      setSubtotal(0);
     }
-  }, [product?.id, product?.handle, product?.selectedVariant?.id]);
+  }, [product?.id, product?.handle, product?.selectedVariant]);
 
   // Pixel / analytics
   useEffect(() => {
@@ -902,28 +844,12 @@ export default function Product() {
     }).catch(() => {});
   }, [product?.handle]);
 
-  // Subtotal
-  useEffect(() => {
-    if (selectedVariant?.price) {
-      const price = parseFloat(selectedVariant.price.amount);
-      setSubtotal(price * quantity);
-    }
-  }, [quantity, selectedVariant]);
-
   // -------- Locals --------
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
   const decrementQuantity = () =>
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const {title, descriptionHtml} = product;
-
-  const hasDiscount =
-    selectedVariant?.compareAtPrice &&
-    selectedVariant?.price?.amount !== selectedVariant?.compareAtPrice?.amount;
-
-  const onAddToCart = (prod) => {
-    // trackAddToCart(prod);
-  };
 
   const mediaItems =
     product.media?.edges && product.media.edges.length > 0
@@ -936,117 +862,18 @@ export default function Product() {
         })) || [];
 
   const whatsappShareUrl = `https://wa.me/send?phone=9613276879&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
+  const subtotal =
+    (parseFloat(selectedVariant?.price?.amount || '0') || 0) * quantity;
 
   return (
     <div className="product">
       <div className="ProductPageTop">
-        {/* 
-          Replace media={product.media.edges} with images={product.images?.edges || []} 
-          and rely on selectedVariantImage to update when variant changes.
-        */}
         <ProductImages
           media={mediaItems}
           selectedVariantImage={selectedVariant?.image}
         />
         <div className="product-main">
           <h1>{title}</h1>
-          {/* AI SUMMARY (button + modal) - COMMENTED OUT */}
-          {/* <div className="ai-summary">
-            <div className="ai-summary__header">
-              <div className="ai-summary__badge">
-                <span className="ai-summary__title">AI Summary</span>
-                <span className="ai-summary__dot" aria-hidden="true" />
-              </div>
-
-              <button
-                type="button"
-                className="ai-summary__action"
-                onClick={openAiSummaryModal}
-                disabled={aiSummaryStatus === 'loading'}
-              >
-                {aiSummaryStatus === 'loading'
-                  ? 'Generating…'
-                  : 'Generate summary'}
-              </button>
-            </div>
-          </div>
-          {aiModalOpen && (
-            <div className="ai-modal-overlay" onClick={closeAiSummaryModal}>
-              <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="ai-modal__header">
-                  <div className="ai-modal__left">
-                    <span className="ai-modal__chip">AI Summary</span>
-                    <span className="ai-modal__status">
-                      {aiSummaryStatus === 'loading'
-                        ? 'Generating'
-                        : aiSummaryStatus === 'typing'
-                        ? 'Writing'
-                        : aiSummaryStatus === 'done'
-                        ? 'Ready'
-                        : aiSummaryStatus === 'error'
-                        ? 'Error'
-                        : ''}
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="ai-modal__close"
-                    onClick={closeAiSummaryModal}
-                    aria-label="Close"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="ai-modal__body" aria-live="polite">
-                  {aiSummaryStatus === 'error' ? (
-                    <p className="ai-modal__error">
-                      Could not generate the summary. Please try again.
-                    </p>
-                  ) : aiSummaryStatus === 'loading' ? (
-                    <div className="ai-modal__skeleton" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-                  ) : (
-                    <p className="ai-modal__text">
-                      {aiSummaryDisplay || ''}
-                      {aiSummaryStatus === 'typing' && (
-                        <span className="ai-modal__cursor" aria-hidden="true">
-                          ▍
-                        </span>
-                      )}
-                    </p>
-                  )}
-                </div>
-
-                <div className="ai-modal__footer">
-                  <p>
-                    {' '}
-                    WhatsApp:&nbsp;
-                    <a
-                      href={whatsappShareUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Share on WhatsApp"
-                    >
-                      Customer Support
-                    </a>
-                  </p>
-                  <button
-                    type="button"
-                    className="ai-modal__secondary"
-                    onClick={closeAiSummaryModal}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          )} */}
-
           {/* Ask AI Button Component */}
           <AskAIButton productId={product.id} productFAQRef={productFAQRef} />
           <div className="price-container">
@@ -1102,8 +929,6 @@ export default function Product() {
             product={product}
             selectedVariant={selectedVariant}
             onVariantChange={setSelectedVariant}
-            onAddToCart={onAddToCart}
-            // formerly `variants={[]}` or undefined, now a real array
             variants={variants}
             quantity={quantity}
           />
@@ -1307,41 +1132,6 @@ export default function Product() {
 
           {activeTab === 'shipping' && (
             <div className="product-section">
-              <h3>Shipping Policy</h3>
-              <p>
-                We offer shipping across all Lebanon, facilitated by our
-                dedicated delivery team servicing the Beirut district and
-                through our partnership with Wakilni for orders beyond Beirut.
-              </p>
-              <p>
-                Upon placing an order, we provide estimated shipping and
-                delivery dates tailored to your item's availability and selected
-                product options. For precise shipping details, kindly reach out
-                to us through the contact information listed in our Contact Us
-                section.
-              </p>
-              <p>
-                Please be aware that shipping rates may vary depending on the
-                destination.
-              </p>
-              <h3>Exchange Policy</h3>
-              <p>
-                We operate a 3-day exchange policy, granting you 3 days from
-                receipt of your item to initiate an exchange.
-              </p>
-              <p>
-                To qualify for an exchange, your item must remain in its
-                original condition, unworn or unused, with tags intact, and in
-                its original sealed packaging. Additionally, you will need to
-                provide a receipt or proof of purchase.
-              </p>
-              <p>
-                To initiate an exchange, please contact us at admin@961souq.com.
-                Upon approval of your exchange request, we will furnish you with
-                an exchange shipping label along with comprehensive instructions
-                for package return. Please note that exchanges initiated without
-                prior authorization will not be accepted.
-              </p>
               <div className="policy-container">
                 <h3>Shipping Policy</h3>
                 <p>
@@ -1385,29 +1175,29 @@ export default function Product() {
                   promptly. We will swiftly address any defects, damages, or
                   incorrect shipments to ensure your satisfaction.
                 </p>
-                <h3 style={{color: '#2172af'}}>
+                <h3 style={{color: '#03072c'}}>
                   Exceptions / Non-exchangeable Items
                 </h3>
                 <p>
                   Certain items are exempt from our exchange policy, including{' '}
-                  <strong style={{color: '#2172af'}}>mobile phones</strong>,
+                  <strong style={{color: '#03072c'}}>mobile phones</strong>,
                   perishable goods (such as{' '}
-                  <strong style={{color: '#2172af'}}>headsets</strong>,{' '}
-                  <strong style={{color: '#2172af'}}>earphones</strong>, and{' '}
-                  <strong style={{color: '#2172af'}}>network card </strong>
-                  or <strong style={{color: '#2172af'}}>wifi routers</strong>
+                  <strong style={{color: '#03072c'}}>headsets</strong>,{' '}
+                  <strong style={{color: '#03072c'}}>earphones</strong>, and{' '}
+                  <strong style={{color: '#03072c'}}>network card </strong>
+                  or <strong style={{color: '#03072c'}}>wifi routers</strong>
                   ), custom-made products (such as{' '}
-                  <strong style={{color: '#2172af'}}>
+                  <strong style={{color: '#03072c'}}>
                     special orders
                   </strong> or{' '}
-                  <strong style={{color: '#2172af'}}>personalized items</strong>
+                  <strong style={{color: '#03072c'}}>personalized items</strong>
                   ), and{' '}
-                  <strong style={{color: '#2172af'}}>pre-ordered goods</strong>.
+                  <strong style={{color: '#03072c'}}>pre-ordered goods</strong>.
                   For queries regarding specific items, please reach out to us.
                 </p>
                 <p>
                   Unfortunately, we are{' '}
-                  <strong style={{color: '#2172af'}}>
+                  <strong style={{color: '#03072c'}}>
                     unable to accommodate exchanges for sale items or gift
                     cards.
                   </strong>
@@ -1526,22 +1316,6 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
       amount
       currencyCode
     }
-    product {
-      title
-      handle
-      images(first: 50) {
-        edges {
-          node {
-            __typename
-            id
-            url
-            altText
-            width
-            height
-          }
-        }
-      }
-    }
     selectedOptions {
       name
       value
@@ -1587,7 +1361,7 @@ const PRODUCT_FRAGMENT = `#graphql
     }
 
     # Fetch product images for SEO or fallback usage
-    images(first: 50) {
+    images(first: 100) {
       edges {
         node {
           __typename
@@ -1601,7 +1375,7 @@ const PRODUCT_FRAGMENT = `#graphql
     }
 
     # Add media for images / video (YouTube) / 3D, etc.
-    media(first: 50) {
+    media(first: 100) {
       edges {
         node {
           __typename
@@ -1647,7 +1421,7 @@ const PRODUCT_FRAGMENT = `#graphql
     selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
       ...ProductVariant
     }
-    variants(first: 1) {
+    variants(first: 250) {
       nodes {
         ...ProductVariant
       }
@@ -1692,28 +1466,4 @@ const PRODUCT_QUERY = `#graphql
     }
   }
   ${PRODUCT_FRAGMENT}
-`;
-
-const PRODUCT_VARIANTS_FRAGMENT = `#graphql
-  fragment ProductVariants on Product {
-    variants(first: 250) {
-      nodes {
-        ...ProductVariant
-      }
-    }
-  }
-  ${PRODUCT_VARIANT_FRAGMENT}
-`;
-
-const VARIANTS_QUERY = `#graphql
-  ${PRODUCT_VARIANTS_FRAGMENT}
-  query ProductVariants(
-    $country: CountryCode
-    $language: LanguageCode
-    $handle: String!
-  ) @inContext(country: $country, language: $language) {
-    product(handle: $handle) {
-      ...ProductVariants
-    }
-  }
 `;

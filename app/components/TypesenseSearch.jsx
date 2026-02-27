@@ -10,9 +10,12 @@ export function TypesenseSearch({
   const fetcher = useFetcher();
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(
+    Boolean(autoFocus || initialQuery.trim()),
+  );
   const lastTermRef = useRef(initialQuery.trim());
   const cachedDataRef = useRef({}); // Cache results to prevent duplicate requests
+  const didMountRef = useRef(false);
 
   // Keep input in sync with URL query
   useEffect(() => {
@@ -20,8 +23,17 @@ export function TypesenseSearch({
     lastTermRef.current = initialQuery.trim();
   }, [initialQuery]);
 
+  // Keep the search UI open when activated from the lazy shell on mobile.
+  useEffect(() => {
+    if (autoFocus) setIsOpen(true);
+  }, [autoFocus]);
+
   // Close suggestions on navigation
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
     setIsOpen(false);
   }, [location.key]);
 
@@ -39,7 +51,6 @@ export function TypesenseSearch({
   useEffect(() => {
     const term = searchTerm.trim();
     if (!term) {
-      setIsOpen(false);
       return;
     }
 
@@ -86,9 +97,9 @@ export function TypesenseSearch({
   const isLoading = fetcher.state === 'loading' && !cachedData;
 
   function handleFocus() {
+    setIsOpen(true);
     const term = searchTerm.trim();
     if (!term) return;
-    setIsOpen(true);
 
     // CRITICAL: Check cache first - NEVER refetch if we have data
     if (cachedDataRef.current[term]) {
@@ -135,7 +146,7 @@ export function TypesenseSearch({
               onChange={(e) => {
                 const value = e.target.value;
                 setSearchTerm(value);
-                setIsOpen(!!value.trim());
+                setIsOpen(true);
               }}
               onFocus={handleFocus}
               placeholder={placeholder}

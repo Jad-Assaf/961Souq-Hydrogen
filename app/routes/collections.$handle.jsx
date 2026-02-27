@@ -12,15 +12,12 @@ import {
 } from '@remix-run/react';
 import {
   getPaginationVariables,
-  Image,
   Money,
   Analytics,
-  VariantSelector,
   getSeoMeta,
 } from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import React, {useEffect, useRef, useState} from 'react';
-import {useMediaQuery} from 'react-responsive';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
@@ -43,7 +40,7 @@ export const meta = ({data}) => {
     title: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
     description: truncateText(
       collection?.description || 'Explore our latest collection at 961Souq.',
-      22,
+      100,
     ),
     url: `https://961souq.com/collections/${collection?.handle || ''}`,
     media:
@@ -128,7 +125,25 @@ export async function loadCriticalData({context, params, request}) {
 
   /* numbered-page param -> cursor handling */
   const pageBy = 30;
-  const page = Number(searchParams.get('page') || 1);
+  const requestedPage = Number(searchParams.get('page') || 1);
+  const normalizedPage =
+    Number.isFinite(requestedPage) && requestedPage > 0
+      ? Math.floor(requestedPage)
+      : 1;
+  const direction = searchParams.get('direction');
+  const hasCursorDirection =
+    Boolean(searchParams.get('cursor')) &&
+    (direction === 'next' || direction === 'previous');
+  const page = normalizedPage === 1 || hasCursorDirection ? normalizedPage : 1;
+
+  if (normalizedPage !== page) {
+    const url = new URL(request.url);
+    url.searchParams.set('page', '1');
+    url.searchParams.delete('cursor');
+    url.searchParams.delete('direction');
+    throw redirect(`${url.pathname}?${url.searchParams.toString()}`, 302);
+  }
+
   const paginationVariables = getPaginationVariables(request, {pageBy});
 
   if (!handle) throw redirect('/collections');
@@ -250,8 +265,11 @@ export async function loadCriticalData({context, params, request}) {
   }
 
   const {collection} = collectionData;
-  if (!collection)
-    throw new Response(`Collection ${handle} not found`, {status: 404});
+  if (!collection) {
+    // Fallback to legacy category routes (e.g. /apple, /gaming) when a
+    // matching Shopify collection handle does not exist.
+    throw redirect(`/${handle}`, 302);
+  }
 
   /* menu / slider collections (unchanged) */
   let menu = null;
@@ -314,13 +332,21 @@ function loadDeferredData({context}) {
 /* ------------------  COLLECTION component ------------------ */
 export default function Collection() {
   const {collection, sliderCollections, currentPage} = useLoaderData();
-  const isDesktop = useMediaQuery({minWidth: 1024});
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const currentSort = searchParams.get('sort') || 'default';
   const [columns, setColumns] = useState(1);
+  const activeFilterKeys = Array.from(
+    new Set(
+      [...searchParams.keys()].filter((key) => key.startsWith('filter.')),
+    ),
+  );
+  const activeFiltersCount = activeFilterKeys.reduce(
+    (count, key) => count + searchParams.getAll(key).length,
+    0,
+  );
 
   /* keep URL tidy on initial hydration (leave pagination params alone) */
   // useEffect(() => {
@@ -364,12 +390,14 @@ export default function Collection() {
   pageNumbers = Array.from(new Set(pageNumbers));
 
   const handleSortChange = (e) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('sort', e.target.value);
-    url.searchParams.set('page', '1');
-    url.searchParams.delete('cursor');
-    url.searchParams.delete('direction');
-    window.location.href = url.toString();
+    const params = new URLSearchParams(searchParams);
+    params.set('sort', e.target.value);
+    params.set('page', '1');
+    params.delete('cursor');
+    params.delete('direction');
+    navigate(`${location.pathname}?${params.toString()}`, {
+      preventScrollReset: true,
+    });
   };
 
   return (
@@ -433,15 +461,13 @@ export default function Collection() {
           {[1, 2, 3, 4, 5].map((num) => (
             <button
               key={num}
+              type="button"
               onClick={() => setColumns(num)}
-              className={`col-btn-${num}`}
-              style={{
-                marginRight: '0.5rem',
-                padding: '0.1rem 0.5rem',
-                borderRadius: '2px',
-                border:
-                  columns === num ? '2px solid #2172af' : '1px solid #ccc',
-              }}
+              className={`col-btn col-btn-${num} ${
+                columns === num ? 'is-active' : ''
+              }`}
+              aria-label={`Show ${num} product columns`}
+              aria-pressed={columns === num}
             >
               {num}
             </button>
@@ -449,19 +475,24 @@ export default function Collection() {
         </div>
       </div>
 
-      <div className="lg:hidden mobile-filter-container">
+      <div className="mobile-only-filter-container mobile-filter-container">
         <div className="my-4">
           <button
+            type="button"
             onClick={() => setIsDrawerOpen(true)}
             className="mobile-filter-btn"
           >
-            Filters
+            <span>Filters</span>
+            {activeFiltersCount > 0 ? (
+              <span className="mobile-filter-count">{activeFiltersCount}</span>
+            ) : null}
           </button>
         </div>
         <FiltersDrawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           filters={collection.products.filters}
+          activeFiltersCount={activeFiltersCount}
         />
       </div>
 
@@ -469,7 +500,7 @@ export default function Collection() {
 
       <div className="flex w-full">
         <div className="flex flex-row w-[100%] collection-bottom">
-          <div className="hidden lg:block w-1/4">
+          <div className="collection-filters-col">
             <ShopifyFilterForm filters={collection.products.filters} />
           </div>
 
@@ -481,12 +512,11 @@ export default function Collection() {
             ) : (
               <>
                 <div className={`products-grid grid-cols-${columns} w-[100%]`}>
-                  {collection.products.nodes.map((product, index) => (
+                  {collection.products.nodes.map((product) => (
                     <ProductItem
                       key={product.id}
                       product={product}
-                      index={index}
-                      numberInRow={1}
+                      columns={columns}
                     />
                   ))}
                 </div>
@@ -567,22 +597,19 @@ export default function Collection() {
 }
 
 /* ------------------  PRODUCT ITEM ------------------ */
-const ProductItem = ({product, index, numberInRow}) => {
+const ProductItem = ({product, columns}) => {
   const ref = useRef(null);
   const [isSoldOut, setIsSoldOut] = useState(false);
+  const showInlineProductForm = columns === 1;
 
   useEffect(() => {
-    setIsSoldOut(
-      !product.variants.nodes.some((variant) => variant.availableForSale),
-    );
-  }, [product]);
+    setIsSoldOut(!product.availableForSale);
+  }, [product.availableForSale]);
 
-  const [selectedVariant, setSelectedVariant] = useState(
-    product.variants.nodes[0],
-  );
+  const [selectedVariant] = useState(product.variants.nodes[0] || null);
   const variantUrl = useVariantUrl(
     product.handle,
-    selectedVariant.selectedOptions,
+    selectedVariant?.selectedOptions || [],
   );
 
   const showWishlist = !!(
@@ -633,14 +660,14 @@ const ProductItem = ({product, index, numberInRow}) => {
             )}
             <Link key={product.id} prefetch="intent" to={variantUrl}>
               <h4>{truncateText(product.title, 30)}</h4>
-              <p className="product-description">
-                {truncateText(product.description, 90)}
-              </p>
+              {/* <p className="product-description" data-nosnippet>
+                {truncateText(product.description, 70)}
+              </p> */}
 
               <div className="price-container">
                 <small
                   className={`product-price ${
-                    Number(selectedVariant.price.amount) > 0 &&
+                    Number(selectedVariant?.price?.amount || 0) > 0 &&
                     selectedVariant.compareAtPrice &&
                     parseFloat(selectedVariant.compareAtPrice.amount) >
                       parseFloat(selectedVariant.price.amount)
@@ -656,7 +683,7 @@ const ProductItem = ({product, index, numberInRow}) => {
                   )}
                 </small>
 
-                {Number(selectedVariant.price.amount) > 0 &&
+                {Number(selectedVariant?.price?.amount || 0) > 0 &&
                   selectedVariant.compareAtPrice &&
                   parseFloat(selectedVariant.compareAtPrice.amount) >
                     parseFloat(selectedVariant.price.amount) && (
@@ -667,26 +694,26 @@ const ProductItem = ({product, index, numberInRow}) => {
               </div>
             </Link>
 
-            <ProductForm
-              product={product}
-              selectedVariant={selectedVariant}
-              setSelectedVariant={setSelectedVariant}
-            />
+            {showInlineProductForm ? (
+              <ProductForm
+                product={product}
+                selectedVariant={selectedVariant}
+              />
+            ) : null}
           </div>
         </div>
 
-        <ProductForm
-          product={product}
-          selectedVariant={selectedVariant}
-          setSelectedVariant={setSelectedVariant}
-        />
+        {!showInlineProductForm ? (
+          <ProductForm product={product} selectedVariant={selectedVariant} />
+        ) : null}
       </div>
     </div>
   );
 };
 
-function ProductForm({product, selectedVariant, setSelectedVariant}) {
+function ProductForm({product, selectedVariant}) {
   const {open} = useAside();
+  const navigate = useNavigate();
   const hasVariants = product.variants.nodes.length > 1;
   const selectedVariantForCart = selectedVariant
     ? {
@@ -711,9 +738,7 @@ function ProductForm({product, selectedVariant, setSelectedVariant}) {
         }
         onClick={() => {
           if (hasVariants) {
-            window.location.href = `/products/${encodeURIComponent(
-              product.handle,
-            )}`;
+            navigate(`/products/${encodeURIComponent(product.handle)}`);
           } else {
             open('cart');
           }
@@ -777,43 +802,17 @@ const COLLECTION_BY_HANDLE_QUERY = `#graphql
 `;
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
   fragment ProductItem on Product {
     id
     handle
     title
     description
+    availableForSale
     featuredImage {
-      id
       altText
       url
-      width
-      height
     }
-    options {
-      name
-      values
-    }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-      maxVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-    compareAtPriceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-      maxVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-    variants(first: 5) {
+    variants(first: 2) {
       nodes {
         id
         availableForSale
@@ -822,11 +821,8 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
           value
         }
         image {
-          id
           url
           altText
-          width
-          height
         }
         price {
           amount
@@ -836,12 +832,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
           amount
           currencyCode
         }
-        sku
         title
-        unitPrice {
-          amount
-          currencyCode
-        }
       }
     }
   }
@@ -894,7 +885,6 @@ const COLLECTION_QUERY = `#graphql
         }
         nodes {
           ...ProductItem
-          availableForSale
         }
         pageInfo {
           hasPreviousPage

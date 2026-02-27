@@ -1,6 +1,6 @@
 // src/root.jsx
 import appStyles from '~/styles/app.css?url';
-import favicon from '~/assets/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png';
+import appStylesInline from '~/styles/app.css?raw';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {redirect} from '@shopify/remix-oxygen';
 import {
@@ -47,15 +47,13 @@ const GOOGLE_ADS_ID = 'AW-378354284';
 
 export function links() {
   return [
-    // {rel: 'stylesheet', href: appStyles},
-    // {rel: 'stylesheet', href: footerStyles},
-    // {rel: 'stylesheet', href: productStyles},
-    // {rel: 'stylesheet', href: productImgStyles},
-    // {rel: 'stylesheet', href: searchStyles},
-    // {rel: 'stylesheet', href: tailwindCss},
     {rel: 'preconnect', href: 'https://cdn.shopify.com'},
     {rel: 'preconnect', href: 'https://shop.app'},
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {
+      rel: 'icon',
+      type: 'image/png',
+      href: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150',
+    },
   ];
 }
 
@@ -168,6 +166,18 @@ export function Layout({children}) {
   const loaderRef = useRef(null);
   const animationRef = useRef(null);
   const isLoading = navigation.state !== 'idle';
+  const inlineAppStyles =
+    typeof document === 'undefined'
+      ? appStylesInline
+      : document.getElementById('app-styles-inline')?.textContent ||
+        appStylesInline;
+  const stableNonce =
+    nonce ||
+    (typeof document !== 'undefined'
+      ? document.querySelector('script[nonce]')?.getAttribute('nonce') ||
+        document.querySelector('style[nonce]')?.getAttribute('nonce') ||
+        undefined
+      : undefined);
 
   // useEffect(() => {
   //   // Only run on client
@@ -282,12 +292,10 @@ export function Layout({children}) {
         {/* <link rel="stylesheet" href={fontStyles}></link> */}
         <Meta />
         <Links />
-        {nonce ? (
-          <>
-            <script
-              nonce={nonce}
-              dangerouslySetInnerHTML={{
-                __html: `
+        <script
+          nonce={stableNonce}
+          dangerouslySetInnerHTML={{
+            __html: `
           (function () {
             var gtagIds = ['${GOOGLE_ANALYTICS_ID}', '${GOOGLE_ADS_ID}'];
             var initialized = false;
@@ -354,10 +362,8 @@ export function Layout({children}) {
             }
           })();
         `,
-              }}
-            ></script>
-          </>
-        ) : null}
+          }}
+        ></script>
         <MetaPixel pixelId={PIXEL_ID} />
         {/* <TikTokPixel pixelId={TIKTOK_PIXEL_ID} /> */}
         <style
@@ -384,6 +390,9 @@ export function Layout({children}) {
         />
       </head>
       <body>
+        <style id="app-styles-inline" suppressHydrationWarning>
+          {inlineAppStyles}
+        </style>
         <ClarityTracker clarityId={clarityId} />
         {/* {loaderVisible && (
           <div
@@ -404,7 +413,7 @@ export function Layout({children}) {
             }}
           >
             <img
-              src={favicon}
+              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150"
               alt="Loading"
               width="80"
               height="80"
@@ -444,7 +453,7 @@ export function Layout({children}) {
         </div>
         <InstantScrollRestoration />
         {/* <ScrollRestoration nonce={nonce} /> */}
-        {nonce ? <Scripts nonce={nonce} /> : <Scripts />}
+        <Scripts nonce={stableNonce} />
         {/* This site is converting visitors into subscribers and customers with https://respond.io */}
         {/* <RespondIOWidget /> */}
         {/* https://respond.io */}
@@ -458,6 +467,248 @@ export function Layout({children}) {
  */
 export default function App() {
   return <Outlet />;
+}
+
+function TicTacToeGame() {
+  const WIN_LINES = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [current, setCurrent] = useState('X');
+  const [winner, setWinner] = useState(null);
+  const [isDraw, setIsDraw] = useState(false);
+  const [playerWins, setPlayerWins] = useState(0);
+  const [aiWins, setAiWins] = useState(0);
+  const [draws, setDraws] = useState(0);
+
+  const getWinner = (nextBoard, symbol) => {
+    for (const [a, b, c] of WIN_LINES) {
+      if (
+        nextBoard[a] === symbol &&
+        nextBoard[b] === symbol &&
+        nextBoard[c] === symbol
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const getBestAiMove = (nextBoard) => {
+    const available = nextBoard
+      .map((cell, index) => (cell ? -1 : index))
+      .filter((index) => index !== -1);
+
+    for (const index of available) {
+      const testBoard = [...nextBoard];
+      testBoard[index] = 'O';
+      if (getWinner(testBoard, 'O')) return index;
+    }
+
+    for (const index of available) {
+      const testBoard = [...nextBoard];
+      testBoard[index] = 'X';
+      if (getWinner(testBoard, 'X')) return index;
+    }
+
+    if (available.includes(4)) return 4;
+
+    const corners = [0, 2, 6, 8].filter((index) => available.includes(index));
+    if (corners.length > 0) {
+      return corners[Math.floor(Math.random() * corners.length)];
+    }
+
+    return available[Math.floor(Math.random() * available.length)];
+  };
+
+  const requestAiMove = async (boardSnapshot) => {
+    const res = await fetch('/api/minigame-ai', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({board: boardSnapshot}),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to get AI move');
+    }
+
+    const move = data?.move;
+    if (!Number.isInteger(move) || move < 0 || move > 8) {
+      throw new Error('Invalid AI move');
+    }
+
+    return move;
+  };
+
+  const onCellClick = (index) => {
+    if (current !== 'X' || board[index] || winner || isDraw) return;
+
+    const nextBoard = [...board];
+    nextBoard[index] = 'X';
+    setBoard(nextBoard);
+
+    if (getWinner(nextBoard, 'X')) {
+      setWinner('X');
+      setPlayerWins((prev) => prev + 1);
+      return;
+    }
+
+    const filled = nextBoard.every(Boolean);
+    if (filled) {
+      setIsDraw(true);
+      setDraws((prev) => prev + 1);
+      return;
+    }
+
+    setCurrent('O');
+  };
+
+  useEffect(() => {
+    if (current !== 'O' || winner || isDraw) return;
+
+    let cancelled = false;
+    const snapshot = [...board];
+    const snapshotKey = snapshot.map((cell) => cell || '-').join('|');
+
+    const playAiTurn = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 280));
+
+      let move = null;
+      try {
+        move = await requestAiMove(snapshot);
+      } catch {
+        move = getBestAiMove(snapshot);
+      }
+
+      if (cancelled) return;
+
+      setBoard((prevBoard) => {
+        const prevKey = prevBoard.map((cell) => cell || '-').join('|');
+        if (prevKey !== snapshotKey) return prevBoard;
+
+        let nextMove = move;
+        if (
+          !Number.isInteger(nextMove) ||
+          nextMove < 0 ||
+          nextMove > 8 ||
+          prevBoard[nextMove]
+        ) {
+          nextMove = getBestAiMove(prevBoard);
+        }
+
+        if (!Number.isInteger(nextMove) || prevBoard[nextMove]) {
+          return prevBoard;
+        }
+
+        const nextBoard = [...prevBoard];
+        nextBoard[nextMove] = 'O';
+
+        if (getWinner(nextBoard, 'O')) {
+          setWinner('O');
+          setAiWins((prev) => prev + 1);
+          return nextBoard;
+        }
+
+        const filled = nextBoard.every(Boolean);
+        if (filled) {
+          setIsDraw(true);
+          setDraws((prev) => prev + 1);
+          return nextBoard;
+        }
+
+        setCurrent('X');
+        return nextBoard;
+      });
+    };
+
+    playAiTurn();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [board, current, winner, isDraw]);
+
+  useEffect(() => {
+    if (winner || isDraw) {
+      setCurrent('X');
+    }
+  }, [winner, isDraw]);
+
+  const getStatusText = () => {
+    if (winner === 'X') return 'You win';
+    if (winner === 'O') return 'AI wins';
+    if (isDraw) return 'Draw game';
+    if (current === 'O') return 'AI is thinking...';
+    return 'Your turn';
+  };
+
+  const newBoard = () => {
+    setBoard(Array(9).fill(null));
+    setCurrent('X');
+    setWinner(null);
+    setIsDraw(false);
+  };
+
+  const resetAll = () => {
+    newBoard();
+    setPlayerWins(0);
+    setAiWins(0);
+    setDraws(0);
+  };
+
+  return (
+    <div className="notfound-game__panel">
+      <div className="notfound-game__stats">
+        <span>You: {playerWins}</span>
+        <span>AI: {aiWins}</span>
+        <span>Draws: {draws}</span>
+      </div>
+
+      <p className="notfound-game__helper">{getStatusText()}</p>
+
+      <div className="notfound-game__tictac-grid" role="grid" aria-label="Tic tac toe board">
+        {board.map((cell, index) => (
+          <button
+            key={index}
+            type="button"
+            className="notfound-game__tictac-cell"
+            onClick={() => onCellClick(index)}
+            disabled={Boolean(cell) || Boolean(winner) || isDraw || current === 'O'}
+            aria-label={`Cell ${index + 1}`}
+          >
+            {cell}
+          </button>
+        ))}
+      </div>
+
+      <div className="notfound-game__input-row">
+        <button type="button" className="notfound-game__submit" onClick={newBoard}>
+          New Board
+        </button>
+        <button type="button" className="notfound-game__start" onClick={resetAll}>
+          Reset Match
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function NotFoundMiniGame() {
+  return (
+    <section className="notfound-game" aria-label="404 mini game">
+      <h3 className="notfound-game__title">Tic-Tac-Toe Challenge</h3>
+      <TicTacToeGame />
+    </section>
+  );
 }
 
 /**
@@ -483,65 +734,37 @@ export function ErrorBoundary() {
     errorStatus,
   });
 
-  // Common error page styling
-  const containerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '70vh',
-    textAlign: 'center',
-    backgroundColor: '#f8f9fa',
-    color: '#333',
-    fontFamily: 'Arial, sans-serif',
-    padding: '20px',
-  };
+  const isNotFound = errorStatus === 404;
 
-  const titleStyle = {
-    fontSize: '6rem',
-    fontWeight: 'bold',
-    margin: '0 0 10px',
-    color: '#232323',
-  };
-
-  const messageStyle = {
-    fontSize: '1.5rem',
-    marginBottom: '20px',
-  };
-
-  const linkStyle = {
-    fontSize: '1rem',
-    color: '#232323',
-    textDecoration: 'none',
-    padding: '10px 20px',
-    border: '1px solid #232323',
-    borderRadius: '30px',
-    transition: 'background-color 0.3s, color 0.3s',
-  };
-
-  const handleMouseEnter = (e) => {
-    e.target.style.backgroundColor = '#232323';
-    e.target.style.color = '#fff';
-  };
-
-  const handleMouseLeave = (e) => {
-    e.target.style.backgroundColor = '#fff';
-    e.target.style.color = '#232323';
-  };
-
-  // Render the error page with appropriate status and message
   return (
-    <div style={containerStyle}>
-      <h1 style={titleStyle}>{errorStatus}</h1>
-      <p style={messageStyle}>{errorMessage}</p>
-      <a
-        href="/"
-        style={linkStyle}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        Go to Homepage
-      </a>
+    <div className="error-page">
+      <section className="error-card" aria-labelledby="error-title">
+        <p className="error-card__status">{isNotFound ? '404' : errorStatus}</p>
+        <h1 id="error-title" className="error-card__title">
+          {isNotFound ? 'Page Not Found' : 'Something Went Wrong'}
+        </h1>
+        <p className="error-card__message">
+          {isNotFound
+            ? "The page you're looking for doesn't exist or may have been moved."
+            : errorMessage}
+        </p>
+
+        {isNotFound ? <NotFoundMiniGame /> : null}
+
+        <div className="error-card__actions">
+          <a href="/" className="error-card__button error-card__button--primary">
+            Go to Homepage
+          </a>
+          {isNotFound ? (
+            <a
+              href="/collections"
+              className="error-card__button error-card__button--secondary"
+            >
+              Browse Collections
+            </a>
+          ) : null}
+        </div>
+      </section>
     </div>
   );
 }

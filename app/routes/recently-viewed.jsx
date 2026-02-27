@@ -553,7 +553,7 @@ export default function RecentlyViewedPage() {
                                 padding: '10px 38px',
                                 borderRadius: 999,
                                 fontWeight: 500,
-                                background: '#2172af',
+                                background: '#03072c',
                                 color: '#fff',
                                 cursor: 'pointer',
                                 width: 'fit-content',
@@ -677,7 +677,7 @@ function ProductCard({product, index = 0}) {
             width="150"
             height="150"
             loading={index < 2 ? 'eager' : 'lazy'}
-            fetchPriority={index < 2 ? 'high' : 'auto'}
+            fetchpriority={index < 2 ? 'high' : 'auto'}
             decoding="async"
           />
           <div className="product-title">{product.title || 'Product'}</div>

@@ -70,7 +70,7 @@
     padding: 0.45rem 1.05rem;
     border-radius: 999px;
     border: none;
-    background: #2172af;
+    background: #03072c;
     color: #f9fafb;
     font-size: 0.85rem;
     font-weight: 500;
@@ -495,9 +495,9 @@
 }
 
 .search-pagination-button:hover {
-    background: #2172af;
+    background: #03072c;
     color: #f9fafb;
-    border-color: #2172af;
+    border-color: #03072c;
     transform: translateY(-1px);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
 }

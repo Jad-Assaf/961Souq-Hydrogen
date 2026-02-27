@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
-import {Link, useRevalidator} from '@remix-run/react';
+import {Link, useNavigate, useRevalidator} from '@remix-run/react';
 import {Money} from '@shopify/hydrogen';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
@@ -109,6 +109,7 @@ function ProductQuickViewModal({
   revalidator,
 }) {
   const overlayRef = useRef(null);
+  const navigate = useNavigate();
   const [modalImageIndex, setModalImageIndex] = useState(0);
   const selectedVariantForCart = selectedVariant
     ? {
@@ -350,7 +351,7 @@ function ProductQuickViewModal({
                   if (!selectedVariant) return;
 
                   if (hasMultipleVariants) {
-                    window.location.href = `/products/${product.handle}`;
+                    navigate(`/products/${encodeURIComponent(product.handle)}`);
                     return;
                   }
 
@@ -403,6 +404,8 @@ function ProductQuickViewModal({
 
 export function ProductItem({product, showFreeShippingTags}) {
   const ref = useRef(null);
+  const hoverImagePreloadRef = useRef(null);
+  const isHoveringRef = useRef(false);
   const {open} = useAside();
   const revalidator = useRevalidator();
 
@@ -415,12 +418,14 @@ export function ProductItem({product, showFreeShippingTags}) {
   const [fadeIn, setFadeIn] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
   const [isSoldOut, setIsSoldOut] = useState(false);
+  const [isHoverImageLoaded, setIsHoverImageLoaded] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalClosing, setIsModalClosing] = useState(false);
 
   const displayProduct = quickViewProduct || product;
   const images = displayProduct.images?.nodes || [];
+  const hoverImageUrl = images[1]?.url || '';
 
   useEffect(() => {
     const soldOut = !displayProduct.variants?.nodes?.some(
@@ -441,6 +446,28 @@ export function ProductItem({product, showFreeShippingTags}) {
       return () => clearTimeout(timer);
     }
   }, [currentImageIndex, firstLoad]);
+
+  useEffect(() => {
+    setCurrentImageIndex(0);
+    setIsHoverImageLoaded(false);
+    isHoveringRef.current = false;
+
+    if (hoverImagePreloadRef.current) {
+      hoverImagePreloadRef.current.onload = null;
+      hoverImagePreloadRef.current.onerror = null;
+      hoverImagePreloadRef.current = null;
+    }
+  }, [displayProduct?.id, hoverImageUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (hoverImagePreloadRef.current) {
+        hoverImagePreloadRef.current.onload = null;
+        hoverImagePreloadRef.current.onerror = null;
+        hoverImagePreloadRef.current = null;
+      }
+    };
+  }, []);
 
   const selectedVariant =
     displayProduct.variants?.nodes?.find((v) => v.availableForSale) ||
@@ -491,9 +518,7 @@ export function ProductItem({product, showFreeShippingTags}) {
 
     setQuickViewFullLoading(true);
     fetch(
-      `/api/home-product?handle=${encodeURIComponent(
-        product.handle,
-      )}&full=1`,
+      `/api/home-product?handle=${encodeURIComponent(product.handle)}&full=1`,
     )
       .then((res) => {
         if (!res.ok) {
@@ -515,18 +540,58 @@ export function ProductItem({product, showFreeShippingTags}) {
       });
   }, [product?.handle, quickViewFullLoaded, quickViewFullLoading]);
 
-  const handleMouseEnter = () => images.length > 1 && setCurrentImageIndex(1);
-  const handleMouseLeave = () => setCurrentImageIndex(0);
-
-  const openModal = useCallback((e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
+  const preloadHoverImage = useCallback(() => {
+    if (!hoverImageUrl || isHoverImageLoaded || hoverImagePreloadRef.current) {
+      return;
     }
-    ensureQuickViewLoaded();
-    setIsModalClosing(false);
-    setIsModalOpen(true);
-  }, [ensureQuickViewLoaded]);
+
+    const img = new Image();
+    hoverImagePreloadRef.current = img;
+
+    img.onload = () => {
+      hoverImagePreloadRef.current = null;
+      setIsHoverImageLoaded(true);
+      if (isHoveringRef.current) {
+        setCurrentImageIndex(1);
+      }
+    };
+
+    img.onerror = () => {
+      hoverImagePreloadRef.current = null;
+    };
+
+    img.src = addWidthParam(hoverImageUrl, 480);
+  }, [hoverImageUrl, isHoverImageLoaded]);
+
+  const handleMouseEnter = () => {
+    if (images.length <= 1) return;
+    isHoveringRef.current = true;
+
+    if (isHoverImageLoaded) {
+      setCurrentImageIndex(1);
+      return;
+    }
+
+    preloadHoverImage();
+  };
+
+  const handleMouseLeave = () => {
+    isHoveringRef.current = false;
+    setCurrentImageIndex(0);
+  };
+
+  const openModal = useCallback(
+    (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      ensureQuickViewLoaded();
+      setIsModalClosing(false);
+      setIsModalOpen(true);
+    },
+    [ensureQuickViewLoaded],
+  );
 
   const closeModal = useCallback(() => {
     setIsModalClosing(true);
@@ -568,7 +633,7 @@ export function ProductItem({product, showFreeShippingTags}) {
             {' '}
             <path
               d="M4 12H20M12 4V20"
-              stroke="#2172af"
+              stroke="#03072c"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"

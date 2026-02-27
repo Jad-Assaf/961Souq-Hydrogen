@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {useSearchParams, useNavigate} from '@remix-run/react';
 
 export function ShopifyFilterForm({filters}) {
@@ -9,10 +9,10 @@ export function ShopifyFilterForm({filters}) {
   // Each key is a filter id with a boolean value.
   const [expandedSections, setExpandedSections] = useState({});
 
-  const toggleSection = (filterId) => {
+  const toggleSection = (filterId, currentState) => {
     setExpandedSections((prev) => ({
       ...prev,
-      [filterId]: !prev[filterId],
+      [filterId]: !currentState,
     }));
   };
 
@@ -34,14 +34,10 @@ export function ShopifyFilterForm({filters}) {
   };
 
   /**
-   * Handle a filter checkbox change.
-   * Accepts the filter id, the raw input value, and the checkbox checked state.
+   * Normalize filter value to the exact string stored in URLSearchParams.
+   * Keeps render path cheap and avoids repeated JSON parsing for each rerender.
    */
-  const handleFilterChange = (filterId, inputValue, checked) => {
-    const newParams = new URLSearchParams(searchParams);
-    const urlKey = getUrlKey(filterId);
-
-    // For vendor filters, ensure the value is a plain string (wrapped in quotes)
+  const normalizeFilterInput = (urlKey, inputValue) => {
     if (urlKey === 'productVendor') {
       if (
         typeof inputValue === 'string' &&
@@ -50,18 +46,52 @@ export function ShopifyFilterForm({filters}) {
       ) {
         try {
           const parsed = JSON.parse(inputValue);
-          if (parsed && parsed.productVendor) {
-            inputValue = `"${parsed.productVendor}"`;
-          }
-        } catch (error) {
-          console.error('Error parsing vendor filter input:', error);
-        }
-      } else {
-        if (!inputValue.startsWith('"') || !inputValue.endsWith('"')) {
-          inputValue = `"${inputValue}"`;
+          return `"${parsed?.productVendor || ''}"`;
+        } catch {
+          return inputValue;
         }
       }
+
+      if (typeof inputValue === 'object' && inputValue !== null) {
+        return `"${inputValue.productVendor || ''}"`;
+      }
+
+      if (typeof inputValue === 'string') {
+        return inputValue.startsWith('"') && inputValue.endsWith('"')
+          ? inputValue
+          : `"${inputValue}"`;
+      }
     }
+
+    if (typeof inputValue === 'string') return inputValue;
+    if (inputValue == null) return '';
+    return JSON.stringify(inputValue);
+  };
+
+  const normalizedFilterValues = useMemo(() => {
+    const valuesByFilterId = new Map();
+
+    for (const filter of filters || []) {
+      const urlKey = getUrlKey(filter.id);
+      const valueMap = new Map();
+
+      for (const value of filter.values || []) {
+        valueMap.set(value.id, normalizeFilterInput(urlKey, value.input));
+      }
+
+      valuesByFilterId.set(filter.id, valueMap);
+    }
+
+    return valuesByFilterId;
+  }, [filters]);
+
+  /**
+   * Handle a filter checkbox change.
+   * Accepts the filter id, normalized input value, and checked state.
+   */
+  const handleFilterChange = (filterId, inputValue, checked) => {
+    const newParams = new URLSearchParams(searchParams);
+    const urlKey = getUrlKey(filterId);
 
     // For the "All" (blank) option, clear all values for the key.
     if (inputValue === '') {
@@ -90,71 +120,124 @@ export function ShopifyFilterForm({filters}) {
     newParams.delete('direction');
     newParams.delete('cursor');
 
-    navigate(`?${newParams.toString()}`, {replace: true});
+    navigate(`?${newParams.toString()}`, {
+      replace: true,
+      preventScrollReset: true,
+    });
+  };
+
+  const selectedFilterCount = useMemo(() => {
+    const uniqueFilterKeys = Array.from(
+      new Set(
+        [...searchParams.keys()].filter((key) => key.startsWith('filter.')),
+      ),
+    );
+
+    return uniqueFilterKeys.reduce(
+      (count, key) => count + searchParams.getAll(key).length,
+      0,
+    );
+  }, [searchParams]);
+
+  const handleClearAllFilters = () => {
+    const newParams = new URLSearchParams(searchParams);
+    const keysToDelete = Array.from(
+      new Set([...newParams.keys()].filter((key) => key.startsWith('filter.'))),
+    );
+
+    keysToDelete.forEach((key) => newParams.delete(key));
+    newParams.delete('direction');
+    newParams.delete('cursor');
+
+    navigate(`?${newParams.toString()}`, {
+      replace: true,
+      preventScrollReset: true,
+    });
   };
 
   return (
     <div className="p-4 side-filter">
+      <div className="filters-panel-header">
+        <div className="filters-panel-header-text">
+          <h3>Filters</h3>
+          <p>
+            {selectedFilterCount > 0
+              ? `${selectedFilterCount} selected`
+              : 'Choose filters'}
+          </p>
+        </div>
+        {selectedFilterCount > 0 ? (
+          <button
+            type="button"
+            className="filters-clear-btn"
+            onClick={handleClearAllFilters}
+          >
+            Clear all
+          </button>
+        ) : null}
+      </div>
+
       {filters.map((filter) => {
         const urlKey = getUrlKey(filter.id);
+        const sectionId = `filter-section-${filter.id.replace(
+          /[^a-zA-Z0-9_-]/g,
+          '-',
+        )}`;
         // Get all current values for this filter key.
-        const currentValues = searchParams.getAll(`filter.${urlKey}`) || [];
+        const currentValues = new Set(
+          searchParams.getAll(`filter.${urlKey}`) || [],
+        );
+        const activeValuesCount = currentValues.size;
         // Check if this section is expanded; default is false (closed).
-        const isExpanded = expandedSections[filter.id] || false;
+        const isExpanded = expandedSections[filter.id] ?? activeValuesCount > 0;
 
         return (
-          <div key={filter.id} className="mb-4 pb-2">
-            <div
-              className="flex justify-between items-center cursor-pointer"
-              onClick={() => toggleSection(filter.id)}
+          <div key={filter.id} className="mb-4 pb-2 collection-filter-section">
+            <button
+              type="button"
+              className="collection-filter-trigger"
+              onClick={() => toggleSection(filter.id, isExpanded)}
+              aria-expanded={isExpanded}
+              aria-controls={sectionId}
             >
-              <p className="filter-title font-bold">{filter.label}</p>
-              <span>{isExpanded ? '-' : '+'}</span>
-            </div>
+              <span className="filter-title font-bold">{filter.label}</span>
+              <span className="collection-filter-meta">
+                {activeValuesCount > 0 ? (
+                  <span className="collection-filter-selected-count">
+                    {activeValuesCount}
+                  </span>
+                ) : null}
+                <span
+                  className={`collection-filter-chevron ${
+                    isExpanded ? 'is-open' : ''
+                  }`}
+                >
+                  ›
+                </span>
+              </span>
+            </button>
             {/* Always render the container and animate max-height and opacity */}
             <div
-              className={`overflow-auto transition-all duration-100 filters-div ${
+              id={sectionId}
+              className={`overflow-auto transition-all duration-100 filters-div collection-filter-values-wrap ${
                 isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
               }`}
             >
-              <div className="flex flex-wrap mt-2">
+              <div className="flex flex-wrap mt-2 collection-filter-values">
                 {filter.values.map((value) => {
-                  let normalizedValue = '';
-                  if (urlKey === 'productVendor') {
-                    // Extract the vendor value whether input is an object or JSON string.
-                    if (typeof value.input === 'object') {
-                      normalizedValue = value.input.productVendor;
-                    } else if (
-                      typeof value.input === 'string' &&
-                      value.input.trim().startsWith('{') &&
-                      value.input.trim().endsWith('}')
-                    ) {
-                      try {
-                        const parsed = JSON.parse(value.input);
-                        normalizedValue = parsed.productVendor;
-                      } catch (error) {
-                        console.error(
-                          'Error parsing vendor filter input in render:',
-                          error,
-                        );
-                        normalizedValue = value.input;
-                      }
-                    } else {
-                      normalizedValue = value.input;
-                    }
-                    // In the URL, vendor filters are stored wrapped in quotes.
-                    normalizedValue = `"${normalizedValue}"`;
-                  } else {
-                    normalizedValue = value.input;
-                  }
+                  const normalizedValue =
+                    normalizedFilterValues.get(filter.id)?.get(value.id) ??
+                    normalizeFilterInput(urlKey, value.input);
 
                   // Check if the normalized value is in the array of current values.
-                  const isActive = currentValues.includes(normalizedValue);
+                  const isActive = currentValues.has(normalizedValue);
 
                   return (
                     <label
                       key={value.id}
-                      className="filters-container mr-2 mb-2"
+                      className={`filters-container mr-2 mb-2 ${
+                        isActive ? 'is-active' : ''
+                      }`}
                     >
                       {value.label}{' '}
                       <span className="value-count">({value.count})</span>
@@ -164,7 +247,7 @@ export function ShopifyFilterForm({filters}) {
                         onChange={(e) =>
                           handleFilterChange(
                             filter.id,
-                            value.input,
+                            normalizedValue,
                             e.target.checked,
                           )
                         }
@@ -182,7 +265,12 @@ export function ShopifyFilterForm({filters}) {
   );
 }
 
-export function FiltersDrawer({isOpen, onClose, filters}) {
+export function FiltersDrawer({
+  isOpen,
+  onClose,
+  filters,
+  activeFiltersCount = 0,
+}) {
   const drawerPanelRef = useRef(null);
   const startYRef = useRef(0);
   const currentYRef = useRef(0);
@@ -237,15 +325,51 @@ export function FiltersDrawer({isOpen, onClose, filters}) {
     }
   };
 
+  const handleOverlayClick = (event) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleOverlayKeyDown = (event) => {
+    if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClose();
+    }
+  };
+
   return (
-    <div className={`drawer-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
+    <div
+      className={`drawer-overlay ${isOpen ? 'open' : ''}`}
+      onClick={handleOverlayClick}
+      onKeyDown={handleOverlayKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label="Close filters drawer"
+    >
       {/* Prevent clicks on the drawer panel from closing the drawer */}
       <div
         ref={drawerPanelRef}
         className={`drawer-panel ${isOpen ? 'open' : ''}`}
-        onClick={(e) => e.stopPropagation()}
       >
-        <div
+        <div className="drawer-header-row">
+          <h3>
+            Filters
+            {activeFiltersCount > 0 ? (
+              <span className="drawer-active-count">{activeFiltersCount}</span>
+            ) : null}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="drawer-close-btn"
+            aria-label="Close filters"
+          >
+            ×
+          </button>
+        </div>
+        <button
+          type="button"
           className="drawer-header"
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
@@ -253,9 +377,10 @@ export function FiltersDrawer({isOpen, onClose, filters}) {
           onTouchMove={handleDragMove}
           onMouseUp={handleDragEnd}
           onTouchEnd={handleDragEnd}
+          aria-label="Drag down to close filters drawer"
         >
           <div className="drawer-handle"></div>
-        </div>
+        </button>
         <ShopifyFilterForm filters={filters} />
       </div>
     </div>

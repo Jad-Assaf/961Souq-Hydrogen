@@ -102,7 +102,7 @@ export function CollapsibleVerticalHeader({header}) {
               >
                 {open ? (
                   <svg
-                    fill="#2172af"
+                    fill="#03072c"
                     height="40px"
                     width="40px"
                     version="1.1"
@@ -129,7 +129,7 @@ export function CollapsibleVerticalHeader({header}) {
                   </svg>
                 ) : (
                   <svg
-                    fill="#2172af"
+                    fill="#03072c"
                     height="40px"
                     width="40px"
                     version="1.1"
@@ -138,7 +138,7 @@ export function CollapsibleVerticalHeader({header}) {
                     xmlnsXlink="http://www.w3.org/1999/xlink"
                     viewBox="0 0 386.257 386.257"
                     xmlSpace="preserve"
-                    stroke="#2172af"
+                    stroke="#03072c"
                   >
                     <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                     <g
