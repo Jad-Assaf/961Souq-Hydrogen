@@ -192,7 +192,7 @@ const MobileAppPopup = () => {
         <div className="appPopupContent">
           <img
             className="appPopupLogo"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png?v=1719486376"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150"
             alt="961Souq"
             loading="lazy"
             decoding="async"
