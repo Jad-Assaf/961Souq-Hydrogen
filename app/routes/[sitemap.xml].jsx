@@ -53,6 +53,10 @@ export async function loader({request, context: {storefront}}) {
     const currentChunk = chunks[part - 1];
 
     if (!currentChunk) {
+      if (section === SITEMAP_SECTIONS.PRODUCTS) {
+        return createXmlResponse(renderUrlSet([]), 60 * 60 * 24);
+      }
+
       return new Response('Sitemap segment not found', {status: 404});
     }
 
