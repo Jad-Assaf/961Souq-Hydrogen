@@ -134,14 +134,12 @@ async function fetchCollectionByHandle(
   const query = options.mobile
     ? GET_HOMEPAGE_COLLECTION_MOBILE_QUERY
     : GET_HOMEPAGE_COLLECTION_QUERY;
-  const {collectionByHandle} = await context.storefront.query(
-    query,
-    {
-      variables: {handle},
-      cache: cacheOverride || context.storefront.CacheShort(),
-    },
-  );
-  return collectionByHandle || null;
+  const {collectionByHandle} = await context.storefront.query(query, {
+    variables: {handle},
+    cache: cacheOverride || context.storefront.CacheShort(),
+  });
+  if (!collectionByHandle?.products?.nodes?.length) return null;
+  return collectionByHandle;
 }
 
 async function fetchSimpleCollectionByHandle(context, handle, cacheOverride) {
@@ -152,7 +150,8 @@ async function fetchSimpleCollectionByHandle(context, handle, cacheOverride) {
       cache: cacheOverride || context.storefront.CacheLong(),
     },
   );
-  return collectionByHandle || null;
+  if (!collectionByHandle?.products?.nodes?.length) return null;
+  return collectionByHandle;
 }
 
 const getHandleFromUrl = (url) => {
@@ -206,6 +205,8 @@ export async function loader(args) {
     'tablets',
     'networking',
     'accessories',
+    'dyson-products',
+    'cosmetics',
   ];
 
   // Fire off critical queries concurrently so above-the-fold content is fast.
@@ -235,8 +236,8 @@ export async function loader(args) {
     const collectionsByHandle = {};
     results.forEach((result, index) => {
       const handle = heroCollectionHandles[index];
-      if (result.status === 'fulfilled' && result.value) {
-        collectionsByHandle[handle] = result.value;
+      if (result.status === 'fulfilled') {
+        collectionsByHandle[handle] = result.value || null;
       }
     });
     return collectionsByHandle;
@@ -292,8 +293,10 @@ export async function loader(args) {
         ).then((results) => {
           const topProductsByHandle = {};
           results.forEach((result, index) => {
-            if (result.status === 'fulfilled' && result.value) {
-              topProductsByHandle[uniqueMenuHandles[index]] = result.value;
+            if (result.status === 'fulfilled') {
+              if (result.value) {
+                topProductsByHandle[uniqueMenuHandles[index]] = result.value;
+              }
             } else {
               console.error(
                 `Failed to load collection for handle: ${uniqueMenuHandles[index]}`,
@@ -563,6 +566,29 @@ export default function Homepage() {
       })
       .filter((item) => item && item.handle !== 'cosmetics');
   }, [header]);
+  const desktopMenuHandles = useMemo(() => {
+    const groups = [
+      appleMenu,
+      gamingMenu,
+      laptopsMenu,
+      monitorsMenu,
+      mobilesMenu,
+      tabletsMenu,
+      audioMenu,
+      fitnessMenu,
+      camerasMenu,
+      homeAppliancesMenu,
+    ];
+
+    return [
+      ...new Set(
+        groups
+          .flat()
+          .map((item) => getHandleFromUrl(item?.url || ''))
+          .filter(Boolean),
+      ),
+    ];
+  }, []);
 
   // RelatedProductsFromHistory temporarily disabled for testing performance
   // const [rpKey, setRpKey] = useState(0);
@@ -591,11 +617,16 @@ export default function Homepage() {
     }),
     [topProducts, restTopProductsSafe, onDemandTopProducts],
   );
+  const hasLoadedHandle = useCallback(
+    (handle) =>
+      Object.prototype.hasOwnProperty.call(fullTopProducts || {}, handle),
+    [fullTopProducts],
+  );
 
   const ensureCollectionLoaded = useCallback(
     (handle) => {
       if (!handle) return;
-      if (fullTopProducts[handle]) return;
+      if (hasLoadedHandle(handle)) return;
       if (inflightCollectionsRef.current.has(handle)) return;
 
       inflightCollectionsRef.current.add(handle);
@@ -611,15 +642,17 @@ export default function Homepage() {
           return res.json();
         })
         .then((data) => {
-          if (data?.collection) {
-            setOnDemandTopProducts((prev) => ({
-              ...prev,
-              [handle]: data.collection,
-            }));
-          }
+          setOnDemandTopProducts((prev) => ({
+            ...prev,
+            [handle]: data?.collection || null,
+          }));
         })
         .catch((error) => {
           console.error('Homepage on-demand collection fetch failed', error);
+          setOnDemandTopProducts((prev) => {
+            if (Object.prototype.hasOwnProperty.call(prev, handle)) return prev;
+            return {...prev, [handle]: null};
+          });
         })
         .finally(() => {
           inflightCollectionsRef.current.delete(handle);
@@ -631,23 +664,33 @@ export default function Homepage() {
           });
         });
     },
-    [fullTopProducts],
+    [hasLoadedHandle],
   );
 
   useEffect(() => {
     if (!isMobile || !mobileLevelOneCollections.length) return;
 
     mobileLevelOneCollections.forEach(({handle}) => {
-      if (!fullTopProducts[handle]) {
+      if (!hasLoadedHandle(handle)) {
         ensureCollectionLoaded(handle);
       }
     });
   }, [
     isMobile,
     mobileLevelOneCollections,
-    fullTopProducts,
+    hasLoadedHandle,
     ensureCollectionLoaded,
   ]);
+
+  useEffect(() => {
+    if (isMobile || !desktopMenuHandles.length) return;
+
+    desktopMenuHandles.forEach((handle) => {
+      if (!hasLoadedHandle(handle)) {
+        ensureCollectionLoaded(handle);
+      }
+    });
+  }, [isMobile, desktopMenuHandles, hasLoadedHandle, ensureCollectionLoaded]);
 
   // Desktop state: original multiple-groups.
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
@@ -677,8 +720,9 @@ export default function Homepage() {
   const handleAudioSelect = buildSelectHandler(setSelectedAudio);
   const handleFitnessSelect = buildSelectHandler(setSelectedFitness);
   const handleCamerasSelect = buildSelectHandler(setSelectedCameras);
-  const handleHomeAppliancesSelect =
-    buildSelectHandler(setSelectedHomeAppliances);
+  const handleHomeAppliancesSelect = buildSelectHandler(
+    setSelectedHomeAppliances,
+  );
 
   const renderCollectionSection = ({
     menu,
@@ -686,19 +730,32 @@ export default function Homepage() {
     onSelect,
     fallbackTitle,
   }) => {
-    const handle = getHandleFromUrl(selectedItem?.url || '');
+    const visibleMenu = menu.filter((item) => {
+      const menuHandle = getHandleFromUrl(item?.url || '');
+      if (!menuHandle) return false;
+      if (!hasLoadedHandle(menuHandle)) return true;
+      return Boolean(fullTopProducts[menuHandle]);
+    });
+    if (!visibleMenu.length) return null;
+
+    const selectedHandle = getHandleFromUrl(selectedItem?.url || '');
+    const resolvedSelectedItem =
+      visibleMenu.find(
+        (item) => getHandleFromUrl(item?.url || '') === selectedHandle,
+      ) || visibleMenu[0];
+    const handle = getHandleFromUrl(resolvedSelectedItem?.url || '');
     const collection = handle ? fullTopProducts[handle] : null;
     const isLoading = handle ? !!loadingHandles[handle] : false;
-    const title = selectedItem?.title || fallbackTitle || 'Collection';
+    const title = resolvedSelectedItem?.title || fallbackTitle || 'Collection';
 
     return (
       <>
         <CollectionCircles
-          collections={menu}
-          selectedCollection={selectedItem}
+          collections={visibleMenu}
+          selectedCollection={resolvedSelectedItem}
           onCollectionSelect={onSelect}
         />
-        {selectedItem && collection ? (
+        {resolvedSelectedItem && collection ? (
           <TopProductSections key={handle} collection={collection} />
         ) : isLoading ? (
           <TopProductPlaceholder
@@ -740,14 +797,16 @@ export default function Homepage() {
       {isMobile ? (
         <>
           {mobileLevelOneCollections.map(({id, handle, title}) => {
-            const collection = fullTopProducts[handle];
+            const collection = hasLoadedHandle(handle)
+              ? fullTopProducts[handle]
+              : undefined;
 
             return collection ? (
               <TopProductSections
                 key={`mobile-${id}`}
                 collection={collection}
               />
-            ) : (
+            ) : collection === null ? null : (
               <TopProductPlaceholder
                 key={`mobile-${id}-placeholder`}
                 title={title}

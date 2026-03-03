@@ -1,13 +1,13 @@
 // NewArrivals.jsx
-import React, {useState, useMemo} from 'react';
+import React, {useMemo} from 'react';
 import {Link} from 'react-router-dom';
 import {ProductRow} from './CollectionDisplay';
 
 export const TopProductSections = ({collection}) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchTerm = '';
+  const products = (collection?.products?.nodes || []).filter(Boolean);
 
   const filteredProducts = useMemo(() => {
-    const products = collection?.products?.nodes || [];
     const normalized = searchTerm.toLowerCase().trim();
     const tokens = normalized ? normalized.split(/\s+/).filter(Boolean) : [];
 
@@ -26,7 +26,9 @@ export const TopProductSections = ({collection}) => {
       // all tokens must appear somewhere, in any order
       return tokens.every((token) => haystack.includes(token));
     });
-  }, [collection, searchTerm]);
+  }, [products, searchTerm]);
+
+  if (!products.length) return null;
 
   return (
     <div className="collection-section">

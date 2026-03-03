@@ -1,5 +1,4 @@
 import {Await, useRouteLoaderData, useLoaderData, data} from '@remix-run/react';
-import {Suspense} from 'react';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {TopProductSections} from '~/components/TopProductSections';
@@ -121,6 +120,7 @@ async function fetchCollectionByHandle(context, handle) {
       cache: context.storefront.CacheLong(),
     },
   );
+  if (!collectionByHandle?.products?.nodes?.length) return null;
   return collectionByHandle || null;
 }
 

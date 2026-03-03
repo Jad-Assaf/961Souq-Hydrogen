@@ -71,7 +71,10 @@ export async function loader({request, context}) {
     menu.items
       ?.map((item) => item?.resource)
       ?.filter(
-        (resource) => resource && resource.__typename === 'Collection',
+        (resource) =>
+          resource &&
+          resource.__typename === 'Collection' &&
+          (resource?.products?.nodes?.length || 0) > 0,
       ) || [];
 
   return json({handle, collections});

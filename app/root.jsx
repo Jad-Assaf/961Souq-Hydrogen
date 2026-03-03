@@ -109,12 +109,27 @@ export async function loader({request, context}) {
  * Load data necessary for rendering content above the fold.
  */
 const processMenuItems = (items) => {
-  return items.map((item) => ({
-    ...item,
-    imageUrl: item.resource?.image?.src || null, // Extract image URL if available
-    altText: item.resource?.image?.altText || item.title, // Use altText or fallback to title
-    items: item.items ? processMenuItems(item.items) : [], // Recursively process submenus
-  }));
+  return (items || [])
+    .map((item) => {
+      const nextItems = item.items ? processMenuItems(item.items) : [];
+      const isCollectionResource = item?.resource?.__typename === 'Collection';
+      const hasCollectionProducts = isCollectionResource
+        ? (item?.resource?.products?.nodes?.length || 0) > 0
+        : true;
+
+      if (isCollectionResource && !hasCollectionProducts) {
+        return null;
+      }
+
+      return {
+        ...item,
+        imageUrl:
+          item.resource?.image?.url || item.resource?.image?.src || null,
+        altText: item.resource?.image?.altText || item.title,
+        items: nextItems,
+      };
+    })
+    .filter(Boolean);
 };
 
 async function loadCriticalData({context}) {

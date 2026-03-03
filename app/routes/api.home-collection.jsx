@@ -17,8 +17,16 @@ export async function loader({request, context}) {
     },
   );
 
-  if (!collectionByHandle) {
-    return json({handle, collection: null}, {status: 404});
+  if (!collectionByHandle || !collectionByHandle?.products?.nodes?.length) {
+    return json(
+      {handle, collection: null},
+      {
+        headers: {
+          'Oxygen-Cache-Control':
+            'public, max-age=3600, stale-while-revalidate=86399',
+        },
+      },
+    );
   }
 
   return json(

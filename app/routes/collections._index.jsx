@@ -76,6 +76,8 @@ export default function Collections() {
  * }}
  */
 function CollectionItem({collection, index}) {
+  if (!collection?.products?.nodes?.length) return null;
+
   return (
     <Link
       className="collection-item"
@@ -102,6 +104,11 @@ const COLLECTIONS_QUERY = `#graphql
     id
     title
     handle
+    products(first: 1) {
+      nodes {
+        id
+      }
+    }
     image {
       id
       url

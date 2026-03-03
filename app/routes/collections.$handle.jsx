@@ -362,6 +362,7 @@ export async function loadCriticalData({context, params, request}) {
       sliderCollections = menu.items
         .map((item) => item?.resource)
         .filter((resource) => resource?.__typename === 'Collection')
+        .filter((resource) => (resource?.products?.nodes?.length || 0) > 0)
         .filter((resource) => {
           const key = resource.handle || resource.id;
           if (!key || seenHandles.has(key)) return false;
@@ -914,6 +915,11 @@ const MENU_QUERY = `#graphql
             image {
               url
               altText
+            }
+            products(first: 1) {
+              nodes {
+                id
+              }
             }
           }
         }

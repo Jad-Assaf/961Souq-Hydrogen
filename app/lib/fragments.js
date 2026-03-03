@@ -172,31 +172,38 @@ const MENU_FRAGMENT = `#graphql
     url
     resource {
       ... on Collection {
+        __typename
+        id
+        handle
+        title
         description
         descriptionHtml
         image {
           src
+          url
           altText
         }
+        products(first: 1) {
+          nodes {
+            id
+          }
+        }
       }
+    }
+  }
+  fragment LeafMenuItem on MenuItem {
+    ...MenuItem
+  }
+  fragment GrandChildMenuItem on MenuItem {
+    ...MenuItem
+    items {
+      ...LeafMenuItem
     }
   }
   fragment ChildMenuItem on MenuItem {
     ...MenuItem
     items {
-      id
-      title
-      url
-      items {
-        id
-        title
-        url
-        items {
-          id
-          title
-          url
-        }
-      }
+      ...GrandChildMenuItem
     }
   }
   fragment ParentMenuItem on MenuItem {

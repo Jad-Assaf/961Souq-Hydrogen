@@ -702,6 +702,11 @@ export const GET_SIMPLE_COLLECTION_QUERY = `#graphql
         url
         altText
       }
+      products(first: 1) {
+        nodes {
+          id
+        }
+      }
     }
   }
 `;
