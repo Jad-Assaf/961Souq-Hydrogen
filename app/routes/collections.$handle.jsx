@@ -16,7 +16,6 @@ import {
   Analytics,
   getSeoMeta,
 } from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
 import React, {useEffect, useRef, useState} from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
@@ -25,10 +24,104 @@ import WishlistButton from '~/components/WishlistButton';
 
 function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') return '';
-  const words = text.split(' ');
+  const words = text.trim().split(/\s+/).filter(Boolean);
   return words.length > maxWords
     ? words.slice(0, maxWords).join(' ') + '…'
-    : text;
+    : words.join(' ');
+}
+
+function truncateChars(text, maxChars) {
+  if (!text || typeof text !== 'string') return '';
+  const normalized = text.trim();
+  return normalized.length > maxChars
+    ? `${normalized.slice(0, maxChars - 1).trimEnd()}…`
+    : normalized;
+}
+
+function stripHtmlTags(text) {
+  return String(text || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function toJsonLdString(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
+}
+
+function getMostCommonValue(values) {
+  const counts = values.reduce((acc, value) => {
+    const normalized = stripHtmlTags(value);
+    if (!normalized) return acc;
+    acc.set(normalized, (acc.get(normalized) || 0) + 1);
+    return acc;
+  }, new Map());
+
+  let winner = '';
+  let maxCount = 0;
+  for (const [value, count] of counts.entries()) {
+    if (count > maxCount) {
+      winner = value;
+      maxCount = count;
+    }
+  }
+
+  return winner;
+}
+
+function getTopFilterValue(filters, matcher) {
+  if (!Array.isArray(filters)) return '';
+
+  const matchingFilter = filters.find((filter) => {
+    const filterText = `${filter?.id || ''} ${
+      filter?.label || ''
+    }`.toLowerCase();
+    return matcher(filterText);
+  });
+
+  if (!matchingFilter?.values?.length) return '';
+
+  const topValue = [...matchingFilter.values]
+    .map((value) => ({
+      label: stripHtmlTags(value?.label),
+      count: Number(value?.count) || 0,
+    }))
+    .filter((value) => value.label)
+    .sort((a, b) => b.count - a.count)[0];
+
+  return topValue?.label || '';
+}
+
+function getPrimaryCollectionIntent(collection) {
+  const filters = collection?.products?.filters || [];
+  const products = collection?.products?.nodes || [];
+
+  const topSubcategory =
+    getTopFilterValue(
+      filters,
+      (text) =>
+        text.includes('product_type') ||
+        text.includes('product type') ||
+        text.includes('producttype'),
+    ) || getMostCommonValue(products.map((product) => product?.productType));
+
+  const topBrand =
+    getTopFilterValue(
+      filters,
+      (text) => text.includes('vendor') || text.includes('brand'),
+    ) || getMostCommonValue(products.map((product) => product?.vendor));
+
+  if (topSubcategory && topBrand) return `${topSubcategory} by ${topBrand}`;
+  return topSubcategory || topBrand || '';
+}
+
+function renderJsonLdScripts(values) {
+  return values
+    .map(
+      (value) =>
+        `<script type="application/ld+json">${toJsonLdString(value)}</script>`,
+    )
+    .join('');
 }
 
 /**
@@ -36,73 +129,55 @@ function truncateText(text, maxWords) {
  */
 export const meta = ({data}) => {
   const collection = data?.collection;
-  return getSeoMeta({
-    title: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
-    description: truncateText(
-      collection?.description || 'Explore our latest collection at 961Souq.',
-      100,
-    ),
-    url: `https://961souq.com/collections/${collection?.handle || ''}`,
+  const canonicalUrl = `https://961souq.com/collections/${
+    collection?.handle || ''
+  }`;
+  const collectionTitle = stripHtmlTags(
+    collection?.seo?.title || collection?.title || 'Electronics Collection',
+  );
+  const primaryIntent = getPrimaryCollectionIntent(collection);
+  const titleIntentPart =
+    primaryIntent &&
+    !collectionTitle.toLowerCase().includes(primaryIntent.toLowerCase())
+      ? ` | ${primaryIntent}`
+      : '';
+  const seoTitle = truncateChars(
+    `${collectionTitle}${titleIntentPart} | 961Souq Lebanon`,
+    60,
+  );
+  const normalizedDescription = stripHtmlTags(collection?.description || '');
+  const fallbackDescription = primaryIntent
+    ? `Shop ${collectionTitle} with focus on ${primaryIntent} at 961Souq Lebanon.`
+    : `Shop ${collectionTitle} at 961Souq Lebanon.`;
+  const truncatedCollectionDescription = truncateText(
+    normalizedDescription || fallbackDescription,
+    120,
+  );
+  const metaDescription = truncateChars(
+    normalizedDescription
+      ? `${fallbackDescription} ${truncatedCollectionDescription}`
+      : `${fallbackDescription} Find original products, key specs, and competitive prices.`,
+    155,
+  );
+
+  const seoMeta = getSeoMeta({
+    title: seoTitle,
+    description: metaDescription,
+    url: canonicalUrl,
     media:
       collection?.image?.url ||
       'https://961souq.com/default-collection-image.jpg',
-    jsonLd: [
-      {
-        '@context': 'http://schema.org/',
-        '@type': 'CollectionPage',
-        name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
-        url: `https://961souq.com/collections/${collection?.handle || ''}`,
-        description: truncateText(collection?.description || '', 22),
-        image: {
-          '@type': 'ImageObject',
-          url:
-            collection?.image?.url ||
-            'https://961souq.com/default-collection-image.jpg',
-        },
-      },
-      {
-        '@context': 'http://schema.org/',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: 'https://961souq.com',
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
-            item: `https://961souq.com/collections/${collection?.handle || ''}`,
-          },
-        ],
-      },
-      {
-        '@context': 'http://schema.org/',
-        '@type': 'ItemList',
-        name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
-        description: truncateText(collection?.description || '', 22),
-        url: `https://961souq.com/collections/${collection?.handle || ''}`,
-        itemListElement: collection?.products?.nodes
-          ?.slice(0, 10)
-          .map((product, index) => ({
-            '@type': 'ListItem',
-            position: index + 1,
-            url: `https://961souq.com/products/${encodeURIComponent(
-              product?.handle,
-            )}`,
-            name: truncateText(product?.title || 'Product', 10),
-            image: {
-              '@type': 'ImageObject',
-              url:
-                product?.featuredImage?.url ||
-                'https://961souq.com/default-product-image.jpg',
-            },
-          })),
-      },
-    ],
   });
+
+  const hasQueryParams = Boolean(data?.hasQueryParams);
+
+  return [
+    ...seoMeta,
+    {
+      name: 'robots',
+      content: hasQueryParams ? 'noindex, follow' : 'index, follow',
+    },
+  ];
 };
 
 /**
@@ -122,6 +197,7 @@ export async function loadCriticalData({context, params, request}) {
   const {handle} = params;
   const {storefront} = context;
   const searchParams = new URL(request.url).searchParams;
+  const hasQueryParams = searchParams.toString().length > 0;
 
   /* numbered-page param -> cursor handling */
   const pageBy = 30;
@@ -266,12 +342,10 @@ export async function loadCriticalData({context, params, request}) {
 
   const {collection} = collectionData;
   if (!collection) {
-    // Fallback to legacy category routes (e.g. /apple, /gaming) when a
-    // matching Shopify collection handle does not exist.
-    throw redirect(`/${handle}`, 302);
+    throw new Response('Collection not found', {status: 404});
   }
 
-  /* menu / slider collections (unchanged) */
+  /* menu / slider collections */
   let menu = null;
   let sliderCollections = [];
   try {
@@ -284,26 +358,16 @@ export async function loadCriticalData({context, params, request}) {
   }
   if (menu?.items?.length) {
     try {
-      sliderCollections = await Promise.all(
-        menu.items.map(async (item) => {
-          const sanitizedHandle = sanitizeHandle(item.title);
-          if (!sanitizedHandle) return null;
-          try {
-            const {collection} = await storefront.query(
-              COLLECTION_BY_HANDLE_QUERY,
-              {variables: {handle: sanitizedHandle}},
-            );
-            return collection;
-          } catch (error) {
-            console.error(
-              `Error fetching collection for ${item.title}:`,
-              error,
-            );
-            return null;
-          }
-        }),
-      );
-      sliderCollections = sliderCollections.filter(Boolean);
+      const seenHandles = new Set();
+      sliderCollections = menu.items
+        .map((item) => item?.resource)
+        .filter((resource) => resource?.__typename === 'Collection')
+        .filter((resource) => {
+          const key = resource.handle || resource.id;
+          if (!key || seenHandles.has(key)) return false;
+          seenHandles.add(key);
+          return true;
+        });
     } catch (error) {
       console.error('Error fetching slider collections:', error);
     }
@@ -313,16 +377,8 @@ export async function loadCriticalData({context, params, request}) {
     collection,
     sliderCollections,
     currentPage: page,
+    hasQueryParams,
   };
-}
-
-function sanitizeHandle(handle) {
-  return handle
-    .toLowerCase()
-    .replace(/"/g, '')
-    .replace(/&/g, '')
-    .replace(/\./g, '-')
-    .replace(/\s+/g, '-');
 }
 
 function loadDeferredData({context}) {
@@ -347,6 +403,64 @@ export default function Collection() {
     (count, key) => count + searchParams.getAll(key).length,
     0,
   );
+  const canonicalUrl = `https://961souq.com/collections/${
+    collection?.handle || ''
+  }`;
+  const normalizedDescription = stripHtmlTags(collection?.description || '');
+  const fallbackDescription = 'Explore our latest collection at 961Souq.';
+  const truncatedCollectionDescription = truncateText(
+    normalizedDescription || fallbackDescription,
+    120,
+  );
+  const metaDescription = truncateChars(truncatedCollectionDescription, 100);
+  const collectionJsonLd = {
+    '@context': 'http://schema.org/',
+    '@type': 'CollectionPage',
+    name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
+    url: canonicalUrl,
+    description: metaDescription,
+    image: {
+      '@type': 'ImageObject',
+      url:
+        collection?.image?.url || 'https://961souq.com/default-collection-image.jpg',
+    },
+  };
+  const breadcrumbJsonLd = {
+    '@context': 'http://schema.org/',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://961souq.com',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
+        item: canonicalUrl,
+      },
+    ],
+  };
+  const itemListJsonLd = {
+    '@context': 'http://schema.org/',
+    '@type': 'ItemList',
+    name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
+    description: metaDescription,
+    url: canonicalUrl,
+    itemListElement: (collection?.products?.nodes || []).slice(0, 10).map((product, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
+      name: truncateText(product?.title || 'Product', 10),
+      image: {
+        '@type': 'ImageObject',
+        url:
+          product?.featuredImage?.url || 'https://961souq.com/default-product-image.jpg',
+      },
+    })),
+  };
 
   /* keep URL tidy on initial hydration (leave pagination params alone) */
   // useEffect(() => {
@@ -402,6 +516,18 @@ export default function Collection() {
 
   return (
     <div className="collection">
+      <div
+        style={{display: 'none'}}
+        aria-hidden="true"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: renderJsonLdScripts([
+            collectionJsonLd,
+            breadcrumbJsonLd,
+            itemListJsonLd,
+          ]),
+        }}
+      />
       <h1>{collection.title}</h1>
 
       {sliderCollections && sliderCollections.length > 0 && (
@@ -607,10 +733,7 @@ const ProductItem = ({product, columns}) => {
   }, [product.availableForSale]);
 
   const [selectedVariant] = useState(product.variants.nodes[0] || null);
-  const variantUrl = useVariantUrl(
-    product.handle,
-    selectedVariant?.selectedOptions || [],
-  );
+  const variantUrl = `/products/${encodeURIComponent(product.handle)}`;
 
   const showWishlist = !!(
     selectedVariant &&
@@ -781,21 +904,19 @@ const MENU_QUERY = `#graphql
       items {
         title
         url
-      }
-    }
-  }
-`;
-
-const COLLECTION_BY_HANDLE_QUERY = `#graphql
-  query GetCollectionByHandle($handle: String!) {
-    collection(handle: $handle) {
-      id
-      title
-      description
-      handle
-      image {
-        url
-        altText
+        resource {
+          __typename
+          ... on Collection {
+            id
+            title
+            description
+            handle
+            image {
+              url
+              altText
+            }
+          }
+        }
       }
     }
   }
@@ -806,6 +927,8 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     id
     handle
     title
+    vendor
+    productType
     description
     availableForSale
     featuredImage {

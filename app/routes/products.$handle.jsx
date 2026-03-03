@@ -21,28 +21,120 @@ import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
 
+function toJsonLdString(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
+}
+
+function renderJsonLdScripts(values) {
+  return values
+    .map(
+      (value) =>
+        `<script type="application/ld+json">${toJsonLdString(value)}</script>`,
+    )
+    .join('');
+}
+
+function stripHtmlTags(text) {
+  return String(text || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function truncateChars(text, maxLength) {
+  const normalized = String(text || '').trim();
+  if (!normalized) return '';
+  return normalized.length > maxLength
+    ? `${normalized.slice(0, maxLength - 1).trimEnd()}…`
+    : normalized;
+}
+
+function buildBrandModel(brand, model) {
+  const normalizedBrand = stripHtmlTags(brand);
+  const normalizedModel = stripHtmlTags(model);
+
+  if (!normalizedBrand) return normalizedModel;
+  if (!normalizedModel) return normalizedBrand;
+  if (normalizedModel.toLowerCase().startsWith(normalizedBrand.toLowerCase())) {
+    return normalizedModel;
+  }
+
+  return `${normalizedBrand} ${normalizedModel}`;
+}
+
+function getProductDifferentiator(product, variant) {
+  const options = Array.isArray(variant?.selectedOptions)
+    ? variant.selectedOptions
+    : [];
+  const priorityKeywords = [
+    'storage',
+    'capacity',
+    'ram',
+    'memory',
+    'processor',
+    'chip',
+    'model',
+    'size',
+    'connectivity',
+  ];
+
+  for (const keyword of priorityKeywords) {
+    const matchingOption = options.find((option) =>
+      String(option?.name || '')
+        .toLowerCase()
+        .includes(keyword),
+    );
+    if (matchingOption?.value) {
+      return `${stripHtmlTags(matchingOption.name)}: ${stripHtmlTags(
+        matchingOption.value,
+      )}`;
+    }
+  }
+
+  const variantTitle = stripHtmlTags(variant?.title || '');
+  if (variantTitle && variantTitle.toLowerCase() !== 'default title') {
+    return variantTitle;
+  }
+
+  const sku = stripHtmlTags(variant?.sku || '');
+  if (sku) return `SKU: ${sku}`;
+
+  const productType = stripHtmlTags(product?.productType || '');
+  if (productType) return productType;
+
+  return '';
+}
+
 // ---------------- SEO & Meta
 export const meta = ({data}) => {
   const product = data?.product;
-  const variants = product.variants || [];
-  const currentVariant = variants[0] || {};
-
-  // Helper to truncate title
-  const truncate = (text, maxLength) =>
-    text?.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
-
-  // Create the raw title
-  const rawTitle = truncate(
-    product?.seoTitle || product?.title || '961 Souq Product',
-    140,
+  const variants = product?.variants || [];
+  const primaryVariant = product?.selectedVariant || variants[0] || {};
+  const brandModel = buildBrandModel(product?.vendor, product?.title);
+  const productSubject =
+    brandModel || stripHtmlTags(product?.title) || 'this product';
+  const differentiator = getProductDifferentiator(product, primaryVariant);
+  const titleBase = differentiator
+    ? `${productSubject} - ${differentiator}`
+    : productSubject;
+  const seoTitle = truncateChars(
+    `${titleBase || 'Electronics Product'} | 961Souq Lebanon`,
+    60,
+  );
+  const seoText = stripHtmlTags(
+    product?.seoDescription || product?.description || '',
+  );
+  const introDescription = differentiator
+    ? `Buy ${productSubject} (${differentiator}) in Lebanon from 961Souq.`
+    : `Buy ${productSubject} in Lebanon from 961Souq.`;
+  const seoDescription = truncateChars(
+    seoText
+      ? `${introDescription} ${seoText}`
+      : `${introDescription} Original product, key specs, warranty support, and fast delivery.`,
+    155,
   );
 
-  // Append " | Lebanon" if not already present (case-insensitive)
-  const formattedTitle = rawTitle.toLowerCase().includes('lebanon')
-    ? rawTitle
-    : `${rawTitle} | Lebanon`;
-
-  const rawImage = product.images?.edges?.[0]?.node?.url || '';
+  const rawImage = product?.images?.edges?.[0]?.node?.url || '';
   let image = rawImage;
 
   // Check for protocol-relative URL
@@ -60,134 +152,26 @@ export const meta = ({data}) => {
       'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
   }
 
-  return getSeoMeta({
-    title: truncate(formattedTitle, 60),
-    description: truncate(
-      product?.seoDescription ||
-        product?.description ||
-        'Discover this product.',
-      150,
-    ),
-    url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
+  const canonicalUrl = `https://961souq.com/products/${encodeURIComponent(
+    product?.handle || '',
+  )}`;
+
+  const seoMeta = getSeoMeta({
+    title: seoTitle,
+    description: seoDescription,
+    url: canonicalUrl,
     media: image,
-    jsonLd: [
-      {
-        '@context': 'http://schema.org/',
-        '@type': 'Product',
-        name: formattedTitle,
-        url: `https://961souq.com/products/${encodeURIComponent(
-          product?.handle,
-        )}`,
-        sku: currentVariant?.sku || product?.id,
-        productID: product?.id,
-        brand: {
-          '@type': 'Brand',
-          name: product?.vendor || '961 Souq',
-        },
-        description: truncate(product?.description || '', 150),
-        image:
-          product?.firstImage ||
-          'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912',
-        offers: variants.map((variant) => ({
-          '@type': 'Offer',
-          priceCurrency:
-            product?.priceRange?.minVariantPrice?.currencyCode || 'USD',
-          price: variant?.price?.amount || '0.00',
-          itemCondition: 'http://schema.org/NewCondition',
-          availability: variant?.availableForSale
-            ? 'http://schema.org/InStock'
-            : 'http://schema.org/OutOfStock',
-          url: `https://961souq.com/products/${encodeURIComponent(
-            product?.handle,
-          )}?variant=${variant?.id}`,
-          image: variant?.image?.url || product?.firstImage || '',
-          name: truncate(`${product?.title} - ${variant?.title || ''}`, 140),
-          sku: variant?.sku || variant?.id,
-          gtin12:
-            variant?.barcode?.length === 12 ? variant?.barcode : undefined,
-          gtin13:
-            variant?.barcode?.length === 13 ? variant?.barcode : undefined,
-          gtin14:
-            variant?.barcode?.length === 14 ? variant?.barcode : undefined,
-          priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split('T')[0],
-          shippingDetails: {
-            '@type': 'OfferShippingDetails',
-            shippingRate: {
-              '@type': 'MonetaryAmount',
-              value: '5.00',
-              currency: 'USD',
-            },
-            shippingDestination: {
-              '@type': 'DefinedRegion',
-              addressCountry: 'LB',
-            },
-            deliveryTime: {
-              '@type': 'ShippingDeliveryTime',
-              handlingTime: {
-                '@type': 'QuantitativeValue',
-                minValue: 0,
-                maxValue: 3,
-                unitCode: 'DAY',
-              },
-              transitTime: {
-                '@type': 'QuantitativeValue',
-                minValue: 1,
-                maxValue: 5,
-                unitCode: 'DAY',
-              },
-            },
-          },
-          hasMerchantReturnPolicy: {
-            '@type': 'MerchantReturnPolicy',
-            applicableCountry: 'LB',
-            returnPolicyCategory:
-              'https://schema.org/MerchantReturnFiniteReturnWindow',
-            merchantReturnDays: 5,
-            returnMethod: 'https://schema.org/ReturnByMail',
-            returnFees: 'https://schema.org/FreeReturn',
-          },
-        })),
-        aggregateRating: product?.metafields?.spr?.reviews
-          ? {
-              '@type': 'AggregateRating',
-              ratingValue: parseFloat(
-                product.metafields.spr.reviews
-                  .split('"ratingValue": "')[1]
-                  ?.split('"')[0] || 0,
-              ),
-              ratingCount: parseInt(
-                product.metafields.spr.reviews
-                  .split('"reviewCount": "')[1]
-                  ?.split('"')[0] || 0,
-                10,
-              ),
-            }
-          : undefined,
-      },
-      {
-        '@context': 'http://schema.org/',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: 'https://961souq.com',
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: formattedTitle,
-            item: `https://961souq.com/products/${encodeURIComponent(
-              product?.handle,
-            )}`,
-          },
-        ],
-      },
-    ],
   });
+
+  const hasQueryParams = Boolean(data?.hasQueryParams);
+
+  return [
+    ...seoMeta,
+    {
+      name: 'robots',
+      content: hasQueryParams ? 'noindex, follow' : 'index, follow',
+    },
+  ];
 };
 
 // ---------------- Loader
@@ -220,6 +204,8 @@ function getCleanProductUrl(requestUrl) {
 async function loadCriticalData({context, params, request}) {
   const {handle} = params;
   const {storefront} = context;
+  const requestUrl = new URL(request.url);
+  const hasQueryParams = requestUrl.searchParams.toString().length > 0;
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
@@ -280,6 +266,7 @@ async function loadCriticalData({context, params, request}) {
       variantPrice: firstVariant?.price || product.priceRange.minVariantPrice,
     },
     relatedProducts,
+    hasQueryParams,
   };
 }
 
@@ -850,6 +837,59 @@ export default function Product() {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const {title, descriptionHtml} = product;
+  const canonicalUrl = `https://961souq.com/products/${encodeURIComponent(
+    product?.handle,
+  )}`;
+  const seoVariant = product?.variants?.[0] || product?.selectedVariant || {};
+  const productJsonLd = {
+    '@context': 'http://schema.org/',
+    '@type': 'Product',
+    name: product?.seoTitle || product?.title || '',
+    url: canonicalUrl,
+    sku: seoVariant?.sku || product?.id,
+    productID: product?.id,
+    brand: {
+      '@type': 'Brand',
+      name: product?.vendor || '961 Souq',
+    },
+    description: String(product?.seoDescription || product?.description || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim(),
+    image:
+      product?.firstImage ||
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912',
+    offers: {
+      '@type': 'Offer',
+      priceCurrency:
+        seoVariant?.price?.currencyCode ||
+        product?.priceRange?.minVariantPrice?.currencyCode ||
+        'USD',
+      price: seoVariant?.price?.amount || '0.00',
+      availability: seoVariant?.availableForSale
+        ? 'http://schema.org/InStock'
+        : 'http://schema.org/OutOfStock',
+      url: canonicalUrl,
+    },
+  };
+  const breadcrumbJsonLd = {
+    '@context': 'http://schema.org/',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://961souq.com',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: product?.title || 'Product',
+        item: canonicalUrl,
+      },
+    ],
+  };
 
   const mediaItems =
     product.media?.edges && product.media.edges.length > 0
@@ -867,6 +907,14 @@ export default function Product() {
 
   return (
     <div className="product">
+      <div
+        style={{display: 'none'}}
+        aria-hidden="true"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: renderJsonLdScripts([productJsonLd, breadcrumbJsonLd]),
+        }}
+      />
       <div className="ProductPageTop">
         <ProductImages
           media={mediaItems}
