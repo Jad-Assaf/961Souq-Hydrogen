@@ -28,7 +28,6 @@ import {
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileAppPopup from '~/components/MobileAppPopup';
-import montserratRegularFont from '~/styles/fonts/Montserrat-Regular.ttf?url';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 // const MANUAL_MENU_HANDLES = [
@@ -48,21 +47,6 @@ import montserratRegularFont from '~/styles/fonts/Montserrat-Regular.ttf?url';
 //   'photography',
 //   'home-appliances',
 // ];
-
-/**
- * Custom hook to detect mobile viewport (below 1024px)
- */
-export function links() {
-  return [
-    {
-      rel: 'preload',
-      as: 'font',
-      href: montserratRegularFont,
-      type: 'font/ttf',
-      crossOrigin: 'anonymous',
-    },
-  ];
-}
 
 /**
  * @type {MetaFunction}
