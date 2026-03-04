@@ -62,7 +62,7 @@ h2 {
 }
 
 :root {
-  --appPopupDur: 220ms;
+  --appPopupDur: 140ms;
   --appPopupEase: cubic-bezier(0.2, 0.8, 0.2, 1);
   --appPopupBlue: #03072c;
 }

@@ -659,8 +659,8 @@ export function ProductItem({product, showFreeShippingTags}) {
                 const srcSet = imageUrl
                   ? `${addWidthParam(imageUrl, 200)} 200w, ${addWidthParam(
                       imageUrl,
-                      320,
-                    )} 320w, ${addWidthParam(imageUrl, 480)} 480w`
+                      200,
+                    )} 320w, ${addWidthParam(imageUrl, 200)} 480w`
                   : undefined;
 
                 return (

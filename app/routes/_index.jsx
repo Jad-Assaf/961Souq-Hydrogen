@@ -544,6 +544,8 @@ export default function Homepage() {
   const [onDemandTopProducts, setOnDemandTopProducts] = useState({});
   const [loadingHandles, setLoadingHandles] = useState({});
   const inflightCollectionsRef = useRef(new Set());
+  const newArrivalsTriggerRef = useRef(null);
+  const [mobilePopupEnabled, setMobilePopupEnabled] = useState(false);
 
   const rootMatch = useMatches()[0];
   const header = rootMatch?.data?.header;
@@ -692,6 +694,33 @@ export default function Homepage() {
     });
   }, [isMobile, desktopMenuHandles, hasLoadedHandle, ensureCollectionLoaded]);
 
+  useEffect(() => {
+    if (!isMobile) return;
+    if (!newArrivals) return;
+    if (mobilePopupEnabled) return;
+
+    const node = newArrivalsTriggerRef.current;
+    if (!node) return;
+
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setMobilePopupEnabled(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setMobilePopupEnabled(true);
+          observer.disconnect();
+        }
+      },
+      {threshold: 0.15},
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isMobile, newArrivals, mobilePopupEnabled]);
+
   // Desktop state: original multiple-groups.
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
   const [selectedGaming, setSelectedGaming] = useState(gamingMenu[0]);
@@ -780,7 +809,7 @@ export default function Homepage() {
 
   return (
     <div className="home">
-      <MobileAppPopup />
+      <MobileAppPopup enabled={mobilePopupEnabled} />
       <h1
         className="home-h1"
         aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"
@@ -788,7 +817,11 @@ export default function Homepage() {
 
       <MosaicHero collections={heroCollections} isMobile={isMobile} />
 
-      {newArrivals && <TopProductSections collection={newArrivals} />}
+      {newArrivals && (
+        <div ref={newArrivalsTriggerRef}>
+          <TopProductSections collection={newArrivals} />
+        </div>
+      )}
       {cosmetics && <TopProductSections collection={cosmetics} />}
 
       {/* RelatedProductsFromHistory temporarily disabled for testing performance */}

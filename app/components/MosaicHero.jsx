@@ -8,6 +8,11 @@ function withWidth(url, width) {
 }
 
 export default function MosaicHero({collections}) {
+  const getImagePriorityProps = (index) =>
+    index < 3
+      ? {loading: 'eager', fetchpriority: 'high'}
+      : {loading: 'lazy'};
+
   const collectionImages = {
     apple:
       'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636',
@@ -93,7 +98,13 @@ export default function MosaicHero({collections}) {
             </div>
 
             <div className="tile__media" aria-hidden="true">
-              <img src={appleFeatureImage.src} alt={appleFeatureImage.alt} />
+              <img
+                src={appleFeatureImage.src}
+                alt={appleFeatureImage.alt}
+                width="900"
+                height="300"
+                {...getImagePriorityProps(0)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -108,7 +119,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Android &amp; iPhone</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={mobilesImage.src} alt={mobilesImage.alt} />
+              <img
+                src={mobilesImage.src}
+                alt={mobilesImage.alt}
+                width="600"
+                height="250"
+                {...getImagePriorityProps(1)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -123,7 +140,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Consoles &amp; Gear</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={gamingImage.src} alt={gamingImage.alt} />
+              <img
+                src={gamingImage.src}
+                alt={gamingImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(2)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -138,7 +161,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">RTX &amp; High FPS</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={gamingLaptopsImage.src} alt={gamingLaptopsImage.alt} />
+              <img
+                src={gamingLaptopsImage.src}
+                alt={gamingLaptopsImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(3)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -153,7 +182,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Builds &amp; PCs</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={desktopsImage.src} alt={desktopsImage.alt} />
+              <img
+                src={desktopsImage.src}
+                alt={desktopsImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(4)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -168,7 +203,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">144Hz / 4K</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={monitorsImage.src} alt={monitorsImage.alt} />
+              <img
+                src={monitorsImage.src}
+                alt={monitorsImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(5)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -183,7 +224,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Study &amp; Play</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={tabletsImage.src} alt={tabletsImage.alt} />
+              <img
+                src={tabletsImage.src}
+                alt={tabletsImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(6)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -198,7 +245,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Routers &amp; Mesh</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={networkingImage.src} alt={networkingImage.alt} />
+              <img
+                src={networkingImage.src}
+                alt={networkingImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(7)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -213,7 +266,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Home Tech &amp; Care</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={dysonImage.src} alt={dysonImage.alt} />
+              <img
+                src={dysonImage.src}
+                alt={dysonImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(8)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -228,7 +287,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Beauty Essentials</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={cosmeticsImage.src} alt={cosmeticsImage.alt} />
+              <img
+                src={cosmeticsImage.src}
+                alt={cosmeticsImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(9)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
@@ -246,7 +311,13 @@ export default function MosaicHero({collections}) {
               <p className="tile__sub">Chargers, Cables &amp; More</p>
             </div>
             <div className="tile__media" aria-hidden="true">
-              <img src={accessoriesImage.src} alt={accessoriesImage.alt} />
+              <img
+                src={accessoriesImage.src}
+                alt={accessoriesImage.alt}
+                width="500"
+                height="250"
+                {...getImagePriorityProps(10)}
+              />
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;

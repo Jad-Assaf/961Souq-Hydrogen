@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
-const SHOW_DELAY_MS = 1000;
-const ANIM_MS = 220; // keep in sync with CSS --appPopupDur
+const ANIM_MS = 140; // keep in sync with CSS --appPopupDur
 const DISMISS_DAYS = 1; // set to 0 if you want it to show every time
 
 function isLikelyMobile() {
@@ -50,7 +49,7 @@ function daysToMs(days) {
   return Math.max(0, Number(days) || 0) * 24 * 60 * 60 * 1000;
 }
 
-const MobileAppPopup = () => {
+const MobileAppPopup = ({enabled = true}) => {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -60,30 +59,18 @@ const MobileAppPopup = () => {
   const lockScroll = useCallback(() => {
     if (typeof window === 'undefined') return;
 
-    const scrollY = window.scrollY || 0;
-    document.body.dataset.appPopupScrollY = String(scrollY);
-
-    // Prevent background scrolling without layout jumping
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
+    // Prevent background scroll without forcing any scroll position restore.
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
   }, []);
 
   const unlockScroll = useCallback(() => {
     if (typeof window === 'undefined') return;
 
-    const y = Number(document.body.dataset.appPopupScrollY || '0');
-    delete document.body.dataset.appPopupScrollY;
-
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
-
-    window.scrollTo(0, y);
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
   }, []);
 
   const closePopup = useCallback(() => {
@@ -119,6 +106,7 @@ const MobileAppPopup = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!enabled) return;
     if (!isLikelyMobile()) return;
 
     // Optional: don’t show again for DISMISS_DAYS
@@ -135,21 +123,18 @@ const MobileAppPopup = () => {
       }
     }
 
-    const t = window.setTimeout(() => {
-      setMounted(true);
-      lockScroll();
+    setMounted(true);
+    lockScroll();
 
-      // Next frame ensures CSS transitions reliably trigger
-      requestAnimationFrame(() => setOpen(true));
-    }, SHOW_DELAY_MS);
-
+    // Keep open transition async so "mounted" renders before "open" toggles.
+    const t = window.setTimeout(() => setOpen(true), 0);
     timersRef.current.push(t);
 
     return () => {
       timersRef.current.forEach((id) => clearTimeout(id));
       timersRef.current = [];
     };
-  }, [lockScroll]);
+  }, [enabled, lockScroll]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -192,7 +177,7 @@ const MobileAppPopup = () => {
         <div className="appPopupContent">
           <img
             className="appPopupLogo"
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150&width=150"
             alt="961Souq"
             loading="lazy"
             decoding="async"
