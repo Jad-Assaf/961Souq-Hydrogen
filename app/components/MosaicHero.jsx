@@ -22,7 +22,7 @@ export default function MosaicHero({collections}) {
   };
 
   const getImageProps = ({url, index, isFeature = false}) => {
-    const widths = isFeature ? [320, 480, 640, 900] : [240, 320, 400, 500];
+    const widths = isFeature ? [320, 480, 640, 900] : [500];
     const maxWidth = widths[widths.length - 1];
 
     return {

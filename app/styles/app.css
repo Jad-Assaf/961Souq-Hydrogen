@@ -7508,8 +7508,8 @@ svg.icon.icon--full-color {
     padding:16px;
   }
   .tile__media img{
-    width:auto;
-    height:220px;
+    width:100%;
+    height:auto;
     transform:translateX(4px);
   }
   .tile--feature .tile__media img{
@@ -7517,8 +7517,8 @@ svg.icon.icon--full-color {
     height:auto;
   }
   .tile--phones .tile__media img{
-    width:auto;
-    height:220px;
+    width:100%;
+    height:auto;
   }
   .tile__title--sm{
     font-size:20px;
