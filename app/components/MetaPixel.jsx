@@ -65,100 +65,47 @@ const trackPageViewCAPI = (eventId, extraData) => {
 };
 
 const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
-const PIXEL_DELAY_MS = 1500;
-const PIXEL_IDLE_TIMEOUT_MS = 3000;
-
-const ensureFbqStub = () => {
-  if (typeof window.fbq === 'function') return window.fbq;
-
-  const fbqStub = function () {
-    fbqStub.callMethod
-      ? fbqStub.callMethod.apply(fbqStub, arguments)
-      : fbqStub.queue.push(arguments);
-  };
-
-  if (!window._fbq) window._fbq = fbqStub;
-  fbqStub.push = fbqStub;
-  fbqStub.loaded = true;
-  fbqStub.version = '2.0';
-  fbqStub.queue = [];
-  window.fbq = fbqStub;
-  return fbqStub;
-};
 
 const MetaPixel = ({pixelId}) => {
   const location = useLocation();
   const didInitRef = useRef(false);
-  const scriptInjectedRef = useRef(false);
-  const fallbackTimerRef = useRef(null);
-  const idleCallbackRef = useRef(null);
 
   // 1) Load the pixel script only once
   useEffect(() => {
     if (!pixelId) return;
-    if (scriptInjectedRef.current) return;
-    if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
-      scriptInjectedRef.current = true;
-      return;
-    }
+    if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) return;
 
-    const injectScript = () => {
-      if (scriptInjectedRef.current) return;
-      scriptInjectedRef.current = true;
-
-      if (fallbackTimerRef.current) {
-        clearTimeout(fallbackTimerRef.current);
-        fallbackTimerRef.current = null;
-      }
-      if (idleCallbackRef.current && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleCallbackRef.current);
-        idleCallbackRef.current = null;
-      }
-
-      const s = document.createElement('script');
-      s.defer = true;
-      s.src = SCRIPT_SRC;
-      document.head.appendChild(s);
-    };
-
-    const scheduleLoad = () => {
-      if ('requestIdleCallback' in window) {
-        idleCallbackRef.current = window.requestIdleCallback(injectScript, {
-          timeout: PIXEL_IDLE_TIMEOUT_MS,
-        });
-        return;
-      }
-
-      fallbackTimerRef.current = window.setTimeout(
-        injectScript,
-        PIXEL_DELAY_MS,
-      );
-    };
-
-    if (document.readyState === 'complete') {
-      scheduleLoad();
-    } else {
-      window.addEventListener('load', scheduleLoad, {once: true});
-    }
-
-    return () => {
-      window.removeEventListener('load', scheduleLoad);
-      if (fallbackTimerRef.current) {
-        clearTimeout(fallbackTimerRef.current);
-        fallbackTimerRef.current = null;
-      }
-      if (idleCallbackRef.current && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleCallbackRef.current);
-        idleCallbackRef.current = null;
-      }
-    };
+    const s = document.createElement('script');
+    s.defer = true;
+    s.src = SCRIPT_SRC;
+    document.head.appendChild(s);
   }, [pixelId]);
 
   // 2) Initialize fbq & send first PageView exactly once
   useEffect(() => {
     if (!pixelId || didInitRef.current) return;
 
-    const fbq = ensureFbqStub();
+    if (typeof fbq !== 'function') {
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod
+            ? n.callMethod.apply(n, arguments)
+            : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.defer = true;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', SCRIPT_SRC);
+    }
+
     fbq('init', pixelId);
 
     const eventId = generateEventId();
@@ -175,7 +122,6 @@ const MetaPixel = ({pixelId}) => {
 
   // 3) Fire a PageView on every route change
   useEffect(() => {
-    const fbq = window.fbq;
     if (typeof fbq !== 'function') return;
 
     const eventId = generateEventId();
