@@ -314,19 +314,11 @@ export function Layout({children}) {
           (function () {
             var gtagIds = ['${GOOGLE_ANALYTICS_ID}', '${GOOGLE_ADS_ID}'];
             var scriptInjected = false;
-            var interactionEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
             var fallbackTimer;
-
-            function removeInteractionListeners() {
-              for (var i = 0; i < interactionEvents.length; i++) {
-                window.removeEventListener(interactionEvents[i], loadGtagScript);
-              }
-            }
 
             function loadGtagScript() {
               if (scriptInjected) return;
               scriptInjected = true;
-              removeInteractionListeners();
               if (fallbackTimer) {
                 clearTimeout(fallbackTimer);
                 fallbackTimer = null;
@@ -341,22 +333,13 @@ export function Layout({children}) {
               document.head.appendChild(script);
             }
 
-            function addInteractionListeners() {
-              for (var i = 0; i < interactionEvents.length; i++) {
-                window.addEventListener(interactionEvents[i], loadGtagScript, {
-                  once: true,
-                  passive: true,
-                });
-              }
-            }
-
             function scheduleGtagLoad() {
               if ('requestIdleCallback' in window) {
-                window.requestIdleCallback(loadGtagScript, {timeout: 8000});
+                window.requestIdleCallback(loadGtagScript, {timeout: 3000});
                 return;
               }
 
-              fallbackTimer = window.setTimeout(loadGtagScript, 5000);
+              fallbackTimer = window.setTimeout(loadGtagScript, 1500);
             }
 
             window.dataLayer = window.dataLayer || [];
@@ -371,8 +354,6 @@ export function Layout({children}) {
               }
               window.__gtagConfigured = true;
             }
-
-            addInteractionListeners();
 
             if (document.readyState === 'complete') {
               scheduleGtagLoad();

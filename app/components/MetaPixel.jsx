@@ -65,8 +65,8 @@ const trackPageViewCAPI = (eventId, extraData) => {
 };
 
 const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
-const PIXEL_DELAY_MS = 5000;
-const PIXEL_IDLE_TIMEOUT_MS = 8000;
+const PIXEL_DELAY_MS = 1500;
+const PIXEL_IDLE_TIMEOUT_MS = 3000;
 
 const ensureFbqStub = () => {
   if (typeof window.fbq === 'function') return window.fbq;
@@ -91,6 +91,7 @@ const MetaPixel = ({pixelId}) => {
   const didInitRef = useRef(false);
   const scriptInjectedRef = useRef(false);
   const fallbackTimerRef = useRef(null);
+  const idleCallbackRef = useRef(null);
 
   // 1) Load the pixel script only once
   useEffect(() => {
@@ -101,24 +102,17 @@ const MetaPixel = ({pixelId}) => {
       return;
     }
 
-    const interactionEvents = [
-      'pointerdown',
-      'keydown',
-      'touchstart',
-      'scroll',
-    ];
-
     const injectScript = () => {
       if (scriptInjectedRef.current) return;
       scriptInjectedRef.current = true;
 
-      for (let i = 0; i < interactionEvents.length; i++) {
-        window.removeEventListener(interactionEvents[i], injectScript);
-      }
-
       if (fallbackTimerRef.current) {
         clearTimeout(fallbackTimerRef.current);
         fallbackTimerRef.current = null;
+      }
+      if (idleCallbackRef.current && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleCallbackRef.current);
+        idleCallbackRef.current = null;
       }
 
       const s = document.createElement('script');
@@ -127,16 +121,9 @@ const MetaPixel = ({pixelId}) => {
       document.head.appendChild(s);
     };
 
-    for (let i = 0; i < interactionEvents.length; i++) {
-      window.addEventListener(interactionEvents[i], injectScript, {
-        once: true,
-        passive: true,
-      });
-    }
-
     const scheduleLoad = () => {
       if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(injectScript, {
+        idleCallbackRef.current = window.requestIdleCallback(injectScript, {
           timeout: PIXEL_IDLE_TIMEOUT_MS,
         });
         return;
@@ -155,12 +142,14 @@ const MetaPixel = ({pixelId}) => {
     }
 
     return () => {
-      for (let i = 0; i < interactionEvents.length; i++) {
-        window.removeEventListener(interactionEvents[i], injectScript);
-      }
+      window.removeEventListener('load', scheduleLoad);
       if (fallbackTimerRef.current) {
         clearTimeout(fallbackTimerRef.current);
         fallbackTimerRef.current = null;
+      }
+      if (idleCallbackRef.current && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleCallbackRef.current);
+        idleCallbackRef.current = null;
       }
     };
   }, [pixelId]);
