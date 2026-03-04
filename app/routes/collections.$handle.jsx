@@ -23,7 +23,7 @@ import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
 import WishlistButton from '~/components/WishlistButton';
 
 const SOCIAL_SHARE_IMAGE =
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961_Souq_Navy.png?v=1772441663&format=webp';
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logo-photo.jpg?v=1772628583';
 
 function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') return '';
