@@ -87,7 +87,7 @@ function CollectionItem({collection, index}) {
     >
       {collection?.image && (
         <img
-          src={`${collection.image.url}&width=250`}
+          src={`${collection.image.url}&format=webp&width=250`}
           alt={collection.image.altText || collection.title}
           loading={index < 3 ? 'eager' : undefined}
           width={150}

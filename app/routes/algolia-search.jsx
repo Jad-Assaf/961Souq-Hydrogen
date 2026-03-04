@@ -13,7 +13,7 @@ function CustomHit({hit}) {
     <a href={`/products/${hit.handle}`} className="product-card">
       {hit.image && (
         <img
-          src={`${hit.image}&width=300`}
+          src={`${hit.image}&format=webp&width=300`}
           alt={hit.name}
           className="as-hit-image"
           width={152}

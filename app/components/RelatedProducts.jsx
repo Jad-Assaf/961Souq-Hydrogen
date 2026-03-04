@@ -77,9 +77,9 @@ function RelatedProductItem({product, index}) {
             data={product.images.edges[0]?.node}
             aspectratio="1/1"
             sizes="(min-width: 45em) 20vw, 40vw"
-            srcSet={`${product.images.edges[0]?.node.url}&width=200 300w,
-                     ${product.images.edges[0]?.node.url}&width=200 600w,
-                     ${product.images.edges[0]?.node.url}&width=200 1200w`}
+            srcSet={`${product.images.edges[0]?.node.url}&format=webp&width=200 300w,
+                     ${product.images.edges[0]?.node.url}&format=webp&width=200 600w,
+                     ${product.images.edges[0]?.node.url}&format=webp&width=200 1200w`}
             alt={product.images.edges[0]?.node.altText || product.title}
             width="150px"
             height="150px"

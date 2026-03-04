@@ -35,7 +35,7 @@ export default function BrandSection({brands}) {
             className={`brand-item ${inView ? 'visible' : 'hidden'}`}
           >
             <img
-              src={`${brand.image}&width=100`}
+              src={`${brand.image}&format=webp&width=100`}
               alt={brand.name}
               width={125}
               height={125}

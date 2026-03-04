@@ -278,7 +278,7 @@ function ProductCard({product}) {
       {product.image && (
         <div className="search-result-image-wrapper">
           <img
-            src={`${product.image}&width=300`}
+            src={`${product.image}&format=webp&width=300`}
             alt={product.title}
             className="search-result-image"
             loading="lazy"

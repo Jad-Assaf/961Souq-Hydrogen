@@ -57,21 +57,21 @@ export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
 };
 
 const imgs = [
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-1.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-1.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/laptops-1.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dekstops.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pc-parts.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-1.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_b9186522-836f-4ab7-9d48-41fbdb1e20ed.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/phones_d5aded45-9b39-47c9-b69e-31b16aaef7aa.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tablets_191d3d41-0840-433d-ab84-644697a6c033.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/earbuds.jpg?v=1747996340',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pioneer.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/accessories_79d5f32e-19db-453e-88ac-8cd3146d101d.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fitness.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/photography.jpg?v=1747995659',
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances.jpg?v=1747995659',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/apple-1.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming-1.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/laptops-1.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/dekstops.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pc-parts.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking-1.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_b9186522-836f-4ab7-9d48-41fbdb1e20ed.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/phones_d5aded45-9b39-47c9-b69e-31b16aaef7aa.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tablets_191d3d41-0840-433d-ab84-644697a6c033.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/earbuds.jpg?v=1747996340&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/pioneer.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/accessories_79d5f32e-19db-453e-88ac-8cd3146d101d.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/fitness.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/photography.jpg?v=1747995659&format=webp',
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home-appliances.jpg?v=1747995659&format=webp',
 ];
 
 const descriptions = [
@@ -106,7 +106,7 @@ function CategoryItem({collection, index}) {
         >
           <img
             // src={imgs[index % imgs.length]}
-            src={`${collection.image.url}&width=250`}
+            src={`${collection.image.url}&format=webp&width=250`}
             alt={collection.title}
             className="category-imgg"
           />

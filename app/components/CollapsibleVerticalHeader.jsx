@@ -76,7 +76,7 @@ export function CollapsibleVerticalHeader({header}) {
             <span className="vh-icon">
               {img(item) && (
                 <img
-                  src={`${img(item)}&width=100`}
+                  src={`${img(item)}&format=webp&width=100`}
                   alt={item.altText || item.title}
                   width="40"
                   height="40"
@@ -178,7 +178,7 @@ export function CollapsibleVerticalHeader({header}) {
         <NavLink to="/" className="vh-logo-link">
           {/* logo for collapsed (60 px) state */}
           <img
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png?v=1719486376"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo_Cart_19e9e372-5859-44c9-8915-11b81ed78213.png?v=1719486376&format=webp"
             alt={shop.name}
             className="logo-collapsed"
             width="50"
@@ -187,7 +187,7 @@ export function CollapsibleVerticalHeader({header}) {
 
           {/* logo for expanded state */}
           <img
-            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&width=400"
+            src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912&format=webp&width=400"
             alt={shop.name}
             className="logo-expanded"
             width="120"

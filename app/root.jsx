@@ -51,8 +51,8 @@ export function links() {
     // {rel: 'preconnect', href: 'https://shop.app'},
     {
       rel: 'icon',
-      type: 'image/png',
-      href: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150',
+      type: 'image/webp',
+      href: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150&format=webp',
     },
   ];
 }
@@ -413,7 +413,7 @@ export function Layout({children}) {
             }}
           >
             <img
-              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150"
+              src="https://cdn.shopify.com/s/files/1/0552/0883/7292/files/newfavicon961.png?v=1772199150&format=webp"
               alt="Loading"
               width="80"
               height="80"

@@ -2,83 +2,108 @@
 import React from 'react';
 import {Link} from '~/components/link';
 
-function withWidth(url, width) {
+function withImageParams(url, {width, quality = 85, format = 'webp'}) {
   if (!url) return '';
-  return `${url}${url.includes('?') ? '&' : '?'}width=${width}`;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}width=${width}&quality=${quality}&format=${format}`;
+}
+
+function buildSrcSet(url, widths) {
+  return widths
+    .map((width) => `${withImageParams(url, {width})} ${width}w`)
+    .join(', ');
 }
 
 export default function MosaicHero({collections}) {
-  const getImagePriorityProps = (index) =>
-    index < 3
-      ? {loading: 'eager', fetchpriority: 'high'}
-      : {loading: 'lazy'};
+  const getImagePriorityProps = (index) => {
+    if (index === 0) return {loading: 'eager', fetchpriority: 'high'};
+    if (index < 3) return {loading: 'eager'};
+    return {loading: 'lazy'};
+  };
+
+  const getImageProps = ({url, index, isFeature = false}) => {
+    const widths = isFeature ? [320, 480, 640, 900] : [240, 320, 400, 500];
+    const maxWidth = widths[widths.length - 1];
+
+    return {
+      src: withImageParams(url, {width: maxWidth}),
+      srcSet: buildSrcSet(url, widths),
+      sizes: isFeature
+        ? '(max-width: 979px) 100vw, 66vw'
+        : '(max-width: 979px) 100vw, 33vw',
+      width: isFeature ? 900 : 500,
+      height: isFeature ? 300 : 250,
+      decoding: 'async',
+      ...getImagePriorityProps(index),
+    };
+  };
 
   const collectionImages = {
     apple:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636&format=webp',
     gaming:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241203.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241203.jpg?v=1771928636&format=webp',
     gamingLaptops:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241207.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241207.jpg?v=1771928636&format=webp',
     mobiles:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241201.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241201.jpg?v=1771928636&format=webp',
     desktops:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241211.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241211.jpg?v=1771928636&format=webp',
     monitors:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241215.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241215.jpg?v=1771928636&format=webp',
     tablets:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241216.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241216.jpg?v=1771928636&format=webp',
     networking:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241217.jpg?v=1771928636',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241217.jpg?v=1771928636&format=webp',
     accessories:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241221.jpg?v=1771928681',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241221.jpg?v=1771928681&format=webp',
     dyson:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241312.jpg?v=1771931777',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241312.jpg?v=1771931777&format=webp',
     cosmetics:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241315.jpg?v=1771931777',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241315.jpg?v=1771931777&format=webp',
   };
   const appleFeatureImage = {
-    src: withWidth(collectionImages.apple, 700),
+    src: collectionImages.apple,
     alt: 'Apple',
   };
   const gamingImage = {
-    src: withWidth(collectionImages.gaming, 400),
+    src: collectionImages.gaming,
     alt: 'Gaming',
   };
   const mobilesImage = {
-    src: withWidth(collectionImages.mobiles, 500),
+    src: collectionImages.mobiles,
     alt: 'Mobiles',
   };
   const gamingLaptopsImage = {
-    src: withWidth(collectionImages.gamingLaptops, 400),
+    src: collectionImages.gamingLaptops,
     alt: 'Gaming Laptops',
   };
   const desktopsImage = {
-    src: withWidth(collectionImages.desktops, 400),
+    src: collectionImages.desktops,
     alt: 'Desktops',
   };
   const monitorsImage = {
-    src: withWidth(collectionImages.monitors, 400),
+    src: collectionImages.monitors,
     alt: 'Monitors',
   };
   const tabletsImage = {
-    src: withWidth(collectionImages.tablets, 400),
+    src: collectionImages.tablets,
     alt: 'Tablets',
   };
   const networkingImage = {
-    src: withWidth(collectionImages.networking, 400),
+    src: collectionImages.networking,
     alt: 'Networking',
   };
   const accessoriesImage = {
-    src: withWidth(collectionImages.accessories, 400),
+    src: collectionImages.accessories,
     alt: 'Accessories',
   };
   const dysonImage = {
-    src: withWidth(collectionImages.dyson, 400),
+    src: collectionImages.dyson,
     alt: 'Dyson',
   };
   const cosmeticsImage = {
-    src: withWidth(collectionImages.cosmetics, 400),
+    src: collectionImages.cosmetics,
     alt: 'Cosmetics',
   };
   const shouldShowCollection = (handle) => {
@@ -99,11 +124,12 @@ export default function MosaicHero({collections}) {
 
             <div className="tile__media" aria-hidden="true">
               <img
-                src={appleFeatureImage.src}
                 alt={appleFeatureImage.alt}
-                width="900"
-                height="300"
-                {...getImagePriorityProps(0)}
+                {...getImageProps({
+                  url: appleFeatureImage.src,
+                  index: 0,
+                  isFeature: true,
+                })}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -120,11 +146,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={mobilesImage.src}
                 alt={mobilesImage.alt}
-                width="600"
-                height="250"
-                {...getImagePriorityProps(1)}
+                {...getImageProps({url: mobilesImage.src, index: 1})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -141,11 +164,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={gamingImage.src}
                 alt={gamingImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(2)}
+                {...getImageProps({url: gamingImage.src, index: 2})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -162,11 +182,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={gamingLaptopsImage.src}
                 alt={gamingLaptopsImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(3)}
+                {...getImageProps({url: gamingLaptopsImage.src, index: 3})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -183,11 +200,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={desktopsImage.src}
                 alt={desktopsImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(4)}
+                {...getImageProps({url: desktopsImage.src, index: 4})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -204,11 +218,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={monitorsImage.src}
                 alt={monitorsImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(5)}
+                {...getImageProps({url: monitorsImage.src, index: 5})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -225,11 +236,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={tabletsImage.src}
                 alt={tabletsImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(6)}
+                {...getImageProps({url: tabletsImage.src, index: 6})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -246,11 +254,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={networkingImage.src}
                 alt={networkingImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(7)}
+                {...getImageProps({url: networkingImage.src, index: 7})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -267,11 +272,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={dysonImage.src}
                 alt={dysonImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(8)}
+                {...getImageProps({url: dysonImage.src, index: 8})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -288,11 +290,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={cosmeticsImage.src}
                 alt={cosmeticsImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(9)}
+                {...getImageProps({url: cosmeticsImage.src, index: 9})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -312,11 +311,8 @@ export default function MosaicHero({collections}) {
             </div>
             <div className="tile__media" aria-hidden="true">
               <img
-                src={accessoriesImage.src}
                 alt={accessoriesImage.alt}
-                width="500"
-                height="250"
-                {...getImagePriorityProps(10)}
+                {...getImageProps({url: accessoriesImage.src, index: 10})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">

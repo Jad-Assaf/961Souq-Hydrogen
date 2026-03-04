@@ -329,7 +329,7 @@ function SearchPageSuggestions({predictive, query}) {
                 >
                   {collection.image?.url && (
                     <img
-                      src={`${collection.image.url}&width=200`}
+                      src={`${collection.image.url}&format=webp&width=200`}
                       alt={collection.image.altText || collection.title}
                       className="suggestion-card-image"
                       loading="lazy"
@@ -405,7 +405,7 @@ function ProductCard({product}) {
       {image?.url && (
         <div className="search-result-image-wrapper">
           <img
-            src={`${image.url}&width=300`}
+            src={`${image.url}&format=webp&width=300`}
             alt={image.altText || product.title}
             className="search-result-image"
             loading="lazy"

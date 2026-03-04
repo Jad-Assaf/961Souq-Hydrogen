@@ -253,7 +253,7 @@ function TypesenseSuggestions({
                   >
                     {product.image && (
                       <img
-                        src={`${product.image}&width=200`}
+                        src={`${product.image}&format=webp&width=200`}
                         alt={product.title}
                         className="suggestion-product-image"
                         loading="lazy"

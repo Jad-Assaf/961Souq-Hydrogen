@@ -376,7 +376,7 @@ export default function RecentlyViewedPage() {
                   }}
                 >
                   <img
-                    src={`${p.featuredImage?.url || ''}&width=144`}
+                    src={`${p.featuredImage?.url || ''}&format=webp&width=144`}
                     alt={p.featuredImage?.altText || p.title || 'Product'}
                     width="72"
                     height="72"
@@ -459,7 +459,7 @@ export default function RecentlyViewedPage() {
                   style={{display: 'block', flex: '0 1 360px', maxWidth: 360}}
                 >
                   <img
-                    src={`${selected.featuredImage?.url || ''}&width=720`}
+                    src={`${selected.featuredImage?.url || ''}&format=webp&width=720`}
                     alt={
                       selected.featuredImage?.altText ||
                       selected.title ||
@@ -672,7 +672,7 @@ function ProductCard({product, index = 0}) {
       >
         <Link to={`/products/${encodeURIComponent(product.handle)}`}>
           <img
-            src={`${product.featuredImage?.url || ''}&width=200`}
+            src={`${product.featuredImage?.url || ''}&format=webp&width=200`}
             alt={product.featuredImage?.altText || product.title || 'Product'}
             width="150"
             height="150"

@@ -22,7 +22,7 @@ import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
 
 const SOCIAL_SHARE_IMAGE =
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961_Souq_Navy.png?v=1772441663';
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961_Souq_Navy.png?v=1772441663&format=webp';
 
 function toJsonLdString(value) {
   return JSON.stringify(value).replace(/</g, '\\u003c');

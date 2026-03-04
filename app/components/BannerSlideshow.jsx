@@ -118,12 +118,12 @@ export function BannerSlideshow({banners, interval = 10000}) {
                 return (
                   <img
                     srcSet={`
-                    ${slide.mobileImageUrl}&width=320 320w,
-                    ${slide.mobileImageUrl}&width=480 480w,
-                    ${slide.mobileImageUrl}&width=640 640w,
+                    ${slide.mobileImageUrl}&format=webp&width=320 320w,
+                    ${slide.mobileImageUrl}&format=webp&width=480 480w,
+                    ${slide.mobileImageUrl}&format=webp&width=640 640w,
                   `}
                     sizes="100vw"
-                    src={`${slide.mobileImageUrl}&width=640`}
+                    src={`${slide.mobileImageUrl}&format=webp&width=640`}
                     alt={slide.alt || `Banner ${current + 1}`}
                     className="banner-image"
                     loading={isFirstSlide ? 'eager' : 'lazy'}
@@ -159,9 +159,9 @@ export function BannerSlideshow({banners, interval = 10000}) {
                 }
                 return (
                   <img
-                    srcSet={`${slide.desktopImageUrl}&width=1024 1024w, ${slide.desktopImageUrl}&width=1200 1200w, ${slide.desktopImageUrl}&width=1500 1500w`}
+                    srcSet={`${slide.desktopImageUrl}&format=webp&width=1024 1024w, ${slide.desktopImageUrl}&format=webp&width=1200 1200w, ${slide.desktopImageUrl}&format=webp&width=1500 1500w`}
                     sizes="(min-width:1025px) 1500px, 100vw"
-                    src={`${slide.desktopImageUrl}&width=1500`}
+                    src={`${slide.desktopImageUrl}&format=webp&width=1500`}
                     alt={slide.alt || `Banner ${current + 1}`}
                     className="banner-image"
                     loading={isFirstSlide ? 'eager' : 'lazy'}

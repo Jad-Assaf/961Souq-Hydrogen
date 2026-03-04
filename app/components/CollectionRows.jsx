@@ -81,10 +81,10 @@ export const CollectionItem = ({collection, index}) => {
       <div className="menu-item-image-wrapper">
         {collection.image && (
           <img
-            src={`${collection.image.url}&width=100`} // Added src
-            srcSet={`${collection.image.url}&width=100 300w,
-                     ${collection.image.url}&width=100 600w,
-                     ${collection.image.url}&width=100 1200w`}
+            src={`${collection.image.url}&format=webp&width=100`} // Added src
+            srcSet={`${collection.image.url}&format=webp&width=100 300w,
+                     ${collection.image.url}&format=webp&width=100 600w,
+                     ${collection.image.url}&format=webp&width=100 1200w`}
             alt={`${collection.image.altText || collection.title} Collection`}
             className={`menu-item-image
             }`}

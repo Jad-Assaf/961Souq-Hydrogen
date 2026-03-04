@@ -19,11 +19,11 @@ const CollectionItem = ({collection, index, onSelect, isActive}) => {
       <div className={`menu-item-image-wrapper ${isActive ? 'active' : ''}`}>
         {collection.image && (
           <img
-            src={`${collection.image.url}&width=150`}
+            src={`${collection.image.url}&format=webp&width=150`}
             srcSet={`
-              ${collection.image.url}&width=150 300w,
-              ${collection.image.url}&width=150 600w,
-              ${collection.image.url}&width=150 1200w
+              ${collection.image.url}&format=webp&width=150 300w,
+              ${collection.image.url}&format=webp&width=150 600w,
+              ${collection.image.url}&format=webp&width=150 1200w
             `}
             alt={`${collection.image.altText || collection.title} Collection`}
             className="menu-item-image"
@@ -44,7 +44,7 @@ export const appleMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Apple-MacBook-Air.jpg?v=1714657225',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Apple-MacBook-Air.jpg?v=1714657225&format=webp',
       altText: 'Apple Macbook Air',
     },
     title: 'Apple Macbook Air',
@@ -53,7 +53,7 @@ export const appleMenu = [
   {
     id: 8,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Apple-MacBook-Pro.jpg?v=1714657223',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Apple-MacBook-Pro.jpg?v=1714657223&format=webp',
       altText: 'Apple Macbooks Pro',
     },
     title: 'Apple Macbook Pro',
@@ -62,7 +62,7 @@ export const appleMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/f7585a000668e51f562541efa35d1178.jpg?v=1714657015',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/f7585a000668e51f562541efa35d1178.jpg?v=1714657015&format=webp',
       altText: 'Apple iMac',
     },
     title: 'Apple iMac',
@@ -71,7 +71,7 @@ export const appleMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/12fd96e86a8a35b81eeaeca3d9ce823a.jpg?v=1714657013',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/12fd96e86a8a35b81eeaeca3d9ce823a.jpg?v=1714657013&format=webp',
       altText: 'Apple Accessories',
     },
     title: 'Apple Accessories',
@@ -80,7 +80,7 @@ export const appleMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/e3a857086e38bb988a5569c2cba8a08c.jpg?v=1714656972',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/e3a857086e38bb988a5569c2cba8a08c.jpg?v=1714656972&format=webp',
       altText: 'Apple iPad',
     },
     title: 'Apple iPad',
@@ -89,7 +89,7 @@ export const appleMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/f74fe97487470214273fc892ff0d9dac.jpg?v=1746620561',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/collections/f74fe97487470214273fc892ff0d9dac.jpg?v=1746620561&format=webp',
       altText: 'Apple Mac Mini',
     },
     title: 'Apple Mac Mini',
@@ -98,7 +98,7 @@ export const appleMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/MJMV3-4_e0d1f591-fc63-4300-b086-2076a8b708af.jpg?v=1714657136',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/MJMV3-4_e0d1f591-fc63-4300-b086-2076a8b708af.jpg?v=1714657136&format=webp',
       altText: 'Apple Mac Studio',
     },
     title: 'Apple Mac Studio',
@@ -107,7 +107,7 @@ export const appleMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Watch-Ultra-2-2.jpg?v=1727879883',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Apple-Watch-Ultra-2-2.jpg?v=1727879883&format=webp',
       altText: 'Apple Watch',
     },
     title: 'Apple Watch',
@@ -120,7 +120,7 @@ export const gamingMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/2481e9abe158cadab142174d138852a2.jpg?v=1714657038',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/2481e9abe158cadab142174d138852a2.jpg?v=1714657038&format=webp',
       altText: 'Gaming Laptops',
     },
     title: 'Gaming Laptops',
@@ -129,7 +129,7 @@ export const gamingMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/gaming-desktop-offer-2.jpg?v=1714657143',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/gaming-desktop-offer-2.jpg?v=1714657143&format=webp',
       altText: 'Gaming Desktops',
     },
     title: 'Gaming Desktops',
@@ -138,7 +138,7 @@ export const gamingMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Gaming-Monitors.jpg?v=1714657201',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Gaming-Monitors.jpg?v=1714657201&format=webp',
       altText: 'Gaming Monitors',
     },
     title: 'Gaming Monitors',
@@ -147,7 +147,7 @@ export const gamingMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Sony-PlayStation-5-Pro-Console-3.jpg?v=1730897478',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Sony-PlayStation-5-Pro-Console-3.jpg?v=1730897478&format=webp',
       altText: 'Gaming Consoles',
     },
     title: 'Gaming Console',
@@ -156,7 +156,7 @@ export const gamingMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Handhled-Gaming-Consoles-Collection.jpg?v=1714657197',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Handhled-Gaming-Consoles-Collection.jpg?v=1714657197&format=webp',
       altText: 'Handheld Consoles',
     },
     title: 'Handheld Consoles',
@@ -165,7 +165,7 @@ export const gamingMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Console-Games-Collection.jpg?v=1714657198',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Console-Games-Collection.jpg?v=1714657198&format=webp',
       altText: 'Console Games',
     },
     title: 'Console Games',
@@ -174,7 +174,7 @@ export const gamingMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Virtual-Reality-Collection.jpg?v=1714657200',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Virtual-Reality-Collection.jpg?v=1714657200&format=webp',
       altText: 'Virtual Reality',
     },
     title: 'Virtual Reality',
@@ -183,7 +183,7 @@ export const gamingMenu = [
   {
     id: 8,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/razer-blackwidow-2019-left-side.webp?v=1714657154',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/razer-blackwidow-2019-left-side.webp?v=1714657154&format=webp',
       altText: 'Gaming Accessories',
     },
     title: 'Gaming Accessories',
@@ -192,7 +192,7 @@ export const gamingMenu = [
   {
     id: 9,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/dead-skull.webp?v=1714657488',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/dead-skull.webp?v=1714657488&format=webp',
       altText: 'Playstation Accessories',
     },
     title: 'PS Accessories',
@@ -204,7 +204,7 @@ export const laptopsMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/6573823c46feafed973c1af406eff3ac.jpg?v=1714656986',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/6573823c46feafed973c1af406eff3ac.jpg?v=1714656986&format=webp',
       altText: 'Asus Laptops',
     },
     title: 'Asus Laptops',
@@ -213,7 +213,7 @@ export const laptopsMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/04dec497761e64442d9c73ebe4c9fd16.png?v=1714656979',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/04dec497761e64442d9c73ebe4c9fd16.png?v=1714656979&format=webp',
       altText: 'Lenovo Laptops',
     },
     title: 'Lenovo Laptops',
@@ -222,7 +222,7 @@ export const laptopsMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/fb752f20e83a395208643dfa13893f3c.jpg?v=1714657083',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/fb752f20e83a395208643dfa13893f3c.jpg?v=1714657083&format=webp',
       altText: 'Microsoft Surface Laptops',
     },
     title: 'Microsoft Surface Laptops',
@@ -231,7 +231,7 @@ export const laptopsMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/67c41fb2ae61930080965e2b309a24f2.jpg?v=1714657009',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/67c41fb2ae61930080965e2b309a24f2.jpg?v=1714657009&format=webp',
       altText: 'MSI Laptops',
     },
     title: 'MSI Laptops',
@@ -240,7 +240,7 @@ export const laptopsMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/402c7e42624f70fb506dc8e2ba6ff5d0.jpg?v=1714656983',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/402c7e42624f70fb506dc8e2ba6ff5d0.jpg?v=1714656983&format=webp',
       altText: 'Dell Laptops',
     },
     title: 'Dell Laptops',
@@ -249,7 +249,7 @@ export const laptopsMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/c70dff45e570d9e5d8f15ed6553009fb.png?v=1714656977',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/c70dff45e570d9e5d8f15ed6553009fb.png?v=1714656977&format=webp',
       altText: 'HP Laptops',
     },
     title: 'HP Laptops',
@@ -258,7 +258,7 @@ export const laptopsMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/be78f4b09d08ca7c9af85a5bda2b2066.jpg?v=1714656985',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/be78f4b09d08ca7c9af85a5bda2b2066.jpg?v=1714656985&format=webp',
       altText: 'Acer Laptops',
     },
     title: 'Acer Laptops',
@@ -270,7 +270,7 @@ export const desktopsMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/hp-victus-desktop.jpg?v=1714656988',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/hp-victus-desktop.jpg?v=1714656988&format=webp',
       altText: 'Branded Desktops',
     },
     title: 'Branded Desktops',
@@ -279,7 +279,7 @@ export const desktopsMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/gaming-desktop-offer-2.jpg?v=1714657143',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/gaming-desktop-offer-2.jpg?v=1714657143&format=webp',
       altText: 'Gaming Desktops',
     },
     title: 'Gaming Desktops',
@@ -288,7 +288,7 @@ export const desktopsMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/29fa4b590132cda6ecb3c863dd618c20.jpg?v=1714656982',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/29fa4b590132cda6ecb3c863dd618c20.jpg?v=1714656982&format=webp',
       altText: 'All-in-one Desktops',
     },
     title: 'All-in-one Desktops',
@@ -297,7 +297,7 @@ export const desktopsMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/POS.jpg?v=1714657052',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/POS.jpg?v=1714657052&format=webp',
       altText: 'POS',
     },
     title: 'POS',
@@ -309,7 +309,7 @@ export const partsMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/mother-boards.jpg?v=1714657124',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/mother-boards.jpg?v=1714657124&format=webp',
       altText: 'Motherboards',
     },
     title: 'Branded Motherboards',
@@ -318,7 +318,7 @@ export const partsMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/CPU_s.jpg?v=1714657125',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/CPU_s.jpg?v=1714657125&format=webp',
       altText: 'CPUs',
     },
     title: 'CPUs',
@@ -327,7 +327,7 @@ export const partsMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/CPU-Coolers.jpg?v=1714657122',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/CPU-Coolers.jpg?v=1714657122&format=webp',
       altText: 'CPU Coolers',
     },
     title: 'CPU Coolers',
@@ -336,7 +336,7 @@ export const partsMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/GPU.jpg?v=1714657128',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/GPU.jpg?v=1714657128&format=webp',
       altText: 'GPUs',
     },
     title: 'GPUs',
@@ -345,7 +345,7 @@ export const partsMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/RAMS.jpg?v=1714657127',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/RAMS.jpg?v=1714657127&format=webp',
       altText: 'RAM',
     },
     title: 'RAM',
@@ -354,7 +354,7 @@ export const partsMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/ssd.jpg?v=1714657118',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/ssd.jpg?v=1714657118&format=webp',
       altText: 'Storage',
     },
     title: 'Storage',
@@ -363,7 +363,7 @@ export const partsMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Power-Supply.jpg?v=1714657005',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Power-Supply.jpg?v=1714657005&format=webp',
       altText: 'Power Supplies',
     },
     title: 'Power Supplies',
@@ -372,7 +372,7 @@ export const partsMenu = [
   {
     id: 8,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/813d80b0b251c24004edfdc06bd71d99_7dc23fcb-2256-427d-a171-d45e906d9cc7.jpg?v=1714657092',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/813d80b0b251c24004edfdc06bd71d99_7dc23fcb-2256-427d-a171-d45e906d9cc7.jpg?v=1714657092&format=webp',
       altText: 'Desktop Cases',
     },
     title: 'Desktop Cases',
@@ -384,7 +384,7 @@ export const networkingMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Archer-VR2100.webp?v=1714657489',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Archer-VR2100.webp?v=1714657489&format=webp',
       altText: 'WiFi Routers',
     },
     title: 'WiFi Routers',
@@ -393,7 +393,7 @@ export const networkingMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Mi-Wi-Fi-Range-Extender-Pro.webp?v=1714657494',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Mi-Wi-Fi-Range-Extender-Pro.webp?v=1714657494&format=webp',
       altText: 'WiFi Range Extenders',
     },
     title: 'WiFi Range Extenders',
@@ -402,7 +402,7 @@ export const networkingMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/img_proxy_d8c6be1f-6467-4b6a-b278-93dcc57e76ec.jpg?v=1714657495',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/img_proxy_d8c6be1f-6467-4b6a-b278-93dcc57e76ec.jpg?v=1714657495&format=webp',
       altText: 'Antennas',
     },
     title: 'Antennas',
@@ -411,7 +411,7 @@ export const networkingMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/USW-Pro-48-PoE.webp?v=1714657496',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/USW-Pro-48-PoE.webp?v=1714657496&format=webp',
       altText: 'Switches',
     },
     title: 'Switches',
@@ -423,7 +423,7 @@ export const monitorsMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/68a0721e462f8235e2833e6740dbf357.jpg?v=1714657051',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/68a0721e462f8235e2833e6740dbf357.jpg?v=1714657051&format=webp',
       altText: 'AOC Monitors',
     },
     title: 'AOC Monitors',
@@ -432,7 +432,7 @@ export const monitorsMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/a376e912c280e174549ada1102c67c64.jpg?v=1714657113',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/a376e912c280e174549ada1102c67c64.jpg?v=1714657113&format=webp',
       altText: 'Acer Monitors',
     },
     title: 'Acer Monitors',
@@ -441,7 +441,7 @@ export const monitorsMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/16e2c812a57d53ffd1bb610ef33372c0.jpg?v=1714657109',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/16e2c812a57d53ffd1bb610ef33372c0.jpg?v=1714657109&format=webp',
       altText: 'Asus Monitors',
     },
     title: 'Asus Monitors',
@@ -450,7 +450,7 @@ export const monitorsMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/1f9c9ccf9e0ec5b0376a28ae6f8c7de8.jpg?v=1714657024',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/1f9c9ccf9e0ec5b0376a28ae6f8c7de8.jpg?v=1714657024&format=webp',
       altText: 'BenQ Monitors',
     },
     title: 'BenQ Monitors',
@@ -459,7 +459,7 @@ export const monitorsMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/13c78bd433f2b1d805a0d103db6c7055.jpg?v=1714657110',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/13c78bd433f2b1d805a0d103db6c7055.jpg?v=1714657110&format=webp',
       altText: 'Dell Monitors',
     },
     title: 'Dell Monitors',
@@ -468,7 +468,7 @@ export const monitorsMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/368f302b50e2de9aec3d17786a68bf4e.jpg?v=1714657115',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/368f302b50e2de9aec3d17786a68bf4e.jpg?v=1714657115&format=webp',
       altText: 'Gigabyte Monitors',
     },
     title: 'Gigabyte Monitors',
@@ -477,7 +477,7 @@ export const monitorsMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/2ecf13df52e054beba96c36bce764cde.jpg?v=1714657008',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/2ecf13df52e054beba96c36bce764cde.jpg?v=1714657008&format=webp',
       altText: 'HP Monitors',
     },
     title: 'HP Monitors',
@@ -486,7 +486,7 @@ export const monitorsMenu = [
   {
     id: 8,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Lenovo-monitors.jpg?v=1714657029',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Lenovo-monitors.jpg?v=1714657029&format=webp',
       altText: 'Lenovo Monitors',
     },
     title: 'Lenovo Monitors',
@@ -495,7 +495,7 @@ export const monitorsMenu = [
   {
     id: 9,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/065951d902c864e1f35d3319e1a74fa4.jpg?v=1714657025',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/065951d902c864e1f35d3319e1a74fa4.jpg?v=1714657025&format=webp',
       altText: 'LG Monitors',
     },
     title: 'LG Monitors',
@@ -504,7 +504,7 @@ export const monitorsMenu = [
   {
     id: 10,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Msi-Monitors.jpg?v=1714657059',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Msi-Monitors.jpg?v=1714657059&format=webp',
       altText: 'MSI Monitors',
     },
     title: 'MSI Monitors',
@@ -513,7 +513,7 @@ export const monitorsMenu = [
   {
     id: 11,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/philips-monitors.jpg?v=1714657006',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/philips-monitors.jpg?v=1714657006&format=webp',
       altText: 'Philips Monitors',
     },
     title: 'Philips Monitors',
@@ -522,7 +522,7 @@ export const monitorsMenu = [
   {
     id: 12,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/ef0a2b514fffc979ba73e8dabc6f5eac.jpg?v=1714657032',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/ef0a2b514fffc979ba73e8dabc6f5eac.jpg?v=1714657032&format=webp',
       altText: 'Samsung Monitors',
     },
     title: 'Samsung Monitors',
@@ -531,7 +531,7 @@ export const monitorsMenu = [
   {
     id: 13,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/11.jpg?v=1714657134',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/11.jpg?v=1714657134&format=webp',
       altText: 'Viewsonic Monitors',
     },
     title: 'Viewsonic Monitors',
@@ -540,7 +540,7 @@ export const monitorsMenu = [
   {
     id: 14,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Samsung-TV_iTunes-Movies-and-TV-shows.jpg?v=1714657137',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Samsung-TV_iTunes-Movies-and-TV-shows.jpg?v=1714657137&format=webp',
       altText: 'Televisions',
     },
     title: 'Televisions',
@@ -552,7 +552,7 @@ export const mobilesMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/b2991d32e4b537945124266af9681644.jpg?v=1714657030',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/b2991d32e4b537945124266af9681644.jpg?v=1714657030&format=webp',
       altText: 'Apple iPhone',
     },
     title: 'Apple iPhone',
@@ -561,7 +561,7 @@ export const mobilesMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/aa7c88badaf598a9b38e30dc825c85de.png?v=1714656974',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/aa7c88badaf598a9b38e30dc825c85de.png?v=1714656974&format=webp',
       altText: 'Samsung Mobile Phones',
     },
     title: 'Samsung Mobile Phones',
@@ -570,7 +570,7 @@ export const mobilesMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Mobile-accessories.jpg?v=1714656995',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Mobile-accessories.jpg?v=1714656995&format=webp',
       altText: 'Mobile Accessories',
     },
     title: 'Mobile Accessories',
@@ -579,7 +579,7 @@ export const mobilesMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/google.jpg?v=1714657087',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/google.jpg?v=1714657087&format=webp',
       altText: 'Google Pixel Phones',
     },
     title: 'Google Pixel Phones',
@@ -588,7 +588,7 @@ export const mobilesMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/f219d124870eb12f1b7415b3c95b0017.jpg?v=1714657055',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/f219d124870eb12f1b7415b3c95b0017.jpg?v=1714657055&format=webp',
       altText: 'Xiaomi Mobile Phones',
     },
     title: 'Xiaomi Mobile Phones',
@@ -597,7 +597,7 @@ export const mobilesMenu = [
   // {
   //   id: 6,
   //   image: {
-  //     url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/infinix.jpg?v=1714657080',
+  //     url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/infinix.jpg?v=1714657080&format=webp',
   //     altText: 'Infinix Mobile Phones',
   //   },
   //   title: 'Infinix Mobile Phones',
@@ -606,7 +606,7 @@ export const mobilesMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/dbae80cff5b0c94f558f5b0817c8ab4e.jpg?v=1714657065',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/dbae80cff5b0c94f558f5b0817c8ab4e.jpg?v=1714657065&format=webp',
       altText: 'Asus Gaming Phones',
     },
     title: 'Asus Gaming Phones',
@@ -618,7 +618,7 @@ export const tabletsMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/59663e172d1f0fa78bcb873332d7e673.jpg?v=1714657091',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/59663e172d1f0fa78bcb873332d7e673.jpg?v=1714657091&format=webp',
       altText: 'Samsung Tablets',
     },
     title: 'Samsung Tablets',
@@ -627,7 +627,7 @@ export const tabletsMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/ede8ec2c515f709ee4f047128d664621.jpg?v=1714657066',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/ede8ec2c515f709ee4f047128d664621.jpg?v=1714657066&format=webp',
       altText: 'Graphic Design Tablets',
     },
     title: 'Graphic Tablets',
@@ -636,7 +636,7 @@ export const tabletsMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Kindle.jpg?v=1714657088',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Kindle.jpg?v=1714657088&format=webp',
       altText: 'Kindle Tablets',
     },
     title: 'Kindle Tablets',
@@ -645,7 +645,7 @@ export const tabletsMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Tablet-Accessories.jpg?v=1714657283',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Tablet-Accessories.jpg?v=1714657283&format=webp',
       altText: 'Tablet Accessories',
     },
     title: 'Tablet Accessories',
@@ -654,7 +654,7 @@ export const tabletsMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/060ef5a299d547641bd55b509d8ae11c.jpg?v=1714657089',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/060ef5a299d547641bd55b509d8ae11c.jpg?v=1714657089&format=webp',
       altText: 'Amazon Tabelts',
     },
     title: 'Amazon Tabelts',
@@ -663,7 +663,7 @@ export const tabletsMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Lenovo-tablets.jpg?v=1714657012',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Lenovo-tablets.jpg?v=1714657012&format=webp',
       altText: 'Lenovo Tablets',
     },
     title: 'Lenovo Tablets',
@@ -672,7 +672,7 @@ export const tabletsMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/0b0868e76629ed14354e99d60ee4a0e1.jpg?v=1714657096',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/0b0868e76629ed14354e99d60ee4a0e1.jpg?v=1714657096&format=webp',
       altText: 'Xiaomi Tablets',
     },
     title: 'Xiaomi Tablets',
@@ -684,7 +684,7 @@ export const audioMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Razer-Kraken-V4-Pro-1.jpg?v=1744629056',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Razer-Kraken-V4-Pro-1.jpg?v=1744629056&format=webp',
       altText: 'Headphones',
     },
     title: 'Headphones',
@@ -693,7 +693,7 @@ export const audioMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/earbuds.jpg?v=1714657093',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/earbuds.jpg?v=1714657093&format=webp',
       altText: 'Earbuds',
     },
     title: 'Earbuds',
@@ -702,7 +702,7 @@ export const audioMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Marshall-Stanmore-III-3.jpg?v=1733497796',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Marshall-Stanmore-III-3.jpg?v=1733497796&format=webp',
       altText: 'Speakers',
     },
     title: 'Speakers',
@@ -711,7 +711,7 @@ export const audioMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Zoom-H8.webp?v=1714657894',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Zoom-H8.webp?v=1714657894&format=webp',
       altText: 'Audio Recorders',
     },
     title: 'Audio Recorders',
@@ -720,7 +720,7 @@ export const audioMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Surround-Systems.jpg?v=1714657298',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Surround-Systems.jpg?v=1714657298&format=webp',
       altText: 'Surround Systems',
     },
     title: 'Surround Systems',
@@ -729,7 +729,7 @@ export const audioMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/1a1a.jpg?v=1714657064',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/1a1a.jpg?v=1714657064&format=webp',
       altText: 'Microphones',
     },
     title: 'Microphones',
@@ -738,7 +738,7 @@ export const audioMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/audio-_-Visual.jpg?v=1714657133',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/audio-_-Visual.jpg?v=1714657133&format=webp',
       altText: 'Pioneer Equipment',
     },
     title: 'Pioneer Equipment',
@@ -750,7 +750,7 @@ export const accessoriesMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/9bd9787c9f7cf3d78706698066fe550b.jpg?v=1714656989',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/9bd9787c9f7cf3d78706698066fe550b.jpg?v=1714656989&format=webp',
       altText: 'Computer Accessories',
     },
     title: 'Computer Accessories',
@@ -759,7 +759,7 @@ export const accessoriesMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/car-accessories_1daafce0-e458-4c00-abd5-4a62fe64abf2.jpg',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/car-accessories_1daafce0-e458-4c00-abd5-4a62fe64abf2.jpg?format=webp',
       altText: 'Car Accessories',
     },
     title: 'Car Accessories',
@@ -768,7 +768,7 @@ export const accessoriesMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Thule-Chasm-BackPack-Black-2.jpg?v=1714657018',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Thule-Chasm-BackPack-Black-2.jpg?v=1714657018&format=webp',
       altText: 'Backpacks and Bags',
     },
     title: 'Backpacks & Bags',
@@ -777,7 +777,7 @@ export const accessoriesMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/SMART-HOME-DEVICES.jpg?v=1714657099',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/SMART-HOME-DEVICES.jpg?v=1714657099&format=webp',
       altText: 'Home Appliances',
     },
     title: 'Home Appliances',
@@ -786,7 +786,7 @@ export const accessoriesMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/printers.jpg?v=1714656998',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/printers.jpg?v=1714656998&format=webp',
       altText: 'Printers',
     },
     title: 'Printers',
@@ -795,7 +795,7 @@ export const accessoriesMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/scooters.jpg?v=1714657047',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/scooters.jpg?v=1714657047&format=webp',
       altText: 'Scooters',
     },
     title: 'Scooters',
@@ -804,7 +804,7 @@ export const accessoriesMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Projectors.jpg?v=1714657100',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Projectors.jpg?v=1714657100&format=webp',
       altText: 'Projectors',
     },
     title: 'Projectors',
@@ -816,7 +816,7 @@ export const fitnessMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/img_proxy_1d5f1de1-9b79-49a6-9e74-a8c2869daf98.jpg?v=1714657022',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/img_proxy_1d5f1de1-9b79-49a6-9e74-a8c2869daf98.jpg?v=1714657022&format=webp',
       altText: 'Garmin Watches',
     },
     title: 'Garmin Watches',
@@ -825,7 +825,7 @@ export const fitnessMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Samsung-Watches.jpg?v=1714657104',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Samsung-Watches.jpg?v=1714657104&format=webp',
       altText: 'Samsung Watches',
     },
     title: 'Samsung Watches',
@@ -834,7 +834,7 @@ export const fitnessMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/huawei-band-8-grey-orange-2.jpg?v=1714657604',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/huawei-band-8-grey-orange-2.jpg?v=1714657604&format=webp',
       altText: 'Fitness Bands',
     },
     title: 'Fitness Bands',
@@ -843,7 +843,7 @@ export const fitnessMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/CMF-by-Nothing-Watch-Pro-5.webp?v=1714657901',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/CMF-by-Nothing-Watch-Pro-5.webp?v=1714657901&format=webp',
       altText: 'Nothing Watches',
     },
     title: 'Nothing Watches',
@@ -852,7 +852,7 @@ export const fitnessMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/730fbee436f3094d6f71dc35da69eff7.jpg?v=1714657068',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/730fbee436f3094d6f71dc35da69eff7.jpg?v=1714657068&format=webp',
       altText: 'Amazfit Watches',
     },
     title: 'Amazfit Watches',
@@ -861,7 +861,7 @@ export const fitnessMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/5b1a5ef91f3421e41193daa1fb8675bc.jpg?v=1714657106',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/5b1a5ef91f3421e41193daa1fb8675bc.jpg?v=1714657106&format=webp',
       altText: 'Xiaomi Watches',
     },
     title: 'Xiaomi Watches',
@@ -870,7 +870,7 @@ export const fitnessMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Huawei-watches.jpg?v=1714657107',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Huawei-watches.jpg?v=1714657107&format=webp',
       altText: 'Huawei Watches',
     },
     title: 'Huawei Watches',
@@ -879,7 +879,7 @@ export const fitnessMenu = [
   {
     id: 8,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Fitbit-Ace-LTE-6.jpg?v=1730821849',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Fitbit-Ace-LTE-6.jpg?v=1730821849&format=webp',
       altText: 'Fitbit Watches',
     },
     title: 'Fitbit Watches',
@@ -888,7 +888,7 @@ export const fitnessMenu = [
   {
     id: 9,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/pd-kdwst-BU.webp?v=1714657902',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/pd-kdwst-BU.webp?v=1714657902&format=webp',
       altText: 'Porodo Watches',
     },
     title: 'Porodo Watches',
@@ -897,7 +897,7 @@ export const fitnessMenu = [
   {
     id: 10,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/green-lion-grand-smart-4.jpg?v=1714657205',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/green-lion-grand-smart-4.jpg?v=1714657205&format=webp',
       altText: 'Green Lion Watches',
     },
     title: 'Green Lion Watches',
@@ -906,7 +906,7 @@ export const fitnessMenu = [
   {
     id: 11,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Porodo-Lifestyle-Smart-Voice-Jump-Skip-Rope.jpg?v=1708767815',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Porodo-Lifestyle-Smart-Voice-Jump-Skip-Rope.jpg?v=1708767815&format=webp',
       altText: 'Fitness Equipment',
     },
     title: 'Fitness Equipment',
@@ -915,7 +915,7 @@ export const fitnessMenu = [
   {
     id: 12,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Porodo-Smart-Wearable-Ring.webp?v=1714657898',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Porodo-Smart-Wearable-Ring.webp?v=1714657898&format=webp',
       altText: 'Fitness Rings',
     },
     title: 'Fitness Rings',
@@ -927,7 +927,7 @@ export const camerasMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Action-Cameras-Collection.jpg?v=1714657202',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Action-Cameras-Collection.jpg?v=1714657202&format=webp',
       altText: 'Action Cameras',
     },
     title: 'Action Cameras',
@@ -936,7 +936,7 @@ export const camerasMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/cameras-accessories.jpg?v=1714657204',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/cameras-accessories.jpg?v=1714657204&format=webp',
       altText: 'Action Camera Accessories',
     },
     title: 'Action Camera Accessories',
@@ -945,7 +945,7 @@ export const camerasMenu = [
   // {
   //   id: 3,
   //   image: {
-  //     url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/3ce866744a2e083d79cf0545d7b5b5cc.jpg?v=1714657062',
+  //     url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/3ce866744a2e083d79cf0545d7b5b5cc.jpg?v=1714657062&format=webp',
   //     altText: 'Drones',
   //   },
   //   title: 'Drones',
@@ -954,7 +954,7 @@ export const camerasMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Insta360-Flow-Smartphone-Gimbal-Stabilizer-4.webp?v=1714657884',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Insta360-Flow-Smartphone-Gimbal-Stabilizer-4.webp?v=1714657884&format=webp',
       altText: 'Gimbal Stabilizer',
     },
     title: 'Gimbal Stabilizer',
@@ -963,7 +963,7 @@ export const camerasMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/771748c78dc8da6e89a773af5e1b1a4b.jpg?v=1714657077',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/771748c78dc8da6e89a773af5e1b1a4b.jpg?v=1714657077&format=webp',
       altText: 'Professional Cameras',
     },
     title: 'Professional Cameras',
@@ -972,7 +972,7 @@ export const camerasMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/canon-camera-lens.jpg?v=1714657157',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/canon-camera-lens.jpg?v=1714657157&format=webp',
       altText: 'Camera Lenses',
     },
     title: 'Camera Lenses',
@@ -981,7 +981,7 @@ export const camerasMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Neewer-A111-Bi-Color-Rig-Light-Stabilizer.webp?v=1714657891',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Neewer-A111-Bi-Color-Rig-Light-Stabilizer.webp?v=1714657891&format=webp',
       altText: 'Camera Accessories',
     },
     title: 'Camera Accessories',
@@ -990,7 +990,7 @@ export const camerasMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Camcorders.jpg?v=1714657342',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Camcorders.jpg?v=1714657342&format=webp',
       altText: 'Camcorders',
     },
     title: 'Camcorders',
@@ -999,7 +999,7 @@ export const camerasMenu = [
   {
     id: 8,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/razer-webcam.jpg?v=1714657158',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/razer-webcam.jpg?v=1714657158&format=webp',
       altText: 'Webcams',
     },
     title: 'Webcams',
@@ -1008,7 +1008,7 @@ export const camerasMenu = [
   {
     id: 9,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/64b7bbdad8239f5eb7e1f2fd9db0f323.jpg?v=1714657078',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/64b7bbdad8239f5eb7e1f2fd9db0f323.jpg?v=1714657078&format=webp',
       altText: 'Surveillance Cameras',
     },
     title: 'Surveillance Cameras',
@@ -1020,7 +1020,7 @@ export const homeAppliancesMenu = [
   {
     id: 1,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Airwrap_3aa48ffd-ad7e-4af5-94a6-2c851683cff8.jpg?v=1740220525',
+      url: 'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Dyson-Airwrap_3aa48ffd-ad7e-4af5-94a6-2c851683cff8.jpg?v=1740220525&format=webp',
       altText: 'dyson products',
     },
     title: 'Dyson Products',
@@ -1029,7 +1029,7 @@ export const homeAppliancesMenu = [
   {
     id: 7,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/kitchen-Appliances.jpg?v=1714657182',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/kitchen-Appliances.jpg?v=1714657182&format=webp',
       altText: 'Kitchen Appliances',
     },
     title: 'Kitchen Appliances',
@@ -1038,7 +1038,7 @@ export const homeAppliancesMenu = [
   {
     id: 2,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/cleaning_devices.jpg?v=1714657183',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/cleaning_devices.jpg?v=1714657183&format=webp',
       altText: 'Cleaning Devices',
     },
     title: 'Cleaning Devices',
@@ -1047,7 +1047,7 @@ export const homeAppliancesMenu = [
   {
     id: 3,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Lighting.jpg?v=1714657186',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/Lighting.jpg?v=1714657186&format=webp',
       altText: 'Lighting',
     },
     title: 'Lighting',
@@ -1056,7 +1056,7 @@ export const homeAppliancesMenu = [
   {
     id: 4,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/streaming-devices.jpg?v=1714657190',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/streaming-devices.jpg?v=1714657190&format=webp',
       altText: 'Streaming Devices',
     },
     title: 'Streaming Devices',
@@ -1065,7 +1065,7 @@ export const homeAppliancesMenu = [
   {
     id: 5,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/IOT.jpg?v=1714657192',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/IOT.jpg?v=1714657192&format=webp',
       altText: 'Smart Home',
     },
     title: 'Smart Home',
@@ -1074,7 +1074,7 @@ export const homeAppliancesMenu = [
   {
     id: 6,
     image: {
-      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/health_Beauty.jpg?v=1714657193',
+      url: 'https://cdn.shopify.com/s/files/1/0858/6821/6639/collections/health_Beauty.jpg?v=1714657193&format=webp',
       altText: 'Personal Care',
     },
     title: 'Personal Care',

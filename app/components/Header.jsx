@@ -771,9 +771,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           >
                             <img
                               sizes="(min-width: 45em) 20vw, 40vw"
-                              srcSet={`${item.imageUrl}&width=150 300w,
-                         ${item.imageUrl}&width=150 600w,
-                         ${item.imageUrl}&width=150 1200w`}
+                              srcSet={`${item.imageUrl}&format=webp&width=150 300w,
+                         ${item.imageUrl}&format=webp&width=150 600w,
+                         ${item.imageUrl}&format=webp&width=150 1200w`}
                               alt={item.altText || item.title}
                               width="50px"
                               height="50px"
@@ -818,9 +818,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           >
                             <img
                               sizes="(min-width: 45em) 20vw, 40vw"
-                              srcSet={`${item.imageUrl}&width=150 300w,
-                         ${item.imageUrl}&width=150 600w,
-                         ${item.imageUrl}&width=150 1200w`}
+                              srcSet={`${item.imageUrl}&format=webp&width=150 300w,
+                         ${item.imageUrl}&format=webp&width=150 600w,
+                         ${item.imageUrl}&format=webp&width=150 1200w`}
                               alt={item.altText || item.title}
                               width="50px"
                               height="50px"
@@ -893,9 +893,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                             >
                               <img
                                 sizes="(min-width: 45em) 20vw, 40vw"
-                                srcSet={`${subItem.imageUrl}&width=150 300w,
-                                       ${subItem.imageUrl}&width=150 600w,
-                                       ${subItem.imageUrl}&width=150 1200w`}
+                                srcSet={`${subItem.imageUrl}&format=webp&width=150 300w,
+                                       ${subItem.imageUrl}&format=webp&width=150 600w,
+                                       ${subItem.imageUrl}&format=webp&width=150 1200w`}
                                 alt={subItem.altText || subItem.title}
                                 className="submenu-item-image"
                                 width="50px"
@@ -936,9 +936,9 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
                           >
                             <img
                               sizes="(min-width: 45em) 20vw, 40vw"
-                              srcSet={`${subItem.imageUrl}&width=150 300w,
-                                       ${subItem.imageUrl}&width=150 600w,
-                                       ${subItem.imageUrl}&width=150 1200w`}
+                              srcSet={`${subItem.imageUrl}&format=webp&width=150 300w,
+                                       ${subItem.imageUrl}&format=webp&width=150 600w,
+                                       ${subItem.imageUrl}&format=webp&width=150 1200w`}
                               alt={subItem.altText || subItem.title}
                               className="submenu-item-image"
                               width="50px"

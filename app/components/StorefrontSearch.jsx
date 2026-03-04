@@ -33,7 +33,7 @@ export function Hit({hit}) {
     >
       {hit.image && (
         <img
-          src={`${hit.image}&width=150`}
+          src={`${hit.image}&format=webp&width=150`}
           alt={hit.name}
           className="as-hit-image"
           width={58}

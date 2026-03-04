@@ -356,11 +356,12 @@ function addWidthParam(url, width) {
   if (!url) return url;
   try {
     const u = new URL(url);
+    u.searchParams.set('format', 'webp');
     u.searchParams.set('width', String(width));
     return u.toString();
   } catch {
     const joiner = url.includes('?') ? '&' : '?';
-    return `${url}${joiner}width=${width}`;
+    return `${url}${joiner}format=webp&width=${width}`;
   }
 }
 

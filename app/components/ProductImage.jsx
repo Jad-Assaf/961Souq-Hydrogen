@@ -222,7 +222,7 @@ export function ProductImages({media, selectedVariantImage}) {
               >
                 {thumbSrc ? (
                   <img
-                    src={`${thumbSrc}&width=150`}
+                    src={`${thumbSrc}&format=webp&width=150`}
                     alt={altText}
                     width={80}
                     height={80}
@@ -257,7 +257,7 @@ export function ProductImages({media, selectedVariantImage}) {
             {selectedMedia.__typename === 'MediaImage' && (
               <img
                 ref={imageRef}
-                src={`${selectedMedia.image.url}&width=600`}
+                src={`${selectedMedia.image.url}&format=webp&width=600`}
                 alt={selectedMedia.image.altText || 'Product Image'}
                 loading="eager"
                 fetchpriority="high"

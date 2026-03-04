@@ -92,7 +92,7 @@ const RightArrowIcon = () => (
 function addWidthParam(url, width) {
   if (!url) return url;
   const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}width=${width}`;
+  return `${url}${separator}format=webp&width=${width}`;
 }
 
 function ProductQuickViewModal({

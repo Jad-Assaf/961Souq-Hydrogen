@@ -250,7 +250,7 @@ function InstantSuggestions({
                   >
                     {product.featuredImage?.url && (
                       <img
-                        src={`${product.featuredImage.url}&width=200`}
+                        src={`${product.featuredImage.url}&format=webp&width=200`}
                         alt={product.featuredImage.altText || product.title}
                         className="suggestion-product-image"
                         loading="lazy"
@@ -286,7 +286,7 @@ function InstantSuggestions({
                   >
                     {collection.image?.url && (
                       <img
-                        src={`${collection.image.url}&width=200`}
+                        src={`${collection.image.url}&format=webp&width=200`}
                         alt={collection.image.altText || collection.title}
                         className="suggestion-card-image"
                         loading="lazy"
