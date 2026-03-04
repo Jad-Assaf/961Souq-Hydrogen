@@ -38,47 +38,47 @@ export default function MosaicHero({collections}) {
       'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241315.jpg?v=1771931777',
   };
   const appleFeatureImage = {
-    src: withWidth(collectionImages.apple, 900),
+    src: withWidth(collectionImages.apple, 700),
     alt: 'Apple',
   };
   const gamingImage = {
-    src: withWidth(collectionImages.gaming, 500),
+    src: withWidth(collectionImages.gaming, 400),
     alt: 'Gaming',
   };
   const mobilesImage = {
-    src: withWidth(collectionImages.mobiles, 600),
+    src: withWidth(collectionImages.mobiles, 500),
     alt: 'Mobiles',
   };
   const gamingLaptopsImage = {
-    src: withWidth(collectionImages.gamingLaptops, 500),
+    src: withWidth(collectionImages.gamingLaptops, 400),
     alt: 'Gaming Laptops',
   };
   const desktopsImage = {
-    src: withWidth(collectionImages.desktops, 500),
+    src: withWidth(collectionImages.desktops, 400),
     alt: 'Desktops',
   };
   const monitorsImage = {
-    src: withWidth(collectionImages.monitors, 500),
+    src: withWidth(collectionImages.monitors, 400),
     alt: 'Monitors',
   };
   const tabletsImage = {
-    src: withWidth(collectionImages.tablets, 500),
+    src: withWidth(collectionImages.tablets, 400),
     alt: 'Tablets',
   };
   const networkingImage = {
-    src: withWidth(collectionImages.networking, 500),
+    src: withWidth(collectionImages.networking, 400),
     alt: 'Networking',
   };
   const accessoriesImage = {
-    src: withWidth(collectionImages.accessories, 500),
+    src: withWidth(collectionImages.accessories, 400),
     alt: 'Accessories',
   };
   const dysonImage = {
-    src: withWidth(collectionImages.dyson, 500),
+    src: withWidth(collectionImages.dyson, 400),
     alt: 'Dyson',
   };
   const cosmeticsImage = {
-    src: withWidth(collectionImages.cosmetics, 500),
+    src: withWidth(collectionImages.cosmetics, 400),
     alt: 'Cosmetics',
   };
   const shouldShowCollection = (handle) => {
