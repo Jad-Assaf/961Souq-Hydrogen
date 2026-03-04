@@ -48,7 +48,7 @@ const GOOGLE_ADS_ID = 'AW-378354284';
 export function links() {
   return [
     {rel: 'preconnect', href: 'https://cdn.shopify.com'},
-    {rel: 'preconnect', href: 'https://shop.app'},
+    // {rel: 'preconnect', href: 'https://shop.app'},
     {
       rel: 'icon',
       type: 'image/png',

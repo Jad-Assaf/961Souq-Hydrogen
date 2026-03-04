@@ -145,7 +145,7 @@ export const meta = ({data}) => {
       ? ` | ${primaryIntent}`
       : '';
   const seoTitle = truncateChars(
-    `${collectionTitle}${titleIntentPart} | 961Souq Lebanon`,
+    `${collectionTitle}${titleIntentPart} | Lebanon | 961Souq`,
     60,
   );
   const normalizedDescription = stripHtmlTags(collection?.description || '');

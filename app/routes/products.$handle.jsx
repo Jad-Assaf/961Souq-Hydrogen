@@ -121,7 +121,7 @@ export const meta = ({data}) => {
     ? `${productSubject} - ${differentiator}`
     : productSubject;
   const seoTitle = truncateChars(
-    `${titleBase || 'Electronics Product'} | 961Souq Lebanon`,
+    `${titleBase || 'Electronics Product'} | Lebanon | 961Souq`,
     60,
   );
   const seoText = stripHtmlTags(
