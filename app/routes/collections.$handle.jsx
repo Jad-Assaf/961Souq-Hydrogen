@@ -22,6 +22,9 @@ import {useAside} from '~/components/Aside';
 import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
 import WishlistButton from '~/components/WishlistButton';
 
+const SOCIAL_SHARE_IMAGE =
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961_Souq_Navy.png?v=1772441663';
+
 function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') return '';
   const words = text.trim().split(/\s+/).filter(Boolean);
@@ -164,9 +167,7 @@ export const meta = ({data}) => {
     title: seoTitle,
     description: metaDescription,
     url: canonicalUrl,
-    media:
-      collection?.image?.url ||
-      'https://961souq.com/default-collection-image.jpg',
+    media: SOCIAL_SHARE_IMAGE,
   });
 
   const hasQueryParams = Boolean(data?.hasQueryParams);
@@ -422,8 +423,7 @@ export default function Collection() {
     description: metaDescription,
     image: {
       '@type': 'ImageObject',
-      url:
-        collection?.image?.url || 'https://961souq.com/default-collection-image.jpg',
+      url: collection?.image?.url || SOCIAL_SHARE_IMAGE,
     },
   };
   const breadcrumbJsonLd = {

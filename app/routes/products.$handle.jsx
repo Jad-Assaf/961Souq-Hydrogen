@@ -21,6 +21,9 @@ import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
 
+const SOCIAL_SHARE_IMAGE =
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961_Souq_Navy.png?v=1772441663';
+
 function toJsonLdString(value) {
   return JSON.stringify(value).replace(/</g, '\\u003c');
 }
@@ -148,8 +151,7 @@ export const meta = ({data}) => {
 
   // Fallback if image is empty
   if (!image) {
-    image =
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
+    image = SOCIAL_SHARE_IMAGE;
   }
 
   const canonicalUrl = `https://961souq.com/products/${encodeURIComponent(
@@ -160,7 +162,7 @@ export const meta = ({data}) => {
     title: seoTitle,
     description: seoDescription,
     url: canonicalUrl,
-    media: image,
+    media: SOCIAL_SHARE_IMAGE,
   });
 
   const hasQueryParams = Boolean(data?.hasQueryParams);
@@ -856,9 +858,7 @@ export default function Product() {
       .replace(/<[^>]*>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim(),
-    image:
-      product?.firstImage ||
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912',
+    image: product?.firstImage || SOCIAL_SHARE_IMAGE,
     offers: {
       '@type': 'Offer',
       priceCurrency:

@@ -60,7 +60,7 @@ export const meta = ({data, matches}) => {
 
   // Your OG image URL
   const ogImageUrl =
-    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961souqLogo-1_2.png?v=1709718912';
+    'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/961_Souq_Navy.png?v=1772441663';
 
   return getSeoMeta(parentSeo, {
     title: '961Souq | Leading Electronics, PC and Gaming Gear Store in Lebanon',
