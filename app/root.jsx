@@ -313,31 +313,26 @@ export function Layout({children}) {
             __html: `
           (function () {
             var gtagIds = ['${GOOGLE_ANALYTICS_ID}', '${GOOGLE_ADS_ID}'];
-            var initialized = false;
+            var scriptInjected = false;
             var interactionEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
+            var fallbackTimer;
 
             function removeInteractionListeners() {
               for (var i = 0; i < interactionEvents.length; i++) {
-                window.removeEventListener(interactionEvents[i], onFirstInteraction);
+                window.removeEventListener(interactionEvents[i], loadGtagScript);
               }
             }
 
-            function initializeAnalytics() {
-              if (initialized) return;
-              initialized = true;
-
+            function loadGtagScript() {
+              if (scriptInjected) return;
+              scriptInjected = true;
               removeInteractionListeners();
-
-              window.dataLayer = window.dataLayer || [];
-              window.gtag = window.gtag || function () {
-                window.dataLayer.push(arguments);
-              };
-
-              window.gtag('js', new Date());
-              for (var i = 0; i < gtagIds.length; i++) {
-                window.gtag('config', gtagIds[i]);
+              if (fallbackTimer) {
+                clearTimeout(fallbackTimer);
+                fallbackTimer = null;
               }
 
+              if (!gtagIds[0]) return;
               var script = document.createElement('script');
               script.async = true;
               script.src =
@@ -346,34 +341,43 @@ export function Layout({children}) {
               document.head.appendChild(script);
             }
 
-            function onFirstInteraction() {
-              initializeAnalytics();
-            }
-
             function addInteractionListeners() {
               for (var i = 0; i < interactionEvents.length; i++) {
-                window.addEventListener(interactionEvents[i], onFirstInteraction, {
+                window.addEventListener(interactionEvents[i], loadGtagScript, {
                   once: true,
                   passive: true,
                 });
               }
             }
 
-            function scheduleAnalyticsInit() {
+            function scheduleGtagLoad() {
               if ('requestIdleCallback' in window) {
-                window.requestIdleCallback(initializeAnalytics, {timeout: 4000});
+                window.requestIdleCallback(loadGtagScript, {timeout: 8000});
                 return;
               }
 
-              window.setTimeout(initializeAnalytics, 2500);
+              fallbackTimer = window.setTimeout(loadGtagScript, 5000);
+            }
+
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function () {
+              window.dataLayer.push(arguments);
+            };
+
+            if (!window.__gtagConfigured) {
+              window.gtag('js', new Date());
+              for (var i = 0; i < gtagIds.length; i++) {
+                window.gtag('config', gtagIds[i]);
+              }
+              window.__gtagConfigured = true;
             }
 
             addInteractionListeners();
 
             if (document.readyState === 'complete') {
-              scheduleAnalyticsInit();
+              scheduleGtagLoad();
             } else {
-              window.addEventListener('load', scheduleAnalyticsInit, {once: true});
+              window.addEventListener('load', scheduleGtagLoad, {once: true});
             }
           })();
         `,
