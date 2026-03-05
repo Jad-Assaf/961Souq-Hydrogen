@@ -48,6 +48,13 @@ function stripHtmlTags(text) {
     .trim();
 }
 
+function appendBrandSuffix(title) {
+  const base = stripHtmlTags(title || '').trim();
+  if (!base) return 'Lebanon | 961Souq';
+  if (/\|\s*Lebanon\s*\|\s*961Souq\s*$/i.test(base)) return base;
+  return `${base} | Lebanon | 961Souq`;
+}
+
 function toJsonLdString(value) {
   return JSON.stringify(value).replace(/</g, '\\u003c');
 }
@@ -144,10 +151,11 @@ export const meta = ({data}) => {
     !collectionTitle.toLowerCase().includes(primaryIntent.toLowerCase())
       ? ` | ${primaryIntent}`
       : '';
-  const seoTitle = truncateChars(
-    `${collectionTitle}${titleIntentPart} | Lebanon | 961Souq`,
+  const fallbackSeoTitle = truncateChars(
+    appendBrandSuffix(`${collectionTitle}${titleIntentPart}`),
     60,
   );
+  const shopifySeoTitle = stripHtmlTags(collection?.seo?.title || '');
   const normalizedDescription = stripHtmlTags(collection?.description || '');
   const fallbackDescription = primaryIntent
     ? `Shop ${collectionTitle} with focus on ${primaryIntent} at 961Souq Lebanon.`
@@ -156,12 +164,20 @@ export const meta = ({data}) => {
     normalizedDescription || fallbackDescription,
     120,
   );
-  const metaDescription = truncateChars(
+  const fallbackMetaDescription = truncateChars(
     normalizedDescription
       ? `${fallbackDescription} ${truncatedCollectionDescription}`
       : `${fallbackDescription} Find original products, key specs, and competitive prices.`,
     155,
   );
+  const shopifySeoDescription = stripHtmlTags(
+    collection?.seo?.description || '',
+  );
+  const seoTitle = truncateChars(
+    appendBrandSuffix(shopifySeoTitle || fallbackSeoTitle),
+    60,
+  );
+  const metaDescription = shopifySeoDescription || fallbackMetaDescription;
 
   const seoMeta = getSeoMeta({
     title: seoTitle,

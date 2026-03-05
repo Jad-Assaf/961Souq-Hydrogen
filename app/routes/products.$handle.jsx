@@ -52,6 +52,13 @@ function truncateChars(text, maxLength) {
     : normalized;
 }
 
+function appendBrandSuffix(title) {
+  const base = stripHtmlTags(title || '').trim();
+  if (!base) return 'Lebanon | 961Souq';
+  if (/\|\s*Lebanon\s*\|\s*961Souq\s*$/i.test(base)) return base;
+  return `${base} | Lebanon | 961Souq`;
+}
+
 function buildBrandModel(brand, model) {
   const normalizedBrand = stripHtmlTags(brand);
   const normalizedModel = stripHtmlTags(model);
@@ -99,12 +106,6 @@ function getProductDifferentiator(product, variant) {
     return variantTitle;
   }
 
-  const sku = stripHtmlTags(variant?.sku || '');
-  if (sku) return `SKU: ${sku}`;
-
-  const productType = stripHtmlTags(product?.productType || '');
-  if (productType) return productType;
-
   return '';
 }
 
@@ -120,22 +121,23 @@ export const meta = ({data}) => {
   const titleBase = differentiator
     ? `${productSubject} - ${differentiator}`
     : productSubject;
-  const seoTitle = truncateChars(
-    `${titleBase || 'Electronics Product'} | Lebanon | 961Souq`,
-    60,
-  );
+  const fallbackSeoTitle = titleBase || 'Electronics Product';
+  const shopifySeoTitle = stripHtmlTags(product?.seo?.title || '');
   const seoText = stripHtmlTags(
     product?.seoDescription || product?.description || '',
   );
   const introDescription = differentiator
     ? `Buy ${productSubject} (${differentiator}) in Lebanon from 961Souq.`
     : `Buy ${productSubject} in Lebanon from 961Souq.`;
-  const seoDescription = truncateChars(
+  const fallbackSeoDescription = truncateChars(
     seoText
       ? `${introDescription} ${seoText}`
       : `${introDescription} Original product, key specs, warranty support, and fast delivery.`,
     155,
   );
+  const shopifySeoDescription = stripHtmlTags(product?.seo?.description || '');
+  const seoTitle = appendBrandSuffix(shopifySeoTitle || fallbackSeoTitle);
+  const seoDescription = shopifySeoDescription || fallbackSeoDescription;
 
   const rawImage = product?.images?.edges?.[0]?.node?.url || '';
   let image = rawImage;

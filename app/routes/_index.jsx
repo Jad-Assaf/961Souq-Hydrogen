@@ -52,7 +52,7 @@ export function links() {
         `${withImageParams(HERO_LCP_IMAGE_URL, 900)} 900w`,
       ].join(', '),
       imageSizes: '(max-width: 979px) 100vw, 66vw',
-      fetchPriority: 'high',
+      fetchpriority: 'high',
     },
   ];
 }
@@ -571,6 +571,8 @@ export default function Homepage() {
   const [onDemandTopProducts, setOnDemandTopProducts] = useState({});
   const [loadingHandles, setLoadingHandles] = useState({});
   const inflightCollectionsRef = useRef(new Set());
+  const queuedCollectionsRef = useRef(new Set());
+  const collectionQueueRef = useRef(Promise.resolve());
   const newArrivalsTriggerRef = useRef(null);
   const [mobilePopupEnabled, setMobilePopupEnabled] = useState(false);
 
@@ -657,41 +659,83 @@ export default function Homepage() {
       if (!handle) return;
       if (hasLoadedHandle(handle)) return;
       if (inflightCollectionsRef.current.has(handle)) return;
+      if (queuedCollectionsRef.current.has(handle)) return;
 
-      inflightCollectionsRef.current.add(handle);
+      queuedCollectionsRef.current.add(handle);
       setLoadingHandles((prev) => {
         if (prev[handle]) return prev;
         return {...prev, [handle]: true};
       });
-      fetch(`/api/home-collection?handle=${encodeURIComponent(handle)}`)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`Failed to load collection: ${handle}`);
+
+      const loadHandle = async () => {
+        inflightCollectionsRef.current.add(handle);
+        try {
+          const maxAttempts = 3;
+          let lastError = null;
+
+          for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+            try {
+              const res = await fetch(
+                `/api/home-collection?handle=${encodeURIComponent(handle)}`,
+              );
+
+              if (!res.ok) {
+                const error = new Error(
+                  `Failed to load collection: ${handle} (status ${res.status})`,
+                );
+                error.status = res.status;
+                throw error;
+              }
+
+              const data = await res.json();
+              setOnDemandTopProducts((prev) => ({
+                ...prev,
+                [handle]: data?.collection || null,
+              }));
+              lastError = null;
+              break;
+            } catch (error) {
+              lastError = error;
+              const isLastAttempt = attempt === maxAttempts;
+              const isNotFound = Number(error?.status) === 404;
+
+              if (isNotFound || isLastAttempt) {
+                throw error;
+              }
+
+              await new Promise((resolve) =>
+                setTimeout(resolve, attempt * 350),
+              );
+            }
           }
-          return res.json();
-        })
-        .then((data) => {
-          setOnDemandTopProducts((prev) => ({
-            ...prev,
-            [handle]: data?.collection || null,
-          }));
-        })
-        .catch((error) => {
+
+          if (lastError) {
+            throw lastError;
+          }
+        } catch (error) {
           console.error('Homepage on-demand collection fetch failed', error);
-          setOnDemandTopProducts((prev) => {
-            if (Object.prototype.hasOwnProperty.call(prev, handle)) return prev;
-            return {...prev, [handle]: null};
-          });
-        })
-        .finally(() => {
+          if (Number(error?.status) === 404) {
+            setOnDemandTopProducts((prev) => {
+              if (Object.prototype.hasOwnProperty.call(prev, handle))
+                return prev;
+              return {...prev, [handle]: null};
+            });
+          }
+        } finally {
           inflightCollectionsRef.current.delete(handle);
+          queuedCollectionsRef.current.delete(handle);
           setLoadingHandles((prev) => {
             if (!prev[handle]) return prev;
             const next = {...prev};
             delete next[handle];
             return next;
           });
-        });
+        }
+      };
+
+      collectionQueueRef.current = collectionQueueRef.current
+        .catch(() => {})
+        .then(loadHandle);
     },
     [hasLoadedHandle],
   );

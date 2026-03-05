@@ -52,11 +52,7 @@ h2 {
 
 /* Hide on small screens */
 @media (max-width: 1023.98px) {
-  .nav-bar-container {
-    display: none !important;
-  }
-
-  .desk-nav-logo {
+  :is(.nav-bar-container, .desk-nav-logo) {
     display: none !important;
   }
 }
@@ -65,6 +61,15 @@ h2 {
   --appPopupDur: 140ms;
   --appPopupEase: cubic-bezier(0.2, 0.8, 0.2, 1);
   --appPopupBlue: #03072c;
+  --aside-width: 20vw;
+  --cart-aside-summary-height-with-discount: 300px;
+  --cart-aside-summary-height: 250px;
+  --grid-item-width: 355px;
+  --header-height: 70px;
+  --color-dark: #000;
+  --color-light: #fff;
+  --vh-width-collapsed: 60px;
+  --vh-width-expanded: 300px;
 }
 
 /* Root */
@@ -840,9 +845,6 @@ aside .cart-price-skeleton {
 @media (max-width: 1024px) {
   .brand-item img {
     transition: none;
-  }
-
-  .brand-item img {
     width: 100px;
   }
 }
@@ -1079,18 +1081,6 @@ aside .cart-price-skeleton {
   @media (max-width: 1024px) {
     padding: 0 10px !important;
   }
-}
-
-:root {
-  --aside-width: 20vw;
-  --cart-aside-summary-height-with-discount: 300px;
-  --cart-aside-summary-height: 250px;
-  --grid-item-width: 355px;
-  --header-height: 70px;
-  --color-dark: #000;
-  --color-light: #fff;
-  --vh-width-collapsed: 60px;
-  --vh-width-expanded: 300px;
 }
 
 html:has(.overlay.expanded) {
@@ -1343,10 +1333,7 @@ button {
     margin-top: 55px !important;
   }
 
-  .home-prev-button,
-  .home-next-button,
-  .circle-next-button,
-  .circle-prev-button {
+  :is(.home-prev-button, .home-next-button, .circle-next-button, .circle-prev-button) {
     display: none;
   }
 }
@@ -1459,10 +1446,7 @@ button {
   margin-bottom: 10px;
 }
 
-.grid-cols-2 .product-card,
-.grid-cols-3 .product-card,
-.grid-cols-4 .product-card,
-.grid-cols-5 .product-card {
+:is(.grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5) .product-card {
   max-width: none;
 }
 
@@ -1482,19 +1466,13 @@ button {
 
 @media (max-width: 510px) {
 
-  .grid-cols-2 .product-card,
-  .grid-cols-3 .product-card,
-  .grid-cols-4 .product-card,
-  .grid-cols-5 .product-card {
+  :is(.grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5) .product-card {
     min-height: unset;
     min-width: 50%;
   }
 }
 
-.grid-cols-2 h4,
-.grid-cols-3 h4,
-.grid-cols-4 h4,
-.grid-cols-5 h4 {
+:is(.grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5) h4 {
   min-height: 80px !important;
 }
 
@@ -2745,8 +2723,7 @@ aside .cart-checkout-button {
   right: 15px;
 }
 
-.home-prev-button svg,
-.home-next-button svg {
+:is(.home-prev-button, .home-next-button) svg {
   width: 35px;
   height: 35px;
   padding: 5px;
@@ -4012,6 +3989,8 @@ svg.icon.icon--full-color {
 .carousel-inner {
   width: auto;
   /* allow the track to grow to N × 100% */
+  display: flex;
+  /* shrink-wrap to slides */
 }
 
 /* Scrollable track */
@@ -4025,12 +4004,6 @@ svg.icon.icon--full-color {
   /* smooth momentum */
   scroll-behavior: smooth;
   /* fallback when JS disabled */
-}
-
-/* Flex row containing the slides */
-.carousel-inner {
-  display: flex;
-  /* shrink-wrap to slides */
 }
 
 /* Each slide */
@@ -5655,10 +5628,7 @@ svg.icon.icon--full-color {
   display: none;
 }
 
-.product-modal-description h2,
-.product-modal-description h3,
-.product-modal-description h4,
-.product-modal-description h5 {
+.product-modal-description :is(h2, h3, h4, h5) {
   color: #000;
   font-weight: 400 !important;
   font-size: 18px !important;
@@ -5677,11 +5647,6 @@ svg.icon.icon--full-color {
 .product-modal .add-to-cart-button:hover {
   background-color: #fff !important;
   color: #03072c;
-}
-
-/* Card anchor for + button */
-.product-card {
-  position: relative;
 }
 
 /* + button */
@@ -5997,48 +5962,27 @@ svg.icon.icon--full-color {
 }
 
 /* Remove blue highlight/focus styles across this UI */
-.product-modal button,
-.product-modal a,
-.product-card button,
-.product-card a,
-.product-section button,
-.product-section a {
+:is(.product-modal, .product-card, .product-section) :is(button, a) {
   -webkit-tap-highlight-color: transparent;
 }
 
 /* Kill default focus rings + blue box-shadows */
-.product-modal button:focus,
-.product-modal button:focus-visible,
-.product-modal a:focus,
-.product-modal a:focus-visible,
-.product-card button:focus,
-.product-card button:focus-visible,
-.product-card a:focus,
-.product-card a:focus-visible,
-.product-section button:focus,
-.product-section button:focus-visible,
-.product-section a:focus,
-.product-section a:focus-visible,
-.product-info-plus:focus,
-.product-info-plus:focus-visible,
-.product-modal-close:focus,
-.product-modal-close:focus-visible,
-.product-modal-nav:focus,
-.product-modal-nav:focus-visible,
-.product-modal-thumb:focus,
-.product-modal-thumb:focus-visible,
-.product-modal .add-to-cart-button:focus,
-.product-modal .add-to-cart-button:focus-visible,
-.product-modal-view-link:focus,
-.product-modal-view-link:focus-visible {
+:is(.product-modal, .product-card, .product-section)
+  :is(button, a):is(:focus, :focus-visible),
+:is(
+    .product-info-plus,
+    .product-modal-close,
+    .product-modal-nav,
+    .product-modal-thumb,
+    .product-modal .add-to-cart-button,
+    .product-modal-view-link
+  ):is(:focus, :focus-visible) {
   outline: none !important;
   box-shadow: none !important;
 }
 
 /* Also prevent active/pressed blue glow in some browsers */
-.product-modal button:active,
-.product-card button:active,
-.product-section button:active {
+:is(.product-modal, .product-card, .product-section) button:active {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -6110,7 +6054,6 @@ svg.icon.icon--full-color {
     z-index: 1;
   }
 
-  .banner-slideshow {}
 }
 
 /* Content container */
