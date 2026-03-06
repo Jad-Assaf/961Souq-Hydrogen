@@ -151,8 +151,8 @@ h2 {
 }
 
 .appPopupLogo {
-  width: 76px;
-  height: 76px;
+  width: 85px;
+  height: auto;
   border-radius: 18px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgb(255, 255, 255);
