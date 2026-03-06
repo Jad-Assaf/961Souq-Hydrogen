@@ -33,6 +33,26 @@ import MobileAppPopup from '~/components/MobileAppPopup';
 const HERO_LCP_IMAGE_URL =
   'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636&format=webp';
 
+const MOBILE_PRODUCT_ROW_HANDLES = [
+  'apple',
+  'gaming-laptops',
+  'gaming-accessories',
+  'laptops',
+  'desktops',
+  'business-monitors',
+  'gaming-monitors',
+  'apple-iphone',
+  'samsung-mobile-phones',
+  'tablets',
+  'audio',
+  'fitness',
+  'photography',
+  'home-appliances',
+  'computer-accessories',
+  'pc-parts',
+  'networking',
+];
+
 function withImageParams(url, width) {
   if (!url) return '';
   const sep = url.includes('?') ? '&' : '?';
@@ -190,6 +210,13 @@ const getHandleFromUrl = (url) => {
   }
   return handle;
 };
+
+const handleToLabel = (handle) =>
+  String(handle || '')
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 
 async function loadCriticalData({context}) {
   const {storefront} = context;
@@ -579,24 +606,12 @@ export default function Homepage() {
   const rootMatch = useMatches()[0];
   const header = rootMatch?.data?.header;
   const mobileLevelOneCollections = useMemo(() => {
-    const items = header?.menu?.items || [];
-    const seenHandles = new Set();
-
-    return items
-      .map((item) => {
-        const handle =
-          item?.resource?.handle || getHandleFromUrl(item?.url || '');
-        if (!handle || seenHandles.has(handle)) return null;
-        seenHandles.add(handle);
-
-        return {
-          id: item?.id || handle,
-          handle,
-          title: item?.resource?.title || item?.title || handle,
-        };
-      })
-      .filter((item) => item && item.handle !== 'cosmetics');
-  }, [header]);
+    return MOBILE_PRODUCT_ROW_HANDLES.map((handle) => ({
+      id: handle,
+      handle,
+      title: handleToLabel(handle),
+    }));
+  }, []);
   const desktopMenuHandles = useMemo(() => {
     const groups = [
       appleMenu,
