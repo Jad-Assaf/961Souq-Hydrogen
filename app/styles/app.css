@@ -1814,17 +1814,13 @@ aside li {
   width: 95vw;
   max-width: 1500px;
   border-radius: 10px;
-  background-color: rgb(3 7 44 / 30%);
+  background-color: #03072c;
   overflow: hidden;
   contain: paint;
   isolation: isolate;
   box-shadow:
-    0 8px 24px rgb(0 0 0 / 18%),
-    inset 0 0 0 1px rgb(255 255 255 / 16%);
-  will-change: background-color;
-  transition:
-    background-color 220ms ease,
-    box-shadow 220ms ease;
+    0 8px 24px rgb(0 0 0 / 18%);
+  transition: box-shadow 220ms ease;
   z-index: 0;
   pointer-events: none;
 
@@ -1840,37 +1836,7 @@ aside li {
 }
 
 .header.is-scrolled .header-top-background {
-  box-shadow:
-    0 10px 28px rgb(0 0 0 / 22%),
-    inset 0 0 0 1px rgb(255 255 255 / 20%);
-}
-
-@media (min-width: 1025px) {
-  .header-top-background::before,
-  .header-top-background::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-  }
-
-  .header-top-background::before {
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-    filter: url(#header-glass-distortion);
-  }
-
-  .header.is-scrolled .header-top-background::before {
-    backdrop-filter: blur(8px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-  }
-
-  .header-top-background::after {
-    box-shadow:
-      inset 2px 2px 1px 0 rgb(255 255 255 / 45%),
-      inset -1px -1px 1px 1px rgb(255 255 255 / 38%);
-  }
+  box-shadow: 0 10px 28px rgb(0 0 0 / 22%);
 }
 
 .header-top {
@@ -3657,13 +3623,6 @@ a.video-link {
 }
 
 .search-glass-filter-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.header-glass-filter-defs {
   position: absolute;
   width: 0;
   height: 0;
