@@ -1,6 +1,5 @@
 // src/root.jsx
 import appStyles from '~/styles/app.css?url';
-import appStylesInline from '~/styles/app.css?raw';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {redirect} from '@shopify/remix-oxygen';
 import {
@@ -10,7 +9,6 @@ import {
   Scripts,
   useRouteError,
   useRouteLoaderData,
-  ScrollRestoration,
   isRouteErrorResponse,
   useNavigation,
   data,
@@ -21,14 +19,13 @@ import {
 // import searchStyles from '~/styles/SearchPage.css?url';
 // import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
-import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
-import React, {Suspense, useEffect, useRef, useState} from 'react';
+import {HEADER_QUERY} from '~/lib/fragments';
+import React, {useEffect, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
 import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
-import RespondIOWidget from './components/RespondIOWidget';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -132,40 +129,6 @@ const processMenuItems = (items) => {
     .filter(Boolean);
 };
 
-async function loadCriticalData({context}) {
-  const {storefront} = context;
-
-  try {
-    // Fetch header data using the HEADER_QUERY
-    // --- ADDED: cache: storefront.CacheLong() ---
-    const header = await storefront.query(HEADER_QUERY, {
-      variables: {headerMenuHandle: 'new-main-menu'},
-      cache: storefront.CacheLong(), // <-- This is the key performance-related change
-    });
-
-    // Process nested menus to extract images
-    if (header?.menu?.items) {
-      header.menu.items = processMenuItems(header.menu.items);
-    }
-
-    return {header};
-  } catch (error) {
-    return {header: null}; // Fallback in case of error
-  }
-}
-
-/**
- * Load data for rendering content below the fold.
- */
-function loadDeferredData({context}) {
-  const {storefront, customerAccount, cart} = context;
-
-  return {
-    cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
-  };
-}
-
 /**
  * Layout component for the application.
  */
@@ -176,16 +139,7 @@ export function Layout({children}) {
   const [nprogress, setNProgress] = useState(null); // Store NProgress instance
   const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const [loaderVisible, setLoaderVisible] = useState(true);
-  const loaderRef = useRef(null);
-  const animationRef = useRef(null);
   const isLoading = navigation.state !== 'idle';
-  const inlineAppStyles =
-    typeof document === 'undefined'
-      ? appStylesInline
-      : document.getElementById('app-styles-inline')?.textContent ||
-        appStylesInline;
   const stableNonce =
     nonce ||
     (typeof document !== 'undefined'
@@ -194,101 +148,34 @@ export function Layout({children}) {
         undefined
       : undefined);
 
-  // useEffect(() => {
-  //   // Only run on client
-  //   if (typeof document === 'undefined') return;
-  //
-  //   // Check if styles are already loaded
-  //   const stylesheetUrls = [
-  //     appStyles,
-  //     // footerStyles,
-  //     // productStyles,
-  //     // productImgStyles,
-  //     // searchStyles,
-  //   ];
-  //
-  //   // Function to check if stylesheets are loaded
-  //   const areStylesLoaded = () => {
-  //     return stylesheetUrls.every((href) => {
-  //       return Array.from(document.styleSheets).some(
-  //         (sheet) => sheet.href === new URL(href, window.location.href).href,
-  //       );
-  //     });
-  //   };
-  //
-  //   if (areStylesLoaded()) {
-  //     setStylesLoaded(true);
-  //     return;
-  //   }
-  //
-  //   // Set up load event listeners
-  //   const loadPromises = stylesheetUrls.map((href) => {
-  //     return new Promise((resolve) => {
-  //       const link = document.querySelector(`link[href="${href}"]`);
-  //       if (link) {
-  //         if (link.sheet) resolve(); // Already loaded
-  //         else link.addEventListener('load', resolve);
-  //       } else {
-  //         resolve(); // Not found, skip
-  //       }
-  //     });
-  //   });
-  //
-  //   // Wait for all stylesheets to load or timeout
-  //   const timeout = new Promise((resolve) => setTimeout(resolve, 3000));
-  //
-  //   Promise.race([Promise.all(loadPromises), timeout])
-  //     .then(() => setStylesLoaded(true))
-  //     .catch(() => setStylesLoaded(true)); // Fail safe
-  //
-  //   return () => {
-  //     // Clean up event listeners
-  //     stylesheetUrls.forEach((href) => {
-  //       const link = document.querySelector(`link[href="${href}"]`);
-  //       if (link) link.removeEventListener('load', loadPromises);
-  //     });
-  //   };
-  // }, []);
-
-  // Handle loader fade-out animation
   useEffect(() => {
-    if (!stylesLoaded || !loaderRef.current) return;
+    if (navigation.state !== 'loading' || nprogress) return;
 
-    // Start fade out animation
-    loaderRef.current.style.opacity = '0';
-
-    // Remove loader after animation completes
-    animationRef.current = setTimeout(() => {
-      setLoaderVisible(false);
-    }, 500);
-
-    return () => {
-      if (animationRef.current) clearTimeout(animationRef.current);
-    };
-  }, [stylesLoaded]);
-
-  useEffect(() => {
-    // Load NProgress once and set it in the state
+    let active = true;
     const loadNProgress = async () => {
       const {default: NProgress} = await import('nprogress');
       await import('nprogress/nprogress.css');
+      if (!active) return;
       NProgress.configure({showSpinner: true});
-      setNProgress(NProgress); // Set NProgress once it's loaded
+      NProgress.start();
+      setNProgress(NProgress);
     };
 
-    if (!nprogress) {
-      loadNProgress(); // Only load NProgress the first time
-    }
+    loadNProgress();
+    return () => {
+      active = false;
+    };
+  }, [navigation.state, nprogress]);
 
-    // Handle the route loading state
+  useEffect(() => {
+    if (!nprogress) return;
     if (navigation.state === 'loading' && nprogress) {
-      nprogress.start(); // Start progress bar
+      nprogress.start();
     } else if (nprogress) {
-      nprogress.done(); // Finish progress bar
+      nprogress.done();
     }
 
     return () => {
-      // Clean up NProgress when component unmounts or state changes
       if (nprogress) {
         nprogress.done();
       }
@@ -405,9 +292,6 @@ export function Layout({children}) {
         />
       </head>
       <body>
-        <style id="app-styles-inline" suppressHydrationWarning>
-          {inlineAppStyles}
-        </style>
         <ClarityTracker clarityId={clarityId} />
         {/* {loaderVisible && (
           <div

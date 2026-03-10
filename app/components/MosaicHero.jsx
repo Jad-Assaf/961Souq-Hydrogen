@@ -26,7 +26,6 @@ function buildSrcSet(url, widths) {
 export default function MosaicHero({collections}) {
   const getImagePriorityProps = (index) => {
     if (index === 0) return {loading: 'eager', fetchpriority: 'high'};
-    if (index < 3) return {loading: 'eager'};
     return {loading: 'lazy', fetchpriority: 'low'};
   };
 

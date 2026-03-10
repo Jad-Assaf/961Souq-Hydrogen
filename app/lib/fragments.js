@@ -176,8 +176,6 @@ const MENU_FRAGMENT = `#graphql
         id
         handle
         title
-        description
-        descriptionHtml
         image {
           src
           url

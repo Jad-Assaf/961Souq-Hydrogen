@@ -203,6 +203,18 @@ const handleToLabel = (handle) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
 
+function runWhenIdle(task, timeout = 2500) {
+  if (typeof window === 'undefined') return () => {};
+
+  if ('requestIdleCallback' in window) {
+    const id = window.requestIdleCallback(task, {timeout});
+    return () => window.cancelIdleCallback(id);
+  }
+
+  const id = window.setTimeout(task, 250);
+  return () => window.clearTimeout(id);
+}
+
 async function loadCriticalData({context}) {
   const {storefront} = context;
   // const menuHandles = MANUAL_MENU_HANDLES;
@@ -651,12 +663,14 @@ export default function Homepage() {
 
   useEffect(() => {
     if (!isMobile || !mobileLevelOneCollections.length) return;
-
-    mobileLevelOneCollections.forEach(({handle}) => {
-      if (!hasLoadedHandle(handle)) {
-        ensureCollectionLoaded(handle);
-      }
+    const cancelIdle = runWhenIdle(() => {
+      mobileLevelOneCollections.forEach(({handle}) => {
+        if (!hasLoadedHandle(handle)) {
+          ensureCollectionLoaded(handle);
+        }
+      });
     });
+    return cancelIdle;
   }, [
     isMobile,
     mobileLevelOneCollections,
@@ -666,12 +680,14 @@ export default function Homepage() {
 
   useEffect(() => {
     if (isMobile || !desktopMenuHandles.length) return;
-
-    desktopMenuHandles.forEach((handle) => {
-      if (!hasLoadedHandle(handle)) {
-        ensureCollectionLoaded(handle);
-      }
+    const cancelIdle = runWhenIdle(() => {
+      desktopMenuHandles.forEach((handle) => {
+        if (!hasLoadedHandle(handle)) {
+          ensureCollectionLoaded(handle);
+        }
+      });
     });
+    return cancelIdle;
   }, [isMobile, desktopMenuHandles, hasLoadedHandle, ensureCollectionLoaded]);
 
   useEffect(() => {
@@ -790,10 +806,9 @@ export default function Homepage() {
   return (
     <div className="home">
       <MobileAppPopup enabled={mobilePopupEnabled} />
-      <h1
-        className="home-h1"
-        aria-label="961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon"
-      ></h1>
+      <h1 className="home-h1 visually-hidden">
+        961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon
+      </h1>
 
       <MosaicHero collections={heroCollections} isMobile={isMobile} />
 
@@ -802,156 +817,124 @@ export default function Homepage() {
           <TopProductSections collection={newArrivals} />
         </div>
       )}
-      {cosmetics && <TopProductSections collection={cosmetics} />}
+      {cosmetics && (
+        <LazyMount rootMargin="220px">
+          <TopProductSections collection={cosmetics} />
+        </LazyMount>
+      )}
 
       {/* RelatedProductsFromHistory temporarily disabled for testing performance */}
       {/* <RelatedProductsFromHistory key={rpKey} /> */}
 
-      {isMobile ? (
-        <>
-          {mobileLevelOneCollections.map(({id, handle, title}) => {
-            const collection = hasLoadedHandle(handle)
-              ? fullTopProducts[handle]
-              : undefined;
+      <LazyMount rootMargin="300px">
+        {isMobile ? (
+          <>
+            {mobileLevelOneCollections.map(({id, handle, title}) => {
+              const collection = hasLoadedHandle(handle)
+                ? fullTopProducts[handle]
+                : undefined;
 
-            return collection ? (
-              <TopProductSections
-                key={`mobile-${id}`}
-                collection={collection}
-              />
-            ) : collection === null ? null : (
-              <TopProductPlaceholder
-                key={`mobile-${id}-placeholder`}
-                title={title}
-                handle={handle}
-                count={4}
-              />
-            );
-          })}
-        </>
-      ) : (
-        // <div>
-        //   <div className="buttons-list">
-        //     <div className="menu-list">
-        //       {menuKeys.map((key) => (
-        //         <button
-        //           key={key}
-        //           onClick={() => handleMenuClick(key)}
-        //           className={key === selectedMenu ? 'button-85' : ''}
-        //         >
-        //           {key.charAt(0).toUpperCase() + key.slice(1)}
-        //         </button>
-        //       ))}
-        //     </div>
-        //   </div>
-        //   <div
-        //     style={{
-        //       opacity: fade ? 0 : 1,
-        //       transition: 'opacity 300ms ease-in-out',
-        //     }}
-        //   >
-        //     <CollectionCircles
-        //       collections={menus[selectedMenu]}
-        //       selectedCollection={selectedCollection}
-        //       onCollectionSelect={setSelectedCollection}
-        //     />
-        //     {selectedCollection &&
-        //       fullTopProducts[getHandleFromUrl(selectedCollection.url)] && (
-        //         <TopProductSections
-        //           key={`${selectedMenu}-${getHandleFromUrl(
-        //             selectedCollection.url,
-        //           )}`}
-        //           collection={
-        //             fullTopProducts[getHandleFromUrl(selectedCollection.url)]
-        //           }
-        //         />
-        //       )}
-        //   </div>
-        // </div>
-        <>
-          <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
+              return collection ? (
+                <TopProductSections
+                  key={`mobile-${id}`}
+                  collection={collection}
+                />
+              ) : collection === null ? null : (
+                <TopProductPlaceholder
+                  key={`mobile-${id}-placeholder`}
+                  title={title}
+                  handle={handle}
+                  count={4}
+                />
+              );
+            })}
+          </>
+        ) : (
+          <>
+            <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
 
-          {/* Apple Group */}
-          {renderCollectionSection({
-            menu: appleMenu,
-            selectedItem: selectedApple,
-            onSelect: handleAppleSelect,
-            fallbackTitle: 'Apple',
-          })}
+            {/* Apple Group */}
+            {renderCollectionSection({
+              menu: appleMenu,
+              selectedItem: selectedApple,
+              onSelect: handleAppleSelect,
+              fallbackTitle: 'Apple',
+            })}
 
-          {/* Gaming Group */}
-          {renderCollectionSection({
-            menu: gamingMenu,
-            selectedItem: selectedGaming,
-            onSelect: handleGamingSelect,
-            fallbackTitle: 'Gaming',
-          })}
+            {/* Gaming Group */}
+            {renderCollectionSection({
+              menu: gamingMenu,
+              selectedItem: selectedGaming,
+              onSelect: handleGamingSelect,
+              fallbackTitle: 'Gaming',
+            })}
 
-          {/* Laptops Group */}
-          {renderCollectionSection({
-            menu: laptopsMenu,
-            selectedItem: selectedLaptops,
-            onSelect: handleLaptopsSelect,
-            fallbackTitle: 'Laptops',
-          })}
+            {/* Laptops Group */}
+            {renderCollectionSection({
+              menu: laptopsMenu,
+              selectedItem: selectedLaptops,
+              onSelect: handleLaptopsSelect,
+              fallbackTitle: 'Laptops',
+            })}
 
-          {/* Monitors Group */}
-          {renderCollectionSection({
-            menu: monitorsMenu,
-            selectedItem: selectedMonitors,
-            onSelect: handleMonitorsSelect,
-            fallbackTitle: 'Monitors',
-          })}
+            {/* Monitors Group */}
+            {renderCollectionSection({
+              menu: monitorsMenu,
+              selectedItem: selectedMonitors,
+              onSelect: handleMonitorsSelect,
+              fallbackTitle: 'Monitors',
+            })}
 
-          {/* Mobiles Group */}
-          {renderCollectionSection({
-            menu: mobilesMenu,
-            selectedItem: selectedMobiles,
-            onSelect: handleMobilesSelect,
-            fallbackTitle: 'Mobiles',
-          })}
+            {/* Mobiles Group */}
+            {renderCollectionSection({
+              menu: mobilesMenu,
+              selectedItem: selectedMobiles,
+              onSelect: handleMobilesSelect,
+              fallbackTitle: 'Mobiles',
+            })}
 
-          {/* Tablets Group */}
-          {renderCollectionSection({
-            menu: tabletsMenu,
-            selectedItem: selectedTablets,
-            onSelect: handleTabletsSelect,
-            fallbackTitle: 'Tablets',
-          })}
+            {/* Tablets Group */}
+            {renderCollectionSection({
+              menu: tabletsMenu,
+              selectedItem: selectedTablets,
+              onSelect: handleTabletsSelect,
+              fallbackTitle: 'Tablets',
+            })}
 
-          {/* Audio Group */}
-          {renderCollectionSection({
-            menu: audioMenu,
-            selectedItem: selectedAudio,
-            onSelect: handleAudioSelect,
-            fallbackTitle: 'Audio',
-          })}
+            {/* Audio Group */}
+            {renderCollectionSection({
+              menu: audioMenu,
+              selectedItem: selectedAudio,
+              onSelect: handleAudioSelect,
+              fallbackTitle: 'Audio',
+            })}
 
-          {/* Fitness Group */}
-          {renderCollectionSection({
-            menu: fitnessMenu,
-            selectedItem: selectedFitness,
-            onSelect: handleFitnessSelect,
-            fallbackTitle: 'Fitness',
-          })}
+            {/* Fitness Group */}
+            {renderCollectionSection({
+              menu: fitnessMenu,
+              selectedItem: selectedFitness,
+              onSelect: handleFitnessSelect,
+              fallbackTitle: 'Fitness',
+            })}
 
-          {/* Cameras Group */}
-          {renderCollectionSection({
-            menu: camerasMenu,
-            selectedItem: selectedCameras,
-            onSelect: handleCamerasSelect,
-            fallbackTitle: 'Cameras',
-          })}
+            {/* Cameras Group */}
+            {renderCollectionSection({
+              menu: camerasMenu,
+              selectedItem: selectedCameras,
+              onSelect: handleCamerasSelect,
+              fallbackTitle: 'Cameras',
+            })}
 
-          {/* Home Appliances Group */}
-          {renderCollectionSection({
-            menu: homeAppliancesMenu,
-            selectedItem: selectedHomeAppliances,
-            onSelect: handleHomeAppliancesSelect,
-            fallbackTitle: 'Home Appliances',
-          })}
-        </>
-      )}
+            {/* Home Appliances Group */}
+            {renderCollectionSection({
+              menu: homeAppliancesMenu,
+              selectedItem: selectedHomeAppliances,
+              onSelect: handleHomeAppliancesSelect,
+              fallbackTitle: 'Home Appliances',
+            })}
+          </>
+        )}
+      </LazyMount>
 
       {/* <ScrollingSVGs /> */}
       <LazyMount>
