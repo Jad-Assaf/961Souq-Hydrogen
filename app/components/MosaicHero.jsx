@@ -2,7 +2,16 @@
 import React from 'react';
 import {Link} from '~/components/link';
 
-function withImageParams(url, {width, quality = 85, format = 'webp'}) {
+export const MOSAIC_IMAGE_QUALITY = 70;
+export const MOSAIC_FEATURE_WIDTHS = [320, 480, 640, 900, 1200];
+export const MOSAIC_TILE_WIDTHS = [240, 320, 400, 500, 640];
+export const MOSAIC_FEATURE_SIZES = '(max-width: 979px) 100vw, 66vw';
+export const MOSAIC_TILE_SIZES = '(max-width: 979px) 100vw, 33vw';
+
+export function withMosaicImageParams(
+  url,
+  {width, quality = MOSAIC_IMAGE_QUALITY, format = 'webp'},
+) {
   if (!url) return '';
   const sep = url.includes('?') ? '&' : '?';
   return `${url}${sep}width=${width}&quality=${quality}&format=${format}`;
@@ -10,26 +19,25 @@ function withImageParams(url, {width, quality = 85, format = 'webp'}) {
 
 function buildSrcSet(url, widths) {
   return widths
-    .map((width) => `${withImageParams(url, {width})} ${width}w`)
+    .map((width) => `${withMosaicImageParams(url, {width})} ${width}w`)
     .join(', ');
 }
 
 export default function MosaicHero({collections}) {
   const getImagePriorityProps = (index) => {
-    if (index < 3) return {loading: 'eager', fetchpriority: 'high'};
-    return {loading: 'lazy'};
+    if (index === 0) return {loading: 'eager', fetchpriority: 'high'};
+    if (index < 3) return {loading: 'eager'};
+    return {loading: 'lazy', fetchpriority: 'low'};
   };
 
   const getImageProps = ({url, index, isFeature = false}) => {
-    const widths = isFeature ? [750] : [500];
+    const widths = isFeature ? MOSAIC_FEATURE_WIDTHS : MOSAIC_TILE_WIDTHS;
     const maxWidth = widths[widths.length - 1];
 
     return {
-      src: withImageParams(url, {width: maxWidth}),
+      src: withMosaicImageParams(url, {width: maxWidth}),
       srcSet: buildSrcSet(url, widths),
-      sizes: isFeature
-        ? '(max-width: 979px) 100vw, 66vw'
-        : '(max-width: 979px) 100vw, 33vw',
+      sizes: isFeature ? MOSAIC_FEATURE_SIZES : MOSAIC_TILE_SIZES,
       width: isFeature ? 900 : 500,
       height: isFeature ? 300 : 250,
       decoding: 'async',

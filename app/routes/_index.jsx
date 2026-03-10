@@ -1,6 +1,10 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import {data, useLoaderData, useMatches} from '@remix-run/react';
-import MosaicHero from '~/components/MosaicHero';
+import MosaicHero, {
+  MOSAIC_FEATURE_SIZES,
+  MOSAIC_FEATURE_WIDTHS,
+  withMosaicImageParams,
+} from '~/components/MosaicHero';
 // import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
 import BrandSection from '~/components/BrandsSection';
@@ -23,14 +27,13 @@ import {
 import {
   GET_HOMEPAGE_COLLECTION_QUERY,
   GET_HOMEPAGE_COLLECTION_MOBILE_QUERY,
-  GET_SIMPLE_COLLECTION_QUERY,
 } from '../data/queries.ts';
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileAppPopup from '~/components/MobileAppPopup';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
-const HERO_LCP_IMAGE_URL =
+const HERO_FEATURE_IMAGE_URL =
   'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636&format=webp';
 
 const MOBILE_PRODUCT_ROW_HANDLES = [
@@ -53,25 +56,19 @@ const MOBILE_PRODUCT_ROW_HANDLES = [
   'networking',
 ];
 
-function withImageParams(url, width) {
-  if (!url) return '';
-  const sep = url.includes('?') ? '&' : '?';
-  return `${url}${sep}width=${width}&quality=65&format=webp`;
-}
-
 export function links() {
+  const imageSrcSet = MOSAIC_FEATURE_WIDTHS.map(
+    (width) =>
+      `${withMosaicImageParams(HERO_FEATURE_IMAGE_URL, {width})} ${width}w`,
+  ).join(', ');
+
   return [
     {
       rel: 'preload',
       as: 'image',
-      href: withImageParams(HERO_LCP_IMAGE_URL, 640),
-      imageSrcSet: [
-        `${withImageParams(HERO_LCP_IMAGE_URL, 320)} 320w`,
-        `${withImageParams(HERO_LCP_IMAGE_URL, 480)} 480w`,
-        `${withImageParams(HERO_LCP_IMAGE_URL, 640)} 640w`,
-        `${withImageParams(HERO_LCP_IMAGE_URL, 900)} 900w`,
-      ].join(', '),
-      imageSizes: '(max-width: 979px) 100vw, 66vw',
+      href: withMosaicImageParams(HERO_FEATURE_IMAGE_URL, {width: 900}),
+      imageSrcSet,
+      imageSizes: MOSAIC_FEATURE_SIZES,
       fetchpriority: 'high',
     },
   ];
@@ -189,18 +186,6 @@ async function fetchCollectionByHandle(
   return collectionByHandle;
 }
 
-async function fetchSimpleCollectionByHandle(context, handle, cacheOverride) {
-  const {collectionByHandle} = await context.storefront.query(
-    GET_SIMPLE_COLLECTION_QUERY,
-    {
-      variables: {handle},
-      cache: cacheOverride || context.storefront.CacheLong(),
-    },
-  );
-  if (!collectionByHandle?.products?.nodes?.length) return null;
-  return collectionByHandle;
-}
-
 const getHandleFromUrl = (url) => {
   const parts = url.split('/collections/');
   if (parts.length < 2) return '';
@@ -249,19 +234,6 @@ async function loadCriticalData({context}) {
 export async function loader(args) {
   const userAgent = args.request.headers.get('user-agent') || '';
   const isMobile = /mobile/i.test(userAgent);
-  const heroCollectionHandles = [
-    'apple',
-    'mobiles',
-    'gaming',
-    'gaming-laptops',
-    'desktops',
-    'monitors',
-    'tablets',
-    'networking',
-    'accessories',
-    'dyson-products',
-    'cosmetics',
-  ];
 
   // Fire off critical queries concurrently so above-the-fold content is fast.
   const criticalDataPromise = loadCriticalData(args);
@@ -278,93 +250,15 @@ export async function loader(args) {
     args.context.storefront.CacheShort(),
     {mobile: isMobile},
   );
-  const heroCollectionsPromise = Promise.allSettled(
-    heroCollectionHandles.map((handle) =>
-      fetchSimpleCollectionByHandle(
-        args.context,
-        handle,
-        args.context.storefront.CacheLong(),
-      ),
-    ),
-  ).then((results) => {
-    const collectionsByHandle = {};
-    results.forEach((result, index) => {
-      const handle = heroCollectionHandles[index];
-      if (result.status === 'fulfilled') {
-        collectionsByHandle[handle] = result.value || null;
-      }
-    });
-    return collectionsByHandle;
-  });
 
-  const [criticalData, newArrivals, cosmetics, heroCollections] =
-    await Promise.all([
-      criticalDataPromise,
-      newArrivalsPromise,
-      cosmeticsPromise,
-      heroCollectionsPromise,
-    ]);
-
-  // Build a unique list of collection handles from your menus.
-  // IMPORTANT: On mobile you are not rendering all the desktop sections,
-  // so skip preloading these collections entirely to avoid slowing down the homepage.
-  const menuHandles = isMobile
-    ? []
-    : [
-        appleMenu[0],
-        gamingMenu[0],
-        laptopsMenu[0],
-        monitorsMenu[0],
-        mobilesMenu[0],
-        tabletsMenu[0],
-        audioMenu[0],
-        fitnessMenu[0],
-        camerasMenu[0],
-        homeAppliancesMenu[0],
-      ].map((item) => getHandleFromUrl(item?.url || ''));
-
-  const excludedHandles = new Set(
-    [newArrivals?.handle, cosmetics?.handle].filter(Boolean),
-  );
-  const uniqueMenuHandles = [...new Set(menuHandles)].filter(
-    (handle) => handle && !excludedHandles.has(handle),
-  );
-
-  // Fetch non-critical collections concurrently (desktop only).
-  // Use a longer cache here because these are homepage sections.
-  const deferredTopProductsPromise =
-    uniqueMenuHandles.length === 0
-      ? Promise.resolve({})
-      : Promise.allSettled(
-          uniqueMenuHandles.map((handle) =>
-            fetchCollectionByHandle(
-              args.context,
-              handle,
-              args.context.storefront.CacheLong(),
-              {mobile: false},
-            ),
-          ),
-        ).then((results) => {
-          const topProductsByHandle = {};
-          results.forEach((result, index) => {
-            if (result.status === 'fulfilled') {
-              if (result.value) {
-                topProductsByHandle[uniqueMenuHandles[index]] = result.value;
-              }
-            } else {
-              console.error(
-                `Failed to load collection for handle: ${uniqueMenuHandles[index]}`,
-              );
-            }
-          });
-          return topProductsByHandle;
-        });
+  const [criticalData, newArrivals, cosmetics] = await Promise.all([
+    criticalDataPromise,
+    newArrivalsPromise,
+    cosmeticsPromise,
+  ]);
 
   // Prepare critical top products.
   const initialTopProducts = {};
-
-  // Wait for non-critical data before returning (keeps your current behavior unchanged).
-  const restTopProducts = await deferredTopProductsPromise;
 
   return data(
     {
@@ -374,9 +268,9 @@ export async function loader(args) {
       url: criticalData.url,
       newArrivals,
       cosmetics,
-      heroCollections,
+      heroCollections: null,
       topProducts: initialTopProducts,
-      restTopProducts,
+      restTopProducts: {},
       isMobile,
     },
     {
