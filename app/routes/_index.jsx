@@ -25,6 +25,7 @@ import {
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileAppPopup from '~/components/MobileAppPopup';
 import {defer} from '@shopify/remix-oxygen';
+import homeStyles from '~/styles/Homepage.css?url';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 const HERO_FEATURE_IMAGE_URL =
@@ -60,6 +61,10 @@ export function links() {
   ).join(', ');
 
   return [
+    {
+      rel: 'stylesheet',
+      href: homeStyles,
+    },
     {
       rel: 'preload',
       as: 'image',
