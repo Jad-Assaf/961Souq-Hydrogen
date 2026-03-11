@@ -1,10 +1,9 @@
 import {Await} from '@remix-run/react';
 import {Suspense} from 'react';
 import {Aside} from '~/components/Aside';
-import {Header, HeaderMenu} from '~/components/Header';
+import {Header} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {Footer} from './Footer';
-import {CollapsibleVerticalHeader} from './CollapsibleVerticalHeader';
 import MobileBottomNavigation from './MobileBottomNavigation';
 
 const shopMenuData = [
@@ -48,16 +47,39 @@ export function PageLayout({
       <CartAside cart={cart} />
       {/* <SearchAside /> */}
       {/* <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} /> */}
-      <MobileBottomNavigation cart={cart} />
+      <Suspense fallback={<MobileBottomNavigation cart={null} />}>
+        <Await resolve={cart}>
+          {(resolvedCart) => <MobileBottomNavigation cart={resolvedCart} />}
+        </Await>
+      </Suspense>
       {/* <CollapsibleVerticalHeader header={header} /> */}
-      {header && (
-        <Header
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
-      )}
+      {header ? (
+        <Suspense
+          fallback={
+            <Header
+              header={header}
+              cart={null}
+              isLoggedIn={false}
+              publicStoreDomain={publicStoreDomain}
+            />
+          }
+        >
+          <Await resolve={cart}>
+            {(resolvedCart) => (
+              <Await resolve={isLoggedIn}>
+                {(resolvedIsLoggedIn) => (
+                  <Header
+                    header={header}
+                    cart={resolvedCart}
+                    isLoggedIn={resolvedIsLoggedIn}
+                    publicStoreDomain={publicStoreDomain}
+                  />
+                )}
+              </Await>
+            )}
+          </Await>
+        </Suspense>
+      ) : null}
       <main>{children}</main>
       <a
         href="https://wa.me/9613276879"
@@ -133,28 +155,6 @@ function CartAside({cart}) {
         </Await>
       </Suspense>
     </Aside>
-  );
-}
-
-/**
- * @param {{
- *   header: PageLayoutProps['header'];
- *   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
- * }}
- */
-function MobileMenuAside({header, publicStoreDomain}) {
-  return (
-    header.menu &&
-    header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
-        <HeaderMenu
-          menu={header.menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
-      </Aside>
-    )
   );
 }
 

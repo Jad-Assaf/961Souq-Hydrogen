@@ -1,5 +1,5 @@
 // src/components/MetaPixelManual.jsx
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 
 // --- Helper: Generate a unique event ID
@@ -65,46 +65,105 @@ const trackPageViewCAPI = (eventId, extraData) => {
 };
 
 const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
+const START_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
+
+const ensureFbq = () => {
+  if (typeof window === 'undefined') return null;
+  if (typeof window.fbq === 'function') return window.fbq;
+
+  const fbq = function () {
+    if (fbq.callMethod) {
+      fbq.callMethod.apply(fbq, arguments);
+    } else {
+      fbq.queue.push(arguments);
+    }
+  };
+
+  window.fbq = fbq;
+  window._fbq = fbq;
+  fbq.push = fbq;
+  fbq.loaded = true;
+  fbq.version = '2.0';
+  fbq.queue = [];
+
+  if (!document.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
+    const script = document.createElement('script');
+    script.defer = true;
+    script.src = SCRIPT_SRC;
+    document.head.appendChild(script);
+  }
+
+  return window.fbq;
+};
 
 const MetaPixel = ({pixelId}) => {
   const location = useLocation();
+  const [isActivated, setIsActivated] = useState(false);
   const didInitRef = useRef(false);
+  const lastTrackedUrlRef = useRef('');
+
+  useEffect(() => {
+    if (!pixelId || isActivated) return;
+    if (typeof window === 'undefined') return;
+
+    let timeoutId = null;
+    let idleId = null;
+
+    const cleanupListeners = () => {
+      START_EVENTS.forEach((eventName) => {
+        window.removeEventListener(eventName, activate);
+      });
+    };
+
+    const activate = () => {
+      cleanupListeners();
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+      setIsActivated(true);
+    };
+
+    START_EVENTS.forEach((eventName) => {
+      window.addEventListener(eventName, activate, {passive: true, once: true});
+    });
+
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(activate, {timeout: 5000});
+    } else {
+      timeoutId = window.setTimeout(activate, 2500);
+    }
+
+    return () => {
+      cleanupListeners();
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [pixelId, isActivated]);
 
   // 1) Load the pixel script only once
   useEffect(() => {
-    if (!pixelId) return;
+    if (!pixelId || !isActivated) return;
     if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) return;
 
     const s = document.createElement('script');
     s.defer = true;
     s.src = SCRIPT_SRC;
     document.head.appendChild(s);
-  }, [pixelId]);
+  }, [pixelId, isActivated]);
 
   // 2) Initialize fbq & send first PageView exactly once
   useEffect(() => {
-    if (!pixelId || didInitRef.current) return;
+    if (!pixelId || !isActivated || didInitRef.current) return;
 
-    if (typeof fbq !== 'function') {
-      !(function (f, b, e, v, n, t, s) {
-        if (f.fbq) return;
-        n = f.fbq = function () {
-          n.callMethod
-            ? n.callMethod.apply(n, arguments)
-            : n.queue.push(arguments);
-        };
-        if (!f._fbq) f._fbq = n;
-        n.push = n;
-        n.loaded = true;
-        n.version = '2.0';
-        n.queue = [];
-        t = b.createElement(e);
-        t.defer = true;
-        t.src = v;
-        s = b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t, s);
-      })(window, document, 'script', SCRIPT_SRC);
-    }
+    const fbq = ensureFbq();
+    if (typeof fbq !== 'function') return;
 
     fbq('init', pixelId);
 
@@ -117,22 +176,32 @@ const MetaPixel = ({pixelId}) => {
     fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
     trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
 
+    lastTrackedUrlRef.current = URL;
     didInitRef.current = true;
-  }, [pixelId]);
+  }, [pixelId, isActivated]);
 
   // 3) Fire a PageView on every route change
   useEffect(() => {
-    if (typeof fbq !== 'function') return;
+    if (!didInitRef.current) return;
+    if (typeof window.fbq !== 'function') return;
+
+    const URL = window.location.href;
+    if (lastTrackedUrlRef.current === URL) return;
 
     const eventId = generateEventId();
     const fbp = getCookie('_fbp');
     const fbc = getCookie('_fbc');
     const external_id = getExternalId();
-    const URL = window.location.href;
 
-    fbq('track', 'PageView', {URL, fbp, fbc, external_id}, {eventID: eventId});
+    window.fbq(
+      'track',
+      'PageView',
+      {URL, fbp, fbc, external_id},
+      {eventID: eventId},
+    );
     trackPageViewCAPI(eventId, {fbp, fbc, external_id, URL});
-  }, [location]);
+    lastTrackedUrlRef.current = URL;
+  }, [location.pathname, location.search, location.hash]);
 
   return null;
 };

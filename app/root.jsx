@@ -1,7 +1,7 @@
 // src/root.jsx
 import appStyles from '~/styles/app.css?url';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
-import {redirect} from '@shopify/remix-oxygen';
+import {defer, redirect} from '@shopify/remix-oxygen';
 import {
   Links,
   Meta,
@@ -11,7 +11,6 @@ import {
   useRouteLoaderData,
   isRouteErrorResponse,
   useNavigation,
-  data,
 } from '@remix-run/react';
 // import footerStyles from '~/styles/Footer.css?url';
 // import productStyles from '~/styles/ProductPage.css?url';
@@ -63,15 +62,13 @@ export async function loader({request, context}) {
   if (match) return redirect(`/products/${match[1]}`, {status: 301});
 
   const {storefront, env, session, customerAccount} = context;
+  const cartPromise = context.cart.get().catch(() => null);
+  const isLoggedInPromise = customerAccount.isLoggedIn().catch(() => false);
 
-  const [cart, isLoggedIn, header] = await Promise.all([
-    context.cart.get(),
-    customerAccount.isLoggedIn(),
-    storefront.query(HEADER_QUERY, {
-      variables: {headerMenuHandle: 'new-main-menu'},
-      cache: storefront.CacheLong(),
-    }),
-  ]);
+  const header = await storefront.query(HEADER_QUERY, {
+    variables: {headerMenuHandle: 'new-main-menu'},
+    cache: storefront.CacheLong(),
+  });
 
   if (header?.menu?.items)
     header.menu.items = processMenuItems(header.menu.items);
@@ -81,11 +78,11 @@ export async function loader({request, context}) {
   headers.set('X-Frame-Options', 'DENY');
   headers.set('X-Content-Type-Options', 'nosniff');
 
-  return data(
+  return defer(
     {
       header,
-      cart,
-      isLoggedIn,
+      cart: cartPromise,
+      isLoggedIn: isLoggedInPromise,
       publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
       shop: getShopAnalytics({
         storefront,
@@ -140,6 +137,8 @@ export function Layout({children}) {
   const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
   const isLoading = navigation.state !== 'idle';
+  const analyticsCart =
+    data?.cart && typeof data.cart?.then === 'function' ? null : data?.cart;
   const stableNonce =
     nonce ||
     (typeof document !== 'undefined'
@@ -332,7 +331,7 @@ export function Layout({children}) {
         <div id="route-fade" data-loading={isLoading}>
           {data ? (
             <Analytics.Provider
-              cart={data.cart}
+              cart={analyticsCart}
               shop={data.shop}
               consent={data.consent}
             >

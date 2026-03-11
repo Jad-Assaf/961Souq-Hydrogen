@@ -504,27 +504,16 @@ export const GET_HOMEPAGE_COLLECTION_QUERY = `#graphql
           title
           handle
           tags
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
           images(first: 2) {
             nodes {
               url
               altText
             }
           }
-          variants(first: 5) {
+          variants(first: 3) {
             nodes {
               id
+              title
               availableForSale
               price {
                 amount
@@ -566,27 +555,16 @@ export const GET_HOMEPAGE_COLLECTION_MOBILE_QUERY = `#graphql
           title
           handle
           tags
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
           images(first: 1) {
             nodes {
               url
               altText
             }
           }
-          variants(first: 3) {
+          variants(first: 2) {
             nodes {
               id
+              title
               availableForSale
               price {
                 amount

@@ -1,5 +1,12 @@
-import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
-import {data, useLoaderData, useMatches} from '@remix-run/react';
+import React, {
+  Suspense,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
+import {Await, useLoaderData, useMatches} from '@remix-run/react';
 import MosaicHero, {
   MOSAIC_FEATURE_SIZES,
   MOSAIC_FEATURE_WIDTHS,
@@ -31,6 +38,7 @@ import {
 import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileAppPopup from '~/components/MobileAppPopup';
+import {defer} from '@shopify/remix-oxygen';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 const HERO_FEATURE_IMAGE_URL =
@@ -255,31 +263,39 @@ export async function loader(args) {
     'new-arrivals',
     args.context.storefront.CacheShort(),
     {mobile: isMobile},
-  );
+  ).catch((error) => {
+    console.error(
+      'Homepage critical collection fetch failed: new-arrivals',
+      error,
+    );
+    return null;
+  });
   const cosmeticsPromise = fetchCollectionByHandle(
     args.context,
     'cosmetics',
     args.context.storefront.CacheShort(),
     {mobile: isMobile},
-  );
+  ).catch((error) => {
+    console.error(
+      'Homepage critical collection fetch failed: cosmetics',
+      error,
+    );
+    return null;
+  });
 
-  const [criticalData, newArrivals, cosmetics] = await Promise.all([
-    criticalDataPromise,
-    newArrivalsPromise,
-    cosmeticsPromise,
-  ]);
+  const criticalData = await criticalDataPromise;
 
   // Prepare critical top products.
   const initialTopProducts = {};
 
-  return data(
+  return defer(
     {
       // sliderCollections: criticalData.sliderCollections,
       title: criticalData.title,
       description: criticalData.description,
       url: criticalData.url,
-      newArrivals,
-      cosmetics,
+      newArrivals: newArrivalsPromise,
+      cosmetics: cosmeticsPromise,
       heroCollections: null,
       topProducts: initialTopProducts,
       restTopProducts: {},
@@ -507,7 +523,12 @@ export default function Homepage() {
   const queuedCollectionsRef = useRef(new Set());
   const collectionQueueRef = useRef(Promise.resolve());
   const newArrivalsTriggerRef = useRef(null);
+  const [hasNewArrivalsSection, setHasNewArrivalsSection] = useState(false);
   const [mobilePopupEnabled, setMobilePopupEnabled] = useState(false);
+  const setNewArrivalsTriggerNode = useCallback((node) => {
+    newArrivalsTriggerRef.current = node;
+    setHasNewArrivalsSection(Boolean(node));
+  }, []);
 
   const rootMatch = useMatches()[0];
   const header = rootMatch?.data?.header;
@@ -692,7 +713,7 @@ export default function Homepage() {
 
   useEffect(() => {
     if (!isMobile) return;
-    if (!newArrivals) return;
+    if (!hasNewArrivalsSection) return;
     if (mobilePopupEnabled) return;
 
     const node = newArrivalsTriggerRef.current;
@@ -715,7 +736,7 @@ export default function Homepage() {
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [isMobile, newArrivals, mobilePopupEnabled]);
+  }, [isMobile, hasNewArrivalsSection, mobilePopupEnabled]);
 
   // Desktop state: original multiple-groups.
   const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
@@ -812,16 +833,36 @@ export default function Homepage() {
 
       <MosaicHero collections={heroCollections} isMobile={isMobile} />
 
-      {newArrivals && (
-        <div ref={newArrivalsTriggerRef}>
-          <TopProductSections collection={newArrivals} />
-        </div>
-      )}
-      {cosmetics && (
-        <LazyMount rootMargin="220px">
-          <TopProductSections collection={cosmetics} />
-        </LazyMount>
-      )}
+      <Suspense
+        fallback={
+          <TopProductPlaceholder
+            title="New Arrivals"
+            handle="new-arrivals"
+            count={isMobile ? 4 : 6}
+          />
+        }
+      >
+        <Await resolve={newArrivals}>
+          {(resolvedNewArrivals) =>
+            resolvedNewArrivals ? (
+              <div ref={setNewArrivalsTriggerNode}>
+                <TopProductSections collection={resolvedNewArrivals} />
+              </div>
+            ) : null
+          }
+        </Await>
+      </Suspense>
+      <Suspense fallback={null}>
+        <Await resolve={cosmetics}>
+          {(resolvedCosmetics) =>
+            resolvedCosmetics ? (
+              <LazyMount rootMargin="220px">
+                <TopProductSections collection={resolvedCosmetics} />
+              </LazyMount>
+            ) : null
+          }
+        </Await>
+      </Suspense>
 
       {/* RelatedProductsFromHistory temporarily disabled for testing performance */}
       {/* <RelatedProductsFromHistory key={rpKey} /> */}

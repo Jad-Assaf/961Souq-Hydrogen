@@ -1,35 +1,76 @@
 // ClarityTracker.js
-import React, {useEffect} from 'react';
+import {useEffect} from 'react';
 import {clarity} from 'react-microsoft-clarity';
 
 // module‐scope flag prevents any double‐init
 let didInitClarity = false;
+const START_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
 
 const ClarityTracker = ({clarityId, userId, userProperties}) => {
   useEffect(() => {
-    // 1) bail if no ID or already initialized
     if (!clarityId || didInitClarity) return;
+    if (typeof window === 'undefined') return;
 
-    // 2) init & consent
-    clarity.init(clarityId);
-    clarity.consent();
+    let cancelled = false;
+    let timeoutId = null;
+    let idleId = null;
 
-    // 3) optionally identify the user
-    if (userId) {
-      clarity.identify(userId, userProperties);
+    const cleanupListeners = () => {
+      START_EVENTS.forEach((eventName) => {
+        window.removeEventListener(eventName, scheduleStart);
+      });
+    };
+
+    const startClarity = () => {
+      if (cancelled || didInitClarity) return;
+
+      clarity.init(clarityId);
+      clarity.consent();
+      if (userId) {
+        clarity.identify(userId, userProperties);
+      }
+      clarity.start();
+      didInitClarity = true;
+    };
+
+    const scheduleStart = () => {
+      cleanupListeners();
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+      startClarity();
+    };
+
+    START_EVENTS.forEach((eventName) => {
+      window.addEventListener(eventName, scheduleStart, {
+        passive: true,
+        once: true,
+      });
+    });
+
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(scheduleStart, {timeout: 5000});
+    } else {
+      timeoutId = window.setTimeout(scheduleStart, 2500);
     }
 
-    // 4) start tracking
-    clarity.start();
-
-    // mark as done
-    didInitClarity = true;
-
-    // cleanup on unmount
     return () => {
-      clarity.stop();
+      cancelled = true;
+      cleanupListeners();
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+      if (didInitClarity) {
+        clarity.stop();
+      }
     };
-  }, [clarityId]); // only re-runs if clarityId itself changes
+  }, [clarityId, userId, userProperties]);
 
   return null;
 };
