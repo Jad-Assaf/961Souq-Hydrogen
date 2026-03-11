@@ -16,26 +16,12 @@ import MosaicHero, {
 import {TopProductSections} from '~/components/TopProductSections';
 import BrandSection from '~/components/BrandsSection';
 import {getSeoMeta} from '@shopify/hydrogen';
-import {
-  CollectionCircles,
-  appleMenu,
-  audioMenu,
-  camerasMenu,
-  fitnessMenu,
-  gamingMenu,
-  homeAppliancesMenu,
-  laptopsMenu,
-  mobilesMenu,
-  monitorsMenu,
-  tabletsMenu,
-} from '~/components/CollectionCircles';
 // import MobileAppPopup from '~/components/MobileAppPopup';
 // import ScrollingSVGs from '~/components/ScrollingSVGs';
 import {
   GET_HOMEPAGE_COLLECTION_QUERY,
   GET_HOMEPAGE_COLLECTION_MOBILE_QUERY,
 } from '../data/queries.ts';
-import {CategorySliderFromMenu} from '~/components/CategorySliderFromMenu';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileAppPopup from '~/components/MobileAppPopup';
 import {defer} from '@shopify/remix-oxygen';
@@ -63,6 +49,9 @@ const MOBILE_PRODUCT_ROW_HANDLES = [
   'pc-parts',
   'networking',
 ];
+const HomeDesktopCollections = React.lazy(() =>
+  import('~/components/HomeDesktopCollections'),
+);
 
 export function links() {
   const imageSrcSet = MOSAIC_FEATURE_WIDTHS.map(
@@ -193,16 +182,6 @@ async function fetchCollectionByHandle(
   if (!collectionByHandle?.products?.nodes?.length) return null;
   return collectionByHandle;
 }
-
-const getHandleFromUrl = (url) => {
-  const parts = url.split('/collections/');
-  if (parts.length < 2) return '';
-  let handle = parts[1].toLowerCase();
-  if (handle.endsWith('/')) {
-    handle = handle.slice(0, -1);
-  }
-  return handle;
-};
 
 const handleToLabel = (handle) =>
   String(handle || '')
@@ -539,30 +518,6 @@ export default function Homepage() {
       title: handleToLabel(handle),
     }));
   }, []);
-  const desktopMenuHandles = useMemo(() => {
-    const groups = [
-      appleMenu,
-      gamingMenu,
-      laptopsMenu,
-      monitorsMenu,
-      mobilesMenu,
-      tabletsMenu,
-      audioMenu,
-      fitnessMenu,
-      camerasMenu,
-      homeAppliancesMenu,
-    ];
-
-    return [
-      ...new Set(
-        groups
-          .flat()
-          .map((item) => getHandleFromUrl(item?.url || ''))
-          .filter(Boolean),
-      ),
-    ];
-  }, []);
-
   // RelatedProductsFromHistory temporarily disabled for testing performance
   // const [rpKey, setRpKey] = useState(0);
 
@@ -700,18 +655,6 @@ export default function Homepage() {
   ]);
 
   useEffect(() => {
-    if (isMobile || !desktopMenuHandles.length) return;
-    const cancelIdle = runWhenIdle(() => {
-      desktopMenuHandles.forEach((handle) => {
-        if (!hasLoadedHandle(handle)) {
-          ensureCollectionLoaded(handle);
-        }
-      });
-    });
-    return cancelIdle;
-  }, [isMobile, desktopMenuHandles, hasLoadedHandle, ensureCollectionLoaded]);
-
-  useEffect(() => {
     if (!isMobile) return;
     if (!hasNewArrivalsSection) return;
     if (mobilePopupEnabled) return;
@@ -737,82 +680,6 @@ export default function Homepage() {
     observer.observe(node);
     return () => observer.disconnect();
   }, [isMobile, hasNewArrivalsSection, mobilePopupEnabled]);
-
-  // Desktop state: original multiple-groups.
-  const [selectedApple, setSelectedApple] = useState(appleMenu[0]);
-  const [selectedGaming, setSelectedGaming] = useState(gamingMenu[0]);
-  const [selectedLaptops, setSelectedLaptops] = useState(laptopsMenu[0]);
-  const [selectedMonitors, setSelectedMonitors] = useState(monitorsMenu[0]);
-  const [selectedMobiles, setSelectedMobiles] = useState(mobilesMenu[0]);
-  const [selectedTablets, setSelectedTablets] = useState(tabletsMenu[0]);
-  const [selectedAudio, setSelectedAudio] = useState(audioMenu[0]);
-  const [selectedFitness, setSelectedFitness] = useState(fitnessMenu[0]);
-  const [selectedCameras, setSelectedCameras] = useState(camerasMenu[0]);
-  const [selectedHomeAppliances, setSelectedHomeAppliances] = useState(
-    homeAppliancesMenu[0],
-  );
-
-  const buildSelectHandler = (setFn) => (item) => {
-    setFn(item);
-    ensureCollectionLoaded(getHandleFromUrl(item?.url || ''));
-  };
-
-  const handleAppleSelect = buildSelectHandler(setSelectedApple);
-  const handleGamingSelect = buildSelectHandler(setSelectedGaming);
-  const handleLaptopsSelect = buildSelectHandler(setSelectedLaptops);
-  const handleMonitorsSelect = buildSelectHandler(setSelectedMonitors);
-  const handleMobilesSelect = buildSelectHandler(setSelectedMobiles);
-  const handleTabletsSelect = buildSelectHandler(setSelectedTablets);
-  const handleAudioSelect = buildSelectHandler(setSelectedAudio);
-  const handleFitnessSelect = buildSelectHandler(setSelectedFitness);
-  const handleCamerasSelect = buildSelectHandler(setSelectedCameras);
-  const handleHomeAppliancesSelect = buildSelectHandler(
-    setSelectedHomeAppliances,
-  );
-
-  const renderCollectionSection = ({
-    menu,
-    selectedItem,
-    onSelect,
-    fallbackTitle,
-  }) => {
-    const visibleMenu = menu.filter((item) => {
-      const menuHandle = getHandleFromUrl(item?.url || '');
-      if (!menuHandle) return false;
-      if (!hasLoadedHandle(menuHandle)) return true;
-      return Boolean(fullTopProducts[menuHandle]);
-    });
-    if (!visibleMenu.length) return null;
-
-    const selectedHandle = getHandleFromUrl(selectedItem?.url || '');
-    const resolvedSelectedItem =
-      visibleMenu.find(
-        (item) => getHandleFromUrl(item?.url || '') === selectedHandle,
-      ) || visibleMenu[0];
-    const handle = getHandleFromUrl(resolvedSelectedItem?.url || '');
-    const collection = handle ? fullTopProducts[handle] : null;
-    const isLoading = handle ? !!loadingHandles[handle] : false;
-    const title = resolvedSelectedItem?.title || fallbackTitle || 'Collection';
-
-    return (
-      <>
-        <CollectionCircles
-          collections={visibleMenu}
-          selectedCollection={resolvedSelectedItem}
-          onCollectionSelect={onSelect}
-        />
-        {resolvedSelectedItem && collection ? (
-          <TopProductSections key={handle} collection={collection} />
-        ) : isLoading ? (
-          <TopProductPlaceholder
-            key={`${handle}-placeholder`}
-            title={title}
-            handle={handle}
-          />
-        ) : null}
-      </>
-    );
-  };
 
   // const reelIds = ['DLIFKQtNTvj', 'DLmgJDxM93m', 'DLaGHiLt0cs', 'DLCs7TsMe0a', 'DKrX0cCsLDQ', 'DKeZDnjsasA'];
   // const productUrls = [
@@ -892,87 +759,15 @@ export default function Homepage() {
           </>
         ) : (
           <>
-            <>{header && <CategorySliderFromMenu menu={header.menu} />}</>
-
-            {/* Apple Group */}
-            {renderCollectionSection({
-              menu: appleMenu,
-              selectedItem: selectedApple,
-              onSelect: handleAppleSelect,
-              fallbackTitle: 'Apple',
-            })}
-
-            {/* Gaming Group */}
-            {renderCollectionSection({
-              menu: gamingMenu,
-              selectedItem: selectedGaming,
-              onSelect: handleGamingSelect,
-              fallbackTitle: 'Gaming',
-            })}
-
-            {/* Laptops Group */}
-            {renderCollectionSection({
-              menu: laptopsMenu,
-              selectedItem: selectedLaptops,
-              onSelect: handleLaptopsSelect,
-              fallbackTitle: 'Laptops',
-            })}
-
-            {/* Monitors Group */}
-            {renderCollectionSection({
-              menu: monitorsMenu,
-              selectedItem: selectedMonitors,
-              onSelect: handleMonitorsSelect,
-              fallbackTitle: 'Monitors',
-            })}
-
-            {/* Mobiles Group */}
-            {renderCollectionSection({
-              menu: mobilesMenu,
-              selectedItem: selectedMobiles,
-              onSelect: handleMobilesSelect,
-              fallbackTitle: 'Mobiles',
-            })}
-
-            {/* Tablets Group */}
-            {renderCollectionSection({
-              menu: tabletsMenu,
-              selectedItem: selectedTablets,
-              onSelect: handleTabletsSelect,
-              fallbackTitle: 'Tablets',
-            })}
-
-            {/* Audio Group */}
-            {renderCollectionSection({
-              menu: audioMenu,
-              selectedItem: selectedAudio,
-              onSelect: handleAudioSelect,
-              fallbackTitle: 'Audio',
-            })}
-
-            {/* Fitness Group */}
-            {renderCollectionSection({
-              menu: fitnessMenu,
-              selectedItem: selectedFitness,
-              onSelect: handleFitnessSelect,
-              fallbackTitle: 'Fitness',
-            })}
-
-            {/* Cameras Group */}
-            {renderCollectionSection({
-              menu: camerasMenu,
-              selectedItem: selectedCameras,
-              onSelect: handleCamerasSelect,
-              fallbackTitle: 'Cameras',
-            })}
-
-            {/* Home Appliances Group */}
-            {renderCollectionSection({
-              menu: homeAppliancesMenu,
-              selectedItem: selectedHomeAppliances,
-              onSelect: handleHomeAppliancesSelect,
-              fallbackTitle: 'Home Appliances',
-            })}
+            <Suspense fallback={null}>
+              <HomeDesktopCollections
+                header={header}
+                fullTopProducts={fullTopProducts}
+                loadingHandles={loadingHandles}
+                hasLoadedHandle={hasLoadedHandle}
+                ensureCollectionLoaded={ensureCollectionLoaded}
+              />
+            </Suspense>
           </>
         )}
       </LazyMount>

@@ -181,11 +181,6 @@ const MENU_FRAGMENT = `#graphql
           url
           altText
         }
-        products(first: 1) {
-          nodes {
-            id
-          }
-        }
       }
     }
   }
