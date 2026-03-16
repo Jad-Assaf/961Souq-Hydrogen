@@ -24,6 +24,9 @@ function buildSrcSet(url, widths) {
 }
 
 export default function MosaicHero({collections}) {
+  const isVideoSource = (url) =>
+    /\.(mp4|webm|ogg)(\?.*)?$/i.test(String(url || ''));
+
   const getImagePriorityProps = (index) => {
     if (index <= 1) return {loading: 'eager', fetchpriority: 'high'};
     return {loading: 'lazy', fetchpriority: 'low'};
@@ -46,27 +49,27 @@ export default function MosaicHero({collections}) {
 
   const collectionImages = {
     apple:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/videos/c/o/v/12194bcc13cb4092afaa0bb3df6fae08.mp4',
     gaming:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241203.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming.jpg?v=1773672306&format=webp',
     gamingLaptops:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241207.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming_laptops.jpg?v=1773672306&format=webp',
     mobiles:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241201.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobiles_9fdbec20-948c-4738-9fb2-c0629f406d7a.jpg?v=1773672307&format=webp',
     desktops:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241211.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/desktops.jpg?v=1773672306&format=webp',
     monitors:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241215.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_f301f500-0563-4eab-a6d8-5321da5812a4.jpg?v=1773672306&format=webp',
     tablets:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241216.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tablets_80cf58eb-958e-43ab-b270-542d43d810c0.jpg?v=1773672306&format=webp',
     networking:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241217.jpg?v=1771928636&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking_32150fc5-127d-4ad6-aca5-baf9060230e4.jpg?v=1773672306&format=webp',
     accessories:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Create_a_premium_202602241221.jpg?v=1771928681&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/accessories_792b1223-1b2f-4517-8c87-ba116e3cfd1e.jpg?v=1773672306&format=webp',
     dyson:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241312.jpg?v=1771931777&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home_appliances.jpg?v=1773672307&format=webp',
     cosmetics:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241315.jpg?v=1771931777&format=webp',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/beauty.jpg?v=1773672306&format=webp',
   };
   const appleFeatureImage = {
     src: collectionImages.apple,
@@ -125,18 +128,30 @@ export default function MosaicHero({collections}) {
           <Link className="tile tile--feature" to="/collections/apple">
             <div className="tile__content">
               <h2 className="tile__title">Apple</h2>
-              <p className="tile__sub">iPhone, iPad, MacBook...</p>
+              <p className="tile__sub">All New MacBook NEO and M5 Chips now Available...</p>
             </div>
 
             <div className="tile__media" aria-hidden="true">
-              <img
-                alt={appleFeatureImage.alt}
-                {...getImageProps({
-                  url: appleFeatureImage.src,
-                  index: 0,
-                  isFeature: true,
-                })}
-              />
+              {isVideoSource(appleFeatureImage.src) ? (
+                <video
+                  src={appleFeatureImage.src}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  aria-label={appleFeatureImage.alt}
+                />
+              ) : (
+                <img
+                  alt={appleFeatureImage.alt}
+                  {...getImageProps({
+                    url: appleFeatureImage.src,
+                    index: 0,
+                    isFeature: true,
+                  })}
+                />
+              )}
             </div>
             <span className="tile__arrow" aria-hidden="true">
               &rarr;
