@@ -18,6 +18,7 @@ import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
 import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
+import {hasPreOrderTag} from '~/lib/productTags';
 import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
 
@@ -325,6 +326,7 @@ export function ProductForm({
   const isComputerComponent =
     Array.isArray(product?.tags) &&
     product.tags.includes('computer components');
+  const isPreOrderProduct = hasPreOrderTag(product?.tags);
 
   // ------------------------------
   // Initialize local selectedOptions
@@ -590,7 +592,9 @@ export function ProductForm({
           {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
             ? 'Call For Price'
             : selectedVariant?.availableForSale
-            ? 'Add to cart'
+            ? isPreOrderProduct
+              ? 'Pre Order'
+              : 'Add to cart'
             : 'Sold out'}
         </AddToCartButton>
         {isComputerComponent && (

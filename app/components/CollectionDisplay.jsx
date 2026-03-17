@@ -4,6 +4,7 @@ import {Money} from '@shopify/hydrogen';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import CollectionRows from './CollectionRows';
+import {hasPreOrderTag} from '../lib/productTags';
 import WishlistButton from './WishlistButton';
 
 const FREE_SHIPPING_TAGS = new Set([
@@ -111,6 +112,7 @@ function ProductQuickViewModal({
   const overlayRef = useRef(null);
   const navigate = useNavigate();
   const [modalImageIndex, setModalImageIndex] = useState(0);
+  const isPreOrderProduct = hasPreOrderTag(product?.tags);
   const selectedVariantForCart = selectedVariant
     ? {
         id: selectedVariant.id,
@@ -384,6 +386,8 @@ function ProductQuickViewModal({
                   ? 'Call for Price'
                   : hasMultipleVariants
                   ? 'Select Options'
+                  : isPreOrderProduct
+                  ? 'Pre Order'
                   : 'Add to cart'}
               </AddToCartButton>
 

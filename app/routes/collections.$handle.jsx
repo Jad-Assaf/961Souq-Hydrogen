@@ -20,6 +20,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
+import {hasPreOrderTag} from '~/lib/productTags';
 import WishlistButton from '~/components/WishlistButton';
 
 const SOCIAL_SHARE_IMAGE =
@@ -855,6 +856,7 @@ function ProductForm({product, selectedVariant}) {
   const {open} = useAside();
   const navigate = useNavigate();
   const hasVariants = product.variants.nodes.length > 1;
+  const isPreOrderProduct = hasPreOrderTag(product?.tags);
   const selectedVariantForCart = selectedVariant
     ? {
         id: selectedVariant.id,
@@ -908,6 +910,8 @@ function ProductForm({product, selectedVariant}) {
           ? 'Sold out'
           : hasVariants
           ? 'Select Options'
+          : isPreOrderProduct
+          ? 'Pre Order'
           : 'Add to cart'}
       </AddToCartButton>
     </div>
@@ -951,6 +955,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     title
     vendor
     productType
+    tags
     description
     availableForSale
     featuredImage {
