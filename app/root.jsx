@@ -181,6 +181,43 @@ export function Layout({children}) {
           name="viewport"
           content="width=device-width,initial-scale=1,viewport-fit=cover"
         />
+        <script
+          nonce={stableNonce}
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                try {
+                  var nav = window.navigator || {};
+                  var connection =
+                    nav.connection || nav.mozConnection || nav.webkitConnection;
+
+                  var lowCpu =
+                    typeof nav.hardwareConcurrency === 'number' &&
+                    nav.hardwareConcurrency > 0 &&
+                    nav.hardwareConcurrency <= 4;
+
+                  var lowRam =
+                    typeof nav.deviceMemory === 'number' &&
+                    nav.deviceMemory > 0 &&
+                    nav.deviceMemory <= 4;
+
+                  var saveData = Boolean(connection && connection.saveData);
+                  var reducedMotion =
+                    typeof window.matchMedia === 'function' &&
+                    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                  if (lowCpu || lowRam || saveData || reducedMotion) {
+                    document.documentElement.classList.add('reduced-glass');
+                    document.documentElement.setAttribute(
+                      'data-performance-tier',
+                      'low',
+                    );
+                  }
+                } catch (_e) {}
+              })();
+            `,
+          }}
+        />
         <link rel="stylesheet" href={appStyles}></link>
         {/* <link rel="stylesheet" href={fontStyles}></link> */}
         <Meta />
