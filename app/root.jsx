@@ -181,6 +181,10 @@ export function Layout({children}) {
           name="viewport"
           content="width=device-width,initial-scale=1,viewport-fit=cover"
         />
+        <meta
+          name="google-site-verification"
+          content="GTiDuRqJ-vKIEfPSdkUrLXpHe2bUWWmAt2jrBHhKQt0"
+        />
         <script
           nonce={stableNonce}
           dangerouslySetInnerHTML={{
