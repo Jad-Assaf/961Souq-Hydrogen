@@ -31,7 +31,11 @@ function safeWrite(items) {
 
 export function WishlistProvider({children}) {
   // Stable hook order; no conditional returns
-  const [items, setItems] = useState(() => safeRead());
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    setItems(safeRead());
+  }, []);
 
   // Sync from other tabs only (native `storage` event works cross-tab)
   useEffect(() => {
