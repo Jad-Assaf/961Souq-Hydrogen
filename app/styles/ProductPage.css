@@ -55,6 +55,35 @@ h4 {
     font-size: 16px !important;
 }
 
+.product-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.product-title-row h1 {
+    margin: 0;
+    line-height: 1.15;
+    color: #03072c;
+}
+
+.product-vat-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border: 1px solid #03072c;
+    border-radius: 999px;
+    background: #03072c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
 .quantity-selector {
     display: flex;
     align-items: center;
@@ -178,6 +207,10 @@ h4 {
     .add-to-cart-button {
         padding: 10px 10px;
         width: 100%;
+    }
+
+    .product-title-row {
+        gap: 8px;
     }
 }
 

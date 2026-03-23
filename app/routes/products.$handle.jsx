@@ -910,6 +910,7 @@ export default function Product() {
   const whatsappShareUrl = `https://wa.me/send?phone=9613276879&text=Hi, I would like to buy ${product.title} https://961souq.com${location.pathname}`;
   const subtotal =
     (parseFloat(selectedVariant?.price?.amount || '0') || 0) * quantity;
+  const showVatBadge = Boolean(selectedVariant?.taxable);
 
   return (
     <div className="product">
@@ -927,7 +928,12 @@ export default function Product() {
           selectedVariantImage={selectedVariant?.image}
         />
         <div className="product-main">
-          <h1>{title}</h1>
+          <div className="product-title-row">
+            <h1>{title}</h1>
+            {showVatBadge && (
+              <span className="product-vat-badge">Excluding VAT</span>
+            )}
+          </div>
           {/* Ask AI Button Component */}
           <AskAIButton productId={product.id} productFAQRef={productFAQRef} />
           <div className="price-container">
@@ -946,9 +952,7 @@ export default function Product() {
               ) : (
                 <span style={{display: 'flex', alignItems: 'center'}}>
                   <Money data={selectedVariant.price} />
-                  {product.metafieldVat?.value === 'Excluding VAT' && (
-                    <>&nbsp; HT &nbsp;</>
-                  )}
+                  {showVatBadge && <>&nbsp; HT &nbsp;</>}
                 </span>
               )}
             </small>
@@ -1019,13 +1023,6 @@ export default function Product() {
             metafieldShipping={product.metafieldShipping}
             // metafieldVat={product.metafieldVat}
           />
-          {product.metafieldVat?.value === 'Excluding VAT' && (
-            <span
-              style={{fontSize: '14px', fontStyle: 'italic', fontWeight: '300'}}
-            >
-              Excluding VAT
-            </span>
-          )}
           <p className="productPageDisclaimer">
             Product images are for reference only. The actual item may differ in
             appearance & colour. Please refer to the product code, SKU, and
@@ -1353,6 +1350,7 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
     quantityAvailable
+    taxable
     compareAtPrice {
       amount
       currencyCode
