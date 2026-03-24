@@ -3,6 +3,24 @@ import React, {useEffect, useState, useCallback} from 'react';
 const DAILY_TOKEN_LIMIT = 100;
 const MAX_INPUT_TOKENS = 50;
 const MAX_OUTPUT_TOKENS = 200;
+const STARTER_PROMPTS = [
+  {
+    label: 'Specs',
+    question: 'What are the main specs of this product?',
+  },
+  {
+    label: 'Warranty',
+    question: 'What warranty comes with this product?',
+  },
+  {
+    label: 'Delivery',
+    question: 'How long does delivery take for this product?',
+  },
+  {
+    label: 'Compatibility',
+    question: 'Is this product compatible with my setup?',
+  },
+];
 
 function estimateTokens(text) {
   if (!text) return 0;
@@ -33,9 +51,34 @@ const ProductFAQ = React.forwardRef(
     const inputRef = React.useRef(null);
 
     const {chat: chatKey, tokens: tokenKey} = storageKeys(productId);
+    const statusLabel = contextError
+      ? 'No context'
+      : !contextLoaded
+      ? 'Loading'
+      : loading
+      ? 'Thinking'
+      : 'Ready';
+    const statusTone = contextError
+      ? 'error'
+      : !contextLoaded
+      ? 'loading'
+      : loading
+      ? 'thinking'
+      : 'ready';
+    const focusInput = useCallback((cursorPosition) => {
+      if (!inputRef.current) return;
+      inputRef.current.focus({preventScroll: true});
+      if (
+        typeof cursorPosition === 'number' &&
+        typeof inputRef.current.setSelectionRange === 'function'
+      ) {
+        inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+      }
+    }, []);
 
     const fetchContext = useCallback(async () => {
-      if (!productId || contextLoaded || productContext) return;
+      if (!productId) return null;
+      if (contextLoaded && productContext) return productContext;
       setContextError('');
       try {
         const res = await fetch(
@@ -43,18 +86,21 @@ const ProductFAQ = React.forwardRef(
         );
         if (!res.ok) {
           setContextError('Unable to load product context.');
-          return;
+          return null;
         }
         const data = await res.json();
         if (data?.description) {
           setProductContext(data);
           setContextLoaded(true);
+          return data;
         } else {
           setContextError('Product details unavailable.');
+          return null;
         }
       } catch (err) {
         console.error('Context fetch failed', err);
         setContextError('Unable to load product context.');
+        return null;
       }
     }, [productContext, contextLoaded, productId]);
 
@@ -169,61 +215,128 @@ const ProductFAQ = React.forwardRef(
       setError('');
     };
 
-    const handleSend = async (e) => {
-      e.preventDefault();
-      const focusInput = () => {
-        if (inputRef.current) {
-          inputRef.current.focus({preventScroll: true});
-        }
-      };
-      if (!input.trim()) return;
-      if (!productId) {
-        setError('Missing product.');
-        focusInput();
-        return;
-      }
-      if (!productContext) {
-        setError('Loading product info, try again.');
-        fetchContext();
-        focusInput();
-        return;
-      }
+    const sendMessage = useCallback(
+      async (messageText) => {
+        const message = String(messageText || '').trim();
+        if (!message) return;
 
-      const inputTokens = estimateTokens(input);
+        if (loading) return;
 
-      // Check if message is too long
-      if (inputTokens > MAX_INPUT_TOKENS) {
-        // Send a special message to the API to have the LLM respond that the message is too long
-        const newMessages = [
-          ...messages,
-          {role: 'user', content: input.trim()},
-        ];
-        setMessages(newMessages);
-        setInput('');
-        setLoading(true);
         setError('');
 
-        try {
-          // Get current page URL for WhatsApp link
-          const productUrl = window.location.href;
+        if (input) {
+          setInput('');
+        }
 
+        const restoreMessageToInput = () => {
+          setInput(message);
+          if (typeof window !== 'undefined') {
+            window.requestAnimationFrame(() => {
+              focusInput(message.length);
+            });
+          }
+        };
+
+        const productUrl = window.location.href;
+
+        if (!productId) {
+          setError('Missing product.');
+          restoreMessageToInput();
+          return;
+        }
+
+        let nextContext = productContext;
+        if (!nextContext) {
+          nextContext = await fetchContext();
+        }
+        if (!nextContext) {
+          setError('Loading product info, try again.');
+          restoreMessageToInput();
+          return;
+        }
+
+        const inputTokens = estimateTokens(message);
+
+        // Check if message is too long
+        if (inputTokens > MAX_INPUT_TOKENS) {
+          const newMessages = [...messages, {role: 'user', content: message}];
+          setMessages(newMessages);
+          setLoading(true);
+
+          try {
+            const res = await fetch('/api/ai-answer-faq', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                productId,
+                messages: newMessages,
+                context: nextContext,
+                maxOutputTokens: MAX_OUTPUT_TOKENS,
+                messageTooLong: true,
+                productUrl,
+                inputTokens,
+              }),
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data?.answer) {
+              setError(data?.error || 'Could not get a response.');
+              return;
+            }
+
+            const assistantMessage = {
+              role: 'assistant',
+              content: data.answer,
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+          } catch (err) {
+            console.error('Chat send failed', err);
+            setError('Something went wrong. Try again.');
+          } finally {
+            setLoading(false);
+            focusInput();
+          }
+          return;
+        }
+
+        // Client-side check (server will enforce the real limit)
+        const todayUsage = dailyTokensUsed + inputTokens;
+        if (todayUsage > DAILY_TOKEN_LIMIT) {
+          setError('Daily limit reached. Please try again tomorrow.');
+          restoreMessageToInput();
+          return;
+        }
+
+        const newMessages = [...messages, {role: 'user', content: message}];
+        setMessages(newMessages);
+        persistTokenUsage(todayUsage);
+        setLoading(true);
+
+        try {
           const res = await fetch('/api/ai-answer-faq', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
               productId,
               messages: newMessages,
-              context: productContext,
+              context: nextContext,
               maxOutputTokens: MAX_OUTPUT_TOKENS,
-              messageTooLong: true,
               productUrl,
               inputTokens,
             }),
           });
 
           const data = await res.json();
-          if (!res.ok || !data?.answer) {
-            setError(data?.error || 'Could not get a response.');
+          if (!res.ok) {
+            if (data?.limitReached) {
+              setError('Daily limit reached. Please try again tomorrow.');
+            } else {
+              setError(data?.error || 'Could not get a response.');
+            }
+            return;
+          }
+          if (!data?.answer) {
+            setError('Could not get a response.');
             return;
           }
 
@@ -239,68 +352,31 @@ const ProductFAQ = React.forwardRef(
           setLoading(false);
           focusInput();
         }
-        return;
-      }
+      },
+      [
+        dailyTokensUsed,
+        fetchContext,
+        focusInput,
+        input,
+        loading,
+        messages,
+        persistTokenUsage,
+        productContext,
+        productId,
+      ],
+    );
 
-      // Client-side check (server will enforce the real limit)
-      const todayUsage = dailyTokensUsed + inputTokens;
-      if (todayUsage > DAILY_TOKEN_LIMIT) {
-        setError('Daily limit reached. Please try again tomorrow.');
-        return;
-      }
-
-      const newMessages = [...messages, {role: 'user', content: input.trim()}];
-      setMessages(newMessages);
-      setInput('');
-      // Still track client-side for UX, but server enforces the real limit
-      persistTokenUsage(todayUsage);
-      setLoading(true);
-      setError('');
-
-      try {
-        // Get current page URL for WhatsApp link
-        const productUrl = window.location.href;
-
-        const res = await fetch('/api/ai-answer-faq', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            productId,
-            messages: newMessages,
-            context: productContext,
-            maxOutputTokens: MAX_OUTPUT_TOKENS,
-            productUrl,
-            inputTokens,
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          if (data?.limitReached) {
-            setError('Daily limit reached. Please try again tomorrow.');
-          } else {
-            setError(data?.error || 'Could not get a response.');
-          }
-          return;
-        }
-        if (!data?.answer) {
-          setError('Could not get a response.');
-          return;
-        }
-
-        const assistantMessage = {
-          role: 'assistant',
-          content: data.answer,
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } catch (err) {
-        console.error('Chat send failed', err);
-        setError('Something went wrong. Try again.');
-      } finally {
-        setLoading(false);
-        focusInput();
-      }
+    const handleSend = async (e) => {
+      e.preventDefault();
+      await sendMessage(input);
     };
+
+    const handleStarterPrompt = useCallback(
+      (question) => {
+        void sendMessage(question);
+      },
+      [sendMessage],
+    );
 
     const handleKeyDown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -349,25 +425,29 @@ const ProductFAQ = React.forwardRef(
           >
             <div
               className="ai-modal product-chat-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="product-chat-title"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="ai-modal__header product-chat-modal__header">
-                <div className="ai-modal__left">
-                  <span className="ai-modal__chip">Ask AI</span>
-                  <span className="ai-modal__status">
-                    {contextError
-                      ? 'No context'
-                      : !contextLoaded
-                      ? 'Loading'
-                      : loading
-                      ? 'Thinking'
-                      : 'Ready'}
-                  </span>
+                <div className="product-chat-modal__titleblock">
+                  <div className="ai-modal__left">
+                    <span className="ai-modal__chip">Ask AI</span>
+                    <span
+                      className={`ai-modal__status product-chat-status product-chat-status--${statusTone}`}
+                    >
+                      {statusLabel}
+                    </span>
+                  </div>
+                  <h2 id="product-chat-title" className="product-chat-modal__title">
+                    Product assistant
+                  </h2>
+                  <p className="product-chat-modal__subtitle">
+                    Ask about specs, warranty, delivery, or compatibility.
+                  </p>
                 </div>
-                <div
-                  className="ai-modal__actions"
-                  style={{display: 'flex', gap: '8px', alignItems: 'center'}}
-                >
+                <div className="ai-modal__actions product-chat-modal__actions">
                   <button
                     type="button"
                     className="ai-modal__clear"
@@ -375,37 +455,8 @@ const ProductFAQ = React.forwardRef(
                     disabled={loading || messages.length === 0}
                     aria-label="Clear chat"
                     title="Clear chat"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '6px',
-                      border: '1px solid rgba(0,0,0,0.1)',
-                      background:
-                        'linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%)',
-                      color: '#444',
-                      fontSize: '16px',
-                      cursor:
-                        loading || messages.length === 0
-                          ? 'not-allowed'
-                          : 'pointer',
-                      opacity: loading || messages.length === 0 ? 0.5 : 1,
-                      transition: 'transform 120ms ease, box-shadow 120ms ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (loading || messages.length === 0) return;
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow =
-                        '0 2px 6px rgba(0,0,0,0.12)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = '';
-                      e.currentTarget.style.boxShadow = '';
-                    }}
                   >
-                    🗑️
+                    Clear
                   </button>
                   <button
                     type="button"
@@ -416,16 +467,7 @@ const ProductFAQ = React.forwardRef(
                     ✕
                   </button>
                 </div>
-                <span
-                  className="ai-modal__disclaimer"
-                  style={{
-                    position: 'absolute',
-                    top: '48px',
-                    fontSize: '12px',
-                    fontStyle: 'italic',
-                    color: 'grey',
-                  }}
-                >
+                <span className="ai-modal__disclaimer product-chat-modal__disclaimer">
                   AI can make mistakes. Always confirm details with a support
                   agent.
                 </span>
@@ -439,7 +481,28 @@ const ProductFAQ = React.forwardRef(
                 >
                   {messages.length === 0 && (
                     <div className="product-chat-empty">
-                      <p>Ask Any question about this product.</p>
+                      <span className="product-chat-empty__eyebrow">
+                        Start here
+                      </span>
+                      <p className="product-chat-empty__title">
+                        Ask any question about this product.
+                      </p>
+                      <p className="product-chat-empty__copy">
+                        Try specs, what&apos;s in the box, warranty, shipping,
+                        or compatibility.
+                      </p>
+                      <div className="product-chat-empty__prompts">
+                        {STARTER_PROMPTS.map((prompt) => (
+                          <button
+                            key={prompt.label}
+                            type="button"
+                            onClick={() => handleStarterPrompt(prompt.question)}
+                            disabled={loading || !!contextError}
+                          >
+                            {prompt.label}
+                          </button>
+                        ))}
+                      </div>
                       {contextError && (
                         <p className="product-chat-error">{contextError}</p>
                       )}
@@ -504,11 +567,7 @@ const ProductFAQ = React.forwardRef(
                             href={match.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{
-                              color: 'rgba(0, 214, 255, 0.9)',
-                              textDecoration: 'underline',
-                              fontWeight: 600,
-                            }}
+                            className="product-chat-link"
                           >
                             {match.text}
                           </a>,
@@ -537,32 +596,41 @@ const ProductFAQ = React.forwardRef(
                     );
                   })}
                   {loading && (
-                    <div className="product-chat-bubble assistant">
+                    <div className="product-chat-bubble assistant product-chat-bubble--loading">
                       <span className="product-chat-role">AI</span>
-                      <p>Thinking...</p>
+                      <div className="product-chat-typing" aria-label="AI is thinking">
+                        <span />
+                        <span />
+                        <span />
+                      </div>
                     </div>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
               </div>
               <form className="product-chat-input" onSubmit={handleSend}>
-                <div className="product-chat-input-row">
-                  <textarea
-                    rows={3}
-                    placeholder="Type your question here..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={!!contextError}
-                    ref={inputRef}
-                    maxLength={1200}
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading || !input.trim() || !!contextError}
-                  >
-                    {loading ? 'Sending…' : 'Send'}
-                  </button>
+                <div className="product-chat-input-shell">
+                  <div className="product-chat-input-row">
+                    <textarea
+                      rows={3}
+                      placeholder="Type your question here..."
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      disabled={!!contextError}
+                      ref={inputRef}
+                      maxLength={1200}
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading || !input.trim() || !!contextError}
+                    >
+                      {loading ? 'Sending...' : 'Send'}
+                    </button>
+                  </div>
+                  {/* <div className="product-chat-input-meta">
+                    <span>Press Enter to send. Use Shift+Enter for a new line.</span>
+                  </div> */}
                 </div>
                 {error && <p className="product-chat-error">{error}</p>}
               </form>
