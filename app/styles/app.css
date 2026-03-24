@@ -6482,6 +6482,7 @@ svg.icon.icon--full-color {
 }
 
 .product-chat-modal__header {
+  position: relative;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   align-items: flex-start;
   flex-wrap: wrap;
@@ -6494,6 +6495,7 @@ svg.icon.icon--full-color {
   gap: 8px;
   flex: 1;
   min-width: min(100%, 360px);
+  padding-right: 132px;
 }
 
 .product-chat-modal__title {
@@ -6506,13 +6508,15 @@ svg.icon.icon--full-color {
 
 .product-chat-modal__subtitle {
   margin: 0;
-  max-width: 56ch;
   font-size: 0.95rem;
   line-height: 1.55;
   color: rgba(226, 232, 240, 0.78);
 }
 
 .product-chat-modal__actions {
+  position: absolute;
+  top: 18px;
+  right: 20px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -6520,12 +6524,15 @@ svg.icon.icon--full-color {
 
 .product-chat-modal__disclaimer {
   position: static;
-  width: 100%;
-  margin-top: -4px;
-  font-size: 0.78rem;
-  line-height: 1.5;
+  width: auto;
+  margin-top: 60px;
+  font-size: 0.71rem;
+  line-height: 1.35;
   font-style: italic;
-  color: rgba(226, 232, 240, 0.54);
+  color: rgba(226, 232, 240, 0.46);
+  @media (max-width: 1028px) {
+    margin-top: 0 !important;
+  }
 }
 
 .product-chat-status {
@@ -6567,7 +6574,7 @@ svg.icon.icon--full-color {
   min-width: 78px;
   height: 38px;
   padding: 0 14px;
-  border-radius: 12px;
+  border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.9);
@@ -6590,6 +6597,12 @@ svg.icon.icon--full-color {
   transform: translateY(-1px);
   border-color: rgba(103, 232, 249, 0.46);
   box-shadow: 0 12px 24px rgba(8, 15, 24, 0.24);
+}
+
+.product-chat-modal .ai-modal__close {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
 }
 
 .product-chat-body {
@@ -7004,8 +7017,13 @@ svg.icon.icon--full-color {
     gap: 14px;
   }
 
+  .product-chat-modal__titleblock {
+    padding-right: 0;
+  }
+
   .product-chat-modal__actions {
-    margin-left: auto;
+    top: 14px;
+    right: 16px;
   }
 
   .product-chat-body {
