@@ -1,349 +1,333 @@
-/* eslint-disable hydrogen/prefer-image-component */
-import React from 'react';
+import {useFetcher} from '@remix-run/react';
+import React, {useEffect, useRef, useState} from 'react';
+import {SearchForm} from '~/components/SearchForm';
 import {Link} from '~/components/link';
 
-export const MOSAIC_IMAGE_QUALITY = 70;
-export const MOSAIC_FEATURE_WIDTHS = [320, 480, 640, 900, 1200];
-export const MOSAIC_TILE_WIDTHS = [240, 320, 400, 500, 640];
-export const MOSAIC_FEATURE_SIZES = '(max-width: 979px) 100vw, 66vw';
-export const MOSAIC_TILE_SIZES = '(max-width: 979px) 100vw, 33vw';
+const HERO_RESULT_LIMIT = 8;
+const HERO_CAROUSEL_SCROLL = 320;
+const HERO_MIN_SEARCH_CHARS = 2;
 
-export function withMosaicImageParams(
-  url,
-  {width, quality = MOSAIC_IMAGE_QUALITY, format = 'webp'},
-) {
+function formatPrice(price) {
+  const priceNum = typeof price === 'number' ? price : Number(price);
+
+  if (!Number.isFinite(priceNum)) return null;
+  if (priceNum === 0) return 'Call for price';
+
+  return `$${priceNum.toFixed(2)}`;
+}
+
+function withImageParams(url) {
   if (!url) return '';
-  const sep = url.includes('?') ? '&' : '?';
-  return `${url}${sep}width=${width}&quality=${quality}&format=${format}`;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}width=320&format=webp`;
 }
 
-function buildSrcSet(url, widths) {
-  return widths
-    .map((width) => `${withMosaicImageParams(url, {width})} ${width}w`)
-    .join(', ');
-}
+function normalizeHeroProduct(product) {
+  const primaryVariant = product?.variants?.nodes?.[0];
+  const variantImage = primaryVariant?.image?.url;
+  const galleryImage = product?.images?.nodes?.[0]?.url;
 
-export default function MosaicHero({collections}) {
-  const isVideoSource = (url) =>
-    /\.(mp4|webm|ogg)(\?.*)?$/i.test(String(url || ''));
-
-  const getImagePriorityProps = (index) => {
-    if (index <= 1) return {loading: 'eager', fetchpriority: 'high'};
-    return {loading: 'lazy', fetchpriority: 'low'};
+  return {
+    id: product?.id,
+    title: product?.title,
+    handle: product?.handle,
+    vendor: product?.vendor || 'New arrival',
+    image: variantImage || galleryImage || product?.image || '',
+    price: primaryVariant?.price?.amount ?? product?.price,
   };
+}
 
-  const getImageProps = ({url, index, isFeature = false}) => {
-    const widths = isFeature ? MOSAIC_FEATURE_WIDTHS : MOSAIC_TILE_WIDTHS;
-    const maxWidth = widths[widths.length - 1];
+function HeroResultCard({product}) {
+  const normalizedProduct = normalizeHeroProduct(product);
+  const price = formatPrice(normalizedProduct.price);
 
-    return {
-      src: withMosaicImageParams(url, {width: maxWidth}),
-      srcSet: buildSrcSet(url, widths),
-      sizes: isFeature ? MOSAIC_FEATURE_SIZES : MOSAIC_TILE_SIZES,
-      width: isFeature ? 900 : 500,
-      height: isFeature ? 300 : 250,
-      decoding: 'async',
-      ...getImagePriorityProps(index),
+  return (
+    <Link
+      className="hero-result-card"
+      to={`/products/${normalizedProduct.handle}`}
+    >
+      <div className="hero-result-card__image-wrap">
+        {normalizedProduct.image ? (
+          <img
+            alt={normalizedProduct.title}
+            className="hero-result-card__image"
+            loading="lazy"
+            src={withImageParams(normalizedProduct.image)}
+          />
+        ) : (
+          <div className="hero-result-card__image hero-result-card__image--empty" />
+        )}
+      </div>
+
+      <div className="hero-result-card__body">
+        <p className="hero-result-card__vendor">{normalizedProduct.vendor}</p>
+        <h3 className="hero-result-card__title">{normalizedProduct.title}</h3>
+        {price ? <p className="hero-result-card__price">{price}</p> : null}
+      </div>
+    </Link>
+  );
+}
+
+function HeroResultSkeleton() {
+  return (
+    <div className="hero-result-card hero-result-card--skeleton">
+      <div className="hero-result-card__image-wrap">
+        <div className="hero-result-card__image hero-result-card__image--empty" />
+      </div>
+      <div className="hero-result-card__body">
+        <div className="hero-result-card__line hero-result-card__line--sm" />
+        <div className="hero-result-card__line" />
+        <div className="hero-result-card__line hero-result-card__line--lg" />
+      </div>
+    </div>
+  );
+}
+
+export default function MosaicHero({newArrivalsProducts = []}) {
+  const fetcher = useFetcher();
+  const carouselRef = useRef(null);
+  const debounceRef = useRef(null);
+  const lastRequestedTermRef = useRef('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showResultsFade, setShowResultsFade] = useState(false);
+  const trimmedSearchTerm = searchTerm.trim();
+  const fetchedQuery = String(fetcher.data?.query || '').trim();
+  const canFetchResults = trimmedSearchTerm.length >= HERO_MIN_SEARCH_CHARS;
+  const isLoading =
+    canFetchResults &&
+    (fetcher.state !== 'idle' || fetchedQuery !== trimmedSearchTerm);
+  const hits =
+    fetchedQuery === trimmedSearchTerm ? fetcher.data?.hits || [] : [];
+  const fallbackProducts = newArrivalsProducts.slice(0, HERO_RESULT_LIMIT);
+  const showingFallbackProducts =
+    !canFetchResults || (!isLoading && hits.length === 0);
+  const displayedProducts =
+    !showingFallbackProducts && hits.length > 0 ? hits : fallbackProducts;
+  const viewAllLink = showingFallbackProducts
+    ? '/collections/new-arrivals'
+    : `/search?q=${encodeURIComponent(trimmedSearchTerm)}`;
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
+      }
     };
+  }, []);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+
+    if (!carousel) {
+      setShowResultsFade(false);
+      return undefined;
+    }
+
+    const updateTrackFade = () => {
+      const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+      const isOverflowing = maxScrollLeft > 4;
+      const isAtEnd = carousel.scrollLeft >= maxScrollLeft - 4;
+
+      setShowResultsFade(isOverflowing && !isAtEnd);
+    };
+
+    updateTrackFade();
+    carousel.addEventListener('scroll', updateTrackFade, {passive: true});
+    window.addEventListener('resize', updateTrackFade);
+
+    return () => {
+      carousel.removeEventListener('scroll', updateTrackFade);
+      window.removeEventListener('resize', updateTrackFade);
+    };
+  }, [displayedProducts.length, isLoading, trimmedSearchTerm]);
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    const trimmedValue = value.trim();
+
+    setSearchTerm(value);
+
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+
+    if (trimmedValue.length < HERO_MIN_SEARCH_CHARS) {
+      lastRequestedTermRef.current = '';
+      return;
+    }
+
+    if (trimmedValue === lastRequestedTermRef.current) {
+      return;
+    }
+
+    debounceRef.current = window.setTimeout(() => {
+      lastRequestedTermRef.current = trimmedValue;
+      fetcher.load(
+        `/search?q=${encodeURIComponent(trimmedValue)}&limit=${HERO_RESULT_LIMIT}`,
+      );
+    }, 220);
   };
 
-  const collectionImages = {
-    apple:
-      'https://cdn.shopify.com/videos/c/o/v/12194bcc13cb4092afaa0bb3df6fae08.mp4',
-    gaming:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming.jpg?v=1773672306&format=webp',
-    gamingLaptops:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming_laptops.jpg?v=1773672306&format=webp',
-    mobiles:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobiles_9fdbec20-948c-4738-9fb2-c0629f406d7a.jpg?v=1773672307&format=webp',
-    desktops:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/desktops.jpg?v=1773672306&format=webp',
-    monitors:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_f301f500-0563-4eab-a6d8-5321da5812a4.jpg?v=1773672306&format=webp',
-    tablets:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/tablets_80cf58eb-958e-43ab-b270-542d43d810c0.jpg?v=1773672306&format=webp',
-    networking:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/networking_32150fc5-127d-4ad6-aca5-baf9060230e4.jpg?v=1773672306&format=webp',
-    accessories:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/accessories_792b1223-1b2f-4517-8c87-ba116e3cfd1e.jpg?v=1773672306&format=webp',
-    dyson:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/home_appliances.jpg?v=1773672307&format=webp',
-    cosmetics:
-      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/beauty.jpg?v=1773672306&format=webp',
+  const handleSearchSubmit = (event) => {
+    const formData = new FormData(event.currentTarget);
+    const submittedQuery = String(formData.get('q') || '').trim();
+
+    if (!submittedQuery) {
+      event.preventDefault();
+    }
   };
-  const appleFeatureImage = {
-    src: collectionImages.apple,
-    alt: 'Apple',
+
+  const scrollCarousel = (direction) => {
+    carouselRef.current?.scrollBy({
+      left: direction * HERO_CAROUSEL_SCROLL,
+      behavior: 'smooth',
+    });
   };
-  const gamingImage = {
-    src: collectionImages.gaming,
-    alt: 'Gaming',
-  };
-  const mobilesImage = {
-    src: collectionImages.mobiles,
-    alt: 'Mobiles',
-  };
-  const gamingLaptopsImage = {
-    src: collectionImages.gamingLaptops,
-    alt: 'Gaming Laptops',
-  };
-  const desktopsImage = {
-    src: collectionImages.desktops,
-    alt: 'Desktops',
-  };
-  const monitorsImage = {
-    src: collectionImages.monitors,
-    alt: 'Monitors',
-  };
-  const tabletsImage = {
-    src: collectionImages.tablets,
-    alt: 'Tablets',
-  };
-  const networkingImage = {
-    src: collectionImages.networking,
-    alt: 'Networking',
-  };
-  const accessoriesImage = {
-    src: collectionImages.accessories,
-    alt: 'Accessories',
-  };
-  const dysonImage = {
-    src: collectionImages.dyson,
-    alt: 'Dyson',
-  };
-  const cosmeticsImage = {
-    src: collectionImages.cosmetics,
-    alt: 'Cosmetics',
-  };
-  const shouldShowCollection = (handle) => {
-    if (!collections || typeof collections !== 'object') return true;
-    if (!Object.prototype.hasOwnProperty.call(collections, handle)) return true;
-    return Boolean(collections[handle]);
-  };
+
+  const resultsTrackShellClassName = showResultsFade
+    ? 'hero-results__track-shell hero-results__track-shell--fade'
+    : 'hero-results__track-shell';
 
   return (
     <section className="mosaic-hero" aria-label="Homepage hero">
-      <div className="mosaic-wrap">
-        {shouldShowCollection('apple') && (
-          <Link className="tile tile--feature" to="/collections/apple">
-            <div className="tile__content">
-              <h2 className="tile__title">Apple</h2>
-              <p className="tile__sub">All New MacBook NEO and M5 Chips now Available...</p>
-            </div>
+      <div className="hero-shell">
+        <div className="hero-frame">
+          <div className="hero-copy">
+            <h2 className="hero-title">
+              Find the device, setup, or upgrade that fits faster.
+            </h2>
 
-            <div className="tile__media" aria-hidden="true">
-              {isVideoSource(appleFeatureImage.src) ? (
+            <p className="hero-lede">
+              Search directly to find what you need, or browse the latest
+              arrivals below.
+            </p>
+
+            <SearchForm
+              method="get"
+              action="/search"
+              className="hero-search-form"
+              onSubmit={handleSearchSubmit}
+            >
+              {({inputRef}) => (
+                <>
+                  <label
+                    className="visually-hidden"
+                    htmlFor="hero-search-input"
+                  >
+                    Search products
+                  </label>
+                  <input
+                    id="hero-search-input"
+                    ref={inputRef}
+                    type="search"
+                    name="q"
+                    className="hero-search-input"
+                    placeholder="Search MacBook, PS5, Dyson, monitors..."
+                    autoComplete="off"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                  />
+                  <button type="submit" className="hero-search-submit">
+                    Search
+                  </button>
+                </>
+              )}
+            </SearchForm>
+
+            <div className="hero-results" aria-live="polite">
+              <div className="hero-results__header">
+                <p className="hero-results__label">
+                  {canFetchResults && hits.length > 0
+                    ? `Instant results for "${trimmedSearchTerm}"`
+                    : canFetchResults && !isLoading
+                    ? `No exact matches for "${trimmedSearchTerm}". Showing new arrivals.`
+                    : 'New arrivals'}
+                </p>
+
+                {displayedProducts.length > 0 ? (
+                  <div className="hero-results__controls">
+                    <button
+                      type="button"
+                      className="hero-results__control"
+                      onClick={() => scrollCarousel(-1)}
+                      aria-label="Scroll results left"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      className="hero-results__control"
+                      onClick={() => scrollCarousel(1)}
+                      aria-label="Scroll results right"
+                    >
+                      →
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              {isLoading ? (
+                <div className={resultsTrackShellClassName}>
+                  <div className="hero-results__track" ref={carouselRef}>
+                    {Array.from({length: 3}, (_, index) => (
+                      <HeroResultSkeleton key={index} />
+                    ))}
+                  </div>
+                </div>
+              ) : displayedProducts.length > 0 ? (
+                <div className={resultsTrackShellClassName}>
+                  <div className="hero-results__track" ref={carouselRef}>
+                    {displayedProducts.map((product) => (
+                      <HeroResultCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="hero-results__empty">
+                  No products are available to preview right now.
+                </div>
+              )}
+
+              <div className="hero-results__footer">
+                {displayedProducts.length > 0 && !isLoading ? (
+                  <Link className="hero-results__view-all" to={viewAllLink}>
+                    View all results
+                  </Link>
+                ) : (
+                  <span
+                    className="hero-results__view-all hero-results__view-all--placeholder"
+                    aria-hidden="true"
+                  >
+                    View all results
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-visual">
+            <Link
+              className="hero-video-link"
+              to="/products/sony-hyperpop-dualsense-ps5-wireless-controller"
+              aria-label="View the Sony Hyperpop DualSense PS5 Wireless Controller"
+            >
+              <div className="hero-video-shell">
                 <video
-                  src={appleFeatureImage.src}
+                  className="hero-video"
+                  src="https://cdn.shopify.com/videos/c/o/v/83a0ee7948374771a51f1e08cb162add.mp4"
                   autoPlay
                   muted
                   loop
                   playsInline
-                  preload="auto"
-                  aria-label={appleFeatureImage.alt}
+                  preload="metadata"
+                  aria-label="Hero showcase video"
                 />
-              ) : (
-                <img
-                  alt={appleFeatureImage.alt}
-                  {...getImageProps({
-                    url: appleFeatureImage.src,
-                    index: 0,
-                    isFeature: true,
-                  })}
-                />
-              )}
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('mobiles') && (
-          <Link className="tile tile--phones" to="/collections/mobiles">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Mobiles</h3>
-              <p className="tile__sub">Android &amp; iPhone</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={mobilesImage.alt}
-                {...getImageProps({url: mobilesImage.src, index: 1})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('gaming') && (
-          <Link className="tile tile--gaming" to="/collections/gaming">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Gaming</h3>
-              <p className="tile__sub">Consoles &amp; Gear</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={gamingImage.alt}
-                {...getImageProps({url: gamingImage.src, index: 2})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('gaming-laptops') && (
-          <Link className="tile tile--laptops" to="/collections/gaming-laptops">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Gaming Laptops</h3>
-              <p className="tile__sub">RTX &amp; High FPS</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={gamingLaptopsImage.alt}
-                {...getImageProps({url: gamingLaptopsImage.src, index: 3})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('desktops') && (
-          <Link className="tile tile--desktops" to="/collections/desktops">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Desktops</h3>
-              <p className="tile__sub">Builds &amp; PCs</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={desktopsImage.alt}
-                {...getImageProps({url: desktopsImage.src, index: 4})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('monitors') && (
-          <Link className="tile tile--monitors" to="/collections/monitors">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Monitors</h3>
-              <p className="tile__sub">144Hz / 4K</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={monitorsImage.alt}
-                {...getImageProps({url: monitorsImage.src, index: 5})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('tablets') && (
-          <Link className="tile tile--tablets" to="/collections/tablets">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Tablets</h3>
-              <p className="tile__sub">Study &amp; Play</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={tabletsImage.alt}
-                {...getImageProps({url: tabletsImage.src, index: 6})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('networking') && (
-          <Link className="tile tile--networking" to="/collections/networking">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Networking</h3>
-              <p className="tile__sub">Routers &amp; Mesh</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={networkingImage.alt}
-                {...getImageProps({url: networkingImage.src, index: 7})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('dyson-products') && (
-          <Link className="tile tile--dyson" to="/collections/dyson-products">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Dyson</h3>
-              <p className="tile__sub">Home Tech &amp; Care</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={dysonImage.alt}
-                {...getImageProps({url: dysonImage.src, index: 8})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('cosmetics') && (
-          <Link className="tile tile--cosmetics" to="/collections/cosmetics">
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Cosmetics</h3>
-              <p className="tile__sub">Beauty Essentials</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={cosmeticsImage.alt}
-                {...getImageProps({url: cosmeticsImage.src, index: 9})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
-
-        {shouldShowCollection('accessories') && (
-          <Link
-            className="tile tile--accessories"
-            to="/collections/accessories"
-          >
-            <div className="tile__content">
-              <h3 className="tile__title tile__title--sm">Accessories</h3>
-              <p className="tile__sub">Chargers, Cables &amp; More</p>
-            </div>
-            <div className="tile__media" aria-hidden="true">
-              <img
-                alt={accessoriesImage.alt}
-                {...getImageProps({url: accessoriesImage.src, index: 10})}
-              />
-            </div>
-            <span className="tile__arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        )}
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
-
-/* eslint-enable hydrogen/prefer-image-component */

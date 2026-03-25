@@ -7,11 +7,7 @@ import React, {
   useCallback,
 } from 'react';
 import {Await, useLoaderData, useMatches} from '@remix-run/react';
-import MosaicHero, {
-  MOSAIC_FEATURE_SIZES,
-  MOSAIC_FEATURE_WIDTHS,
-  withMosaicImageParams,
-} from '~/components/MosaicHero';
+import MosaicHero from '~/components/MosaicHero';
 // import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
 import BrandSection from '~/components/BrandsSection';
@@ -27,9 +23,6 @@ import MobileAppPopup from '~/components/MobileAppPopup';
 import {defer} from '@shopify/remix-oxygen';
 import homeStyles from '~/styles/Homepage.css?url';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
-
-const HERO_FEATURE_IMAGE_URL =
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636&format=webp';
 
 const MOBILE_PRODUCT_ROW_HANDLES = [
   'apple',
@@ -55,23 +48,10 @@ const HomeDesktopCollections = React.lazy(() =>
 );
 
 export function links() {
-  const imageSrcSet = MOSAIC_FEATURE_WIDTHS.map(
-    (width) =>
-      `${withMosaicImageParams(HERO_FEATURE_IMAGE_URL, {width})} ${width}w`,
-  ).join(', ');
-
   return [
     {
       rel: 'stylesheet',
       href: homeStyles,
-    },
-    {
-      rel: 'preload',
-      as: 'image',
-      href: withMosaicImageParams(HERO_FEATURE_IMAGE_URL, {width: 900}),
-      imageSrcSet,
-      imageSizes: MOSAIC_FEATURE_SIZES,
-      fetchpriority: 'high',
     },
   ];
 }
@@ -268,6 +248,7 @@ export async function loader(args) {
   });
 
   const criticalData = await criticalDataPromise;
+  const resolvedNewArrivals = await newArrivalsPromise;
 
   // Prepare critical top products.
   const initialTopProducts = {};
@@ -278,7 +259,7 @@ export async function loader(args) {
       title: criticalData.title,
       description: criticalData.description,
       url: criticalData.url,
-      newArrivals: newArrivalsPromise,
+      newArrivals: resolvedNewArrivals,
       cosmetics: cosmeticsPromise,
       heroCollections: null,
       topProducts: initialTopProducts,
@@ -703,27 +684,23 @@ export default function Homepage() {
         961Souq | Leading Electronics, PC and Gaming Equipment Store in Lebanon
       </h1>
 
-      <MosaicHero collections={heroCollections} isMobile={isMobile} />
+      <MosaicHero
+        collections={heroCollections}
+        isMobile={isMobile}
+        newArrivalsProducts={newArrivals?.products?.nodes || []}
+      />
 
-      <Suspense
-        fallback={
-          <TopProductPlaceholder
-            title="New Arrivals"
-            handle="new-arrivals"
-            count={isMobile ? 4 : 6}
-          />
-        }
-      >
-        <Await resolve={newArrivals}>
-          {(resolvedNewArrivals) =>
-            resolvedNewArrivals ? (
-              <div ref={setNewArrivalsTriggerNode}>
-                <TopProductSections collection={resolvedNewArrivals} />
-              </div>
-            ) : null
-          }
-        </Await>
-      </Suspense>
+      {newArrivals ? (
+        <div ref={setNewArrivalsTriggerNode}>
+          <TopProductSections collection={newArrivals} />
+        </div>
+      ) : (
+        <TopProductPlaceholder
+          title="New Arrivals"
+          handle="new-arrivals"
+          count={isMobile ? 4 : 6}
+        />
+      )}
       <Suspense fallback={null}>
         <Await resolve={cosmetics}>
           {(resolvedCosmetics) =>

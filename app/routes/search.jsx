@@ -7,6 +7,7 @@ import {
 } from '~/lib/typesense.server';
 
 const PER_PAGE = 50;
+const MAX_LIMIT = 12;
 
 /**
  * @type {MetaFunction}
@@ -26,6 +27,11 @@ export async function loader({request, context}) {
   const url = new URL(request.url);
   const originalQ = (url.searchParams.get('q') || '').trim();
   const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
+  const requestedLimit = parseInt(url.searchParams.get('limit') || '', 10);
+  const perPage =
+    Number.isFinite(requestedLimit) && requestedLimit > 0
+      ? Math.min(requestedLimit, MAX_LIMIT)
+      : PER_PAGE;
 
   function expandNumericTokens(original) {
     const trimmed = original.trim();
@@ -46,7 +52,7 @@ export async function loader({request, context}) {
   const q = expandNumericTokens(originalQ);
 
   if (!q) {
-    return json({query: '', hits: [], found: 0, page: 1, perPage: PER_PAGE});
+    return json({query: '', hits: [], found: 0, page: 1, perPage});
   }
 
   const client = getTypesenseSearchClientFromEnv(context.env);
@@ -55,7 +61,7 @@ export async function loader({request, context}) {
     q,
     query_by: 'title,sku,handle,tags',
     query_by_weights: '10,10,5,2',
-    per_page: PER_PAGE,
+    per_page: perPage,
     page,
     prefix: true,
     infix: 'always,fallback,always,always',
@@ -106,7 +112,7 @@ export async function loader({request, context}) {
       hits,
       found: result.found ?? hits.length,
       page,
-      perPage: PER_PAGE,
+      perPage,
     });
   } catch (error) {
     console.error('Typesense search error:', error);
