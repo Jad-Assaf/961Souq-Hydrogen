@@ -1,4 +1,5 @@
 import React from 'react';
+import {Analytics} from '@shopify/hydrogen';
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {
@@ -116,6 +117,7 @@ export async function loader({request, context}) {
 
 export default function SearchRoute() {
   const {query, hits, found, page, perPage} = useLoaderData();
+  const trimmedQuery = query?.trim();
 
   return (
     <div className="search-page">
@@ -200,6 +202,9 @@ export default function SearchRoute() {
         page={page}
         perPage={perPage}
       />
+      {trimmedQuery ? (
+        <Analytics.SearchView data={{searchTerm: trimmedQuery}} />
+      ) : null}
     </div>
   );
 }

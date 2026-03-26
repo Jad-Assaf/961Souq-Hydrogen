@@ -3,6 +3,7 @@ import {RemixServer} from '@remix-run/react';
 import isbot from 'isbot';
 import {renderToReadableStream} from 'react-dom/server';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
+import {resolveCheckoutDomain} from '~/lib/shopifyAnalytics';
 
 /**
  * @param {Request} request
@@ -29,9 +30,13 @@ export default async function handleRequest(
     });
   }
 
+  const checkoutDomain = resolveCheckoutDomain(
+    context.env.PUBLIC_CHECKOUT_DOMAIN,
+    request.url,
+  );
   const {nonce, header, NonceProvider} = createContentSecurityPolicy({
     shop: {
-      checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
+      checkoutDomain,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
     scriptSrc: [

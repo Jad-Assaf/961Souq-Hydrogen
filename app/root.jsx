@@ -19,6 +19,11 @@ import {
 // import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {HEADER_QUERY} from '~/lib/fragments';
+import {
+  getAnalyticsCookieDomain,
+  normalizeHostname,
+  resolveCheckoutDomain,
+} from '~/lib/shopifyAnalytics';
 import React, {useEffect, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
@@ -62,6 +67,10 @@ export async function loader({request, context}) {
   if (match) return redirect(`/products/${match[1]}`, {status: 301});
 
   const {storefront, env, session, customerAccount} = context;
+  const checkoutDomain = resolveCheckoutDomain(
+    env.PUBLIC_CHECKOUT_DOMAIN,
+    request.url,
+  );
   const cartPromise = context.cart.get().catch(() => null);
   const isLoggedInPromise = customerAccount.isLoggedIn().catch(() => false);
 
@@ -83,13 +92,14 @@ export async function loader({request, context}) {
       header,
       cart: cartPromise,
       isLoggedIn: isLoggedInPromise,
+      storefrontHost: normalizeHostname(request.url),
       publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
       shop: getShopAnalytics({
         storefront,
         publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
       }),
       consent: {
-        checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+        checkoutDomain,
         storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
         country: storefront.i18n.country,
         language: storefront.i18n.language,
@@ -129,8 +139,10 @@ export function Layout({children}) {
   const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
   const isLoading = navigation.state !== 'idle';
-  const analyticsCart =
-    data?.cart && typeof data.cart?.then === 'function' ? null : data?.cart;
+  const analyticsCookieDomain = getAnalyticsCookieDomain(
+    data?.storefrontHost,
+    data?.consent?.checkoutDomain,
+  );
   const stableNonce =
     nonce ||
     (typeof document !== 'undefined'
@@ -364,9 +376,10 @@ export function Layout({children}) {
         <div id="route-fade" data-loading={isLoading}>
           {data ? (
             <Analytics.Provider
-              cart={analyticsCart}
+              cart={data.cart}
               shop={data.shop}
               consent={data.consent}
+              cookieDomain={analyticsCookieDomain}
             >
               <SearchProvider>
                 <WishlistProvider>
