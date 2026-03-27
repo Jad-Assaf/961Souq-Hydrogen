@@ -20,7 +20,6 @@ import {
 import {PageLayout} from '~/components/PageLayout';
 import {HEADER_QUERY} from '~/lib/fragments';
 import {
-  getAnalyticsCookieDomain,
   normalizeHostname,
   resolveCheckoutDomain,
 } from '~/lib/shopifyAnalytics';
@@ -44,6 +43,7 @@ export const shouldRevalidate = ({formMethod, defaultShouldRevalidate}) => {
 const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
 const GOOGLE_ANALYTICS_ID = 'G-CB623RXLSE';
 const GOOGLE_ADS_ID = 'AW-378354284';
+const SHOPIFY_COOKIE_DOMAIN = '.961souq.com';
 // const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
 
 export function links() {
@@ -64,7 +64,9 @@ export function links() {
 export async function loader({request, context}) {
   const url = new URL(request.url);
   const match = url.pathname.match(/^\/collections\/[^/]+\/products\/(.+)/);
-  if (match) return redirect(`/products/${match[1]}`, {status: 301});
+  if (match) {
+    return redirect(`/products/${match[1]}${url.search}`, {status: 301});
+  }
 
   const {storefront, env, session, customerAccount} = context;
   const checkoutDomain = resolveCheckoutDomain(
@@ -139,10 +141,6 @@ export function Layout({children}) {
   const clarityId = 'q97botmzx1'; // Replace with your Clarity project ID
 
   const isLoading = navigation.state !== 'idle';
-  const analyticsCookieDomain = getAnalyticsCookieDomain(
-    data?.storefrontHost,
-    data?.consent?.checkoutDomain,
-  );
   const stableNonce =
     nonce ||
     (typeof document !== 'undefined'
@@ -379,7 +377,7 @@ export function Layout({children}) {
               cart={data.cart}
               shop={data.shop}
               consent={data.consent}
-              cookieDomain={analyticsCookieDomain}
+              cookieDomain={SHOPIFY_COOKIE_DOMAIN}
             >
               <SearchProvider>
                 <WishlistProvider>
