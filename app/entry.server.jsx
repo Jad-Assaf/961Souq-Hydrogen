@@ -1,5 +1,5 @@
 // entry.server.jsx
-import {RemixServer} from '@remix-run/react';
+import {ServerRouter} from 'react-router';
 import isbot from 'isbot';
 import {renderToReadableStream} from 'react-dom/server';
 import {createContentSecurityPolicy} from '@shopify/hydrogen';
@@ -9,14 +9,14 @@ import {resolveCheckoutDomain} from '~/lib/shopifyAnalytics';
  * @param {Request} request
  * @param {number} responseStatusCode
  * @param {Headers} responseHeaders
- * @param {EntryContext} remixContext
+ * @param {EntryContext} reactRouterContext
  * @param {AppLoadContext} context
  */
 export default async function handleRequest(
   request,
   responseStatusCode,
   responseHeaders,
-  remixContext,
+  reactRouterContext,
   context,
 ) {
   const url = new URL(request.url);
@@ -255,7 +255,11 @@ export default async function handleRequest(
 
   const body = await renderToReadableStream(
     <NonceProvider>
-      <RemixServer context={remixContext} url={request.url} nonce={nonce} />
+      <ServerRouter
+        context={reactRouterContext}
+        url={request.url}
+        nonce={nonce}
+      />
     </NonceProvider>,
     {
       nonce,
@@ -281,5 +285,5 @@ export default async function handleRequest(
   });
 }
 
-/** @typedef {import('@shopify/remix-oxygen').EntryContext} EntryContext */
-/** @typedef {import('@shopify/remix-oxygen').AppLoadContext} AppLoadContext */
+/** @typedef {import('react-router').EntryContext} EntryContext */
+/** @typedef {import('@shopify/hydrogen').HydrogenRouterContextProvider} AppLoadContext */

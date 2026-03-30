@@ -9,7 +9,11 @@ import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
  * @param {Env} env
  * @param {ExecutionContext} executionContext
  */
-export async function createAppLoadContext(request, env, executionContext) {
+export async function createHydrogenRouterContext(
+  request,
+  env,
+  executionContext,
+) {
   /**
    * Open a cache instance in the worker and a custom session instance.
    */
@@ -35,8 +39,7 @@ export async function createAppLoadContext(request, env, executionContext) {
     },
   });
 
-  return {
-    ...hydrogenContext,
-    // declare additional Remix loader context
-  };
+  return hydrogenContext;
 }
+
+export const createAppLoadContext = createHydrogenRouterContext;

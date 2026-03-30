@@ -10,7 +10,7 @@ import {themeSchema} from '~/weaverse/schema.server';
  * The context implementation is separate from server.ts
  * so that type can be extracted for AppLoadContext
  * */
-export async function createAppLoadContext(
+export async function createHydrogenRouterContext(
   request: Request,
   env: Env,
   executionContext: ExecutionContext,
@@ -40,9 +40,7 @@ export async function createAppLoadContext(
     },
   });
 
-  return {
-    ...hydrogenContext,
-    // declare additional Remix loader context
+  return Object.assign(hydrogenContext, {
     weaverse: new WeaverseClient({
       ...hydrogenContext,
       request,
@@ -50,5 +48,7 @@ export async function createAppLoadContext(
       themeSchema,
       components,
     }),
-  };
+  });
 }
+
+export const createAppLoadContext = createHydrogenRouterContext;

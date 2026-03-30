@@ -1,10 +1,19 @@
 import React, {createContext, useContext, useState, useCallback} from 'react';
-import {algoliasearch} from 'algoliasearch';
 
-const searchClient = algoliasearch(
-  'J1G0XS6JMY',
-  'd79ceb9a07d6afa035dfda887d8f2f93',
-);
+let searchClientPromise;
+
+async function getSearchClient() {
+  if (typeof window === 'undefined') return null;
+
+  if (!searchClientPromise) {
+    searchClientPromise = import('algoliasearch/dist/lite/builds/browser').then(
+      ({liteClient}) =>
+        liteClient('J1G0XS6JMY', 'd79ceb9a07d6afa035dfda887d8f2f93'),
+    );
+  }
+
+  return searchClientPromise;
+}
 
 const SearchContext = createContext();
 
@@ -41,7 +50,12 @@ export function SearchProvider({children}) {
       setIsLoading(true);
 
       try {
-        // Use the search method directly on searchClient
+        const searchClient = await getSearchClient();
+        if (!searchClient) {
+          setSearchResults([]);
+          return;
+        }
+
         const response = await searchClient.search([
           {
             indexName: 'shopify_products',
@@ -90,7 +104,7 @@ export function SearchProvider({children}) {
     setSearchInput,
     performSearch,
     setInitialQuery,
-    searchClient,
+    searchClient: null,
   };
 
   return (
