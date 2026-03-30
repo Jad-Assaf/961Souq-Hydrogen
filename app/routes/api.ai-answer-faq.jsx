@@ -466,7 +466,7 @@ export async function action({request, context}) {
         .trim();
 
       // Add WhatsApp link (simple, no prefilled text to avoid URL noise)
-      const whatsappLink = 'https://wa.me/9613276879';
+      const whatsappLink = 'https://wa.me/96170961961';
 
       const contactInfo =
         userLang === 'Arabic'
@@ -481,7 +481,7 @@ export async function action({request, context}) {
           : 'Your message is too long. Please shorten it to about 80 words or fewer.';
 
       // Add WhatsApp link (simple, no prefilled text to avoid URL noise)
-      const whatsappLink = 'https://wa.me/9613276879';
+      const whatsappLink = 'https://wa.me/96170961961';
 
       const contactInfo =
         userLang === 'Arabic'
@@ -692,7 +692,7 @@ export async function action({request, context}) {
     }
 
     // Generate WhatsApp link (simple, no prefilled text to avoid URL noise)
-    const whatsappLink = 'https://wa.me/9613276879';
+    const whatsappLink = 'https://wa.me/96170961961';
 
     // Remove any WhatsApp links that the LLM might have added
     let cleanedAnswer = answer
