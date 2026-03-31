@@ -5,6 +5,7 @@ import {Header} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {Footer} from './Footer';
 import MobileBottomNavigation from './MobileBottomNavigation';
+import StorefrontChatbot from './StorefrontChatbot';
 
 const shopMenuData = [
   {title: 'Apple', link: '/collections/apple'},
@@ -81,6 +82,7 @@ export function PageLayout({
         </Suspense>
       ) : null}
       <main>{children}</main>
+      <StorefrontChatbot />
       <a
         href="https://wa.me/96170961961"
         target="_blank"

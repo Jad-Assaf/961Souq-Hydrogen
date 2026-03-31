@@ -1,6 +1,7 @@
 import {useEffect, useState, useRef, useId, useMemo} from 'react';
 import {Link, NavLink, useLocation} from '@remix-run/react';
 import {useAside} from '~/components/Aside';
+import {AnnouncementBar} from '~/components/AnnouncementBar';
 import {useWishlist} from '~/lib/WishlistContext';
 import {useOptimisticCart} from '@shopify/hydrogen';
 import defaultLogoSvgRaw from '~/assets/961_Souq.svg?raw';
@@ -373,6 +374,7 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
     <>
       <SearchGlassFilterDefs />
       <header className={`header ${isHeaderScrolled ? 'is-scrolled' : ''}`}>
+        <AnnouncementBar />
         <div className="header-top-background" aria-hidden="true"></div>
         <div className="header-top">
           <button

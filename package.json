@@ -7,6 +7,9 @@
   "scripts": {
     "build": "shopify hydrogen build --codegen",
     "dev": "shopify hydrogen dev --codegen",
+    "dev:main-env": "shopify hydrogen dev --env-branch=main --codegen",
+    "env:list": "shopify hydrogen env list",
+    "env:pull:main": "shopify hydrogen env pull --env-branch=main --env-file=.env",
     "preview": "shopify hydrogen preview --build",
     "lint": "eslint --cache --cache-location .eslintcache --no-error-on-unmatched-pattern --ext .js,.ts,.jsx,.tsx .",
     "codegen": "shopify hydrogen codegen"

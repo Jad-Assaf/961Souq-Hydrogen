@@ -20,6 +20,10 @@ declare global {
 
   interface Env extends HydrogenEnv {
     // declare additional Env parameter use in the fetch handler and Remix loader context here
+    OPENAI_API_KEY?: string;
+    PRIVATE_STOREFRONT_API_TOKEN?: string;
+    SHOPIFY_STOREFRONT_PRIVATE_TOKEN?: string;
+    SHOPIFY_STOREFRONT_PUBLIC_TOKEN?: string;
   }
 }
 

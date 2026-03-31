@@ -9,8 +9,11 @@ function normalizeShopDomain(raw) {
 }
 
 function normalizeSecret(raw) {
-  if (typeof raw !== 'string') return '';
-  const trimmed = raw.trim();
+  if (raw == null) return '';
+  if (typeof raw === 'object' && 'value' in raw) {
+    return normalizeSecret(raw.value);
+  }
+  const trimmed = String(raw).trim();
   if (
     (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
     (trimmed.startsWith("'") && trimmed.endsWith("'"))
@@ -40,6 +43,19 @@ function logInfo(requestId, stage, meta = {}) {
 
 function logError(requestId, stage, meta = {}) {
   console.error(`[product-summary][${requestId}] ${stage}`, meta);
+}
+
+function describeSecretCandidate(raw) {
+  const isObject = typeof raw === 'object' && raw !== null;
+
+  return {
+    exists: raw != null,
+    type: typeof raw,
+    constructorName: raw?.constructor?.name || null,
+    hasValueProp: Boolean(isObject && 'value' in raw),
+    keys: isObject ? Object.keys(raw).slice(0, 5) : [],
+    normalizedLength: normalizeSecret(raw).length,
+  };
 }
 
 async function shopifyAdminGraphQL({
@@ -150,7 +166,8 @@ export async function action({request, context}) {
     }
     logInfo(requestId, 'request:parsed', {productId: shortId(productId)});
 
-    const openaiKey = normalizeSecret(context.env.OPENAI_API_KEY);
+    const openaiKeyRaw = context.env.OPENAI_API_KEY;
+    const openaiKey = normalizeSecret(openaiKeyRaw);
 
     // IMPORTANT:
     // PUBLIC_STORE_DOMAIN should be your *.myshopify.com domain for Admin API calls.
@@ -162,6 +179,10 @@ export async function action({request, context}) {
 
     logInfo(requestId, 'env:check', {
       hasOpenAIKey: Boolean(openaiKey),
+      openAIKeyShape: describeSecretCandidate(openaiKeyRaw),
+      envOpenAIKeys: Object.keys(context.env || {}).filter((key) =>
+        key.toUpperCase().includes('OPENAI'),
+      ),
       hasAdminToken: Boolean(adminToken),
       adminTokenLength: adminToken?.length || 0,
       hasPublicStoreDomain: Boolean(adminShopDomain),
@@ -169,7 +190,9 @@ export async function action({request, context}) {
     });
 
     if (!openaiKey) {
-      logError(requestId, 'env:missing_openai_key');
+      logError(requestId, 'env:missing_openai_key', {
+        openAIKeyShape: describeSecretCandidate(openaiKeyRaw),
+      });
       return json(
         {error: 'Missing OPENAI_API_KEY', stage: 'env', requestId},
         {status: 500},
