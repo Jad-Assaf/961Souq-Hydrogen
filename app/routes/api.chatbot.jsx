@@ -12,6 +12,8 @@ const DEFAULT_MODEL = 'gpt-5.4-mini';
 const MAX_TOOL_ROUNDS = 6;
 const MAX_MESSAGES = 16;
 const MAX_TEXT_BLOCK = 4000;
+const OFF_TOPIC_REPLY =
+  '<p>I can only help with 961 Souq shopping questions, including products, collections, prices, availability, store policies, cart, checkout, and account or order help.</p><p>I can’t help with coding, writing, translation, weather, news, or other unrelated topics.</p>';
 
 function createRequestId() {
   try {
@@ -378,6 +380,38 @@ export async function action({request, context}) {
 
   const pageContext = normalizePageContext(body?.pageContext);
   const currentProductHandle = detectCurrentProductHandle(pageContext);
+  const lastUserMessage = getLastUserMessage(messages);
+
+  if (
+    shouldRejectClearlyOffTopicRequest(lastUserMessage, {
+      currentProductHandle,
+      pageContext,
+    })
+  ) {
+    logInfo(requestId, 'request:clearly_off_topic', {
+      lastUserMessage,
+      pathname: pageContext?.pathname || null,
+      currentProductHandle,
+    });
+    return createJsonResponse(
+      {
+        success: true,
+        answer: OFF_TOPIC_REPLY,
+        answerHtml: OFF_TOPIC_REPLY,
+        cards: [],
+        cartAction: {didChange: false, action: null, message: null},
+        loggedIn: false,
+        requestId,
+        outOfScope: true,
+      },
+      {
+        headers: new Headers({
+          'Cache-Control': 'no-store',
+        }),
+      },
+    );
+  }
+
   const isLoggedIn = await context.customerAccount
     .isLoggedIn()
     .catch(() => false);
@@ -688,6 +722,7 @@ function buildInstructions({pageContext, currentProductHandle}) {
   return [
     'You are the 961 Souq storefront assistant.',
     'Help shoppers find products, compare products, answer store policy questions, manage the live cart, and help signed-in customers with account or order questions.',
+    'If the shopper clearly asks for something unrelated to the store, such as coding, translation, general knowledge, writing, math, weather, or news, refuse briefly and redirect them back to store or product questions.',
     'Always use tools for factual store data. Never invent product availability, pricing, policies, cart contents, or order details.',
     'For shopping or recommendation requests, search the store catalog first before answering.',
     'If the shopper has not chosen an exact variant or quantity, ask a short follow-up question before adding to cart.',
@@ -748,6 +783,78 @@ function detectCurrentProductHandle(pageContext) {
   const match = pathname.match(/^\/products\/([^/?#]+)/i);
 
   return match ? decodeURIComponent(match[1]) : null;
+}
+
+function getLastUserMessage(messages) {
+  if (!Array.isArray(messages)) {
+    return '';
+  }
+
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message?.role === 'user' && typeof message?.content === 'string') {
+      return message.content.trim();
+    }
+  }
+
+  return '';
+}
+
+function shouldRejectClearlyOffTopicRequest(message, context = {}) {
+  const normalized = String(message || '')
+    .trim()
+    .toLowerCase();
+
+  if (!normalized || looksStoreRelatedMessage(normalized, context)) {
+    return false;
+  }
+
+  const offTopicPatterns = [
+    /\b(write|generate|create|build|debug|fix|review|explain|optimize)\b.{0,50}\b(code|javascript|js|typescript|ts|python|react|css|html|sql|api|function|component|script)\b/,
+    /\b(code|javascript|js|typescript|ts|python|react|css|html|sql|api|function|component|script)\b.{0,50}\b(write|generate|create|build|debug|fix|review|explain|optimize)\b/,
+    /\btranslate\b|\btranslation\b|\bproofread\b|\bparaphrase\b|\bsummarize\b|\bsummary\b|\brewrite\b/,
+    /\bweather\b|\btemperature\b|\bforecast\b/,
+    /\bnews\b|\bheadline\b|\bcurrent events\b/,
+    /\bcapital of\b|\bpopulation of\b|\bpresident\b|\bprime minister\b/,
+    /\bpoem\b|\bstory\b|\bessay\b|\bjoke\b|\briddle\b/,
+    /\bmath\b|\balgebra\b|\bcalculus\b|\bequation\b|\bsolve\b.{0,30}\b(x|y|\d)/,
+    /\bmedical\b|\bsymptom\b|\bdiagnosis\b|\blegal\b|\blawyer\b/,
+    /\bstock market\b|\bcrypto\b|\bbitcoin\b|\bethereum\b|\bhoroscope\b/,
+  ];
+
+  return offTopicPatterns.some((pattern) => pattern.test(normalized));
+}
+
+function looksStoreRelatedMessage(message, context = {}) {
+  const normalized = String(message || '')
+    .trim()
+    .toLowerCase();
+
+  if (!normalized) {
+    return false;
+  }
+
+  const pathname = String(context?.pageContext?.pathname || '').toLowerCase();
+  if (
+    (context?.currentProductHandle || pathname.startsWith('/products/')) &&
+    /\b(this|it|that|this one|that one|same one|same product)\b/.test(
+      normalized,
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    /\b(product|products|item|items|collection|collections|category|categories|catalog|shop|store|brand|brands|price|prices|pricing|cost|budget|deal|discount|discount code|coupon|promo code|voucher|sale|stock|available|availability|recommend|recommendation|suggest|show|list|find|search|compare|comparison|spec|specs|specifications|feature|features|buy|purchase|cart|basket|checkout|shipping|delivery|pickup|return|returns|refund|refunds|warranty|policy|policies|faq|payment|installment|cash on delivery|cod|account|login|sign in|sign-in|order|orders|track|tracking|wishlist)\b/.test(
+      normalized,
+    )
+  ) {
+    return true;
+  }
+
+  return /\b(laptop|laptops|gaming laptop|desktop|pc|computer|monitor|keyboard|mouse|headset|chair|iphone|ipad|macbook|tablet|phone|smartphone|camera|router|ssd|hdd|ram|memory|processor|cpu|gpu|graphics card|printer|console|playstation|ps5|xbox|accessory|accessories|gaming|apple|dell|hp|acer|lenovo|msi|asus|samsung|ryzen|intel|amd|rtx|gtx)\b/.test(
+    normalized,
+  );
 }
 
 async function runToolByName(name, args, toolContext) {

@@ -5,6 +5,7 @@ import {useAside} from './Aside';
 
 const STORAGE_KEY = 'storefront-chatbot-state-v2';
 const LEGACY_STORAGE_KEY = 'storefront-chatbot-history-v1';
+export const STOREFRONT_CHATBOT_OPEN_EVENT = 'storefront-chatbot:open';
 const STARTER_PROMPTS = [
   {label: 'Find a laptop', question: 'I need a good gaming laptop.'},
   {
@@ -312,10 +313,37 @@ function persistChatState(state) {
   window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 }
 
-function ChatbotIcon() {
+export function ChatbotIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3.25c-4.88 0-8.75 3.4-8.75 7.7 0 2.2 1.02 4.2 2.82 5.62-.15 1.04-.57 2.1-1.23 3.03a.75.75 0 0 0 .79 1.15c1.73-.34 3.24-.93 4.46-1.75.62.12 1.26.18 1.91.18 4.88 0 8.75-3.4 8.75-7.7s-3.87-7.23-8.75-7.23Zm-3.25 8.06a1.15 1.15 0 1 1 0-2.3 1.15 1.15 0 0 1 0 2.3Zm3.25 0a1.15 1.15 0 1 1 0-2.3 1.15 1.15 0 0 1 0 2.3Zm3.25 0a1.15 1.15 0 1 1 0-2.3 1.15 1.15 0 0 1 0 2.3Z" />
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M8 12H8.009M11.991 12H12M15.991 12H16"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M11.5003 12H5.41872M5.24634 12.7972L4.24158 15.7986C3.69128 17.4424 3.41613 18.2643 3.61359 18.7704C3.78506 19.21 4.15335 19.5432 4.6078 19.6701C5.13111 19.8161 5.92151 19.4604 7.50231 18.7491L17.6367 14.1886C19.1797 13.4942 19.9512 13.1471 20.1896 12.6648C20.3968 12.2458 20.3968 11.7541 20.1896 11.3351C19.9512 10.8529 19.1797 10.5057 17.6367 9.81135L7.48483 5.24303C5.90879 4.53382 5.12078 4.17921 4.59799 4.32468C4.14397 4.45101 3.77572 4.78336 3.60365 5.22209C3.40551 5.72728 3.67772 6.54741 4.22215 8.18767L5.24829 11.2793C5.34179 11.561 5.38855 11.7019 5.407 11.8459C5.42338 11.9738 5.42321 12.1032 5.40651 12.231C5.38768 12.375 5.34057 12.5157 5.24634 12.7972Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -470,6 +498,24 @@ export default function StorefrontChatbot() {
       });
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const handleOpenRequest = () => {
+      openChat();
+    };
+
+    window.addEventListener(STOREFRONT_CHATBOT_OPEN_EVENT, handleOpenRequest);
+    return () => {
+      window.removeEventListener(
+        STOREFRONT_CHATBOT_OPEN_EVENT,
+        handleOpenRequest,
+      );
+    };
+  }, [openChat]);
 
   const closeChat = useCallback(() => {
     setIsOpen(false);
@@ -720,7 +766,7 @@ export default function StorefrontChatbot() {
                     rows={3}
                     maxLength={1200}
                     value={input}
-                    placeholder="Ask for a product, compare options, or say add this to my cart..."
+                    placeholder="Ask Anything..."
                     onChange={(event) => setInput(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' && !event.shiftKey) {
@@ -729,8 +775,15 @@ export default function StorefrontChatbot() {
                       }
                     }}
                   />
-                  <button type="submit" disabled={loading || !input.trim()}>
-                    {loading ? 'Sending...' : 'Send'}
+                  <button
+                    type="submit"
+                    disabled={loading || !input.trim()}
+                    aria-label={loading ? 'Sending message' : 'Send message'}
+                  >
+                    <SendIcon />
+                    <span className="visually-hidden">
+                      {loading ? 'Sending...' : 'Send'}
+                    </span>
                   </button>
                 </div>
               </div>

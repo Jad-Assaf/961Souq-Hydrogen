@@ -1,7 +1,8 @@
-import React, {useMemo} from 'react';
-import {NavLink} from '@remix-run/react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {NavLink, useLocation} from 'react-router';
 import {useAside} from '~/components/Aside';
 import {useWishlist} from '~/lib/WishlistContext';
+import {ChatbotIcon, STOREFRONT_CHATBOT_OPEN_EVENT} from './StorefrontChatbot';
 
 // Replace this with your full data URI:
 // data:image/png;base64,....
@@ -11,6 +12,9 @@ export const MOBILE_NAV_FROSTED_MAP =
 export default function MobileBottomNavigation({cart}) {
   const {open} = useAside();
   const {items} = useWishlist();
+  const location = useLocation();
+  const [isSupportMenuOpen, setIsSupportMenuOpen] = useState(false);
+  const supportMenuRef = useRef(null);
 
   /* ---------------------------------------------------------------
      Derive quantity from ANY cart shape
@@ -45,6 +49,44 @@ export default function MobileBottomNavigation({cart}) {
     () => (Array.isArray(items) ? items.length : 0),
     [items],
   );
+
+  useEffect(() => {
+    setIsSupportMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isSupportMenuOpen) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event) => {
+      if (!supportMenuRef.current?.contains(event.target)) {
+        setIsSupportMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsSupportMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSupportMenuOpen]);
+
+  const openChatbot = () => {
+    setIsSupportMenuOpen(false);
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event(STOREFRONT_CHATBOT_OPEN_EVENT));
+    }
+  };
 
   return (
     <>
@@ -93,28 +135,16 @@ export default function MobileBottomNavigation({cart}) {
       </svg>
 
       <nav id="mobile-bottom-nav" className="mobile-bottom-nav">
-        <NavLink
-          prefetch="intent"
-          to="/"
-          className="nav-item"
-          aria-label="Homepage Button"
-          end
-        >
+        <NavLink to="/" className="nav-item" aria-label="Homepage Button" end>
           <HomeIcon />
         </NavLink>
 
-        <NavLink
-          prefetch="intent"
-          to="/wishlist"
-          aria-label="Wishlist Page"
-          className="nav-item"
-        >
+        <NavLink to="/wishlist" aria-label="Wishlist Page" className="nav-item">
           <WishListIcon />
           {wishCount > 0 && <span className="badge">{wishCount}</span>}
         </NavLink>
 
         <NavLink
-          prefetch="intent"
           to="/account"
           className="nav-item"
           aria-label="User Account Button"
@@ -124,6 +154,51 @@ export default function MobileBottomNavigation({cart}) {
           <UserIcon />
         </NavLink>
 
+        <div className="mobile-support-nav" ref={supportMenuRef}>
+          {isSupportMenuOpen && (
+            <div className="mobile-support-menu" role="menu">
+              <button
+                type="button"
+                className="mobile-support-menu__action"
+                onClick={openChatbot}
+                role="menuitem"
+              >
+                <span className="mobile-support-menu__icon mobile-support-menu__icon--chat">
+                  <ChatbotIcon />
+                </span>
+                <span className="mobile-support-menu__label">Ask AI</span>
+              </button>
+
+              <a
+                href="https://wa.me/96170961961"
+                target="_blank"
+                rel="noreferrer"
+                className="mobile-support-menu__action"
+                role="menuitem"
+                onClick={() => setIsSupportMenuOpen(false)}
+              >
+                <span className="mobile-support-menu__icon mobile-support-menu__icon--whatsapp">
+                  <WhatsappIcon />
+                </span>
+                <span className="mobile-support-menu__label">WhatsApp</span>
+              </a>
+            </div>
+          )}
+
+          <button
+            type="button"
+            className={`nav-item mobile-support-toggle${
+              isSupportMenuOpen ? ' is-active' : ''
+            }`}
+            aria-label="Open support options"
+            aria-haspopup="menu"
+            aria-expanded={isSupportMenuOpen}
+            onClick={() => setIsSupportMenuOpen((previous) => !previous)}
+          >
+            <ChatbotIcon />
+          </button>
+        </div>
+
         <button
           className="nav-item cart-toggle"
           aria-label="Open Cart"
@@ -132,16 +207,6 @@ export default function MobileBottomNavigation({cart}) {
           <CartIcon />
           {itemCount > 0 && <span className="badge">{itemCount}</span>}
         </button>
-
-        <NavLink
-          prefetch="intent"
-          to="https://wa.me/96170961961"
-          className="nav-item"
-          target="_blank"
-          aria-label="Contact us on Whatsapp"
-        >
-          <WhatsappIcon />
-        </NavLink>
       </nav>
     </>
   );
