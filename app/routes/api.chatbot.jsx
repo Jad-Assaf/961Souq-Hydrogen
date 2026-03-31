@@ -890,6 +890,10 @@ async function searchStoreCatalog(args, toolContext) {
   const shoppingContext = String(
     args?.shopping_context || args?.context || 'General storefront help',
   ).trim();
+  const searchQuery = normalizeCatalogSearchQuery(query) || query;
+  const fallbackQueries = Array.from(
+    new Set([searchQuery, query].filter(Boolean)),
+  );
 
   if (!query) {
     return {ok: false, error: 'Missing query.'};
@@ -899,28 +903,56 @@ async function searchStoreCatalog(args, toolContext) {
     const result = await callStorefrontMcp(
       'search_shop_catalog',
       {
-        query,
+        query: searchQuery,
         context: shoppingContext || 'General storefront help',
       },
       toolContext.context.env.PUBLIC_STORE_DOMAIN,
     );
 
+    const normalizedResult = filterCatalogSearchResult(
+      normalizeCatalogSearchResult(result),
+      query,
+    );
+
+    if (!hasCatalogEntries(normalizedResult)) {
+      const fallback = await searchCatalogFallback(
+        fallbackQueries,
+        toolContext,
+        query,
+      ).catch(() => null);
+
+      if (fallback && hasCatalogEntries(fallback)) {
+        return {
+          ok: true,
+          source: 'typesense_fallback',
+          query,
+          search_query: searchQuery,
+          note: 'Catalog results were refined with the local search index to match the requested product type.',
+          ...fallback,
+        };
+      }
+    }
+
     return {
       ok: true,
       source: 'shopify_storefront_mcp',
       query,
-      ...normalizeCatalogSearchResult(result),
+      search_query: searchQuery,
+      ...normalizedResult,
     };
   } catch (error) {
-    const fallback = await searchCatalogFallback(query, toolContext).catch(
-      () => null,
-    );
+    const fallback = await searchCatalogFallback(
+      fallbackQueries,
+      toolContext,
+      query,
+    ).catch(() => null);
 
-    if (fallback) {
+    if (fallback && hasCatalogEntries(fallback)) {
       return {
         ok: true,
         source: 'typesense_fallback',
         query,
+        search_query: searchQuery,
         note: 'Storefront MCP search was unavailable, so fallback catalog results were used.',
         ...fallback,
       };
@@ -1474,29 +1506,41 @@ function detectCatalogItemKind(item, url) {
   return 'product';
 }
 
-async function searchCatalogFallback(query, toolContext) {
+async function searchCatalogFallback(queries, toolContext, originalQuery = '') {
   const client = getTypesenseSearchClientFromEnv(toolContext.context.env);
-  const result = await client
-    .collections(TYPESENSE_PRODUCTS_COLLECTION)
-    .documents()
-    .search({
-      q: query,
-      query_by: 'title,sku,handle,tags',
-      query_by_weights: '10,8,6,2',
-      per_page: 8,
-      prefix: true,
-      infix: 'always,fallback,always,always',
-      num_typos: '2,1,0,0',
-      enable_typos_for_numerical_tokens: false,
-      filter_by: 'status:=active',
-      sort_by: '_text_match:desc,price:desc',
-      prioritize_exact_match: true,
-    });
+  const queryList = Array.isArray(queries)
+    ? queries
+    : [String(queries || '').trim()].filter(Boolean);
 
-  const hits = Array.isArray(result?.hits) ? result.hits : [];
+  for (const currentQuery of queryList) {
+    const result = await client
+      .collections(TYPESENSE_PRODUCTS_COLLECTION)
+      .documents()
+      .search({
+        q: expandCatalogSearchQueryTokens(currentQuery),
+        query_by: 'title,sku,handle,tags',
+        query_by_weights: '10,10,5,2',
+        per_page: 8,
+        prefix: true,
+        infix: 'always,fallback,always,always',
+        num_typos: '2,1,0,0',
+        min_len_1typo: 5,
+        min_len_2typo: 8,
+        typo_tokens_threshold: 1,
+        enable_typos_for_numerical_tokens: false,
+        enable_typos_for_alpha_numerical_tokens: false,
+        drop_tokens_threshold: 0,
+        exhaustive_search: true,
+        sort_by: '_text_match:desc,price:desc',
+        prioritize_exact_match: true,
+        prioritize_token_position: true,
+        prioritize_num_matching_fields: true,
+        text_match_type: 'max_score',
+        filter_by: 'status:=active',
+      });
 
-  return {
-    products: hits.map(({document}) => ({
+    const hits = Array.isArray(result?.hits) ? result.hits : [];
+    const mapped = hits.map(({document}) => ({
       kind: 'product',
       title: document.title,
       handle: document.handle,
@@ -1510,8 +1554,173 @@ async function searchCatalogFallback(query, toolContext) {
           : 'Call for price',
       currency: null,
       variant_id: null,
-    })),
+    }));
+
+    const filtered = filterCatalogSearchResult(
+      {products: mapped, collections: [], raw_text: null},
+      originalQuery || currentQuery,
+    );
+
+    if (hasCatalogEntries(filtered)) {
+      return filtered;
+    }
+  }
+
+  return {
+    products: [],
+    collections: [],
+    raw_text: null,
   };
+}
+
+function hasCatalogEntries(result) {
+  return Boolean(result?.products?.length || result?.collections?.length);
+}
+
+function normalizeCatalogSearchQuery(query) {
+  const raw = String(query || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  const normalized = raw
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s/+.-]/gu, ' ')
+    .replace(
+      /\b(i need|i want|i would like|i'm looking for|i am looking for|looking for|show me|find me|help me find|can you find|can you show me|could you show me|recommend|suggest|give me|a good|some|please)\b/g,
+      ' ',
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return normalized || raw;
+}
+
+function expandCatalogSearchQueryTokens(query) {
+  const trimmed = String(query || '').trim();
+  if (!trimmed) return '';
+
+  return trimmed
+    .split(/\s+/)
+    .flatMap((term) => {
+      if (/^\d+$/.test(term)) {
+        return [term, `${term}gb`];
+      }
+
+      return [term];
+    })
+    .join(' ');
+}
+
+function filterCatalogSearchResult(result, query) {
+  const requestedFamily = getRequestedCatalogFamily(query);
+  if (!requestedFamily) {
+    return result;
+  }
+
+  const filteredProducts = Array.isArray(result?.products)
+    ? result.products.filter((product) =>
+        matchesRequestedCatalogFamily(product, requestedFamily),
+      )
+    : [];
+
+  return {
+    ...result,
+    products: filteredProducts,
+    raw_text:
+      filteredProducts.length || result?.collections?.length
+        ? null
+        : result?.raw_text || null,
+  };
+}
+
+function getRequestedCatalogFamily(query) {
+  const normalized = String(query || '')
+    .trim()
+    .toLowerCase();
+
+  if (!normalized) {
+    return null;
+  }
+
+  if (/\b(laptop|laptops|notebook|notebooks|macbook)\b/.test(normalized)) {
+    return 'laptop';
+  }
+
+  if (
+    /\b(desktop|desktops|gaming pc|pc build|tower pc|tower)\b/.test(normalized)
+  ) {
+    return 'desktop';
+  }
+
+  if (/\b(monitor|monitors|display)\b/.test(normalized)) {
+    return 'monitor';
+  }
+
+  if (
+    /\b(phone|phones|smartphone|smartphones|iphone|mobile|mobiles)\b/.test(
+      normalized,
+    )
+  ) {
+    return 'phone';
+  }
+
+  if (/\b(tablet|tablets|ipad|ipads)\b/.test(normalized)) {
+    return 'tablet';
+  }
+
+  return null;
+}
+
+function matchesRequestedCatalogFamily(product, family) {
+  const haystack = [
+    product?.title,
+    product?.handle,
+    product?.url,
+    product?.description,
+    product?.subtitle,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  if (!haystack) {
+    return false;
+  }
+
+  switch (family) {
+    case 'laptop':
+      return (
+        /\b(laptop|notebook|macbook|alienware|omen|nitro|legion|zenbook|vivobook|thinkpad|rog|predator)\b/.test(
+          haystack,
+        ) && !isAccessoryLikeProduct(haystack)
+      );
+    case 'desktop':
+      return (
+        /\b(desktop|pc|computer|tower|all in one|aio)\b/.test(haystack) &&
+        !isAccessoryLikeProduct(haystack)
+      );
+    case 'monitor':
+      return /\b(monitor|display)\b/.test(haystack);
+    case 'phone':
+      return (
+        /\b(phone|smartphone|iphone|mobile|galaxy|pixel)\b/.test(haystack) &&
+        !isAccessoryLikeProduct(haystack)
+      );
+    case 'tablet':
+      return (
+        /\b(tablet|ipad|tab)\b/.test(haystack) &&
+        !isAccessoryLikeProduct(haystack)
+      );
+    default:
+      return true;
+  }
+}
+
+function isAccessoryLikeProduct(text) {
+  return /\b(backpack|bag|sleeve|cooling|cooler|fan|pad|stand|holder|dock|docking|adapter|charger|cable|hub|case|cover|skin|sticker|mouse|keyboard|headset|speaker|controller|accessor(?:y|ies))\b/.test(
+    String(text || '').toLowerCase(),
+  );
 }
 
 function summarizeCart(cart) {
