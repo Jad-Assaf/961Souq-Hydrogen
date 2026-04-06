@@ -602,8 +602,7 @@ export function ProductForm({
         </AddToCartButton>
         {hasSubscriptionDisclaimer && (
           <p className="product-subscription-disclaimer">
-            Any subscription associated with this product is offered by a third
-            party. We do not provide or manage the subscription and are not
+            Any subscription associated with this product is offered by Whoop. We do not provide or manage the subscription and are not
             responsible for its activation, billing, renewal, or support.
           </p>
         )}
