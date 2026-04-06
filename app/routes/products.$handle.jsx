@@ -327,6 +327,9 @@ export function ProductForm({
     Array.isArray(product?.tags) &&
     product.tags.includes('computer components');
   const isPreOrderProduct = hasPreOrderTag(product?.tags);
+  const hasSubscriptionDisclaimer = ['yes', 'true', '1'].includes(
+    (product?.metafieldSubscription?.value || '').trim().toLowerCase(),
+  );
 
   // ------------------------------
   // Initialize local selectedOptions
@@ -597,6 +600,13 @@ export function ProductForm({
               : 'Add to cart'
             : 'Sold out'}
         </AddToCartButton>
+        {hasSubscriptionDisclaimer && (
+          <p className="product-subscription-disclaimer">
+            Any subscription associated with this product is offered by a third
+            party. We do not provide or manage the subscription and are not
+            responsible for its activation, billing, renewal, or support.
+          </p>
+        )}
         {isComputerComponent && (
           <span className="computer-components-note">
             Due to high demand and limited stock, computer components may have
@@ -1495,6 +1505,9 @@ const PRODUCT_FRAGMENT = `#graphql
       value
     }
     metafieldVat: metafield(namespace: "custom", key: "vat") {
+      value
+    }
+    metafieldSubscription: metafield(namespace: "custom", key: "subscription") {
       value
     }
 
