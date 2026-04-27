@@ -1,5 +1,6 @@
 import {CartForm} from '@shopify/hydrogen';
 import React, {useState} from 'react';
+import {CartTrackingFields} from './CartTrackingFields';
 
 /**
  * @param {{
@@ -39,6 +40,7 @@ export function AddToCartButton({
             type="hidden"
             value={JSON.stringify(analytics)}
           />
+          <CartTrackingFields />
           <button
             type="submit"
             data-tt-event="AddToCart"

@@ -1,4 +1,5 @@
 import {CartForm, Money} from '@shopify/hydrogen';
+import {CartTrackingFields} from './CartTrackingFields';
 import {useEffect, useRef, useState, useMemo} from 'react';
 import {trackInitiateCheckout} from '~/lib/metaPixelEvents';
 
@@ -232,6 +233,7 @@ function UpdateDiscountForm({discountCodes, children}) {
         discountCodes: discountCodes || [],
       }}
     >
+      <CartTrackingFields />
       {children}
     </CartForm>
   );
@@ -317,7 +319,12 @@ function UpdateGiftCardForm({giftCardCodes, saveAppliedCode, children}) {
       {(fetcher) => {
         const code = fetcher.formData?.get('giftCardCode');
         if (code) saveAppliedCode && saveAppliedCode(code);
-        return children;
+        return (
+          <>
+            <CartTrackingFields />
+            {children}
+          </>
+        );
       }}
     </CartForm>
   );

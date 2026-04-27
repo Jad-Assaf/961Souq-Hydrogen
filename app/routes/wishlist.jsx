@@ -1,5 +1,6 @@
 // app/routes/wishlist.jsx
 import {CartForm} from '@shopify/hydrogen';
+import {CartTrackingFields} from '~/components/CartTrackingFields';
 import {Link, useFetcher} from '@remix-run/react';
 import React, {useEffect, useMemo, useState} from 'react';
 import {useWishlist} from '~/lib/WishlistContext';
@@ -347,6 +348,7 @@ export default function WishlistPage() {
                       ],
                     }}
                   >
+                    <CartTrackingFields />
                     <button type="submit" className="wishlist-add-btn">
                       Add to Cart
                     </button>
@@ -385,6 +387,7 @@ export default function WishlistPage() {
             action={CartForm.ACTIONS.LinesAdd}
             inputs={{lines: allLines}}
           >
+            <CartTrackingFields />
             <button type="submit" className="wishlist-addall-btn">
               Add All to Cart
             </button>

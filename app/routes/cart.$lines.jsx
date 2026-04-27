@@ -1,4 +1,5 @@
 import {redirect} from '@shopify/remix-oxygen';
+import {syncCartTracking} from '~/lib/cartTracking';
 
 /**
  * Automatically creates a new cart based on the URL and redirects straight to checkout.
@@ -46,7 +47,14 @@ export async function loader({request, context, params}) {
     discountCodes: discountArray,
   });
 
-  const cartResult = result.cart;
+  const cartResult = await syncCartTracking({
+    cartApi: cart,
+    cartData: result.cart,
+    cartId: result?.cart?.id,
+    request,
+    formData: new FormData(),
+    countryCode: context.storefront?.i18n?.country,
+  });
 
   if (result.errors?.length || !cartResult) {
     throw new Response('Link may be expired. Try checking the URL.', {

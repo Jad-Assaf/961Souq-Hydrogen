@@ -2,6 +2,7 @@
 import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
 import {Link, useSearchParams, useLoaderData} from '@remix-run/react';
 import {Money, CartForm} from '@shopify/hydrogen';
+import {CartTrackingFields} from '~/components/CartTrackingFields';
 import {json} from '@shopify/remix-oxygen';
 
 /**
@@ -545,24 +546,27 @@ export default function RecentlyViewedPage() {
                           }}
                         >
                           {(fetcher) => (
-                            <button
-                              type="submit"
-                              disabled={fetcher.state !== 'idle'}
-                              style={{
-                                border: '1px solid #fff',
-                                padding: '10px 38px',
-                                borderRadius: 999,
-                                fontWeight: 500,
-                                background: '#03072c',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                width: 'fit-content',
-                              }}
-                            >
-                              {fetcher.state === 'submitting'
-                                ? 'Adding…'
-                                : 'Add to Cart'}
-                            </button>
+                            <>
+                              <CartTrackingFields />
+                              <button
+                                type="submit"
+                                disabled={fetcher.state !== 'idle'}
+                                style={{
+                                  border: '1px solid #fff',
+                                  padding: '10px 38px',
+                                  borderRadius: 999,
+                                  fontWeight: 500,
+                                  background: '#03072c',
+                                  color: '#fff',
+                                  cursor: 'pointer',
+                                  width: 'fit-content',
+                                }}
+                              >
+                                {fetcher.state === 'submitting'
+                                  ? 'Adding…'
+                                  : 'Add to Cart'}
+                              </button>
+                            </>
                           )}
                         </CartForm>
                       ) : null

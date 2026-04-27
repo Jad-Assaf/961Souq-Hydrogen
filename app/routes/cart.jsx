@@ -2,6 +2,7 @@ import {Await, useRouteLoaderData, useLoaderData, data} from '@remix-run/react';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {TopProductSections} from '~/components/TopProductSections';
+import {syncCartTracking} from '~/lib/cartTracking';
 
 /**
  * @type {MetaFunction}
@@ -85,8 +86,16 @@ export async function action({request, context}) {
   }
 
   const cartId = result?.cart?.id;
+  const cartResult = await syncCartTracking({
+    cartApi: cart,
+    cartData: result?.cart,
+    cartId,
+    request,
+    formData,
+    countryCode: context.storefront?.i18n?.country,
+  });
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
-  const {cart: cartResult, errors} = result;
+  const {errors} = result;
 
   const redirectTo = formData.get('redirectTo') ?? null;
   if (typeof redirectTo === 'string') {

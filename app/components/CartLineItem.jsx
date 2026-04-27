@@ -4,6 +4,7 @@ import {Link} from '@remix-run/react';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
 import {truncateText} from './CollectionDisplay';
+import {CartTrackingFields} from './CartTrackingFields';
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -170,6 +171,7 @@ function CartLineRemoveButton({lineIds, disabled}) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
+      <CartTrackingFields />
       <button className="bin-button">Remove Item</button>
     </CartForm>
   );
@@ -188,6 +190,7 @@ function CartLineUpdateButton({children, lines}) {
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{lines}}
     >
+      <CartTrackingFields />
       {children}
     </CartForm>
   );
