@@ -1,6 +1,31 @@
-const TRACKING_ATTRIBUTE_KEYS = ['country', 'fbp', 'host', 'locale', 'sh', 'sw', 'ttp', 'vid'];
+const TRACKING_ATTRIBUTE_KEYS = [
+  'country',
+  'fbp',
+  'host',
+  'locale',
+  'sh',
+  'sw',
+  'ttp',
+  'vid',
+  'source',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+];
 const SHOPIFY_CART_TOKEN_NOTE_KEY = 'shopify-cart-token';
 const SHOPIFY_CART_TOKEN_NOTE_PATTERN = /^shopify-cart-token:\s*.*$/im;
+const ATTRIBUTION_COOKIE_KEY = 'storefront_attribution';
+const VISITOR_ID_COOKIE_KEY = 'storefront_vid';
+const NOTE_TRACKING_KEYS = [
+  'source',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+];
 
 function firstNonEmpty(...values) {
   for (const value of values) {
@@ -81,7 +106,88 @@ export function extractCartTrackingFromRequest({
     vid: firstNonEmpty(
       formData.get('vid'),
       url.searchParams.get('vid'),
+      cookies[VISITOR_ID_COOKIE_KEY],
       cookies.vid,
+    ),
+    source: firstNonEmpty(
+      formData.get('source'),
+      url.searchParams.get('source'),
+      (() => {
+        try {
+          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
+          if (!attributionCookie) return null;
+          return JSON.parse(attributionCookie)?.source;
+        } catch {
+          return null;
+        }
+      })(),
+      request.headers.get('referer'),
+      request.headers.get('referrer'),
+    ),
+    utm_source: firstNonEmpty(
+      formData.get('utm_source'),
+      url.searchParams.get('utm_source'),
+      (() => {
+        try {
+          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
+          if (!attributionCookie) return null;
+          return JSON.parse(attributionCookie)?.utm_source;
+        } catch {
+          return null;
+        }
+      })(),
+    ),
+    utm_medium: firstNonEmpty(
+      formData.get('utm_medium'),
+      url.searchParams.get('utm_medium'),
+      (() => {
+        try {
+          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
+          if (!attributionCookie) return null;
+          return JSON.parse(attributionCookie)?.utm_medium;
+        } catch {
+          return null;
+        }
+      })(),
+    ),
+    utm_campaign: firstNonEmpty(
+      formData.get('utm_campaign'),
+      url.searchParams.get('utm_campaign'),
+      (() => {
+        try {
+          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
+          if (!attributionCookie) return null;
+          return JSON.parse(attributionCookie)?.utm_campaign;
+        } catch {
+          return null;
+        }
+      })(),
+    ),
+    utm_term: firstNonEmpty(
+      formData.get('utm_term'),
+      url.searchParams.get('utm_term'),
+      (() => {
+        try {
+          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
+          if (!attributionCookie) return null;
+          return JSON.parse(attributionCookie)?.utm_term;
+        } catch {
+          return null;
+        }
+      })(),
+    ),
+    utm_content: firstNonEmpty(
+      formData.get('utm_content'),
+      url.searchParams.get('utm_content'),
+      (() => {
+        try {
+          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
+          if (!attributionCookie) return null;
+          return JSON.parse(attributionCookie)?.utm_content;
+        } catch {
+          return null;
+        }
+      })(),
     ),
   };
 }
@@ -151,6 +257,32 @@ export function upsertShopifyCartTokenNote(note, cartId) {
   return `${currentNote}\n${nextLine}`;
 }
 
+function upsertTrackingNoteLines(note, tracking) {
+  let nextNote = String(note || '').trim();
+
+  for (const key of NOTE_TRACKING_KEYS) {
+    const value = firstNonEmpty(tracking[key]);
+    if (!value) continue;
+
+    const line = `${key}: ${value}`;
+    const pattern = new RegExp(`^${key}:\\s*.*$`, 'im');
+
+    if (!nextNote) {
+      nextNote = line;
+      continue;
+    }
+
+    if (pattern.test(nextNote)) {
+      nextNote = nextNote.replace(pattern, line);
+      continue;
+    }
+
+    nextNote = `${nextNote}\n${line}`;
+  }
+
+  return nextNote;
+}
+
 export async function syncCartTracking({
   cartApi,
   cartData,
@@ -182,7 +314,10 @@ export async function syncCartTracking({
     nextCart = attributesResult?.cart || nextCart;
   }
 
-  const nextNote = upsertShopifyCartTokenNote(nextCart?.note, cartId);
+  const nextNote = upsertTrackingNoteLines(
+    upsertShopifyCartTokenNote(nextCart?.note, cartId),
+    tracking,
+  );
   if (nextNote !== String(nextCart?.note || '').trim()) {
     const noteResult = await cartApi.updateNote(nextNote, {cartId});
     nextCart = noteResult?.cart || nextCart;
