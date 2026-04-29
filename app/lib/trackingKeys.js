@@ -45,3 +45,10 @@ export const CHECKOUT_URL_TRACKING_KEYS = [
 
 export const ATTRIBUTION_COOKIE_KEY = 'storefront_attribution';
 export const VISITOR_ID_COOKIE_KEY = 'storefront_vid';
+
+export function getTrackingCookieKey(key) {
+  return `storefront_attr_${String(key || '')
+    .trim()
+    .replace(/[^a-z0-9]+/gi, '_')
+    .toLowerCase()}`;
+}

@@ -29,6 +29,7 @@ import MetaPixel from './components/MetaPixel';
 import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
+import {AttributionTracker} from './components/AttributionTracker';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -335,6 +336,7 @@ export function Layout({children}) {
       </head>
       <body>
         <ClarityTracker clarityId={clarityId} />
+        <AttributionTracker />
         {/* {loaderVisible && (
           <div
             ref={loaderRef}

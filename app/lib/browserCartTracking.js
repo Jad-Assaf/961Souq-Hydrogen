@@ -2,6 +2,7 @@ import {getAnalyticsCookieDomain, normalizeHostname} from './shopifyAnalytics';
 import {
   ATTRIBUTION_COOKIE_KEY,
   CHECKOUT_TRACKING_ATTRIBUTE_KEYS,
+  getTrackingCookieKey,
   VISITOR_ID_COOKIE_KEY,
 } from './trackingKeys';
 
@@ -120,7 +121,20 @@ function readStoredAttribution() {
     return sessionValue;
   }
 
-  return parseStoredJson(readCookie(ATTRIBUTION_COOKIE_KEY));
+  const cookieValue = parseStoredJson(readCookie(ATTRIBUTION_COOKIE_KEY));
+  if (Object.keys(cookieValue).length > 0) {
+    return cookieValue;
+  }
+
+  const attributeCookies = {};
+  for (const key of CHECKOUT_TRACKING_ATTRIBUTE_KEYS) {
+    const value = readCookie(getTrackingCookieKey(key));
+    if (value) {
+      attributeCookies[key] = value;
+    }
+  }
+
+  return attributeCookies;
 }
 
 function storeAttribution(attribution, cookieDomain) {
@@ -135,6 +149,11 @@ function storeAttribution(attribution, cookieDomain) {
   }
 
   writeCookie(ATTRIBUTION_COOKIE_KEY, serialized, {domain: cookieDomain});
+
+  for (const [key, value] of Object.entries(attribution)) {
+    if (!firstNonEmpty(value)) continue;
+    writeCookie(getTrackingCookieKey(key), value, {domain: cookieDomain});
+  }
 }
 
 function getOrCreateVisitorId(cookieDomain) {
@@ -197,8 +216,62 @@ function pickAttributionValue(key, params, storedAttribution) {
         readCookie('ttp'),
       );
     default:
-      return firstNonEmpty(params.get(key), storedAttribution[key]);
+      return firstNonEmpty(
+        params.get(key),
+        storedAttribution[key],
+        readCookie(getTrackingCookieKey(key)),
+      );
   }
+}
+
+function inferSource(params, storedAttribution) {
+  const explicitSource = firstNonEmpty(
+    params.get('source'),
+    params.get('utm_source'),
+    storedAttribution.source,
+    storedAttribution.utm_source,
+  );
+  if (explicitSource) {
+    return explicitSource;
+  }
+
+  if (
+    params.get('fbclid') ||
+    storedAttribution.fbclid ||
+    params.get('fbc') ||
+    storedAttribution.fbc
+  ) {
+    return 'meta';
+  }
+
+  if (
+    params.get('gclid') ||
+    storedAttribution.gclid ||
+    params.get('gbraid') ||
+    storedAttribution.gbraid ||
+    params.get('wbraid') ||
+    storedAttribution.wbraid
+  ) {
+    return 'google';
+  }
+
+  if (params.get('ttclid') || storedAttribution.ttclid) {
+    return 'tiktok';
+  }
+
+  if (params.get('msclkid') || storedAttribution.msclkid) {
+    return 'microsoft';
+  }
+
+  if (params.get('twclid') || storedAttribution.twclid) {
+    return 'twitter';
+  }
+
+  if (params.get('rdt_cid') || storedAttribution.rdt_cid) {
+    return 'reddit';
+  }
+
+  return getReferrerSource();
 }
 
 export function collectBrowserCartTracking(rootData) {
@@ -236,16 +309,16 @@ export function collectBrowserCartTracking(rootData) {
       readCookie('_shopify_y'),
       getOrCreateVisitorId(cookieDomain),
     ),
-    source: firstNonEmpty(
-      params.get('source'),
-      storedAttribution.source,
-      getReferrerSource(),
-    ),
+    source: inferSource(params, storedAttribution),
   };
 
   for (const key of CHECKOUT_TRACKING_ATTRIBUTE_KEYS) {
     if (tracking[key]) continue;
     tracking[key] = pickAttributionValue(key, params, storedAttribution);
+  }
+
+  if (!tracking.utm_source && tracking.source && tracking.source !== 'direct') {
+    tracking.utm_source = tracking.source;
   }
 
   const storedPayload = Object.fromEntries(

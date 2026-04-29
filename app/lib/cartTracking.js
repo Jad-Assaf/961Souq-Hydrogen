@@ -2,6 +2,7 @@ import {
   ATTRIBUTION_COOKIE_KEY,
   CHECKOUT_TRACKING_ATTRIBUTE_KEYS,
   CHECKOUT_URL_TRACKING_KEYS,
+  getTrackingCookieKey,
   NOTE_TRACKING_KEYS,
   SHOPIFY_CART_TOKEN_ATTRIBUTE_KEY,
   VISITOR_ID_COOKIE_KEY,
@@ -50,7 +51,7 @@ function readAttributionCookieValue(cookies, key) {
 
     return JSON.parse(attributionCookie)?.[key] ?? null;
   } catch {
-    return null;
+    return cookies[getTrackingCookieKey(key)] ?? null;
   }
 }
 
