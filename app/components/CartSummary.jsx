@@ -1,7 +1,9 @@
+import {Form} from '@remix-run/react';
 import {CartForm, Money} from '@shopify/hydrogen';
 import {CartTrackingFields} from './CartTrackingFields';
 import {useEffect, useRef, useState, useMemo} from 'react';
 import {trackInitiateCheckout} from '~/lib/metaPixelEvents';
+import {CUSTOM_CHECKOUT_STAMP_ACTION} from '~/lib/cartTracking';
 
 export function CartSummary({cart, layout}) {
   const className =
@@ -131,9 +133,10 @@ export default function CartCheckoutActions({
     }
   }, [cartTotal, showAlert]);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = (event) => {
     if (cartTotal > 10000) {
       // Prevent navigation, show alert
+      event.preventDefault();
       setShowAlert(true);
     } else {
       // **Added: Track Initiate Checkout Event**
@@ -152,16 +155,27 @@ export default function CartCheckoutActions({
 
   return (
     <div className="cart-checkout-container">
-      <button
-        type="button"
-        className={`cart-checkout-button ${
-          cartTotal > 10000 ? 'disabled-look' : ''
-        }`}
-        onClick={handleButtonClick}
-        aria-label="Continue to Checkout" // **Optional: Added aria-label for accessibility**
-      >
-        Continue to Checkout
-      </button>
+      <Form method="post" action="/cart">
+        <input
+          type="hidden"
+          name={CartForm.INPUT_NAME}
+          value={JSON.stringify({
+            action: CUSTOM_CHECKOUT_STAMP_ACTION,
+            inputs: {},
+          })}
+        />
+        <CartTrackingFields />
+        <button
+          type="submit"
+          className={`cart-checkout-button ${
+            cartTotal > 10000 ? 'disabled-look' : ''
+          }`}
+          onClick={handleButtonClick}
+          aria-label="Continue to Checkout"
+        >
+          Continue to Checkout
+        </button>
+      </Form>
 
       {showAlert && (
         <div className="alert-box">

@@ -2,7 +2,11 @@ import {Await, useRouteLoaderData, useLoaderData, data} from '@remix-run/react';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {TopProductSections} from '~/components/TopProductSections';
-import {syncCartTracking} from '~/lib/cartTracking';
+import {
+  CUSTOM_CHECKOUT_STAMP_ACTION,
+  stampCartForCheckout,
+  syncCartTracking,
+} from '~/lib/cartTracking';
 
 /**
  * @type {MetaFunction}
@@ -46,6 +50,7 @@ export async function action({request, context}) {
 
   let status = 200;
   let result;
+  let checkoutRedirectUrl = null;
 
   switch (action) {
     case CartForm.ACTIONS.LinesAdd: {
@@ -81,24 +86,52 @@ export async function action({request, context}) {
       });
       break;
     }
+    case CUSTOM_CHECKOUT_STAMP_ACTION: {
+      const currentCart = await cart.get();
+      if (!currentCart?.id) {
+        throw new Error('No cart found for checkout.');
+      }
+
+      result = {
+        cart: currentCart,
+        errors: [],
+      };
+
+      const stampedCheckout = await stampCartForCheckout({
+        cartApi: cart,
+        cartData: currentCart,
+        cartId: currentCart.id,
+        request,
+        formData,
+        countryCode: context.storefront?.i18n?.country,
+      });
+
+      result.cart = stampedCheckout.cart;
+      checkoutRedirectUrl = stampedCheckout.checkoutUrl;
+      break;
+    }
     default:
       throw new Error(`${action} cart action is not defined`);
   }
 
   const cartId = result?.cart?.id;
-  const cartResult = await syncCartTracking({
-    cartApi: cart,
-    cartData: result?.cart,
-    cartId,
-    request,
-    formData,
-    countryCode: context.storefront?.i18n?.country,
-  });
+  const cartResult =
+    action === CUSTOM_CHECKOUT_STAMP_ACTION
+      ? result.cart
+      : await syncCartTracking({
+          cartApi: cart,
+          cartData: result?.cart,
+          cartId,
+          request,
+          formData,
+          countryCode: context.storefront?.i18n?.country,
+        });
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
   const {errors} = result;
 
-  const redirectTo = formData.get('redirectTo') ?? null;
-  if (typeof redirectTo === 'string') {
+  const redirectTo =
+    checkoutRedirectUrl || String(formData.get('redirectTo') || '').trim();
+  if (redirectTo) {
     status = 303;
     headers.set('Location', redirectTo);
   }

@@ -1,31 +1,15 @@
-const TRACKING_ATTRIBUTE_KEYS = [
-  'country',
-  'fbp',
-  'host',
-  'locale',
-  'sh',
-  'sw',
-  'ttp',
-  'vid',
-  'source',
-  'utm_source',
-  'utm_medium',
-  'utm_campaign',
-  'utm_term',
-  'utm_content',
-];
+import {
+  ATTRIBUTION_COOKIE_KEY,
+  CHECKOUT_TRACKING_ATTRIBUTE_KEYS,
+  CHECKOUT_URL_TRACKING_KEYS,
+  NOTE_TRACKING_KEYS,
+  SHOPIFY_CART_TOKEN_ATTRIBUTE_KEY,
+  VISITOR_ID_COOKIE_KEY,
+} from './trackingKeys';
+
+export const CUSTOM_CHECKOUT_STAMP_ACTION = 'CustomCheckoutStamp';
 const SHOPIFY_CART_TOKEN_NOTE_KEY = 'shopify-cart-token';
 const SHOPIFY_CART_TOKEN_NOTE_PATTERN = /^shopify-cart-token:\s*.*$/im;
-const ATTRIBUTION_COOKIE_KEY = 'storefront_attribution';
-const VISITOR_ID_COOKIE_KEY = 'storefront_vid';
-const NOTE_TRACKING_KEYS = [
-  'source',
-  'utm_source',
-  'utm_medium',
-  'utm_campaign',
-  'utm_term',
-  'utm_content',
-];
 
 function firstNonEmpty(...values) {
   for (const value of values) {
@@ -59,12 +43,115 @@ function parseCookieHeader(cookieHeader) {
   return cookies;
 }
 
+function readAttributionCookieValue(cookies, key) {
+  try {
+    const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
+    if (!attributionCookie) return null;
+
+    return JSON.parse(attributionCookie)?.[key] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function getPreferredLocale(request) {
   const acceptLanguage = request.headers.get('accept-language');
   if (!acceptLanguage) return null;
 
   const [firstLanguage] = acceptLanguage.split(',');
   return firstNonEmpty(firstLanguage);
+}
+
+function pickTrackedValue({formData, url, request, cookies, key, countryCode}) {
+  switch (key) {
+    case 'country':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        request.headers.get('cf-ipcountry'),
+        request.headers.get('x-country-code'),
+        countryCode,
+      );
+    case 'fbp':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        readAttributionCookieValue(cookies, key),
+        cookies._fbp,
+        cookies.fbp,
+      );
+    case 'host':
+      return firstNonEmpty(formData.get(key), url.host);
+    case 'locale':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        getPreferredLocale(request),
+      );
+    case 'sh':
+    case 'sw':
+    case '_kx':
+    case 'epik':
+    case 'fbclid':
+    case 'gbraid':
+    case 'gclid':
+    case 'msclkid':
+    case 'rdt_cid':
+    case 'ScCid':
+    case 'ttclid':
+    case 'twclid':
+    case 'wbraid':
+    case 'utm_id':
+    case 'utm_source':
+    case 'utm_medium':
+    case 'utm_campaign':
+    case 'utm_term':
+    case 'utm_content':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        readAttributionCookieValue(cookies, key),
+      );
+    case 'ttp':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        readAttributionCookieValue(cookies, key),
+        cookies._ttp,
+        cookies.ttp,
+      );
+    case 'vid':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        readAttributionCookieValue(cookies, key),
+        cookies._shopify_y,
+        cookies[VISITOR_ID_COOKIE_KEY],
+        cookies.vid,
+      );
+    case 'fbc':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        readAttributionCookieValue(cookies, key),
+        cookies._fbc,
+        cookies.fbc,
+      );
+    case 'source':
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        readAttributionCookieValue(cookies, key),
+        request.headers.get('referer'),
+        request.headers.get('referrer'),
+      );
+    default:
+      return firstNonEmpty(
+        formData.get(key),
+        url.searchParams.get(key),
+        readAttributionCookieValue(cookies, key),
+      );
+  }
 }
 
 export function extractCartTrackingFromRequest({
@@ -74,122 +161,20 @@ export function extractCartTrackingFromRequest({
 }) {
   const url = new URL(request.url);
   const cookies = parseCookieHeader(request.headers.get('cookie'));
+  const tracking = {};
 
-  return {
-    country: firstNonEmpty(
-      formData.get('country'),
-      url.searchParams.get('country'),
-      request.headers.get('cf-ipcountry'),
-      request.headers.get('x-country-code'),
+  for (const key of CHECKOUT_TRACKING_ATTRIBUTE_KEYS) {
+    tracking[key] = pickTrackedValue({
+      formData,
+      url,
+      request,
+      cookies,
+      key,
       countryCode,
-    ),
-    fbp: firstNonEmpty(
-      formData.get('fbp'),
-      url.searchParams.get('fbp'),
-      cookies._fbp,
-      cookies.fbp,
-    ),
-    host: firstNonEmpty(formData.get('host'), url.host),
-    locale: firstNonEmpty(
-      formData.get('locale'),
-      url.searchParams.get('locale'),
-      getPreferredLocale(request),
-    ),
-    sh: firstNonEmpty(formData.get('sh'), url.searchParams.get('sh')),
-    sw: firstNonEmpty(formData.get('sw'), url.searchParams.get('sw')),
-    ttp: firstNonEmpty(
-      formData.get('ttp'),
-      url.searchParams.get('ttp'),
-      cookies._ttp,
-      cookies.ttp,
-    ),
-    vid: firstNonEmpty(
-      formData.get('vid'),
-      url.searchParams.get('vid'),
-      cookies[VISITOR_ID_COOKIE_KEY],
-      cookies.vid,
-    ),
-    source: firstNonEmpty(
-      formData.get('source'),
-      url.searchParams.get('source'),
-      (() => {
-        try {
-          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
-          if (!attributionCookie) return null;
-          return JSON.parse(attributionCookie)?.source;
-        } catch {
-          return null;
-        }
-      })(),
-      request.headers.get('referer'),
-      request.headers.get('referrer'),
-    ),
-    utm_source: firstNonEmpty(
-      formData.get('utm_source'),
-      url.searchParams.get('utm_source'),
-      (() => {
-        try {
-          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
-          if (!attributionCookie) return null;
-          return JSON.parse(attributionCookie)?.utm_source;
-        } catch {
-          return null;
-        }
-      })(),
-    ),
-    utm_medium: firstNonEmpty(
-      formData.get('utm_medium'),
-      url.searchParams.get('utm_medium'),
-      (() => {
-        try {
-          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
-          if (!attributionCookie) return null;
-          return JSON.parse(attributionCookie)?.utm_medium;
-        } catch {
-          return null;
-        }
-      })(),
-    ),
-    utm_campaign: firstNonEmpty(
-      formData.get('utm_campaign'),
-      url.searchParams.get('utm_campaign'),
-      (() => {
-        try {
-          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
-          if (!attributionCookie) return null;
-          return JSON.parse(attributionCookie)?.utm_campaign;
-        } catch {
-          return null;
-        }
-      })(),
-    ),
-    utm_term: firstNonEmpty(
-      formData.get('utm_term'),
-      url.searchParams.get('utm_term'),
-      (() => {
-        try {
-          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
-          if (!attributionCookie) return null;
-          return JSON.parse(attributionCookie)?.utm_term;
-        } catch {
-          return null;
-        }
-      })(),
-    ),
-    utm_content: firstNonEmpty(
-      formData.get('utm_content'),
-      url.searchParams.get('utm_content'),
-      (() => {
-        try {
-          const attributionCookie = cookies[ATTRIBUTION_COOKIE_KEY];
-          if (!attributionCookie) return null;
-          return JSON.parse(attributionCookie)?.utm_content;
-        } catch {
-          return null;
-        }
-      })(),
-    ),
-  };
+    });
+  }
+
+  return tracking;
 }
 
 function normalizeAttributes(attributes = []) {
@@ -223,27 +208,42 @@ function areAttributesEqual(left, right) {
   });
 }
 
-export function mergeTrackingAttributes(existingAttributes = [], tracking = {}) {
+export function mergeTrackingAttributes(
+  existingAttributes = [],
+  tracking = {},
+  extraAttributes = {},
+) {
   const attributeMap = normalizeAttributes(existingAttributes);
 
-  for (const key of TRACKING_ATTRIBUTE_KEYS) {
+  for (const key of CHECKOUT_TRACKING_ATTRIBUTE_KEYS) {
     const value = firstNonEmpty(tracking[key]);
     if (value) {
       attributeMap.set(key, value);
     }
   }
 
+  for (const [key, value] of Object.entries(extraAttributes)) {
+    const nextValue = firstNonEmpty(value);
+    if (nextValue) {
+      attributeMap.set(key, nextValue);
+    }
+  }
+
   return attributesToArray(attributeMap);
 }
 
-export function upsertShopifyCartTokenNote(note, cartId) {
+export function extractShopifyCartToken(cartId) {
   const rawCartId = firstNonEmpty(cartId);
-  const token = rawCartId ? rawCartId.split('/').pop() || rawCartId : null;
+  return rawCartId ? rawCartId.split('/').pop() || rawCartId : null;
+}
+
+export function upsertShopifyCartTokenNote(note, cartId) {
+  const token = extractShopifyCartToken(cartId);
   if (!token) {
     return firstNonEmpty(note) || '';
   }
 
-  const nextLine = `${SHOPIFY_CART_TOKEN_NOTE_KEY}: ${token}`;
+  const nextLine = `${SHOPIFY_CART_TOKEN_NOTE_KEY}:${token}`;
   const currentNote = String(note || '').trim();
 
   if (!currentNote) {
@@ -300,12 +300,15 @@ export async function syncCartTracking({
     formData,
     countryCode,
   });
+  const cartToken = extractShopifyCartToken(cartId);
   let nextCart = cartData;
 
   const existingAttributes = Array.isArray(nextCart?.attributes)
     ? nextCart.attributes
     : [];
-  const nextAttributes = mergeTrackingAttributes(existingAttributes, tracking);
+  const nextAttributes = mergeTrackingAttributes(existingAttributes, tracking, {
+    [SHOPIFY_CART_TOKEN_ATTRIBUTE_KEY]: cartToken,
+  });
 
   if (!areAttributesEqual(existingAttributes, nextAttributes)) {
     const attributesResult = await cartApi.updateAttributes(nextAttributes, {
@@ -324,4 +327,60 @@ export async function syncCartTracking({
   }
 
   return nextCart;
+}
+
+export function buildStampedCheckoutUrl(checkoutUrl, tracking = {}, cartToken) {
+  const rawCheckoutUrl = firstNonEmpty(checkoutUrl);
+  if (!rawCheckoutUrl) return null;
+
+  const url = new URL(rawCheckoutUrl);
+
+  for (const key of CHECKOUT_URL_TRACKING_KEYS) {
+    const value =
+      key === SHOPIFY_CART_TOKEN_ATTRIBUTE_KEY
+        ? firstNonEmpty(cartToken)
+        : firstNonEmpty(tracking[key]);
+
+    if (value) {
+      url.searchParams.set(key, value);
+    }
+  }
+
+  return url.toString();
+}
+
+export async function stampCartForCheckout({
+  cartApi,
+  cartData,
+  cartId,
+  request,
+  formData,
+  countryCode,
+}) {
+  const cart = await syncCartTracking({
+    cartApi,
+    cartData,
+    cartId,
+    request,
+    formData,
+    countryCode,
+  });
+  const tracking = extractCartTrackingFromRequest({
+    request,
+    formData,
+    countryCode,
+  });
+  const cartToken = extractShopifyCartToken(cartId);
+  const checkoutUrl = buildStampedCheckoutUrl(
+    cart?.checkoutUrl,
+    tracking,
+    cartToken,
+  );
+
+  return {
+    cart,
+    cartToken,
+    checkoutUrl,
+    tracking,
+  };
 }
