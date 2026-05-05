@@ -392,6 +392,9 @@ export function formatSearchPrice(price?: SearchPrice | null): string | null {
   const currencyCode = price.currencyCode || 'USD';
 
   if (min == null && max == null) return null;
+  if ((min ?? max) === 0 && (max == null || max === 0)) {
+    return 'Call For Price';
+  }
 
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
