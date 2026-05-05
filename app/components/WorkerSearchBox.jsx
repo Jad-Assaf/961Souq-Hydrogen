@@ -6,6 +6,7 @@ import {
   fetchCustomSearch,
   formatSearchPrice,
   SEARCH_RESULTS_LIMIT,
+  withSearchImageWidth,
 } from '~/lib/customSearch';
 
 const SEARCH_DEBOUNCE_MS = 700;
@@ -263,7 +264,10 @@ export function WorkerSearchBox({
                           >
                             {product.image?.url ? (
                               <img
-                                src={product.image.url}
+                                src={withSearchImageWidth(
+                                  product.image.url,
+                                  100,
+                                )}
                                 alt={product.image.altText || product.title}
                                 className="suggestion-product-image"
                                 loading="lazy"

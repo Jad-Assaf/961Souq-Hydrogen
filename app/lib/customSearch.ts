@@ -341,6 +341,29 @@ export function formatSearchPrice(price?: SearchPrice | null): string | null {
   return formatter.format(min ?? max ?? 0);
 }
 
+export function withSearchImageWidth(
+  imageUrl?: string | null,
+  width?: number,
+): string {
+  const trimmedUrl = imageUrl?.trim();
+  if (!trimmedUrl || !width || !Number.isFinite(width)) return trimmedUrl || '';
+
+  const normalizedWidth = Math.max(1, Math.floor(width));
+
+  try {
+    const isAbsolute = /^https?:\/\//i.test(trimmedUrl);
+    const parsedUrl = new URL(trimmedUrl, 'https://search-image.local');
+    parsedUrl.searchParams.set('width', String(normalizedWidth));
+
+    return isAbsolute
+      ? parsedUrl.toString()
+      : `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+  } catch {
+    const separator = trimmedUrl.includes('?') ? '&' : '?';
+    return `${trimmedUrl}${separator}width=${normalizedWidth}`;
+  }
+}
+
 export function debounce<T extends (...args: any[]) => void>(
   callback: T,
   wait = 180,

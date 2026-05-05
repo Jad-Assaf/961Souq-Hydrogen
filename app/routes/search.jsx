@@ -9,6 +9,7 @@ import {
   formatSearchPrice,
   normalizeSearchResponse,
   SEARCH_RESULTS_LIMIT,
+  withSearchImageWidth,
 } from '~/lib/customSearch';
 
 function availabilityPillStyle(isAvailable) {
@@ -108,7 +109,9 @@ export default function SearchRoute() {
       /> */}
 
       {!trimmedQuery ? (
-        <div className="search-empty-state">Start typing to see search results.</div>
+        <div className="search-empty-state">
+          Start typing to see search results.
+        </div>
       ) : result.products.length === 0 ? (
         <div className="search-results">
           <div className="search-empty-state">
@@ -141,7 +144,9 @@ function SearchResultsGrid({query, originalQuery, page, products}) {
   const hasNextPage = products.length === SEARCH_RESULTS_LIMIT;
   const previousPageHref =
     page > 1 ? `/search?q=${encodeURIComponent(query)}&page=${page - 1}` : null;
-  const nextPageHref = `/search?q=${encodeURIComponent(query)}&page=${page + 1}`;
+  const nextPageHref = `/search?q=${encodeURIComponent(query)}&page=${
+    page + 1
+  }`;
 
   return (
     <div className="search-results">
@@ -162,15 +167,15 @@ function SearchResultsGrid({query, originalQuery, page, products}) {
             product.availableForSale === false
               ? 'Out of stock'
               : product.availableForSale === true
-                ? 'In stock'
-                : null;
+              ? 'In stock'
+              : null;
 
           return (
             <Link key={product.id} to={href} className="search-result-card">
               <div className="search-result-image-wrapper">
                 {product.image?.url ? (
                   <img
-                    src={product.image.url}
+                    src={withSearchImageWidth(product.image.url, 300)}
                     alt={product.image.altText || product.title}
                     className="search-result-image"
                     loading="lazy"

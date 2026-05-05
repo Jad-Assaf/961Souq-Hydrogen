@@ -10,6 +10,7 @@ import {
   formatSearchPrice,
   normalizeSearchResponse,
   SEARCH_RESULTS_LIMIT,
+  withSearchImageWidth,
 } from '~/lib/customSearch';
 
 export const meta = () => {
@@ -75,10 +76,13 @@ export default function TestSearchRoute() {
     <div className="worker-search-page">
       <div className="worker-search-page__inner">
         <header className="worker-search-page__header">
-          <p className="worker-search-page__eyebrow">Cloudflare Worker Search</p>
+          <p className="worker-search-page__eyebrow">
+            Cloudflare Worker Search
+          </p>
           <h1 className="worker-search-page__title">Test Search</h1>
           <p className="worker-search-page__subtitle">
-            Isolated search page using the server-side `/api/custom-search` proxy.
+            Isolated search page using the server-side `/api/custom-search`
+            proxy.
           </p>
         </header>
 
@@ -116,7 +120,9 @@ function EmptyState() {
   return (
     <section className="worker-search-page__empty">
       <h2>Start with at least 2 characters</h2>
-      <p>Try a model name, brand, or product family such as iPhone or AirPods.</p>
+      <p>
+        Try a model name, brand, or product family such as iPhone or AirPods.
+      </p>
     </section>
   );
 }
@@ -126,7 +132,9 @@ function NoResultsState({query, originalQuery, suggestions}) {
     <section className="worker-search-page__empty">
       <h2>No products found for "{query}"</h2>
       {originalQuery ? <p>Corrected from "{originalQuery}".</p> : null}
-      <p>Check spelling, shorten the phrase, or try a related product family.</p>
+      <p>
+        Check spelling, shorten the phrase, or try a related product family.
+      </p>
       {suggestions?.length ? (
         <div className="worker-search-page__suggestions">
           {suggestions.map((suggestion) => (
@@ -152,9 +160,7 @@ function ResultsGrid({query, originalQuery, result}) {
           {result.total} result{result.total === 1 ? '' : 's'} for "{query}"
         </h2>
         {originalQuery ? <p>Corrected from "{originalQuery}".</p> : null}
-        {result.tookMs ? (
-          <p>Response time: {result.tookMs} ms</p>
-        ) : null}
+        {result.tookMs ? <p>Response time: {result.tookMs} ms</p> : null}
       </div>
 
       <div className="worker-search-page__grid">
@@ -165,8 +171,8 @@ function ResultsGrid({query, originalQuery, result}) {
             product.availableForSale === false
               ? 'Out of stock'
               : product.availableForSale === true
-                ? 'In stock'
-                : null;
+              ? 'In stock'
+              : null;
 
           return (
             <Link
@@ -177,7 +183,7 @@ function ResultsGrid({query, originalQuery, result}) {
               <div className="worker-search-page__card-media">
                 {product.image?.url ? (
                   <img
-                    src={product.image.url}
+                    src={withSearchImageWidth(product.image.url, 300)}
                     alt={product.image.altText || product.title}
                     className="worker-search-page__card-image"
                     loading="lazy"
