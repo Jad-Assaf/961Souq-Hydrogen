@@ -6,26 +6,21 @@ import {
   SEARCH_DEFAULT_LIMIT,
   SEARCH_DEFAULT_SUGGEST_LIMIT,
   SEARCH_MIN_QUERY_LENGTH,
+  type SearchResponse,
 } from '../lib/customSearch';
 
 const CACHE_CONTROL = 'public, max-age=10, stale-while-revalidate=60';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 const DEFAULT_OPENAI_SEARCH_MODEL = 'gpt-5.4-mini';
 const DEFAULT_OPENAI_SEARCH_REASONING_EFFORT = 'none';
-const SEARCH_INTENT_CACHE_TTL_MS = 5 * 60 * 1000;
-const SEARCH_CORRECTION_CACHE_TTL_MS = 5 * 60 * 1000;
+const SEARCH_INTELLIGENCE_CACHE_TTL_MS = 5 * 60 * 1000;
 const SEARCH_RESPONSE_CACHE_TTL_MS = 15 * 1000;
-const searchIntentCache = new Map<
+const MAX_EXPANSION_QUERIES = 4;
+const SEARCH_EXPANSION_LIMIT = 8;
+const searchIntelligenceCache = new Map<
   string,
   {
-    value: SearchIntentResult;
-    timestamp: number;
-  }
->();
-const searchCorrectionCache = new Map<
-  string,
-  {
-    value: SearchCorrectionResult;
+    value: SearchIntelligenceResult;
     timestamp: number;
   }
 >();
@@ -53,12 +48,150 @@ type SearchCorrectionResult = {
   reason: string;
 };
 
+type SearchIntelligenceResult = {
+  correction: SearchCorrectionResult;
+  intent: SearchIntentResult;
+};
+
 type OpenAIReasoningEffort = 'none' | 'low' | 'medium' | 'high' | 'xhigh';
 
-function buildWorkerEndpoint(
-  baseUrl: string,
-  mode: 'search' | 'suggest',
-): URL {
+const ELECTRONICS_SYNONYM_GROUPS = [
+  ['ps5', 'ps 5', 'playstation 5', 'playstation5', 'sony playstation 5'],
+  ['ps4', 'ps 4', 'playstation 4', 'playstation4', 'sony playstation 4'],
+  ['ps3', 'ps 3', 'playstation 3', 'playstation3'],
+  ['ps portal', 'playstation portal'],
+  ['dualsense', 'ps5 controller', 'playstation 5 controller'],
+  ['xbox series x', 'series x', 'xbox sx'],
+  ['xbox series s', 'series s', 'xbox ss'],
+  ['xbox one', 'xbone'],
+  ['nintendo switch', 'switch oled', 'switch lite'],
+  [
+    'xm6',
+    '1000xm6',
+    'wh-1000xm6',
+    'wf-1000xm6',
+    'sony xm6',
+    'sony wh-1000xm6',
+    'sony wf-1000xm6',
+  ],
+  ['xm5', '1000xm5', 'wh-1000xm5', 'sony xm5', 'sony wh-1000xm5'],
+  ['xm4', '1000xm4', 'wh-1000xm4', 'sony xm4', 'sony wh-1000xm4'],
+  ['xm3', '1000xm3', 'wh-1000xm3', 'sony xm3', 'sony wh-1000xm3'],
+  ['wf xm5', 'wfxm5', 'wf-1000xm5', 'sony wf-1000xm5'],
+  ['wf xm4', 'wfxm4', 'wf-1000xm4', 'sony wf-1000xm4'],
+  ['ch720', 'ch720n', 'wh-ch720n', 'sony wh-ch720n'],
+  ['ch520', 'wh-ch520', 'sony wh-ch520'],
+  ['qc ultra', 'quietcomfort ultra', 'bose quietcomfort ultra'],
+  ['qc earbuds', 'quietcomfort earbuds', 'bose quietcomfort earbuds'],
+  ['airpods pro', 'airpod pro', 'apple airpods pro'],
+  ['airpods max', 'airpod max', 'apple airpods max'],
+  ['airpods', 'airpod', 'apple airpods'],
+  ['iphone', 'apple iphone'],
+  ['ipad', 'apple ipad'],
+  ['macbook', 'apple macbook'],
+  ['apple watch', 'iwatch'],
+  ['galaxy watch', 'samsung watch'],
+  ['galaxy buds', 'samsung buds', 'buds pro', 'buds2 pro', 'buds 2 pro'],
+  ['galaxy s24', 's24', 'samsung s24', 'samsung galaxy s24'],
+  ['galaxy s25', 's25', 'samsung s25', 'samsung galaxy s25'],
+  ['nvme', 'm.2', 'm2 ssd', 'm.2 ssd', 'ssd m2'],
+  ['ssd', 'solid state drive'],
+  ['hdd', 'hard drive', 'hard disk'],
+  ['ram', 'memory'],
+  ['gpu', 'graphics card', 'vga'],
+  ['cpu', 'processor'],
+  ['psu', 'power supply'],
+  ['ups', 'battery backup'],
+  ['motherboard', 'mainboard', 'mobo'],
+  ['computer case', 'pc case', 'chassis'],
+  ['thermal paste', 'thermal compound'],
+  ['heatsink', 'heat sink'],
+  ['liquid cooler', 'water cooler', 'aio cooler'],
+  ['ddr5', 'ddr5 ram', 'ddr5 memory'],
+  ['ddr4', 'ddr4 ram', 'ddr4 memory'],
+  ['rtx', 'geforce rtx', 'nvidia rtx'],
+  ['gtx', 'geforce gtx', 'nvidia gtx'],
+  ['radeon', 'amd radeon'],
+  ['ryzen', 'amd ryzen'],
+  ['core i9', 'i9', 'intel i9'],
+  ['core i7', 'i7', 'intel i7'],
+  ['core i5', 'i5', 'intel i5'],
+  ['core i3', 'i3', 'intel i3'],
+  ['wifi', 'wi-fi', 'wireless'],
+  ['wifi 7', 'wi-fi 7', '802.11be', 'be wifi'],
+  ['wifi 6e', 'wi-fi 6e', '802.11ax 6e', 'ax wifi 6e'],
+  ['wifi 6', 'wi-fi 6', '802.11ax', 'ax wifi'],
+  ['wifi 5', 'wi-fi 5', '802.11ac', 'ac wifi'],
+  ['router', 'wifi router', 'wireless router'],
+  ['ap', 'access point'],
+  ['mesh', 'mesh wifi', 'mesh router'],
+  ['network switch', 'ethernet switch'],
+  ['lan', 'ethernet', 'network cable'],
+  ['poe', 'power over ethernet'],
+  ['sfp', 'fiber module', 'sfp module'],
+  ['onu', 'ont', 'fiber modem'],
+  ['bt', 'bluetooth'],
+  ['nfc', 'near field communication'],
+  ['qi', 'wireless charging', 'qi charger'],
+  ['tws', 'true wireless', 'wireless earbuds'],
+  ['anc', 'noise cancelling', 'noise canceling'],
+  ['nc', 'noise cancelling', 'noise canceling'],
+  ['transparency mode', 'ambient mode', 'ambient sound'],
+  ['hi res', 'hi-res', 'high resolution audio'],
+  ['ldac', 'sony ldac'],
+  ['aptx', 'apt-x', 'qualcomm aptx'],
+  ['dac', 'digital to analog converter'],
+  ['amp', 'amplifier'],
+  ['soundbar', 'sound bar'],
+  ['sub', 'subwoofer'],
+  ['oled', 'amoled'],
+  ['mini led', 'miniled'],
+  ['micro led', 'microled'],
+  ['qled', 'quantum dot'],
+  ['hdr', 'high dynamic range'],
+  ['dolby vision', 'dv hdr'],
+  ['hfr', 'high frame rate'],
+  ['hz', 'refresh rate'],
+  ['uhd', '4k'],
+  ['4k', 'uhd', '2160p', 'ultra hd'],
+  ['fhd', '1080p', 'full hd'],
+  ['hd', '720p'],
+  ['qhd', '1440p', '2k', 'wqhd'],
+  ['uwqhd', 'ultrawide qhd', '3440x1440'],
+  ['5k', '5120x2880'],
+  ['8k', '4320p', '8k uhd'],
+  ['usb c', 'usb-c', 'type c', 'type-c'],
+  ['usb a', 'usb-a', 'type a', 'type-a'],
+  ['micro usb', 'micro-usb'],
+  ['lightning', 'apple lightning'],
+  ['pd', 'power delivery', 'usb pd'],
+  ['gan', 'gallium nitride'],
+  ['hdmi', 'hdmi cable'],
+  ['hdmi 2.1', 'hdmi2.1'],
+  ['dp', 'displayport'],
+  ['vga', 'd sub', 'd-sub'],
+  ['dvi', 'digital visual interface'],
+  ['tb3', 'thunderbolt 3'],
+  ['tb4', 'thunderbolt 4'],
+  ['tb5', 'thunderbolt 5'],
+  ['aio', 'all in one', 'all-in-one'],
+  ['vr', 'virtual reality'],
+  ['ar', 'augmented reality'],
+  ['mr', 'mixed reality'],
+  ['nas', 'network attached storage'],
+  ['cctv', 'security camera', 'surveillance camera'],
+  ['ptz', 'pan tilt zoom'],
+  ['nvr', 'network video recorder'],
+  ['dvr', 'digital video recorder'],
+  ['pos', 'point of sale'],
+  ['ups battery', 'replacement battery', 'ups replacement battery'],
+  ['sim', 'sim card'],
+  ['esim', 'e-sim', 'embedded sim'],
+  ['sd card', 'memory card', 'secure digital card'],
+  ['microsd', 'micro sd', 'micro-sd', 'tf card'],
+] as const;
+
+function buildWorkerEndpoint(baseUrl: string, mode: 'search' | 'suggest'): URL {
   const parsed = new URL(baseUrl);
   const normalizedPath = parsed.pathname.endsWith('/')
     ? parsed.pathname.slice(0, -1)
@@ -78,6 +211,146 @@ function parseBooleanParam(value: string | null): boolean | null {
   return null;
 }
 
+function normalizeExpansionText(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[-_/+.]+/g, ' ')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function compactExpansionText(value: string): string {
+  return normalizeExpansionText(value).replace(/\s+/g, '');
+}
+
+function buildInchExpansionQueries(query: string): string[] {
+  const expansions: string[] = [];
+  const seen = new Set([query.trim().toLowerCase()]);
+  const inchPattern =
+    /(\d{1,3}(?:\.\d{1,2})?)\s*(?:"|″|inches|inch|in\b|-inch)/gi;
+  const matches = [...query.matchAll(inchPattern)].slice(0, 2);
+
+  for (const match of matches) {
+    const size = match[1];
+    const current = match[0];
+    const variants = [`${size} inch`, `${size}"`, `${size} in`, `${size}-inch`];
+
+    for (const variant of variants) {
+      if (variant.toLowerCase() === current.toLowerCase()) continue;
+      const expanded = query
+        .replace(current, variant)
+        .replace(/\s+/g, ' ')
+        .trim();
+      const key = expanded.toLowerCase();
+      if (!expanded || seen.has(key)) continue;
+      seen.add(key);
+      expansions.push(expanded);
+    }
+  }
+
+  return expansions;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function replaceAliasInQuery(
+  query: string,
+  alias: string,
+  replacement: string,
+): string | null {
+  const aliasWords = normalizeExpansionText(alias).split(' ').filter(Boolean);
+  if (!aliasWords.length) return null;
+
+  const pattern = aliasWords.map(escapeRegExp).join('[-_/+.\\s]*');
+  const regex = new RegExp(
+    `(^|[^\\p{L}\\p{N}])(${pattern})(?=$|[^\\p{L}\\p{N}])`,
+    'iu',
+  );
+  if (!regex.test(query)) return null;
+
+  return query
+    .replace(regex, (_match, prefix) => `${prefix}${replacement}`)
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getSearchExpansionQueries(query: string): string[] {
+  const normalizedQuery = normalizeExpansionText(query);
+  const compactQuery = compactExpansionText(query);
+  const expansionQueries = buildInchExpansionQueries(query);
+  const seen = new Set([normalizedQuery, compactQuery]);
+
+  for (const expansion of expansionQueries) {
+    seen.add(normalizeExpansionText(expansion));
+    seen.add(compactExpansionText(expansion));
+  }
+
+  if (expansionQueries.length >= MAX_EXPANSION_QUERIES) {
+    return expansionQueries.slice(0, MAX_EXPANSION_QUERIES);
+  }
+
+  for (const group of ELECTRONICS_SYNONYM_GROUPS) {
+    const matchedAlias = group.find((alias) => {
+      const normalizedAlias = normalizeExpansionText(alias);
+      const compactAlias = compactExpansionText(alias);
+      if (!normalizedAlias || !compactAlias) return false;
+      if (
+        normalizedQuery === normalizedAlias ||
+        compactQuery === compactAlias
+      ) {
+        return true;
+      }
+      return (
+        replaceAliasInQuery(
+          normalizedQuery,
+          normalizedAlias,
+          normalizedAlias,
+        ) != null
+      );
+    });
+
+    if (!matchedAlias) continue;
+
+    for (const synonym of group) {
+      const normalizedSynonym = normalizeExpansionText(synonym);
+      const compactSynonym = compactExpansionText(synonym);
+      if (
+        !normalizedSynonym ||
+        seen.has(normalizedSynonym) ||
+        seen.has(compactSynonym)
+      ) {
+        continue;
+      }
+
+      const expandedQuery =
+        replaceAliasInQuery(normalizedQuery, matchedAlias, normalizedSynonym) ||
+        normalizedSynonym;
+      const normalizedExpandedQuery = normalizeExpansionText(expandedQuery);
+      const compactExpandedQuery = compactExpansionText(expandedQuery);
+
+      if (
+        normalizedExpandedQuery &&
+        !seen.has(normalizedExpandedQuery) &&
+        !seen.has(compactExpandedQuery)
+      ) {
+        seen.add(normalizedExpandedQuery);
+        seen.add(compactExpandedQuery);
+        expansionQueries.push(normalizedExpandedQuery);
+      }
+
+      if (expansionQueries.length >= MAX_EXPANSION_QUERIES) {
+        return expansionQueries;
+      }
+    }
+  }
+
+  return expansionQueries;
+}
+
 function getOpenAISearchModel(context: any): string {
   const configured = context.env?.OPENAI_SEARCH_MODEL;
   return typeof configured === 'string' && configured.trim()
@@ -85,9 +358,7 @@ function getOpenAISearchModel(context: any): string {
     : DEFAULT_OPENAI_SEARCH_MODEL;
 }
 
-function getOpenAISearchReasoningEffort(
-  context: any,
-): OpenAIReasoningEffort {
+function getOpenAISearchReasoningEffort(context: any): OpenAIReasoningEffort {
   const configured = context.env?.OPENAI_SEARCH_REASONING_EFFORT;
   return configured === 'low' ||
     configured === 'medium' ||
@@ -99,7 +370,7 @@ function getOpenAISearchReasoningEffort(
 }
 
 function logOpenAIRequestFailure(
-  task: 'intent' | 'correction',
+  task: 'search_intelligence',
   response: Response,
   openaiJson: any,
 ) {
@@ -115,7 +386,7 @@ function logOpenAIRequestFailure(
 }
 
 function logOpenAIIncompleteResponse(
-  task: 'intent' | 'correction',
+  task: 'search_intelligence',
   openaiJson: any,
 ) {
   console.error('[api.custom-search] OpenAI response incomplete', {
@@ -194,9 +465,7 @@ function normalizeCorrectionConfidence(
     if (value > 0) return 'low';
   }
 
-  return value === 'low' || value === 'medium' || value === 'high'
-    ? value
-    : '';
+  return value === 'low' || value === 'medium' || value === 'high' ? value : '';
 }
 
 function buildOpenAIQueryInput(query: string, task: string) {
@@ -206,19 +475,13 @@ function buildOpenAIQueryInput(query: string, task: string) {
       content: [
         {
           type: 'input_text',
-          text: `Search query: ${JSON.stringify(query)}\n${task}. Return JSON only.`,
+          text: `Search query: ${JSON.stringify(
+            query,
+          )}\n${task}. Return JSON only.`,
         },
       ],
     },
   ];
-}
-
-function getQueryTerms(value: string): string[] {
-  return value
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean);
 }
 
 function shouldUseCorrectedQuery(
@@ -235,7 +498,9 @@ function shouldUseCorrectedQuery(
   );
 }
 
-function parseIntentJson(text: string): SearchIntentResult | null {
+function parseSearchIntelligenceJson(
+  text: string,
+): SearchIntelligenceResult | null {
   if (!text) return null;
 
   const match = text.match(/\{[\s\S]*\}/);
@@ -251,39 +516,25 @@ function parseIntentJson(text: string): SearchIntentResult | null {
         : 'generic';
 
     return {
-      intent,
-      subject: cleanIntentValue(parsed?.subject),
-      accessory: cleanIntentValue(parsed?.accessory),
-      focusTerms: cleanIntentTerms(parsed?.focus_terms),
-      excludeTerms: cleanIntentTerms(parsed?.exclude_terms),
-    };
-  } catch {
-    return null;
-  }
-}
-
-function parseCorrectionJson(text: string): SearchCorrectionResult | null {
-  if (!text) return null;
-
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) return null;
-
-  try {
-    const parsed = JSON.parse(match[0]);
-
-    return {
-      correctedQuery: cleanCorrectedQuery(parsed?.corrected_query),
-      correctionConfidence: normalizeCorrectionConfidence(
-        parsed?.correction_confidence,
-      ),
-      shouldReplace:
-        typeof parsed?.should_replace === 'boolean'
-          ? parsed.should_replace
-          : Boolean(
-              cleanCorrectedQuery(parsed?.corrected_query),
-            ),
-      changedTerms: cleanIntentTerms(parsed?.changed_terms, 8),
-      reason: cleanShortReason(parsed?.reason),
+      correction: {
+        correctedQuery: cleanCorrectedQuery(parsed?.corrected_query),
+        correctionConfidence: normalizeCorrectionConfidence(
+          parsed?.correction_confidence,
+        ),
+        shouldReplace:
+          typeof parsed?.should_replace === 'boolean'
+            ? parsed.should_replace
+            : Boolean(cleanCorrectedQuery(parsed?.corrected_query)),
+        changedTerms: cleanIntentTerms(parsed?.changed_terms, 8),
+        reason: cleanShortReason(parsed?.reason),
+      },
+      intent: {
+        intent,
+        subject: cleanIntentValue(parsed?.subject),
+        accessory: cleanIntentValue(parsed?.accessory),
+        focusTerms: cleanIntentTerms(parsed?.focus_terms),
+        excludeTerms: cleanIntentTerms(parsed?.exclude_terms),
+      },
     };
   } catch {
     return null;
@@ -303,6 +554,7 @@ function buildSearchResponseCacheKey(input: {
   limit: number;
   page: number;
   available: boolean | null;
+  aiEnabled: boolean;
 }): string {
   return [
     input.mode,
@@ -310,6 +562,7 @@ function buildSearchResponseCacheKey(input: {
     input.limit,
     input.page,
     input.available == null ? 'any' : String(input.available),
+    input.aiEnabled ? 'ai' : 'raw',
   ].join('|');
 }
 
@@ -333,80 +586,132 @@ function setCachedSearchResponse(
   });
 }
 
-async function detectSearchIntent(
-  query: string,
-  context: any,
-): Promise<SearchIntentResult | null> {
-  const cacheKey = query.trim().toLowerCase();
-  const cached = searchIntentCache.get(cacheKey);
+function mergeSupplementalSearchResponses(
+  primary: SearchResponse,
+  supplementalResponses: SearchResponse[],
+  maxAddedProducts = SEARCH_EXPANSION_LIMIT,
+): SearchResponse {
+  const products = [...primary.products];
+  let addedProducts = 0;
+  const seenProducts = new Set(
+    products.map((product) => product.id || product.handle).filter(Boolean),
+  );
+  const suggestions = [...primary.suggestions];
+  const seenSuggestions = new Set(
+    suggestions.map((suggestion) => suggestion.trim().toLowerCase()),
+  );
 
-  if (cached && Date.now() - cached.timestamp < SEARCH_INTENT_CACHE_TTL_MS) {
-    return cached.value;
+  for (const response of supplementalResponses) {
+    for (const product of response.products) {
+      if (addedProducts >= maxAddedProducts) break;
+      const key = product.id || product.handle;
+      if (!key || seenProducts.has(key)) continue;
+      seenProducts.add(key);
+      products.push(product);
+      addedProducts += 1;
+    }
+
+    for (const suggestion of response.suggestions) {
+      const key = suggestion.trim().toLowerCase();
+      if (!key || seenSuggestions.has(key)) continue;
+      seenSuggestions.add(key);
+      suggestions.push(suggestion);
+    }
   }
 
-  const openaiKey = context.env?.OPENAI_API_KEY;
-  if (!openaiKey) {
-    return null;
+  return {
+    ...primary,
+    products,
+    suggestions,
+    total: Math.max(primary.total, products.length),
+    tookMs: Math.max(
+      primary.tookMs,
+      ...supplementalResponses.map((response) => response.tookMs),
+    ),
+  };
+}
+
+function applyWorkerSearchParams(input: {
+  endpoint: URL;
+  query: string;
+  limit: number;
+  page: number;
+  available: boolean | null;
+  mode: 'search' | 'suggest';
+  searchIntent: SearchIntentResult | null;
+}) {
+  input.endpoint.searchParams.set('q', input.query);
+  input.endpoint.searchParams.set('limit', String(input.limit));
+
+  if (input.mode !== 'search') return;
+
+  input.endpoint.searchParams.set('page', String(input.page));
+  if (input.available != null) {
+    input.endpoint.searchParams.set('available', String(input.available));
   }
-
-  try {
-    const payload = {
-      model: getOpenAISearchModel(context),
-      reasoning: {effort: getOpenAISearchReasoningEffort(context)},
-      instructions:
-        'Classify ecommerce search intent for a consumer electronics store. Return JSON only with keys intent, subject, accessory, focus_terms, exclude_terms. intent must be one of: device, accessory, generic. Use accessory when the user wants a case, cover, charger, cable, adapter, protector, stand, holder, keyboard, mouse, bag, sleeve, or similar add-on. Use device when the user is looking for the main product itself like iphone, ipad, samsung phone, macbook, laptop, airpods, playstation, monitor, tv. subject should be the main product family if clear. accessory should be the accessory type if clear. focus_terms should be up to 4 short terms that the search engine should prioritize in titles and tags. exclude_terms should be up to 4 short terms that likely represent the wrong product class for this query, such as case or cover when the user wants the actual device. Return empty strings or empty arrays when unknown. JSON only.',
-      input: buildOpenAIQueryInput(query, 'Classify the ecommerce search intent'),
-      text: {
-        format: {
-          type: 'json_object',
-        },
-      },
-      max_output_tokens: 120,
-    };
-
-    const response = await fetch(OPENAI_RESPONSES_URL, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${openaiKey}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const openaiJson = await response.json().catch(() => null);
-    if (!response.ok) {
-      logOpenAIRequestFailure('intent', response, openaiJson);
-      return null;
+  if (input.searchIntent?.intent && input.searchIntent.intent !== 'generic') {
+    input.endpoint.searchParams.set('intent', input.searchIntent.intent);
+    if (input.searchIntent.subject) {
+      input.endpoint.searchParams.set(
+        'intent_subject',
+        input.searchIntent.subject,
+      );
     }
-    if (openaiJson?.status === 'incomplete') {
-      logOpenAIIncompleteResponse('intent', openaiJson);
-      return null;
+    if (input.searchIntent.accessory) {
+      input.endpoint.searchParams.set(
+        'intent_accessory',
+        input.searchIntent.accessory,
+      );
     }
-
-    const parsed = parseIntentJson(extractOutputText(openaiJson));
-    if (parsed) {
-      searchIntentCache.set(cacheKey, {
-        value: parsed,
-        timestamp: Date.now(),
-      });
+    if (input.searchIntent.focusTerms.length) {
+      input.endpoint.searchParams.set(
+        'intent_focus',
+        input.searchIntent.focusTerms.join(','),
+      );
     }
-
-    return parsed;
-  } catch {
-    return null;
+    if (input.searchIntent.excludeTerms.length) {
+      input.endpoint.searchParams.set(
+        'intent_exclude',
+        input.searchIntent.excludeTerms.join(','),
+      );
+    }
   }
 }
 
-async function detectSearchCorrection(
+async function fetchWorkerSearchResponse(input: {
+  endpoint: URL;
+  requestHeaders: Record<string, string>;
+  fallbackQuery: string;
+}): Promise<SearchResponse | null> {
+  const response = await fetch(input.endpoint.toString(), {
+    method: 'GET',
+    headers: input.requestHeaders,
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    console.error('[api.custom-search] worker error', {
+      url: input.endpoint.toString(),
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+    });
+    return null;
+  }
+
+  return normalizeSearchResponse(await response.json(), input.fallbackQuery);
+}
+
+async function detectSearchIntelligence(
   query: string,
   context: any,
-): Promise<SearchCorrectionResult | null> {
+): Promise<SearchIntelligenceResult | null> {
   const cacheKey = query.trim().toLowerCase();
-  const cached = searchCorrectionCache.get(cacheKey);
+  const cached = searchIntelligenceCache.get(cacheKey);
 
   if (
     cached &&
-    Date.now() - cached.timestamp < SEARCH_CORRECTION_CACHE_TTL_MS
+    Date.now() - cached.timestamp < SEARCH_INTELLIGENCE_CACHE_TTL_MS
   ) {
     return cached.value;
   }
@@ -421,14 +726,17 @@ async function detectSearchCorrection(
       model: getOpenAISearchModel(context),
       reasoning: {effort: getOpenAISearchReasoningEffort(context)},
       instructions:
-        'You are a typo-correction engine for ecommerce search. Return JSON only with keys corrected_query, correction_confidence, should_replace, changed_terms, reason. Your job is to output the most likely intended query after fixing typos automatically. corrected_query must preserve user intent and fix typos, missing letters, swapped letters, repeated letters, spacing mistakes, and obvious brand/model misspellings. Do not broaden the query or add new product concepts. For obvious typos you must correct them: iphnoe -> iphone, ipohne -> iphone, iphne -> iphone, macbok -> macbook, mabcook -> macbook, airpds -> airpods, samsng -> samsung. If the user query contains a typo, return the corrected query and set should_replace to true. Only return an empty corrected_query when the original query is already correct. changed_terms must list the corrected terms. reason must briefly explain the correction. correction_confidence must be one of high, medium, low, or empty string. JSON only.',
-      input: buildOpenAIQueryInput(query, 'Correct typos in the search query'),
+        'You are a search-intelligence engine for a consumer electronics ecommerce store. Return JSON only with keys corrected_query, correction_confidence, should_replace, changed_terms, reason, intent, subject, accessory, focus_terms, exclude_terms. First, correct typos in the search query. corrected_query must preserve user intent and fix typos, missing letters, swapped letters, repeated letters, spacing mistakes, and obvious brand/model misspellings. Do not broaden the query or add new product concepts. For obvious typos you must correct them: iphnoe -> iphone, ipohne -> iphone, iphne -> iphone, macbok -> macbook, mabcook -> macbook, airpds -> airpods, samsng -> samsung. If the query contains a typo, return the corrected query and set should_replace to true. Only return an empty corrected_query when the original query is already correct. correction_confidence must be high, medium, low, or empty string. Then classify ecommerce search intent. intent must be one of: device, accessory, generic. Use accessory when the user wants a case, cover, charger, cable, adapter, protector, stand, holder, keyboard, mouse, bag, sleeve, or similar add-on. Use device when the user is looking for the main product itself like iphone, ipad, samsung phone, macbook, laptop, airpods, playstation, monitor, tv. subject should be the main product family if clear. accessory should be the accessory type if clear. focus_terms should be up to 4 short terms to prioritize in titles and tags. exclude_terms should be up to 4 short terms that likely represent the wrong product class, such as case or cover when the user wants the actual device. Return empty strings or empty arrays when unknown. JSON only.',
+      input: buildOpenAIQueryInput(
+        query,
+        'Correct typos and classify ecommerce search intent',
+      ),
       text: {
         format: {
           type: 'json_object',
         },
       },
-      max_output_tokens: 120,
+      max_output_tokens: 180,
     };
 
     const response = await fetch(OPENAI_RESPONSES_URL, {
@@ -442,17 +750,17 @@ async function detectSearchCorrection(
 
     const openaiJson = await response.json().catch(() => null);
     if (!response.ok) {
-      logOpenAIRequestFailure('correction', response, openaiJson);
+      logOpenAIRequestFailure('search_intelligence', response, openaiJson);
       return null;
     }
     if (openaiJson?.status === 'incomplete') {
-      logOpenAIIncompleteResponse('correction', openaiJson);
+      logOpenAIIncompleteResponse('search_intelligence', openaiJson);
       return null;
     }
 
-    const parsed = parseCorrectionJson(extractOutputText(openaiJson));
+    const parsed = parseSearchIntelligenceJson(extractOutputText(openaiJson));
     if (parsed) {
-      searchCorrectionCache.set(cacheKey, {
+      searchIntelligenceCache.set(cacheKey, {
         value: parsed,
         timestamp: Date.now(),
       });
@@ -478,8 +786,8 @@ export async function loader({
     requestedMode === 'correct'
       ? 'correct'
       : requestedMode === 'suggest'
-        ? 'suggest'
-        : 'search';
+      ? 'suggest'
+      : 'search';
   const defaultLimit =
     mode === 'suggest' ? SEARCH_DEFAULT_SUGGEST_LIMIT : SEARCH_DEFAULT_LIMIT;
   const limit = clampSearchLimit(
@@ -491,6 +799,8 @@ export async function loader({
     Number.parseInt(requestUrl.searchParams.get('page') || '1', 10) || 1,
   );
   const available = parseBooleanParam(requestUrl.searchParams.get('available'));
+  const aiParam = parseBooleanParam(requestUrl.searchParams.get('ai'));
+  const aiEnabled = aiParam !== false;
   const headers = {
     'Cache-Control': CACHE_CONTROL,
   };
@@ -501,6 +811,7 @@ export async function loader({
     limit,
     page,
     available,
+    aiEnabled,
   });
 
   if (query.length < SEARCH_MIN_QUERY_LENGTH) {
@@ -528,9 +839,10 @@ export async function loader({
   }
 
   if (mode === 'correct') {
-    const correction = shouldDetectSearchIntent(query, 'search')
-      ? await detectSearchCorrection(query, context)
+    const intelligence = shouldDetectSearchIntent(query, 'search')
+      ? await detectSearchIntelligence(query, context)
       : null;
+    const correction = intelligence?.correction || null;
     const resolvedQuery = shouldUseCorrectedQuery(query, correction)
       ? correction!.correctedQuery
       : query;
@@ -563,13 +875,12 @@ export async function loader({
   }
 
   const endpoint = buildWorkerEndpoint(searchServiceUrl, mode);
-  const shouldUseAI = shouldDetectSearchIntent(query, mode);
-  const [searchCorrection, searchIntent] = shouldUseAI
-    ? await Promise.all([
-        detectSearchCorrection(query, context),
-        detectSearchIntent(query, context),
-      ])
-    : [null, null];
+  const shouldUseAI = aiEnabled && shouldDetectSearchIntent(query, mode);
+  const searchIntelligence = shouldUseAI
+    ? await detectSearchIntelligence(query, context)
+    : null;
+  const searchCorrection = searchIntelligence?.correction || null;
+  const searchIntent = searchIntelligence?.intent || null;
   const resolvedQuery = shouldUseCorrectedQuery(query, searchCorrection)
     ? searchCorrection!.correctedQuery
     : query;
@@ -579,6 +890,7 @@ export async function loader({
     limit,
     page,
     available,
+    aiEnabled: shouldUseAI,
   });
   const cachedResponse = getCachedSearchResponse(responseCacheKey);
 
@@ -594,36 +906,20 @@ export async function loader({
     return json(cachedResponse, {headers});
   }
 
-  endpoint.searchParams.set('q', resolvedQuery);
-  endpoint.searchParams.set('limit', String(limit));
+  applyWorkerSearchParams({
+    endpoint,
+    query: resolvedQuery,
+    limit,
+    page,
+    available,
+    mode,
+    searchIntent,
+  });
 
-  if (mode === 'search') {
-    endpoint.searchParams.set('page', String(page));
-    if (available != null) {
-      endpoint.searchParams.set('available', String(available));
-    }
-    if (searchIntent?.intent && searchIntent.intent !== 'generic') {
-      endpoint.searchParams.set('intent', searchIntent.intent);
-      if (searchIntent.subject) {
-        endpoint.searchParams.set('intent_subject', searchIntent.subject);
-      }
-      if (searchIntent.accessory) {
-        endpoint.searchParams.set('intent_accessory', searchIntent.accessory);
-      }
-      if (searchIntent.focusTerms.length) {
-        endpoint.searchParams.set(
-          'intent_focus',
-          searchIntent.focusTerms.join(','),
-        );
-      }
-      if (searchIntent.excludeTerms.length) {
-        endpoint.searchParams.set(
-          'intent_exclude',
-          searchIntent.excludeTerms.join(','),
-        );
-      }
-    }
-  }
+  const expansionQueries =
+    mode === 'search' && page === 1
+      ? getSearchExpansionQueries(resolvedQuery)
+      : [];
 
   const requestHeaders: Record<string, string> = {
     Accept: 'application/json',
@@ -640,43 +936,68 @@ export async function loader({
       mode,
       searchCorrection,
       searchIntent,
+      expansionQueries,
+      aiEnabled: shouldUseAI,
       endpoint: endpoint.toString(),
       hasToken: Boolean(searchServiceToken),
     });
 
-    const response = await fetch(endpoint.toString(), {
-      method: 'GET',
-      headers: requestHeaders,
+    const normalized = await fetchWorkerSearchResponse({
+      endpoint,
+      requestHeaders,
+      fallbackQuery: resolvedQuery,
     });
 
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => '');
-      console.error('[api.custom-search] worker error', {
-        url: endpoint.toString(),
-        status: response.status,
-        statusText: response.statusText,
-        body: errorBody,
-      });
+    if (!normalized) {
       return json(createEmptySearchResponse(query), {headers});
     }
 
-    const normalized = normalizeSearchResponse(
-      await response.json(),
-      resolvedQuery,
-    );
+    const supplementalResponses = (
+      await Promise.all(
+        expansionQueries.map((expansionQuery) => {
+          const expansionEndpoint = buildWorkerEndpoint(searchServiceUrl, mode);
+          applyWorkerSearchParams({
+            endpoint: expansionEndpoint,
+            query: expansionQuery,
+            limit: Math.min(limit, SEARCH_EXPANSION_LIMIT),
+            page: 1,
+            available,
+            mode,
+            searchIntent,
+          });
+          return fetchWorkerSearchResponse({
+            endpoint: expansionEndpoint,
+            requestHeaders,
+            fallbackQuery: expansionQuery,
+          });
+        }),
+      )
+    ).filter((response): response is SearchResponse => Boolean(response));
+
+    const merged = supplementalResponses.length
+      ? mergeSupplementalSearchResponses(normalized, supplementalResponses)
+      : normalized;
     const responsePayload = {
-      ...normalized,
+      ...merged,
       query: resolvedQuery,
       normalizedQuery: resolvedQuery.trim().toLowerCase(),
       debugCorrection: {
         originalQuery: query,
         resolvedQuery,
-        correctionSource: searchCorrection ? 'llm' : 'none',
+        correctionSource: searchCorrection
+          ? 'llm'
+          : aiEnabled
+          ? 'none'
+          : 'disabled',
         correctionConfidence: searchCorrection?.correctionConfidence || '',
         correctedQuery: searchCorrection?.correctedQuery || '',
         shouldReplace: Boolean(searchCorrection?.shouldReplace),
         changedTerms: searchCorrection?.changedTerms || [],
         reason: searchCorrection?.reason || '',
+      },
+      debugExpansion: {
+        queries: expansionQueries,
+        addedProducts: merged.products.length - normalized.products.length,
       },
     };
     setCachedSearchResponse(responseCacheKey, responsePayload);
@@ -684,10 +1005,13 @@ export async function loader({
       query,
       resolvedQuery,
       mode,
-      total: normalized.total,
-      products: normalized.products.length,
-      suggestions: normalized.suggestions.length,
-      tookMs: normalized.tookMs,
+      expansionQueries,
+      addedExpansionProducts:
+        merged.products.length - normalized.products.length,
+      total: merged.total,
+      products: merged.products.length,
+      suggestions: merged.suggestions.length,
+      tookMs: merged.tookMs,
     });
 
     return json(responsePayload, {headers});

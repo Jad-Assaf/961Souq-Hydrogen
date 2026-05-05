@@ -8,7 +8,11 @@ import {
   SEARCH_RESULTS_LIMIT,
 } from '~/lib/customSearch';
 
-const DEBOUNCE_MS = 220;
+const SEARCH_DEBOUNCE_MS = 700;
+
+function getSearchCacheKey(query) {
+  return query.trim().toLowerCase();
+}
 
 function availabilityPillStyle(isAvailable) {
   return {
@@ -41,7 +45,7 @@ export function WorkerSearchBox({
   const wrapperRef = useRef(null);
   const activeRequestIdRef = useRef(0);
   const cacheRef = useRef(new Map());
-  const debouncedFetchRef = useRef(null);
+  const debouncedSearchRef = useRef(null);
   const lastCorrectionRef = useRef({from: '', to: ''});
 
   useEffect(() => {
@@ -52,8 +56,9 @@ export function WorkerSearchBox({
   }, [initialQuery]);
 
   useEffect(() => {
-    debouncedFetchRef.current = debounce(async (nextQuery, requestId) => {
-      const cached = cacheRef.current.get(nextQuery);
+    debouncedSearchRef.current = debounce(async (nextQuery, requestId) => {
+      const cacheKey = getSearchCacheKey(nextQuery);
+      const cached = cacheRef.current.get(cacheKey);
       if (cached) {
         if (activeRequestIdRef.current === requestId) {
           setResults(cached);
@@ -67,8 +72,8 @@ export function WorkerSearchBox({
         available: true,
       });
       const effectiveQuery = response.query?.trim() || nextQuery;
-      cacheRef.current.set(nextQuery, response);
-      cacheRef.current.set(effectiveQuery, response);
+      cacheRef.current.set(cacheKey, response);
+      cacheRef.current.set(getSearchCacheKey(effectiveQuery), response);
 
       if (activeRequestIdRef.current === requestId) {
         setResults(response);
@@ -85,10 +90,10 @@ export function WorkerSearchBox({
           setQuery(effectiveQuery);
         }
       }
-    }, DEBOUNCE_MS);
+    }, SEARCH_DEBOUNCE_MS);
 
     return () => {
-      debouncedFetchRef.current?.cancel();
+      debouncedSearchRef.current?.cancel();
     };
   }, []);
 
@@ -121,7 +126,7 @@ export function WorkerSearchBox({
 
     if (trimmedQuery.length < 2) {
       activeRequestIdRef.current += 1;
-      debouncedFetchRef.current?.cancel();
+      debouncedSearchRef.current?.cancel();
       setResults(createEmptySearchResponse(trimmedQuery));
       setIsLoading(false);
       return;
@@ -131,11 +136,11 @@ export function WorkerSearchBox({
       lastCorrectionRef.current.to &&
       trimmedQuery.toLowerCase() === lastCorrectionRef.current.to
     ) {
-      const cached = cacheRef.current.get(trimmedQuery);
+      const cached = cacheRef.current.get(getSearchCacheKey(trimmedQuery));
       lastCorrectionRef.current = {from: '', to: ''};
       if (cached) {
         activeRequestIdRef.current += 1;
-        debouncedFetchRef.current?.cancel();
+        debouncedSearchRef.current?.cancel();
         setResults(cached);
         setIsLoading(false);
         setIsOpen(true);
@@ -147,7 +152,7 @@ export function WorkerSearchBox({
     activeRequestIdRef.current = requestId;
     setIsLoading(true);
     setIsOpen(true);
-    debouncedFetchRef.current?.(trimmedQuery, requestId);
+    debouncedSearchRef.current?.(trimmedQuery, requestId);
   }, [query]);
 
   function submitSearch(nextQuery) {
@@ -246,14 +251,11 @@ export function WorkerSearchBox({
                         product.availableForSale === false
                           ? 'Out of stock'
                           : product.availableForSale === true
-                            ? 'In stock'
-                            : null;
+                          ? 'In stock'
+                          : null;
 
                       return (
-                        <li
-                          key={product.id}
-                          className="suggestion-product-row"
-                        >
+                        <li key={product.id} className="suggestion-product-row">
                           <Link
                             to={href}
                             className="suggestion-product-link"

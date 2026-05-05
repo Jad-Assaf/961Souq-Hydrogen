@@ -39,16 +39,6 @@ export type SearchResponse = {
   tookMs: number;
 };
 
-export type SearchCorrectionResponse = {
-  originalQuery: string;
-  query: string;
-  correctedQuery: string;
-  shouldReplace: boolean;
-  correctionConfidence: 'low' | 'medium' | 'high' | '';
-  changedTerms: string[];
-  reason: string;
-};
-
 type DebouncedFunction<T extends (...args: any[]) => void> = ((
   ...args: Parameters<T>
 ) => void) & {
@@ -97,8 +87,8 @@ function normalizeImage(input: any): SearchImage | null {
     typeof input.url === 'string' && input.url.trim()
       ? input.url
       : typeof input.src === 'string' && input.src.trim()
-        ? input.src
-        : null;
+      ? input.src
+      : null;
 
   if (!url) return null;
 
@@ -108,8 +98,8 @@ function normalizeImage(input: any): SearchImage | null {
       typeof input.altText === 'string' && input.altText.trim()
         ? input.altText
         : typeof input.alt === 'string' && input.alt.trim()
-          ? input.alt
-          : null,
+        ? input.alt
+        : null,
   };
 }
 
@@ -138,8 +128,8 @@ function normalizeProduct(input: any): SearchProduct | null {
       typeof input.availableForSale === 'boolean'
         ? input.availableForSale
         : typeof input.available === 'boolean'
-          ? input.available
-          : null,
+        ? input.available
+        : null,
     price: normalizePrice(input.price),
     image: normalizeImage(input.image),
     url:
@@ -193,7 +183,9 @@ export function normalizeSearchResponse(
     normalizedQuery:
       typeof data.normalizedQuery === 'string'
         ? data.normalizedQuery
-        : String(fallbackQuery ?? '').trim().toLowerCase(),
+        : String(fallbackQuery ?? '')
+            .trim()
+            .toLowerCase(),
     total: toNumber(data.total) ?? productsSource.length,
     products: productsSource
       .map((product) => normalizeProduct(product))
@@ -213,6 +205,7 @@ export function buildCustomSearchPath(
     available?: boolean;
     mode?: 'search' | 'suggest' | 'correct';
     page?: number;
+    useAI?: boolean;
   } = {},
 ): string {
   const params = new URLSearchParams();
@@ -236,6 +229,9 @@ export function buildCustomSearchPath(
     }
     if (typeof options.available === 'boolean') {
       params.set('available', String(options.available));
+    }
+    if (options.useAI === false) {
+      params.set('ai', 'false');
     }
   }
 
@@ -271,85 +267,14 @@ async function fetchSearchPath(
   }
 }
 
-export async function fetchCustomCorrection(
-  query: string,
-): Promise<SearchCorrectionResponse> {
-  const trimmedQuery = query.trim();
-
-  if (trimmedQuery.length < SEARCH_MIN_QUERY_LENGTH) {
-    return {
-      originalQuery: trimmedQuery,
-      query: trimmedQuery,
-      correctedQuery: '',
-      shouldReplace: false,
-      correctionConfidence: '',
-      changedTerms: [],
-      reason: '',
-    };
-  }
-
-  const path = buildCustomSearchPath(trimmedQuery, {mode: 'correct'});
-
-  try {
-    const response = await fetch(path, {
-      headers: {
-        Accept: 'application/json',
-      },
-      credentials: 'same-origin',
-    });
-
-    if (!response.ok) {
-      return {
-        originalQuery: trimmedQuery,
-        query: trimmedQuery,
-        correctedQuery: '',
-        shouldReplace: false,
-        correctionConfidence: '',
-        changedTerms: [],
-        reason: '',
-      };
-    }
-
-    const data = (await response.json()) as Partial<SearchCorrectionResponse>;
-    return {
-      originalQuery:
-        typeof data.originalQuery === 'string'
-          ? data.originalQuery
-          : trimmedQuery,
-      query: typeof data.query === 'string' ? data.query : trimmedQuery,
-      correctedQuery:
-        typeof data.correctedQuery === 'string' ? data.correctedQuery : '',
-      shouldReplace: Boolean(data.shouldReplace),
-      correctionConfidence:
-        data.correctionConfidence === 'low' ||
-        data.correctionConfidence === 'medium' ||
-        data.correctionConfidence === 'high'
-          ? data.correctionConfidence
-          : '',
-      changedTerms: Array.isArray(data.changedTerms)
-        ? data.changedTerms.filter(
-            (value): value is string =>
-              typeof value === 'string' && value.trim().length > 0,
-          )
-        : [],
-      reason: typeof data.reason === 'string' ? data.reason : '',
-    };
-  } catch {
-    return {
-      originalQuery: trimmedQuery,
-      query: trimmedQuery,
-      correctedQuery: '',
-      shouldReplace: false,
-      correctionConfidence: '',
-      changedTerms: [],
-      reason: '',
-    };
-  }
-}
-
 export async function fetchCustomSearch(
   query: string,
-  options: {limit?: number; available?: boolean; page?: number} = {},
+  options: {
+    limit?: number;
+    available?: boolean;
+    page?: number;
+    useAI?: boolean;
+  } = {},
 ): Promise<SearchResponse> {
   const trimmedQuery = query.trim();
   if (trimmedQuery.length < SEARCH_MIN_QUERY_LENGTH) {
@@ -361,6 +286,7 @@ export async function fetchCustomSearch(
       limit: options.limit,
       page: options.page,
       available: options.available,
+      useAI: options.useAI,
     }),
     trimmedQuery,
   );
