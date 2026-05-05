@@ -2,6 +2,7 @@
 import {json} from '@shopify/remix-oxygen';
 
 const DEFAULT_MAX_OUTPUT = 500; // Allow fuller answers to avoid truncation
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini-2026-03-17';
 
 // Server-side token tracking using IP + User-Agent fingerprint
 // Uses Cloudflare Cache API for persistent storage (available in all Workers)
@@ -247,7 +248,9 @@ function isStoreQuestion(text) {
     /\b(physical store|store|shop|showroom|branch|address|location)\b/i;
   const zalkaRegex = /\b(zalka|zalqa|white tower)\b/i;
   const arabicRegex = /(متجر|محل|فرع|عنوان|موقع|زلقا|زلقه|وين|أين)/;
-  return storeRegex.test(text) || zalkaRegex.test(text) || arabicRegex.test(text);
+  return (
+    storeRegex.test(text) || zalkaRegex.test(text) || arabicRegex.test(text)
+  );
 }
 
 function isWhoQuestion(text) {
@@ -424,8 +427,8 @@ export async function action({request, context}) {
     ].join(' ');
 
     const chatPayload = {
-      model: 'gpt-5-nano',
-      reasoning: {effort: 'minimal'},
+      model: DEFAULT_OPENAI_MODEL,
+      reasoning: {effort: 'none'},
       instructions: systemPrompt,
       input: 'User: [Message too long]\n\nAssistant:',
       max_output_tokens: 50,
@@ -601,8 +604,8 @@ export async function action({request, context}) {
   }Conversation:\n${conversationHistory}\n\nAssistant:`;
 
   const chatPayload = {
-    model: 'gpt-5-nano',
-    reasoning: {effort: 'minimal'},
+    model: DEFAULT_OPENAI_MODEL,
+    reasoning: {effort: 'none'},
     instructions: systemPrompt,
     input: fullInput,
     max_output_tokens:
@@ -705,11 +708,15 @@ export async function action({request, context}) {
     cleanedAnswer = cleanedAnswer.replace(/\n-\s*$/g, '').trim();
 
     const lastAssistantMessage =
-      messages.slice().reverse().find((m) => m.role === 'assistant')?.content ||
-      '';
+      messages
+        .slice()
+        .reverse()
+        .find((m) => m.role === 'assistant')?.content || '';
     const prevUserMessage =
-      messages.slice(0, -1).reverse().find((m) => m.role === 'user')?.content ||
-      '';
+      messages
+        .slice(0, -1)
+        .reverse()
+        .find((m) => m.role === 'user')?.content || '';
     const shouldRetryForRepetition =
       normalizeText(cleanedAnswer) &&
       normalizeText(cleanedAnswer) === normalizeText(lastAssistantMessage) &&

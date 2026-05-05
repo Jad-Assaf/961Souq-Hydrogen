@@ -2,6 +2,7 @@
 import {json} from '@shopify/remix-oxygen';
 
 const SHOPIFY_ADMIN_API_VERSION = '2025-07';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini-2026-03-17';
 
 function normalizeShopDomain(raw) {
   if (!raw) return '';
@@ -294,10 +295,10 @@ export async function action({request, context}) {
     // 3) OpenAI call
     // Key changes:
     // - max_output_tokens increased a lot
-    // - reasoning effort minimal
+    // - reasoning disabled for lower latency
     const payload = {
-      model: 'gpt-5-nano',
-      reasoning: {effort: 'minimal'},
+      model: DEFAULT_OPENAI_MODEL,
+      reasoning: {effort: 'none'},
       instructions:
         'Write a concise, neutral e-commerce summary. No prices, no warranty, no emojis, no exaggerated claims. Keep it easy to scan.',
       input: `Product: ${title}

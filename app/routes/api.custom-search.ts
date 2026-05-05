@@ -11,7 +11,7 @@ import {
 
 const CACHE_CONTROL = 'public, max-age=10, stale-while-revalidate=60';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
-const DEFAULT_OPENAI_SEARCH_MODEL = 'gpt-5.4-mini';
+const DEFAULT_OPENAI_SEARCH_MODEL = 'gpt-5.4-mini-2026-03-17';
 const DEFAULT_OPENAI_SEARCH_REASONING_EFFORT = 'none';
 const SEARCH_INTELLIGENCE_CACHE_TTL_MS = 5 * 60 * 1000;
 const SEARCH_RESPONSE_CACHE_TTL_MS = 15 * 1000;
@@ -86,6 +86,17 @@ const ELECTRONICS_SYNONYM_GROUPS = [
   ['airpods pro', 'airpod pro', 'apple airpods pro'],
   ['airpods max', 'airpod max', 'apple airpods max'],
   ['airpods', 'airpod', 'apple airpods'],
+  [
+    'whoop',
+    'woop',
+    'whop',
+    'whooop',
+    'whoop band',
+    'whoop strap',
+    'whoop 4.0',
+    'whoop 5.0',
+    'whoop mg',
+  ],
   ['iphone', 'apple iphone'],
   ['ipad', 'apple ipad'],
   ['macbook', 'apple macbook'],
@@ -191,6 +202,25 @@ const ELECTRONICS_SYNONYM_GROUPS = [
   ['microsd', 'micro sd', 'micro-sd', 'tf card'],
 ] as const;
 
+const DETERMINISTIC_SEARCH_CORRECTIONS = [
+  {
+    canonical: 'whoop',
+    aliases: [
+      'woop',
+      'whop',
+      'whoop',
+      'whoo',
+      'whooop',
+      'wooop',
+      'whopp',
+      'whoopp',
+      'woopp',
+      'woops',
+      'whoops',
+    ],
+  },
+] as const;
+
 function buildWorkerEndpoint(baseUrl: string, mode: 'search' | 'suggest'): URL {
   const parsed = new URL(baseUrl);
   const normalizedPath = parsed.pathname.endsWith('/')
@@ -255,6 +285,80 @@ function buildInchExpansionQueries(query: string): string[] {
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function getEditDistanceWithinLimit(
+  first: string,
+  second: string,
+  limit: number,
+): number {
+  if (Math.abs(first.length - second.length) > limit) return limit + 1;
+
+  let previous = Array.from({length: second.length + 1}, (_, index) => index);
+
+  for (let i = 1; i <= first.length; i += 1) {
+    const current = [i];
+    let rowMin = current[0];
+
+    for (let j = 1; j <= second.length; j += 1) {
+      const cost = first[i - 1] === second[j - 1] ? 0 : 1;
+      const value = Math.min(
+        current[j - 1] + 1,
+        previous[j] + 1,
+        previous[j - 1] + cost,
+      );
+      current[j] = value;
+      rowMin = Math.min(rowMin, value);
+    }
+
+    if (rowMin > limit) return limit + 1;
+    previous = current;
+  }
+
+  return previous[second.length];
+}
+
+function isDeterministicCorrectionMatch(token: string, canonical: string) {
+  if (!token || token.length < 4 || token.length > canonical.length + 1) {
+    return false;
+  }
+
+  return getEditDistanceWithinLimit(token, canonical, 1) <= 1;
+}
+
+function getDeterministicSearchCorrection(
+  query: string,
+): SearchCorrectionResult | null {
+  let changed = false;
+  const changedTerms: string[] = [];
+
+  const correctedQuery = query.replace(/[\p{L}\p{N}]+/gu, (rawToken) => {
+    const token = normalizeExpansionText(rawToken);
+    for (const correction of DETERMINISTIC_SEARCH_CORRECTIONS) {
+      if (
+        correction.aliases.includes(token as any) ||
+        isDeterministicCorrectionMatch(token, correction.canonical)
+      ) {
+        if (token !== correction.canonical) {
+          changed = true;
+          changedTerms.push(rawToken);
+        }
+        return correction.canonical;
+      }
+    }
+
+    return rawToken;
+  });
+
+  if (!changed) return null;
+
+  return {
+    correctedQuery: correctedQuery.replace(/\s+/g, ' ').trim(),
+    correctionConfidence: 'high',
+    shouldReplace: true,
+    changedTerms: Array.from(new Set(changedTerms)),
+    reason: 'Known product-name typo corrected before LLM processing.',
+  };
 }
 
 function replaceAliasInQuery(
@@ -726,7 +830,7 @@ async function detectSearchIntelligence(
       model: getOpenAISearchModel(context),
       reasoning: {effort: getOpenAISearchReasoningEffort(context)},
       instructions:
-        'You are a search-intelligence engine for a consumer electronics ecommerce store. Return JSON only with keys corrected_query, correction_confidence, should_replace, changed_terms, reason, intent, subject, accessory, focus_terms, exclude_terms. First, correct typos in the search query. corrected_query must preserve user intent and fix typos, missing letters, swapped letters, repeated letters, spacing mistakes, and obvious brand/model misspellings. Do not broaden the query or add new product concepts. For obvious typos you must correct them: iphnoe -> iphone, ipohne -> iphone, iphne -> iphone, macbok -> macbook, mabcook -> macbook, airpds -> airpods, samsng -> samsung. If the query contains a typo, return the corrected query and set should_replace to true. Only return an empty corrected_query when the original query is already correct. correction_confidence must be high, medium, low, or empty string. Then classify ecommerce search intent. intent must be one of: device, accessory, generic. Use accessory when the user wants a case, cover, charger, cable, adapter, protector, stand, holder, keyboard, mouse, bag, sleeve, or similar add-on. Use device when the user is looking for the main product itself like iphone, ipad, samsung phone, macbook, laptop, airpods, playstation, monitor, tv. subject should be the main product family if clear. accessory should be the accessory type if clear. focus_terms should be up to 4 short terms to prioritize in titles and tags. exclude_terms should be up to 4 short terms that likely represent the wrong product class, such as case or cover when the user wants the actual device. Return empty strings or empty arrays when unknown. JSON only.',
+        'You are a search-intelligence engine for a consumer electronics ecommerce store. Return JSON only with keys corrected_query, correction_confidence, should_replace, changed_terms, reason, intent, subject, accessory, focus_terms, exclude_terms. First, correct typos in the search query. corrected_query must preserve user intent and fix typos, missing letters, swapped letters, repeated letters, spacing mistakes, and obvious brand/model misspellings. Do not broaden the query or add new product concepts. For obvious typos you must correct them: woop -> whoop, whop -> whoop, whooop -> whoop, iphnoe -> iphone, ipohne -> iphone, iphne -> iphone, macbok -> macbook, mabcook -> macbook, airpds -> airpods, samsng -> samsung. If the query contains a typo, return the corrected query and set should_replace to true. Only return an empty corrected_query when the original query is already correct. correction_confidence must be high, medium, low, or empty string. Then classify ecommerce search intent. intent must be one of: device, accessory, generic. Use accessory when the user wants a case, cover, charger, cable, adapter, protector, stand, holder, keyboard, mouse, bag, sleeve, or similar add-on. Use device when the user is looking for the main product itself like iphone, ipad, samsung phone, macbook, laptop, airpods, playstation, monitor, tv, or wearable tracker. subject should be the main product family if clear. accessory should be the accessory type if clear. focus_terms should be up to 4 short terms to prioritize in titles and tags. exclude_terms should be up to 4 short terms that likely represent the wrong product class, such as case or cover when the user wants the actual device. Return empty strings or empty arrays when unknown. JSON only.',
       input: buildOpenAIQueryInput(
         query,
         'Correct typos and classify ecommerce search intent',
@@ -839,10 +943,13 @@ export async function loader({
   }
 
   if (mode === 'correct') {
-    const intelligence = shouldDetectSearchIntent(query, 'search')
-      ? await detectSearchIntelligence(query, context)
-      : null;
-    const correction = intelligence?.correction || null;
+    const deterministicCorrection = getDeterministicSearchCorrection(query);
+    const intelligence =
+      !deterministicCorrection && shouldDetectSearchIntent(query, 'search')
+        ? await detectSearchIntelligence(query, context)
+        : null;
+    const correction =
+      deterministicCorrection || intelligence?.correction || null;
     const resolvedQuery = shouldUseCorrectedQuery(query, correction)
       ? correction!.correctedQuery
       : query;
@@ -876,10 +983,13 @@ export async function loader({
 
   const endpoint = buildWorkerEndpoint(searchServiceUrl, mode);
   const shouldUseAI = aiEnabled && shouldDetectSearchIntent(query, mode);
+  const deterministicCorrection = getDeterministicSearchCorrection(query);
+  const intelligenceQuery = deterministicCorrection?.correctedQuery || query;
   const searchIntelligence = shouldUseAI
-    ? await detectSearchIntelligence(query, context)
+    ? await detectSearchIntelligence(intelligenceQuery, context)
     : null;
-  const searchCorrection = searchIntelligence?.correction || null;
+  const searchCorrection =
+    deterministicCorrection || searchIntelligence?.correction || null;
   const searchIntent = searchIntelligence?.intent || null;
   const resolvedQuery = shouldUseCorrectedQuery(query, searchCorrection)
     ? searchCorrection!.correctedQuery
@@ -985,7 +1095,9 @@ export async function loader({
         originalQuery: query,
         resolvedQuery,
         correctionSource: searchCorrection
-          ? 'llm'
+          ? deterministicCorrection
+            ? 'deterministic'
+            : 'llm'
           : aiEnabled
           ? 'none'
           : 'disabled',

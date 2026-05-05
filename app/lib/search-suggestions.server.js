@@ -9,6 +9,7 @@ import {
 const suggestionsCache = new Map();
 const CACHE_TTL = 30000; // 30 seconds
 const CACHE_MAX_SIZE = 100; // Max cached queries
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini-2026-03-17';
 
 // Clean up old cache entries periodically
 function cleanupCache() {
@@ -534,8 +535,8 @@ export async function generateSearchSuggestions(originalQuery, context) {
 
     // Call GPT with focused typo correction prompt
     const payload = {
-      model: 'gpt-5-nano',
-      reasoning: {effort: 'minimal'},
+      model: DEFAULT_OPENAI_MODEL,
+      reasoning: {effort: 'none'},
       instructions: `Correct spelling errors in the query to match product names. Return 6 corrected queries, one per line. Do NOT return the original query. Return only the corrected query text with no extra words or explanations.`,
       input: `"${originalQuery}" Products: ${spellingTerms}`,
       max_output_tokens: 60,
