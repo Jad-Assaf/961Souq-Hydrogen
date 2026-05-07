@@ -10,6 +10,35 @@ const suggestionsCache = new Map();
 const CACHE_TTL = 30000; // 30 seconds
 const CACHE_MAX_SIZE = 100; // Max cached queries
 const DEFAULT_OPENAI_MODEL = 'gpt-5.4-nano-2026-03-17';
+const KNOWN_ELECTRONICS_BRANDS = [
+  {
+    canonical: 'Porodo',
+    aliases: ['porodo', 'prodo', 'pordo', 'parodo', 'porod', 'porodoo'],
+  },
+  {
+    canonical: 'Green Lion',
+    aliases: [
+      'green lion',
+      'greenlion',
+      'grean lion',
+      'gren lion',
+      'green lio',
+      'green liom',
+      'green lyon',
+    ],
+  },
+  {
+    canonical: 'Powerology',
+    aliases: [
+      'powerology',
+      'powerlogy',
+      'power ology',
+      'powerolgy',
+      'powerlogi',
+      'powerolojy',
+    ],
+  },
+];
 
 // Clean up old cache entries periodically
 function cleanupCache() {
@@ -64,6 +93,16 @@ function cleanSuggestionText(text) {
   return text
     .replace(/\s*\((?:[^)]*(corrected|original|same)\b[^)]*)\)/gi, '')
     .replace(/\s+corrected\s+as\s+.+$/i, '')
+    .trim();
+}
+
+function normalizeLookupText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[-_/+.]+/g, ' ')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -409,8 +448,6 @@ export async function generateSearchSuggestions(originalQuery, context) {
     // Extract and score correct spellings
     const correctSpellings = [];
     const seenSpellings = new Set();
-    const queryLower = originalQuery.toLowerCase();
-
     const addSpelling = (term, source = 'title') => {
       if (!term) return;
 
@@ -429,6 +466,29 @@ export async function generateSearchSuggestions(originalQuery, context) {
         correctSpellings.push({term: cleaned, similarity, source});
       }
     };
+
+    const normalizedQuery = normalizeLookupText(originalQuery);
+    const compactQuery = normalizedQuery.replace(/\s+/g, '');
+
+    KNOWN_ELECTRONICS_BRANDS.forEach(({canonical, aliases}) => {
+      const matchedAlias = aliases.find((alias) => {
+        const normalizedAlias = normalizeLookupText(alias);
+        if (!normalizedAlias) return false;
+
+        const compactAlias = normalizedAlias.replace(/\s+/g, '');
+
+        return (
+          normalizedQuery === normalizedAlias ||
+          compactQuery === compactAlias ||
+          normalizedQuery.includes(normalizedAlias) ||
+          compactQuery.includes(compactAlias)
+        );
+      });
+
+      if (matchedAlias) {
+        addSpelling(canonical, 'known_brand');
+      }
+    });
 
     // Extract product terms from matched products
     similarProducts.hits?.forEach(({document}) => {
@@ -537,7 +597,7 @@ export async function generateSearchSuggestions(originalQuery, context) {
     const payload = {
       model: DEFAULT_OPENAI_MODEL,
       reasoning: {effort: 'none'},
-      instructions: `Correct spelling errors in the query to match product names. Return 6 corrected queries, one per line. Do NOT return the original query. Return only the corrected query text with no extra words or explanations.`,
+      instructions: `Correct spelling errors in the query to match product names and electronics brands. Return 6 corrected queries, one per line. Do NOT return the original query. Return only the corrected query text with no extra words or explanations. Examples: prodo -> porodo, greenlion -> green lion, powerlogy -> powerology.`,
       input: `"${originalQuery}" Products: ${spellingTerms}`,
       max_output_tokens: 60,
     };

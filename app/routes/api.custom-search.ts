@@ -97,6 +97,9 @@ const ELECTRONICS_SYNONYM_GROUPS = [
     'whoop 5.0',
     'whoop mg',
   ],
+  ['porodo'],
+  ['green lion', 'greenlion'],
+  ['powerology', 'power ology'],
   ['iphone', 'apple iphone'],
   ['ipad', 'apple ipad'],
   ['macbook', 'apple macbook'],
@@ -219,6 +222,31 @@ const DETERMINISTIC_SEARCH_CORRECTIONS = [
       'whoops',
     ],
   },
+  {
+    canonical: 'porodo',
+    aliases: ['prodo', 'pordo', 'parodo', 'porod', 'porodoo'],
+  },
+  {
+    canonical: 'green lion',
+    aliases: [
+      'greenlion',
+      'grean lion',
+      'gren lion',
+      'green lio',
+      'green liom',
+      'green lyon',
+    ],
+  },
+  {
+    canonical: 'powerology',
+    aliases: [
+      'powerlogy',
+      'power ology',
+      'powerolgy',
+      'powerlogi',
+      'powerolojy',
+    ],
+  },
 ] as const;
 
 function buildWorkerEndpoint(baseUrl: string, mode: 'search' | 'suggest'): URL {
@@ -331,8 +359,28 @@ function getDeterministicSearchCorrection(
 ): SearchCorrectionResult | null {
   let changed = false;
   const changedTerms: string[] = [];
+  let correctedQuery = query;
 
-  const correctedQuery = query.replace(/[\p{L}\p{N}]+/gu, (rawToken) => {
+  // Normalize known multi-word aliases before token-by-token correction.
+  for (const correction of DETERMINISTIC_SEARCH_CORRECTIONS) {
+    for (const alias of correction.aliases) {
+      if (alias === correction.canonical) continue;
+
+      const replaced = replaceAliasInQuery(
+        correctedQuery,
+        alias,
+        correction.canonical,
+      );
+
+      if (replaced && replaced !== correctedQuery) {
+        correctedQuery = replaced;
+        changed = true;
+        changedTerms.push(alias);
+      }
+    }
+  }
+
+  correctedQuery = correctedQuery.replace(/[\p{L}\p{N}]+/gu, (rawToken) => {
     const token = normalizeExpansionText(rawToken);
     for (const correction of DETERMINISTIC_SEARCH_CORRECTIONS) {
       if (
@@ -830,7 +878,7 @@ async function detectSearchIntelligence(
       model: getOpenAISearchModel(context),
       reasoning: {effort: getOpenAISearchReasoningEffort(context)},
       instructions:
-        'You are a search-intelligence engine for a consumer electronics ecommerce store. Return JSON only with keys corrected_query, correction_confidence, should_replace, changed_terms, reason, intent, subject, accessory, focus_terms, exclude_terms. First, correct typos in the search query. corrected_query must preserve user intent and fix typos, missing letters, swapped letters, repeated letters, spacing mistakes, and obvious brand/model misspellings. Do not broaden the query or add new product concepts. For obvious typos you must correct them: woop -> whoop, whop -> whoop, whooop -> whoop, iphnoe -> iphone, ipohne -> iphone, iphne -> iphone, macbok -> macbook, mabcook -> macbook, airpds -> airpods, samsng -> samsung. If the query contains a typo, return the corrected query and set should_replace to true. Only return an empty corrected_query when the original query is already correct. correction_confidence must be high, medium, low, or empty string. Then classify ecommerce search intent. intent must be one of: device, accessory, generic. Use accessory when the user wants a case, cover, charger, cable, adapter, protector, stand, holder, keyboard, mouse, bag, sleeve, or similar add-on. Use device when the user is looking for the main product itself like iphone, ipad, samsung phone, macbook, laptop, airpods, playstation, monitor, tv, or wearable tracker. subject should be the main product family if clear. accessory should be the accessory type if clear. focus_terms should be up to 4 short terms to prioritize in titles and tags. exclude_terms should be up to 4 short terms that likely represent the wrong product class, such as case or cover when the user wants the actual device. Return empty strings or empty arrays when unknown. JSON only.',
+        'You are a search-intelligence engine for a consumer electronics ecommerce store. Return JSON only with keys corrected_query, correction_confidence, should_replace, changed_terms, reason, intent, subject, accessory, focus_terms, exclude_terms. First, correct typos in the search query. corrected_query must preserve user intent and fix typos, missing letters, swapped letters, repeated letters, spacing mistakes, and obvious brand/model misspellings. Do not broaden the query or add new product concepts. For obvious typos you must correct them: woop -> whoop, whop -> whoop, whooop -> whoop, iphnoe -> iphone, ipohne -> iphone, iphne -> iphone, macbok -> macbook, mabcook -> macbook, airpds -> airpods, samsng -> samsung, prodo -> porodo, greenlion -> green lion, grean lion -> green lion, powerlogy -> powerology. If the query contains a typo, return the corrected query and set should_replace to true. Only return an empty corrected_query when the original query is already correct. correction_confidence must be high, medium, low, or empty string. Then classify ecommerce search intent. intent must be one of: device, accessory, generic. Use accessory when the user wants a case, cover, charger, cable, adapter, protector, stand, holder, keyboard, mouse, bag, sleeve, or similar add-on. Use device when the user is looking for the main product itself like iphone, ipad, samsung phone, macbook, laptop, airpods, playstation, monitor, tv, or wearable tracker. subject should be the main product family if clear. accessory should be the accessory type if clear. focus_terms should be up to 4 short terms to prioritize in titles and tags. exclude_terms should be up to 4 short terms that likely represent the wrong product class, such as case or cover when the user wants the actual device. Return empty strings or empty arrays when unknown. JSON only.',
       input: buildOpenAIQueryInput(
         query,
         'Correct typos and classify ecommerce search intent',
