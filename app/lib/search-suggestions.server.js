@@ -9,7 +9,7 @@ import {
 const suggestionsCache = new Map();
 const CACHE_TTL = 30000; // 30 seconds
 const CACHE_MAX_SIZE = 100; // Max cached queries
-const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini-2026-03-17';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4-nano-2026-03-17';
 
 // Clean up old cache entries periodically
 function cleanupCache() {
@@ -365,7 +365,7 @@ function calculateSimilarity(str1, str2) {
 }
 
 /**
- * Shared function to generate search query suggestions using GPT-5-nano
+ * Shared function to generate search query suggestions using gpt-5.4-nano-2026-03-17
  * @param {string} originalQuery - The user's search query
  * @param {object} context - Remix context with env and other resources
  * @returns {Promise<string[]>} Array of suggested search queries

@@ -11,7 +11,7 @@ import {
 
 const CACHE_CONTROL = 'public, max-age=10, stale-while-revalidate=60';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
-const DEFAULT_OPENAI_SEARCH_MODEL = 'gpt-5.4-mini-2026-03-17';
+const DEFAULT_OPENAI_SEARCH_MODEL = 'gpt-5.4-nano-2026-03-17';
 const DEFAULT_OPENAI_SEARCH_REASONING_EFFORT = 'none';
 const SEARCH_INTELLIGENCE_CACHE_TTL_MS = 5 * 60 * 1000;
 const SEARCH_RESPONSE_CACHE_TTL_MS = 15 * 1000;

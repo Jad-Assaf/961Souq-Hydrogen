@@ -2,7 +2,7 @@
 import {json} from '@shopify/remix-oxygen';
 
 const DEFAULT_MAX_OUTPUT = 500; // Allow fuller answers to avoid truncation
-const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini-2026-03-17';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4-nano-2026-03-17';
 
 // Server-side token tracking using IP + User-Agent fingerprint
 // Uses Cloudflare Cache API for persistent storage (available in all Workers)

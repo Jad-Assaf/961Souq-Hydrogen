@@ -2,7 +2,7 @@
 import {json} from '@shopify/remix-oxygen';
 
 const SHOPIFY_ADMIN_API_VERSION = '2025-07';
-const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini-2026-03-17';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4-nano-2026-03-17';
 
 function normalizeShopDomain(raw) {
   if (!raw) return '';

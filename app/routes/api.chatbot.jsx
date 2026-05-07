@@ -8,7 +8,7 @@ import {
 } from '~/lib/typesense.server';
 
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
-const DEFAULT_MODEL = 'gpt-5.4-mini-2026-03-17';
+const DEFAULT_MODEL = 'gpt-5.4-nano-2026-03-17';
 const MAX_TOOL_ROUNDS = 6;
 const MAX_MESSAGES = 16;
 const MAX_TEXT_BLOCK = 4000;

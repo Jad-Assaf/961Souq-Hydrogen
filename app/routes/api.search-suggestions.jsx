@@ -3,7 +3,7 @@ import {json} from '@shopify/remix-oxygen';
 import {generateSearchSuggestions} from '~/lib/search-suggestions.server';
 
 /**
- * API endpoint to generate search query suggestions using GPT-5-nano
+ * API endpoint to generate search query suggestions using gpt-5.4-nano-2026-03-17
  * when a user query returns 0 results from Typesense.
  */
 export async function loader({request, context}) {
