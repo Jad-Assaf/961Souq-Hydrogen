@@ -1107,7 +1107,7 @@ export async function loader({
       mode === 'search' &&
       page === 1 &&
       shouldUseAI &&
-      normalized.products.length === 0
+      (normalized.products.length === 0 || normalized.needsAiFallback === true)
     ) {
       searchIntelligence = await detectSearchIntelligence(
         deterministicCorrection?.correctedQuery || query,
