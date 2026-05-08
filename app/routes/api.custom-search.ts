@@ -1032,16 +1032,14 @@ export async function loader({
   const endpoint = buildWorkerEndpoint(searchServiceUrl, mode);
   const shouldUseAI = aiEnabled && shouldDetectSearchIntent(query, mode);
   const deterministicCorrection = getDeterministicSearchCorrection(query);
-  const intelligenceQuery = deterministicCorrection?.correctedQuery || query;
-  const searchIntelligence = shouldUseAI
-    ? await detectSearchIntelligence(intelligenceQuery, context)
-    : null;
-  const searchCorrection =
-    deterministicCorrection || searchIntelligence?.correction || null;
-  const searchIntent = searchIntelligence?.intent || null;
-  const resolvedQuery = shouldUseCorrectedQuery(query, searchCorrection)
+  let searchIntelligence: SearchIntelligenceResult | null = null;
+  let searchCorrection: SearchCorrectionResult | null =
+    deterministicCorrection || null;
+  let searchIntent: SearchIntentResult | null = null;
+  let resolvedQuery = shouldUseCorrectedQuery(query, searchCorrection)
     ? searchCorrection!.correctedQuery
     : query;
+  let expansionQueries: string[] = [];
   const responseCacheKey = buildSearchResponseCacheKey({
     query: resolvedQuery,
     mode,
@@ -1064,21 +1062,6 @@ export async function loader({
     return json(cachedResponse, {headers});
   }
 
-  applyWorkerSearchParams({
-    endpoint,
-    query: resolvedQuery,
-    limit,
-    page,
-    available,
-    mode,
-    searchIntent,
-  });
-
-  const expansionQueries =
-    mode === 'search' && page === 1
-      ? getSearchExpansionQueries(resolvedQuery)
-      : [];
-
   const requestHeaders: Record<string, string> = {
     Accept: 'application/json',
   };
@@ -1088,6 +1071,16 @@ export async function loader({
   }
 
   try {
+    applyWorkerSearchParams({
+      endpoint,
+      query: resolvedQuery,
+      limit,
+      page,
+      available,
+      mode,
+      searchIntent,
+    });
+
     console.log('[api.custom-search] proxying request', {
       query,
       resolvedQuery,
@@ -1100,7 +1093,7 @@ export async function loader({
       hasToken: Boolean(searchServiceToken),
     });
 
-    const normalized = await fetchWorkerSearchResponse({
+    let normalized = await fetchWorkerSearchResponse({
       endpoint,
       requestHeaders,
       fallbackQuery: resolvedQuery,
@@ -1109,6 +1102,56 @@ export async function loader({
     if (!normalized) {
       return json(createEmptySearchResponse(query), {headers});
     }
+
+    if (
+      mode === 'search' &&
+      page === 1 &&
+      shouldUseAI &&
+      normalized.products.length === 0
+    ) {
+      searchIntelligence = await detectSearchIntelligence(
+        deterministicCorrection?.correctedQuery || query,
+        context,
+      );
+      searchCorrection =
+        deterministicCorrection || searchIntelligence?.correction || null;
+      searchIntent = searchIntelligence?.intent || null;
+
+      const llmResolvedQuery = shouldUseCorrectedQuery(query, searchCorrection)
+        ? searchCorrection!.correctedQuery
+        : resolvedQuery;
+
+      if (searchIntent || llmResolvedQuery !== resolvedQuery) {
+        const retryEndpoint = buildWorkerEndpoint(searchServiceUrl, mode);
+        applyWorkerSearchParams({
+          endpoint: retryEndpoint,
+          query: llmResolvedQuery,
+          limit,
+          page,
+          available,
+          mode,
+          searchIntent,
+        });
+
+        const retryResponse = await fetchWorkerSearchResponse({
+          endpoint: retryEndpoint,
+          requestHeaders,
+          fallbackQuery: llmResolvedQuery,
+        });
+
+        if (retryResponse && retryResponse.products.length > 0) {
+          normalized = retryResponse;
+          resolvedQuery = retryResponse.query || llmResolvedQuery;
+        }
+      }
+    } else if (normalized.query?.trim()) {
+      resolvedQuery = normalized.query.trim();
+    }
+
+    expansionQueries =
+      mode === 'search' && page === 1
+        ? getSearchExpansionQueries(resolvedQuery)
+        : [];
 
     const supplementalResponses = (
       await Promise.all(
@@ -1146,6 +1189,8 @@ export async function loader({
           ? deterministicCorrection
             ? 'deterministic'
             : 'llm'
+          : resolvedQuery.trim().toLowerCase() !== query.trim().toLowerCase()
+          ? 'worker_db'
           : aiEnabled
           ? 'none'
           : 'disabled',
