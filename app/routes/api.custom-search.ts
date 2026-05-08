@@ -1031,7 +1031,7 @@ export async function loader({
 
   const endpoint = buildWorkerEndpoint(searchServiceUrl, mode);
   const shouldUseAI = aiEnabled && shouldDetectSearchIntent(query, mode);
-  const deterministicCorrection = getDeterministicSearchCorrection(query);
+  const deterministicCorrection = null as SearchCorrectionResult | null;
   let searchIntelligence: SearchIntelligenceResult | null = null;
   let searchCorrection: SearchCorrectionResult | null =
     deterministicCorrection || null;

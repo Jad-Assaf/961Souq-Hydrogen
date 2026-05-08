@@ -4,6 +4,7 @@ node_modules
 /build
 /dist
 /index.js
+/migrations
 /public/build
 /.mf
 .env
