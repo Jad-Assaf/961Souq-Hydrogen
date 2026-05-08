@@ -37,7 +37,6 @@ export type SearchResponse = {
   products: SearchProduct[];
   suggestions: string[];
   tookMs: number;
-  needsAiFallback?: boolean;
 };
 
 type DebouncedFunction<T extends (...args: any[]) => void> = ((
@@ -196,7 +195,6 @@ export function normalizeSearchResponse(
         typeof value === 'string' && value.trim().length > 0,
     ),
     tookMs: toNumber(data.tookMs) ?? 0,
-    needsAiFallback: data.needsAiFallback === true,
   };
 }
 
