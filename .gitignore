@@ -63,3 +63,13 @@ app/styles/build-my-setup.css
 app/styles/christmas.css
 app/styles/menu-navbar.css
 app/styles/reset.css
+
+# Custom search experiment kept locally
+app/components/WorkerSearchBox.jsx
+app/lib/customSearch.ts
+app/routes/api.custom-search.ts
+app/routes/api.test-search.ts
+app/routes/test-search.jsx
+app/styles/search-test.css
+app/styles/worker-search.css
+guides/search-typo-vocabulary.sql

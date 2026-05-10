@@ -20,26 +20,25 @@ export async function loader({request, context}) {
 
   const searchParams = {
     q,
-    query_by: 'title,tags',
-    query_by_weights: '8,2',
+    query_by: 'title,vendor,tags',
+    query_by_weights: '8,4,2',
     per_page: perPage,
     page,
     prefix: true,
-    infix: 'always,always',
-    num_typos: '1,0',
+    infix: 'always,fallback,always',
+    num_typos: '1,1,0',
     min_len_1typo: 4,
     min_len_2typo: 7,
     typo_tokens_threshold: 1,
     enable_typos_for_numerical_tokens: false,
     enable_typos_for_alpha_numerical_tokens: false,
-    drop_tokens_threshold: 0,
+    drop_tokens_threshold: 1,
     exhaustive_search: true,
     prioritize_exact_match: true,
     prioritize_token_position: true,
     prioritize_num_matching_fields: true,
     text_match_type: 'max_score',
     highlight_full_fields: 'title',
-    filter_by: 'status:=active',
   };
   try {
     const result = await client

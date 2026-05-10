@@ -47,19 +47,19 @@ export async function loader({request, context}) {
 
   const searchParams = {
     q,
-    query_by: 'title,sku,handle,tags',
-    query_by_weights: '10,10,5,2',
+    query_by: 'title,vendor,sku,handle,tags',
+    query_by_weights: '10,6,10,5,2',
     per_page: perPage,
     page,
     prefix: true,
-    infix: 'always,fallback,always,always',
-    num_typos: '2,1,0,0',
+    infix: 'always,fallback,fallback,always,always',
+    num_typos: '2,1,1,0,0',
     min_len_1typo: 4,
     min_len_2typo: 8,
     typo_tokens_threshold: 1,
     enable_typos_for_numerical_tokens: false,
     enable_typos_for_alpha_numerical_tokens: false,
-    drop_tokens_threshold: 0,
+    drop_tokens_threshold: 1,
     exhaustive_search: true,
     sort_by: '_text_match:desc,price:desc',
     prioritize_exact_match: true,
@@ -67,7 +67,6 @@ export async function loader({request, context}) {
     prioritize_num_matching_fields: true,
     text_match_type: 'max_score',
     highlight_full_fields: 'title',
-    filter_by: 'status:=active',
   };
 
   try {
