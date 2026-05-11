@@ -16,22 +16,7 @@ export async function loader({request, context}) {
   // Original query from the URL
   const originalQ = url.searchParams.get('q')?.trim() || '';
 
-  // Helper to expand numeric tokens (e.g., 16 → "16 16gb")
-  function expandNumericTokens(original) {
-    const terms = original.split(/\s+/);
-    const expanded = [];
-    for (const term of terms) {
-      if (/^\d+$/.test(term)) {
-        expanded.push(term);
-        expanded.push(`${term}gb`);
-      } else {
-        expanded.push(term);
-      }
-    }
-    return expanded.join(' ');
-  }
-
-  const q = expandNumericTokens(originalQ);
+  const q = originalQ;
 
   const perPage = Math.min(
     100,

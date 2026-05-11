@@ -1,6 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Form, useFetcher, useLocation} from '@remix-run/react';
 
+const SEARCH_DEBOUNCE_MS = 100;
+
 export function TypesenseSearch({
   initialQuery = '',
   action = '/search',
@@ -49,11 +51,6 @@ export function TypesenseSearch({
       return; // Already have data, STOP HERE
     }
     
-    // CRITICAL: Don't refetch if fetcher is already loading this term
-    if (fetcher.state === 'loading' && lastTermRef.current === term) {
-      return; // Already loading, STOP HERE
-    }
-    
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       // FINAL CHECK: Don't make request if we have data
@@ -61,16 +58,12 @@ export function TypesenseSearch({
         lastTermRef.current = term;
         return;
       }
-      // FINAL CHECK: Don't make request if already loading
-      if (fetcher.state === 'loading') {
-        return;
-      }
       lastTermRef.current = term;
       const params = new URLSearchParams();
       params.set('q', term);
       params.set('perPage', '20');
       fetcher.load(`/api/typesensesearch?${params.toString()}`);
-    }, 300); // Increased debounce to 300ms
+    }, SEARCH_DEBOUNCE_MS);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -96,17 +89,11 @@ export function TypesenseSearch({
     const term = searchTerm.trim();
     if (!term) return;
     setIsOpen(true);
-    
     // CRITICAL: Check cache first - NEVER refetch if we have data
     if (cachedDataRef.current[term]) {
       return; // STOP - we have data
     }
-    
-    // CRITICAL: Don't fetch if already loading
-    if (fetcher.state === 'loading' && lastTermRef.current === term) {
-      return; // STOP - already loading
-    }
-    
+
     // Only fetch if we truly don't have data and aren't loading
     if (lastTermRef.current !== term && !cachedDataRef.current[term]) {
       lastTermRef.current = term;

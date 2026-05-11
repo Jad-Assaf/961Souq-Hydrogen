@@ -17,23 +17,7 @@ export async function loader({request, context}) {
   const originalQ = (url.searchParams.get('q') || '').trim();
   const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
 
-  function expandNumericTokens(original) {
-    const trimmed = original.trim();
-    if (!trimmed) return '';
-    const terms = trimmed.split(/\s+/);
-    const expanded = [];
-    for (const term of terms) {
-      if (/^\d+$/.test(term)) {
-        expanded.push(term);
-        expanded.push(`${term}gb`);
-      } else {
-        expanded.push(term);
-      }
-    }
-    return expanded.join(' ');
-  }
-
-  const q = expandNumericTokens(originalQ);
+  const q = originalQ;
 
   if (!q) {
     return json({query: '', hits: [], found: 0, page: 1, perPage: PER_PAGE});
