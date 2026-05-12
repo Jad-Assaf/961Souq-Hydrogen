@@ -25,7 +25,7 @@ export async function loader({request, context}) {
     per_page: perPage,
     page,
     prefix: true,
-    infix: 'always,fallback,always',
+    infix: 'always,off,always',
     num_typos: '1,1,0',
     min_len_1typo: 4,
     min_len_2typo: 7,
