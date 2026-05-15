@@ -598,8 +598,16 @@ strong {
 }
 
 .complementary-category-button:disabled {
-    cursor: wait;
     opacity: 0.72;
+}
+
+.complementary-category-button.empty,
+.complementary-category-button.empty:hover {
+    background: #f2f2f2;
+    border-color: #d6d6d6;
+    color: #9a9a9a;
+    cursor: not-allowed;
+    opacity: 1;
 }
 
 .complementary-products-row .collection-products-row {

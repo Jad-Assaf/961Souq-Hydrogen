@@ -18,8 +18,10 @@ export default function ComplementaryProductsRow({
   const [pageInfo, setPageInfo] = useState(initialPageInfo);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [categoryAvailability, setCategoryAvailability] = useState(null);
   const fetchedCountRef = useRef(initialFetchedCount);
   const requestIdRef = useRef(0);
+  const availabilityRequestIdRef = useRef(0);
   const autoOpenedCategoryRef = useRef(null);
 
   useEffect(() => {
@@ -34,10 +36,51 @@ export default function ComplementaryProductsRow({
     setProducts(initialProducts);
     setPageInfo(initialPageInfo);
     setActiveCategory(null);
+    setCategoryAvailability(null);
     fetchedCountRef.current = initialFetchedCount;
     requestIdRef.current += 1;
+    availabilityRequestIdRef.current += 1;
     autoOpenedCategoryRef.current = null;
   }, [initialProducts, initialPageInfo, initialFetchedCount, productHandle]);
+
+  useEffect(() => {
+    if (!productHandle || !categories.length) {
+      setCategoryAvailability({});
+      return;
+    }
+
+    const requestId = availabilityRequestIdRef.current + 1;
+    availabilityRequestIdRef.current = requestId;
+
+    async function loadAvailability() {
+      try {
+        const params = new URLSearchParams({
+          handle: productHandle,
+          availability: '1',
+          limit: '20',
+        });
+
+        const response = await fetch(`/api/complementary-products?${params}`, {
+          headers: {accept: 'application/json'},
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (requestId !== availabilityRequestIdRef.current) return;
+
+        setCategoryAvailability(data?.availability || {});
+      } catch (error) {
+        if (requestId !== availabilityRequestIdRef.current) return;
+
+        console.error('[complementary][client] availability-error', {
+          productHandle,
+          message: error?.message,
+        });
+        setCategoryAvailability({});
+      }
+    }
+
+    loadAvailability();
+  }, [categories, productHandle]);
 
   const loadMore = useCallback(async ({
     categoryKey = activeCategory,
@@ -169,6 +212,8 @@ export default function ComplementaryProductsRow({
 
   const handleCategoryClick = useCallback(
     (categoryKey) => {
+      if (categoryAvailability?.[categoryKey]?.available === false) return;
+
       const resetPageInfo = {
         hasNextPage: true,
         endCursor: null,
@@ -185,18 +230,23 @@ export default function ComplementaryProductsRow({
         replace: true,
       });
     },
-    [loadMore],
+    [categoryAvailability, loadMore],
   );
 
   useEffect(() => {
-    const firstCategory = categories[0]?.key;
+    if (!categoryAvailability) return;
+
+    const firstCategory = categories.find(
+      (category) => categoryAvailability?.[category.key]?.available !== false,
+    )?.key;
+
     if (!firstCategory || autoOpenedCategoryRef.current === firstCategory) {
       return;
     }
 
     autoOpenedCategoryRef.current = firstCategory;
     handleCategoryClick(firstCategory);
-  }, [categories, handleCategoryClick]);
+  }, [categories, categoryAvailability, handleCategoryClick]);
 
   const closeActiveCategory = useCallback(() => {
     requestIdRef.current += 1;
@@ -214,20 +264,32 @@ export default function ComplementaryProductsRow({
       <h2>{title}</h2>
       <div className="complementary-category-buttons" aria-label={title}>
         {categories.map((category) => (
-          <button
-            className={[
-              'complementary-category-button',
-              activeCategory === category.key ? 'active' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            disabled={isLoadingMore && activeCategory === category.key}
-            key={category.key}
-            onClick={() => handleCategoryClick(category.key)}
-            type="button"
-          >
-            {category.label}
-          </button>
+          (() => {
+            const isUnavailable =
+              categoryAvailability?.[category.key]?.available === false;
+
+            return (
+              <button
+                className={[
+                  'complementary-category-button',
+                  activeCategory === category.key ? 'active' : '',
+                  isUnavailable ? 'empty' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                disabled={
+                  isUnavailable ||
+                  !categoryAvailability ||
+                  (isLoadingMore && activeCategory === category.key)
+                }
+                key={category.key}
+                onClick={() => handleCategoryClick(category.key)}
+                type="button"
+              >
+                {category.label}
+              </button>
+            );
+          })()
         ))}
       </div>
 

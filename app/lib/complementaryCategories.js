@@ -1,6 +1,18 @@
 const MAX_QUERY_PARTS = 12;
 
 const CATEGORY_OPTIONS = {
+  'samsung-mobile': [
+    {key: 'samsung-chargers-cables', label: 'Samsung Chargers & Cables'},
+    {key: 'samsung-charging-stations', label: 'Samsung Charging Stations'},
+    {key: 'samsung-phone-covers', label: 'Samsung Phone Covers'},
+    {key: 'samsung-phone-stands', label: 'Samsung Phone Stands'},
+    {key: 'samsung-phone-holders', label: 'Samsung Phone Holders'},
+    {
+      key: 'samsung-screen-camera-protectors',
+      label: 'Samsung Screen & Camera Protectors',
+    },
+    {key: 'samsung-smarttag', label: 'Samsung SmartTag'},
+  ],
   'apple-mobile': [
     {key: 'iphone-covers', label: 'iPhone Covers'},
     {key: 'iphone-chargers', label: 'iPhone Chargers'},
@@ -116,9 +128,17 @@ export function isAppleMobilePhone(product) {
   );
 }
 
+export function isSamsungMobilePhone(product) {
+  return (
+    normalizeComplementaryText(product?.vendor) === 'samsung' &&
+    normalizeComplementaryText(product?.productType) === 'mobile phones'
+  );
+}
+
 export function getComplementarySourceMode(product) {
   const text = getProductText(product);
 
+  if (isSamsungMobilePhone(product)) return 'samsung-mobile';
   if (isAppleMobilePhone(product)) return 'apple-mobile';
   if (hasTag(product, (tag) => tag === 'mobile phones')) return 'mobile';
   if (hasTag(product, (tag) => tag.includes('gaming laptop'))) {
@@ -199,6 +219,75 @@ export function productMatchesIphoneCoverModel(candidate, sourceProduct) {
     : !containsAny(candidateText, ['pro max', 'promax', 'pro', 'max', 'plus', 'mini']);
 
   return hasSourcePhrase || (hasIphoneFamily && hasGeneration && hasVariant);
+}
+
+function normalizeSamsungVariant(value) {
+  const variant = normalizeComplementaryText(value);
+  if (variant === '+') return 'plus';
+  if (variant === '5g') return '';
+
+  return variant;
+}
+
+function extractSamsungModels(value) {
+  const models = [];
+  const text = String(value || '');
+  const pattern =
+    /\b(?:samsung\s*)?galaxy\s+(s\d{1,2}|a\d{1,2}|note\s*\d{1,2}|z\s*(?:fold|flip)\s*\d{1,2})(?:\s*(ultra|plus|\+|fe|5g))?\b/gi;
+  let match;
+
+  while ((match = pattern.exec(text))) {
+    const model = normalizeComplementaryText(match[1]);
+    const variant = normalizeSamsungVariant(match[2]);
+    models.push({
+      model,
+      variant,
+      phrase: normalizeComplementaryText(
+        ['galaxy', model, variant].filter(Boolean).join(' '),
+      ),
+    });
+  }
+
+  return models;
+}
+
+export function extractSamsungModel(product) {
+  const values = [product?.title, ...(product?.tags || [])];
+
+  for (const value of values) {
+    const [model] = extractSamsungModels(value);
+    if (model) return model;
+  }
+
+  return null;
+}
+
+export function productMatchesSamsungPhoneModel(candidate, sourceProduct) {
+  const sourceModel = extractSamsungModel(sourceProduct);
+  if (!sourceModel) return false;
+
+  const candidateValues = [candidate?.title, ...(candidate?.tags || [])];
+  const candidateModels = candidateValues.flatMap(extractSamsungModels);
+
+  if (
+    candidateModels.some(
+      (model) =>
+        model.model === sourceModel.model &&
+        model.variant === sourceModel.variant,
+    )
+  ) {
+    return true;
+  }
+
+  const candidateText = normalizeComplementaryText(candidateValues.join(' '));
+  const hasGalaxyFamily =
+    candidateText.includes('samsung') || candidateText.includes('galaxy');
+  const hasModel = candidateText.includes(sourceModel.model);
+  const hasVariant = sourceModel.variant
+    ? candidateText.includes(sourceModel.variant)
+    : !containsAny(candidateText, ['ultra', 'plus', 'fe']);
+
+  return hasGalaxyFamily && hasModel && hasVariant;
 }
 
 export function getComplementaryCategoryOptions(product) {
