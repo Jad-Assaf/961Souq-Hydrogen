@@ -1,16 +1,40 @@
 import {json} from '@shopify/remix-oxygen';
 import {
-  productMatchesComplementaryRules,
-  resolveComplementarySearchPlan,
-  sortComplementaryProducts,
-} from '~/lib/complementaryProducts';
+  isAppleMobilePhone,
+  isValidComplementaryCategory,
+  productMatchesIphoneCoverModel,
+} from '~/lib/complementaryCategories';
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 20;
-const MAX_FETCH_PER_REQUEST = 100;
-const MAX_PRODUCTS_PER_BUCKET_ROUND = 5;
+const MAX_FETCHED_PER_CATEGORY = 100;
+const CATEGORY_COLLECTION_HANDLES = {
+  'iphone-covers': 'iphone-covers',
+  'iphone-chargers': 'iphone-chargers',
+  'iphone-charging-stations': 'iphone-charging-stations',
+  'iphone-screen-camera-protectors': 'iphone-screen-camera-protectors',
+  'iphone-holders': 'iphone-holders',
+  'gaming-mice': 'gaming-mouse',
+  'gaming-keyboards': 'gaming-keyboards',
+  'gaming-headphones': 'gaming-headphones',
+  mousepads: 'mousepads',
+  'gaming-speakers': 'gaming-speakers',
+  backpacks: 'backpacks',
+  sleeves: 'laptop-sleeves',
+  'adapters-hubs': 'external-hubs-docks',
+  mouse: 'mice',
+  keyboards: 'keyboards',
+  'external-storage': 'external-storage',
+  covers: 'covers',
+  chargers: 'chargers',
+  'charging-stations': 'charging-stations',
+  'phone-holders': 'phone-holders',
+  'screen-protectors': 'screen-protectors',
+};
 
 function shouldShowComplementaryProducts(product) {
+  if (isAppleMobilePhone(product)) return true;
+
   const tags = Array.isArray(product?.tags) ? product.tags : [];
 
   return tags.some((tag) => {
@@ -19,187 +43,22 @@ function shouldShowComplementaryProducts(product) {
   });
 }
 
-function normalizeTag(tag) {
-  return String(tag || '')
-    .trim()
-    .toLowerCase();
-}
-
-function getProductText(product) {
-  return [
-    product?.title,
-    product?.productType,
-    product?.vendor,
-    ...(product?.tags || []),
-  ]
-    .map((value) => String(value || '').toLowerCase())
-    .join(' ');
-}
-
-function getSourceComplementaryMode(product) {
-  const text = getProductText(product);
-  const tags = (product?.tags || []).map(normalizeTag);
-
-  if (tags.some((tag) => tag === 'mobile phones')) return 'mobile';
-  if (tags.some((tag) => tag.includes('gaming laptop'))) {
-    return 'gaming-laptop';
-  }
-  if (tags.some((tag) => tag.includes('laptop'))) return 'laptop';
-  if (text.includes('gaming laptop')) return 'gaming-laptop';
-  if (text.includes('laptop')) return 'laptop';
-
-  return 'other';
-}
-
-function hasTag(product, matcher) {
-  return (product?.tags || []).map(normalizeTag).some(matcher);
-}
-
-function getMobileBucket(product) {
-  const text = getProductText(product);
-
-  if (hasTag(product, (tag) => tag.includes('covers'))) return 'covers';
-  if (hasTag(product, (tag) => tag.includes('charging cable'))) {
-    return 'charging-cables';
-  }
-  if (
-    hasTag(product, (tag) => tag.includes('adapter')) ||
-    text.includes('adapter')
-  ) {
-    return 'adapters';
-  }
-  if (
-    text.includes('charging cable') ||
-    text.includes('lightning cable') ||
-    text.includes('usb-c cable') ||
-    text.includes('usb c cable')
-  ) {
-    return 'charging-cables';
-  }
-  if (hasTag(product, (tag) => tag === 'mobile accessories')) {
-    return 'mobile-accessories';
-  }
-
-  return null;
-}
-
-function getLaptopBucket(product, isGamingLaptop) {
-  const text = getProductText(product);
-
-  if (text.includes('backpack')) return 'backpacks';
-  if (!isGamingLaptop && (text.includes('sleeve') || text.includes('bag'))) {
-    return 'sleeves';
-  }
-  if (isGamingLaptop && text.includes('cooler')) return 'laptop-cooler';
-  if (
-    text.includes('hub') ||
-    text.includes('adapter') ||
-    text.includes('adaptor')
-  ) {
-    return 'hubs-adapters';
-  }
-  if (text.includes('mousepad') || text.includes('mouse pad')) {
-    return 'mousepads';
-  }
-  if (text.includes('keyboard')) {
-    if (!isGamingLaptop || text.includes('gaming')) return 'keyboards';
-    return null;
-  }
-  if (text.includes('mouse')) {
-    if (!isGamingLaptop || text.includes('gaming')) return 'mouse';
-    return null;
-  }
-
-  return null;
-}
-
-function getBucketOrder(mode) {
-  if (mode === 'mobile') {
-    return ['covers', 'charging-cables', 'adapters', 'mobile-accessories'];
-  }
-
-  if (mode === 'gaming-laptop') {
-    return [
-      'mouse',
-      'keyboards',
-      'mousepads',
-      'hubs-adapters',
-      'backpacks',
-      'laptop-cooler',
-    ];
-  }
-
-  if (mode === 'laptop') {
-    return [
-      'backpacks',
-      'sleeves',
-      'mouse',
-      'keyboards',
-      'mousepads',
-      'hubs-adapters',
-    ];
-  }
-
-  return [];
-}
-
-function getComplementaryBucket(product, mode) {
-  if (mode === 'mobile') return getMobileBucket(product);
-  if (mode === 'gaming-laptop') return getLaptopBucket(product, true);
-  if (mode === 'laptop') return getLaptopBucket(product, false);
-  return null;
-}
-
-function arrangeProductsByBuckets(products, sourceProduct, limit) {
-  const mode = getSourceComplementaryMode(sourceProduct);
-  const bucketOrder = getBucketOrder(mode);
-  if (!bucketOrder.length) return products.slice(0, limit);
-
-  const buckets = new Map(bucketOrder.map((bucket) => [bucket, []]));
-
-  for (const product of products) {
-    const bucket = getComplementaryBucket(product, mode);
-    if (!bucket || !buckets.has(bucket)) continue;
-    buckets.get(bucket).push(product);
-  }
-
-  const arrangedProducts = [];
-  let offset = 0;
-
-  while (arrangedProducts.length < limit) {
-    let addedInRound = 0;
-
-    for (const bucket of bucketOrder) {
-      const productsInBucket = buckets.get(bucket) || [];
-      const batch = productsInBucket.slice(
-        offset,
-        offset + MAX_PRODUCTS_PER_BUCKET_ROUND,
-      );
-
-      for (const product of batch) {
-        arrangedProducts.push(product);
-        addedInRound += 1;
-        if (arrangedProducts.length >= limit) break;
-      }
-
-      if (arrangedProducts.length >= limit) break;
+function filterComplementaryCollectionProducts(products, sourceProduct, category) {
+  return products.filter((recommendedProduct) => {
+    if (recommendedProduct.id === sourceProduct.id) return false;
+    if (category === 'iphone-covers') {
+      return productMatchesIphoneCoverModel(recommendedProduct, sourceProduct);
     }
 
-    if (!addedInRound) break;
-    offset += MAX_PRODUCTS_PER_BUCKET_ROUND;
-  }
-
-  return arrangedProducts.length ? arrangedProducts : products.slice(0, limit);
+    return true;
+  });
 }
 
 export async function loader({request, context}) {
   const url = new URL(request.url);
   const handle = url.searchParams.get('handle') || '';
+  const selectedCategory = url.searchParams.get('category') || '';
   const cursor = url.searchParams.get('cursor') || null;
-  const initialQueryIndex = Math.max(
-    0,
-    Number(url.searchParams.get('queryIndex') || 0) || 0,
-  );
   const requestedLimit = Number(url.searchParams.get('limit') || DEFAULT_LIMIT);
   const limit = Math.min(
     MAX_LIMIT,
@@ -228,141 +87,82 @@ export async function loader({request, context}) {
     return json({products: [], pageInfo: null, fetchedCount: 0});
   }
 
-  const complementarySearchPlan = await resolveComplementarySearchPlan(
-    product,
-    context,
-  );
-  const complementaryQueries = complementarySearchPlan.queries;
-  console.info('[complementary][api] source', {
-    handle,
-    cursor,
-    initialQueryIndex,
-    limit,
-    title: product.title,
-    tags: product.tags,
-    productType: product.productType,
-    planSource: complementarySearchPlan.source,
-    category: complementarySearchPlan.category,
-    mustInclude: complementarySearchPlan.mustInclude,
-    avoid: complementarySearchPlan.avoid,
-    queries: complementaryQueries,
-  });
-
-  if (!complementaryQueries.length || initialQueryIndex >= complementaryQueries.length) {
-    console.info('[complementary][api] skipped-empty-query', {
+  const hasSelectedCategory = Boolean(selectedCategory);
+  if (!hasSelectedCategory) {
+    console.info('[complementary][api] skipped-missing-category', {
       handle,
       title: product.title,
     });
-    return json({products: [], pageInfo: null});
+
+    return json({products: [], pageInfo: null, fetchedCount: 0});
   }
 
-  let nextCursor = cursor;
-  let pageInfo = null;
-  let queryIndex = initialQueryIndex;
-  let fetchedCount = 0;
-  const collectedProducts = [];
-  const fallbackProducts = [];
-
-  while (
-    queryIndex < complementaryQueries.length &&
-    fetchedCount < MAX_FETCH_PER_REQUEST &&
-    collectedProducts.length < limit
+  if (
+    !isValidComplementaryCategory(product, selectedCategory)
   ) {
-    const query = complementaryQueries[queryIndex];
-    const {products} = await context.storefront.query(
-      COMPLEMENTARY_PRODUCTS_BY_TAG_QUERY,
+    console.info('[complementary][api] skipped-invalid-category', {
+      handle,
+      title: product.title,
+      selectedCategory,
+    });
+
+    return json({products: [], pageInfo: null, fetchedCount: 0});
+  }
+
+  const collectionHandle =
+    CATEGORY_COLLECTION_HANDLES[selectedCategory] || selectedCategory;
+  let after = cursor;
+  let collection = null;
+  let collectionPageInfo = null;
+  let fetchedCount = 0;
+  const filteredProducts = [];
+
+  do {
+    const result = await context.storefront.query(
+      COMPLEMENTARY_COLLECTION_PRODUCTS_QUERY,
       {
         variables: {
-          query,
+          handle: collectionHandle,
           first: limit,
-          after: nextCursor,
+          after,
         },
       },
     );
 
-    const nodes = products?.nodes || [];
-    const storefrontPageInfo = products?.pageInfo || null;
-    const hasNextPage = Boolean(storefrontPageInfo?.hasNextPage);
+    collection = result.collection;
+    const nodes = collection?.products?.nodes || [];
+    collectionPageInfo = collection?.products?.pageInfo || null;
     fetchedCount += nodes.length;
-    nextCursor = hasNextPage ? storefrontPageInfo?.endCursor || null : null;
-    pageInfo = {
-      ...(storefrontPageInfo || {}),
-      endCursor: nextCursor,
-      hasNextPage: hasNextPage || queryIndex + 1 < complementaryQueries.length,
-      queryIndex: hasNextPage ? queryIndex : queryIndex + 1,
-    };
 
-    console.info('[complementary][api] page', {
-      handle,
-      queryIndex,
-      query,
-      fetchedOnPage: nodes.length,
-      fetchedTotal: fetchedCount,
-      hasNextPage,
-      collectedBeforeFilter: collectedProducts.length,
-      returnedTitles: nodes.map((node) => node.title),
-    });
-
-    collectedProducts.push(
-      ...nodes
-        .filter((recommendedProduct) => recommendedProduct.id !== product.id)
-        .filter((recommendedProduct) => recommendedProduct.availableForSale)
-        .filter((recommendedProduct) =>
-          productMatchesComplementaryRules(
-            recommendedProduct,
-            product,
-            complementarySearchPlan,
-          ),
-        ),
+    filteredProducts.push(
+      ...filterComplementaryCollectionProducts(
+        nodes,
+        product,
+        selectedCategory,
+      ),
     );
 
-    fallbackProducts.push(
-      ...nodes
-        .filter((recommendedProduct) => recommendedProduct.id !== product.id)
-        .filter((recommendedProduct) => recommendedProduct.availableForSale),
-    );
-
-    if (!hasNextPage) {
-      queryIndex += 1;
-    }
-  }
-
-  let filteredProducts = sortComplementaryProducts(
-    collectedProducts.length ? collectedProducts : fallbackProducts,
-    product,
+    after = collectionPageInfo?.endCursor || null;
+  } while (
+    selectedCategory === 'iphone-covers' &&
+    collectionPageInfo?.hasNextPage &&
+    filteredProducts.length < limit &&
+    fetchedCount < MAX_FETCHED_PER_CATEGORY
   );
-  filteredProducts = arrangeProductsByBuckets(filteredProducts, product, limit);
 
-  if (!filteredProducts.length) {
-    const {products: fallbackProductConnection} = await context.storefront.query(
-      COMPLEMENTARY_FALLBACK_PRODUCTS_QUERY,
-      {
-        variables: {
-          first: limit,
-        },
-      },
-    );
+  const pageInfo = collectionPageInfo
+    ? {
+        ...collectionPageInfo,
+        queryIndex: 0,
+      }
+    : null;
 
-    filteredProducts = arrangeProductsByBuckets(
-      (fallbackProductConnection?.nodes || [])
-        .filter((recommendedProduct) => recommendedProduct.id !== product.id)
-        .filter((recommendedProduct) => recommendedProduct.availableForSale),
-      product,
-      limit,
-    );
-
-    console.info('[complementary][api] broad-fallback', {
-      handle,
-      returnedCount: filteredProducts.length,
-      returnedTitles: filteredProducts.map((node) => node.title),
-    });
-  }
-
-  console.info('[complementary][api] result', {
+  console.info('[complementary][api] collection-category-result', {
     handle,
+    selectedCategory,
+    collectionHandle,
+    collectionFound: Boolean(collection),
     fetchedTotal: fetchedCount,
-    strictMatches: collectedProducts.length,
-    fallbackMatches: fallbackProducts.length,
     returnedCount: filteredProducts.length,
     returnedTitles: filteredProducts.map((node) => node.title),
     pageInfo,
@@ -387,96 +187,60 @@ const PRODUCT_TAGS_QUERY = `#graphql
   }
 `;
 
-const COMPLEMENTARY_PRODUCTS_BY_TAG_QUERY = `#graphql
-  query ComplementaryProductsPage($first: Int!, $after: String, $query: String!) {
-    products(first: $first, after: $after, query: $query) {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      nodes {
-        id
-        title
-        handle
-        availableForSale
-        tags
-        images(first: 1) {
-          edges {
-            node {
-              url
-              altText
+const COMPLEMENTARY_COLLECTION_PRODUCTS_QUERY = `#graphql
+  query ComplementaryCollectionProducts($handle: String!, $first: Int!, $after: String) {
+    collection(handle: $handle) {
+      products(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          id
+          title
+          handle
+          availableForSale
+          tags
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
             }
           }
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-        compareAtPriceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-        variants(first: 1) {
-          nodes {
-            id
-            price {
-              amount
-              currencyCode
-            }
-            compareAtPrice {
+          priceRange {
+            minVariantPrice {
               amount
               currencyCode
             }
           }
-        }
-      }
-    }
-  }
-`;
-
-const COMPLEMENTARY_FALLBACK_PRODUCTS_QUERY = `#graphql
-  query ComplementaryFallbackProducts($first: Int!) {
-    products(first: $first) {
-      nodes {
-        id
-        title
-        handle
-        availableForSale
-        tags
-        images(first: 1) {
-          edges {
-            node {
-              url
-              altText
-            }
-          }
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-        compareAtPriceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-        variants(first: 1) {
-          nodes {
-            id
-            price {
+          compareAtPriceRange {
+            minVariantPrice {
               amount
               currencyCode
             }
-            compareAtPrice {
-              amount
-              currencyCode
+          }
+          variants(first: 1) {
+            nodes {
+              id
+              title
+              image {
+                url
+                altText
+              }
+              selectedOptions {
+                name
+                value
+              }
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
             }
           }
         }

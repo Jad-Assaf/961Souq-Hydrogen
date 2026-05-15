@@ -13,10 +13,14 @@ import {CartTrackingFields} from './CartTrackingFields';
  */
 export function AddToCartButton({
   analytics,
+  ariaLabel,
   children,
+  className = '',
   disabled,
+  includeBaseClass = true,
   lines,
   onClick,
+  title,
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -44,11 +48,18 @@ export function AddToCartButton({
           <button
             type="submit"
             data-tt-event="AddToCart"
+            aria-label={ariaLabel}
+            title={title}
             onClick={handleAnimation}
             disabled={disabled ?? fetcher.state !== 'idle'}
-            className={`add-to-cart-button ${disabled ? 'disabled' : ''} ${
-              fetcher.state !== 'idle' ? 'loading' : ''
-            }`}
+            className={[
+              includeBaseClass ? 'add-to-cart-button' : '',
+              className,
+              disabled ? 'disabled' : '',
+              fetcher.state !== 'idle' ? 'loading' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             style={buttonStyles} // Apply inline styles for animation
           >
             {children}

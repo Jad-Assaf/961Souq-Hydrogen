@@ -150,6 +150,9 @@ const CATEGORY_PROFILES = [
     queryTerms: [
       'gaming mouse',
       'gaming keyboard',
+      'gaming speaker',
+      'gaming microphone',
+      'gaming mic',
       'mouse',
       'keyboard',
       'hub',
@@ -165,12 +168,19 @@ const CATEGORY_PROFILES = [
       'laptop stand',
       'laptop cooler',
       'docking station',
+      'magic mouse',
+      'magic trackpad',
+      'magic keyboard',
+      'apple adapter',
     ],
     candidateTerms: [
       'mouse',
       'keyboard',
       'gaming mouse',
       'gaming keyboard',
+      'gaming speaker',
+      'gaming microphone',
+      'gaming mic',
       'hub',
       'hubs adapters',
       'mousepad',
@@ -185,6 +195,9 @@ const CATEGORY_PROFILES = [
       'laptop cooler',
       'dock',
       'docking station',
+      'magic mouse',
+      'magic trackpad',
+      'magic keyboard',
     ],
   },
   {
@@ -274,6 +287,18 @@ const CATEGORY_PROFILES = [
     candidateTerms: ['ethernet', 'lan cable', 'patch cable', 'adapter', 'poe'],
   },
 ];
+
+function getProductMode(product) {
+  const text = getProductSearchText(product);
+
+  if (text.includes('macbook') || text.includes('imac')) {
+    return 'apple-computer';
+  }
+  if (text.includes('gaming laptop')) return 'gaming-laptop';
+  if (text.includes('laptop')) return 'laptop';
+
+  return '';
+}
 
 export function normalizeSearchText(value) {
   return String(value || '')
@@ -513,6 +538,7 @@ function getSourceProfile(product) {
   return {
     family,
     modelPhrase,
+    mode: getProductMode(product),
     category: getCategoryProfile(product),
     usefulTags: getUsefulTags(product),
     titleTokens: getTitleTokens(product),
@@ -661,7 +687,9 @@ export async function resolveComplementarySearchPlan(product, context) {
         'First decide whether the source product is a main product or an accessory.',
         'If the source product is an accessory, search for the main products/devices/categories that this accessory is compatible with.',
         'If the source product is a main product, search for accessories that fit or pair with it.',
-        'For laptops/desktops/gaming laptops/gaming desktops, focus on mice, keyboards, hubs, mousepads, cables, computer accessories, and backpacks.',
+        'For gaming laptops, search only for gaming mouse, gaming keyboards, mousepads, gaming speakers, gaming mics. Exclude Apple products and exclude hubs/adapters.',
+        'For non-Apple laptops, search for backpacks, sleeves, mouse, keyboards, mousepads, hubs and adapters. Exclude Apple-made products and Apple-specific products.',
+        'For Apple MacBooks and iMacs, search for Apple adapters, sleeves, backpacks, Magic Mouse, Magic Trackpad, Magic Keyboard, and hubs.',
         'For mobile phones/phones, focus on exact-model cases/covers/protectors, charging cables, chargers, adapters, MagSafe, and mobile accessories.',
         'For other categories, infer practical accessories from product type, title, vendor, and tags.',
         'The final query should be broad enough to avoid an empty section while staying compatible with the source product role.',
@@ -684,6 +712,9 @@ Rules:
 - Prefer tags and exact model phrases when available.
 - If sourceProductRole is "accessory", shopifyQueries must search for compatible main products, not more accessories.
 - If sourceProductRole is "main", shopifyQueries must search for compatible accessories, not alternate main products.
+- For gaming laptops, avoid Apple, MacBook, iMac, hubs, adapters, docks, and USB hubs.
+- For non-Apple laptops, avoid Apple, MacBook, iMac, Magic Mouse, Magic Keyboard, and Magic Trackpad.
+- For Apple MacBooks/iMacs, Apple accessories are preferred.
 - Do not include the source product itself.
 - Do not include unrelated product categories.`,
       max_output_tokens: 900,
@@ -738,6 +769,7 @@ Rules:
 
 export function buildNativeComplementaryQueries(product) {
   const profile = getSourceProfile(product);
+  const productMode = getProductMode(product);
   const queryStages = [];
   const isProfiledSource = Boolean(profile.family || profile.category);
 
@@ -765,10 +797,45 @@ export function buildNativeComplementaryQueries(product) {
   }
 
   if (profile.category) {
-    const categoryParts = [
+    let categoryParts = [
       ...profile.category.accessoryTags.map((tag) => quotedField('tag', tag)),
       ...profile.category.queryTerms.map((term) => quotedPhrase(term)),
     ];
+
+    if (productMode === 'gaming-laptop') {
+      categoryParts = [
+        quotedPhrase('gaming mouse'),
+        quotedPhrase('gaming keyboard'),
+        quotedPhrase('mousepad'),
+        quotedPhrase('mouse pad'),
+        quotedPhrase('gaming speaker'),
+        quotedPhrase('gaming mic'),
+        quotedPhrase('gaming microphone'),
+      ];
+    } else if (productMode === 'laptop') {
+      categoryParts = [
+        quotedPhrase('backpack'),
+        quotedPhrase('laptop sleeve'),
+        quotedPhrase('mouse'),
+        quotedPhrase('keyboard'),
+        quotedPhrase('mousepad'),
+        quotedPhrase('mouse pad'),
+        quotedPhrase('hub'),
+        quotedPhrase('adapter'),
+        quotedPhrase('hubs adapters'),
+      ];
+    } else if (productMode === 'apple-computer') {
+      categoryParts = [
+        quotedPhrase('apple adapter'),
+        quotedPhrase('macbook sleeve'),
+        quotedPhrase('backpack'),
+        quotedPhrase('magic mouse'),
+        quotedPhrase('magic trackpad'),
+        quotedPhrase('magic keyboard'),
+        quotedPhrase('hub'),
+        quotedPhrase('usb c hub'),
+      ];
+    }
 
     if (profile.modelPhrase && profile.category.key === 'mobile') {
       categoryParts.unshift(quotedPhrase(`${profile.modelPhrase} charger`));
@@ -904,6 +971,31 @@ function candidateMatchesCategorySource(candidate, sourceProfile) {
   if (!category) return true;
 
   const candidateText = getProductSearchText(candidate);
+  const sourceMode =
+    sourceProfile.category?.key === 'computer' ? sourceProfile.mode : '';
+
+  if (
+    ['gaming-laptop', 'laptop'].includes(sourceMode) &&
+    (candidateText.includes('apple') ||
+      candidateText.includes('macbook') ||
+      candidateText.includes('imac') ||
+      candidateText.includes('magic mouse') ||
+      candidateText.includes('magic keyboard') ||
+      candidateText.includes('magic trackpad'))
+  ) {
+    return false;
+  }
+
+  if (
+    sourceMode === 'gaming-laptop' &&
+    (candidateText.includes('hub') ||
+      candidateText.includes('adapter') ||
+      candidateText.includes('adaptor') ||
+      candidateText.includes('dock'))
+  ) {
+    return false;
+  }
+
   const hasCategoryTag = category.accessoryTags.some((tag) =>
     candidateText.includes(normalizeSearchText(tag)),
   );

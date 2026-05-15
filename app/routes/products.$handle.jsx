@@ -20,6 +20,7 @@ import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
 import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 import {hasPreOrderTag} from '~/lib/productTags';
+import {isAppleMobilePhone} from '~/lib/complementaryCategories';
 import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
 
@@ -55,6 +56,8 @@ function truncateChars(text, maxLength) {
 }
 
 function shouldShowComplementaryProducts(product) {
+  if (isAppleMobilePhone(product)) return true;
+
   const tags = Array.isArray(product?.tags) ? product.tags : [];
 
   return tags.some((tag) => {
@@ -1082,6 +1085,7 @@ export default function Product() {
             initialPageInfo={complementaryProductsPageInfo}
             initialFetchedCount={complementaryProductsFetchedCount || 0}
             productHandle={product.handle}
+            sourceProduct={product}
             title="Pair it with"
           />
         </div>
