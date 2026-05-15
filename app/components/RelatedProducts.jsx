@@ -1,12 +1,25 @@
 import React, {useRef, useState, useEffect} from 'react';
 import {Link} from '@remix-run/react';
-import {Money, Image} from '@shopify/hydrogen'; // Import Image from hydrogen
+import {Money} from '@shopify/hydrogen';
 
-export default function RelatedProductsRow({products}) {
+export default function RelatedProductsRow({
+  products,
+  title = 'You May Also Like',
+  hasMore = false,
+  isLoadingMore = false,
+  onNeedMore,
+}) {
   const rowRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+
+  if (!Array.isArray(products) || products.length === 0) return null;
+
+  const maybeLoadMore = () => {
+    const row = rowRef.current;
+    if (!row || !hasMore || isLoadingMore || !onNeedMore) return;
+
+    const remaining = row.scrollWidth - row.scrollLeft - row.clientWidth;
+    if (remaining < 500) onNeedMore();
+  };
 
   const scrollRow = (offset) => {
     if (!rowRef.current) return;
@@ -14,16 +27,21 @@ export default function RelatedProductsRow({products}) {
       left: offset,
       behavior: 'smooth',
     });
+    window.setTimeout(maybeLoadMore, 350);
   };
 
   return (
     <div className="collection-section">
-      <h2>You May Also Like</h2>
+      <h2>{title}</h2>
       <div className="product-row-container">
         <button className="home-prev-button" onClick={() => scrollRow(-600)}>
           <LeftArrowIcon />
         </button>
-        <div className="collection-products-row" ref={rowRef}>
+        <div
+          className="collection-products-row"
+          ref={rowRef}
+          onScroll={maybeLoadMore}
+        >
           {products.map((product, index) => (
             <RelatedProductItem
               key={product.id}

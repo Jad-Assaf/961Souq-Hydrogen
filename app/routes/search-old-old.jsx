@@ -122,7 +122,7 @@ export async function loader({request, context}) {
 
   // Extended GraphQL to retrieve productFilters data
   const SEARCH_PRODUCTS_QUERY = `#graphql
-    query SearchProducts(
+    query SearchOldOldProductsWithFilters(
       $query: String!,
       $first: Int,
       $last: Int,
@@ -620,7 +620,7 @@ async function predictiveSearch({request, context, query}) {
   }
 
   const SEARCH_PRODUCTS_QUERY = `#graphql
-    query SearchProducts(
+    query SearchOldOldProductsBasic(
       $query: String!,
       $first: Int,
       $last: Int,

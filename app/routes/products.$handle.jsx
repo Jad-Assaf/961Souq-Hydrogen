@@ -14,6 +14,7 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
+import ComplementaryProductsRow from '~/components/ComplementaryProductsRow';
 import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
@@ -51,6 +52,15 @@ function truncateChars(text, maxLength) {
   return normalized.length > maxLength
     ? `${normalized.slice(0, maxLength - 1).trimEnd()}…`
     : normalized;
+}
+
+function shouldShowComplementaryProducts(product) {
+  const tags = Array.isArray(product?.tags) ? product.tags : [];
+
+  return tags.some((tag) => {
+    const normalizedTag = String(tag || '').trim().toLowerCase();
+    return normalizedTag === 'mobile phones' || normalizedTag.includes('laptop');
+  });
 }
 
 function appendBrandSuffix(title) {
@@ -246,6 +256,10 @@ async function loadCriticalData({context, params, request}) {
 
   // Fetch related products
   let relatedProducts = [];
+  let complementaryProducts = [];
+  let complementaryProductsPageInfo = null;
+  let complementaryProductsFetchedCount = 0;
+  const showComplementaryProducts = shouldShowComplementaryProducts(product);
 
   if (product?.id) {
     const {productRecommendations} = await storefront.query(
@@ -257,6 +271,14 @@ async function loadCriticalData({context, params, request}) {
       },
     );
     relatedProducts = productRecommendations || [];
+  }
+
+  if (showComplementaryProducts) {
+    complementaryProductsPageInfo = {
+      hasNextPage: true,
+      endCursor: null,
+      queryIndex: 0,
+    };
   }
 
   // Return necessary product data including SEO, first image, and variant price
@@ -271,6 +293,10 @@ async function loadCriticalData({context, params, request}) {
       variantPrice: firstVariant?.price || product.priceRange.minVariantPrice,
     },
     relatedProducts,
+    complementaryProducts,
+    complementaryProductsPageInfo,
+    complementaryProductsFetchedCount,
+    showComplementaryProducts,
     hasQueryParams,
   };
 }
@@ -600,10 +626,12 @@ export function ProductForm({
               : 'Add to cart'
             : 'Sold out'}
         </AddToCartButton>
+
         {hasSubscriptionDisclaimer && (
           <p className="product-subscription-disclaimer">
-            Any subscription associated with this product is offered by Whoop. We do not provide or manage the subscription and are not
-            responsible for its activation, billing, renewal, or support.
+            Any subscription associated with this product is offered by Whoop.
+            We do not provide or manage the subscription and are not responsible
+            for its activation, billing, renewal, or support.
           </p>
         )}
         {isComputerComponent && (
@@ -639,7 +667,14 @@ export function ProductForm({
 //                   Main Product
 // -----------------------------------------------------
 export default function Product() {
-  const {product, relatedProducts} = useLoaderData();
+  const {
+    product,
+    relatedProducts,
+    complementaryProducts,
+    complementaryProductsPageInfo,
+    complementaryProductsFetchedCount,
+    showComplementaryProducts,
+  } = useLoaderData();
   const variants = product.variants;
   const location = useLocation();
 
@@ -1039,6 +1074,18 @@ export default function Product() {
           </p>
         </div>
       </div>
+
+      {showComplementaryProducts ? (
+        <div className="complementary-products-row">
+          <ComplementaryProductsRow
+            initialProducts={complementaryProducts || []}
+            initialPageInfo={complementaryProductsPageInfo}
+            initialFetchedCount={complementaryProductsFetchedCount || 0}
+            productHandle={product.handle}
+            title="Pair it with"
+          />
+        </div>
+      ) : null}
 
       <div className="ProductPageBottom">
         <>
@@ -1519,7 +1566,7 @@ const PRODUCT_FRAGMENT = `#graphql
 `;
 
 const PRODUCT_QUERY = `#graphql
-  query Product(
+  query ProductPageProduct(
     $country: CountryCode
     $handle: String!
     $language: LanguageCode

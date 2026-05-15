@@ -4,7 +4,7 @@ export const CART_QUERY_FRAGMENT = `#graphql
     currencyCode
     amount
   }
-  fragment CartLine on CartLine {
+  fragment LibCartLine on CartLine {
     id
     quantity
     attributes {
@@ -105,7 +105,7 @@ export const CART_QUERY_FRAGMENT = `#graphql
       }
     }
   }
-  fragment CartApiQuery on Cart {
+  fragment LibCartApiQuery on Cart {
     updatedAt
     id
     appliedGiftCards {
@@ -130,7 +130,7 @@ export const CART_QUERY_FRAGMENT = `#graphql
     }
     lines(first: $numCartLines) {
       nodes {
-        ...CartLine
+        ...LibCartLine
       }
       nodes {
         ...CartLineComponent
@@ -312,7 +312,7 @@ export const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   }
 `;
 
-export const RECENTLY_VIEWED_PRODUCTS_QUERY = `#graphql
+export const RECENTLY_VIEWED_PRODUCTS_QUERY = `
   query RecentlyViewedProducts($handles: [String!]!) {
     products(first: 10, query: $handles) {
       edges {

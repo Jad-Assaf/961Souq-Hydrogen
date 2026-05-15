@@ -54,7 +54,7 @@ export const action = async ({request, context}: ActionFunctionArgs) => {
     questions.push(question);
 
     // 3. Update the metafield
-    const UPDATE_METAFIELD_MUTATION = `#graphql
+    const UPDATE_METAFIELD_MUTATION = `
       mutation UpdateProductQuestions($input: MetafieldsSetInput!) {
         metafieldsSet(metafields: [$input]) {
           metafields {

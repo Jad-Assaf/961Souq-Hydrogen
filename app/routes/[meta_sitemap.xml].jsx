@@ -214,7 +214,7 @@ function stripTableTags(html) {
  * Updated GraphQL query to include image and selectedOptions for each variant.
  */
 const PRODUCTS_QUERY = `#graphql
-  query Products($first: Int!, $after: String) {
+  query MetaSitemapProducts($first: Int!, $after: String) {
   products(first: $first, after: $after, query: "published_status:'online_store:visible'") {
     pageInfo {
       hasNextPage

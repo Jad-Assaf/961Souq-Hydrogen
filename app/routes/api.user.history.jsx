@@ -19,7 +19,7 @@ export async function loader({request, context}) {
     if (!customerAccessToken) return json({ids: []});
 
     const CUSTOMER_Q = `#graphql
-      query CustomerFromToken($token: String!) {
+      query UserHistoryCustomerFromToken($token: String!) {
         customer(customerAccessToken: $token) { id }
       }
     `;

@@ -394,7 +394,7 @@ Write 3–4 short sentences. Max 450 characters.`,
     logInfo(requestId, 'openai:summary_ready', {summaryLength: summary.length});
 
     // 4) Save metafield
-    const writeMfMutation = `#graphql
+    const writeMfMutation = `
       mutation WriteSummary($metafields: [MetafieldsSetInput!]!) {
         metafieldsSet(metafields: $metafields) {
           metafields { id namespace key value }

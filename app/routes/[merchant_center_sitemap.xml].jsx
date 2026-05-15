@@ -239,7 +239,7 @@ function stripImgTags(html) {
  *  - All variants (here, we request up to 100, but can paginate if you have more)
  */
 const PRODUCTS_QUERY = `#graphql
-  query Products($first: Int!, $after: String) {
+  query MerchantCenterProducts($first: Int!, $after: String) {
     products(first: $first, after: $after, query: "published_status:'online_store:visible'") {
       pageInfo {
         hasNextPage

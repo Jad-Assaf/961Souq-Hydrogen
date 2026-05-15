@@ -367,7 +367,7 @@ function xmlEncode(value) {
 }
 
 const PRODUCTS_QUERY = `#graphql
-  query Products($first: Int!, $after: String) {
+  query SitemapProducts($first: Int!, $after: String) {
     products(first: $first, after: $after, query: "status:active AND published_status:'online_store:visible'") {
       pageInfo {
         hasNextPage
@@ -388,7 +388,7 @@ const PRODUCTS_QUERY = `#graphql
 `;
 
 const COLLECTIONS_QUERY = `#graphql
-  query Collections($first: Int!, $after: String) {
+  query SitemapCollections($first: Int!, $after: String) {
     collections(first: $first, after: $after, query: "published_status:'online_store:visible'") {
       pageInfo {
         hasNextPage

@@ -168,7 +168,7 @@ async function fetchCollectionByHandle(context, handle) {
 
 // GraphQL query to retrieve a collection along with its products.
 const GET_COLLECTION_BY_HANDLE_QUERY = `#graphql
-  query GetCollectionByHandle($handle: String!) {
+  query CartGetCollectionByHandle($handle: String!) {
     collectionByHandle(handle: $handle) {
       id
       title

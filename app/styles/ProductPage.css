@@ -536,6 +536,68 @@ strong {
     width: 100%;
 }
 
+.complementary-products-row {
+    width: 100%;
+}
+
+.complementary-products-row .collection-section {
+    width: 100%;
+    margin: 0 auto 30px;
+}
+
+.complementary-products-row .collection-section h2 {
+    margin: 0 10px 8px;
+}
+
+.complementary-products-row .collection-products-row {
+    padding: 10px 0;
+}
+
+.complementary-products-loading .collection-products-row {
+    min-height: 270px;
+}
+
+.complementary-products-skeleton-card {
+    min-height: 245px;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.complementary-products-skeleton-image,
+.complementary-products-skeleton-line {
+    border-radius: 6px;
+    background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 37%, #eeeeee 63%);
+    background-size: 400% 100%;
+    animation: complementarySkeletonPulse 1.2s ease-in-out infinite;
+}
+
+.complementary-products-skeleton-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+}
+
+.complementary-products-skeleton-line {
+    width: 100%;
+    height: 14px;
+    margin-top: 12px;
+}
+
+.complementary-products-skeleton-line.short {
+    width: 58%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@keyframes complementarySkeletonPulse {
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
+}
+
 .product-details li,
 .product-metafields li {
     font-size: 12px;

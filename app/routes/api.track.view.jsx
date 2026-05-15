@@ -32,7 +32,7 @@ export async function action({request, context}) {
     if (!customerAccessToken) return new Response(null, {status: 204});
 
     const CUSTOMER_Q = `#graphql
-      query CustomerFromToken($token: String!) {
+      query TrackViewCustomerFromToken($token: String!) {
         customer(customerAccessToken: $token) { id email }
       }
     `;
