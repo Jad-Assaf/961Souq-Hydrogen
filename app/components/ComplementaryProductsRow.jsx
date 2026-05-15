@@ -23,8 +23,14 @@ export default function ComplementaryProductsRow({
   const requestIdRef = useRef(0);
   const availabilityRequestIdRef = useRef(0);
   const autoOpenedCategoryRef = useRef(null);
+  const prevProductHandleRef = useRef(null);
 
+  // Reset only when navigating to a different product. Cart updates revalidate
+  // the route and pass new loader array references, which must not wipe client state.
   useEffect(() => {
+    if (prevProductHandleRef.current === productHandle) return;
+    prevProductHandleRef.current = productHandle;
+
     console.info('[complementary][client] reset', {
       productHandle,
       initialProductsCount: initialProducts.length,
@@ -41,7 +47,12 @@ export default function ComplementaryProductsRow({
     requestIdRef.current += 1;
     availabilityRequestIdRef.current += 1;
     autoOpenedCategoryRef.current = null;
-  }, [initialProducts, initialPageInfo, initialFetchedCount, productHandle]);
+  }, [
+    productHandle,
+    initialProducts,
+    initialPageInfo,
+    initialFetchedCount,
+  ]);
 
   useEffect(() => {
     if (!productHandle || !categories.length) {
@@ -248,15 +259,6 @@ export default function ComplementaryProductsRow({
     handleCategoryClick(firstCategory);
   }, [categories, categoryAvailability, handleCategoryClick]);
 
-  const closeActiveCategory = useCallback(() => {
-    requestIdRef.current += 1;
-    setActiveCategory(null);
-    setProducts([]);
-    setPageInfo(null);
-    setIsLoadingMore(false);
-    fetchedCountRef.current = 0;
-  }, []);
-
   if (!categories.length) return null;
 
   return (
@@ -266,7 +268,8 @@ export default function ComplementaryProductsRow({
         {categories.map((category) => (
           (() => {
             const isUnavailable =
-              categoryAvailability?.[category.key]?.available === false;
+              categoryAvailability != null &&
+              categoryAvailability[category.key]?.available === false;
 
             return (
               <button
@@ -279,7 +282,6 @@ export default function ComplementaryProductsRow({
                   .join(' ')}
                 disabled={
                   isUnavailable ||
-                  !categoryAvailability ||
                   (isLoadingMore && activeCategory === category.key)
                 }
                 key={category.key}
@@ -319,7 +321,6 @@ export default function ComplementaryProductsRow({
             Boolean(pageInfo?.hasNextPage) && products.length < MAX_PRODUCTS
           }
           isLoadingMore={isLoadingMore}
-          onAddToCart={closeActiveCategory}
           onNeedMore={() => loadMore()}
           showAddToCart
         />

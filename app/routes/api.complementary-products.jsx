@@ -6,6 +6,7 @@ import {
   isValidComplementaryCategory,
   productMatchesIphoneCoverModel,
   productMatchesSamsungPhoneModel,
+  shuffleComplementaryProducts,
 } from '~/lib/complementaryCategories';
 
 const DEFAULT_LIMIT = 20;
@@ -254,7 +255,7 @@ export async function loader({request, context}) {
   });
 
   return json({
-    products: filteredProducts,
+    products: shuffleComplementaryProducts(filteredProducts),
     pageInfo,
     fetchedCount,
   });

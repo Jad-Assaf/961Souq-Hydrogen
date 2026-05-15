@@ -300,6 +300,16 @@ export function isValidComplementaryCategory(product, categoryKey) {
   );
 }
 
+/** Fisher–Yates shuffle; returns a new array. */
+export function shuffleComplementaryProducts(products) {
+  const shuffled = [...products];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 function escapeSearchValue(value) {
   return String(value || '')
     .replace(/\\/g, '\\\\')

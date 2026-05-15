@@ -9,7 +9,6 @@ export default function RelatedProductsRow({
   title = 'You May Also Like',
   hasMore = false,
   isLoadingMore = false,
-  onAddToCart,
   onNeedMore,
   showAddToCart = false,
 }) {
@@ -51,7 +50,6 @@ export default function RelatedProductsRow({
               key={product.id}
               product={product}
               index={index}
-              onAddToCart={onAddToCart}
               showAddToCart={showAddToCart}
             />
           ))}
@@ -64,7 +62,7 @@ export default function RelatedProductsRow({
   );
 }
 
-function RelatedProductItem({product, index, onAddToCart, showAddToCart}) {
+function RelatedProductItem({product, index, showAddToCart}) {
   const [isVisible, setIsVisible] = useState(false);
   const {open} = useAside();
 
@@ -126,7 +124,6 @@ function RelatedProductItem({product, index, onAddToCart, showAddToCart}) {
               onClick={(event) => {
                 event.stopPropagation();
                 if (canAddToCart) {
-                  onAddToCart?.(product);
                   open('cart');
                 }
               }}
