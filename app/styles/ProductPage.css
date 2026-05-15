@@ -573,6 +573,9 @@ strong {
     margin: 0 10px 10px;
     padding-bottom: 4px;
     scrollbar-width: thin;
+    @media (max-width: 850px) {
+        justify-content: start !important;
+    }
 }
 
 .complementary-category-button {
