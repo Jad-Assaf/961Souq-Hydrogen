@@ -7,14 +7,28 @@ export function TypesenseSearch({
   initialQuery = '',
   action = '/search',
   placeholder = 'Search products...',
+  autoFocus = false,
 }) {
   const fetcher = useFetcher();
   const location = useLocation();
+  const inputRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [isOpen, setIsOpen] = useState(false);
   const debounceRef = useRef(null);
   const lastTermRef = useRef(initialQuery.trim());
   const cachedDataRef = useRef({}); // Cache results to prevent duplicate requests
+
+  // Restore focus after lazy-load swap from Header placeholder input
+  useEffect(() => {
+    if (!autoFocus || !inputRef.current) return;
+    const input = inputRef.current;
+    const frameId = requestAnimationFrame(() => {
+      input.focus({preventScroll: true});
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    });
+    return () => cancelAnimationFrame(frameId);
+  }, [autoFocus]);
 
   // Keep input in sync with URL query
   useEffect(() => {
@@ -121,6 +135,7 @@ export function TypesenseSearch({
         <Form method="get" action={action} className="search-form">
           <div className="search-input-wrapper">
             <input
+              ref={inputRef}
               type="search"
               name="q"
               value={searchTerm}

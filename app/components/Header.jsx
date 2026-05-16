@@ -69,6 +69,10 @@ function LazyTypesenseSearch({
     }
   };
 
+  const handlePreload = () => {
+    if (!shouldLoad) setShouldLoad(true);
+  };
+
   if (SearchComponent) {
     return (
       <SearchComponent
@@ -85,6 +89,7 @@ function LazyTypesenseSearch({
       className={`search-bar-wrapper${
         shouldLoad ? ' search-bar-wrapper--open' : ''
       }`}
+      onPointerEnter={handlePreload}
     >
       <form method="get" action={action} className="search-form">
         <div className="search-input-wrapper">
