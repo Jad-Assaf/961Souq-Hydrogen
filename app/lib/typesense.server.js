@@ -2,6 +2,7 @@
 import Typesense from 'typesense';
 
 export const TYPESENSE_PRODUCTS_COLLECTION = 'products';
+export const TYPESENSE_ACTIVE_PRODUCTS_FILTER = 'status:=active';
 
 function getSharedConfig(env) {
   const host = env.TYPESENSE_HOST;

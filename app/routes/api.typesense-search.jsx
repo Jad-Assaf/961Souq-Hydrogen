@@ -1,6 +1,7 @@
 // app/routes/api.typesensesearch.jsx
 import {json} from '@shopify/remix-oxygen';
 import {
+  TYPESENSE_ACTIVE_PRODUCTS_FILTER,
   getTypesenseSearchClientFromEnv,
   TYPESENSE_PRODUCTS_COLLECTION,
 } from '~/lib/typesense.server';
@@ -34,6 +35,7 @@ export async function loader({request, context}) {
     enable_typos_for_alpha_numerical_tokens: false,
     drop_tokens_threshold: 1,
     exhaustive_search: true,
+    filter_by: TYPESENSE_ACTIVE_PRODUCTS_FILTER,
     prioritize_exact_match: true,
     prioritize_token_position: true,
     prioritize_num_matching_fields: true,

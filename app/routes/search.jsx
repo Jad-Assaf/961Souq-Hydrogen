@@ -2,6 +2,7 @@ import React from 'react';
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {
+  TYPESENSE_ACTIVE_PRODUCTS_FILTER,
   getTypesenseSearchClientFromEnv,
   TYPESENSE_PRODUCTS_COLLECTION,
 } from '~/lib/typesense.server';
@@ -42,6 +43,7 @@ export async function loader({request, context}) {
     drop_tokens_threshold: 1,
     exhaustive_search: true,
     sort_by: '_text_match:desc,price:desc',
+    filter_by: TYPESENSE_ACTIVE_PRODUCTS_FILTER,
     prioritize_exact_match: true,
     prioritize_token_position: true,
     prioritize_num_matching_fields: true,
