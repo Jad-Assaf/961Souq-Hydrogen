@@ -1,5 +1,6 @@
 // app/routes/api.menu-submenu.jsx
 import {json} from '@shopify/remix-oxygen';
+import {withCollectionFallbackImage} from '~/lib/collectionImage';
 
 const MENU_SUBMENU_QUERY = `#graphql
   query MenuSubmenuWithCollections($handle: String!) {
@@ -75,7 +76,8 @@ export async function loader({request, context}) {
           resource &&
           resource.__typename === 'Collection' &&
           (resource?.products?.nodes?.length || 0) > 0,
-      ) || [];
+      )
+      .map(withCollectionFallbackImage) || [];
 
   return json({handle, collections});
 }

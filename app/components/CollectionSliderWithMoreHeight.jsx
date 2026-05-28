@@ -1,5 +1,6 @@
 import {Link} from '@remix-run/react';
 import React, {useRef} from 'react';
+import {getCollectionImage} from '~/lib/collectionImage';
 // import '../styles/HomeSliderWithMoreHeight.css';
 
 export const CategorySliderWithMoreHeight = ({sliderCollections}) => {
@@ -93,6 +94,9 @@ const descriptions = [
 ];
 
 function CategoryItem({collection, index}) {
+  const image = getCollectionImage(collection);
+  if (!image) return null;
+
   return (
     <>
       <div className="category-container">
@@ -106,8 +110,8 @@ function CategoryItem({collection, index}) {
         >
           <img
             // src={imgs[index % imgs.length]}
-            src={`${collection.image.url}&format=webp&width=250`}
-            alt={collection.title}
+            src={`${image.url}&format=webp&width=250`}
+            alt={image.altText || collection.title}
             className="category-imgg"
           />
         </Link>

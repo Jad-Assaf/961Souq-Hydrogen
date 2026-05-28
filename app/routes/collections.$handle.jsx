@@ -22,6 +22,7 @@ import {useAside} from '~/components/Aside';
 import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
 import {hasPreOrderTag} from '~/lib/productTags';
 import WishlistButton from '~/components/WishlistButton';
+import {withCollectionFallbackImage} from '~/lib/collectionImage';
 
 const SOCIAL_SHARE_IMAGE =
   'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logo-photo.jpg?v=1772628583';
@@ -358,7 +359,7 @@ export async function loadCriticalData({context, params, request}) {
     }
   }
 
-  const {collection} = collectionData;
+  const collection = withCollectionFallbackImage(collectionData.collection);
   if (!collection) {
     throw new Response('Collection not found', {status: 404});
   }
@@ -381,6 +382,7 @@ export async function loadCriticalData({context, params, request}) {
         .map((item) => item?.resource)
         .filter((resource) => resource?.__typename === 'Collection')
         .filter((resource) => (resource?.products?.nodes?.length || 0) > 0)
+        .map(withCollectionFallbackImage)
         .filter((resource) => {
           const key = resource.handle || resource.id;
           if (!key || seenHandles.has(key)) return false;
@@ -467,17 +469,22 @@ export default function Collection() {
     name: `${collection?.title || 'Collection'} | Lebanon | 961Souq`,
     description: metaDescription,
     url: canonicalUrl,
-    itemListElement: (collection?.products?.nodes || []).slice(0, 10).map((product, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      url: `https://961souq.com/products/${encodeURIComponent(product?.handle)}`,
-      name: truncateText(product?.title || 'Product', 10),
-      image: {
-        '@type': 'ImageObject',
-        url:
-          product?.featuredImage?.url || 'https://961souq.com/default-product-image.jpg',
-      },
-    })),
+    itemListElement: (collection?.products?.nodes || [])
+      .slice(0, 10)
+      .map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `https://961souq.com/products/${encodeURIComponent(
+          product?.handle,
+        )}`,
+        name: truncateText(product?.title || 'Product', 10),
+        image: {
+          '@type': 'ImageObject',
+          url:
+            product?.featuredImage?.url ||
+            'https://961souq.com/default-product-image.jpg',
+        },
+      })),
   };
 
   /* keep URL tidy on initial hydration (leave pagination params alone) */
@@ -939,6 +946,11 @@ const MENU_QUERY = `#graphql
             products(first: 1) {
               nodes {
                 id
+                title
+                featuredImage {
+                  url
+                  altText
+                }
               }
             }
           }

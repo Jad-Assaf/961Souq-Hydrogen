@@ -1,6 +1,7 @@
 // app/components/CategorySliderFromMenu.jsx
 import React, {useRef} from 'react';
 import {Link} from '@remix-run/react';
+import {getCollectionImage} from '~/lib/collectionImage';
 // import '../styles/HomeSliderWithMoreHeight.css';
 
 export function CategorySliderFromMenu({menu}) {
@@ -25,8 +26,7 @@ export function CategorySliderFromMenu({menu}) {
   };
 
   /* ------------ helpers ------------- */
-  const imgSrc = (item) =>
-    item?.resource?.image?.url || item?.resource?.image?.src || '';
+  const imgSrc = (item) => getCollectionImage(item?.resource)?.url || '';
   const title = (item) => item?.resource?.title || item?.title || '—';
   const path = (item) =>
     item?.resource?.handle
@@ -64,7 +64,9 @@ export function CategorySliderFromMenu({menu}) {
               <div className="category-container" key={item.id}>
                 <Link to={path(item)} aria-label={title(item)}>
                   <img
-                    src={`${src}${src.includes('?') ? '&' : '?'}format=webp&width=250`}
+                    src={`${src}${
+                      src.includes('?') ? '&' : '?'
+                    }format=webp&width=250`}
                     alt={title(item)}
                     className="category-imgg"
                     loading="lazy"

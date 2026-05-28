@@ -1,5 +1,6 @@
 import {json} from '@shopify/remix-oxygen';
 import {GET_HOMEPAGE_COLLECTION_QUERY} from '~/data/queries';
+import {withCollectionFallbackImage} from '~/lib/collectionImage';
 
 export async function loader({request, context}) {
   const url = new URL(request.url);
@@ -31,7 +32,7 @@ export async function loader({request, context}) {
     }
 
     return json(
-      {handle, collection: collectionByHandle},
+      {handle, collection: withCollectionFallbackImage(collectionByHandle)},
       {
         headers: {
           'Oxygen-Cache-Control':

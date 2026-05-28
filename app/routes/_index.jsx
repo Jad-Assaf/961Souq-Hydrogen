@@ -22,6 +22,7 @@ import {
   GET_HOMEPAGE_COLLECTION_QUERY,
   GET_HOMEPAGE_COLLECTION_MOBILE_QUERY,
 } from '../data/queries.ts';
+import {withCollectionFallbackImage} from '~/lib/collectionImage';
 // import RelatedProductsFromHistory from '~/components/RelatedProductsFromHistory';
 import MobileAppPopup from '~/components/MobileAppPopup';
 import {defer} from '@shopify/remix-oxygen';
@@ -185,7 +186,7 @@ async function fetchCollectionByHandle(
     cache: cacheOverride || context.storefront.CacheShort(),
   });
   if (!collectionByHandle?.products?.nodes?.length) return null;
-  return collectionByHandle;
+  return withCollectionFallbackImage(collectionByHandle);
 }
 
 const handleToLabel = (handle) =>

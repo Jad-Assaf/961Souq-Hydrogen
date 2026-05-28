@@ -1,6 +1,10 @@
 import {useLoaderData, Link} from '@remix-run/react';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {
+  getCollectionImage,
+  withCollectionFallbackImage,
+} from '~/lib/collectionImage';
 import '../styles/CollectionsIndex.css';
 
 /**
@@ -33,7 +37,12 @@ async function loadCriticalData({context, request}) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {collections};
+  return {
+    collections: {
+      ...collections,
+      nodes: collections.nodes.map(withCollectionFallbackImage),
+    },
+  };
 }
 
 /**
@@ -77,6 +86,7 @@ export default function Collections() {
  */
 function CollectionItem({collection, index}) {
   if (!collection?.products?.nodes?.length) return null;
+  const image = getCollectionImage(collection);
 
   return (
     <Link
@@ -85,10 +95,10 @@ function CollectionItem({collection, index}) {
       to={`/collections/${collection.handle}`}
       prefetch="intent"
     >
-      {collection?.image && (
+      {image && (
         <img
-          src={`${collection.image.url}&format=webp&width=250`}
-          alt={collection.image.altText || collection.title}
+          src={`${image.url}&format=webp&width=250`}
+          alt={image.altText || collection.title}
           loading={index < 3 ? 'eager' : undefined}
           width={150}
           height={150}
@@ -107,6 +117,11 @@ const COLLECTIONS_QUERY = `#graphql
     products(first: 1) {
       nodes {
         id
+        title
+        featuredImage {
+          url
+          altText
+        }
       }
     }
     image {

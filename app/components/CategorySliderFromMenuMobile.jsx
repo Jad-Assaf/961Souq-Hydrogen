@@ -1,6 +1,7 @@
 // app/components/CategorySliderFromMenu.jsx
 import React, {useRef} from 'react';
 import {Link} from '@remix-run/react';
+import {getCollectionImage} from '~/lib/collectionImage';
 // import '../styles/HomeSliderWithMoreHeight.css';
 
 /**
@@ -16,8 +17,7 @@ export function CategorySliderFromMenuMobile({menu}) {
   if (!menu?.items?.length) return null;
 
   /* ---------- helpers ---------- */
-  const imgSrc = (item) =>
-    item?.resource?.image?.url || item?.resource?.image?.src || '';
+  const imgSrc = (item) => getCollectionImage(item?.resource)?.url || '';
 
   const itemTitle = (item) => item?.resource?.title || item?.title || '—';
 

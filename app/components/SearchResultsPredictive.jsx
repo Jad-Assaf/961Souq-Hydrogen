@@ -5,6 +5,7 @@ import {
   getEmptyPredictiveSearchResult,
   urlWithTrackingParams,
 } from '~/lib/search';
+import {getCollectionImage} from '~/lib/collectionImage';
 import {useAside} from './Aside';
 
 /**
@@ -111,14 +112,15 @@ function SearchResultsPredictiveCollections({term, collections, closeSearch}) {
             trackingParams: collection.trackingParameters,
             term: term.current,
           });
+          const image = getCollectionImage(collection);
 
           return (
             <li className="predictive-search-result-item" key={collection.id}>
               <Link onClick={closeSearch} to={colllectionUrl}>
-                {collection.image?.url && (
+                {image?.url && (
                   <Image
-                    alt={collection.image.altText ?? ''}
-                    src={collection.image.url}
+                    alt={image.altText || collection.title || ''}
+                    src={image.url}
                     width={50}
                     height={50}
                   />

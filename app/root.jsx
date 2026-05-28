@@ -19,10 +19,7 @@ import {
 // import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {HEADER_QUERY} from '~/lib/fragments';
-import {
-  normalizeHostname,
-  resolveCheckoutDomain,
-} from '~/lib/shopifyAnalytics';
+import {normalizeHostname, resolveCheckoutDomain} from '~/lib/shopifyAnalytics';
 import React, {useEffect, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
@@ -30,6 +27,7 @@ import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
 import {AttributionTracker} from './components/AttributionTracker';
+import {getCollectionImage} from '~/lib/collectionImage';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -120,11 +118,12 @@ const processMenuItems = (items) => {
     .map((item) => {
       const nextItems = item.items ? processMenuItems(item.items) : [];
 
+      const image = getCollectionImage(item.resource);
+
       return {
         ...item,
-        imageUrl:
-          item.resource?.image?.url || item.resource?.image?.src || null,
-        altText: item.resource?.image?.altText || item.title,
+        imageUrl: image?.url || null,
+        altText: image?.altText || item.title,
         items: nextItems,
       };
     })

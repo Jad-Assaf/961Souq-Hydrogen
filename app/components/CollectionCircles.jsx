@@ -1,9 +1,11 @@
 import {Link} from '@remix-run/react';
 import React, {useEffect, useRef, useState} from 'react';
+import {getCollectionImage} from '~/lib/collectionImage';
 
 // Reusable Component for CollectionItem
 const CollectionItem = ({collection, index, onSelect, isActive}) => {
   const [isLoading, setIsLoading] = useState(true);
+  const image = getCollectionImage(collection);
 
   return (
     <Link
@@ -17,15 +19,15 @@ const CollectionItem = ({collection, index, onSelect, isActive}) => {
       className={`menu-item-container ${isLoading ? 'loading' : ''}`}
     >
       <div className={`menu-item-image-wrapper ${isActive ? 'active' : ''}`}>
-        {collection.image && (
+        {image && (
           <img
-            src={`${collection.image.url}&format=webp&width=150`}
+            src={`${image.url}&format=webp&width=150`}
             srcSet={`
-              ${collection.image.url}&format=webp&width=150 300w,
-              ${collection.image.url}&format=webp&width=150 600w,
-              ${collection.image.url}&format=webp&width=150 1200w
+              ${image.url}&format=webp&width=150 300w,
+              ${image.url}&format=webp&width=150 600w,
+              ${image.url}&format=webp&width=150 1200w
             `}
-            alt={`${collection.image.altText || collection.title} Collection`}
+            alt={`${image.altText || collection.title} Collection`}
             className="menu-item-image"
             width={150}
             height={150}

@@ -2,6 +2,7 @@ import React, {useRef, useEffect, useState} from 'react';
 import {Link} from '@remix-run/react';
 import {ProductRow} from './CollectionDisplay';
 import {Image} from '@shopify/hydrogen-react';
+import {getCollectionImage} from '~/lib/collectionImage';
 
 const CollectionRows = ({menuCollections}) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -68,6 +69,7 @@ const CollectionRows = ({menuCollections}) => {
 export const CollectionItem = ({collection, index}) => {
   const [isLoading, setIsLoading] = useState(true);
   const ref = useRef(null);
+  const image = getCollectionImage(collection);
 
   const handleImageLoad = () => {
     setIsLoading(false);
@@ -79,13 +81,13 @@ export const CollectionItem = ({collection, index}) => {
       className="menu-item-container"
     >
       <div className="menu-item-image-wrapper">
-        {collection.image && (
+        {image && (
           <img
-            src={`${collection.image.url}&format=webp&width=100`} // Added src
-            srcSet={`${collection.image.url}&format=webp&width=100 300w,
-                     ${collection.image.url}&format=webp&width=100 600w,
-                     ${collection.image.url}&format=webp&width=100 1200w`}
-            alt={`${collection.image.altText || collection.title} Collection`}
+            src={`${image.url}&format=webp&width=100`} // Added src
+            srcSet={`${image.url}&format=webp&width=100 300w,
+                     ${image.url}&format=webp&width=100 600w,
+                     ${image.url}&format=webp&width=100 1200w`}
+            alt={`${image.altText || collection.title} Collection`}
             className={`menu-item-image
             }`}
             width={150}

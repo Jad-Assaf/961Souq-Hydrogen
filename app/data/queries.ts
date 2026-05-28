@@ -244,6 +244,17 @@ export let COLLECTIONS_QUERY = `#graphql
           height
           altText
         }
+        products(first: 1) {
+          nodes {
+            title
+            featuredImage {
+              url
+              width
+              height
+              altText
+            }
+          }
+        }
       }
       pageInfo {
         hasPreviousPage
@@ -683,6 +694,11 @@ export const GET_SIMPLE_COLLECTION_QUERY = `#graphql
       products(first: 1) {
         nodes {
           id
+          title
+          featuredImage {
+            url
+            altText
+          }
         }
       }
     }

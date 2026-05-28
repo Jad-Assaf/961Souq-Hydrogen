@@ -87,6 +87,17 @@ export const FEATURED_COLLECTION_FRAGMENT = `#graphql
       height
       url
     }
+    products(first: 1) {
+      nodes {
+        title
+        featuredImage {
+          altText
+          width
+          height
+          url
+        }
+      }
+    }
   }
 `;
 

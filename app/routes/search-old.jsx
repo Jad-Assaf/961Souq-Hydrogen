@@ -4,6 +4,7 @@ import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 // import searchTestStyles from '~/styles/search-test.css?url';
 import {InstantSearchBar} from '~/components/InstantSearchBar';
+import {getCollectionImage} from '~/lib/collectionImage';
 
 /**
  * @type {MetaFunction}
@@ -66,6 +67,17 @@ const SEARCH_AND_PREDICTIVE_QUERY = `#graphql
           altText
           width
           height
+        }
+        products(first: 1) {
+          nodes {
+            title
+            featuredImage {
+              url
+              altText
+              width
+              height
+            }
+          }
         }
       }
       pages {
@@ -321,26 +333,30 @@ function SearchPageSuggestions({predictive, query}) {
             Collections matching "{query}"
           </p>
           <ul className="suggestions-list suggestions-list--grid">
-            {predictive.collections.map((collection) => (
-              <li key={collection.id} className="suggestion-card">
-                <a
-                  href={`/collections/${collection.handle}`}
-                  className="suggestion-card-link"
-                >
-                  {collection.image?.url && (
-                    <img
-                      src={`${collection.image.url}&format=webp&width=200`}
-                      alt={collection.image.altText || collection.title}
-                      className="suggestion-card-image"
-                      loading="lazy"
-                    />
-                  )}
-                  <span className="suggestion-card-title">
-                    {collection.title}
-                  </span>
-                </a>
-              </li>
-            ))}
+            {predictive.collections.map((collection) => {
+              const image = getCollectionImage(collection);
+
+              return (
+                <li key={collection.id} className="suggestion-card">
+                  <a
+                    href={`/collections/${collection.handle}`}
+                    className="suggestion-card-link"
+                  >
+                    {image?.url && (
+                      <img
+                        src={`${image.url}&format=webp&width=200`}
+                        alt={image.altText || collection.title}
+                        className="suggestion-card-image"
+                        loading="lazy"
+                      />
+                    )}
+                    <span className="suggestion-card-title">
+                      {collection.title}
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

@@ -308,6 +308,15 @@ export type FeaturedCollectionDetailsFragment = Pick<
   image?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'altText' | 'width' | 'height' | 'url'>
   >;
+  products: {
+    nodes: Array<
+      Pick<StorefrontAPI.Product, 'title'> & {
+        featuredImage?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.Image, 'altText' | 'width' | 'height' | 'url'>
+        >;
+      }
+    >;
+  };
 };
 
 export type CollectionContentFragment = Pick<
@@ -967,6 +976,18 @@ export type CollectionsQuery = {
             'id' | 'url' | 'width' | 'height' | 'altText'
           >
         >;
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'width' | 'height' | 'altText'
+                >
+              >;
+            }
+          >;
+        };
       }
     >;
     pageInfo: Pick<
@@ -1432,7 +1453,15 @@ export type GetSimpleCollectionQuery = {
   collectionByHandle?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
       image?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Image, 'url' | 'altText'>>;
-      products: {nodes: Array<Pick<StorefrontAPI.Product, 'id'>>};
+      products: {
+        nodes: Array<
+          Pick<StorefrontAPI.Product, 'id' | 'title'> & {
+            featuredImage?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Image, 'url' | 'altText'>
+            >;
+          }
+        >;
+      };
     }
   >;
 };
@@ -1554,6 +1583,15 @@ export type MenuItemFragment = Pick<
         image?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
         >;
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+              >;
+            }
+          >;
+        };
       }
   >;
 };
@@ -1570,6 +1608,15 @@ export type LeafMenuItemFragment = Pick<
         image?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
         >;
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+              >;
+            }
+          >;
+        };
       }
   >;
 };
@@ -1591,6 +1638,15 @@ export type GrandChildMenuItemFragment = Pick<
             image?: StorefrontAPI.Maybe<
               Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
             >;
+            products: {
+              nodes: Array<
+                Pick<StorefrontAPI.Product, 'title'> & {
+                  featuredImage?: StorefrontAPI.Maybe<
+                    Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                  >;
+                }
+              >;
+            };
           }
       >;
     }
@@ -1603,6 +1659,15 @@ export type GrandChildMenuItemFragment = Pick<
         image?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
         >;
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+              >;
+            }
+          >;
+        };
       }
   >;
 };
@@ -1629,6 +1694,15 @@ export type ChildMenuItemFragment = Pick<
                 image?: StorefrontAPI.Maybe<
                   Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                 >;
+                products: {
+                  nodes: Array<
+                    Pick<StorefrontAPI.Product, 'title'> & {
+                      featuredImage?: StorefrontAPI.Maybe<
+                        Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                      >;
+                    }
+                  >;
+                };
               }
           >;
         }
@@ -1641,6 +1715,15 @@ export type ChildMenuItemFragment = Pick<
             image?: StorefrontAPI.Maybe<
               Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
             >;
+            products: {
+              nodes: Array<
+                Pick<StorefrontAPI.Product, 'title'> & {
+                  featuredImage?: StorefrontAPI.Maybe<
+                    Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                  >;
+                }
+              >;
+            };
           }
       >;
     }
@@ -1653,6 +1736,15 @@ export type ChildMenuItemFragment = Pick<
         image?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
         >;
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+              >;
+            }
+          >;
+        };
       }
   >;
 };
@@ -1684,6 +1776,15 @@ export type ParentMenuItemFragment = Pick<
                     image?: StorefrontAPI.Maybe<
                       Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                     >;
+                    products: {
+                      nodes: Array<
+                        Pick<StorefrontAPI.Product, 'title'> & {
+                          featuredImage?: StorefrontAPI.Maybe<
+                            Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                          >;
+                        }
+                      >;
+                    };
                   }
               >;
             }
@@ -1696,6 +1797,15 @@ export type ParentMenuItemFragment = Pick<
                 image?: StorefrontAPI.Maybe<
                   Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                 >;
+                products: {
+                  nodes: Array<
+                    Pick<StorefrontAPI.Product, 'title'> & {
+                      featuredImage?: StorefrontAPI.Maybe<
+                        Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                      >;
+                    }
+                  >;
+                };
               }
           >;
         }
@@ -1708,6 +1818,15 @@ export type ParentMenuItemFragment = Pick<
             image?: StorefrontAPI.Maybe<
               Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
             >;
+            products: {
+              nodes: Array<
+                Pick<StorefrontAPI.Product, 'title'> & {
+                  featuredImage?: StorefrontAPI.Maybe<
+                    Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                  >;
+                }
+              >;
+            };
           }
       >;
     }
@@ -1720,6 +1839,15 @@ export type ParentMenuItemFragment = Pick<
         image?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
         >;
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+              >;
+            }
+          >;
+        };
       }
   >;
 };
@@ -1753,6 +1881,15 @@ export type MenuFragment = Pick<StorefrontAPI.Menu, 'id'> & {
                         image?: StorefrontAPI.Maybe<
                           Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                         >;
+                        products: {
+                          nodes: Array<
+                            Pick<StorefrontAPI.Product, 'title'> & {
+                              featuredImage?: StorefrontAPI.Maybe<
+                                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                              >;
+                            }
+                          >;
+                        };
                       }
                   >;
                 }
@@ -1765,6 +1902,15 @@ export type MenuFragment = Pick<StorefrontAPI.Menu, 'id'> & {
                     image?: StorefrontAPI.Maybe<
                       Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                     >;
+                    products: {
+                      nodes: Array<
+                        Pick<StorefrontAPI.Product, 'title'> & {
+                          featuredImage?: StorefrontAPI.Maybe<
+                            Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                          >;
+                        }
+                      >;
+                    };
                   }
               >;
             }
@@ -1777,6 +1923,15 @@ export type MenuFragment = Pick<StorefrontAPI.Menu, 'id'> & {
                 image?: StorefrontAPI.Maybe<
                   Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                 >;
+                products: {
+                  nodes: Array<
+                    Pick<StorefrontAPI.Product, 'title'> & {
+                      featuredImage?: StorefrontAPI.Maybe<
+                        Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                      >;
+                    }
+                  >;
+                };
               }
           >;
         }
@@ -1789,6 +1944,15 @@ export type MenuFragment = Pick<StorefrontAPI.Menu, 'id'> & {
             image?: StorefrontAPI.Maybe<
               Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
             >;
+            products: {
+              nodes: Array<
+                Pick<StorefrontAPI.Product, 'title'> & {
+                  featuredImage?: StorefrontAPI.Maybe<
+                    Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                  >;
+                }
+              >;
+            };
           }
       >;
     }
@@ -1855,6 +2019,15 @@ export type HeaderQuery = {
                                 'src' | 'url' | 'altText'
                               >
                             >;
+                            products: {
+                              nodes: Array<
+                                Pick<StorefrontAPI.Product, 'title'> & {
+                                  featuredImage?: StorefrontAPI.Maybe<
+                                    Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                                  >;
+                                }
+                              >;
+                            };
                           }
                       >;
                     }
@@ -1867,6 +2040,15 @@ export type HeaderQuery = {
                         image?: StorefrontAPI.Maybe<
                           Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                         >;
+                        products: {
+                          nodes: Array<
+                            Pick<StorefrontAPI.Product, 'title'> & {
+                              featuredImage?: StorefrontAPI.Maybe<
+                                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                              >;
+                            }
+                          >;
+                        };
                       }
                   >;
                 }
@@ -1879,6 +2061,15 @@ export type HeaderQuery = {
                     image?: StorefrontAPI.Maybe<
                       Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                     >;
+                    products: {
+                      nodes: Array<
+                        Pick<StorefrontAPI.Product, 'title'> & {
+                          featuredImage?: StorefrontAPI.Maybe<
+                            Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                          >;
+                        }
+                      >;
+                    };
                   }
               >;
             }
@@ -1891,6 +2082,15 @@ export type HeaderQuery = {
                 image?: StorefrontAPI.Maybe<
                   Pick<StorefrontAPI.Image, 'src' | 'url' | 'altText'>
                 >;
+                products: {
+                  nodes: Array<
+                    Pick<StorefrontAPI.Product, 'title'> & {
+                      featuredImage?: StorefrontAPI.Maybe<
+                        Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                      >;
+                    }
+                  >;
+                };
               }
           >;
         }
@@ -2421,7 +2621,15 @@ export type GetMenuQuery = {
                 image?: StorefrontAPI.Maybe<
                   Pick<StorefrontAPI.Image, 'url' | 'altText'>
                 >;
-                products: {nodes: Array<Pick<StorefrontAPI.Product, 'id'>>};
+                products: {
+                  nodes: Array<
+                    Pick<StorefrontAPI.Product, 'id' | 'title'> & {
+                      featuredImage?: StorefrontAPI.Maybe<
+                        Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                      >;
+                    }
+                  >;
+                };
               })
         >;
       }
@@ -2549,7 +2757,15 @@ export type CollectionFragment = Pick<
   StorefrontAPI.Collection,
   'id' | 'title' | 'handle'
 > & {
-  products: {nodes: Array<Pick<StorefrontAPI.Product, 'id'>>};
+  products: {
+    nodes: Array<
+      Pick<StorefrontAPI.Product, 'id' | 'title'> & {
+        featuredImage?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.Image, 'url' | 'altText'>
+        >;
+      }
+    >;
+  };
   image?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
   >;
@@ -2572,7 +2788,15 @@ export type StoreCollectionsQuery = {
   collections: {
     nodes: Array<
       Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
-        products: {nodes: Array<Pick<StorefrontAPI.Product, 'id'>>};
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'id' | 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Image, 'url' | 'altText'>
+              >;
+            }
+          >;
+        };
         image?: StorefrontAPI.Maybe<
           Pick<
             StorefrontAPI.Image,
@@ -3079,6 +3303,15 @@ export type PredictiveCollectionFragment = {__typename: 'Collection'} & Pick<
     image?: StorefrontAPI.Maybe<
       Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
     >;
+    products: {
+      nodes: Array<
+        Pick<StorefrontAPI.Product, 'title'> & {
+          featuredImage?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+          >;
+        }
+      >;
+    };
   };
 
 export type PredictivePageFragment = {__typename: 'Page'} & Pick<
@@ -3151,6 +3384,18 @@ export type PredictiveSearchQuery = {
           image?: StorefrontAPI.Maybe<
             Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
           >;
+          products: {
+            nodes: Array<
+              Pick<StorefrontAPI.Product, 'title'> & {
+                featuredImage?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'url' | 'altText' | 'width' | 'height'
+                  >
+                >;
+              }
+            >;
+          };
         }
     >;
     pages: Array<
@@ -3293,6 +3538,18 @@ export type SearchAndPredictiveQuery = {
         image?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
         >;
+        products: {
+          nodes: Array<
+            Pick<StorefrontAPI.Product, 'title'> & {
+              featuredImage?: StorefrontAPI.Maybe<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            }
+          >;
+        };
       }
     >;
     pages: Array<Pick<StorefrontAPI.Page, 'id' | 'handle' | 'title'>>;
@@ -3410,7 +3667,7 @@ interface GeneratedQueryTypes {
     return: CollectionDetailsQuery;
     variables: CollectionDetailsQueryVariables;
   };
-  '#graphql\n  query Collections(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        id\n        title\n        description\n        handle\n        seo {\n          description\n          title\n        }\n        image {\n          id\n          url\n          width\n          height\n          altText\n        }\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
+  '#graphql\n  query Collections(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        id\n        title\n        description\n        handle\n        seo {\n          description\n          title\n        }\n        image {\n          id\n          url\n          width\n          height\n          altText\n        }\n        products(first: 1) {\n          nodes {\n            title\n            featuredImage {\n              url\n              width\n              height\n              altText\n            }\n          }\n        }\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
     return: CollectionsQuery;
     variables: CollectionsQueryVariables;
   };
@@ -3454,11 +3711,11 @@ interface GeneratedQueryTypes {
     return: GetHomeProductMobileByHandleQuery;
     variables: GetHomeProductMobileByHandleQueryVariables;
   };
-  '#graphql\n  query GetSimpleCollection($handle: String!) {\n    collectionByHandle(handle: $handle) {\n      id\n      title\n      handle\n      image {\n        url\n        altText\n      }\n      products(first: 1) {\n        nodes {\n          id\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query GetSimpleCollection($handle: String!) {\n    collectionByHandle(handle: $handle) {\n      id\n      title\n      handle\n      image {\n        url\n        altText\n      }\n      products(first: 1) {\n        nodes {\n          id\n          title\n          featuredImage {\n            url\n            altText\n          }\n        }\n      }\n    }\n  }\n': {
     return: GetSimpleCollectionQuery;
     variables: GetSimpleCollectionQueryVariables;
   };
-  '#graphql\n  fragment Shop on Shop {\n    id\n    name\n    description\n    primaryDomain {\n      url\n    }\n    brand {\n      logo {\n        image {\n          url\n        }\n      }\n    }\n  }\n  query Header(\n    $country: CountryCode\n    $headerMenuHandle: String!\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    shop {\n      ...Shop\n    }\n    menu(handle: $headerMenuHandle) {\n      ...Menu\n    }\n  }\n  #graphql\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    tags\n    title\n    type\n    url\n    resource {\n      ... on Collection {\n        __typename\n        id\n        handle\n        title\n        image {\n          src\n          url\n          altText\n        }\n      }\n    }\n  }\n  fragment LeafMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment GrandChildMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...LeafMenuItem\n    }\n  }\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...GrandChildMenuItem\n    }\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n\n': {
+  '#graphql\n  fragment Shop on Shop {\n    id\n    name\n    description\n    primaryDomain {\n      url\n    }\n    brand {\n      logo {\n        image {\n          url\n        }\n      }\n    }\n  }\n  query Header(\n    $country: CountryCode\n    $headerMenuHandle: String!\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    shop {\n      ...Shop\n    }\n    menu(handle: $headerMenuHandle) {\n      ...Menu\n    }\n  }\n  #graphql\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    tags\n    title\n    type\n    url\n    resource {\n      ... on Collection {\n        __typename\n        id\n        handle\n        title\n        image {\n          src\n          url\n          altText\n        }\n        products(first: 1) {\n          nodes {\n            title\n            featuredImage {\n              url\n              altText\n            }\n          }\n        }\n      }\n    }\n  }\n  fragment LeafMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment GrandChildMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...LeafMenuItem\n    }\n  }\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...GrandChildMenuItem\n    }\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n\n': {
     return: HeaderQuery;
     variables: HeaderQueryVariables;
   };
@@ -3550,7 +3807,7 @@ interface GeneratedQueryTypes {
     return: CartGetCollectionByHandleQuery;
     variables: CartGetCollectionByHandleQueryVariables;
   };
-  '#graphql\n  query GetMenu($handle: String!) {\n    menu(handle: $handle) {\n      items {\n        title\n        url\n        resource {\n          __typename\n          ... on Collection {\n            id\n            title\n            description\n            handle\n            image {\n              url\n              altText\n            }\n            products(first: 1) {\n              nodes {\n                id\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query GetMenu($handle: String!) {\n    menu(handle: $handle) {\n      items {\n        title\n        url\n        resource {\n          __typename\n          ... on Collection {\n            id\n            title\n            description\n            handle\n            image {\n              url\n              altText\n            }\n            products(first: 1) {\n              nodes {\n                id\n                title\n                featuredImage {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: GetMenuQuery;
     variables: GetMenuQueryVariables;
   };
@@ -3558,7 +3815,7 @@ interface GeneratedQueryTypes {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };
-  '#graphql\n  fragment Collection on Collection {\n    id\n    title\n    handle\n    products(first: 1) {\n      nodes {\n        id\n      }\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query StoreCollections(\n    $country: CountryCode\n    $endCursor: String\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $startCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(\n      first: $first,\n      last: $last,\n      before: $startCursor,\n      after: $endCursor\n    ) {\n      nodes {\n        ...Collection\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment Collection on Collection {\n    id\n    title\n    handle\n    products(first: 1) {\n      nodes {\n        id\n        title\n        featuredImage {\n          url\n          altText\n        }\n      }\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query StoreCollections(\n    $country: CountryCode\n    $endCursor: String\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $startCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(\n      first: $first,\n      last: $last,\n      before: $startCursor,\n      after: $endCursor\n    ) {\n      nodes {\n        ...Collection\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
     return: StoreCollectionsQuery;
     variables: StoreCollectionsQueryVariables;
   };
@@ -3582,7 +3839,7 @@ interface GeneratedQueryTypes {
     return: SearchOldOldProductsWithFiltersQuery;
     variables: SearchOldOldProductsWithFiltersQueryVariables;
   };
-  '#graphql\n  query PredictiveSearch(\n    $country: CountryCode\n    $language: LanguageCode\n    $limitScope: PredictiveSearchLimitScope!\n    $term: String!\n    $types: [PredictiveSearchType!]\n  ) @inContext(country: $country, language: $language) {\n    predictiveSearch(\n      limitScope: $limitScope,\n      query: $term,\n      types: $types\n    ) {\n      articles {\n        ...PredictiveArticle\n      }\n      collections {\n        ...PredictiveCollection\n      }\n      pages {\n        ...PredictivePage\n      }\n      products {\n        ...PredictiveProduct\n      }\n      queries {\n        ...PredictiveQuery\n      }\n    }\n  }\n  #graphql\n  fragment PredictiveArticle on Article {\n    __typename\n    id\n    title\n    handle\n    blog {\n      handle\n    }\n    image {\n      url\n      altText\n      width\n      height\n    }\n    trackingParameters\n  }\n\n  #graphql\n  fragment PredictiveCollection on Collection {\n    __typename\n    id\n    title\n    handle\n    image {\n      url\n      altText\n      width\n      height\n    }\n    trackingParameters\n  }\n\n  #graphql\n  fragment PredictivePage on Page {\n    __typename\n    id\n    title\n    handle\n    trackingParameters\n  }\n\n  #graphql\n  fragment PredictiveProduct on Product {\n    __typename\n    id\n    title\n    vendor\n    productType\n    tags\n    description\n    handle\n    trackingParameters\n    variants(first: 1) {\n      nodes {\n        id\n        sku\n        image {\n          url\n          altText\n          width\n          height\n        }\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n\n  #graphql\n  fragment PredictiveQuery on SearchQuerySuggestion {\n    __typename\n    text\n    styledText\n    trackingParameters\n  }\n\n': {
+  '#graphql\n  query PredictiveSearch(\n    $country: CountryCode\n    $language: LanguageCode\n    $limitScope: PredictiveSearchLimitScope!\n    $term: String!\n    $types: [PredictiveSearchType!]\n  ) @inContext(country: $country, language: $language) {\n    predictiveSearch(\n      limitScope: $limitScope,\n      query: $term,\n      types: $types\n    ) {\n      articles {\n        ...PredictiveArticle\n      }\n      collections {\n        ...PredictiveCollection\n      }\n      pages {\n        ...PredictivePage\n      }\n      products {\n        ...PredictiveProduct\n      }\n      queries {\n        ...PredictiveQuery\n      }\n    }\n  }\n  #graphql\n  fragment PredictiveArticle on Article {\n    __typename\n    id\n    title\n    handle\n    blog {\n      handle\n    }\n    image {\n      url\n      altText\n      width\n      height\n    }\n    trackingParameters\n  }\n\n  #graphql\n  fragment PredictiveCollection on Collection {\n    __typename\n    id\n    title\n    handle\n    image {\n      url\n      altText\n      width\n      height\n    }\n    products(first: 1) {\n      nodes {\n        title\n        featuredImage {\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n    trackingParameters\n  }\n\n  #graphql\n  fragment PredictivePage on Page {\n    __typename\n    id\n    title\n    handle\n    trackingParameters\n  }\n\n  #graphql\n  fragment PredictiveProduct on Product {\n    __typename\n    id\n    title\n    vendor\n    productType\n    tags\n    description\n    handle\n    trackingParameters\n    variants(first: 1) {\n      nodes {\n        id\n        sku\n        image {\n          url\n          altText\n          width\n          height\n        }\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n\n  #graphql\n  fragment PredictiveQuery on SearchQuerySuggestion {\n    __typename\n    text\n    styledText\n    trackingParameters\n  }\n\n': {
     return: PredictiveSearchQuery;
     variables: PredictiveSearchQueryVariables;
   };
@@ -3590,7 +3847,7 @@ interface GeneratedQueryTypes {
     return: SearchOldOldProductsBasicQuery;
     variables: SearchOldOldProductsBasicQueryVariables;
   };
-  '#graphql\n  query SearchAndPredictive(\n    $query: String!\n    $limit: Int!\n    $country: CountryCode\n    $language: LanguageCode\n    $searchAfter: String\n    $searchBefore: String\n    $searchFirst: Int\n    $searchLast: Int\n  ) @inContext(country: $country, language: $language) {\n    predictiveSearch(\n      query: $query\n      limit: $limit\n      limitScope: EACH\n      searchableFields: [\n        TITLE\n        PRODUCT_TYPE\n        VARIANTS_TITLE\n        VENDOR\n        VARIANTS_SKU\n        TAG\n      ]\n    ) {\n      products {\n        id\n        handle\n        title\n        availableForSale\n        featuredImage {\n          url\n          altText\n          width\n          height\n        }\n        priceRange {\n          minVariantPrice {\n            amount\n            currencyCode\n          }\n        }\n      }\n      collections {\n        id\n        handle\n        title\n        image {\n          url\n          altText\n          width\n          height\n        }\n      }\n      pages {\n        id\n        handle\n        title\n      }\n      articles {\n        id\n        handle\n        title\n      }\n      queries {\n        text\n      }\n    }\n\n    search(\n      query: $query\n      types: [PRODUCT]\n      first: $searchFirst\n      last: $searchLast\n      after: $searchAfter\n      before: $searchBefore\n    ) {\n      edges {\n        cursor\n        node {\n          __typename\n          ... on Product {\n            id\n            handle\n            title\n            availableForSale\n            featuredImage {\n              url\n              altText\n              width\n              height\n            }\n            priceRange {\n              minVariantPrice {\n                amount\n                currencyCode\n              }\n            }\n          }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n': {
+  '#graphql\n  query SearchAndPredictive(\n    $query: String!\n    $limit: Int!\n    $country: CountryCode\n    $language: LanguageCode\n    $searchAfter: String\n    $searchBefore: String\n    $searchFirst: Int\n    $searchLast: Int\n  ) @inContext(country: $country, language: $language) {\n    predictiveSearch(\n      query: $query\n      limit: $limit\n      limitScope: EACH\n      searchableFields: [\n        TITLE\n        PRODUCT_TYPE\n        VARIANTS_TITLE\n        VENDOR\n        VARIANTS_SKU\n        TAG\n      ]\n    ) {\n      products {\n        id\n        handle\n        title\n        availableForSale\n        featuredImage {\n          url\n          altText\n          width\n          height\n        }\n        priceRange {\n          minVariantPrice {\n            amount\n            currencyCode\n          }\n        }\n      }\n      collections {\n        id\n        handle\n        title\n        image {\n          url\n          altText\n          width\n          height\n        }\n        products(first: 1) {\n          nodes {\n            title\n            featuredImage {\n              url\n              altText\n              width\n              height\n            }\n          }\n        }\n      }\n      pages {\n        id\n        handle\n        title\n      }\n      articles {\n        id\n        handle\n        title\n      }\n      queries {\n        text\n      }\n    }\n\n    search(\n      query: $query\n      types: [PRODUCT]\n      first: $searchFirst\n      last: $searchLast\n      after: $searchAfter\n      before: $searchBefore\n    ) {\n      edges {\n        cursor\n        node {\n          __typename\n          ... on Product {\n            id\n            handle\n            title\n            availableForSale\n            featuredImage {\n              url\n              altText\n              width\n              height\n            }\n            priceRange {\n              minVariantPrice {\n                amount\n                currencyCode\n              }\n            }\n          }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n': {
     return: SearchAndPredictiveQuery;
     variables: SearchAndPredictiveQueryVariables;
   };

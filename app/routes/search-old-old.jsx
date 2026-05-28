@@ -505,6 +505,17 @@ const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
       width
       height
     }
+    products(first: 1) {
+      nodes {
+        title
+        featuredImage {
+          url
+          altText
+          width
+          height
+        }
+      }
+    }
     trackingParameters
   }
 `;

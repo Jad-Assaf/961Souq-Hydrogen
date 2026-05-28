@@ -1,6 +1,7 @@
 // app/components/MobileCategoryCards.jsx
 import React, {useMemo, useState, useEffect, useRef, useCallback} from 'react';
 import {Link} from '@remix-run/react';
+import {getCollectionImage} from '~/lib/collectionImage';
 
 function getHandleFromUrl(url = '') {
   if (!url) return '';
@@ -99,10 +100,8 @@ function getSubcardImage(sub) {
   // 2) Image on the resource union (Collection/Product)
   const resource = sub.resource;
   if (resource) {
-    if (resource.image) {
-      if (resource.image.url) return resource.image.url;
-      if (resource.image.src) return resource.image.src;
-    }
+    const collectionImage = getCollectionImage(resource);
+    if (collectionImage?.url) return collectionImage.url;
     if (resource.featuredImage) {
       if (resource.featuredImage.url) return resource.featuredImage.url;
       if (resource.featuredImage.src) return resource.featuredImage.src;

@@ -1,6 +1,7 @@
 // app/components/InstantSearchBar.jsx
 import React, {useEffect, useRef, useState} from 'react';
 import {Form, useFetcher, useLocation} from '@remix-run/react';
+import {getCollectionImage} from '~/lib/collectionImage';
 
 export function InstantSearchBar({
   initialQuery = '',
@@ -278,26 +279,30 @@ function InstantSuggestions({
           <div className="suggestions-section">
             <p className="suggestions-heading">Collections</p>
             <ul className="suggestions-list suggestions-list--grid">
-              {predictive.collections.map((collection) => (
-                <li key={collection.id} className="suggestion-card">
-                  <a
-                    href={`/collections/${collection.handle}`}
-                    className="suggestion-card-link"
-                  >
-                    {collection.image?.url && (
-                      <img
-                        src={`${collection.image.url}&format=webp&width=200`}
-                        alt={collection.image.altText || collection.title}
-                        className="suggestion-card-image"
-                        loading="lazy"
-                      />
-                    )}
-                    <span className="suggestion-card-title">
-                      {collection.title}
-                    </span>
-                  </a>
-                </li>
-              ))}
+              {predictive.collections.map((collection) => {
+                const image = getCollectionImage(collection);
+
+                return (
+                  <li key={collection.id} className="suggestion-card">
+                    <a
+                      href={`/collections/${collection.handle}`}
+                      className="suggestion-card-link"
+                    >
+                      {image?.url && (
+                        <img
+                          src={`${image.url}&format=webp&width=200`}
+                          alt={image.altText || collection.title}
+                          className="suggestion-card-image"
+                          loading="lazy"
+                        />
+                      )}
+                      <span className="suggestion-card-title">
+                        {collection.title}
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
