@@ -58,6 +58,8 @@ export default function MosaicHero({collections}) {
       'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/mobiles_9fdbec20-948c-4738-9fb2-c0629f406d7a.jpg?v=1773672307&format=webp',
     desktops:
       'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/desktops.jpg?v=1773672306&format=webp',
+    lego:
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/lego.jpg?v=1779965287',
     monitors:
       'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/monitors_f301f500-0563-4eab-a6d8-5321da5812a4.jpg?v=1773672306&format=webp',
     tablets:
@@ -90,6 +92,10 @@ export default function MosaicHero({collections}) {
   const desktopsImage = {
     src: collectionImages.desktops,
     alt: 'Desktops',
+  };
+  const legoImage = {
+    src: collectionImages.lego,
+    alt: 'LEGO Building Bricks',
   };
   const monitorsImage = {
     src: collectionImages.monitors,
@@ -233,6 +239,27 @@ export default function MosaicHero({collections}) {
           </Link>
         )}
 
+        {shouldShowCollection('lego-building-bricks') && (
+          <Link
+            className="tile tile--lego"
+            to="/collections/lego-building-bricks"
+          >
+            <div className="tile__content">
+              <h3 className="tile__title tile__title--sm">LEGO</h3>
+              <p className="tile__sub">Building Bricks</p>
+            </div>
+            <div className="tile__media" aria-hidden="true">
+              <img
+                alt={legoImage.alt}
+                {...getImageProps({url: legoImage.src, index: 5})}
+              />
+            </div>
+            <span className="tile__arrow" aria-hidden="true">
+              &rarr;
+            </span>
+          </Link>
+        )}
+
         {shouldShowCollection('monitors') && (
           <Link className="tile tile--monitors" to="/collections/monitors">
             <div className="tile__content">
@@ -242,7 +269,7 @@ export default function MosaicHero({collections}) {
             <div className="tile__media" aria-hidden="true">
               <img
                 alt={monitorsImage.alt}
-                {...getImageProps({url: monitorsImage.src, index: 5})}
+                {...getImageProps({url: monitorsImage.src, index: 6})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -260,7 +287,7 @@ export default function MosaicHero({collections}) {
             <div className="tile__media" aria-hidden="true">
               <img
                 alt={tabletsImage.alt}
-                {...getImageProps({url: tabletsImage.src, index: 6})}
+                {...getImageProps({url: tabletsImage.src, index: 7})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -278,7 +305,7 @@ export default function MosaicHero({collections}) {
             <div className="tile__media" aria-hidden="true">
               <img
                 alt={networkingImage.alt}
-                {...getImageProps({url: networkingImage.src, index: 7})}
+                {...getImageProps({url: networkingImage.src, index: 8})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -296,7 +323,7 @@ export default function MosaicHero({collections}) {
             <div className="tile__media" aria-hidden="true">
               <img
                 alt={dysonImage.alt}
-                {...getImageProps({url: dysonImage.src, index: 8})}
+                {...getImageProps({url: dysonImage.src, index: 9})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -314,7 +341,7 @@ export default function MosaicHero({collections}) {
             <div className="tile__media" aria-hidden="true">
               <img
                 alt={cosmeticsImage.alt}
-                {...getImageProps({url: cosmeticsImage.src, index: 9})}
+                {...getImageProps({url: cosmeticsImage.src, index: 10})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
@@ -335,7 +362,7 @@ export default function MosaicHero({collections}) {
             <div className="tile__media" aria-hidden="true">
               <img
                 alt={accessoriesImage.alt}
-                {...getImageProps({url: accessoriesImage.src, index: 10})}
+                {...getImageProps({url: accessoriesImage.src, index: 11})}
               />
             </div>
             <span className="tile__arrow" aria-hidden="true">
