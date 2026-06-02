@@ -28,6 +28,7 @@ export const CHECKOUT_TRACKING_ATTRIBUTE_KEYS = [
   'utm_term',
   'utm_content',
   'source',
+  'wtp',
 ];
 
 export const NOTE_TRACKING_KEYS = [
@@ -39,9 +40,7 @@ export const NOTE_TRACKING_KEYS = [
   'utm_content',
 ];
 
-export const CHECKOUT_URL_TRACKING_KEYS = [
-  ...CHECKOUT_TRACKING_ATTRIBUTE_KEYS,
-];
+export const CHECKOUT_URL_TRACKING_KEYS = [...CHECKOUT_TRACKING_ATTRIBUTE_KEYS];
 
 export const ATTRIBUTION_COOKIE_KEY = 'storefront_attribution';
 export const VISITOR_ID_COOKIE_KEY = 'storefront_vid';

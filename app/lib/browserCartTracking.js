@@ -194,6 +194,13 @@ function getOrCreateVisitorId(cookieDomain) {
 
 function pickAttributionValue(key, params, storedAttribution) {
   switch (key) {
+    case 'wtp':
+      return firstNonEmpty(
+        params.get(key),
+        readWetrackedBrowserId(),
+        storedAttribution[key],
+        readCookie(getTrackingCookieKey(key)),
+      );
     case 'fbp':
       return firstNonEmpty(
         params.get(key),
@@ -222,6 +229,21 @@ function pickAttributionValue(key, params, storedAttribution) {
         readCookie(getTrackingCookieKey(key)),
       );
   }
+}
+
+function readWetrackedBrowserId() {
+  if (typeof window === 'undefined') return '';
+
+  const value = window['wt:wtp'];
+  if (typeof value === 'string' || typeof value === 'number') {
+    return firstNonEmpty(value);
+  }
+
+  if (value && typeof value === 'object') {
+    return firstNonEmpty(value.id, value.browserId, value.wtp);
+  }
+
+  return '';
 }
 
 function inferSource(params, storedAttribution) {

@@ -22,13 +22,11 @@ import {HEADER_QUERY} from '~/lib/fragments';
 import {normalizeHostname, resolveCheckoutDomain} from '~/lib/shopifyAnalytics';
 import React, {useEffect, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
-import MetaPixel from './components/MetaPixel';
 import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
 import {AttributionTracker} from './components/AttributionTracker';
 import {getCollectionImage} from '~/lib/collectionImage';
-// import TikTokPixel from './components/TikTokPixel';
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -39,11 +37,7 @@ export const shouldRevalidate = ({formMethod, defaultShouldRevalidate}) => {
   return defaultShouldRevalidate;
 };
 
-const PIXEL_ID = '459846537541051'; // Replace with your actual Pixel ID
-const GOOGLE_ANALYTICS_ID = 'G-CB623RXLSE';
-const GOOGLE_ADS_ID = 'AW-378354284';
 const SHOPIFY_COOKIE_DOMAIN = '.961souq.com';
-// const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
 
 export function links() {
   return [
@@ -237,79 +231,15 @@ export function Layout({children}) {
         <Meta />
         <Links />
         <script
+          async
           nonce={stableNonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-          (function () {
-            var gtagIds = ['${GOOGLE_ANALYTICS_ID}', '${GOOGLE_ADS_ID}'];
-            var initialized = false;
-            var interactionEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
-
-            function removeInteractionListeners() {
-              for (var i = 0; i < interactionEvents.length; i++) {
-                window.removeEventListener(interactionEvents[i], onFirstInteraction);
-              }
-            }
-
-            function initializeAnalytics() {
-              if (initialized) return;
-              initialized = true;
-
-              removeInteractionListeners();
-
-              window.dataLayer = window.dataLayer || [];
-              window.gtag = window.gtag || function () {
-                window.dataLayer.push(arguments);
-              };
-
-              window.gtag('js', new Date());
-              for (var i = 0; i < gtagIds.length; i++) {
-                window.gtag('config', gtagIds[i]);
-              }
-
-              var script = document.createElement('script');
-              script.async = true;
-              script.src =
-                'https://www.googletagmanager.com/gtag/js?id=' +
-                encodeURIComponent(gtagIds[0]);
-              document.head.appendChild(script);
-            }
-
-            function onFirstInteraction() {
-              initializeAnalytics();
-            }
-
-            function addInteractionListeners() {
-              for (var i = 0; i < interactionEvents.length; i++) {
-                window.addEventListener(interactionEvents[i], onFirstInteraction, {
-                  once: true,
-                  passive: true,
-                });
-              }
-            }
-
-            function scheduleAnalyticsInit() {
-              if ('requestIdleCallback' in window) {
-                window.requestIdleCallback(initializeAnalytics, {timeout: 4000});
-                return;
-              }
-
-              window.setTimeout(initializeAnalytics, 2500);
-            }
-
-            addInteractionListeners();
-
-            if (document.readyState === 'complete') {
-              scheduleAnalyticsInit();
-            } else {
-              window.addEventListener('load', scheduleAnalyticsInit, {once: true});
-            }
-          })();
-        `,
-          }}
+          src="https://pixel.wetracked.io/wtp.js"
         ></script>
-        <MetaPixel pixelId={PIXEL_ID} />
-        {/* <TikTokPixel pixelId={TIKTOK_PIXEL_ID} /> */}
+        <script
+          async
+          nonce={stableNonce}
+          src="https://pixel.wetracked.io/961souqs.myshopify.com/events.js"
+        ></script>
         <style
           dangerouslySetInnerHTML={{
             __html: `
