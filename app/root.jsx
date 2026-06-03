@@ -38,9 +38,6 @@ export const shouldRevalidate = ({formMethod, defaultShouldRevalidate}) => {
 };
 
 const SHOPIFY_COOKIE_DOMAIN = '.961souq.com';
-const META_PIXEL_ID = '459846537541051';
-const GOOGLE_ANALYTICS_ID = 'G-CB623RXLSE';
-const GOOGLE_ADS_ID = 'AW-378354284';
 
 export function links() {
   return [
@@ -233,55 +230,6 @@ export function Layout({children}) {
         {/* <link rel="stylesheet" href={fontStyles}></link> */}
         <Meta />
         <Links />
-        <script
-          async
-          nonce={stableNonce}
-          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`}
-        ></script>
-        <script
-          nonce={stableNonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){window.dataLayer.push(arguments);}
-              window.gtag = window.gtag || gtag;
-              gtag('js', new Date());
-              gtag('config', '${GOOGLE_ANALYTICS_ID}', {send_page_view: false});
-              gtag('config', '${GOOGLE_ADS_ID}', {send_page_view: false});
-            `,
-          }}
-        ></script>
-        <script
-          nonce={stableNonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-              !function(f,b,e,v,n,t,s) {
-                if (f.fbq) return;
-                n = f.fbq = function() {
-                  n.callMethod
-                    ? n.callMethod.apply(n, arguments)
-                    : n.queue.push(arguments);
-                };
-                if (!f._fbq) f._fbq = n;
-                n.push = n;
-                n.loaded = true;
-                n.version = '2.0';
-                n.queue = [];
-                t = b.createElement(e);
-                t.async = true;
-                t.src = v;
-                s = b.getElementsByTagName(e)[0];
-                s.parentNode.insertBefore(t, s);
-              }(
-                window,
-                document,
-                'script',
-                'https://connect.facebook.net/en_US/fbevents.js',
-              );
-              fbq('init', '${META_PIXEL_ID}');
-            `,
-          }}
-        ></script>
         <script
           async
           nonce={stableNonce}
