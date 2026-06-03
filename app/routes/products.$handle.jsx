@@ -17,6 +17,8 @@ import RelatedProductsRow from '~/components/RelatedProducts';
 import ComplementaryProductsRow from '~/components/ComplementaryProductsRow';
 import {ProductMetafields} from '~/components/Metafields';
 import RecentlyViewedProducts from '../components/RecentlyViewed';
+import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
+import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 import {hasPreOrderTag} from '~/lib/productTags';
 import {
   isAppleMobilePhone,
@@ -380,6 +382,9 @@ export function ProductForm({
   });
 
   const handleAddToCart = () => {
+    // Track the AddToCart event
+    trackAddToCart(product);
+    trackAddToCartGA(product);
     onAddToCart(product);
   };
 
@@ -866,6 +871,11 @@ export default function Product() {
       setQuantity(1);
     }
   }, [product?.id, product?.handle, product?.selectedVariant]);
+
+  // Pixel / analytics
+  useEffect(() => {
+    trackViewContent(product);
+  }, [product]);
 
   // Edge-cacheable tracking endpoint (per view)
   const trackOnceRef = useRef(false);

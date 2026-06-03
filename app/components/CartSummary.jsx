@@ -2,6 +2,7 @@ import {Form} from '@remix-run/react';
 import {CartForm, Money} from '@shopify/hydrogen';
 import {CartTrackingFields} from './CartTrackingFields';
 import {useEffect, useRef, useState, useMemo} from 'react';
+import {trackInitiateCheckout} from '~/lib/metaPixelEvents';
 import {CUSTOM_CHECKOUT_STAMP_ACTION} from '~/lib/cartTracking';
 
 export function CartSummary({cart, layout}) {
@@ -137,6 +138,16 @@ export default function CartCheckoutActions({
       // Prevent navigation, show alert
       event.preventDefault();
       setShowAlert(true);
+    } else {
+      // **Added: Track Initiate Checkout Event**
+      trackInitiateCheckout(cart); // **Added Line**
+
+      // Navigate to checkout
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        console.error('Checkout URL is undefined.');
+      }
     }
   };
 
