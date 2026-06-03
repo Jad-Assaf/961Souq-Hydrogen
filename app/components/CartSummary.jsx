@@ -125,6 +125,7 @@ export default function CartCheckoutActions({
 }) {
   // **Added `cart` Parameter**
   const [showAlert, setShowAlert] = useState(false);
+  const checkoutTrackedRef = useRef(false);
 
   // Hide the alert if the subtotal drops below $5000
   useEffect(() => {
@@ -140,7 +141,10 @@ export default function CartCheckoutActions({
       setShowAlert(true);
     } else {
       // **Added: Track Initiate Checkout Event**
-      trackInitiateCheckout(cart); // **Added Line**
+      if (!checkoutTrackedRef.current) {
+        checkoutTrackedRef.current = true;
+        trackInitiateCheckout(cart); // **Added Line**
+      }
 
       // Navigate to checkout
       if (checkoutUrl) {

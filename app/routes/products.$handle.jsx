@@ -382,10 +382,18 @@ export function ProductForm({
   });
 
   const handleAddToCart = () => {
-    // Track the AddToCart event
-    trackAddToCart(product);
-    trackAddToCartGA(product);
     onAddToCart(product);
+  };
+
+  const handleCartAddSuccess = () => {
+    const trackingProduct = {
+      ...product,
+      selectedVariant,
+      quantity: safeQuantity,
+    };
+
+    trackAddToCart(trackingProduct, {}, {quantity: safeQuantity});
+    trackAddToCartGA(trackingProduct);
   };
 
   // Sync local state when the parent’s selectedVariant changes
@@ -623,6 +631,7 @@ export function ProductForm({
                 ]
               : []
           }
+          onCartAddSuccess={handleCartAddSuccess}
           contentId={product.id}
         >
           {selectedVariant?.price && Number(selectedVariant.price.amount) === 0
