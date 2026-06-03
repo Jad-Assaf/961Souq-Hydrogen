@@ -758,6 +758,105 @@ strong {
     color: #cdcdcd;
 }
 
+.product-authenticity {
+    position: relative;
+    max-width: 450px;
+    margin: 0 0 15px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(31, 122, 61, 0.14);
+    border-radius: 12px;
+    background:
+        linear-gradient(135deg, rgba(31, 122, 61, 0.08), rgba(255, 255, 255, 0) 42%),
+        #fff;
+    box-shadow: 0 10px 24px rgba(3, 7, 44, 0.08);
+}
+
+.product-authenticity::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 0;
+    width: 3px;
+    border-radius: 0 999px 999px 0;
+    background: #1f7a3d;
+}
+
+.product-authenticity__trigger {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 14px;
+    padding: 16px 18px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.product-authenticity__trigger:focus-visible {
+    outline: 2px solid rgba(31, 122, 61, 0.55);
+    outline-offset: -4px;
+}
+
+.product-authenticity__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #21a552, #12692f);
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 8px 18px rgba(31, 122, 61, 0.25);
+}
+
+.product-authenticity h2 {
+    margin: 0;
+    color: #03072c;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.product-authenticity__content {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    overflow: hidden;
+    transition:
+        max-height 320ms ease,
+        opacity 220ms ease,
+        transform 320ms ease;
+}
+
+.product-authenticity__content.is-open {
+    max-height: 160px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.product-authenticity p {
+    margin: 0;
+    padding: 0 18px 16px 66px;
+    color: #555c68;
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .product-authenticity__content {
+        transition: none;
+        transform: none;
+    }
+}
+
 .productPageDisclaimer {
     font-size: 11px;
     line-height: 15px;

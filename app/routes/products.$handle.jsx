@@ -691,6 +691,7 @@ export default function Product() {
   );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [authenticityOpen, setAuthenticityOpen] = useState(false);
   const productFAQRef = React.useRef(null);
 
   // ------------------------------
@@ -1068,6 +1069,36 @@ export default function Product() {
             </ul>
           </div>
           <hr className="productPage-hr" />
+          <section
+            className="product-authenticity"
+            aria-labelledby="product-authenticity-title"
+          >
+            <button
+              type="button"
+              className="product-authenticity__trigger"
+              aria-expanded={authenticityOpen}
+              aria-controls="product-authenticity-content"
+              onClick={() => setAuthenticityOpen((open) => !open)}
+            >
+              <span className="product-authenticity__icon" aria-hidden="true">
+                ✓
+              </span>
+              <h2 id="product-authenticity-title">Product Authenticity</h2>
+            </button>
+            <div
+              id="product-authenticity-content"
+              className={`product-authenticity__content ${
+                authenticityOpen ? 'is-open' : ''
+              }`}
+            >
+              <p>
+                Every product sold by 961 Souq is sourced from trusted suppliers
+                and verified before dispatch. We only list genuine items with
+                clear product details, warranty information, and after-sales
+                support.
+              </p>
+            </div>
+          </section>
           <ProductMetafields
             metafieldCondition={product.metafieldCondition}
             metafieldWarranty={product.metafieldWarranty}
