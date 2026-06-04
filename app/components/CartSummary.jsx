@@ -3,6 +3,7 @@ import {CartForm, Money} from '@shopify/hydrogen';
 import {CartTrackingFields} from './CartTrackingFields';
 import {useEffect, useRef, useState, useMemo} from 'react';
 import {trackInitiateCheckout} from '~/lib/metaPixelEvents';
+import {trackInitiateCheckoutGA} from '~/lib/googleAnalyticsEvents';
 import {CUSTOM_CHECKOUT_STAMP_ACTION} from '~/lib/cartTracking';
 
 export function CartSummary({cart, layout}) {
@@ -144,6 +145,7 @@ export default function CartCheckoutActions({
       if (!checkoutTrackedRef.current) {
         checkoutTrackedRef.current = true;
         trackInitiateCheckout(cart); // **Added Line**
+        trackInitiateCheckoutGA(cart);
       }
 
       // Navigate to checkout
