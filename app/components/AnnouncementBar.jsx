@@ -1,4 +1,19 @@
-const STORE_MAP_URL = 'https://maps.app.goo.gl/wKNzrfSVrLm7srkB7';
+import {useCallback, useEffect, useRef, useState} from 'react';
+
+const LOCATIONS = [
+  {
+    name: '961Souq Zalka',
+    detail: 'Zalka highway showroom',
+    mapSrc:
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d21093.419219079944!2d35.55484145!3d33.90311849999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f3dfcf5060a0d%3A0xf692c306dec18a7d!2s961Souq!5e1!3m2!1sen!2slb!4v1781004771672!5m2!1sen!2slb',
+  },
+  {
+    name: '961Souq Jal el Dib',
+    detail: 'Jal el Dib highway showroom',
+    mapSrc:
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d21093.419219079944!2d35.55484145!3d33.90311849999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f3f95e4fde8b1%3A0x33e6d50aeff26a83!2s961Souq!5e1!3m2!1sen!2slb!4v1781004785280!5m2!1sen!2slb',
+  },
+];
 
 const SOCIAL_LINKS = [
   {
@@ -24,21 +39,69 @@ const SOCIAL_LINKS = [
 ];
 
 export function AnnouncementBar() {
+  const [locationsOpen, setLocationsOpen] = useState(false);
+  const [locationsClosing, setLocationsClosing] = useState(false);
+  const closeTimerRef = useRef(null);
+
+  const openLocations = () => {
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+    }
+
+    setLocationsClosing(false);
+    setLocationsOpen(true);
+  };
+
+  const closeLocations = useCallback(() => {
+    setLocationsClosing(true);
+
+    closeTimerRef.current = window.setTimeout(() => {
+      setLocationsOpen(false);
+      setLocationsClosing(false);
+      closeTimerRef.current = null;
+    }, 220);
+  }, []);
+
+  useEffect(() => {
+    if (!locationsOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeLocations();
+      }
+    };
+
+    document.body.classList.add('locations-modal-open');
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.classList.remove('locations-modal-open');
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeLocations, locationsOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="header-announcement">
       <div className="header-announcement__inner">
-        <a
-          href={STORE_MAP_URL}
-          target="_blank"
-          rel="noreferrer"
+        <button
+          type="button"
           className="header-announcement__map"
-          aria-label="Open our Zalka showroom location in Google Maps"
+          aria-label="View our store locations"
+          onClick={openLocations}
         >
           <MapPinIcon className="header-announcement__map-icon" />
           <span className="header-announcement__map-prefix">
-            Visit our Zalka showroom
+            View our locations
           </span>
-        </a>
+        </button>
 
         <div className="header-announcement__social">
           <span className="header-announcement__social-label">Follow us</span>
@@ -56,7 +119,91 @@ export function AnnouncementBar() {
           ))}
         </div>
       </div>
+
+      {locationsOpen ? (
+        <div
+          className={
+            'locations-modal' +
+            (locationsClosing ? ' locations-modal--closing' : '')
+          }
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeLocations();
+            }
+          }}
+        >
+          <div
+            className="locations-modal__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="locations-modal-title"
+          >
+            <div className="locations-modal__header">
+              <div>
+                {/* <span className="locations-modal__eyebrow">961Souq</span> */}
+                <h2 id="locations-modal-title">Our locations</h2>
+              </div>
+              <button
+                type="button"
+                className="locations-modal__close"
+                aria-label="Close locations popup"
+                onClick={closeLocations}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            <div className="locations-modal__grid">
+              {LOCATIONS.map((location, index) => (
+                <article
+                  className="locations-modal__card"
+                  key={location.mapSrc}
+                >
+                  <div className="locations-modal__card-header">
+                    <span className="locations-modal__number">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <h3>{location.name}</h3>
+                      <p>{location.detail}</p>
+                    </div>
+                  </div>
+                  <div className="locations-modal__map-frame">
+                    <iframe
+                      src={location.mapSrc}
+                      title={`${location.name} map`}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function CloseIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
   );
 }
 
