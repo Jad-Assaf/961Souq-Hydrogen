@@ -4,12 +4,14 @@ const LOCATIONS = [
   {
     name: '961Souq Zalka',
     detail: 'Zalka highway showroom',
+    shareUrl: 'https://www.google.com/maps?cid=17767477914204473981',
     mapSrc:
       'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d21093.419219079944!2d35.55484145!3d33.90311849999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f3dfcf5060a0d%3A0xf692c306dec18a7d!2s961Souq!5e1!3m2!1sen!2slb!4v1781004771672!5m2!1sen!2slb',
   },
   {
     name: '961Souq Jal el Dib',
     detail: 'Jal el Dib highway showroom',
+    shareUrl: 'https://www.google.com/maps?cid=3739910783529806467',
     mapSrc:
       'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d21093.419219079944!2d35.55484145!3d33.90311849999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f3f95e4fde8b1%3A0x33e6d50aeff26a83!2s961Souq!5e1!3m2!1sen!2slb!4v1781004785280!5m2!1sen!2slb',
   },
@@ -41,7 +43,10 @@ const SOCIAL_LINKS = [
 export function AnnouncementBar() {
   const [locationsOpen, setLocationsOpen] = useState(false);
   const [locationsClosing, setLocationsClosing] = useState(false);
+  const [activeShareLocation, setActiveShareLocation] = useState(null);
+  const [shareStatus, setShareStatus] = useState(null);
   const closeTimerRef = useRef(null);
+  const shareTimerRef = useRef(null);
 
   const openLocations = () => {
     if (closeTimerRef.current) {
@@ -53,6 +58,8 @@ export function AnnouncementBar() {
   };
 
   const closeLocations = useCallback(() => {
+    setActiveShareLocation(null);
+    setShareStatus(null);
     setLocationsClosing(true);
 
     closeTimerRef.current = window.setTimeout(() => {
@@ -62,11 +69,59 @@ export function AnnouncementBar() {
     }, 220);
   }, []);
 
+  const markShareStatus = (status) => {
+    setShareStatus(status);
+
+    if (shareTimerRef.current) {
+      window.clearTimeout(shareTimerRef.current);
+    }
+
+    shareTimerRef.current = window.setTimeout(() => {
+      setShareStatus(null);
+      shareTimerRef.current = null;
+    }, 1800);
+  };
+
+  const copyShareText = async (text, status) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      markShareStatus(status);
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.setAttribute('readonly', '');
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      markShareStatus(status);
+    }
+  };
+
+  const getEmbedCode = (location) =>
+    `<iframe src="${location.mapSrc}" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+
+  const getShareText = (location) =>
+    `${location.name} - ${location.detail}\n${location.shareUrl}`;
+
+  const openShareSheet = (location) => {
+    setShareStatus(null);
+    setActiveShareLocation(location);
+  };
+
   useEffect(() => {
     if (!locationsOpen) return undefined;
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
+        if (activeShareLocation) {
+          setActiveShareLocation(null);
+          setShareStatus(null);
+          return;
+        }
+
         closeLocations();
       }
     };
@@ -78,12 +133,16 @@ export function AnnouncementBar() {
       document.body.classList.remove('locations-modal-open');
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [closeLocations, locationsOpen]);
+  }, [activeShareLocation, closeLocations, locationsOpen]);
 
   useEffect(() => {
     return () => {
       if (closeTimerRef.current) {
         window.clearTimeout(closeTimerRef.current);
+      }
+
+      if (shareTimerRef.current) {
+        window.clearTimeout(shareTimerRef.current);
       }
     };
   }, []);
@@ -164,10 +223,19 @@ export function AnnouncementBar() {
                     <span className="locations-modal__number">
                       {String(index + 1).padStart(2, '0')}
                     </span>
-                    <div>
+                    <div className="locations-modal__card-copy">
                       <h3>{location.name}</h3>
                       <p>{location.detail}</p>
                     </div>
+                    <button
+                      type="button"
+                      className="locations-modal__share"
+                      aria-label={`Share ${location.name}`}
+                      onClick={() => openShareSheet(location)}
+                    >
+                      <ShareIcon />
+                      <span>Share</span>
+                    </button>
                   </div>
                   <div className="locations-modal__map-frame">
                     <iframe
@@ -182,6 +250,132 @@ export function AnnouncementBar() {
               ))}
             </div>
           </div>
+
+          {activeShareLocation ? (
+            <div
+              className="locations-share-sheet"
+              role="presentation"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                  setActiveShareLocation(null);
+                  setShareStatus(null);
+                }
+              }}
+            >
+              <div
+                className="locations-share-sheet__panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="locations-share-title"
+              >
+                <div className="locations-share-sheet__header">
+                  <h3 id="locations-share-title">Share</h3>
+                  <button
+                    type="button"
+                    className="locations-share-sheet__close"
+                    aria-label="Close share popup"
+                    onClick={() => {
+                      setActiveShareLocation(null);
+                      setShareStatus(null);
+                    }}
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+
+                <div className="locations-share-sheet__preview">
+                  <span className="locations-share-sheet__preview-icon">
+                    <MapPinIcon />
+                  </span>
+                  <div>
+                    <strong>{activeShareLocation.name}</strong>
+                    <span>{activeShareLocation.detail}</span>
+                  </div>
+                </div>
+
+                <div className="locations-share-sheet__copy">
+                  <span>{activeShareLocation.shareUrl}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyShareText(activeShareLocation.shareUrl, 'link')
+                    }
+                  >
+                    {shareStatus === 'link' ? 'Copied' : 'Copy Link'}
+                  </button>
+                </div>
+
+                <div className="locations-share-sheet__actions">
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      getShareText(activeShareLocation),
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="locations-share-sheet__action"
+                  >
+                    <span className="locations-share-sheet__action-icon locations-share-sheet__action-icon--whatsapp">
+                      <WhatsAppIcon />
+                    </span>
+                    <span>WhatsApp</span>
+                  </a>
+                  <a
+                    href={`mailto:?subject=${encodeURIComponent(
+                      activeShareLocation.name,
+                    )}&body=${encodeURIComponent(
+                      getShareText(activeShareLocation),
+                    )}`}
+                    className="locations-share-sheet__action"
+                  >
+                    <span className="locations-share-sheet__action-icon locations-share-sheet__action-icon--gmail">
+                      <MailIcon />
+                    </span>
+                    <span>Gmail</span>
+                  </a>
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                      activeShareLocation.shareUrl,
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="locations-share-sheet__action"
+                  >
+                    <span className="locations-share-sheet__action-icon locations-share-sheet__action-icon--facebook">
+                      <FacebookIcon />
+                    </span>
+                    <span>Facebook</span>
+                  </a>
+                  <a
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                      activeShareLocation.name,
+                    )}&url=${encodeURIComponent(activeShareLocation.shareUrl)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="locations-share-sheet__action"
+                  >
+                    <span className="locations-share-sheet__action-icon locations-share-sheet__action-icon--x">
+                      <XIcon />
+                    </span>
+                    <span>X</span>
+                  </a>
+                  <button
+                    type="button"
+                    className="locations-share-sheet__action"
+                    onClick={() =>
+                      copyShareText(getEmbedCode(activeShareLocation), 'embed')
+                    }
+                  >
+                    <span className="locations-share-sheet__action-icon locations-share-sheet__action-icon--embed">
+                      <EmbedIcon />
+                    </span>
+                    <span>
+                      {shareStatus === 'embed' ? 'Copied' : 'Embed a map'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -203,6 +397,79 @@ function CloseIcon(props) {
     >
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+function ShareIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+      <path d="M16 6 12 2 8 6" />
+      <path d="M12 2v14" />
+    </svg>
+  );
+}
+
+function MailIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="M4 4h16v16H4z" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  );
+}
+
+function XIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="M13.7 10.6 21.1 2h-1.8l-6.4 7.5L7.8 2H2l7.8 11.4L2 22h1.8l6.8-7.9 5.4 7.9h5.8l-8.1-11.4Zm-2.4 2.8-.8-1.1-6.3-8.9H7l5 7.1.8 1.1 6.7 9.5h-2.8l-5.4-7.7Z" />
+    </svg>
+  );
+}
+
+function EmbedIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="m8 9-4 3 4 3" />
+      <path d="m16 9 4 3-4 3" />
+      <path d="m14 5-4 14" />
     </svg>
   );
 }
