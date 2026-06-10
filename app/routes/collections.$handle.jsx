@@ -414,7 +414,8 @@ export default function Collection() {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const currentSort = searchParams.get('sort') || 'default';
-  const [columns, setColumns] = useState(1);
+  const [columns, setColumns] = useState('default');
+
   const activeFilterKeys = Array.from(
     new Set(
       [...searchParams.keys()].filter((key) => key.startsWith('filter.')),
@@ -662,7 +663,9 @@ export default function Collection() {
               </p>
             ) : (
               <>
-                <div className={`products-grid grid-cols-${columns} w-[100%]`}>
+                <div
+                  className={`products-grid grid-cols-${columns} w-[100%]`}
+                >
                   {collection.products.nodes.map((product) => (
                     <ProductItem
                       key={product.id}
@@ -786,9 +789,9 @@ const ProductItem = ({product, columns}) => {
                 </div>
                 <img
                   srcSet={`
-                    ${product.featuredImage.url}&format=webp&width=400 300w,
-                    ${product.featuredImage.url}&format=webp&width=400 600w,
-                    ${product.featuredImage.url}&format=webp&width=400 1200w
+                    ${product.featuredImage.url}&format=webp&width=250 300w,
+                    ${product.featuredImage.url}&format=webp&width=250 600w,
+                    ${product.featuredImage.url}&format=webp&width=250 1200w
                   `}
                   alt={product.featuredImage.altText || product.title}
                   loading="lazy"

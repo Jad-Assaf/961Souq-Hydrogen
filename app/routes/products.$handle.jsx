@@ -1516,8 +1516,8 @@ const PRODUCT_FRAGMENT = `#graphql
       }
     }
 
-    # Fetch product images for SEO or fallback usage
-    images(first: 100) {
+    # Keep one image for SEO/fallback. Gallery media comes from the media field.
+    images(first: 1) {
       edges {
         node {
           __typename
@@ -1530,8 +1530,8 @@ const PRODUCT_FRAGMENT = `#graphql
       }
     }
 
-    # Add media for images / video (YouTube) / 3D, etc.
-    media(first: 100) {
+    # Add initial gallery media without pulling every product asset into SSR.
+    media(first: 20) {
       edges {
         node {
           __typename
