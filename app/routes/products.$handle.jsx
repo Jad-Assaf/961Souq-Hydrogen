@@ -1,7 +1,7 @@
 import '../styles/ProductPage.css';
 import React, {useEffect, useRef, useState} from 'react';
 import {redirect} from '@shopify/remix-oxygen';
-import {useLoaderData, useLocation} from '@remix-run/react';
+import {Await, useLoaderData, useLocation} from '@remix-run/react';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -261,24 +261,24 @@ async function loadCriticalData({context, params, request}) {
   // Extract the first image
   const firstImage = product.images?.edges?.[0]?.node?.url || null;
 
-  // Fetch related products
-  let relatedProducts = [];
+  // Fetch below-the-fold recommendations without blocking the product shell.
   let complementaryProducts = [];
   let complementaryProductsPageInfo = null;
   let complementaryProductsFetchedCount = 0;
   const showComplementaryProducts = shouldShowComplementaryProducts(product);
-
-  if (product?.id) {
-    const {productRecommendations} = await storefront.query(
-      RECOMMENDED_PRODUCTS_QUERY,
-      {
-        variables: {
-          productId: product.id,
-        },
-      },
-    );
-    relatedProducts = productRecommendations || [];
-  }
+  const relatedProducts = product?.id
+    ? storefront
+        .query(RECOMMENDED_PRODUCTS_QUERY, {
+          variables: {
+            productId: product.id,
+          },
+        })
+        .then(({productRecommendations}) => productRecommendations || [])
+        .catch((error) => {
+          console.error('Product recommendations fetch failed', error);
+          return [];
+        })
+    : Promise.resolve([]);
 
   if (showComplementaryProducts) {
     complementaryProductsPageInfo = {
@@ -1436,7 +1436,13 @@ export default function Product() {
 
       <div className="related-products-row">
         <div className="related-products">
-          <RelatedProductsRow products={relatedProducts || []} />
+          <React.Suspense fallback={null}>
+            <Await resolve={relatedProducts}>
+              {(resolvedRelatedProducts) => (
+                <RelatedProductsRow products={resolvedRelatedProducts || []} />
+              )}
+            </Await>
+          </React.Suspense>
         </div>
       </div>
       <div className="recently-viewed-container">

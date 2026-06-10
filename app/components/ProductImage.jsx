@@ -1,8 +1,6 @@
 import '../styles/ProductImage.css';
 import {useEffect, useState, useRef} from 'react';
-import Lightbox from 'yet-another-react-lightbox';
-import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
-import 'yet-another-react-lightbox/styles.css';
+import {createPortal} from 'react-dom';
 import {useSwipeable} from 'react-swipeable';
 
 const LeftArrowIcon = () => (
@@ -43,36 +41,28 @@ export function ProductImages({media, selectedVariantImage}) {
   thumbnailRefs.current = [];
   const imageRef = useRef(null);
 
-  // Preload an image given its URL
   const preloadImage = (url) => {
-    if (!url) return;
+    if (!url || typeof window === 'undefined') return;
     const img = new window.Image();
-    img.src = url;
+    img.src = `${url}&format=webp&width=600`;
   };
 
-  // Preload ALL images on mount (if they are MediaImage type)
-  useEffect(() => {
-    media.forEach(({node}) => {
-      if (node.__typename === 'MediaImage' && node.image?.url) {
-        preloadImage(node.image.url);
-      }
-    });
-  }, [media]);
-
-  // (Optional) Preload adjacent images as well
   useEffect(() => {
     const total = media.length;
     if (total === 0) return;
-    const nextIndex = (selectedIndex + 1) % total;
-    const prevIndex = (selectedIndex - 1 + total) % total;
-    const preloadURLs = [];
-    if (media[nextIndex]?.node?.__typename === 'MediaImage') {
-      preloadURLs.push(media[nextIndex].node.image.url);
+
+    const nearbyIndexes = new Set([
+      selectedIndex,
+      (selectedIndex + 1) % total,
+      (selectedIndex - 1 + total) % total,
+    ]);
+
+    for (const index of nearbyIndexes) {
+      const node = media[index]?.node;
+      if (node?.__typename === 'MediaImage') {
+        preloadImage(node.image?.url);
+      }
     }
-    if (media[prevIndex]?.node?.__typename === 'MediaImage') {
-      preloadURLs.push(media[prevIndex].node.image.url);
-    }
-    preloadURLs.forEach((url) => preloadImage(url));
   }, [selectedIndex, media]);
 
   // Update selected index if variant image is selected
@@ -180,20 +170,6 @@ export function ProductImages({media, selectedVariantImage}) {
     }
     return {thumbSrc, altText, isVideo};
   };
-
-  const lightboxSlides = media.map(({node}) => {
-    if (node.__typename === 'MediaImage') {
-      return {src: node.image.url};
-    } else if (node.__typename === 'ExternalVideo') {
-      return {src: node.embedUrl};
-    } else if (node.__typename === 'Video') {
-      const vidSource = node.sources?.[0]?.url;
-      return {src: vidSource || ''};
-    } else if (node.__typename === 'Model3d') {
-      return {src: ''};
-    }
-    return {src: ''};
-  });
 
   const selectedMedia = media[selectedIndex]?.node;
   const isVideoMedia =
@@ -328,31 +304,226 @@ export function ProductImages({media, selectedVariantImage}) {
         )}
       </div>
 
-      {/* Lightbox */}
       {isLightboxOpen && (
-        <Lightbox
-          open={isLightboxOpen}
-          close={() => setIsLightboxOpen(false)}
-          index={selectedIndex}
-          slides={lightboxSlides}
-          onIndexChange={setSelectedIndex}
-          plugins={[Fullscreen]}
-          controller={{
-            closeOnBackdropClick: true,
-          }}
-          carousel={{
-            // other carousel settings…
-            imageProps: {
-              onContextMenu: (e) => e.preventDefault(),
-              // Optional: disable text selection and dragging
-              draggable: false,
-              style: {userSelect: 'none'},
-            },
-          }}
+        <ProductLightbox
+          media={media}
+          selectedIndex={selectedIndex}
+          onClose={() => setIsLightboxOpen(false)}
+          onPrevious={doPrevImage}
+          onNext={doNextImage}
+          onSelect={setSelectedIndex}
         />
       )}
     </div>
   );
+}
+
+function ProductLightbox({
+  media,
+  selectedIndex,
+  onClose,
+  onPrevious,
+  onNext,
+  onSelect,
+}) {
+  const closeButtonRef = useRef(null);
+  const selectedMedia = media[selectedIndex]?.node;
+  const total = media.length;
+  const selectedImageUrl =
+    selectedMedia?.__typename === 'MediaImage'
+      ? selectedMedia.image?.url
+      : null;
+  const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(
+    selectedMedia?.__typename !== 'MediaImage',
+  );
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: onNext,
+    onSwipedRight: onPrevious,
+    trackMouse: true,
+  });
+
+  useEffect(() => {
+    setIsLightboxImageLoaded(selectedMedia?.__typename !== 'MediaImage');
+  }, [selectedImageUrl, selectedMedia?.__typename]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      } else if (event.key === 'ArrowLeft') {
+        onPrevious();
+      } else if (event.key === 'ArrowRight') {
+        onNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose, onNext, onPrevious]);
+
+  if (!selectedMedia) return null;
+
+  const renderLightboxMedia = () => {
+    if (selectedMedia.__typename === 'MediaImage') {
+      return (
+        <>
+          {!isLightboxImageLoaded ? (
+            <div className="product-lightbox__loader" aria-live="polite">
+              Loading image
+            </div>
+          ) : null}
+          <img
+            key={selectedMedia.id || selectedMedia.image.url}
+            src={`${selectedMedia.image.url}&format=webp&width=1400`}
+            alt={selectedMedia.image.altText || 'Product Image'}
+            className={`product-lightbox__image ${
+              isLightboxImageLoaded ? 'is-loaded' : 'is-loading'
+            }`}
+            draggable="false"
+            decoding="async"
+            onLoad={() => setIsLightboxImageLoaded(true)}
+            onContextMenu={(event) => event.preventDefault()}
+          />
+        </>
+      );
+    }
+
+    if (selectedMedia.__typename === 'ExternalVideo') {
+      return (
+        <iframe
+          src={selectedMedia.embedUrl}
+          title="Product video"
+          className="product-lightbox__iframe"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      );
+    }
+
+    if (selectedMedia.__typename === 'Video' && selectedMedia.sources?.[0]) {
+      return (
+        <video className="product-lightbox__video" controls autoPlay>
+          <source
+            src={selectedMedia.sources[0].url}
+            type={selectedMedia.sources[0].mimeType || 'video/mp4'}
+          />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+
+    return (
+      <div className="product-lightbox__unsupported">
+        3D Model preview not implemented
+      </div>
+    );
+  };
+
+  const lightboxMarkup = (
+    <div
+      className="product-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Product media viewer"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <button
+        ref={closeButtonRef}
+        type="button"
+        className="product-lightbox__close"
+        aria-label="Close product media viewer"
+        onClick={onClose}
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+
+      {total > 1 ? (
+        <button
+          type="button"
+          className="product-lightbox__nav product-lightbox__nav--prev"
+          aria-label="Previous media"
+          onClick={onPrevious}
+        >
+          <LeftArrowIcon />
+        </button>
+      ) : null}
+
+      <div className="product-lightbox__stage" {...swipeHandlers}>
+        {renderLightboxMedia()}
+      </div>
+
+      {total > 1 ? (
+        <button
+          type="button"
+          className="product-lightbox__nav product-lightbox__nav--next"
+          aria-label="Next media"
+          onClick={onNext}
+        >
+          <RightArrowIcon />
+        </button>
+      ) : null}
+
+      {total > 1 ? (
+        <div className="product-lightbox__footer">
+          <span className="product-lightbox__counter">
+            {selectedIndex + 1} / {total}
+          </span>
+          <div className="product-lightbox__thumbs">
+            {media.map(({node}, index) => {
+              const isActive = index === selectedIndex;
+              const thumbSrc =
+                node.__typename === 'MediaImage'
+                  ? node.image?.url
+                  : node.__typename === 'ExternalVideo'
+                  ? 'https://img.icons8.com/color/480/youtube-play.png?quality=50'
+                  : node.__typename === 'Video'
+                  ? 'https://img.icons8.com/fluency/480/video.png'
+                  : '';
+
+              return (
+                <button
+                  key={node.id || index}
+                  type="button"
+                  className={`product-lightbox__thumb ${
+                    isActive ? 'is-active' : ''
+                  }`}
+                  aria-label={`View media ${index + 1}`}
+                  aria-current={isActive ? 'true' : undefined}
+                  onClick={() => onSelect(index)}
+                >
+                  {thumbSrc ? (
+                    <img
+                      src={`${thumbSrc}&format=webp&width=120`}
+                      alt=""
+                      width="56"
+                      height="56"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span>3D</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  if (typeof document === 'undefined') return lightboxMarkup;
+
+  return createPortal(lightboxMarkup, document.body);
 }
 
 /** @typedef {import('storefrontapi.generated').ProductFragment} ProductFragment */
