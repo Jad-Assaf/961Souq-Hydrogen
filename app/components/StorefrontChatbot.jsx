@@ -2,10 +2,10 @@ import {Image} from '@shopify/hydrogen';
 import {Link, useRevalidator} from 'react-router';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useAside} from './Aside';
+import {ChatbotIcon, STOREFRONT_CHATBOT_OPEN_EVENT} from './chatbotShared';
 
 const STORAGE_KEY = 'storefront-chatbot-state-v2';
 const LEGACY_STORAGE_KEY = 'storefront-chatbot-history-v1';
-export const STOREFRONT_CHATBOT_OPEN_EVENT = 'storefront-chatbot:open';
 const STARTER_PROMPTS = [
   {label: 'Find a laptop', question: 'I need a good gaming laptop.'},
   {
@@ -313,27 +313,6 @@ function persistChatState(state) {
   window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 }
 
-export function ChatbotIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M8 12H8.009M11.991 12H12M15.991 12H16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function SendIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -417,7 +396,7 @@ function ChatResultCards({cards}) {
   );
 }
 
-export default function StorefrontChatbot() {
+export default function StorefrontChatbot({initialOpen = false}) {
   const [hasHydrated, setHasHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -427,16 +406,23 @@ export default function StorefrontChatbot() {
   const [pendingCartOpen, setPendingCartOpen] = useState('idle');
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
+  const initialOpenRef = useRef(initialOpen);
   const {open: openAside} = useAside();
   const revalidator = useRevalidator();
 
   useEffect(() => {
     const storedState = loadStoredChatState();
     setMessages(storedState.messages);
-    setIsOpen(storedState.isOpen);
+    setIsOpen(storedState.isOpen || initialOpenRef.current);
     setInput(storedState.input);
     setHasHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (hasHydrated && initialOpen) {
+      setIsOpen(true);
+    }
+  }, [hasHydrated, initialOpen]);
 
   useEffect(() => {
     if (!hasHydrated) return;

@@ -416,6 +416,19 @@ export default function Collection() {
   const currentSort = searchParams.get('sort') || 'default';
   const [columns, setColumns] = useState('default');
 
+  useEffect(() => {
+    if (columns !== 'default' || typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const mobileQuery = window.matchMedia('(max-width: 768px)');
+    if (mobileQuery.matches) {
+      setColumns(1);
+    }
+
+    return undefined;
+  }, [columns]);
+
   const activeFilterKeys = Array.from(
     new Set(
       [...searchParams.keys()].filter((key) => key.startsWith('filter.')),

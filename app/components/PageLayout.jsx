@@ -1,11 +1,13 @@
 import {Await} from '@remix-run/react';
-import {Suspense} from 'react';
+import {lazy, Suspense, useEffect, useState} from 'react';
 import {Aside} from '~/components/Aside';
 import {Header} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {Footer} from './Footer';
 import MobileBottomNavigation from './MobileBottomNavigation';
-import StorefrontChatbot from './StorefrontChatbot';
+import {STOREFRONT_CHATBOT_OPEN_EVENT} from './chatbotShared';
+
+const StorefrontChatbot = lazy(() => import('./StorefrontChatbot'));
 
 const shopMenuData = [
   {title: 'Apple', link: '/collections/apple'},
@@ -82,7 +84,7 @@ export function PageLayout({
         </Suspense>
       ) : null}
       <main>{children}</main>
-      <StorefrontChatbot />
+      <LazyStorefrontChatbot />
       <a
         href="https://wa.me/96170961961"
         target="_blank"
@@ -157,6 +159,30 @@ function CartAside({cart}) {
         </Await>
       </Suspense>
     </Aside>
+  );
+}
+
+function LazyStorefrontChatbot() {
+  const [shouldOpenOnMount, setShouldOpenOnMount] = useState(false);
+
+  useEffect(() => {
+    const handleOpenRequest = () => {
+      setShouldOpenOnMount(true);
+    };
+
+    window.addEventListener(STOREFRONT_CHATBOT_OPEN_EVENT, handleOpenRequest);
+    return () => {
+      window.removeEventListener(
+        STOREFRONT_CHATBOT_OPEN_EVENT,
+        handleOpenRequest,
+      );
+    };
+  }, []);
+
+  return (
+    <Suspense fallback={null}>
+      <StorefrontChatbot initialOpen={shouldOpenOnMount} />
+    </Suspense>
   );
 }
 
