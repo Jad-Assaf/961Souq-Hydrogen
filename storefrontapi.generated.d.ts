@@ -2327,6 +2327,19 @@ export type ChatbotProductDetailsQuery = {
   >;
 };
 
+export type ChatbotProductVariantForCartQueryVariables = StorefrontAPI.Exact<{
+  id: StorefrontAPI.Scalars['ID']['input'];
+}>;
+
+export type ChatbotProductVariantForCartQuery = {
+  node?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.ProductVariant, 'id' | 'title' | 'availableForSale'> & {
+      price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+      product: Pick<StorefrontAPI.Product, 'title' | 'handle'>;
+    }
+  >;
+};
+
 export type ComplementarySourceProductQueryVariables = StorefrontAPI.Exact<{
   handle: StorefrontAPI.Scalars['String']['input'];
 }>;
@@ -2616,7 +2629,7 @@ export type GetMenuQuery = {
             }
           | ({__typename: 'Collection'} & Pick<
               StorefrontAPI.Collection,
-              'id' | 'title' | 'description' | 'handle'
+              'id' | 'title' | 'handle'
             > & {
                 image?: StorefrontAPI.Maybe<
                   Pick<StorefrontAPI.Image, 'url' | 'altText'>
@@ -2645,7 +2658,6 @@ export type ProductItemFragment = Pick<
   | 'vendor'
   | 'productType'
   | 'tags'
-  | 'description'
   | 'availableForSale'
 > & {
   featuredImage?: StorefrontAPI.Maybe<
@@ -2717,7 +2729,6 @@ export type CollectionQuery = {
             | 'vendor'
             | 'productType'
             | 'tags'
-            | 'description'
             | 'availableForSale'
           > & {
             featuredImage?: StorefrontAPI.Maybe<
@@ -3635,7 +3646,7 @@ interface GeneratedQueryTypes {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };
-  '#graphql\n  query Catalog(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    products(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        ...AllCollectionsProductItem\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n  #graphql\n  fragment ProductItem on Product {\n    id\n    handle\n    title\n    vendor\n    productType\n    tags\n    description\n    availableForSale\n    featuredImage {\n      altText\n      url\n    }\n    variants(first: 2) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        image {\n          url\n          altText\n        }\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n        title\n      }\n    }\n  }\n\n': {
+  '#graphql\n  query Catalog(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    products(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        ...AllCollectionsProductItem\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n  #graphql\n  fragment ProductItem on Product {\n    id\n    handle\n    title\n    vendor\n    productType\n    tags\n    availableForSale\n    featuredImage {\n      altText\n      url\n    }\n    variants(first: 2) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        image {\n          url\n          altText\n        }\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n        title\n      }\n    }\n  }\n\n': {
     return: CatalogQuery;
     variables: CatalogQueryVariables;
   };
@@ -3759,6 +3770,10 @@ interface GeneratedQueryTypes {
     return: ChatbotProductDetailsQuery;
     variables: ChatbotProductDetailsQueryVariables;
   };
+  '#graphql\n  query ChatbotProductVariantForCart($id: ID!) {\n    node(id: $id) {\n      ... on ProductVariant {\n        id\n        title\n        availableForSale\n        price {\n          amount\n          currencyCode\n        }\n        product {\n          title\n          handle\n        }\n      }\n    }\n  }\n': {
+    return: ChatbotProductVariantForCartQuery;
+    variables: ChatbotProductVariantForCartQueryVariables;
+  };
   '#graphql\n  query ComplementarySourceProduct($handle: String!) {\n    product(handle: $handle) {\n      id\n      title\n      vendor\n      productType\n      tags\n    }\n  }\n': {
     return: ComplementarySourceProductQuery;
     variables: ComplementarySourceProductQueryVariables;
@@ -3807,11 +3822,11 @@ interface GeneratedQueryTypes {
     return: CartGetCollectionByHandleQuery;
     variables: CartGetCollectionByHandleQueryVariables;
   };
-  '#graphql\n  query GetMenu($handle: String!) {\n    menu(handle: $handle) {\n      items {\n        title\n        url\n        resource {\n          __typename\n          ... on Collection {\n            id\n            title\n            description\n            handle\n            image {\n              url\n              altText\n            }\n            products(first: 1) {\n              nodes {\n                id\n                title\n                featuredImage {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query GetMenu($handle: String!) {\n    menu(handle: $handle) {\n      items {\n        title\n        url\n        resource {\n          __typename\n          ... on Collection {\n            id\n            title\n            handle\n            image {\n              url\n              altText\n            }\n            products(first: 1) {\n              nodes {\n                id\n                title\n                featuredImage {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: GetMenuQuery;
     variables: GetMenuQueryVariables;
   };
-  '#graphql\n  #graphql\n  fragment ProductItem on Product {\n    id\n    handle\n    title\n    vendor\n    productType\n    tags\n    description\n    availableForSale\n    featuredImage {\n      altText\n      url\n    }\n    variants(first: 2) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        image {\n          url\n          altText\n        }\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n        title\n      }\n    }\n  }\n\n  query Collection(\n    $handle: String!\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n    $filters: [ProductFilter!]\n    $sortKey: ProductCollectionSortKeys\n    $reverse: Boolean\n  ) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      seo {\n        title\n        description\n      }\n      image {\n        url\n        altText\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor,\n        filters: $filters,\n        sortKey: $sortKey,\n        reverse: $reverse\n      ) {\n        filters {\n          id\n          label\n          type\n          values {\n            id\n            label\n            count\n            input\n          }\n        }\n        nodes {\n          ...ProductItem\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  #graphql\n  fragment ProductItem on Product {\n    id\n    handle\n    title\n    vendor\n    productType\n    tags\n    availableForSale\n    featuredImage {\n      altText\n      url\n    }\n    variants(first: 2) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        image {\n          url\n          altText\n        }\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n        title\n      }\n    }\n  }\n\n  query Collection(\n    $handle: String!\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n    $filters: [ProductFilter!]\n    $sortKey: ProductCollectionSortKeys\n    $reverse: Boolean\n  ) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      seo {\n        title\n        description\n      }\n      image {\n        url\n        altText\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor,\n        filters: $filters,\n        sortKey: $sortKey,\n        reverse: $reverse\n      ) {\n        filters {\n          id\n          label\n          type\n          values {\n            id\n            label\n            count\n            input\n          }\n        }\n        nodes {\n          ...ProductItem\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };

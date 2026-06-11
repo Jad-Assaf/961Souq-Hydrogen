@@ -73,10 +73,6 @@
     grid-template-columns: repeat(1, 1fr);
 }
 
-.grid-cols-default {
-    grid-template-columns: repeat(5, 1fr);
-}
-
 .grid-cols-2 {
     grid-template-columns: repeat(2, 1fr);
 }
@@ -190,12 +186,10 @@
     color: #232323;
 }
 
-.grid-cols-default .product-description,
 .grid-cols-2 .product-description,
 .grid-cols-3 .product-description,
 .grid-cols-4 .product-description,
 .grid-cols-5 .product-description,
-.grid-cols-default .product-info-container .product-form,
 .grid-cols-2 .product-info-container .product-form,
 .grid-cols-3 .product-info-container .product-form,
 .grid-cols-4 .product-info-container .product-form,
@@ -229,66 +223,6 @@
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
-}
-
-@media (max-width: 768px) {
-    .grid-cols-default {
-        grid-template-columns: repeat(1, 1fr);
-    }
-
-    .grid-cols-default .product-item-collection {
-        min-width: 95% !important;
-        margin: auto;
-    }
-
-    .grid-cols-default .collection-product-link {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        align-items: flex-start;
-        width: 50% !important;
-    }
-
-    .grid-cols-default .collection-product-image {
-        filter: blur(0px);
-        opacity: 1;
-        width: 100%;
-        height: auto;
-        margin: 0 !important;
-    }
-
-    .grid-cols-default .price-container {
-        min-height: 20px !important;
-        display: block !important;
-    }
-
-    .grid-cols-default .product-price {
-        min-height: unset !important;
-    }
-
-    .grid-cols-default .product-info-container {
-        width: 80%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding-top: 10px;
-    }
-
-    .grid-cols-default .product-info-container .add-to-cart-button {
-        display: block;
-        border-radius: 5px;
-        width: 85% !important;
-    }
-
-    .collection .grid-cols-default h4 {
-        font-size: 14px !important;
-    }
-
-    .grid-cols-default .mobile-container {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
 }
 
 .view-container {

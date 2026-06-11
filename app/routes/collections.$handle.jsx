@@ -19,10 +19,14 @@ import {
 import React, {useEffect, useRef, useState} from 'react';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
-import {FiltersDrawer, ShopifyFilterForm} from '~/components/FiltersDrawer';
+import {ShopifyFilterForm} from '~/components/FiltersDrawer';
 import {hasPreOrderTag} from '~/lib/productTags';
 import WishlistButton from '~/components/WishlistButton';
 import {withCollectionFallbackImage} from '~/lib/collectionImage';
+
+const MobileFiltersDrawer = React.lazy(
+  () => import('~/components/MobileFiltersDrawer'),
+);
 
 const SOCIAL_SHARE_IMAGE =
   'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logo-photo.jpg?v=1772628583';
@@ -414,10 +418,10 @@ export default function Collection() {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const currentSort = searchParams.get('sort') || 'default';
-  const [columns, setColumns] = useState('default');
+  const [columns, setColumns] = useState(5);
 
   useEffect(() => {
-    if (columns !== 'default' || typeof window === 'undefined') {
+    if (typeof window === 'undefined') {
       return undefined;
     }
 
@@ -427,7 +431,7 @@ export default function Collection() {
     }
 
     return undefined;
-  }, [columns]);
+  }, []);
 
   const activeFilterKeys = Array.from(
     new Set(
@@ -653,12 +657,16 @@ export default function Collection() {
             ) : null}
           </button>
         </div>
-        <FiltersDrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          filters={collection.products.filters}
-          activeFiltersCount={activeFiltersCount}
-        />
+        {isDrawerOpen ? (
+          <React.Suspense fallback={null}>
+            <MobileFiltersDrawer
+              isOpen={isDrawerOpen}
+              onClose={() => setIsDrawerOpen(false)}
+              filters={collection.products.filters}
+              activeFiltersCount={activeFiltersCount}
+            />
+          </React.Suspense>
+        ) : null}
       </div>
 
       <hr className="col-hr" />
@@ -953,7 +961,6 @@ const MENU_QUERY = `#graphql
           ... on Collection {
             id
             title
-            description
             handle
             image {
               url
@@ -984,7 +991,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     vendor
     productType
     tags
-    description
     availableForSale
     featuredImage {
       altText

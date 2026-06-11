@@ -23,7 +23,6 @@ import {normalizeHostname, resolveCheckoutDomain} from '~/lib/shopifyAnalytics';
 import React, {useEffect, useState} from 'react';
 import ClarityTracker from './components/ClarityTracker';
 import MetaPixel from './components/MetaPixel';
-import {SearchProvider} from './lib/searchContext.jsx';
 import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
 import {AttributionTracker} from './components/AttributionTracker';
@@ -380,18 +379,14 @@ export function Layout({children}) {
               consent={data.consent}
               cookieDomain={SHOPIFY_COOKIE_DOMAIN}
             >
-              <SearchProvider>
-                <WishlistProvider>
-                  <PageLayout {...data}>{children}</PageLayout>
-                </WishlistProvider>
-              </SearchProvider>
+              <WishlistProvider>
+                <PageLayout {...data}>{children}</PageLayout>
+              </WishlistProvider>
             </Analytics.Provider>
           ) : (
-            <SearchProvider>
-              <WishlistProvider>
-                <PageLayout>{children}</PageLayout>
-              </WishlistProvider>
-            </SearchProvider>
+            <WishlistProvider>
+              <PageLayout>{children}</PageLayout>
+            </WishlistProvider>
           )}
         </div>
         <InstantScrollRestoration />

@@ -14,9 +14,7 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import {useAside} from '~/components/Aside';
 import {RECOMMENDED_PRODUCTS_QUERY} from '~/lib/fragments';
 import RelatedProductsRow from '~/components/RelatedProducts';
-import ComplementaryProductsRow from '~/components/ComplementaryProductsRow';
 import {ProductMetafields} from '~/components/Metafields';
-import RecentlyViewedProducts from '../components/RecentlyViewed';
 import {trackAddToCart, trackViewContent} from '~/lib/metaPixelEvents';
 import {trackAddToCartGA} from '~/lib/googleAnalyticsEvents';
 import {hasPreOrderTag} from '~/lib/productTags';
@@ -26,6 +24,13 @@ import {
 } from '~/lib/complementaryCategories';
 import WishlistButton from '~/components/WishlistButton';
 import AskAIButton from '~/components/AskAIButton';
+
+const ComplementaryProductsRow = React.lazy(
+  () => import('~/components/ComplementaryProductsRow'),
+);
+const RecentlyViewedProducts = React.lazy(
+  () => import('../components/RecentlyViewed'),
+);
 
 const SOCIAL_SHARE_IMAGE =
   'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/logo-photo.jpg?v=1772628583';
@@ -244,6 +249,7 @@ async function loadCriticalData({context, params, request}) {
       handle,
       selectedOptions: getSelectedProductOptions(request) || [],
     },
+    cache: storefront.CacheShort(),
   });
 
   if (!product) {
@@ -272,6 +278,7 @@ async function loadCriticalData({context, params, request}) {
           variables: {
             productId: product.id,
           },
+          cache: storefront.CacheShort(),
         })
         .then(({productRecommendations}) => productRecommendations || [])
         .catch((error) => {
@@ -1124,14 +1131,16 @@ export default function Product() {
 
       {showComplementaryProducts ? (
         <div className="complementary-products-row">
-          <ComplementaryProductsRow
-            initialProducts={complementaryProducts || []}
-            initialPageInfo={complementaryProductsPageInfo}
-            initialFetchedCount={complementaryProductsFetchedCount || 0}
-            productHandle={product.handle}
-            sourceProduct={product}
-            title="Pair it with"
-          />
+          <React.Suspense fallback={null}>
+            <ComplementaryProductsRow
+              initialProducts={complementaryProducts || []}
+              initialPageInfo={complementaryProductsPageInfo}
+              initialFetchedCount={complementaryProductsFetchedCount || 0}
+              productHandle={product.handle}
+              sourceProduct={product}
+              title="Pair it with"
+            />
+          </React.Suspense>
         </div>
       ) : null}
 
@@ -1446,7 +1455,9 @@ export default function Product() {
         </div>
       </div>
       <div className="recently-viewed-container">
-        <RecentlyViewedProducts currentProductId={product.id} />
+        <React.Suspense fallback={null}>
+          <RecentlyViewedProducts currentProductId={product.id} />
+        </React.Suspense>
       </div>
     </div>
   );

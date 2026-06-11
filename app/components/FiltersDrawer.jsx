@@ -1,5 +1,7 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {useSearchParams, useNavigate} from '@remix-run/react';
+
+export {default as FiltersDrawer} from './MobileFiltersDrawer';
 
 export function ShopifyFilterForm({filters}) {
   const [searchParams] = useSearchParams();
@@ -261,128 +263,6 @@ export function ShopifyFilterForm({filters}) {
           </div>
         );
       })}
-    </div>
-  );
-}
-
-export function FiltersDrawer({
-  isOpen,
-  onClose,
-  filters,
-  activeFiltersCount = 0,
-}) {
-  const drawerPanelRef = useRef(null);
-  const startYRef = useRef(0);
-  const currentYRef = useRef(0);
-  const [dragging, setDragging] = useState(false);
-  const dragThreshold = 80; // pixels to pull down to close
-
-  // Disable background scroll when drawer is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      // Reset transform when the drawer is opened
-      if (drawerPanelRef.current) {
-        drawerPanelRef.current.style.transform = 'translateY(0)';
-      }
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  // Handlers for dragging the drawer handle
-  const handleDragStart = (e) => {
-    setDragging(true);
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    startYRef.current = clientY;
-  };
-
-  const handleDragMove = (e) => {
-    if (!dragging) return;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    currentYRef.current = clientY;
-    const deltaY = clientY - startYRef.current;
-    if (drawerPanelRef.current && deltaY > 0) {
-      // Only allow dragging downward
-      drawerPanelRef.current.style.transform = `translateY(${deltaY}px)`;
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDragging(false);
-    const deltaY = currentYRef.current - startYRef.current;
-    if (deltaY > dragThreshold) {
-      // Close the drawer if dragged down beyond the threshold
-      onClose();
-    } else {
-      // Reset to fully open if not dragged enough
-      if (drawerPanelRef.current) {
-        drawerPanelRef.current.style.transform = 'translateY(0)';
-      }
-    }
-  };
-
-  const handleOverlayClick = (event) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleOverlayKeyDown = (event) => {
-    if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onClose();
-    }
-  };
-
-  return (
-    <div
-      className={`drawer-overlay ${isOpen ? 'open' : ''}`}
-      onClick={handleOverlayClick}
-      onKeyDown={handleOverlayKeyDown}
-      role="button"
-      tabIndex={0}
-      aria-label="Close filters drawer"
-    >
-      {/* Prevent clicks on the drawer panel from closing the drawer */}
-      <div
-        ref={drawerPanelRef}
-        className={`drawer-panel ${isOpen ? 'open' : ''}`}
-      >
-        <div className="drawer-header-row">
-          <h3>
-            Filters
-            {activeFiltersCount > 0 ? (
-              <span className="drawer-active-count">{activeFiltersCount}</span>
-            ) : null}
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="drawer-close-btn"
-            aria-label="Close filters"
-          >
-            ×
-          </button>
-        </div>
-        <button
-          type="button"
-          className="drawer-header"
-          onMouseDown={handleDragStart}
-          onTouchStart={handleDragStart}
-          onMouseMove={handleDragMove}
-          onTouchMove={handleDragMove}
-          onMouseUp={handleDragEnd}
-          onTouchEnd={handleDragEnd}
-          aria-label="Drag down to close filters drawer"
-        >
-          <div className="drawer-handle"></div>
-        </button>
-        <ShopifyFilterForm filters={filters} />
-      </div>
     </div>
   );
 }

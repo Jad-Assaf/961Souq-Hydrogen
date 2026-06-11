@@ -6,8 +6,6 @@ import {useWishlist} from '~/lib/WishlistContext';
 import {useOptimisticCart} from '@shopify/hydrogen';
 import defaultLogoSvgRaw from '~/assets/961_Souq.svg?raw';
 
-// import StorefrontSearch from './StorefrontSearch';
-
 function getCartCount(cart) {
   if (!cart) return 0;
 
@@ -624,7 +622,6 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
           </div>
           <LazyTypesenseSearch placeholder="Search Products" />
           {/* <InstantSearchBar action="/search" /> */}
-          {/* <AlgoliaSearch /> */}
           <div className="header-ctas">
             <NavLink
               prefetch="intent"

@@ -154,6 +154,26 @@ const PRODUCT_DETAILS_QUERY = `#graphql
   }
 `;
 
+const PRODUCT_VARIANT_FOR_CART_QUERY = `#graphql
+  query ChatbotProductVariantForCart($id: ID!) {
+    node(id: $id) {
+      ... on ProductVariant {
+        id
+        title
+        availableForSale
+        price {
+          amount
+          currencyCode
+        }
+        product {
+          title
+          handle
+        }
+      }
+    }
+  }
+`;
+
 const TOOL_DEFINITIONS = [
   {
     type: 'function',
@@ -237,7 +257,7 @@ const TOOL_DEFINITIONS = [
     type: 'function',
     name: 'add_to_cart',
     description:
-      'Add a specific product variant to the current cart after the shopper has chosen the exact item.',
+      'Add a specific product variant to the current cart after the shopper has chosen the exact item. Products with a zero price cannot be added; tell the shopper to contact support for pricing.',
     parameters: {
       type: 'object',
       additionalProperties: false,
@@ -726,6 +746,7 @@ function buildInstructions({pageContext, currentProductHandle}) {
     'Always use tools for factual store data. Never invent product availability, pricing, policies, cart contents, or order details.',
     'For shopping or recommendation requests, search the store catalog first before answering.',
     'If the shopper has not chosen an exact variant or quantity, ask a short follow-up question before adding to cart.',
+    'Never add products with a zero price to the cart. A zero price means call for price; tell the shopper to contact support for pricing.',
     'Respond with simple HTML only. Allowed tags: p, br, ul, ol, li, strong, em, a.',
     'Do not use Markdown.',
     'Use relative links only, such as <a href="/account/login">sign in</a> or <a href="/cart">cart</a>. Never output raw URLs or full domains.',
@@ -1089,6 +1110,28 @@ async function addToCart(args, toolContext) {
     return {ok: false, error: 'Missing merchandise_id.'};
   }
 
+  const variant = await getProductVariantForCart(merchandiseId, toolContext);
+
+  if (!variant) {
+    return {
+      ok: false,
+      error: 'Unable to find that product variant.',
+    };
+  }
+
+  if (isZeroOrNegativeMoney(variant.price)) {
+    return {
+      ok: false,
+      blocked_reason: 'call_for_price',
+      product_title: variant.product?.title || null,
+      product_handle: variant.product?.handle || null,
+      price: formatMoney(variant.price),
+      error: `${
+        variant.product?.title || 'This product'
+      } is call for price and cannot be added to the cart. Please contact support for pricing.`,
+    };
+  }
+
   const result = await toolContext.context.cart.addLines([
     {merchandiseId, quantity},
   ]);
@@ -1112,6 +1155,18 @@ async function addToCart(args, toolContext) {
     message: 'Item added to cart.',
     cart: summarizeCart(result?.cart || null),
   };
+}
+
+async function getProductVariantForCart(merchandiseId, toolContext) {
+  const {node} = await toolContext.context.storefront.query(
+    PRODUCT_VARIANT_FOR_CART_QUERY,
+    {
+      variables: {id: merchandiseId},
+      cache: toolContext.context.storefront.CacheShort(),
+    },
+  );
+
+  return node?.id === merchandiseId ? node : null;
 }
 
 async function updateCartLine(args, toolContext) {
@@ -1787,6 +1842,11 @@ function formatMoney(money) {
   }
 
   return `${money.amount} ${money.currencyCode}`;
+}
+
+function isZeroOrNegativeMoney(money) {
+  const amount = Number(money?.amount);
+  return Number.isFinite(amount) && amount <= 0;
 }
 
 function formatPriceRange(priceRange) {
