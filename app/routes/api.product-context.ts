@@ -7,7 +7,15 @@ This warranty applies to All Products, purchased from 961 Souq. The warranty cov
 `;
 
 const SHIPPING_POLICY = `Shipping Policy:
-We offer shipping across all Lebanon, facilitated by our dedicated delivery team servicing the Beirut district and through our partnership with Wakilni for orders beyond Beirut.
+961 Souq does not offer free delivery.
+
+Delivery options:
+- Inside Beirut same day delivery, big package 5 to 50 kg
+- Inside Beirut same day delivery, 3 to 5 kg
+- Outside Beirut 3 to 5 days delivery
+- Outside Beirut same day delivery, 3 to 5 kg
+
+For delivery pricing, contact support.
 `;
 
 export async function loader({request, context}: LoaderFunctionArgs) {

@@ -61,7 +61,7 @@ export const TopProductSections = ({collection}) => {
         </div>
       </div>
 
-      <ProductRow products={filteredProducts} showFreeShippingTags />
+      <ProductRow products={filteredProducts} />
     </div>
   );
 };

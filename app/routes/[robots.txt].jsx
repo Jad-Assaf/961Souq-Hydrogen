@@ -75,7 +75,6 @@ Crawl-delay: 1
 function generalDisallowRules({shopId, sitemapUrl}) {
   return `Disallow: /admin
 Disallow: /facebookConversions
-Disallow: /search-old
 Disallow: /wp-content
 Disallow: /wp-admin
 Disallow: /wp-*

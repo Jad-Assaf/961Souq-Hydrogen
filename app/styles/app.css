@@ -1447,20 +1447,6 @@ button {
   transition: all 0.1s ease;
 }
 
-.product-free-shipping {
-  align-items: center;
-  display: flex;
-  justify-content: space-evenly;
-  width: 80%;
-  margin: 5px auto;
-
-  span {
-    font-size: 14px;
-    color: #232323;
-    font-weight: 500;
-  }
-}
-
 .product-card:hover .product-price {
   color: #40d4da;
 }
@@ -5091,7 +5077,7 @@ svg.icon.icon--full-color {
   margin: 50px auto 20px;
 }
 
-/* app/styles/search-test.css */
+/* Search page */
 
 /* Layout */
 
@@ -5876,70 +5862,57 @@ svg.icon.icon--full-color {
 /* Pagination */
 
 .search-pagination {
-  margin-top: 2rem;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 12px;
+  margin: 22px 0 8px;
+  padding: 10px 0;
 }
 
-.search-pagination-inner {
-  display: inline-flex;
-  gap: 0.75rem;
-  padding: 0.4rem;
-  border-radius: 999px;
-  background: rgba(248, 250, 252, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-}
-
-.search-pagination-button {
+.search-pagination-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 0.9rem;
+  min-width: 110px;
+  height: 40px;
+  padding: 0 14px;
   border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #111827;
+  border: 1px solid rgba(64, 137, 255, 0.43);
+  background: rgba(255, 255, 255, 1);
+  color: #000;
   text-decoration: none;
-  border: 1px solid transparent;
-  transition:
-    background 0.12s ease,
-    border-color 0.12s ease,
-    transform 0.1s ease,
-    box-shadow 0.12s ease,
-    color 0.12s ease;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: transform 140ms ease, background 140ms ease,
+    border-color 140ms ease, opacity 140ms ease;
+  user-select: none;
 }
 
-.search-pagination-button:hover {
-  background: #03072c;
-  color: #f9fafb;
-  border-color: #03072c;
+.search-pagination-link:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
 }
 
-.search-pagination-button--disabled {
-  opacity: 0.5;
-  cursor: default;
-  border-color: transparent;
-  box-shadow: none;
-  background: transparent;
+.search-pagination-link:active {
+  transform: translateY(0px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.search-pagination-link--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
   pointer-events: none;
 }
 
-.search-page-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 98px;
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #03072c 0%, #1e293b 100%);
-  color: #f8fafc;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+.search-pagination-status {
+  font-size: 13px;
+  color: #000;
+  padding: 0 4px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* Empty state */
@@ -6012,9 +5985,22 @@ svg.icon.icon--full-color {
     max-width: calc(50% - 0.45rem);
   }
 
-  .search-pagination-inner {
-    width: 100%;
-    justify-content: space-between;
+}
+
+@media (max-width: 480px) {
+  .search-pagination {
+    gap: 10px;
+  }
+
+  .search-pagination-link {
+    min-width: 96px;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .search-pagination-status {
+    font-size: 12px;
   }
 }
 

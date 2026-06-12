@@ -509,17 +509,18 @@ export async function action({request, context}) {
     '1. ONLY answer questions about this specific product (including specs/details/features), shipping, warranty, or our physical store location. NOTHING ELSE.',
     '2. If asked about anything else (other products, general questions, unrelated topics), politely decline and redirect to product/shipping/warranty/store.',
     '3. Keep responses concise (one short paragraph or a few brief bullet points) while still providing the requested product specs/details when asked.',
-    '4. DO NOT include any WhatsApp links, contact links, or contact instructions in your response. Only include the physical store location link when explicitly asked about the store.',
+    '4. DO NOT include any WhatsApp links or contact links in your response. Only tell the user to contact support when they ask about pricing, or include the physical store location link when explicitly asked about the store.',
     '5. Never write unfinished sentences. Use complete sentences only.',
     `6. Respond in ${userLang}.`,
-    '7. If the user asks about price or cost and a positive price is available, treat the price as excluding VAT. Present BOTH: "Price (excl. VAT): <amount>" and "Price (incl. 11% VAT): <amount x 1.11>". Never describe an ex-VAT price as including VAT. Always remind them to confirm pricing with a support agent.',
-    '8. If the price is missing or 0, clearly say "Call for price" and remind the user to confirm pricing with a support agent. Do NOT fabricate VAT numbers when price is missing/zero.',
+    '7. If the user asks about price, cost, value, or delivery pricing, do not quote prices and do not calculate VAT. Tell them to contact support for current pricing.',
+    '8. If the price is missing or 0, clearly say "Call for price" and tell the user to contact support for pricing.',
     '9. If the user asks for specs/details/features, provide the available specifications from context; do not refuse. Keep it concise but include the key points.',
-    '10. If asked whether the product is good for the listed price, give a brief value assessment based on the available details, but DO NOT advise buying or not buying.',
+    '10. If asked whether the product is good for the listed price, do not assess value by price. Tell them to contact support for current pricing and offer to summarize the product specs.',
     '11. If the request is unclear, ask a brief clarification question instead of repeating yourself.',
     '12. Never repeat your previous response verbatim. If the user asks something new, answer the newest question with fresh wording and relevant details.',
-    '13. Only mention price when the user explicitly asks about price or value.',
+    '13. Only mention pricing support when the user explicitly asks about price, cost, delivery pricing, or value.',
     '14. Answer the question directly without adding unrelated disclaimers.',
+    '15. Never say delivery or shipping is free. If asked about shipping or delivery, use the provided shipping context exactly.',
   ].join(' ');
 
   const identityPrompt = identityMode
@@ -539,34 +540,19 @@ export async function action({request, context}) {
   // Use full description provided by product-context loader (already capped upstream)
   const trimmedDescription = description;
 
-  // Derive VAT math if we can safely parse a single price
   const needsPrice = isPriceQuestion(lastUserMessage);
-  const rawPrice = productContext.price || '';
-  const priceRangeLike = rawPrice.includes('-');
-  const numericPriceMatch = rawPrice.replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
-  const basePrice =
-    numericPriceMatch && !priceRangeLike ? Number(numericPriceMatch[1]) : null;
-  const hasValidPrice = Number.isFinite(basePrice) && basePrice > 0;
-  const vatPrice = hasValidPrice ? Number((basePrice * 1.11).toFixed(2)) : null;
 
   // Minimize context - only include essential info
   let contextSummary = [
     `Title: ${productContext.title || ''}`,
     productContext.vendor ? `Vendor: ${productContext.vendor}` : '',
-    needsPrice && productContext.price ? `Price: ${productContext.price}` : '',
     `Description: ${trimmedDescription}`,
   ]
     .filter(Boolean)
     .join('\n');
 
   if (needsPrice) {
-    if (hasValidPrice) {
-      contextSummary += `\nPrice shown (excl. VAT): ${basePrice}`;
-      contextSummary += `\nPrice incl. 11% VAT: ${vatPrice}`;
-      contextSummary += `\nPrice note: Website prices are displayed excluding VAT. Present excl. VAT first, then 11% VAT included.`;
-    } else {
-      contextSummary += `\nPrice note: Price unavailable/0. Respond with "Call for price" and remind to confirm pricing with a support agent. Do NOT calculate VAT when price is missing/zero.`;
-    }
+    contextSummary += `\nPrice note: Do not quote prices or calculate VAT. Tell the user to contact support for current pricing.`;
   }
 
   // Add shipping/warranty only if explicitly asked about
@@ -578,10 +564,7 @@ export async function action({request, context}) {
     lastMessage.includes('warranty') || lastMessage.includes('guarantee');
 
   if (needsShipping && productContext.shipping) {
-    contextSummary += `\nShipping: ${productContext.shipping.substring(
-      0,
-      200,
-    )}`;
+    contextSummary += `\nShipping: ${productContext.shipping}`;
   }
   if (needsWarranty && productContext.warranty) {
     contextSummary += `\nWarranty: ${productContext.warranty.substring(

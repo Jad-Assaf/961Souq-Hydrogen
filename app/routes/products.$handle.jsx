@@ -1299,21 +1299,20 @@ export default function Product() {
               <div className="policy-container">
                 <h3>Shipping Policy</h3>
                 <p>
-                  We offer nationwide shipping across Lebanon, facilitated by
-                  our dedicated delivery team servicing the Beirut district and
-                  through our partnership with Wakilni for orders beyond Beirut.
+                  961 Souq does not offer free delivery. Available delivery
+                  options are listed below. For delivery pricing, please
+                  contact support.
                 </p>
-                <p>
-                  Upon placing an order, we provide estimated shipping and
-                  delivery dates tailored to your item's availability and
-                  selected product options. For precise shipping details, kindly
-                  reach out to us through the contact information listed in our
-                  Contact Us section.
-                </p>
-                <p>
-                  Please be aware that shipping rates may vary depending on the
-                  destination.
-                </p>
+                <ul>
+                  <li>
+                    Inside Beirut same day delivery, big package 5 to 50 kg
+                  </li>
+                  <li>Inside Beirut same day delivery, 3 to 5 kg</li>
+                  <li>Outside Beirut 3 to 5 days delivery</li>
+                  <li>
+                    Outside Beirut same day delivery, 3 to 5 kg
+                  </li>
+                </ul>
                 <h3>Exchange Policy</h3>
                 <p>
                   We operate a 3-day exchange policy, granting you 3 days from

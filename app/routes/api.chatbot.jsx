@@ -14,6 +14,10 @@ const MAX_MESSAGES = 16;
 const MAX_TEXT_BLOCK = 4000;
 const OFF_TOPIC_REPLY =
   '<p>I can only help with 961 Souq shopping questions, including products, collections, prices, availability, store policies, cart, checkout, and account or order help.</p><p>I can’t help with coding, writing, translation, weather, news, or other unrelated topics.</p>';
+const DELIVERY_POLICY_TEXT =
+  '961 Souq does not offer free delivery. Delivery options: Inside Beirut same day delivery for big packages from 5 to 50 kg. Inside Beirut same day delivery for 3 to 5 kg. Outside Beirut 3 to 5 days delivery. Outside Beirut same day delivery for 3 to 5 kg. For delivery pricing, contact support.';
+const DELIVERY_POLICY_HTML =
+  '<p>961 Souq does not offer free delivery. For delivery pricing, please contact support.</p><ul><li>Inside Beirut same day delivery, big package 5 to 50 kg</li><li>Inside Beirut same day delivery, 3 to 5 kg</li><li>Outside Beirut, 3 to 5 days delivery</li><li>Outside Beirut same day delivery, 3 to 5 kg</li></ul>';
 
 function createRequestId() {
   try {
@@ -671,10 +675,7 @@ function normalizeUiCard(item) {
       item.image,
       item?.featured_image?.url,
     ) || null;
-  const price =
-    kind === 'product'
-      ? firstString(item.price, item.price_range, item.price_text)
-      : null;
+  const price = kind === 'product' ? 'Contact support for pricing' : null;
   const subtitle =
     kind === 'collection' ? firstString(item.subtitle) || 'Collection' : null;
 
@@ -744,9 +745,11 @@ function buildInstructions({pageContext, currentProductHandle}) {
     'Help shoppers find products, compare products, answer store policy questions, manage the live cart, and help signed-in customers with account or order questions.',
     'If the shopper clearly asks for something unrelated to the store, such as coding, translation, general knowledge, writing, math, weather, or news, refuse briefly and redirect them back to store or product questions.',
     'Always use tools for factual store data. Never invent product availability, pricing, policies, cart contents, or order details.',
+    'If the shopper asks for any product, shipping, or delivery price, tell them to contact support for current pricing. Do not quote prices or calculate VAT in chat answers.',
     'For shopping or recommendation requests, search the store catalog first before answering.',
     'If the shopper has not chosen an exact variant or quantity, ask a short follow-up question before adding to cart.',
     'Never add products with a zero price to the cart. A zero price means call for price; tell the shopper to contact support for pricing.',
+    `Delivery policy: ${DELIVERY_POLICY_TEXT} Never say delivery or shipping is free.`,
     'Respond with simple HTML only. Allowed tags: p, br, ul, ol, li, strong, em, a.',
     'Do not use Markdown.',
     'Use relative links only, such as <a href="/account/login">sign in</a> or <a href="/cart">cart</a>. Never output raw URLs or full domains.',
@@ -997,6 +1000,15 @@ async function searchStorePolicies(args, toolContext) {
     return {ok: false, error: 'Missing question.'};
   }
 
+  if (isDeliveryPolicyQuestion(`${question} ${policyContext}`)) {
+    return {
+      ok: true,
+      source: 'hardcoded_delivery_policy',
+      question,
+      answer: DELIVERY_POLICY_HTML,
+    };
+  }
+
   try {
     const result = await callStorefrontMcp(
       'search_shop_policies_and_faqs',
@@ -1022,6 +1034,12 @@ async function searchStorePolicies(args, toolContext) {
           : 'Policy lookup is unavailable right now.',
     };
   }
+}
+
+function isDeliveryPolicyQuestion(value) {
+  return /\b(delivery|deliver|shipping|ship|courier|beirut|outside beirut|wakilni|fee|fees|charge|charges)\b/i.test(
+    String(value || ''),
+  );
 }
 
 async function getProductDetails(args, toolContext) {
@@ -1072,7 +1090,7 @@ async function getProductDetails(args, toolContext) {
             alt_text: product.featuredImage.altText || product.title,
           }
         : null,
-      price_range: formatPriceRange(product.priceRange),
+      price_range: 'Contact support for pricing',
       options: Array.isArray(product.options)
         ? product.options.map((option) => ({
             name: option.name,
@@ -1084,8 +1102,8 @@ async function getProductDetails(args, toolContext) {
             id: variant.id,
             title: variant.title,
             available_for_sale: Boolean(variant.availableForSale),
-            price: formatMoney(variant.price),
-            compare_at_price: formatMoney(variant.compareAtPrice),
+            price: 'Contact support for pricing',
+            compare_at_price: null,
             selected_options: variant.selectedOptions || [],
           }))
         : [],
@@ -1125,7 +1143,7 @@ async function addToCart(args, toolContext) {
       blocked_reason: 'call_for_price',
       product_title: variant.product?.title || null,
       product_handle: variant.product?.handle || null,
-      price: formatMoney(variant.price),
+      price: 'Contact support for pricing',
       error: `${
         variant.product?.title || 'This product'
       } is call for price and cannot be added to the cart. Please contact support for pricing.`,
@@ -1515,15 +1533,7 @@ function normalizeCatalogEntry(item) {
         firstString(item.description, item.body, item.summary, item.text) || '',
         420,
       ) || null,
-    price:
-      kind === 'product'
-        ? firstString(
-            item.price,
-            item.formatted_price,
-            item.formattedPrice,
-            item.price_text,
-          ) || null
-        : null,
+    price: kind === 'product' ? 'Contact support for pricing' : null,
     currency: firstString(item.currency, item.currency_code, item.currencyCode),
     variant_id: kind === 'product' ? variantId : null,
     subtitle:
@@ -1603,10 +1613,7 @@ async function searchCatalogFallback(queries, toolContext, originalQuery = '') {
         normalizeStorefrontUrl(document.url) || `/products/${document.handle}`,
       image_url: document.image || null,
       description: null,
-      price:
-        typeof document.price === 'number' && document.price > 0
-          ? `${document.price}`
-          : 'Call for price',
+      price: 'Contact support for pricing',
       currency: null,
       variant_id: null,
     }));

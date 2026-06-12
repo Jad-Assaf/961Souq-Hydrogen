@@ -15,7 +15,6 @@ import {
 // import footerStyles from '~/styles/Footer.css?url';
 // import productStyles from '~/styles/ProductPage.css?url';
 // import productImgStyles from '~/styles/ProductImage.css?url';
-// import searchStyles from '~/styles/SearchPage.css?url';
 // import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {HEADER_QUERY} from '~/lib/fragments';

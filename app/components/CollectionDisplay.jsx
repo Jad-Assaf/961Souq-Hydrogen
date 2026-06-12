@@ -7,13 +7,6 @@ import CollectionRows from './CollectionRows';
 import {hasPreOrderTag} from '../lib/productTags';
 import WishlistButton from './WishlistButton';
 
-const FREE_SHIPPING_TAGS = new Set([
-  'gaming laptops',
-  'business laptops',
-  'apple macbooks',
-  'apple imac',
-]);
-
 export function truncateText(text, maxWords) {
   if (!text || typeof text !== 'string') return '';
   const words = text.split(' ');
@@ -28,7 +21,7 @@ export const CollectionDisplay = React.memo(({menuCollections}) => (
   </div>
 ));
 
-export function ProductRow({products, showFreeShippingTags = false}) {
+export function ProductRow({products}) {
   const rowRef = useRef(null);
   const scrollRow = (distance) =>
     rowRef.current.scrollBy({left: distance, behavior: 'smooth'});
@@ -44,11 +37,7 @@ export function ProductRow({products, showFreeShippingTags = false}) {
       </button>
       <div className="collection-products-row" ref={rowRef}>
         {products.map((product) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            showFreeShippingTags={showFreeShippingTags}
-          />
+          <ProductItem key={product.id} product={product} />
         ))}
       </div>
       <button
@@ -406,7 +395,7 @@ function ProductQuickViewModal({
   );
 }
 
-export function ProductItem({product, showFreeShippingTags}) {
+export function ProductItem({product}) {
   const ref = useRef(null);
   const hoverImagePreloadRef = useRef(null);
   const isHoveringRef = useRef(false);
@@ -477,12 +466,6 @@ export function ProductItem({product, showFreeShippingTags}) {
     displayProduct.variants?.nodes?.find((v) => v.availableForSale) ||
     displayProduct.variants?.nodes?.[0] ||
     null;
-
-  const showFreeShipping =
-    showFreeShippingTags &&
-    (displayProduct.tags || []).some((tag) =>
-      FREE_SHIPPING_TAGS.has(tag.toLowerCase().trim()),
-    );
 
   const showWishlist = !!(
     selectedVariant &&
@@ -709,24 +692,6 @@ export function ProductItem({product, showFreeShippingTags}) {
             )}
         </div>
 
-        {showFreeShipping && (
-          <div className="product-free-shipping">
-            <svg
-              className="bc-free-delivery-icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              width="18"
-              height="18"
-            >
-              <rect x="3" y="7" width="11" height="9" rx="1.2" fill="#1f6feb" />
-              <path d="M14 10h4l3 3v3h-7z" fill="#2ea043"></path>
-              <path d="M16 11h2.6l1.4 1.4H16z" fill="#a5d6ff"></path>
-              <circle cx="7" cy="18" r="1.7" fill="#111"></circle>
-              <circle cx="18" cy="18" r="1.7" fill="#111"></circle>
-            </svg>
-            <span>Free Shipping</span>
-          </div>
-        )}
       </Link>
 
       <ProductQuickViewModal
