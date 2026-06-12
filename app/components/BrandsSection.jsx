@@ -1,19 +1,42 @@
-import React, {useRef} from 'react';
-import {useInView} from 'react-intersection-observer';
+import React, {useEffect, useRef, useState} from 'react';
 
 export default function BrandSection({brands}) {
-  const {ref, inView} = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
-
+  const sectionRef = useRef(null);
   const gridRef = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || inView) return;
+
+    if (
+      typeof window === 'undefined' ||
+      !('IntersectionObserver' in window)
+    ) {
+      setInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      {threshold: 0.1},
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [inView]);
+
   const scrollGrid = (distance) => {
     gridRef.current?.scrollBy({left: distance, behavior: 'smooth'});
   };
 
   return (
-    <section className="brand-section" ref={ref}>
+    <section className="brand-section" ref={sectionRef}>
       <h2>Shop By Brand</h2>
 
       <button

@@ -1,8 +1,7 @@
 // ClarityTracker.js
 import {useEffect} from 'react';
-import {clarity} from 'react-microsoft-clarity';
 
-// module‐scope flag prevents any double‐init
+// Module-scope flag prevents any double init.
 let didInitClarity = false;
 const START_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
 
@@ -24,12 +23,31 @@ const ClarityTracker = ({clarityId, userId, userProperties}) => {
     const startClarity = () => {
       if (cancelled || didInitClarity) return;
 
-      clarity.init(clarityId);
-      clarity.consent();
+      window.clarity =
+        window.clarity ||
+        function clarityQueue() {
+          window.clarity.q = window.clarity.q || [];
+          window.clarity.q.push(arguments);
+        };
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.clarity.ms/tag/${encodeURIComponent(
+        clarityId,
+      )}`;
+      document.head.appendChild(script);
+
+      window.clarity('consent');
       if (userId) {
-        clarity.identify(userId, userProperties);
+        window.clarity('identify', userId);
       }
-      clarity.start();
+      if (userProperties && typeof userProperties === 'object') {
+        Object.entries(userProperties).forEach(([key, value]) => {
+          if (value != null) {
+            window.clarity('set', key, String(value));
+          }
+        });
+      }
       didInitClarity = true;
     };
 
@@ -65,9 +83,6 @@ const ClarityTracker = ({clarityId, userId, userProperties}) => {
       }
       if (timeoutId !== null) {
         window.clearTimeout(timeoutId);
-      }
-      if (didInitClarity) {
-        clarity.stop();
       }
     };
   }, [clarityId, userId, userProperties]);

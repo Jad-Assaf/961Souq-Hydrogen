@@ -3992,32 +3992,6 @@ a.video-link {
   }
 }
 
-.reels-overlay {
-  position: fixed;
-  inset: 0;
-  height: 100dvh;
-  z-index: 1000;
-}
-
-@supports not (height: 100dvh) {
-  .reels-overlay {
-    height: 100svh;
-  }
-}
-
-.reels-close {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 22px;
-  cursor: pointer;
-  z-index: 1001;
-}
 
 @media (max-width: 1024px) {
   .vertical-header {
