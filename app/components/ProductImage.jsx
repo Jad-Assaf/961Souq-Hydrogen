@@ -1,7 +1,61 @@
 import '../styles/ProductImage.css';
 import {useEffect, useState, useRef} from 'react';
 import {createPortal} from 'react-dom';
-import {useSwipeable} from 'react-swipeable';
+
+function useHorizontalSwipe({onSwipeLeft, onSwipeRight, threshold = 45}) {
+  const gestureRef = useRef(null);
+  const didSwipeRef = useRef(false);
+
+  const startGesture = (event) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    didSwipeRef.current = false;
+    gestureRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+    };
+
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const endGesture = (event) => {
+    const gesture = gestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+    gestureRef.current = null;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+
+    const deltaX = event.clientX - gesture.startX;
+    const deltaY = event.clientY - gesture.startY;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (absX < threshold || absX < absY * 1.25) return;
+
+    didSwipeRef.current = true;
+    if (deltaX < 0) {
+      onSwipeLeft();
+    } else {
+      onSwipeRight();
+    }
+  };
+
+  const cancelGesture = () => {
+    gestureRef.current = null;
+  };
+
+  return {
+    onPointerDown: startGesture,
+    onPointerUp: endGesture,
+    onPointerCancel: cancelGesture,
+    onPointerLeave: cancelGesture,
+    wasSwiped: () => didSwipeRef.current,
+    clearSwiped: () => {
+      didSwipeRef.current = false;
+    },
+  };
+}
 
 const LeftArrowIcon = () => (
   <svg
@@ -145,10 +199,13 @@ export function ProductImages({media, selectedVariantImage}) {
     setShowKeyIndicator(false);
   };
 
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: doNextImage,
-    onSwipedRight: doPrevImage,
-    trackMouse: true,
+  const {
+    wasSwiped,
+    clearSwiped,
+    ...swipeHandlers
+  } = useHorizontalSwipe({
+    onSwipeLeft: doNextImage,
+    onSwipeRight: doPrevImage,
   });
 
   const getThumbnailInfo = (node) => {
@@ -217,8 +274,14 @@ export function ProductImages({media, selectedVariantImage}) {
       {/* Main Media */}
       <div
         className="main-image"
-        onClick={() => setIsLightboxOpen(true)}
-        style={{cursor: 'grab'}}
+        onClick={() => {
+          if (wasSwiped()) {
+            clearSwiped();
+            return;
+          }
+          setIsLightboxOpen(true);
+        }}
+        style={{cursor: 'grab', touchAction: 'pan-y'}}
         {...swipeHandlers}
       >
         {selectedMedia && (
@@ -336,10 +399,10 @@ function ProductLightbox({
   const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(
     selectedMedia?.__typename !== 'MediaImage',
   );
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: onNext,
-    onSwipedRight: onPrevious,
-    trackMouse: true,
+  const {wasSwiped: _wasSwiped, clearSwiped: _clearSwiped, ...swipeHandlers} =
+    useHorizontalSwipe({
+    onSwipeLeft: onNext,
+    onSwipeRight: onPrevious,
   });
 
   useEffect(() => {
@@ -458,7 +521,11 @@ function ProductLightbox({
         </button>
       ) : null}
 
-      <div className="product-lightbox__stage" {...swipeHandlers}>
+      <div
+        className="product-lightbox__stage"
+        style={{touchAction: 'pan-y'}}
+        {...swipeHandlers}
+      >
         {renderLightboxMedia()}
       </div>
 

@@ -2823,6 +2823,97 @@ export type StoreCollectionsQuery = {
   };
 };
 
+export type CosmeticsProductFragment = Pick<
+  StorefrontAPI.Product,
+  | 'id'
+  | 'handle'
+  | 'title'
+  | 'vendor'
+  | 'productType'
+  | 'tags'
+  | 'availableForSale'
+> & {
+  featuredImage?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Image, 'url' | 'altText'>
+  >;
+  images: {nodes: Array<Pick<StorefrontAPI.Image, 'url' | 'altText'>>};
+  variants: {
+    nodes: Array<
+      Pick<
+        StorefrontAPI.ProductVariant,
+        'id' | 'title' | 'availableForSale'
+      > & {
+        selectedOptions: Array<
+          Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+        >;
+        image?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.Image, 'url' | 'altText'>
+        >;
+        price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+        compareAtPrice?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+        >;
+      }
+    >;
+  };
+};
+
+export type CosmeticsCollectionQueryVariables = StorefrontAPI.Exact<{
+  handle: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type CosmeticsCollectionQuery = {
+  collection?: StorefrontAPI.Maybe<
+    Pick<
+      StorefrontAPI.Collection,
+      'id' | 'handle' | 'title' | 'description'
+    > & {
+      seo: Pick<StorefrontAPI.Seo, 'title' | 'description'>;
+      image?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Image, 'url' | 'altText'>>;
+      products: {
+        nodes: Array<
+          Pick<
+            StorefrontAPI.Product,
+            | 'id'
+            | 'handle'
+            | 'title'
+            | 'vendor'
+            | 'productType'
+            | 'tags'
+            | 'availableForSale'
+          > & {
+            featuredImage?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Image, 'url' | 'altText'>
+            >;
+            images: {
+              nodes: Array<Pick<StorefrontAPI.Image, 'url' | 'altText'>>;
+            };
+            variants: {
+              nodes: Array<
+                Pick<
+                  StorefrontAPI.ProductVariant,
+                  'id' | 'title' | 'availableForSale'
+                > & {
+                  selectedOptions: Array<
+                    Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+                  >;
+                  image?: StorefrontAPI.Maybe<
+                    Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                  >;
+                  price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+                  compareAtPrice?: StorefrontAPI.Maybe<
+                    Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+                  >;
+                }
+              >;
+            };
+          }
+        >;
+      };
+    }
+  >;
+};
+
 export type PageQueryVariables = StorefrontAPI.Exact<{
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -3463,6 +3554,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  fragment Collection on Collection {\n    id\n    title\n    handle\n    products(first: 1) {\n      nodes {\n        id\n        title\n        featuredImage {\n          url\n          altText\n        }\n      }\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query StoreCollections(\n    $country: CountryCode\n    $endCursor: String\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $startCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collections(\n      first: $first,\n      last: $last,\n      before: $startCursor,\n      after: $endCursor\n    ) {\n      nodes {\n        ...Collection\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n': {
     return: StoreCollectionsQuery;
     variables: StoreCollectionsQueryVariables;
+  };
+  '#graphql\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    productType\n    tags\n    collections(first: 1) {\n      edges {\n        node {\n          id\n          handle\n          title\n        }\n      }\n    }\n\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n      maxVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n\n    # Keep one image for SEO/fallback. Gallery media comes from the media field.\n    images(first: 1) {\n      edges {\n        node {\n          __typename\n          id\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n\n    # Add initial gallery media without pulling every product asset into SSR.\n    media(first: 20) {\n      edges {\n        node {\n          __typename\n          mediaContentType\n          alt\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n          ... on Video {\n            id\n            sources {\n              url\n              mimeType\n            }\n          }\n          ... on ExternalVideo {\n            id\n            embedUrl\n            host\n          }\n          ... on Model3d {\n            id\n            sources {\n              url\n            }\n          }\n        }\n      }\n    }\n\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    variants(first: 250) {\n      nodes {\n        ...ProductVariant\n      }\n    }\n    seo {\n      description\n      title\n    }\n    metafieldOfficialProductLink: metafield(namespace: "custom", key: "official_product_link") {\n      value\n    }\n    metafieldCondition: metafield(namespace: "custom", key: "condition") {\n      value\n    }\n    metafieldWarranty: metafield(namespace: "custom", key: "warranty") {\n      value\n    }\n    metafieldShipping: metafield(namespace: "custom", key: "shipping") {\n      value\n    }\n    metafieldVat: metafield(namespace: "custom", key: "vat") {\n      value\n    }\n    metafieldSubscription: metafield(namespace: "custom", key: "subscription") {\n      value\n    }\n\n    # AI SUMMARY (added)\n    metafieldAiSummary: metafield(namespace: "custom", key: "ai_summary") {\n      value\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    quantityAvailable\n    taxable\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n  }\n\n\n  query CosmeticsCollection($handle: String!) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      seo {\n        title\n        description\n      }\n      image {\n        url\n        altText\n      }\n      products(first: 24) {\n        nodes {\n          ...CosmeticsProduct\n        }\n      }\n    }\n  }\n': {
+    return: CosmeticsCollectionQuery;
+    variables: CosmeticsCollectionQueryVariables;
   };
   '#graphql\n  query Page(\n    $language: LanguageCode,\n    $country: CountryCode,\n    $handle: String!\n  )\n  @inContext(language: $language, country: $country) {\n    page(handle: $handle) {\n      id\n      title\n      body\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
     return: PageQuery;

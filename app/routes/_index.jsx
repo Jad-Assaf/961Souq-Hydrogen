@@ -7,11 +7,7 @@ import React, {
   useCallback,
 } from 'react';
 import {Await, useLoaderData, useMatches} from '@remix-run/react';
-import MosaicHero, {
-  MOSAIC_FEATURE_SIZES,
-  MOSAIC_FEATURE_WIDTHS,
-  withMosaicImageParams,
-} from '~/components/MosaicHero';
+import MosaicHero from '~/components/MosaicHero';
 // import {CategorySlider} from '~/components/CollectionSlider';
 import {TopProductSections} from '~/components/TopProductSections';
 import BrandSection from '~/components/BrandsSection';
@@ -30,7 +26,7 @@ import homeStyles from '~/styles/Homepage.css?url';
 // import InstagramReelsCarousel from '~/components/InstagramCarousel';
 
 const HERO_FEATURE_IMAGE_URL =
-  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/Image_202602241158.jpg?v=1771928636&format=webp';
+  'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/new_apple.webp?v=1781333903';
 
 const MOBILE_PRODUCT_ROW_HANDLES = [
   'apple',
@@ -56,11 +52,6 @@ const HomeDesktopCollections = React.lazy(() =>
 );
 
 export function links() {
-  const imageSrcSet = MOSAIC_FEATURE_WIDTHS.map(
-    (width) =>
-      `${withMosaicImageParams(HERO_FEATURE_IMAGE_URL, {width})} ${width}w`,
-  ).join(', ');
-
   return [
     {
       rel: 'stylesheet',
@@ -69,9 +60,7 @@ export function links() {
     {
       rel: 'preload',
       as: 'image',
-      href: withMosaicImageParams(HERO_FEATURE_IMAGE_URL, {width: 900}),
-      imageSrcSet,
-      imageSizes: MOSAIC_FEATURE_SIZES,
+      href: HERO_FEATURE_IMAGE_URL,
       fetchpriority: 'high',
     },
   ];

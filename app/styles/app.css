@@ -1376,7 +1376,18 @@ button {
 
 .product-card img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.product-card > a > img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: 180px;
+  max-height: 180px;
+  object-fit: contain;
+  background: #fff;
 }
 
 .product-card .product-title:hover {
@@ -3206,6 +3217,7 @@ aside .cart-checkout-button {
 .slideshow {
   position: relative;
   width: 100%;
+  aspect-ratio: 1 / 1;
   height: auto;
   overflow: hidden;
 }
@@ -3213,14 +3225,19 @@ aside .cart-checkout-button {
 /* extracted from styles.imageWrapper */
 .imageWrapper {
   width: 100%;
+  aspect-ratio: 1 / 1;
   height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
 }
 
 /* extracted from styles.image */
 .image {
   width: 100%;
-  height: auto;
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
 }
 
 .sold-out-ban {
@@ -3267,15 +3284,16 @@ aside .cart-checkout-button {
 }
 
 .product-image img {
-  height: auto;
+  height: 100%;
   width: 100%;
+  object-fit: contain;
 }
 
 .product-image {
   /* from styles.image */
   width: 100%;
-  height: auto;
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
 
   /* initial state for fade-in */
   opacity: 0;
@@ -4849,17 +4867,19 @@ svg.icon.icon--full-color {
 /* ---------- Media ---------- */
 .wishlist-thumb {
   grid-area: thumb;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
   border-radius: 12px;
   overflow: hidden;
+  background: #fff;
 }
 
 .wishlist-thumb img {
   width: 100%;
-  max-width: 300px;
-  aspect-ratio: 1/1;
-  /* consistent height without hardcoded px */
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
   display: block;
   margin: auto;
 }
@@ -5799,12 +5819,13 @@ svg.icon.icon--full-color {
   background: #fff;
   overflow: hidden;
   padding: 25px 0;
+  box-sizing: border-box;
 }
 
 .search-result-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.18s ease;
 }
 

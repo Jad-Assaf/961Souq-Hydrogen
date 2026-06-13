@@ -33,6 +33,16 @@ export default function MosaicHero({collections}) {
   };
 
   const getImageProps = ({url, index, isFeature = false}) => {
+    if (index === 0 && isFeature) {
+      return {
+        src: url,
+        width: 900,
+        height: 300,
+        decoding: 'async',
+        ...getImagePriorityProps(index),
+      };
+    }
+
     const widths = isFeature ? MOSAIC_FEATURE_WIDTHS : MOSAIC_TILE_WIDTHS;
     const maxWidth = widths[widths.length - 1];
 
@@ -49,7 +59,7 @@ export default function MosaicHero({collections}) {
 
   const collectionImages = {
     apple:
-      'https://cdn.shopify.com/videos/c/o/v/12194bcc13cb4092afaa0bb3df6fae08.mp4',
+      'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/new_apple.webp?v=1781333903',
     gaming:
       'https://cdn.shopify.com/s/files/1/0552/0883/7292/files/gaming.jpg?v=1773672306&format=webp',
     gamingLaptops:

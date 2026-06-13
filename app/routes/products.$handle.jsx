@@ -1546,8 +1546,8 @@ const PRODUCT_FRAGMENT = `#graphql
       }
     }
 
-    # Add initial gallery media without pulling every product asset into SSR.
-    media(first: 20) {
+    # Fetch up to 200 gallery media items for products with large image sets.
+    media(first: 200) {
       edges {
         node {
           __typename
