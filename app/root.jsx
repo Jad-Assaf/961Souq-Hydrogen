@@ -26,6 +26,7 @@ import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
 import {AttributionTracker} from './components/AttributionTracker';
 import {getCollectionImage} from '~/lib/collectionImage';
+import WebMcpReadOnlyTools from './components/WebMcpReadOnlyTools';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -332,6 +333,7 @@ export function Layout({children}) {
         />
       </head>
       <body>
+        <WebMcpReadOnlyTools />
         <ClarityTracker clarityId={clarityId} />
         <AttributionTracker />
         {/* {loaderVisible && (
