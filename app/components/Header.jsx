@@ -89,11 +89,18 @@ function LazyTypesenseSearch({
       }`}
       onPointerEnter={handlePreload}
     >
-      <form method="get" action={action} className="search-form">
+      <form
+        method="get"
+        action={action}
+        className="search-form"
+        toolname="search_products_page_basic"
+        tooldescription="Search the 961Souq product catalog and navigate to matching product results."
+      >
         <div className="search-input-wrapper">
           <input
             type="search"
             name="q"
+            toolparamdescription="Product search query, such as a brand, model, category, or accessory."
             value={pendingQuery}
             autoComplete="off"
             onChange={(e) => setPendingQuery(e.target.value)}

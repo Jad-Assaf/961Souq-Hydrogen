@@ -11,7 +11,6 @@ const SEARCH_PRODUCTS_TOOL = {
   name: 'search_products',
   description:
     'Search the 961Souq product catalog and return matching products with titles, handles, prices, images, and product URLs.',
-  ...TOOL_ANNOTATIONS,
   inputSchema: {
     type: 'object',
     properties: {
@@ -39,7 +38,6 @@ const GET_PRODUCT_TOOL = {
   name: 'get_product_summary',
   description:
     'Get read-only product details from 961Souq by product handle, including title, vendor, type, description, price range, availability, variants, and canonical URL.',
-  ...TOOL_ANNOTATIONS,
   inputSchema: {
     type: 'object',
     properties: {
@@ -61,7 +59,6 @@ const GET_STORE_NAVIGATION_TOOL = {
   name: 'get_store_navigation',
   description:
     'Return key 961Souq store pages, category URLs, sitemap URL, and contact/policy URLs for navigation.',
-  ...TOOL_ANNOTATIONS,
   inputSchema: {
     type: 'object',
     properties: {},
@@ -93,8 +90,12 @@ export default function WebMcpReadOnlyTools() {
   useEffect(() => {
     if (window.__961souqWebMcpRegistered) return;
 
-    const registry = findWebMcpRegistry();
-    if (!registry) return;
+    const modelContext = document.modelContext || window.navigator?.modelContext;
+    if (!modelContext || typeof modelContext.registerTool !== 'function') {
+      return;
+    }
+
+    const controller = new AbortController();
 
     const tools = [
       {
@@ -111,81 +112,23 @@ export default function WebMcpReadOnlyTools() {
       },
     ];
 
-    const registered = registerTools(registry, tools);
-    if (registered) {
+    try {
+      tools.forEach((tool) => {
+        modelContext.registerTool(tool, {signal: controller.signal});
+      });
       window.__961souqWebMcpRegistered = true;
+    } catch (error) {
+      controller.abort();
+      window.__961souqWebMcpRegistered = false;
     }
+
+    return () => {
+      controller.abort();
+      window.__961souqWebMcpRegistered = false;
+    };
   }, []);
 
   return null;
-}
-
-function findWebMcpRegistry() {
-  const nav = window.navigator || {};
-  const candidates = [
-    window.webMCP,
-    window.webMcp,
-    window.WebMCP,
-    nav.webMCP,
-    nav.webMcp,
-    nav.mcp,
-  ];
-
-  return candidates.find((candidate) => candidate && typeof candidate === 'object');
-}
-
-function registerTools(registry, tools) {
-  if (
-    typeof registry.registerTools === 'function' &&
-    tryRegister(() => registry.registerTools(tools))
-  ) {
-    return true;
-  }
-
-  const target =
-    registry.tools && typeof registry.tools.register === 'function'
-      ? registry.tools
-      : registry;
-
-  if (typeof target.registerTool === 'function') {
-    return tools.every((tool) =>
-      tryRegister(() => target.registerTool(tool, tool.execute)) ||
-      tryRegister(() =>
-        target.registerTool(
-          tool.name,
-          getToolMetadata(tool),
-          tool.execute,
-        ),
-      ) ||
-      tryRegister(() => target.registerTool(tool.name, tool.execute)),
-    );
-  }
-
-  if (typeof target.register === 'function') {
-    return tools.every((tool) =>
-      tryRegister(() => target.register(tool, tool.execute)) ||
-      tryRegister(() =>
-        target.register(tool.name, getToolMetadata(tool), tool.execute),
-      ) ||
-      tryRegister(() => target.register(tool.name, tool.execute)),
-    );
-  }
-
-  return false;
-}
-
-function tryRegister(register) {
-  try {
-    register();
-    return true;
-  } catch (_error) {
-    return false;
-  }
-}
-
-function getToolMetadata(tool) {
-  const {execute, ...metadata} = tool;
-  return metadata;
 }
 
 async function searchProducts(input = {}) {
@@ -270,17 +213,7 @@ async function getStoreNavigation() {
 }
 
 function createToolResult(data) {
-  const text = JSON.stringify(data, null, 2);
-
-  return {
-    structuredContent: data,
-    content: [
-      {
-        type: 'text',
-        text,
-      },
-    ],
-  };
+  return JSON.stringify(data, null, 2);
 }
 
 function clampInteger(value, fallback, min, max) {

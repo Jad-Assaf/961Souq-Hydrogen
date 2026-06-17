@@ -132,12 +132,19 @@ export function TypesenseSearch({
           isOpen ? ' search-bar-wrapper--open' : ''
         }`}
       >
-        <Form method="get" action={action} className="search-form">
+        <Form
+          method="get"
+          action={action}
+          className="search-form"
+          toolname="search_products_page_predictive"
+          tooldescription="Search the 961Souq product catalog and navigate to matching product results."
+        >
           <div className="search-input-wrapper">
             <input
               ref={inputRef}
               type="search"
               name="q"
+              toolparamdescription="Product search query, such as a brand, model, category, or accessory."
               value={searchTerm}
               autoComplete="off"
               onChange={(e) => {
