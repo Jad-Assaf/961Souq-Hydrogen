@@ -115,7 +115,7 @@ export default {
         );
       }
 
-      applyWebMcpHeaders(response);
+      applyWebMcpHeaders(response, env);
 
       if (response.status === 404) {
         /**
@@ -139,8 +139,12 @@ export default {
   },
 };
 
-function applyWebMcpHeaders(response) {
+function applyWebMcpHeaders(response, env) {
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
   response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
   response.headers.set('Permissions-Policy', 'tools=(self)');
+
+  if (env.WEBMCP_ORIGIN_TRIAL_TOKEN) {
+    response.headers.set('Origin-Trial', env.WEBMCP_ORIGIN_TRIAL_TOKEN);
+  }
 }

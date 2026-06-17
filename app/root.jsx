@@ -26,7 +26,6 @@ import InstantScrollRestoration from './components/InstantScrollRestoration';
 import {WishlistProvider} from './lib/WishlistContext';
 import {AttributionTracker} from './components/AttributionTracker';
 import {getCollectionImage} from '~/lib/collectionImage';
-import WebMcpReadOnlyTools from './components/WebMcpReadOnlyTools';
 // import TikTokPixel from './components/TikTokPixel';
 
 /**
@@ -43,6 +42,218 @@ const GOOGLE_ANALYTICS_ID = 'G-CB623RXLSE';
 const GOOGLE_ADS_ID = 'AW-378354284';
 const SHOPIFY_COOKIE_DOMAIN = '.961souq.com';
 // const TIKTOK_PIXEL_ID = 'D0QOS83C77U6EL28VLR0';
+
+const WEB_MCP_READ_ONLY_TOOLS_SCRIPT = `
+(function () {
+  if (window.__961souqWebMcpRegistered) return;
+
+  var modelContext = document.modelContext || (window.navigator && window.navigator.modelContext);
+  if (!modelContext || typeof modelContext.registerTool !== 'function') return;
+
+  var categories = [
+    ['Mobiles', '/collections/mobiles'],
+    ['Tablets', '/collections/tablets'],
+    ['Apple', '/collections/apple'],
+    ['Gaming', '/collections/gaming'],
+    ['Gaming Laptops', '/collections/gaming-laptops'],
+    ['Business Laptops', '/collections/business-laptops'],
+    ['PC Parts', '/collections/pc-parts'],
+    ['Monitors', '/collections/monitors'],
+    ['Networking', '/collections/networking'],
+    ['Audio', '/collections/audio'],
+    ['Photography', '/collections/photography'],
+    ['Home Appliances', '/collections/home-appliances'],
+    ['Cosmetics', '/cosmetics'],
+    ['Body Care', '/collections/body-care'],
+    ['Fitness', '/collections/fitness'],
+    ['Accessories', '/collections/accessories']
+  ];
+
+  function clampInteger(value, fallback, min, max) {
+    var number = parseInt(value, 10);
+    if (!Number.isFinite(number)) return fallback;
+    return Math.min(max, Math.max(min, number));
+  }
+
+  function absolutizeUrl(value) {
+    if (!value) return null;
+    try {
+      return new URL(value, window.location.origin).toString();
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function createToolResult(data) {
+    return JSON.stringify(data, null, 2);
+  }
+
+  async function searchProducts(input) {
+    input = input || {};
+    var query = String(input.query || '').trim();
+    var limit = clampInteger(input.limit, 5, 1, 10);
+
+    if (!query) {
+      return createToolResult({error: 'Missing query', products: []});
+    }
+
+    var params = new URLSearchParams({
+      q: query,
+      perPage: String(limit),
+      page: '1'
+    });
+    var response = await fetch('/api/typesensesearch?' + params.toString(), {
+      headers: {'Accept': 'application/json'}
+    });
+    var data = await response.json();
+
+    if (!response.ok) {
+      return createToolResult({
+        error: data && data.error ? data.error : 'Search failed',
+        products: []
+      });
+    }
+
+    var products = (data.hits || []).slice(0, limit).map(function (product) {
+      return {
+        id: product.id,
+        title: product.title,
+        handle: product.handle,
+        vendor: product.vendor,
+        price: product.price,
+        available: product.available,
+        image: absolutizeUrl(product.image),
+        url: absolutizeUrl(product.url || ('/products/' + product.handle))
+      };
+    });
+
+    return createToolResult({
+      query: query,
+      found: data.found || products.length,
+      products: products
+    });
+  }
+
+  async function getProductSummary(input) {
+    input = input || {};
+    var handle = String(input.handle || '').trim();
+
+    if (!handle) {
+      return createToolResult({error: 'Missing handle'});
+    }
+
+    var params = new URLSearchParams({handle: handle});
+    var response = await fetch('/api/mcp-product?' + params.toString(), {
+      headers: {'Accept': 'application/json'}
+    });
+    var data = await response.json();
+
+    if (!response.ok) {
+      return createToolResult({
+        error: data && data.error ? data.error : 'Product lookup failed'
+      });
+    }
+
+    return createToolResult(data);
+  }
+
+  async function getStoreNavigation() {
+    var origin = window.location.origin;
+
+    return createToolResult({
+      name: '961Souq',
+      home: origin + '/',
+      collections: origin + '/collections',
+      contact: origin + '/contact',
+      policies: origin + '/policies',
+      sitemap: origin + '/sitemap.xml',
+      llms: origin + '/llms.txt',
+      categories: categories.map(function (entry) {
+        return {
+          name: entry[0],
+          url: origin + entry[1]
+        };
+      })
+    });
+  }
+
+  var annotations = {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false
+  };
+
+  var tools = [
+    {
+      name: 'search_products',
+      description: 'Search the 961Souq product catalog and return matching products with titles, handles, prices, images, and product URLs.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 120,
+            description: 'Product search query, such as a brand, model, or category.'
+          },
+          limit: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 10,
+            default: 5,
+            description: 'Maximum number of products to return.'
+          }
+        },
+        required: ['query'],
+        additionalProperties: false
+      },
+      annotations: annotations,
+      execute: searchProducts
+    },
+    {
+      name: 'get_product_summary',
+      description: 'Get read-only product details from 961Souq by product handle, including title, vendor, type, description, price range, availability, variants, and canonical URL.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          handle: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 160,
+            pattern: '^[a-zA-Z0-9][a-zA-Z0-9_-]*$',
+            description: 'Product handle from a 961Souq product URL.'
+          }
+        },
+        required: ['handle'],
+        additionalProperties: false
+      },
+      annotations: annotations,
+      execute: getProductSummary
+    },
+    {
+      name: 'get_store_navigation',
+      description: 'Return key 961Souq store pages, category URLs, sitemap URL, and contact/policy URLs for navigation.',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+        additionalProperties: false
+      },
+      annotations: annotations,
+      execute: getStoreNavigation
+    }
+  ];
+
+  try {
+    tools.forEach(function (tool) {
+      modelContext.registerTool(tool);
+    });
+    window.__961souqWebMcpRegistered = true;
+  } catch (_error) {
+    window.__961souqWebMcpRegistered = false;
+  }
+})();
+`;
 
 export function links() {
   return [
@@ -197,6 +408,12 @@ export function Layout({children}) {
         <script
           nonce={stableNonce}
           dangerouslySetInnerHTML={{
+            __html: WEB_MCP_READ_ONLY_TOOLS_SCRIPT,
+          }}
+        />
+        <script
+          nonce={stableNonce}
+          dangerouslySetInnerHTML={{
             __html: `
               (function () {
                 try {
@@ -333,7 +550,6 @@ export function Layout({children}) {
         />
       </head>
       <body>
-        <WebMcpReadOnlyTools />
         <ClarityTracker clarityId={clarityId} />
         <AttributionTracker />
         {/* {loaderVisible && (
