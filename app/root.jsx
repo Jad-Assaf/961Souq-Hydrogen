@@ -48,7 +48,6 @@ const WEB_MCP_READ_ONLY_TOOLS_SCRIPT = `
   if (window.__961souqWebMcpRegistered) return;
 
   var modelContext = document.modelContext || (window.navigator && window.navigator.modelContext);
-  if (!modelContext || typeof modelContext.registerTool !== 'function') return;
 
   var categories = [
     ['Mobiles', '/collections/mobiles'],
@@ -86,6 +85,140 @@ const WEB_MCP_READ_ONLY_TOOLS_SCRIPT = `
 
   function createToolResult(data) {
     return JSON.stringify(data, null, 2);
+  }
+
+  function describeCartAction(action) {
+    switch (action) {
+      case 'LinesAdd':
+        return {
+          name: 'add_to_cart',
+          description: 'Prepares the selected 961Souq product or variant to be added to the shopping cart.'
+        };
+      case 'LinesUpdate':
+        return {
+          name: 'update_cart_qty',
+          description: 'Prepares a quantity update for an existing product line in the 961Souq shopping cart.'
+        };
+      case 'LinesRemove':
+        return {
+          name: 'remove_cart_line',
+          description: 'Prepares removal of an existing product line from the 961Souq shopping cart.'
+        };
+      case 'DiscountCodesUpdate':
+        return {
+          name: 'apply_discount',
+          description: 'Prepares a discount code update for the 961Souq shopping cart.'
+        };
+      case 'GiftCardCodesUpdate':
+        return {
+          name: 'apply_gift_card',
+          description: 'Prepares a gift card code update for the 961Souq shopping cart.'
+        };
+      default:
+        return null;
+    }
+  }
+
+  function getCartAction(form) {
+    var input = form.querySelector('input[name="cartFormInput"]');
+    if (!input || !input.value) return null;
+
+    try {
+      var payload = JSON.parse(input.value);
+      return payload && payload.action;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function applyFormTool(form, name, description) {
+    if (!form || form.hasAttribute('toolname')) return;
+    form.setAttribute('toolname', name);
+    form.setAttribute('tooldescription', description);
+  }
+
+  function annotateWebMcpForms() {
+    var forms = document.querySelectorAll('form');
+    forms.forEach(function (form, index) {
+      if (form.matches('.search-form')) {
+        applyFormTool(
+          form,
+          form.querySelector('[data-typesense-search]') ? 'search_products_page_predictive' : 'search_products_page',
+          'Search the 961Souq product catalog and navigate to matching product results.'
+        );
+        var searchInput = form.querySelector('input[type="search"], input[name="q"]');
+        if (searchInput && !searchInput.hasAttribute('toolparamdescription')) {
+          searchInput.setAttribute('toolparamdescription', 'Product search query, such as a brand, model, category, or accessory.');
+        }
+        return;
+      }
+
+      if (form.matches('.contact-form')) {
+        applyFormTool(
+          form,
+          'prepare_customer_support_message',
+          'Prepares a customer support message with name, email address, and message body for 961Souq.'
+        );
+        var contactName = form.querySelector('input[name="name"]');
+        var contactEmail = form.querySelector('input[name="email"]');
+        var contactMessage = form.querySelector('textarea[name="message"]');
+        if (contactName && !contactName.hasAttribute('toolparamdescription')) {
+          contactName.setAttribute('toolparamdescription', 'Customer full name.');
+        }
+        if (contactEmail && !contactEmail.hasAttribute('toolparamdescription')) {
+          contactEmail.setAttribute('toolparamdescription', 'Customer email address for the reply.');
+        }
+        if (contactMessage && !contactMessage.hasAttribute('toolparamdescription')) {
+          contactMessage.setAttribute('toolparamdescription', 'Message or question for 961Souq customer support.');
+        }
+        return;
+      }
+
+      if (form.matches('.account-logout')) {
+        applyFormTool(form, 'sign_out_customer', 'Prepares signing the current customer out of their 961Souq account.');
+        return;
+      }
+
+      if (form.closest('.account-profile')) {
+        applyFormTool(
+          form,
+          'update_customer_profile',
+          'Prepares updates to the current customer profile information in a 961Souq account.'
+        );
+        return;
+      }
+
+      if (form.querySelector('input[name="addressId"]')) {
+        applyFormTool(
+          form,
+          'update_customer_address_' + index,
+          'Prepares updates to a shipping address in the current 961Souq customer account.'
+        );
+        return;
+      }
+
+      var cartAction = describeCartAction(getCartAction(form));
+      if (cartAction) {
+        applyFormTool(form, cartAction.name + '_' + index, cartAction.description);
+        var discountInput = form.querySelector('input[name="discountCode"]');
+        if (discountInput && !discountInput.hasAttribute('toolparamdescription')) {
+          discountInput.setAttribute('toolparamdescription', 'Discount code to apply to the cart.');
+        }
+        var giftCardInput = form.querySelector('input[name="giftCardCode"]');
+        if (giftCardInput && !giftCardInput.hasAttribute('toolparamdescription')) {
+          giftCardInput.setAttribute('toolparamdescription', 'Gift card code to apply to the cart.');
+        }
+        return;
+      }
+
+      if (form.matches('.product-chat-input')) {
+        applyFormTool(
+          form,
+          'prepare_product_chat_message_' + index,
+          'Prepares a product support chat message for 961Souq customer assistance.'
+        );
+      }
+    });
   }
 
   async function searchProducts(input) {
@@ -244,13 +377,26 @@ const WEB_MCP_READ_ONLY_TOOLS_SCRIPT = `
     }
   ];
 
-  try {
-    tools.forEach(function (tool) {
-      modelContext.registerTool(tool);
+  if (modelContext && typeof modelContext.registerTool === 'function') {
+    try {
+      tools.forEach(function (tool) {
+        modelContext.registerTool(tool);
+      });
+      window.__961souqWebMcpRegistered = true;
+    } catch (_error) {
+      window.__961souqWebMcpRegistered = false;
+    }
+  }
+
+  annotateWebMcpForms();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', annotateWebMcpForms, {once: true});
+  }
+  if ('MutationObserver' in window) {
+    var observer = new MutationObserver(function () {
+      annotateWebMcpForms();
     });
-    window.__961souqWebMcpRegistered = true;
-  } catch (_error) {
-    window.__961souqWebMcpRegistered = false;
+    observer.observe(document.documentElement, {childList: true, subtree: true});
   }
 })();
 `;
